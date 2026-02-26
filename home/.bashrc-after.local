@@ -234,8 +234,9 @@ umount-maybe() {
 
 alias mountall='sudo -i /bin/sh -c "/usr/bin/udiskie-mount -a; /usr/bin/udiskie-mount -a"'
 
-alias qa='pathaction'
-alias qai='pathaction -t install'
+# Changed to command
+# alias qa='pathaction'
+# alias qai='pathaction -t install'
 
 alias_completion() {
   local func_name='alias_completion'
