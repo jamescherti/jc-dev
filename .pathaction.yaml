@@ -2,6 +2,7 @@
 
 actions:
   - path_match: "*"
+    shell: True
     command: "JC_DEV_UNATTENDED=1 ./install.sh"
     tags:
       - main
