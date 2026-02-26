@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+c=${1:-10}; git --no-pager shortlog --summary --numbered | head -n $c

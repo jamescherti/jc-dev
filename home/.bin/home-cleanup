@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euf -o pipefail
+
+MTIME="+15"
+
+cleanup_dir() {
+  local dir="$1"
+  if ! [[ -d "$dir" ]]; then
+    return 0
+  fi
+
+  local before
+  before=$(LC_ALL=C du -hs "$dir" | cut -f 1)
+
+  find "$dir" -type f -mtime "$MTIME" -delete
+
+  local after
+  after=$(LC_ALL=C du -hs "$dir" | cut -f 1)
+  if [[ "$before" != "$after" ]]; then
+    echo "[CLEANUP] $before -> $after: $dir" >&2
+  fi
+}
+
+cleanup_dir "$HOME/.cache/pip"
+cleanup_dir "$HOME/.cache/thumbnails"
+cleanup_dir "$HOME/.cache/python_cache"
+cleanup_dir "$HOME/.cache/python_cache_egg"
+cleanup_dir "$HOME/.cache/python_cache_mypy"
+cleanup_dir "$HOME/.vim_bundle/undo"
+cleanup_dir "$HOME/.vim_bundle/swp"
+cleanup_dir "$HOME/.vim_bundle/backup"
+cleanup_dir "$HOME/.vim_bundle/view"
+cleanup_dir "$HOME/.emacs-data/var/autosave"
+cleanup_dir "$HOME/.emacs-data/var/backup"
+cleanup_dir "$HOME/.emacs-data/var/undo-fu-session"
+cleanup_dir "$HOME/.emacs-data/var/tmp-files.d"
+cleanup_dir "$HOME/.emacs-data/var/elisp-autofmt-cache"

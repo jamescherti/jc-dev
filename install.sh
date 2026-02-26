@@ -50,10 +50,13 @@ init() {
     exit 1
   fi
 
-  if ! type -P rsync &>/dev/null; then
-    echo "Error: the 'rsync' command was not found." >&2
-    exit 1
-  fi
+  local cmd
+  for cmd in rsync pip python git readlink; do
+    if ! type -P "$cmd" &>/dev/null; then
+      echo "Error: the '$cmd' command was not found." >&2
+      exit 1
+    fi
+  done
 
   SCRIPT_DIR=$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")
   mkdir -p "$GIT_CLONE_DIR"
@@ -219,6 +222,36 @@ main() {
   secure_dir ~/.vim_bundle
   secure_dir ~/.bash_history
   secure_dir ~/
+
+  # PIP
+  MY_PIP_PACKAGES=()
+  if ! type -P pathaction &>/dev/null; then
+    MY_PIP_PACKAGES+=(pathaction)
+  fi
+
+  if ! type -P ultyas &>/dev/null; then
+    MY_PIP_PACKAGES+=(ultyas)
+  fi
+
+  if ! type -P git-commitflow &>/dev/null; then
+    MY_PIP_PACKAGES+=(git-commitflow)
+  fi
+
+  if ! type -P batchfetch &>/dev/null; then
+    MY_PIP_PACKAGES+=(batchfetch)
+  fi
+
+  if ! type -P git-smartmv &>/dev/null; then
+    MY_PIP_PACKAGES+=(git-smartmv)
+  fi
+
+  if [[ "${#MY_PIP_PACKAGES[@]}" -gt 1 ]]; then
+    if [[ "${VIRTUAL_ENV:-}" ]]; then
+      pip install "${MY_PIP_PACKAGES[@]}"
+    else
+      pip install --user "${MY_PIP_PACKAGES[@]}"
+    fi
+  fi
 }
 
 main "$@"

@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+# Do a safe "git pull" (do not replace anything and do not do anything
+# if some files were modified in the current local repository).
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -u
+set -e
+
+# Global variables
+CURDIR=$(git rev-parse --show-toplevel)
+BASENAME=$(basename "$CURDIR")
+
+# Show an error
+error() {
+  echo "[ERROR REPO] $BASENAME: $*" >&2
+}
+
+# Modified and deleted files
+AMOUNT_MODIFIED_FILES=$(git diff --name-only --diff-filter=ACMRD HEAD | wc -l)
+if [[ $AMOUNT_MODIFIED_FILES -gt 0 ]]; then
+  error "git pull error: you need to commit the files you modified/deleted."
+  exit 1
+fi
+
+# Run a command and show an error
+run() {
+  local command
+  local message
+  local output
+  local errno=0
+
+  command="$1"
+  message="$2"
+
+  output=$($command) >/dev/null 2>&1 || errno=1
+  if [[ $errno -ne 0 ]]; then
+    error "$message ($output)"
+    exit 1
+  fi
+
+}
+
+echo "[REPO] $BASENAME"
+
+# git remote update will update all of your branches set to track remote ones,
+# but not merge any changes in.
+run 'git fetch --quiet' 'Unable to fetch from all remote repositories'
+run 'git merge --quiet --ff-only' 'Unable to do a fast-forward mege'
+git status --short

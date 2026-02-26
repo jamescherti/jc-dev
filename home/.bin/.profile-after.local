@@ -1,0 +1,115 @@
+#!/usr/bin/env sh
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+append_path "$HOME/.bin"
+export PYTHONPATH="$HOME/.bin/python_modules:$PYTHONPATH"
+
+# The default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+umask 022
+
+export PYTHONPYCACHEPREFIX="$HOME/.cache/python_cache"
+# mkdir -p "$PYTHONPYCACHEPREFIX" >/dev/null 2>&1
+
+export MYPY_CACHE_DIR="$HOME/.cache/python_cache_mypy"
+# mkdir -p "$MYPY_CACHE_DIR" >/dev/null 2>&1
+
+export PYTHON_EGG_CACHE="$HOME/.cache/python_cache_egg"
+# mkdir -p "$PYTHON_EGG_CACHE" >/dev/null 2>&1
+
+export PIP_DOWNLOAD_CACHE="$HOME/.cache/pip_download_cache"
+# mkdir -p "$PIP_DOWNLOAD_CACHE" >/dev/null 2>&1
+
+if [ -d /home/.data/.sdcv_dict ]; then
+  export STARDICT_DATA_DIR=/home/.data/.sdcv_dict
+fi
+
+export LIBVIRT_DEFAULT_URI=qemu:///system
+
+# Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
+# lsp-use-plists flag. plists provide better performance in deserialization and
+# also put less presure than hash-tables.
+export LSP_USE_PLISTS=true
+
+export VIM_PERSISTENT_SESSION_ENABLED=0
+
+#------------------------------------------------------------------------------
+# CUSTOM ENV
+#------------------------------------------------------------------------------
+custom_env() {
+  _CUSTOM_ENV_ACTION="$1"
+  _CUSTOM_ENV="$2"
+
+  if [ -z "$_CUSTOM_ENV_ACTION" ] \
+    || { [ "$_CUSTOM_ENV_ACTION" != "list" ] \
+      && [ -z "$_CUSTOM_ENV" ]; }; then
+    echo "Usage: custom-env <list|load> <env>" >&2
+    return 1
+  fi
+
+  if ! [ -d "$CUSTOM_ENV_BASE_PATH" ]; then
+    echo "Error \$CUSTOM_ENV_BASE_PATH: No such file" \
+      "or directory: $CUSTOM_ENV_BASE_PATH" >&2
+    return 1
+  fi
+
+  local env_path
+  env_path="$CUSTOM_ENV_BASE_PATH"
+  if [ -n "$_CUSTOM_ENV" ]; then
+    env_path="${env_path}/${_CUSTOM_ENV}"
+  fi
+
+  env_path=$(readlink -e "$env_path" 2>/dev/null)
+
+  if [ -z "$env_path" ] || ! [ -d "$env_path" ]; then
+    echo "Error: No such directory: $env_path" >&2
+    return 1
+  fi
+
+  if [ "$_CUSTOM_ENV_ACTION" = "list" ]; then
+    echo "'${env_path}':"
+    ls -1 "$env_path"
+  elif [ "$_CUSTOM_ENV_ACTION" = "load" ]; then
+    echo "[load-custom-env] $env_path"
+    # export PATH="$env_path/bin:$PATH"
+    _jc_add_local_path "$env_path"
+  fi
+}
+
+# AI env var hugging face
+export JC_DOTFILES_UNATTENDED=1
+export EFFICIENT_VIM_CONFIG_UNATTENDED=1
+
+export BATCHFETCH_CHECK_UNTRACKED=1
+export BATCHFETCH_JOBS=5
+
+# Reset the SSH agent (will be loaded later)
+# shellcheck disable=SC2034
+SSH_AGENT_PID=""
+# shellcheck disable=SC2034
+SSH_AUTH_SOCK=""

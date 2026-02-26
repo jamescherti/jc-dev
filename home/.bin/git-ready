@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+"Check if a repository should be released."
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+from typing import Optional, Set
+
+
+def get_latest_commit(branch: str) -> Optional[str]:
+    """Fetch the latest commit hash of the given branch."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", branch],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+
+
+def is_commit_tagged(commit: str) -> bool:
+    """Check if the given commit hash is associated with any tag."""
+    try:
+        result = subprocess.run(
+            ["git", "tag", "--contains", commit],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True
+        )
+        # return bool(result.stdout.strip())
+    except subprocess.CalledProcessError:
+        return False
+    else:
+        return True
+
+
+def get_default_or_develop_branch(repo_path: Path) -> Set[str]:
+    """
+    Check the default branch of a Git repository using `git symbolic-ref`,
+    and use 'develop' if it exists.
+
+    :param repo_path: Path to the Git repository.
+    :return: The default branch or 'develop' if it exists; otherwise, None.
+    """
+    result: Set[str] = set()
+    # Get the default branch
+    output = subprocess.run(
+        ["git", "-C", str(repo_path), "symbolic-ref",
+         "refs/remotes/origin/HEAD"],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    default_branch = output.split("/")[-1]
+    result.add(default_branch)
+
+    try:
+        # Check if 'develop' branch exists
+        subprocess.run(
+            ["git", "-C", str(repo_path), "show-ref", "--heads", "develop"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=True,
+        )
+        result.add("develop")
+    except subprocess.CalledProcessError:
+        pass
+
+    # If 'develop' does not exist, return the default branch
+    return result
+
+
+def does_branch_need_release(branches: Set[str]) -> Set[str]:
+    """Check if the latest commit in each branch is not part of any tag."""
+    result = set()
+    for branch in branches:
+        latest_commit = get_latest_commit(branch)
+        if latest_commit is None:
+            print(f"Branch '{branch}' does not exist or cannot be accessed.",
+                  file=sys.stderr)
+            sys.exit(1)
+
+        if is_commit_tagged(latest_commit):
+            result.add(branch)
+
+    return result
+
+
+def unset_git_environment_variables() -> None:
+    """
+    Unset all environment variables that start with 'GIT_'.
+    """
+    for key in list(os.environ):
+        if key.startswith("GIT_"):
+            del os.environ[key]
+
+
+if __name__ == "__main__":
+    unset_git_environment_variables()
+    branches_to_check = get_default_or_develop_branch(Path("."))
+    branches_need_release = does_branch_need_release(branches_to_check)
+    if branches_need_release:
+        print(f"[RELEASE] {os.getcwd()}:", ", ".join(branches_need_release))
+        sys.exit(1)
+    else:
+        print("[IGNORE]", os.getcwd())

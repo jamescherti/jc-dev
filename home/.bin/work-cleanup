@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+#
+# Do a safe "git pull" (do not replace anything and do not do anything
+# if some files were modified in the current local repository).
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euf -o pipefail
+IFS=$'\n\t' # strict mode
+
+MODIFIED_DAYS="+90"
+TOTAL_CLEANUPS=0
+
+ATEXIT_DONE=0
+atexit() {
+  local errno="$?"
+  if [[ "$ATEXIT_DONE" -eq 0 ]]; then
+    if [[ $TOTAL_CLEANUPS -eq 0 ]]; then
+      echo "Nothing to do."
+    fi
+    ATEXIT_DONE=1
+  fi
+  exit "$errno"
+}
+
+trap 'atexit' INT TERM EXIT
+
+cleanup_files() {
+  local path="$1"
+  local glob="$2"
+  local filetype="$3" # f, d
+  local modified_days="$4"
+  local title="${filetype}: ${glob} in ${path}:"
+
+  #
+  # Commands
+  #
+  local cmd_find
+  cmd_find=(find "$path" -type "$filetype" -name "$glob" -not -path '*/\.git/*')
+  local cmd_find_total
+  cmd_find_total=("${cmd_find[@]}")
+
+  [[ $modified_days != "" ]] && cmd_find+=(-mtime "$modified_days")
+
+  #
+  # Find the files
+  #
+  readarray -t list_files < <("${cmd_find[@]}" 2>/dev/null)
+  if [[ ${#list_files[@]} -le 0 ]]; then
+    return
+  fi
+
+  #
+  # Show infos
+  #
+
+  # shellcheck disable=SC2001
+  echo "$title" | sed -e 's/./-/g'
+  echo "$title"
+  # shellcheck disable=SC2001
+  echo "$title" | sed -e 's/./-/g'
+
+  local item
+  local counter=0
+  echo "Command:" "${cmd_find[@]}"
+  echo "Files:"
+  # shellcheck disable=SC1073
+  for item in "${list_files[@]}"; do
+    echo "  $item"
+    counter=$((counter + 1))
+    [[ $counter -gt 5 ]] && echo "  (more...)" && break
+  done
+  echo -n "The files that will be deleted:" "${#list_files[@]}" "/ "
+  "${cmd_find_total[@]}" 2>/dev/null | wc -l || true
+  echo -n "Size: "
+  du --human-readable --summarize --total "${list_files[@]}" | tail -n 1 | sed -e 's/total//' || true
+
+  #
+  # Delete
+  #
+  echo
+  local ANSWER=''
+  read -r -p "Delete? [y,n] " ANSWER
+  if [[ "$ANSWER" = "y" ]]; then
+    for item in "${list_files[@]}"; do
+      echo "DELETE: $item"
+      rm -fr "$item"
+    done
+  fi
+
+  echo
+
+  TOTAL_CLEANUPS=$((TOTAL_CLEANUPS + 1))
+}
+
+main() {
+  cleanup_files "$HOME/.cache/thumbnails" '*.png' f "$MODIFIED_DAYS"
+  cleanup_files "$HOME/.vim_bundle/backup" '*' f "$MODIFIED_DAYS"
+  cleanup_files "$HOME/.vim_bundle/undo" '*' f "$MODIFIED_DAYS"
+  cleanup_files "$HOME" '.DS_Store' f "$MODIFIED_DAYS"
+  cleanup_files "$HOME" '.comments' d ""
+  cleanup_files "$HOME" '__pycache__' d ""
+}
+
+main "$@"
