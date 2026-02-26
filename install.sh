@@ -214,7 +214,7 @@ main() {
   git_clone \
     https://github.com/jamescherti/lightemacs \
     "$GIT_CLONE_DIR/lightemacs"
-  cd "$GIT_CLONE_DIR/dotfiles"
+  cd "$GIT_CLONE_DIR/lightemacs"
   git checkout develop
 
   # Secure dirs
