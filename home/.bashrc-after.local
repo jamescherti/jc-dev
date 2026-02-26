@@ -457,13 +457,13 @@ if [[ $OSFAMILY != "" ]]; then
   fi
 fi
 
+alias cip="so command cip"
 # alias gd='command git ydiff'
 # alias gdr="git diff"
 # alias cia="git cia"
 # alias ci="command git-commitflow"
 # alias gd="g d"
 # alias cip="git-commitflow --push"
-alias cip="so command cip"
 # alias gs="git show"
 # alias b='gb'
 # alias gs='git st'
@@ -474,9 +474,6 @@ alias cip="so command cip"
 # alias real-emacs='command emacs'
 # alias emacs=emacs-edit
 # alias e=devemacs
-# if [[ $DISPLAY != "" ]] && type -P emacsclient &>/dev/null; then
-#   alias vim=emacs-edit
-# fi
 
 # Aliases
 alias git-sync-upstream='preload-ssh-agent so git-sync-upstream'
