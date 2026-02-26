@@ -86,7 +86,7 @@
 ;;         t))
 
 (setq compile-angel-verbose t)
-(setq compile-angel-debug t)
+(setq compile-angel-debug nil)
 
 ;; To stop vterm from asking for confirmation and force it to compile the
 ;; module automatically, you need to set the vterm-always-compile-module
