@@ -27,15 +27,12 @@
 #
 
 set -euf -o pipefail
-IFS=$'\n\t' # strict mode
 
 MODIFY_BACKGROUND=1
 
-USER_HOME="$(eval echo "~$USER")"
-
 run() {
-  echo "$@"
-  "$@"
+  printf "%s\n" "$*"
+  "$@" || true 1
 }
 
 gset() {
@@ -47,7 +44,7 @@ gset() {
 # Background
 #-------------------------------------------------------------------->
 if [[ $MODIFY_BACKGROUND ]]; then
-  GNOME_BACKGROUND_DIR="$USER_HOME/.backgrounds"
+  GNOME_BACKGROUND_DIR="$HOME/.backgrounds"
   mkdir -p "$GNOME_BACKGROUND_DIR"
   GNOME_BACKGROUND_PATH="$GNOME_BACKGROUND_DIR/background.png"
   cp "files-settings-gnome/background.png" "$GNOME_BACKGROUND_PATH"
@@ -67,15 +64,15 @@ gset org.gnome.system.locale region en_US.UTF-8
 # gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
 gsettings set org.gnome.desktop.wm.preferences button-layout 'close:'
 
-gset org.gnome.desktop.interface cursor-theme Adwaita
+# gset org.gnome.desktop.interface cursor-theme Adwaita
 gset org.gnome.desktop.interface document-font-name 'DejaVu Sans 10'
 gset org.gnome.desktop.interface font-name 'DejaVu Sans 10'
-gset org.gnome.desktop.interface monospace-font-name 'Inconsolata Bold 10'
+gset org.gnome.desktop.interface monospace-font-name 'Iosevka Bold 10'
 gset org.gnome.desktop.interface font-antialiasing 'rgba' # rgba / grayscale
 gset org.gnome.desktop.interface font-hinting 'medium'    # slight / medium / full
-gset org.gnome.desktop.interface gtk-theme Adwaita-dark   # HighContrastInverse / Adwaita-dark
+# gset org.gnome.desktop.interface gtk-theme Adwaita-dark   # HighContrastInverse / Adwaita-dark
 gset org.gnome.desktop.wm.preferences titlebar-font 'DejaVu Sans 10'
-gset org.gnome.desktop.interface icon-theme Adwaita
+# gset org.gnome.desktop.interface icon-theme Adwaita
 
 if type -P meld >/dev/null 2>&1; then
   gset org.gnome.meld custom-font 'monospace 16'

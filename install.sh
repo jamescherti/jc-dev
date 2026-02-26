@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 #
 # Describe: Install the jc-dev development environment
 #
@@ -206,9 +205,7 @@ main() {
   fi
 
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
-    cd "$SCRIPT_DIR"
-    pwd
-    "./data/settings/update-mimetypes.py"
+    "$SCRIPT_DIR/data/settings/update-mimetypes.py"
   fi
 
   # JC-DOTFILES
@@ -273,11 +270,6 @@ main() {
       pip install --user "${MY_PIP_PACKAGES[@]}"
     fi
   fi
-
-  # Fixes the issue where the terminal session is corrupt because of gpg agent
-  gpgconf --kill gpg-agent || :
-  # pkill -x gpgconf || :
-  # pkill -x gpg-agent || :
 
   "$SCRIPT_DIR/home/.bin/update-emacs-config"
   "$SCRIPT_DIR/home/.bin/update-project-list"

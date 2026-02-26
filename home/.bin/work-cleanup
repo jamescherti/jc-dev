@@ -30,7 +30,6 @@
 #
 
 set -euf -o pipefail
-IFS=$'\n\t' # strict mode
 
 MODIFIED_DAYS="+90"
 TOTAL_CLEANUPS=0

@@ -32,7 +32,7 @@
 actions:
   - path_match: "*"
     shell: true
-    command: "JC_DEV_UNATTENDED=1 ./install.sh"
+    command: "export JC_DEV_UNATTENDED=1; $(type -P so || echo '') ./install.sh"
     tags:
       - main
       - install
