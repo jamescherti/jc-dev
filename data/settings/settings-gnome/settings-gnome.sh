@@ -55,6 +55,7 @@ fi
 
 if [[ $MODIFY_BACKGROUND -ne 0 ]]; then
   gset org.gnome.desktop.background picture-uri "file://$GNOME_BACKGROUND_PATH"
+  gset org.gnome.desktop.background picture-uri-dark "file://$GNOME_BACKGROUND_PATH"
 fi
 #-------------------------------------------------------------------->
 
