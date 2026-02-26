@@ -120,7 +120,7 @@ sync_home() {
 
   # rsync without delete
   echo "[RUN-RSYNC]" home/ '->' "$HOME/"
-  rsync "${rsync_opts[@]}" home/ "$HOME/"
+  rsync "${rsync_opts[@]}" "$SCRIPT_DIR/home/" "$HOME/"
 }
 
 main() {
@@ -144,15 +144,6 @@ main() {
     "$GIT_CLONE_DIR/jc-dotfiles"
   cd "$GIT_CLONE_DIR/jc-dotfiles"
   JC_DOTFILES_UNATTENDED=1 ./install.sh
-
-  set +e
-  set +u
-  # shellcheck disable=SC1090
-  source ~/.profile
-  # shellcheck disable=SC1090
-  source ~/.bashrc
-  set -e
-  set -u
 
   # BASH-STDOPS
   git_clone \
