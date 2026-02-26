@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+"""Execute a script with its shebang."""
+
+import os
+import shlex
+import subprocess
+import sys
+from pathlib import Path
+from typing import Union
+
+
+class ShebangError(Exception):
+    """Error with the method read_shebang()."""
+
+
+def read_shebang(script_path: Union[Path, str]) -> list:
+    """Return the shebang line of a file.
+
+    >>> shebang("file.sh")
+    ['/usr/bin/env', 'bash']
+
+    """
+    with open(script_path, "rb") as fhandler:
+        line = fhandler.readline().strip().decode()
+
+    if len(line) > 2 and line[0:2] == '#!':
+        shebang_split = shlex.split(line[2:].strip())
+        if not Path(shebang_split[0]).is_file():
+            raise ShebangError(f"the shebang '{shebang_split}' does not exist")
+
+        if not os.access(shebang_split[0], os.X_OK):
+            raise ShebangError(f"the shebang '{shebang_split}' is not "
+                               "executable")
+
+        return shebang_split
+
+    raise ShebangError("the shebang line was not found")
+
+
+if __name__ == "__main__":
+    def command_line_interface():
+        """Command line interface."""
+        script_path = Path(sys.argv[1])
+        try:
+            shebang = read_shebang(script_path)
+        except (ShebangError, FileNotFoundError) as err:
+            print(f"Error: {err}.", file=sys.stderr)
+            sys.exit(1)
+
+        cmd = shebang + [str(script_path)] + sys.argv[2:]
+        print("[RUN]", cmd, file=sys.stderr)
+        subprocess.call(cmd)
+
+    command_line_interface()
