@@ -135,44 +135,12 @@ NewLine="\n"
 Jobs="\j"
 # End Colors }}}
 
-alias si=smart-install
-
 # Removed: --color=never
-if type -P rg >/dev/null 2>&1; then
-  alias gr='rg'
-else
-  alias gr='grep -R -i --no-messages'
-fi
-
-alias f=fd
 
 preload-ssh-agent() {
   [[ $# -eq 0 ]] && return 0
   esa ssh-add-exec "$@" || return 1
 }
-
-alias virt-manager="ssh-add-all; virt-manager"
-
-alias ls='_jc_better_ls --hide=build --hide=Templates --hide=Desktop'
-
-if type -P git-smartmv >/dev/null 2>&1; then
-  alias mv="git-smartmv -w 10 --non-interactive"
-fi
-
-alias minimal-emacs='command emacs --init-directory=~/.minimal-emacs.d'
-alias memacs=minimal-emacs
-alias me=minimal-emacs
-
-alias real_emacs='command emacs'
-# alias emacs=emacs-edit
-alias ee=emacs-edit
-alias e=devemacs
-
-# if [[ $DISPLAY != "" ]] && type -P emacsclient &>/dev/null; then
-#   alias vim=emacs-edit
-# fi
-
-alias bf="batchfetch"
 
 _git_wrapper() {
   if type -P so &>/dev/null; then
@@ -255,36 +223,6 @@ release-twine() {
   popd &>/dev/null || return 1
   return "${errno}"
 }
-
-alias git-sync-upstream='preload-ssh-agent so git-sync-upstream'
-alias git-sync='git-sync-upstream'
-
-alias home-git-clone='preload-ssh-agent home-git-clone'
-
-alias c=wcalc
-
-alias gd="g d"
-
-# alias gd='command git ydiff'
-# alias gdr="git diff"
-
-alias ci="command git-commitflow"
-alias cia="git cia"
-alias cip="git-commitflow --push"
-alias gs="git show"
-alias b='gb'
-alias gs='git st'
-alias gst='git st'
-alias t='git st'
-
-# alias st="command git status -s"
-
-alias s='esa ssh-add-exec ssh'
-
-alias dist-dotfiles="so esa ssh-add-exec dist-dotfiles"
-alias home-update="so esa ssh-add-exec home-update"
-alias hup=home-update
-alias scp="esa ssh-add-exec scp"
 
 umount-maybe() {
   local dir="$1"
@@ -518,3 +456,74 @@ if [[ $OSFAMILY != "" ]]; then
     source "main_$OSFAMILY/bin/activate"
   fi
 fi
+
+# alias gd='command git ydiff'
+# alias gdr="git diff"
+# alias cia="git cia"
+# alias ci="command git-commitflow"
+# alias gd="g d"
+# alias cip="git-commitflow --push"
+# alias gs="git show"
+# alias b='gb'
+# alias gs='git st'
+# alias gst='git st'
+# alias t='git st'
+# alias st="command git status -s"
+# alias memacs=minimal-emacs
+# alias real-emacs='command emacs'
+# alias emacs=emacs-edit
+# alias e=devemacs
+# if [[ $DISPLAY != "" ]] && type -P emacsclient &>/dev/null; then
+#   alias vim=emacs-edit
+# fi
+
+# Aliases
+alias git-sync-upstream='preload-ssh-agent so git-sync-upstream'
+alias git-sync='git-sync-upstream'
+alias c=wcalc
+
+alias s='esa ssh-add-exec ssh'
+alias home-update="so esa ssh-add-exec home-update"
+alias hup=home-update
+alias scp="esa ssh-add-exec scp"
+alias si=smart-install
+
+if type -P rg >/dev/null 2>&1; then
+  alias gr='rg'
+else
+  alias gr='grep -R -i --no-messages'
+fi
+
+path-is-inside-of() {
+  local target="$1"
+  local base="${2%/}"
+
+  [[ "$target" == "$base" ]] || [[ "$target" == "$base/"* ]]
+}
+
+smart-fd() {
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1 || path-is-inside-of "$PWD" "$HOME/src"; then
+    echo hidden
+    command fd "$@"
+  else
+    echo super search
+    command fd --hidden --no-ignore --exclude '.git' "$@"
+  fi
+}
+
+# alias f='fd --no-ignore'
+alias f='smart-fd'
+alias fd='smart-fd'
+alias virt-manager="ssh-add-all; virt-manager"
+alias ls='_jc_better_ls --hide=build --hide=Templates --hide=Desktop'
+
+if type -P git-smartmv >/dev/null 2>&1; then
+  alias mv="git-smartmv -w 10 --non-interactive"
+fi
+
+alias minimal-emacs='command emacs --init-directory=~/.minimal-emacs.d'
+alias me=minimal-emacs
+
+alias e=emacs-edit
+
+alias bf="batchfetch"
