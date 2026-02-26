@@ -74,6 +74,9 @@ lightemacs-init-files() {
     lightemacs_path="$SRC_DIR/lightemacs"
   elif [[ -d "$HOME/.jc-dev/lightemacs" ]]; then
     lightemacs_path="$HOME/.jc-dev/lightemacs"
+  else
+    echo "Cannot find the Lightemacs source code" >&2
+    exit 1
   fi
 
   run-rsync "$lightemacs_path/early-init.el" \
