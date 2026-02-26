@@ -1,0 +1,8 @@
+---
+
+actions:
+  - path_match: "*"
+    command: "./install.sh"
+    tags:
+      - main
+      - install
