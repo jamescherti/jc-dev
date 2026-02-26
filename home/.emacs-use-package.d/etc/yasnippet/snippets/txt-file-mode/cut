@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: cut
+# key: cut
+# expand-env: ((yas-indent-line 'fixed))
+# --
+--8<---------------cut here---------------start------------->8---

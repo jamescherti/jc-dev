@@ -45,9 +45,7 @@ export PYTHON_EGG_CACHE="$HOME/.cache/python_cache_egg"
 export PIP_DOWNLOAD_CACHE="$HOME/.cache/pip_download_cache"
 # mkdir -p "$PIP_DOWNLOAD_CACHE" >/dev/null 2>&1
 
-if [ -d /home/.data/.sdcv_dict ]; then
-  export STARDICT_DATA_DIR=/home/.data/.sdcv_dict
-fi
+export STARDICT_DATA_DIR=/opt/local/sdcv_dict
 
 export LIBVIRT_DEFAULT_URI=qemu:///system
 
@@ -61,45 +59,45 @@ export VIM_PERSISTENT_SESSION_ENABLED=0
 #------------------------------------------------------------------------------
 # CUSTOM ENV
 #------------------------------------------------------------------------------
-custom_env() {
-  _CUSTOM_ENV_ACTION="$1"
-  _CUSTOM_ENV="$2"
-
-  if [ -z "$_CUSTOM_ENV_ACTION" ] \
-    || { [ "$_CUSTOM_ENV_ACTION" != "list" ] \
-      && [ -z "$_CUSTOM_ENV" ]; }; then
-    echo "Usage: custom-env <list|load> <env>" >&2
-    return 1
-  fi
-
-  if ! [ -d "$CUSTOM_ENV_BASE_PATH" ]; then
-    echo "Error \$CUSTOM_ENV_BASE_PATH: No such file" \
-      "or directory: $CUSTOM_ENV_BASE_PATH" >&2
-    return 1
-  fi
-
-  local env_path
-  env_path="$CUSTOM_ENV_BASE_PATH"
-  if [ -n "$_CUSTOM_ENV" ]; then
-    env_path="${env_path}/${_CUSTOM_ENV}"
-  fi
-
-  env_path=$(readlink -e "$env_path" 2>/dev/null)
-
-  if [ -z "$env_path" ] || ! [ -d "$env_path" ]; then
-    echo "Error: No such directory: $env_path" >&2
-    return 1
-  fi
-
-  if [ "$_CUSTOM_ENV_ACTION" = "list" ]; then
-    echo "'${env_path}':"
-    ls -1 "$env_path"
-  elif [ "$_CUSTOM_ENV_ACTION" = "load" ]; then
-    echo "[load-custom-env] $env_path"
-    # export PATH="$env_path/bin:$PATH"
-    _jc_add_local_path "$env_path"
-  fi
-}
+# custom_env() {
+#   _CUSTOM_ENV_ACTION="$1"
+#   _CUSTOM_ENV="$2"
+#
+#   if [ -z "$_CUSTOM_ENV_ACTION" ] \
+#     || { [ "$_CUSTOM_ENV_ACTION" != "list" ] \
+#       && [ -z "$_CUSTOM_ENV" ]; }; then
+#     echo "Usage: custom-env <list|load> <env>" >&2
+#     return 1
+#   fi
+#
+#   if ! [ -d "$CUSTOM_ENV_BASE_PATH" ]; then
+#     echo "Error \$CUSTOM_ENV_BASE_PATH: No such file" \
+#       "or directory: $CUSTOM_ENV_BASE_PATH" >&2
+#     return 1
+#   fi
+#
+#   local env_path
+#   env_path="$CUSTOM_ENV_BASE_PATH"
+#   if [ -n "$_CUSTOM_ENV" ]; then
+#     env_path="${env_path}/${_CUSTOM_ENV}"
+#   fi
+#
+#   env_path=$(readlink -e "$env_path" 2>/dev/null)
+#
+#   if [ -z "$env_path" ] || ! [ -d "$env_path" ]; then
+#     echo "Error: No such directory: $env_path" >&2
+#     return 1
+#   fi
+#
+#   if [ "$_CUSTOM_ENV_ACTION" = "list" ]; then
+#     echo "'${env_path}':"
+#     ls -1 "$env_path"
+#   elif [ "$_CUSTOM_ENV_ACTION" = "load" ]; then
+#     echo "[load-custom-env] $env_path"
+#     # export PATH="$env_path/bin:$PATH"
+#     _jc_add_local_path "$env_path"
+#   fi
+# }
 
 # AI env var hugging face
 export JC_DOTFILES_UNATTENDED=1
