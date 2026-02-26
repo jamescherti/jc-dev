@@ -123,8 +123,6 @@ sync_home() {
 main() {
   init
 
-  sync_home
-
   if [[ "${JC_DEV_UNATTENDED:-}" = "" ]] \
     && [[ "${JC_DEV_UNATTENDED:-}" -eq 0 ]]; then
     echo
@@ -134,6 +132,8 @@ main() {
       exit 1
     fi
   fi
+
+  sync_home
 
   # BASH-STDOPS
   git_clone \
