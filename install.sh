@@ -106,8 +106,24 @@ secure_dir() {
   fi
 }
 
+sync_home() {
+  echo "---------------------------------------------------------------------"
+  echo " UPDATE-HOME: $HOME"
+  echo "---------------------------------------------------------------------"
+
+  local rsync_opts=(--archive
+    --exclude '*.elc' --exclude '*.eln'
+    --exclude='flymake_*' --exclude='flycheck_*')
+
+  # rsync without delete
+  echo "[RUN-RSYNC]" home/ '->' "$HOME/"
+  rsync "${rsync_opts[@]}" home/ "$HOME/"
+}
+
 main() {
   init
+
+  sync_home
 
   if [[ "${JC_DEV_UNATTENDED:-}" = "" ]] \
     && [[ "${JC_DEV_UNATTENDED:-}" -eq 0 ]]; then
