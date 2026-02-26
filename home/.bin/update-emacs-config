@@ -69,11 +69,18 @@ lightemacs-init-files() {
   local dir="$1"
   mkdir -p "$dir/lisp/local/"
 
-  run-rsync "$SRC_DIR/lightemacs/early-init.el" \
-    "$SRC_DIR/lightemacs/init.el" \
+  local lightemacs_path
+  if [[ -d "$SRC_DIR/lightemacs" ]]; then
+    lightemacs_path="$SRC_DIR/lightemacs"
+  elif [[ -d "$HOME/.jc-dev/lightemacs" ]]; then
+    lightemacs_path="$HOME/.jc-dev/lightemacs"
+  fi
+
+  run-rsync "$lightemacs_path/early-init.el" \
+    "$lightemacs_path/init.el" \
     "$dir/"
 
-  run-rsync "$SRC_DIR/lightemacs/lisp/lightemacs/" \
+  run-rsync "$lightemacs_path/lisp/lightemacs/" \
     "$dir/lisp/lightemacs/"
 }
 

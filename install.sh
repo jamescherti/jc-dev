@@ -278,6 +278,9 @@ main() {
   # pkill -x gpgconf || :
   # pkill -x gpg-agent || :
 
+  "$SCRIPT_DIR/home/.bin/update-emacs-config"
+  "$SCRIPT_DIR/home/.bin/update-project-list"
+
   echo
   echo Success.
 }
