@@ -48,10 +48,10 @@ init() {
     SRC_DIR="$DEST_DIR/src/emacs"
     if [[ -d "$SRC_DIR/lightemacs" ]]; then
       SRC_DIR="$HOME/.jc-dev"
+    else
+      git -C "$SRC_DIR/lightemacs/" checkout develop
     fi
   fi
-
-  git -C "$SRC_DIR/lightemacs/" checkout develop
 
   # Init the base
   EMACS_BASE="$DEST_DIR/.emacs-use-package.d"
