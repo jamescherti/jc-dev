@@ -1,0 +1,553 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euf -o pipefail
+
+if ! git remote -v | grep '/emacs '; then
+  echo "This is not an Emacs repository." >&2
+  exit 1
+fi
+
+SOFTWARE_NAME="emacs"
+
+NUM_PROC=$(nproc --ignore=1)
+
+# Emacs will be installed under the following path:
+#   $EMACS_INSTALL_PREFIX/<OS>/<EMACS_VERSION>
+#
+# For example, on a Debian system with the current Git branch "emacs-30":
+# $EMACS_INSTALL_PREFIX/debian/branch-emacs-30
+EMACS_INSTALL_PREFIX="$HOME/.local"
+
+# Append the operating system name to $EMACS_INSTALL_PREFIX.
+#
+# For example, on a Debian system with the current Git branch "emacs-30",
+# the resulting path prefix would be:
+#   $EMACS_INSTALL_PREFIX/debian/
+EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM=1
+
+# Append the emacs branch name to $EMACS_INSTALL_PREFIX.
+#
+# For example, on a Debian system with the current Git branch "emacs-30",
+# the resulting path prefix would be:
+#   $EMACS_INSTALL_PREFIX/debian/branch-emacs-30
+EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
+
+# Performance-focused build flags for compiling Emacs (or other large C
+# projects). These settings are intended to maximize runtime and startup
+# performance, with no regard for debugging convenience or security hardening.
+#
+# CFLAGS:
+# -------
+# -O2: Enables general-purpose optimizations that do not compromise stability.
+#
+# -pipe: Uses pipes rather than temporary files during compilation; speeds up
+# build process.
+#
+# -march=native: Generates code optimized specifically for the host CPU (e.g.,
+# AVX, SSE, etc.).
+#
+# -mtune=native: Tunes performance (instruction scheduling) for the host CPU
+# model.
+#
+# -fomit-frame-pointer: Frees up a general-purpose register and reduces function
+#                       prologue/epilogue overhead. Makes backtraces and
+#                       profiling more difficult—acceptable for release builds.
+#
+# -flto: Enables Link Time Optimization. Allows the compiler to perform
+#        whole-program optimizations, including cross-module inlining, dead code
+#        elimination, and constant propagation.
+#
+# LDFLAGS:
+# --------
+# -Wl,-O1: Basic linker-level optimizations (binary layout, symbol resolution).
+#
+# -Wl,--sort-common: Coalesces common symbols to reduce binary size and improve
+# layout.
+#
+# -Wl,--as-needed: Links shared libraries only if they are actually used,
+# reducing binary dependencies.
+#
+# -Wl,-z,pack-relative-relocs: Optimizes relative relocations in ELF binaries,
+#                              reducing startup time on glibc >= 2.35 (especially
+#                              relevant for x86_64).
+#
+# Note: These flags intentionally omit all security-hardening and debugging aids.
+#       Use only for trusted code and final performance builds.
+
+# shellcheck disable=SC1091
+source /etc/os-release
+
+# Force gcc
+# ID=debian
+
+# Semantic Interposition: Added -fno-semantic-interposition to CFLAGS. This
+# significantly speeds up position-independent executables (which Emacs uses for
+# native compilation) by allowing the compiler to optimize function calls within
+# the same shared object.
+#
+# -fno-semantic-interposition can slightly improve performance of .eln shared
+# objects under native compilation by allowing more aggressive inlining, though
+# gains are modest.
+#
+# REMOVED:  -fno-semantic-interposition
+export CFLAGS="-O2 -pipe -march=native -mtune=native -fomit-frame-pointer"
+if [[ $ID = DISABLEDarch ]]; then
+  # Arch Linux
+  export CC=clang
+  export CXX=clang++
+  export AR=llvm-ar
+  export NM=llvm-nm
+  export LD=ld.lld
+  export RANLIB=ranlib
+  export CFLAGS="$CFLAGS -flto=full"
+else
+  # -O2                    # Safe, good optimization level; avoids some aggressive optimizations of -O3
+  # -pipe                  # Speeds up compilation by using pipes instead of temporary files
+  # -march=native           # Uses CPU-specific instructions; improves performance on your machine but reduces portability
+  # -mtune=native           # Tunes instruction scheduling for your CPU
+  # Optimizes for your specific CPU.
+  # Drawback: Reduces portability; binary may not run on older CPUs.
+  # Action: Keep for personal builds; remove for distributing binaries.
+  #
+  # -fomit-frame-pointer    # Slightly faster code; makes debugging harder
+  #                         -fomit-frame-pointer
+  #                         Removes the frame pointer to free a register, giving slightly faster code.
+  #                         Drawback: Makes debugging crashes and profiling harder.
+  #                         Action: Keep it for release builds; remove it if you plan to debug or use profiling tools.
+  #
+  # -flto=full              # Full link-time optimization; reduces binary size and can improve runtime performance
+  export CFLAGS="$CFLAGS -flto"
+fi
+
+# -Wl,-O2 – Instructs the linker to optimize layout of the binary. Helps reduce
+# cache misses slightly.
+#
+# -Wl,--sort-common – Orders common symbols to improve memory locality. Small
+# effect, generally safe.
+#
+# -Wl,--as-needed – Only links libraries that are actually used. Reduces the
+# size of the executable and startup overhead. Useful for Emacs because it links
+# many libraries.
+#
+# -Wl,-z,pack-relative-relocs – Reduces the size of relocations for
+# position-independent executables. Slightly reduces memory usage and can
+# improve startup speed.
+export LDFLAGS="-Wl,-O2 -Wl,--sort-common \
+  -Wl,--as-needed -Wl,-z,pack-relative-relocs"
+
+# Debian
+export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/10/include"
+export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/10"
+
+export CXXFLAGS="$CFLAGS"
+
+# The `--with-mps=yes` configure flag instructs Emacs to use the **Memory Pool
+# System (MPS)** for memory management instead of its default conservative
+# garbage collector. MPS is a modular, high-performance garbage collection
+# library that supports precise and incremental collection, allowing Emacs to
+# manage memory more efficiently, especially in memory-intensive workloads.
+# Enabling this option requires that the MPS library and headers are installed
+# and accessible during compilation. While primarily experimental, using MPS can
+# improve performance and enable advanced memory management features, making it
+# particularly useful for custom Emacs builds such as those using the
+# incremental garbage collection (IGC) framework.
+# TODO: try: --with-mps=yes
+#
+# Using the Memory Pool System (MPS) in Emacs introduces several drawbacks. It
+# is largely experimental, so some Emacs packages or internal subsystems may not
+# be fully compatible, potentially causing crashes or subtle memory issues.
+# Building Emacs with MPS also adds complexity, requiring the library and
+# headers to be correctly installed and configured, which can complicate
+# cross-platform builds. Additionally, while MPS can improve memory management
+# in certain workloads, it may introduce overhead in typical usage, and standard
+# debugging or profiling tools may not fully support MPS, making memory issues
+# harder to diagnose.
+CONFIGURE_ARGS=(
+  # --without-all
+
+  # Enable internal assertions and type checks. Helpful during debugging or for
+  # development builds.
+  # --enable-checking=all
+  # --enable-check-lisp-object-type
+
+  --with-gnutls
+
+  --enable-link-time-optimization
+  --disable-build-details
+
+  # --disable-year2038: On a 64-bit Arch system, your time_t is already 64-bit.
+  # This flag is primarily for 32-bit systems trying to avoid or acknowledge the
+  # 2038 bug. It adds no value to your build.
+  # --disable-year2038
+
+  # By default, many autotools-based projects hide the actual compiler/linker
+  # commands and show simplified status lines like: This option disables that
+  # simplification and shows the full compilation and linking commands used
+  # (i.e., long gcc/ld command lines).
+  # --disable-silent-rules
+
+  # This flag enables automatic dependency tracking for C header files (.h),
+  # such that when a header file changes, the appropriate source files (.c)
+  # that include it will be recompiled. This relies on the GCC compiler's -MMD
+  # and -MF flags.
+  #
+  # When a header file changes, only the affected .c files are recompiled.
+  # This avoids either: Rebuilding the entire project unnecessarily, or
+  # Missing necessary recompilation (leading to incorrect builds).
+  #
+  # Improved Build Efficiency Particularly beneficial in large codebases like
+  # Emacs, this option ensures that only modified and dependent files are
+  # rebuilt. Over time, this saves significant build time.
+  --enable-autodepend
+
+  #  Enable GC_REMEMBER_LAST_MARKED by default (it was disabled in Emacs 29)
+  #  to make it easier to debug difficult-to-reproduce GC problems
+  #  encountered by users.  This increases GC costs by about 5 %, which can
+  #  be avoided by turning the mark trace buffer back off using the new
+  #  --disable-gc-mark-trace option.
+  #  https://lists.gnu.org/archive/html/emacs-devel/2024-09/msg00240.html
+  --disable-gc-mark-trace
+
+  # configure: WARNING: This configuration installs a 'movemail' program that
+  # does not retrieve POP3 email. By default, Emacs 25 and earlier installed a
+  # 'movemail' program that retrieved POP3 email via only insecure channels, a
+  # practice that is no longer recommended but that you can continue to
+  # support by using './configure --with-pop'. configure: You might want to
+  # use './configure --with-mailutils'.
+  --without-mailutils
+  --without-pop
+
+  # --without-hesiod disables support for Hesiod, a relatively obscure name
+  # service protocol that maps names to data using DNS. In Emacs, Hesiod
+  # support is used for resolving user information (such as user names and
+  # home directories) via a network-based lookup instead of relying solely on
+  # local system files like /etc/passwd.
+  --without-hesiod
+
+  # On Linux, --without-included-regex is typically faster than
+  # --with-included-regex, assuming your system's C library (e.g., glibc)
+  # provides a high-performance and standards-compliant regex implementation.
+  --without-included-regex
+
+  --with-native-compilation=aot
+  --with-modules
+  --with-threads
+
+  --with-tree-sitter
+  --with-xml2
+  --without-gpm
+  --with-zlib
+
+  --without-xwidgets
+
+  --with-xdbe
+
+  # --with-x-toolkit=lucid
+
+  # --with-x-toolkit=gtk3
+  # --without-toolkit-scroll-bars
+  # --without-pgtk
+
+  --with-toolkit-scroll-bars
+  --with-pgtk
+
+  --without-ns
+  --without-xaw3d
+
+  --with-cairo # Uses cairo and pango (instead of xft)
+
+  # --with-cairo-xcb is the preferred option for modern systems due to its
+  # performance benefits and alignment with current X11 development trends.
+  # However, --with-cairo remains a solid choice, especially if compatibility
+  # with a wide range of systems is a priority.
+  #
+  # Fewer developers test Emacs with --with-cairo-xcb than with default
+  # --with-cairo + Xlib.
+  #
+  # You should remove this. Since you are using --with-pgtk, Emacs uses the GTK3
+  # drawing backend, which handles Cairo internally. The xcb specific flag is
+  # for X11 environments and ma
+  # --with-cairo-xcb # Remove when pgtk
+
+  --with-harfbuzz
+
+  # --without-xft: If you're using Harfbuzz (as suggested), you don't need
+  # --XFT, which is now replaced.
+  --without-xft # Replaced with harfbuzz
+
+  --without-m17n-flt # I am using English only
+  --without-libotf
+
+  --with-file-notification=inotify
+
+  # Reduced Binary Size: The portable dumper generates a "dumped" file
+  # containing the preloaded Emacs Lisp code, which increases the size of the
+  # Emacs binary. Disabling it avoids creating this extra file.
+  #
+  # Simpler Build Process: Without the portable dumper, Emacs doesn't require
+  # pdumper.c-specific logic, which simplifies the build process and avoids
+  # some potential portability or compatibility issues on less common
+  # platforms.
+  #
+  # Without a dump file, Emacs dynamically loads all its initial configuration
+  # and packages during startup. This may make debugging and customization of
+  # the initialization process easier because everything is loaded on-demand
+  # rather than being baked into the dumped image.
+  --with-pdumper
+
+  # Yes, --with-wide-int can make certain integer operations faster in Emacs
+  # Lisp because it allows using a wider native integer type instead of
+  # resorting to bignum arithmetic for larger numbers. This reduces the
+  # overhead of allocating and managing bignums.
+  #
+  # However, the speed improvement mainly applies when manipulating integers
+  # near or beyond the default integer size limit. For typical integer
+  # operations within the smaller range, performance differences are minimal.
+  #
+  # --with-wide-int: This is the default on 64-bit systems. Manually specifying
+  # it is harmless but unnecessary.
+  # --with-wide-int
+
+  # Not relevant in Linux
+  # --without-native-image-api
+
+  --without-imagemagick
+
+  --with-gif
+  --with-jpeg
+  --with-png
+  --with-rsvg
+  --with-tiff
+  --with-xpm
+  --with-webp
+
+  # The LCMS2 library enables color management for image processing in Emacs,
+  # allowing for accurate color rendering of images and fonts. If you work
+  # with images or high-quality graphics in Emacs (e.g., in Org-mode, dired
+  # with image previews, or using image-based formats), you may want to keep
+  # this enabled.
+  --without-lcms2
+
+  # Consider enabling SQLite if you use packages that rely on databases (e.g.,
+  # Org-mode, Magit, Projectile).
+  #
+  # Org-mode can use SQLite for its archive feature, allowing for faster and
+  # more efficient handling of large Org files. It enables quicker searches
+  # and better organization of extensive Org-mode databases.
+  # Package.el (Emacs' built-in package manager) can use SQLite for its
+  # database, potentially speeding up package operations.
+  # Other packages that use it: Magit, Projectile, Company.
+  #
+  # (That should speed up things like Org Roam or Magit Forge)
+  --with-sqlite3
+
+  # Pixel Precision Scrolling
+  --with-xinput2
+
+  --without-compress-install
+  # --with-compress-install
+
+  # Depends on your use case: DBus is a messaging system used by many Linux
+  # desktop environments for communication between applications. Disabling
+  # DBus will remove certain integration features, such as notifications or
+  # communication with other applications.
+  --with-dbus
+
+  --with-libgmp
+
+  --without-kerberos
+  --without-kerberos5
+  --without-sound
+
+  # Not important unless using GNOME: These options disable GConf and
+  # Settings, which are used for configuration in GNOME-based environments.
+  --without-gconf
+
+  # Useful for .service files: Type=notify
+  # --with-libsystemd
+
+  # GSettings
+  #
+  # What it does: GSettings is the configuration storage system for GNOME and
+  # GTK-based desktops.
+  #
+  # Why you want it: It allows Emacs to read system-wide settings like your
+  # default monospace font, font rendering hints (antialiasing), and UI themes.
+  #
+  # When to disable: Only disable this if you are building a strictly
+  # terminal-only Emacs (headless server) or if you want to avoid installing
+  # glib dependencies. If you disable this on a desktop, Emacs will ignore your
+  # system font configuration.
+  --without-gsettings
+
+  # What it does: This links against libselinux to handle file contexts
+  # (security labels) when creating or copying files.
+  #
+  # Why you want it: If you are on a distribution that enforces SELinux (Fedora,
+  # RHEL, CentOS), you must keep this enabled. Otherwise, files created by Emacs
+  # may have the wrong security context, leading to "Permission Denied" errors
+  # when other services try to access them.
+  #
+  # When to disable: If you are on Debian, Ubuntu, or Arch Linux (which
+  # typically use AppArmor or nothing), this library does nothing for you. You
+  # can safely strip it out.
+  --without-selinux
+
+  # Smack is a Mandatory Access Control framework similar to SELinux, but it is
+  # rarely used outside of embedded environments (like Tizen) or highly specific
+  # corporate deployments.
+  --without-libsmack
+
+  # Important if using X11 and multiple input methods: X Input Method (XIM) is
+  # an interface for input methods, which is essential for languages like
+  # Chinese, Japanese, or Korean. Disabling XIM can affect text input in those
+  # languages. Why disable? If you don't need multi-language input support
+  # (for languages that require XIM), it's safe to disable it.
+  --without-xim
+
+  # Disable (--disable-largefile): Only if you do not work with files larger
+  # than 2GB and want to reduce Emacs' binary size and potential overhead.
+  # This option limits Emacs to handling files up to 2GB in size. If you're
+  # not working with very large files, this might be a good option to reduce
+  # potential overhead and the complexity of Emacs when dealing with files
+  # that could be impractical to open or edit within Emacs.
+  # It may slightly reduce the size of the Emacs binary and improve
+  # performance, but this benefit is minimal in most cases.
+  #
+  # --disable-largefile: I recommend removing this. The "overhead" of 64-bit
+  # file offsets is non-existent on a 64-bit Arch system. Disabling this makes
+  # it impossible to open files larger than 2GB, which can be a significant
+  # limitation if you ever need to view large log files or database dumps.
+  # --disable-largefile
+)
+
+#
+# Prefix
+#
+detect_git_branch() {
+  BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+  if [[ $BRANCH_NAME != "" ]] && [[ $BRANCH_NAME != "HEAD" ]]; then
+    EMACS_BRANCH="/branch-$BRANCH_NAME"
+  else
+    TAG_NAME=$(git describe --tags --abbrev=0)
+    if [[ $TAG_NAME != "HEAD" ]]; then
+      EMACS_BRANCH="/tag-$TAG_NAME"
+    fi
+  fi
+
+  if [[ $EMACS_BRANCH = "" ]]; then
+    echo "Error: cannot detect the version." >&2
+    exit 1
+  fi
+}
+
+operating_system() {
+  case "$OSTYPE" in
+  darwin*)
+    echo macos
+    ;;
+  *)
+    if [[ -f /etc/os-release ]]; then
+      # shellcheck disable=SC1091
+      source /etc/os-release
+      test "$ID" = "archlinux" && ID=arch
+      echo "$ID"
+    else
+      exit 1
+    fi
+    ;;
+  esac
+}
+
+# shellcheck disable=SC2317
+error_handler() {
+  local errno="$?"
+  echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+    "(${BASH_COMMAND} exited with status $errno)" >&2
+  exit "${errno}"
+}
+
+main() {
+  trap "error_handler" ERR
+  set -o errtrace
+
+  # Append the OS family
+  if [[ $EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM -ne 0 ]]; then
+    EMACS_INSTALL_PREFIX="${EMACS_INSTALL_PREFIX}/$(operating_system)"
+  fi
+
+  EMACS_INSTALL_PREFIX="${EMACS_INSTALL_PREFIX}/${SOFTWARE_NAME}"
+
+  if [[ $EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH -ne 0 ]]; then
+    detect_git_branch
+    EMACS_INSTALL_PREFIX="$EMACS_INSTALL_PREFIX$EMACS_BRANCH"
+    CONFIGURE_ARGS+=("--prefix=${EMACS_INSTALL_PREFIX}")
+  fi
+
+  GIT_TOP_LEVEL=$(git rev-parse --show-toplevel)
+  cd "$GIT_TOP_LEVEL"
+
+  # if [[ -f /etc/makepkg.conf ]]; then
+  #   # shellcheck disable=SC1091
+  #   source /etc/makepkg.conf
+  # fi
+
+  echo "[SOURCE DIR] " "$(pwd)"
+  echo "[CONFIGURE OPTION] " "${CONFIGURE_ARGS[@]}"
+  echo "[CFLAGS] $CFLAGS"
+  echo "[LDFLAGS] $LDFLAGS"
+  echo
+
+  read -r -p "Compile Emacs? [y,n] " ANSWER
+  if [[ "$ANSWER" != "y" ]]; then
+    echo "Interrupted." >&2
+    exit 1
+  fi
+
+  # Avoid too many: *.~1~ files
+  [[ -d .git/hooks ]] && rm -fr .git/hooks/*
+
+  git clean -fxd
+  git reset --hard HEAD
+  ./autogen.sh
+
+  ./configure "${CONFIGURE_ARGS[@]}"
+
+  make -j "$NUM_PROC"
+
+  # make install-strip: This is a variant of make install, but with the added step
+  # of "stripping" the binaries. Stripping refers to removing debugging symbols
+  # and other information from the executable files, reducing their size. This is
+  # usually done for production releases to make the binaries smaller and more
+  # efficient, since debugging symbols are typically not needed in a production
+  # environment.
+  make install-strip
+}
+
+main "$@"

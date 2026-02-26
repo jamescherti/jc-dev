@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+USER=$(id -un)
+HOME=$(eval echo "~$USER")
+
+# This have to be defined after sourcing profile and bashrc
+# set -euf -o pipefail
+set -e
+set -u
+
+# EMACS_BIN="$HOME/.bin/run-emacs"
+EMACS_BIN="$HOME/.bin/run-emacs-use-package"
+# # EMACS_BIN="$HOME/.bin/run-emacs-30"
+# EMACS_BIN="$HOME/.bin/run-emacs-master"
+# EMACS_BIN="$HOME/.bin/run-emacs-straight"
+
+is_wayland() {
+    [[ $XDG_SESSION_TYPE = wayland ]] || return 1
+}
+
+is_gnome() {
+    [[ $XDG_CURRENT_DESKTOP = GNOME ]] || return 1
+}
+
+has_run_or_raise() {
+    test -d ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
+}
+
+bg_run() {
+    # nohup
+    # --chdir "$HOME" <- breaks ./apps in a different directory
+    "$@" &
+    disown
+}
+
+show_window() {
+    local proc_name="$1"
+    local win_name="$2"
+
+    if is_wayland; then
+        if pgrep "$proc_name" &>/dev/null; then
+            echo "[IGNORE] The process $proc_name is already running"
+            return 0
+        fi
+    else
+        if wmctrl -x -a "$win_name"; then
+            echo "[FOCUS WINDOW] $win_name"
+            return 0
+        elif [[ $# -gt 0 ]]; then
+            shift
+            shift
+            echo "[RUN]" "$@"
+            bg_run "$@"
+        fi
+    fi
+
+    return 1
+}
+
+start-or-raise-emacs() {
+    if pgrep --quiet --exact emacs; then
+        if is_wayland; then
+            if is_gnome && has_run_or_raise; then
+                gdbus call --session --dest org.gnome.Shell \
+                    --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+                    --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+                    ",${EMACS_BIN},,/Lightemacs$/"
+            else
+                bg_run "$EMACS_BIN"
+            fi
+        else
+            show_window emacs "emacs.Emacs" "$EMACS_BIN"
+        fi
+    else
+        bg_run "$EMACS_BIN"
+        # "$EMACS_BIN"
+    fi
+}
+
+# TODO should this be added back
+# cleanup-emacs() {
+#     if [[ -d ~/.emacs.d/eln-cache/ ]]; then
+#         rm -fr ~/.emacs.d/eln-cache/
+#     fi
+#
+#     if [[ -d ~/.emacs.d/elpa/ ]]; then
+#         rm -fr ~/.emacs.d/elpa/ &
+#         disown
+#     fi
+# }
+
+main() {
+    # cleanup-emacs
+    # Check if Emacs server is running
+    start-or-raise-emacs "$@"
+}
+
+main "$@"

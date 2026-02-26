@@ -72,7 +72,7 @@ shortcut() {
   ((SHORTCUT_INDEX += 1))
 }
 
-if [[ $USER = "work" ]]; then
+if type -P xdevenv &>/dev/null; then
   shortcut "xocrshot" "<Primary><Alt>O" "$USER_HOME/.bin/xdevenv xocrshot"
   # shortcut "Screenshot" "<Primary><Alt>C" "$USER_HOME/.bin/xdevenv screenshot"
   shortcut "Editor" "<Primary><Alt>V" "$USER_HOME/.bin/xdevenv editor"
