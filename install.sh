@@ -253,6 +253,9 @@ main() {
       pip install --user "${MY_PIP_PACKAGES[@]}"
     fi
   fi
+
+  echo
+  echo Success.
 }
 
 main "$@"
