@@ -46,6 +46,9 @@ init() {
 
   if [[ -z ${SRC_DIR:-} ]]; then
     SRC_DIR="$DEST_DIR/src/emacs"
+    if [[ -d "$SRC_DIR/lightemacs" ]]; then
+      SRC_DIR="$HOME/.jc-dev"
+    fi
   fi
 
   git -C "$SRC_DIR/lightemacs/" checkout develop
