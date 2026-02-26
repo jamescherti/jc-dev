@@ -138,6 +138,18 @@ main() {
 
   sync_home
 
+  # JC-DOTFILES
+  git_clone \
+    https://github.com/jamescherti/jc-dotfiles \
+    "$GIT_CLONE_DIR/jc-dotfiles"
+  cd "$GIT_CLONE_DIR/jc-dotfiles"
+  JC_DOTFILES_UNATTENDED=1 ./install.sh
+
+  # shellcheck disable=SC1090
+  source ~/.profile
+  # shellcheck disable=SC1090
+  source ~/.bashrc
+
   # BASH-STDOPS
   git_clone \
     https://github.com/jamescherti/bash-stdops \
@@ -154,13 +166,6 @@ main() {
   rm -f ~/.config/nvim/init.vim
   cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.vimrc
   cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.config/nvim/init.vim
-
-  # JC-DOTFILES
-  git_clone \
-    https://github.com/jamescherti/jc-dotfiles \
-    "$GIT_CLONE_DIR/jc-dotfiles"
-  cd "$GIT_CLONE_DIR/jc-dotfiles"
-  JC_DOTFILES_UNATTENDED=1 ./install.sh
 
   # JC-FIREFOX-SETTINGS
   LIST_FIREFOX_DIRS=("$HOME/.mozilla/firefox"
