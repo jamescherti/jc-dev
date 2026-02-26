@@ -267,14 +267,16 @@ alias gd="g d"
 
 # alias gd='command git ydiff'
 # alias gdr="git diff"
+
 alias ci="command git-commitflow"
 alias cia="git cia"
-# alias cip="command esa ssh-add-exec git-commitflow --push"
+alias cip="git-commitflow --push"
 alias gs="git show"
 alias b='gb'
 alias gs='git st'
 alias gst='git st'
 alias t='git st'
+
 # alias st="command git status -s"
 
 alias s='esa ssh-add-exec ssh'
