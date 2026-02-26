@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euf -o pipefail
+
+# shellcheck disable=SC2317
+error_handler() {
+  local errno="$?"
+  echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+    "(${BASH_COMMAND} exited with status $errno)" >&2
+  exit "${errno}"
+}
+
+init() {
+  trap "error_handler" ERR
+  set -o errtrace
+
+  if [[ -z ${DEST_DIR:-} ]]; then
+    DEST_DIR="$HOME"
+  fi
+
+  if [[ -z ${SRC_DIR:-} ]]; then
+    SRC_DIR="$DEST_DIR/src/emacs"
+  fi
+
+  git -C "$SRC_DIR/lightemacs/" checkout develop
+
+  # Init the base
+  EMACS_BASE="$DEST_DIR/.emacs-use-package.d"
+  mkdir -p "$EMACS_BASE"
+  lightemacs-init-files "$EMACS_BASE"
+}
+
+run-rsync() {
+  echo "[RSYNC]" "$@"
+  rsync -a --delete \
+    --times --atimes --exclude '*.elc' --exclude '*.eln' \
+    --exclude config.el \
+    "$@" &
+  return 0
+}
+
+lightemacs-init-files() {
+  local dir="$1"
+  mkdir -p "$dir/lisp/local/"
+
+  run-rsync "$SRC_DIR/lightemacs/early-init.el" \
+    "$SRC_DIR/lightemacs/init.el" \
+    "$dir/"
+
+  run-rsync "$SRC_DIR/lightemacs/lisp/lightemacs/" \
+    "$dir/lisp/lightemacs/"
+}
+
+custom-emacs() {
+  local custom_emacs_name="$1"
+  local dest_dir="$DEST_DIR/.${custom_emacs_name}.d"
+
+  echo
+  echo "[CUSTOM-EMACS] ${custom_emacs_name}"
+  lightemacs-init-files "$dest_dir"
+
+  echo "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
+  run-rsync \
+    "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
+
+  shift
+
+  cp -a "$EMACS_BASE/lisp/local/config.el" \
+    "$dest_dir/lisp/local/config.el"
+  if [[ $# -gt 0 ]]; then
+    printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
+  fi
+}
+
+# ------------------------------------------------------------------------------
+# INIT
+# ------------------------------------------------------------------------------
+init
+
+# ------------------------------------------------------------------------------
+# My Emacs: EMACS MASTER
+# ------------------------------------------------------------------------------
+custom-emacs "emacs-master" &
+custom-emacs "emacs-29.1" &
+
+custom-emacs "emacs-elpaca" \
+  "(eval-and-compile (setq lightemacs-package-manager 'elpaca))" &
+
+custom-emacs "emacs-straight" \
+  "(eval-and-compile (setq lightemacs-package-manager 'straight))" &
+
+# ------------------------------------------------------------------------------
+# OTHER LIGHTEMACS
+# ------------------------------------------------------------------------------
+lightemacs-init-files "$DEST_DIR/.lightemacs.d" &
+lightemacs-init-files "$DEST_DIR/.devemacs.d" &
+lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d" &
+lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d" &
+
+#echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)" \
+#  "(setq lightemacs-modules '(le-flavor-micro le-compile-angel le-group-evil))" \
+#  >"$DEST_DIR/.lightemacs.d/lisp/local/config.el"
+
+rm -fr "$DEST_DIR/.emacs-27.d"
+rm -fr "$DEST_DIR/.emacs-sandbox-28/.emacs.d"
+# lightemacs-init-files "$DEST_DIR/.emacs-27.d" &
+# lightemacs-init-files "$DEST_DIR/.emacs-sandbox-28/.emacs.d" &
+
+echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)" \
+  >"$DEST_DIR/.lightemacs.d/lisp/local/config.el"
+
+echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
+      (setq lightemacs-package-manager 'straight)" \
+  >"$DEST_DIR/.lightemacs-straight.d/lisp/local/config.el"
+
+echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
+      (setq lightemacs-package-manager 'elpaca)" \
+  >"$DEST_DIR/.lightemacs-elpaca.d/lisp/local/config.el"
+
+wait
