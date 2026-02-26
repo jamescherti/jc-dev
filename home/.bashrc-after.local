@@ -463,7 +463,7 @@ fi
 # alias ci="command git-commitflow"
 # alias gd="g d"
 # alias cip="git-commitflow --push"
-alias cip="so cip"
+alias cip="so command cip"
 # alias gs="git show"
 # alias b='gb'
 # alias gs='git st'
