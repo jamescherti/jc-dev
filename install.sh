@@ -129,6 +129,7 @@ main() {
     git_clone \
       https://github.com/jamescherti/jc-gnome-settings \
       "$BASE_DIR/jc-gnome-settings"
+    cd "$BASE_DIR/jc-gnome-settings"
     ./jc-gnome-settings.sh
   fi
 
@@ -137,6 +138,7 @@ main() {
     git_clone \
       https://github.com/jamescherti/jc-xfce-settings \
       "$BASE_DIR/jc-xfce-settings"
+    cd "$BASE_DIR/jc-xfce-settings"
     ./jc-xfce-settings.sh
   fi
 }
