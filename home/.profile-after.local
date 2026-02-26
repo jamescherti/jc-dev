@@ -59,47 +59,72 @@ export VIM_PERSISTENT_SESSION_ENABLED=0
 #------------------------------------------------------------------------------
 # CUSTOM ENV
 #------------------------------------------------------------------------------
-# custom_env() {
-#   _CUSTOM_ENV_ACTION="$1"
-#   _CUSTOM_ENV="$2"
-#
-#   if [ -z "$_CUSTOM_ENV_ACTION" ] \
-#     || { [ "$_CUSTOM_ENV_ACTION" != "list" ] \
-#       && [ -z "$_CUSTOM_ENV" ]; }; then
-#     echo "Usage: custom-env <list|load> <env>" >&2
-#     return 1
-#   fi
-#
-#   if ! [ -d "$CUSTOM_ENV_BASE_PATH" ]; then
-#     echo "Error \$CUSTOM_ENV_BASE_PATH: No such file" \
-#       "or directory: $CUSTOM_ENV_BASE_PATH" >&2
-#     return 1
-#   fi
-#
-#   local env_path
-#   env_path="$CUSTOM_ENV_BASE_PATH"
-#   if [ -n "$_CUSTOM_ENV" ]; then
-#     env_path="${env_path}/${_CUSTOM_ENV}"
-#   fi
-#
-#   env_path=$(readlink -e "$env_path" 2>/dev/null)
-#
-#   if [ -z "$env_path" ] || ! [ -d "$env_path" ]; then
-#     echo "Error: No such directory: $env_path" >&2
-#     return 1
-#   fi
-#
-#   if [ "$_CUSTOM_ENV_ACTION" = "list" ]; then
-#     echo "'${env_path}':"
-#     ls -1 "$env_path"
-#   elif [ "$_CUSTOM_ENV_ACTION" = "load" ]; then
-#     echo "[load-custom-env] $env_path"
-#     # export PATH="$env_path/bin:$PATH"
-#     _jc_add_local_path "$env_path"
-#   fi
-# }
+custom_env() {
+  # Use local variables to avoid polluting the global shell namespace
+  local action="$1"
+  local env_name="$2"
+  local base_path="${CUSTOM_ENV_BASE_PATH}"
+  local requested_path
+  local resolved_path
+
+  # 1. Validation
+  if [ -z "$action" ] || { [ "$action" != "list" ] && [ -z "$env_name" ]; }; then
+    echo "Usage: custom_env <list|load> [env]" >&2
+    return 1
+  fi
+
+  if [ -z "$base_path" ] || [ ! -d "$base_path" ]; then
+    echo "Error: \$CUSTOM_ENV_BASE_PATH is not set or not a directory: $base_path" >&2
+    return 1
+  fi
+
+  # 2. Path Construction
+  requested_path="${base_path}"
+  if [ -n "$env_name" ]; then
+    requested_path="${base_path}/${env_name}"
+  fi
+
+  # 3. Path Resolution
+  resolved_path=$(readlink -e "$requested_path" 2>/dev/null)
+
+  if [ -z "$resolved_path" ] || [ ! -d "$resolved_path" ]; then
+    # Use requested_path here so the error message is actually helpful
+    echo "Error: No such directory: $requested_path" >&2
+    return 1
+  fi
+
+  # 4. Actions
+  case "$action" in
+  "list")
+    echo "'${resolved_path}':"
+    ls -1 "$resolved_path"
+    ;;
+  "load")
+    echo "[load-custom-env] $resolved_path"
+    if declare -f _jc_add_local_path >/dev/null; then
+      _jc_add_local_path "$resolved_path"
+    else
+      # Fallback if your helper function isn't loaded
+      export PATH="$resolved_path/bin:$PATH"
+    fi
+    ;;
+  *)
+    echo "Error: Unknown action '$action'. Use 'list' or 'load'." >&2
+    return 1
+    ;;
+  esac
+}
+
+OSFAMILY=$(osid)
+if test "$USER" != "" && test "$OSFAMILY" != ""; then
+  CUSTOM_ENV_BASE_PATH="/opt/local/$USER/$OSFAMILY"
+  custom_env load emacs/tag-emacs-30.2 >/dev/null
+fi
 
 # AI env var hugging face
+export TRANSFORMERS_OFFLINE=1
+export HF_DATASETS_OFFLINE=1
+
 export JC_DOTFILES_UNATTENDED=1
 export EFFICIENT_VIM_CONFIG_UNATTENDED=1
 
