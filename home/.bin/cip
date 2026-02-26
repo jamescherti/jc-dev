@@ -26,4 +26,8 @@
 # SOFTWARE.
 #
 
+if type -P gpg-connect-agent &>/dev/null; then
+  gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1 || :
+fi
+
 exec git-commitflow --push "$@"

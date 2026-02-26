@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 #
 # Describe: Install the jc-dev development environment
 #
