@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# After commit
+
+sset -euf -o pipefail
+IFS=$'\n\t'
+
+export FROM_POST_COMMIT=1
+echo "[HOOK] post-commit"

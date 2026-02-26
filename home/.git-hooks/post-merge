@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euf -o pipefail
+IFS=$'\n\t'
+
+export FROM_POST_MERGE=1
+echo "[HOOK] post-merge"
+
+#
+# UPDATE CFG
+#
+# readarray -t LIST_MERGED_FILES < <(git diff --name-only HEAD~1)
+# UPDATE_CFG=0
+# for MERGED_FILE in "${LIST_MERGED_FILES[@]}"; do
+#   if [[ $MERGED_FILE =~ ^TEST\/ ]]; then
+#
+#     UPDATE_CFG=1
+#   fi
+# done
+#
+# if [[ $UPDATE_CFG -eq 1 ]]; then
+#   pushd . &>/dev/null
+#   cd TEST
+#   echo "Updating home-settings dotfiles..."
+#   ./install.sh >/dev/null || echo "Error."
+#   popd &>/dev/null
+# fi

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euf -o pipefail
+IFS=$'\n\t'
+
+export FROM_PRE_PUSH=1
+echo "[HOOK] pre-push"
+
+#
+# GIT-LFS
+#
+#TOPLEVEL=$(git rev-parse --show-toplevel)
+#if [[ -f "$TOPLEVEL/.gitattributes" ]]; then
+#  echo "[INFO] git lfs activated"
+# type -P git-lfs >/dev/null 2>&1 || { echo -e "\\nThis repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting .git/hooks/pre-push.\\n" >&2; exit 2; }
+#  git lfs pre-push "$@"
+#fi

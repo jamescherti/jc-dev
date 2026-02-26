@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# After Cloning
+
+set -euf -o pipefail
+IFS=$'\n\t'
+
+export FROM_POST_CHECKOUT=1
+echo "[HOOK] post-checkout"
+
+if type -P git-setup &>/dev/null && ! git-setup; then
+  echo "Error: the command 'git-setup' has failed." >&2
+fi

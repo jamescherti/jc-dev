@@ -1,0 +1,240 @@
+#!/usr/bin/env bash
+
+# set -o xtrace
+
+set -euf -o pipefail
+IFS=$'\n\t'
+echo "[HOOK] pre-commit"
+
+AUTHORINFO=$(git var GIT_AUTHOR_IDENT)
+echo "[INFO] Author: $AUTHORINFO"
+# EMAIL=$(printf '%s\n' "${AUTHORINFO}" | sed -n 's/^.* <\(.*\)> .*$/\1/p')
+# NAME=$(printf '%s\n' "${AUTHORINFO}" | sed -n 's/^\(.*\) <.*$/\1/p')
+
+#-------------------------------------------------------------------------------
+# Error handler
+#-------------------------------------------------------------------------------
+# shellcheck disable=SC2317
+error_handler() {
+  local errno="$?"
+  echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+    "(${BASH_COMMAND} exited with status $errno)" >&2
+  exit "${errno}"
+}
+trap "error_handler" ERR
+set -o errtrace
+
+check_email_change() {
+  if type -P git-setup &>/dev/null && ! git-setup; then
+    echo
+    echo "WARNING: The commit has been canceled because the name / email" \
+      "has been changed. Please commit again." >&2
+    exit 1
+  fi
+}
+
+error() {
+  echo "$@" >&2
+}
+
+init() {
+  local git_username
+  git_username=$(git config --get user.name)
+
+  if ! echo "$git_username" | grep -q ' '; then
+    error "[ERROR] Your GIT username '$git_username' is incomplete. " \
+      "It needs to contain 'firstname lastname' (separated by a space)."
+    echo
+    error "Please put your firstname and lastname with this command:"
+    error "--------------------------------------------------------------------"
+    error "    git config --global user.name 'Firstname Lastname'"
+    error "--------------------------------------------------------------------"
+    echo
+    exit 1
+  fi
+
+  if git rev-parse --verify HEAD >/dev/null 2>&1; then
+    AGAINST=HEAD
+  else
+    # Initial commit: diff against an empty tree object
+    AGAINST=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+  fi
+
+  # Redirect output to stderr.
+  # exec 1>&2
+
+  # I use INSTALL_HOOKS_GITROOT to update the symbolic links
+  # (from absolute to relative: it is better for people who move
+  #  their directory locally)
+  INSTALL_HOOKS_GITROOT="$(git rev-parse --show-toplevel)"
+  if ! [ -d "$INSTALL_HOOKS_GITROOT/.git" ]; then
+    echo "Error: the script $0 is not in a GIT directory: $(pwd)"
+    exit 1
+  else
+    cd "$INSTALL_HOOKS_GITROOT" || exit 1
+  fi
+
+  INIT_SUCCESS=1
+}
+
+check_gpg() {
+  #
+  # Check the GPG configuration
+  #
+  local gpgerror=0
+  local gpgsign=''
+
+  gpgsign=$(git config commit.gpgsign || true) # needs to be: true
+  if [ "${gpgsign,,}" != "true" ]; then
+    error "ERROR: you need to activate GPG signature with:" \
+      "git config commit.gpgsign true"
+    gpgerror=1
+  fi
+
+  local gpgkey=''
+  gpgkey=$(git config user.signingkey || true)
+  if [ "${gpgkey}" = "" ]; then
+    error "ERROR: you need to specify your GPG key with:" \
+      "git config user.signingkey <GPG-KEY-ID>"
+    gpgerror=1
+  fi
+
+  if [ "$gpgerror" -eq "1" ]; then
+    echo "[WARNING] You need to configure your GIT with GPG."
+    exit 0
+  fi
+}
+
+update_list_files() {
+  MODIFIED_FILES=()
+  DELETED_FILES=()
+
+  # A=added C=Copied M=Modified R=Renamed
+  for file in $(git diff-index --cached --name-only --diff-filter=ACMR HEAD || true); do
+    if ! [ -e "$file" ]; then
+      echo "[IGNORED] $file"
+      continue
+    fi
+
+    MODIFIED_FILES+=("$file")
+  done
+
+  for file in $(git diff-index --cached --name-only --diff-filter=D HEAD || true); do
+    DELETED_FILES+=("$file")
+  done
+}
+
+check_non_ascii() {
+  # If you want to allow non-ASCII filenames set this variable to true.
+  # allownonascii=$(git config --bool hooks.allownonascii)
+  # local allownonascii
+  allownonascii=false
+
+  # Cross platform projects tend to avoid non-ASCII filenames; prevent
+  # them from being added to the repository. We exploit the fact that the
+  # printable range starts at the space character and ends with tilde.
+  if [ "$allownonascii" != "true" ]; then
+    # Note that the use of brackets around a tr range is ok here, (it's even
+    # required, for portability to Solaris 10's /usr/bin/tr), since the square
+    # bracket bytes happen to fall in the designated range.
+    local fresult=''
+    # TODO: REUSE the list of files
+    fresult=$(git diff --cached --name-only --diff-filter=A -z "$AGAINST" | LC_ALL=C tr -d '[ -~]\0' | wc -c)
+    if [ "$fresult" -ne "0" ]; then
+      error_begin
+      echo "[ERROR] Attempt to add a non-ASCII file name (a file name with accents?):"
+      git diff --cached --name-only --diff-filter=A -z "$AGAINST" | LC_ALL=C cat
+
+      echo
+      echo
+      echo "[ERROR] non-ASCII file names can cause problems because we work with people "
+      echo "        who use different operating systems. To be portable, would you please"
+      echo "        rename the non-ASCII file name to an valid ASCII name with:"
+      echo "        git mv nonasciifile validfilename"
+      echo
+      error_end
+      exit 1
+    fi
+  fi
+}
+
+check_syntax() {
+  SYNTAX CHECK
+  echo
+  echo "[CHECK] Checking the Syntax"
+  local file
+  for file in "${MODIFIED_FILES[@]}"; do
+    "$MISCDIR/check_syntax.sh" "$file" "$(pwd)"
+  done
+}
+
+check_pre_commit() {
+  # Pre-commit
+  if [[ -f .gitattributes ]] && grep -q 'filter=git-crypt' .gitattributes; then
+    echo "[IGNORE] pre-commit (git-crypt)"
+  elif ! [[ -f "$INSTALL_HOOKS_GITROOT/.pre-commit-config.yaml" ]]; then
+    echo "[IGNORE] pre-commit (Missing: .pre-commit-config.yaml)"
+  else
+    #!/usr/bin/env bash
+    # File generated by pre-commit: https://pre-commit.com
+    # ID: 138fd403232d2ddd5efb44317e38bf03
+
+    # start templated
+    if type -P pre-commit &>/dev/null; then
+      INSTALL_PYTHON=/usr/bin/python3
+      ARGS=(hook-impl --config=.pre-commit-config.yaml --hook-type=pre-commit)
+      # end templated
+
+      HERE="$(cd "$(dirname "$0")" && pwd)"
+      ARGS+=(--hook-dir "$HERE" -- "$@")
+
+      if [ -x "$INSTALL_PYTHON" ]; then
+        exec "$INSTALL_PYTHON" -mpre_commit "${ARGS[@]}"
+      elif command -v pre-commit >/dev/null; then
+        exec pre-commit "${ARGS[@]}"
+      else
+        echo 'Error: pre-commit not found.' 1>&2
+        exit 1
+      fi
+    fi
+  fi
+}
+
+check_arch_linux() {
+  # TODO: Use a temporary file
+  if [[ -f PKGBUILD ]]; then
+    if ! [[ -f .SRCINFO ]] || [[ PKGBUILD -nt .SRCINFO ]]; then
+      echo "[INFO] Update .SRCINFO"
+      makepkg --printsrcinfo >.SRCINFO
+      if git status --porcelain "$file" | grep -q '^[ M]'; then
+        makepkg --verifysource -f
+        echo "[FAILED] The .SRCINFO file has been updated successfully." \
+          "Please commit again."
+        exit 1
+      fi
+    fi
+
+    makepkg --verifysource -f
+  fi
+}
+
+main() {
+  echo "[INFO] client side pre-commit hook started"
+  init
+  [ "$INIT_SUCCESS" -ne "1" ] && die "You need to run init() before main()"
+
+  # Update the list of files
+  update_list_files
+
+  # Checks
+  check_email_change "$@"
+  check_gpg
+  check_non_ascii
+  # check_syntax
+
+  check_arch_linux
+  check_pre_commit "$@"
+}
+
+# Main
+main "$@"
