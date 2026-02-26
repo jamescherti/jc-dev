@@ -1,4 +1,5 @@
 ---
+
 options:
   shell_path: /bin/bash
   timeout: 600
