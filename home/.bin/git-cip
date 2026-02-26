@@ -26,4 +26,5 @@
 # SOFTWARE.
 #
 
-exec esa git-commitflow --push "$@"
+gpgconf --kill gpg-agent || :
+exec esa exec git-commitflow --push "$@"
