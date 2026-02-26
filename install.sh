@@ -210,6 +210,13 @@ main() {
     "./data/settings/update-mimetypes.py"
   fi
 
+  # JC-DOTFILES
+  git_clone \
+    https://github.com/jamescherti/lightemacs \
+    "$GIT_CLONE_DIR/lightemacs"
+  cd "$GIT_CLONE_DIR/dotfiles"
+  git checkout develop
+
   # Secure dirs
   secure_dir ~/.gnupg
   secure_dir ~/.ssh
