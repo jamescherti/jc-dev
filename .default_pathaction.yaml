@@ -1,0 +1,26 @@
+---
+options:
+  shell_path: /bin/bash
+  timeout: 600
+  confirm_after_timeout: 15
+
+  debug: false
+  verbose: true
+
+vars:
+  ssh_agent: "esa ssh-add-exec"
+
+actions:
+  - path_match: "*/setup.py"
+    tags: main
+    command: "pip install {{ file|quote }}"
+
+  - path_match: "*.txt"
+    tags: main
+    command: "cat {{ file|quote }}"
+
+  - path_match: "*"
+    tags: main
+    cwd: "{{ file|dirname }}"
+    shell: true
+    command: 'source ~/.bashrc; {{ file|shebang_quote }} {{ file|quote }}'

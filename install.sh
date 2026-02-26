@@ -223,6 +223,18 @@ main() {
   secure_dir ~/.bash_history
   secure_dir ~/
 
+  if ! [[ -f ~/.sync-spell-dict ]]; then
+    touch ~/.sync-spell-dict
+  fi
+
+  cp "$SCRIPT_DIR/.default_pathaction.yaml" "$HOME/.pathaction.yaml"
+
+  mkdir -p ~/.git-templates
+  if ! [[ -L ~/.git-templates/hooks ]]; then
+    # rm -f ~/.git-templates/hooks
+    ln -sf ~/.git-hooks/ ~/.git-templates/hooks
+  fi
+
   # PIP
   MY_PIP_PACKAGES=()
   if ! type -P pathaction &>/dev/null; then
