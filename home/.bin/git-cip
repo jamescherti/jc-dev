@@ -26,5 +26,10 @@
 # SOFTWARE.
 #
 
-gpgconf --kill gpg-agent || :
+GPG_TTY="$(tty)"
+export GPG_TTY
+if command -v gpg-connect-agent &>/dev/null; then
+  gpg-connect-agent updatestartuptty /bye >/dev/null
+fi
+
 exec esa exec git-commitflow --push "$@"
