@@ -145,10 +145,14 @@ main() {
   cd "$GIT_CLONE_DIR/jc-dotfiles"
   JC_DOTFILES_UNATTENDED=1 ./install.sh
 
+  set +e
+  set +u
   # shellcheck disable=SC1090
   source ~/.profile
   # shellcheck disable=SC1090
   source ~/.bashrc
+  set -e
+  set -u
 
   # BASH-STDOPS
   git_clone \
