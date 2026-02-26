@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# Describe: Install the jc-dev development environment
+#
 # Author: James Cherti
 # URL: https://github.com/jamescherti/jc-dev
 #
@@ -29,8 +31,7 @@
 # shellcheck disable=SC2269
 set -euf -o pipefail
 
-BASE_DIR="$HOME/.jc-dev"
-mkdir -p "$BASE_DIR"
+GIT_CLONE_DIR="$HOME/.jc-dev"
 
 # shellcheck disable=SC2317
 error_handler() {
@@ -43,6 +44,9 @@ error_handler() {
 init() {
   trap "error_handler" ERR
   set -o errtrace
+
+  SCRIPT_DIR=$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")
+  mkdir -p "$GIT_CLONE_DIR"
 
   # Check if terminal supports color
   if [ -t 1 ] && [ "$(tput colors)" -ge 8 ]; then
@@ -83,6 +87,9 @@ git_clone() {
 main() {
   init
 
+  # Secure dirs
+  install -d --mode 0700 ~/.gnupg
+
   if [[ "${JC_DEV_UNATTENDED:-}" = "" ]] \
     && [[ "${JC_DEV_UNATTENDED:-}" -eq 0 ]]; then
     echo
@@ -94,12 +101,16 @@ main() {
   fi
 
   # BASH-STDOPS
-  git_clone https://github.com/jamescherti/bash-stdops "$BASE_DIR/bash-stdops"
-  cd "$BASE_DIR/bash-stdops"
+  git_clone \
+    https://github.com/jamescherti/bash-stdops \
+    "$GIT_CLONE_DIR/bash-stdops"
+  cd "$GIT_CLONE_DIR/bash-stdops"
   PREFIX="$HOME/.local" ./install.sh
 
   # LIGHTVIM
-  git_clone https://github.com/jamescherti/lightvim "$BASE_DIR/lightvim"
+  git_clone \
+    https://github.com/jamescherti/lightvim \
+    "$GIT_CLONE_DIR/lightvim"
   mkdir -p ~/.config/nvim
   rm -f ~/.vimrc
   rm -f ~/.config/nvim/init.vim
@@ -107,8 +118,10 @@ main() {
   cp ~/.home-update/lightvim/lightvim.vim ~/.config/nvim/init.vim
 
   # JC-DOTFILES
-  git_clone https://github.com/jamescherti/jc-dotfiles "$BASE_DIR/jc-dotfiles"
-  cd "$BASE_DIR/jc-dotfiles"
+  git_clone \
+    https://github.com/jamescherti/jc-dotfiles \
+    "$GIT_CLONE_DIR/jc-dotfiles"
+  cd "$GIT_CLONE_DIR/jc-dotfiles"
   JC_DEV_UNATTENDED=1 ./install.sh
 
   # JC-FIREFOX-SETTINGS
@@ -117,8 +130,8 @@ main() {
   for firefox_dir in "${LIST_FIREFOX_DIRS[@]}"; do
     if [[ -d "$firefox_dir" ]]; then
       git_clone https://github.com/jamescherti/jc-firefox-settings \
-        "$BASE_DIR/jc-firefox-settings"
-      cd "$BASE_DIR/jc-firefox-settings"
+        "$GIT_CLONE_DIR/jc-firefox-settings"
+      cd "$GIT_CLONE_DIR/jc-firefox-settings"
       ./install.sh
       break
     fi
@@ -126,20 +139,37 @@ main() {
 
   # JC-GNOME-SETTINGS
   if [[ $XDG_CURRENT_DESKTOP = GNOME ]]; then
+    # JC-GNOME-SETTINGS
     git_clone \
       https://github.com/jamescherti/jc-gnome-settings \
-      "$BASE_DIR/jc-gnome-settings"
-    cd "$BASE_DIR/jc-gnome-settings"
+      "$GIT_CLONE_DIR/jc-gnome-settings"
+    cd "$GIT_CLONE_DIR/jc-gnome-settings"
     ./jc-gnome-settings.sh
+
+    # LOCAL GNOME SETTINGS
+    cd "$SCRIPT_DIR/data/settings/settings-gnome/"
+    ./settings-gnome-keyboard-shortcuts.sh
+    ./settings-gnome.sh
   fi
 
   # JC-XFCE-SETTINGS
   if [[ $XDG_CURRENT_DESKTOP = XFCE ]]; then
+    # JC-XFCE-SETTINGS
     git_clone \
       https://github.com/jamescherti/jc-xfce-settings \
-      "$BASE_DIR/jc-xfce-settings"
-    cd "$BASE_DIR/jc-xfce-settings"
+      "$GIT_CLONE_DIR/jc-xfce-settings"
+    cd "$GIT_CLONE_DIR/jc-xfce-settings"
     ./jc-xfce-settings.sh
+
+    # Local XFCE settings
+    cd "$SCRIPT_DIR/data/settings/settings-xfce4/"
+    ./settings-xfce4.sh
+  fi
+
+  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
+    cd "$SCRIPT_DIR"
+    pwd
+    "./data/settings/update-mimetypes.py"
   fi
 }
 
