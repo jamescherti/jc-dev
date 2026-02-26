@@ -152,8 +152,8 @@ main() {
   mkdir -p ~/.config/nvim
   rm -f ~/.vimrc
   rm -f ~/.config/nvim/init.vim
-  cp ~/.home-update/lightvim/lightvim.vim ~/.vimrc
-  cp ~/.home-update/lightvim/lightvim.vim ~/.config/nvim/init.vim
+  cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.vimrc
+  cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.config/nvim/init.vim
 
   # JC-DOTFILES
   git_clone \
