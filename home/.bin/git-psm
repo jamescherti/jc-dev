@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+
+# Requirements:
+#   - pwd
+#   - git
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+"""Git Parallel Submodule Foreach."""
+
+import os
+import shutil
+import subprocess
+import sys
+import textwrap
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import cpu_count
+from pathlib import Path
+from typing import List, Tuple
+
+import colorama
+from git_helpers import git_toplevel
+
+MAX_WORKERS = 6 if (cpu_count() or 1) < 6 else (cpu_count() or 1)
+CMD_TIMEOUT = 60 * 60 * 2
+
+ENV = os.environ.copy()
+ENV["GIT_TERMINAL_PROMPT"] = "0"
+
+
+def git_submodules_list(path: os.PathLike):
+    """List gitsubmodules directories."""
+    cmd = ['git', '-C', str(path), 'submodule', 'foreach', '--quiet',
+           '--recursive', 'pwd']
+    output = subprocess.check_output(cmd, env=ENV)
+    result = []
+    for line in output.decode(errors="ignore").splitlines():
+        result.append(Path(line))
+    result.append(Path(os.getcwd()))
+    return result
+
+
+def check_requirements():
+    for cmd in ("pwd", "git"):
+        if not shutil.which(cmd):
+            print("Error: the command '{}' was not found.".format(cmd),
+                  file=sys.stderr)
+            sys.exit(1)
+
+
+def ensure_dirs_exist(list_directories: List[os.PathLike]):
+    for directory in list_directories:
+        if not Path(directory).is_dir():
+            print(f"Error: the directory does not exist: {directory}",
+                  file=sys.stderr)
+            sys.exit(1)
+
+
+def run_command(repo_path: os.PathLike, cmd: list, **kwargs) -> Tuple[str,
+                                                                      int]:
+    """Run a command."""
+    # This function is the same function as git-find
+    indent = " " * 4
+    errno = 0
+
+    output = colorama.Fore.YELLOW + str(repo_path)
+    if not cmd:
+        output += colorama.Fore.RESET + "\n"
+        return output, errno
+    else:
+        output += (": " + " ".join(cmd) + colorama.Fore.RESET + "\n")
+
+    try:
+        raw_output = subprocess.check_output(cmd,
+                                             stderr=subprocess.STDOUT,
+                                             cwd=repo_path,
+                                             timeout=CMD_TIMEOUT,
+                                             text=True,
+                                             **kwargs)
+    except subprocess.CalledProcessError as err:
+        output += indent + f"ERROR: {err}\n\n{indent}OUTPUT:\n" + \
+            f"{indent}-------\n" + textwrap.indent(err.output, prefix=indent)
+        errno = err.returncode
+        return output, errno
+
+    # Add raw_output to output
+    raw_output = raw_output.replace("\t", "    ")
+    if raw_output:
+        raw_output += "\n"
+
+    output += textwrap.indent(raw_output, prefix=indent)
+
+    if errno:
+        if raw_output:
+            output += "\n"
+
+        output += indent + "[ERROR: " + str(errno) + "]" + "\n"
+
+    return output, errno
+
+
+def threaded_git_submodules_foreach(list_submodules: List[os.PathLike],
+                                    command: List[str]):
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = []
+
+        for submodule_path in list_submodules:
+            futures.append(
+                executor.submit(run_command,
+                                repo_path=submodule_path,
+                                cmd=command,
+                                env=ENV)
+            )
+
+        errno = 0
+        try:
+            output_errors = ""
+            for future in as_completed(futures):
+                output, returncode = future.result()
+                if returncode:
+                    errno = 1
+                    output_errors += output
+                else:
+                    print(output, end="")
+
+            sys.stdout.write(output_errors)
+        except KeyboardInterrupt:
+            sys.stdout.write("\nInterrupted.\n")
+            sys.exit(1)
+        else:
+            sys.exit(errno)
+
+
+def main():
+    """The command-line interface."""
+    if len(sys.argv) == 1:
+        print("Git Parallel Submodule Foreach", file=sys.stderr)
+        print("", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} <command>", file=sys.stderr)
+        sys.exit(1)
+
+    check_requirements()
+
+    toplevel = git_toplevel(".", env=ENV)
+    # print(toplevel)
+
+    list_submodules = git_submodules_list(toplevel)
+    ensure_dirs_exist(list_submodules)
+
+    threaded_git_submodules_foreach(list_submodules, sys.argv[1:])
+
+
+if __name__ == "__main__":
+    main()

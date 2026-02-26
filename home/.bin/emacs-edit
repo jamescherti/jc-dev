@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euf -o pipefail
+
+EMACS_TIMEOUT=3
+EMACS_NEW_TAB=1
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: $0 file"
+  exit 1
+fi
+
+# Requirements
+for CMD in emacs emacsclient; do
+  if ! type -P "$CMD" &>/dev/null; then
+    echo "Error: $CMD not found in \$PATH" >&2
+    exit 1
+  fi
+done
+
+run-emacsclient() {
+  emacsclient --no-wait "--timeout=$EMACS_TIMEOUT" "$@" 2>/dev/null \
+    || return "$?"
+}
+
+run-emacs-without-args() {
+  # Do not use EMACS_ARGS
+  emacs &>/dev/null || return "$?"
+}
+
+emacs-open-in-a-new-tab() {
+  [[ $EMACS_NEW_TAB -ne 0 ]] \
+    && run-emacsclient --suppress-output --eval '(tab-bar-new-tab) '
+  run-emacsclient --suppress-output "$@"
+}
+
+# Edit
+if run-emacsclient --suppress-output -e t; then
+  emacs-open-in-a-new-tab "$@"
+else
+  run-emacs-without-args &
+  disown
+
+  while true; do
+    AFTER_EMACS_INIT=$(run-emacsclient -e "(when after-init-time t)" || true)
+    if [[ $AFTER_EMACS_INIT = t ]]; then
+      break
+    fi
+    sleep 0.1
+  done
+
+  # EasySession: Wait until the session is loaded
+  while true; do
+    SESSION_LOADED=$(
+      run-emacsclient \
+        -e "(and (boundp 'easysession--current-session-name)
+                 easysession--current-session-name)" 2>/dev/null || true
+    )
+
+    if [[ $SESSION_LOADED != "" ]] && [[ $SESSION_LOADED != nil ]]; then
+      break
+    fi
+
+    sleep 0.1
+  done
+
+  # Open the file in a new tab
+  emacs-open-in-a-new-tab "$@"
+fi
