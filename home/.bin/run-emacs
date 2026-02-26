@@ -51,7 +51,7 @@ if [[ -f ~/.bashrc ]]; then
 fi
 
 if [[ $RUN_EMACS_BIN = "" ]]; then
-  RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
+  RUN_EMACS_BIN="emacs"
 fi
 
 set -euf -o pipefail

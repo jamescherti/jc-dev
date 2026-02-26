@@ -26,4 +26,9 @@
 # SOFTWARE.
 #
 
+export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
+if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+  export RUN_EMACS_BIN="emacs"
+fi
+
 exec run-emacs --init-directory ~/.emacs-elpaca.d/ "$@"
