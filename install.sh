@@ -45,6 +45,16 @@ init() {
   trap "error_handler" ERR
   set -o errtrace
 
+  if [ "$(id -u)" -eq "0" ]; then
+    echo "Error: you cannot run this script as root." >&2
+    exit 1
+  fi
+
+  if ! type -P rsync &>/dev/null; then
+    echo "Error: the 'rsync' command was not found." >&2
+    exit 1
+  fi
+
   SCRIPT_DIR=$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")
   mkdir -p "$GIT_CLONE_DIR"
 
@@ -84,11 +94,20 @@ git_clone() {
   fi
 }
 
+secure_dir() {
+  if [[ -d "$1" ]]; then
+    echo "[Secure Dir] $1"
+    chmod 700 "$1"
+  elif [[ -f "$1" ]]; then
+    echo "[Secure File] $1"
+    chmod 600 "$1"
+  else
+    echo "[Ignore Securing] $1"
+  fi
+}
+
 main() {
   init
-
-  # Secure dirs
-  install -d --mode 0700 ~/.gnupg
 
   if [[ "${JC_DEV_UNATTENDED:-}" = "" ]] \
     && [[ "${JC_DEV_UNATTENDED:-}" -eq 0 ]]; then
@@ -171,6 +190,19 @@ main() {
     pwd
     "./data/settings/update-mimetypes.py"
   fi
+
+  # Secure dirs
+  secure_dir ~/.gnupg
+  secure_dir ~/.ssh
+  secure_dir ~/Documents
+  secure_dir ~/Downloads
+  secure_dir ~/src
+  secure_dir ~/Sync
+  secure_dir ~/.emacs-data
+  secure_dir ~/.vim
+  secure_dir ~/.vim_bundle
+  secure_dir ~/.bash_history
+  secure_dir ~/
 }
 
 main "$@"
