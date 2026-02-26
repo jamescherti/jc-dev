@@ -247,6 +247,7 @@ main() {
 
   if [[ "${#MY_PIP_PACKAGES[@]}" -gt 1 ]]; then
     if [[ "${VIRTUAL_ENV:-}" ]]; then
+      pip install --upgrade pip
       pip install "${MY_PIP_PACKAGES[@]}"
     else
       pip install --user "${MY_PIP_PACKAGES[@]}"
