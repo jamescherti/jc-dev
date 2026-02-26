@@ -91,9 +91,9 @@ git_clone() {
 
     git clone -q "$url" "$dir"
   else
+    git -C "$dir" fetch --all --prune
     git -C "$dir" clean -fxd
-    git -C "$dir" reset --hard HEAD
-    git -C "$dir" pull --ff-only
+    git -C "$dir" reset --hard '@{upstream}'
   fi
 }
 
