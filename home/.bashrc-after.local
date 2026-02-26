@@ -175,7 +175,7 @@ alias e=devemacs
 alias bf="batchfetch"
 
 _git_wrapper() {
-  if type -P preload-ssh-agent &>/dev/null && type -P so &>/dev/null; then
+  if type -P so &>/dev/null; then
     local cmd_prefix=()
     local cur_arg
     local key
@@ -205,6 +205,7 @@ _git_wrapper() {
     # echo "[RUN]" "${cmd_prefix[@]}" "$@" >&2
     "${cmd_prefix[@]}" "$@"
   else
+    echo "[RUN]" "$@"
     "$@"
   fi
 }
