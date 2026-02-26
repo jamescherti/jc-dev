@@ -1,0 +1,240 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euf -o pipefail
+
+UNIFIED_SPELL_FILE="$HOME/.sync-spell-dict"
+ASPELL_FILE="$HOME/.aspell.en.pws"
+VIM_SPELL_FILE="$HOME/.vim-spell.en.utf8.add"
+
+# Internal variables
+FIREFOX=0
+THUNDERBIRD=0
+VIM=0
+ASPELL=0
+
+#-------------------------------------------------------------------------------
+# Error handler
+#-------------------------------------------------------------------------------
+# shellcheck disable=SC2317
+error_handler() {
+  local errno="$?"
+  echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+    "(${BASH_COMMAND} exited with status $errno)" >&2
+  exit "${errno}"
+}
+
+trap "error_handler" ERR
+set -o errtrace
+
+#-------------------------------------------------------------------------------
+# Atexit
+#-------------------------------------------------------------------------------
+TMP_FILE=$(mktemp)
+ATEXIT_DONE=0
+atexit() {
+  local errno="$?"
+  if [[ "$ATEXIT_DONE" -eq 0 ]]; then
+    if [[ -f "$TMP_FILE" ]]; then
+      rm -f "$TMP_FILE" || true
+    fi
+    ATEXIT_DONE=1
+  fi
+  exit "$errno"
+}
+trap 'atexit' INT TERM EXIT
+
+#-------------------------------------------------------------------------------
+# Generate unified spell file
+#-------------------------------------------------------------------------------
+gen-unified-spell-file() {
+  local item
+
+  cp "$UNIFIED_SPELL_FILE" "$TMP_FILE"
+
+  # ASPELL
+  if [[ -f "$ASPELL_FILE" ]]; then
+    FIRST_ASPELL_LINE=$(head -n 1 "$ASPELL_FILE")
+    if echo "$FIRST_ASPELL_LINE" | grep -q "^personal_ws"; then
+      (grep -v "^personal_ws" <"$ASPELL_FILE" || true) \
+        >>"$TMP_FILE"
+      ASPELL=1
+    fi
+  fi
+
+  # VIM SPELL
+  if [[ -f "$VIM_SPELL_FILE" ]]; then
+    cat "$VIM_SPELL_FILE" >>"$TMP_FILE"
+    VIM=1
+  fi
+
+  # FIREFOX
+  local local_dicts
+  local local_path
+  for local_path in "$HOME/.mozilla/firefox" \
+    "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox"; do
+    if [[ -d "$local_path" ]]; then
+      readarray -t local_dicts < \
+        <(find "$local_path" -maxdepth 2 -name persdict.dat)
+      for item in "${local_dicts[@]}"; do
+        cat "$item" >>"$TMP_FILE"
+        LIST_FIREFOX_DICTS+=("$item")
+      done
+      FIREFOX=1
+    fi
+  done
+
+  # THUNDERBIRD
+  local local_path
+  for local_path in "$HOME/.mozilla/firefox" \
+    "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird"; do
+    if [[ -d "$local_path" ]]; then
+      readarray -t local_dicts < \
+        <(find "$local_path" -maxdepth 2 -name persdict.dat)
+      for item in "${local_dicts[@]}"; do
+        cat "$item" >>"$TMP_FILE"
+        LIST_THUNDERBIRD_DICTS+=("$item")
+      done
+      THUNDERBIRD=1
+    fi
+  done
+
+  # Unified spell file (Source of truth)
+  cat "$TMP_FILE" | grep -v '^$' | grep -E '^[[:alpha:]]+$' \
+    | LC_ALL=C sort -u >"$UNIFIED_SPELL_FILE"
+}
+
+#-------------------------------------------------------------------------------
+# Generate software spell dictionary
+#-------------------------------------------------------------------------------
+gen-dict-from-unified-spell-file() {
+  local item
+
+  # ASPELL
+  if [[ $ASPELL -ne 0 ]]; then
+    if [[ "$FIRST_ASPELL_LINE" != *utf8 ]]; then
+      # Remove all spaces in the end of FIRST_ASPELL_LINE
+      FIRST_ASPELL_LINE="${FIRST_ASPELL_LINE%%*( )}"
+
+      # Append utf8
+      FIRST_ASPELL_LINE="$FIRST_ASPELL_LINE utf-8"
+    fi
+
+    echo "$FIRST_ASPELL_LINE" >"$ASPELL_FILE"
+
+    cat "$UNIFIED_SPELL_FILE" >>"$ASPELL_FILE"
+  fi
+
+  if [[ $VIM -ne 0 ]]; then
+    cat "$UNIFIED_SPELL_FILE" >"$VIM_SPELL_FILE"
+  fi
+
+  # FIREFOX
+  if [[ $FIREFOX -ne 0 ]]; then
+    for item in "${LIST_FIREFOX_DICTS[@]}"; do
+      cat "$UNIFIED_SPELL_FILE" >"$item"
+    done
+  fi
+
+  # THUNDERBIRD
+  if [[ $THUNDERBIRD -ne 0 ]]; then
+    for item in "${LIST_THUNDERBIRD_DICTS[@]}"; do
+      cat "$UNIFIED_SPELL_FILE" >"$item"
+    done
+  fi
+}
+
+# Removes lines from a file that are exactly equal to the value of $string
+remove_exact_line() {
+  local file="$1"
+  local string="$2"
+  if [[ -f $file ]]; then
+    echo "Remove $string from: $file"
+    awk -v s="$string" '$0 != s' "$file" >"$TMP_FILE" && mv "$TMP_FILE" "$file"
+  fi
+}
+
+#-------------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------------
+main() {
+  if [[ $# -eq 0 ]] || [[ $1 = sync ]]; then
+    # Delete the legacy one
+    rm -f ~/.spell-unified
+
+    gen-unified-spell-file
+    gen-dict-from-unified-spell-file
+
+    if [[ $ASPELL -ne 0 ]]; then
+      wc -l "$ASPELL_FILE"
+    fi
+
+    if [[ $VIM -ne 0 ]]; then
+      wc -l "$VIM_SPELL_FILE"
+    fi
+
+    if [[ $FIREFOX -ne 0 ]]; then
+      for item in "${LIST_FIREFOX_DICTS[@]}"; do
+        wc -l "$item"
+      done
+    fi
+
+    if [[ $THUNDERBIRD -ne 0 ]]; then
+      for item in "${LIST_THUNDERBIRD_DICTS[@]}"; do
+        wc -l "$item"
+      done
+    fi
+
+    echo
+    echo "Success."
+  elif [[ $1 = remove ]]; then
+    remove_exact_line "$ASPELL_FILE" "$2"
+    remove_exact_line "$UNIFIED_SPELL_FILE" "$2"
+    remove_exact_line "$VIM_SPELL_FILE" "$2"
+    readarray -t LIST_FIREFOX_DICTS < \
+      <(find ~/.mozilla/firefox -maxdepth 2 -name persdict.dat)
+
+    # Firefox
+    local file
+    for file in "${LIST_FIREFOX_DICTS[@]}"; do
+      remove_exact_line "$file" "$2"
+    done
+
+    # Thunderbird
+    # TODO make it like LIST_FIREFOX_DICTS
+    if [[ -d ~/.thunderbird ]]; then
+      readarray -t LIST_THUNDERBIRD_DICTS < \
+        <(find ~/.thunderbird -maxdepth 2 -name persdict.dat)
+      for file in "${LIST_THUNDERBIRD_DICTS[@]}"; do
+        remove_exact_line "$file" "$2"
+      done
+    fi
+  fi
+}
+
+main "$@"
