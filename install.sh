@@ -160,7 +160,7 @@ main() {
     https://github.com/jamescherti/jc-dotfiles \
     "$GIT_CLONE_DIR/jc-dotfiles"
   cd "$GIT_CLONE_DIR/jc-dotfiles"
-  JC_DEV_UNATTENDED=1 ./install.sh
+  JC_DOTFILES_UNATTENDED=1 ./install.sh
 
   # JC-FIREFOX-SETTINGS
   LIST_FIREFOX_DIRS=("$HOME/.mozilla/firefox"
