@@ -65,6 +65,11 @@ EMACS_ARGS_DICT=(
   --chdir "$HOME"
 )
 
+# Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
+# lsp-use-plists flag. plists provide better performance in deserialization and
+# also put less presure than hash-tables.
+export LSP_USE_PLISTS=true
+
 run-renice-all() {
   # TODO: Conflict with ananicy
   if [[ -f /usr/local/bin/renice-all ]] && type -P sudo &>/dev/null; then

@@ -68,7 +68,7 @@ init() {
   #  their directory locally)
   INSTALL_HOOKS_GITROOT="$(git rev-parse --show-toplevel)"
   if ! [ -d "$INSTALL_HOOKS_GITROOT/.git" ]; then
-    echo "Error: the script $0 is not in a GIT directory: $(pwd)"
+    echo "Error: the script $0 is not in a GIT directory: $PWD"
     exit 1
   else
     cd "$INSTALL_HOOKS_GITROOT" || exit 1
@@ -164,7 +164,7 @@ check_syntax() {
   echo "[CHECK] Checking the Syntax"
   local file
   for file in "${MODIFIED_FILES[@]}"; do
-    "$MISCDIR/check_syntax.sh" "$file" "$(pwd)"
+    "$MISCDIR/check_syntax.sh" "$file" "$PWD"
   done
 }
 

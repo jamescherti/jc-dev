@@ -29,7 +29,7 @@
 set -euf -o pipefail
 
 EMACS_TIMEOUT=3
-EMACS_NEW_TAB=1
+EMACS_NEW_TAB=0
 
 if [[ $# -eq 0 ]]; then
   echo "Usage: $0 file"

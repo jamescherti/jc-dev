@@ -518,7 +518,7 @@ main() {
   #   source /etc/makepkg.conf
   # fi
 
-  echo "[SOURCE DIR] " "$(pwd)"
+  echo "[SOURCE DIR] " "$PWD"
   echo "[CONFIGURE OPTION] " "${CONFIGURE_ARGS[@]}"
   echo "[CFLAGS] $CFLAGS"
   echo "[LDFLAGS] $LDFLAGS"

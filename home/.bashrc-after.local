@@ -457,7 +457,7 @@ if [[ $OSFAMILY != "" ]]; then
   fi
 fi
 
-alias cip="so command cip"
+alias cip="so cip"
 # alias gd='command git ydiff'
 # alias gdr="git diff"
 # alias cia="git cia"
@@ -500,11 +500,10 @@ path-is-inside-of() {
 }
 
 smart-fd() {
-  if git rev-parse --is-inside-work-tree >/dev/null 2>&1 || path-is-inside-of "$PWD" "$HOME/src"; then
-    echo hidden
-    command fd "$@"
+  if git rev-parse --is-inside-work-tree &>/dev/null \
+    || path-is-inside-of "$PWD" "$HOME/src"; then
+    command fd --hidden --ignore "$@"
   else
-    echo super search
     command fd --hidden --no-ignore --exclude '.git' "$@"
   fi
 }
@@ -523,5 +522,24 @@ alias minimal-emacs='command emacs --init-directory=~/.minimal-emacs.d'
 alias me=minimal-emacs
 
 alias e=emacs-edit
+
+is-emacs-server-running() {
+  local result
+  result=$(emacsclient -e "(+ 1 1)" 2>/dev/null)
+  [[ $result = 2 ]] && return 0
+  return 1
+}
+
+smart-editor() {
+  if type -P emacs &>/dev/null \
+    && pgrep --quiet --exact emacs \
+    && is-emacs-server-running; then
+    emacs-edit "$@"
+  else
+    vim "$@"
+  fi
+}
+
+alias vim=smart-editor
 
 alias bf="batchfetch"

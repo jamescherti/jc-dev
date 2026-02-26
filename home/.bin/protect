@@ -26,6 +26,9 @@
 # SOFTWARE.
 #
 
+set -e
+set -u
+
 protect() {
   local path
   if [[ "$1" != "" ]]; then
