@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+EMACS_RUNNING=0
+
+# TODO change this in run-emacs and xdevenv-emacs using 1 file sourced
+if [[ -f /etc/profile ]]; then
+  # shellcheck disable=SC1091
+  source /etc/profile
+fi
+
+if [[ -f /etc/bash.bashrc ]]; then
+  # shellcheck disable=SC1091
+  source /etc/bash.bashrc
+fi
+
+# shellcheck disable=SC1090
+if [[ -f ~/.profile ]]; then
+  # shellcheck disable=SC1090
+  source ~/.profile
+fi
+
+if [[ -f ~/.bashrc ]]; then
+  # shellcheck disable=SC1090
+  source ~/.bashrc
+fi
+
+if [[ $RUN_EMACS_BIN = "" ]]; then
+  RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
+fi
+
+set -euf -o pipefail
+
+EMACS_ARGS_DICT=(
+  --no-site-file
+  --no-site-lisp
+  --no-splash
+  --no-x-resources
+  --no-loadup
+  --chdir "$HOME"
+)
+
+run-renice-all() {
+  # TODO: Conflict with ananicy
+  if [[ -f /usr/local/bin/renice-all ]] && type -P sudo &>/dev/null; then
+    (sleep 5 && sudo /usr/local/bin/renice-all) &
+    disown
+  fi
+}
+
+is-emacs-server-running() {
+  local result
+  result=$(emacsclient -e "(+ 1 1)" 2>/dev/null)
+  [[ $result = 2 ]] && return 0
+  return 1
+}
+
+is-emacs-daemon() {
+  local result
+  result=$(emacsclient -e "(daemonp)" 2>/dev/null)
+  [[ $result = t ]] && return 0
+  return 1
+}
+
+if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+  echo "Error: File not found: '$RUN_EMACS_BIN'" >&2
+  exit 1
+fi
+
+if is-emacs-server-running; then
+  if is-emacs-daemon; then
+    exec "emacsclient" -c
+    exit 1
+  else
+    EMACS_RUNNING=1
+  fi
+else
+  if [[ $EMACS_RUNNING -ne 0 ]]; then
+    if pgrep --quiet --exact emacs; then
+      EMACS_RUNNING=1
+    fi
+  fi
+fi
+
+if [[ $EMACS_RUNNING -ne 0 ]]; then
+  echo "Emacs is already running." >&2
+  exit 1
+else
+  exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
+fi
+
+# disown
+# run-renice-all
+
+# if has_run_or_raise && is_gnome && is_wayland; then
+#   gdbus call --session --dest org.gnome.Shell \
+#     --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+#     --method org.gnome.Shell.Extensions.RunOrRaise.Call ",$HOME/.bin/xdevenv-emacs,,/Emacs/"
+# else
+# fi
+#
+# show_window_maximized emacs "emacs.Emacs" emacs
+
+# Firejail
+# if type -P window-watch &>/dev/null &&
+#   type -P firejail &>/dev/null; then
+#   # Use firejail
+#   show_window_maximized emacs "emacs.Emacs" \
+#     window-watch emacs.Emacs ~/.bin/jemacs
+#   # firejail "--profile=$FIREJAIL_EMACS_PROFILE" \
+#   #   "--env=LD_LIBRARY_PATH=$HOME/.local/lib/" emacs
+# fi
+
+# else
+#   if ! show_window_maximized "emacs.Emacs" \
+#        env GTK_THEME=Adwaita:dark emacs; then
+#     # ENGLISH: Unify spell file
+#     sync-spell-dict
+#   fi
+# fi
+
+# BUG: why does this slow odwn
+
+# wmctrl -x -a Emacs && emacs_running=1
+# if [[ $emacs_running -eq 0 ]]; then
+#     pkill gpgconf
+#     pkill gpg-agent
+#     gpgconf --kill gpg-agent
+#
+#     # devuser dev gpgconf --kill gpg-agent
+#     # if [[ -d /home/dev ]]; then
+#     #   devuser dev emacs
+#     #   exit "$?"
+#     # fi
+# fi
