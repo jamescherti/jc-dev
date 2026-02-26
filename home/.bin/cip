@@ -26,4 +26,4 @@
 # SOFTWARE.
 #
 
-exec git cip "$@"
+exec git-commitflow --push "$@"
