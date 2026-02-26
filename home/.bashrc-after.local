@@ -159,18 +159,18 @@ if type -P git-smartmv >/dev/null 2>&1; then
   alias mv="git-smartmv -w 10 --non-interactive"
 fi
 
-alias minimal-emacs='emacs --init-directory=~/.minimal-emacs.d'
+alias minimal-emacs='command emacs --init-directory=~/.minimal-emacs.d'
 alias memacs=minimal-emacs
 alias me=minimal-emacs
 
 alias real_emacs='command emacs'
-alias emacs=emacs-edit
-# alias ee=emacs-edit
+# alias emacs=emacs-edit
+alias ee=emacs-edit
 alias e=devemacs
 
-if [[ $DISPLAY != "" ]] && type -P emacsclient &>/dev/null; then
-  alias vim=emacs-edit
-fi
+# if [[ $DISPLAY != "" ]] && type -P emacsclient &>/dev/null; then
+#   alias vim=emacs-edit
+# fi
 
 alias bf="batchfetch"
 
