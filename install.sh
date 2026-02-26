@@ -266,6 +266,11 @@ main() {
     fi
   fi
 
+  # Fixes the issue where the terminal session is corrupt because of gpg agent
+  gpgconf --kill gpg-agent || :
+  # pkill -x gpgconf || :
+  # pkill -x gpg-agent || :
+
   echo
   echo Success.
 }
