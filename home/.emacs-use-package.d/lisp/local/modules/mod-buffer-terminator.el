@@ -1,79 +1,100 @@
 ;;; mod-buffer-terminator.el --- mod-buffer-terminator -*- lexical-binding: t -*-
 
+;; Author: James Cherti
+;; URL: https://github.com/jamescherti/jc-dev
+;; Package-Requires: ((emacs "29.1"))
+;; Keywords: maint
+;; Version: 0.0.9
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 
+;; Configure buffer terminator.
 
 ;;; Code:
 
-(require 'le-buffer-terminator)
 (require 'buffer-guardian)
+(require 'lightemacs-use-package)
 
-(defvar my-buffer-terminator-keep-buffer-regexp nil)
-(setq my-buffer-terminator-keep-buffer-regexp '("\\`\\(?: \\)?\\*eldoc for .*\\*\\'"
-                                                "\\`\\(?: \\)?\\*EGLOT .*\\*\\'"
-                                                "\\`\\(?: \\)?\\*straight.*\\*\\'"
-                                                "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
-                                                "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
-                                                ;; "\\` \\*Minibuf-[0-9]+\\*\\'"
-                                                ;; "\\` \\*Compiler Input\\*-"
-                                                ;; "\\` \\*stderr of "
-                                                ;; "\\`\\*gptel"
-                                                ;; "\\` \\*flymake-.*\\*\\'"
-                                                ;; "\\` \\*Preview:.*\\*\\'"
-                                                ;; "\\` \\*Old buffer "  ; tab-bar
-                                                ;; "\\` \\*markdown-code-fontification:.*\\*\\'"
-                                                ;; "\\` \\*wgrep "
-                                                ;; "\\` \\*Org "
-                                                ;; "\\` \\*org-src-"
-                                                ;; "\\` \\*Echo Area [0-9]+\\*\\'"
-                                                ))
+(defvar mod-buffer-terminator-keep-buffer-regexp nil)
+(setq mod-buffer-terminator-keep-buffer-regexp '("\\`\\(?: \\)?\\*eldoc for .*\\*\\'"
+                                                 "\\`\\(?: \\)?\\*EGLOT .*\\*\\'"
+                                                 "\\`\\(?: \\)?\\*straight.*\\*\\'"
+                                                 "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
+                                                 "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
+                                                 ;; "\\` \\*Minibuf-[0-9]+\\*\\'"
+                                                 ;; "\\` \\*Compiler Input\\*-"
+                                                 ;; "\\` \\*stderr of "
+                                                 ;; "\\`\\*gptel"
+                                                 ;; "\\` \\*flymake-.*\\*\\'"
+                                                 ;; "\\` \\*Preview:.*\\*\\'"
+                                                 ;; "\\` \\*Old buffer "  ; tab-bar
+                                                 ;; "\\` \\*markdown-code-fontification:.*\\*\\'"
+                                                 ;; "\\` \\*wgrep "
+                                                 ;; "\\` \\*Org "
+                                                 ;; "\\` \\*org-src-"
+                                                 ;; "\\` \\*Echo Area [0-9]+\\*\\'"
+                                                 ))
 
-(defvar my-buffer-terminator-always-keep nil)
-(setq my-buffer-terminator-always-keep '("*Messages*"
-                                         "*tmux*"
-                                         "*scratch*"
-                                         "*Flymake log*"
-                                         "*Compile-Log*"
-                                         "*Warnings*"
-                                         "*Ollama*"
-                                         "*Non-Native-Compiled*"
-                                         "*compile-angel:debug*"
-                                         "*vc*"
-                                         "*Help*"
-                                         "*Ediff Registry*"
+(defvar mod-buffer-terminator-always-keep nil)
+(setq mod-buffer-terminator-always-keep '("*Messages*"
+                                          "*tmux*"
+                                          "*scratch*"
+                                          "*Flymake log*"
+                                          "*Compile-Log*"
+                                          "*Warnings*"
+                                          "*Ollama*"
+                                          "*Non-Native-Compiled*"
+                                          "*compile-angel:debug*"
+                                          "*vc*"
+                                          "*Help*"
+                                          "*Ediff Registry*"
 
-                                         "*Flymake log*"
-                                         "*Async-native-compile-log*"
-                                         "*Native-compile-Log*"
-                                         "*Backtrace*"
+                                          "*Flymake log*"
+                                          "*Async-native-compile-log*"
+                                          "*Native-compile-Log*"
+                                          "*Backtrace*"
 
-                                         "*lsp-log*"
-                                         "*pylsp*"
-                                         "*pylsp::stderr*"
+                                          "*lsp-log*"
+                                          "*pylsp*"
+                                          "*pylsp::stderr*"
 
-                                         ;; " *server*"
-                                         ;; " *counsel*"
-                                         ;; " *eldoc*"
-                                         ;; " *code-converting-work*"
-                                         ;; " *code-conversion-work*"
-                                         ;; " *Compiler Input*"
-                                         ;; " *jka-compr-wr-temp*"
-                                         ;; " *elisp-flymake-byte-compile*"
-                                         ;; " *consult-async*"
-                                         ;; " *consult-async-stderr*"
-                                         "*Org string width*"
-                                         "*Async-native-compile-log*"))
+                                          ;; " *server*"
+                                          ;; " *counsel*"
+                                          ;; " *eldoc*"
+                                          ;; " *code-converting-work*"
+                                          ;; " *code-conversion-work*"
+                                          ;; " *Compiler Input*"
+                                          ;; " *jka-compr-wr-temp*"
+                                          ;; " *elisp-flymake-byte-compile*"
+                                          ;; " *consult-async*"
+                                          ;; " *consult-async-stderr*"
+                                          "*Org string width*"
+                                          "*Async-native-compile-log*"))
 
-(defvar-local buffer-terminator-keep nil)
-(defvar-local my-track-buffers--list-buffers nil)
+(defvar-local mod-buffer-terminator--keep nil)
+;; (defvar-local my-buffer-terminator--track-buffers--list-buffers nil)
 
-(defun my-buffer-terminator-predicate ()
+(defun mod-buffer-terminator-predicate ()
   "Return :kill, :keep, or nil."
   (let* ((file-name (buffer-file-name (buffer-base-buffer)))
          ;; (buffer (current-buffer))
          )
     (cond
-     (buffer-terminator-keep
+     (mod-buffer-terminator--keep
       :keep)
 
      ;; ((and (eq my-track-buffers--buffer-type 'overlay)
@@ -118,12 +139,11 @@
          ;; Let buffer terminator decide
          ;; (t
          ;;  nil)
-         )))
-     )))
+         ))))))
 
 (setq buffer-terminator-rules-alist
       `(
-        (call-function . my-buffer-terminator-predicate)
+        (call-function . mod-buffer-terminator-predicate)
 
         ;; Keep active buffers.
         ;; (This can be customized with `buffer-terminator-inactivity-timeout'
@@ -144,29 +164,29 @@
         ;; you are doing.
         ;; (keep-buffer-property . special)
 
-        (keep-buffer-name . ,my-buffer-terminator-always-keep)
+        (keep-buffer-name . ,mod-buffer-terminator-always-keep)
 
-        (keep-buffer-name-regexp . ,my-buffer-terminator-keep-buffer-regexp)
+        (keep-buffer-name-regexp . ,mod-buffer-terminator-keep-buffer-regexp)
 
         (keep-buffer-property . visible)
 
         ;; Kill
         (return . :kill)))
 
-(defun buffer-terminator-crazy ()
+(defun mod-buffer-terminator-crazy ()
   "Buffer terminator crazy."
   (interactive)
   (setopt buffer-terminator-verbose t)
   (setopt buffer-terminator-inactivity-timeout 3)
   (setopt buffer-terminator-interval 1))
 
-(defun buffer-terminator-sane ()
+(defun mod-buffer-terminator-sane ()
   "Buffer terminator crazy."
   (interactive)
   (setopt buffer-terminator-inactivity-timeout 200)
   (setopt buffer-terminator-interval 100))
 
-(buffer-terminator-sane)
+(mod-buffer-terminator-sane)
 
 ;; (defvar my-buffer-rename-list nil
 ;;   "List of buffer renames as cons cells (old-name . new-name).")
@@ -200,7 +220,7 @@
 
 ;;; Functions
 
-(defun empty ()
+(defun mod-buffer-terminator-empty ()
   "Kill all buffers."
   (interactive)
   ;; (when (fboundp 'eglot-shutdown-all)
@@ -209,15 +229,15 @@
 
   (when (fboundp 'easysession-reset)
     (funcall 'easysession-reset))
-  ;; (only)
+  ;; (mod-buffer-terminator-only)
   ;; (scratch-buffer)
   )
 
-(defun my-buffer-terminator-toggle-keep ()
+(defun mod-buffer-terminator-toggle-keep ()
   "Docstring."
   (interactive)
-  (setq buffer-terminator-keep (not buffer-terminator-keep))
-  (if buffer-terminator-keep
+  (setq mod-buffer-terminator--keep (not mod-buffer-terminator--keep))
+  (if mod-buffer-terminator--keep
       (message "Always keep: %s" (buffer-name))
     (message "Do not always keep: %s" (buffer-name))))
 
@@ -230,14 +250,14 @@
 ;;       (buffer-terminator--buffer-visible-p buffer)
 ;;     (error "Undeclared: buffer-terminator--buffer-visible-p")))
 
-(defun empty-all ()
+(defun mod-buffer-terminator-empty-all ()
   "Kill all buffers."
   (interactive)
-  (empty)
+  (mod-buffer-terminator-empty)
   (when (fboundp 'tmux-reset)
     (tmux-reset nil)))
 
-(defun my-buffer-list ()
+(defun mod-buffer-terminator-buffer-list ()
   "Create a buffer listing the names of all open buffers."
   (interactive)
   (let ((list-buffer-name "*Buffer List*"))
@@ -251,7 +271,7 @@
 
 ;;; buffer terminator II
 
-(defun buffer-terminator2--file-buffer ()
+(defun mod-buffer-terminator--file-buffer ()
   "Return :keep the non file-visiting buffers whose name start with a space."
   (let ((file-name (buffer-file-name (buffer-base-buffer))))
     (when (and file-name
@@ -264,7 +284,7 @@
             (set-buffer-modified-p nil))
         :kill))))
 
-(defun buffer-terminator2--non-file-buffer-name-starts-with-space ()
+(defun mod-buffer-terminator--non-file-buffer-name-starts-with-space ()
   "Return :keep the non file-visiting buffers whose name start with a space."
   (let ((buffer-name (buffer-name)))
     (when (and buffer-name
@@ -272,33 +292,34 @@
                (not (buffer-file-name (buffer-base-buffer))))
       :keep)))
 
-(defun buffer-terminator2-kill-non-visible-buffers (&optional buffers)
+(defun mod-buffer-terminator-kill-non-visible-buffers (&optional buffers)
   "Terminate all non visible buffers.
 BUFFERS is a buffer or a list of alive buffers."
   (let* ((buffer-terminator-protect-unsaved-file-buffers nil)
-         (rules `((call-function . buffer-terminator2--file-buffer)
-                  (call-function . buffer-terminator2--non-file-buffer-name-starts-with-space)
+         (rules `((call-function . mod-buffer-terminator--file-buffer)
+                  (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
                   (keep-buffer-property . process)
                   ;; (keep-buffer-property . special)
-                  (keep-buffer-name . ,my-buffer-terminator-always-keep)
-                  (keep-buffer-name-regexp . ,my-buffer-terminator-keep-buffer-regexp)
+                  (keep-buffer-name . ,mod-buffer-terminator-always-keep)
+                  (keep-buffer-name-regexp . ,mod-buffer-terminator-keep-buffer-regexp)
                   (keep-buffer-property . visible)
                   (return . :kill)))
-         (result (buffer-terminator-apply-rules rules buffers)))
+         (result (with-no-warnings
+                   (buffer-terminator-apply-rules rules buffers))))
     (let ((inhibit-message t))
       (dolist (buffer-info result)
-        ;; (message "[BUFFER-TERMINATOR2] Killed non visible: %s" pair)
+        ;; (message "[MOD-BUFFER-TERMINATOR] Killed non visible: %s" pair)
         (let* ((buffer-name (cdr (assq 'buffer-name buffer-info)))
                (major-mode (cdr (assq 'major-mode buffer-info)))
                (file-name (cdr (assq 'file-name buffer-info))))
-          (message "[BUFFER-TERMINATOR2] Killed non visible: %s (%s)"
+          (message "[MOD-BUFFER-TERMINATOR] Killed non visible: %s (%s)"
                    buffer-name (if file-name file-name major-mode)))))
-    (message "[BUFFER-TERMINATOR2] Terminated %s buffers" (length result))))
+    (message "[MOD-BUFFER-TERMINATOR] Terminated %s buffers" (length result))))
 
-(defun buffer-terminator2-kill-all-buffers (&optional buffers)
+(defun mod-buffer-terminator-kill-all-buffers (&optional buffers)
   "Kill all visible buffers.
 BUFFERS is a buffer or a list of alive buffers."
-  (let ((rules '((call-function . buffer-terminator2--non-file-buffer-name-starts-with-space)
+  (let ((rules '((call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
                  ;; TODO How to remove special without causing an issue
                  (keep-buffer-property . process)
                  ;; (keep-buffer-property . special)
@@ -307,7 +328,7 @@ BUFFERS is a buffer or a list of alive buffers."
         (buffer-terminator-apply-rules rules buffers)
       (error "Undefined: buffer-terminator-apply-rules"))))
 
-(defun buffer-terminator2-find-dired-parent ()
+(defun mod-buffer-terminator-find-dired-parent ()
   "Open the current directory in a `dired' buffer and select the current file."
   (interactive)
   (let* ((buffer (or (buffer-base-buffer)
@@ -325,17 +346,17 @@ BUFFERS is a buffer or a list of alive buffers."
           (dired-goto-file file-name)
           (lightemacs-recenter-maybe))))))
 
-(defun buffer-terminator2-find-dired-parent-kill-buffer ()
+(defun mod-buffer-terminator-find-dired-parent-kill-buffer ()
   "Open the current directory in a `dired' buffer and select the current file."
   (let* ((buffer (or (buffer-base-buffer)
                      (current-buffer)))
          (file-name (buffer-file-name buffer)))
 
-    (buffer-terminator2-find-dired-parent)
+    (mod-buffer-terminator-find-dired-parent)
     (when file-name
-      (buffer-terminator2-kill-non-visible-buffers buffer))))
+      (mod-buffer-terminator-kill-non-visible-buffers buffer))))
 
-(defun buffer-terminator2---non-minibuffer-windows ()
+(defun mod-buffer-terminator---non-minibuffer-windows ()
   "Return a list of all windows excluding the minibuffer."
   (let (result)
     (dolist (win (window-list))
@@ -345,25 +366,25 @@ BUFFERS is a buffer or a list of alive buffers."
             (push win result)))))
     result))
 
-(defvar-local my-buffer-protected-from-close nil
+(defvar-local mod-buffer-terminator--protected-from-close nil
   "Non-nil means the current buffer is protected from being closed.")
 
-(defun my-toggle-protect-buffer-from-close ()
+(defun mod-buffer-terminator--toggle-protect-buffer-from-close ()
   "Toggle the protection flag to prevent the current buffer from being closed."
   (interactive)
-  (setq my-buffer-protected-from-close (not my-buffer-protected-from-close))
-  (message "Buffer protection enabled: %s" my-buffer-protected-from-close))
+  (setq mod-buffer-terminator--protected-from-close (not mod-buffer-terminator--protected-from-close))
+  (message "Buffer protection enabled: %s" mod-buffer-terminator--protected-from-close))
 
-(defun buffer-terminator2-close-window (&optional kill-buffer)
+(defun mod-buffer-terminator-close-window (&optional kill-buffer)
   "Close the current window and kill the buffer when KILL-BUFFER is set to t.
 When KILL-BUFFER is t, file-visiting buffers are saved before being killed.
 If the window is the last one in its tab-bar tab, the tab will also be closed.
 By default, closing the last window in a tab does not close the tab."
   (interactive)
-  (if my-buffer-protected-from-close
+  (if mod-buffer-terminator--protected-from-close
       (user-error "You cannot close: %s" (buffer-name))
     (let* ((buffer (or (buffer-base-buffer) (current-buffer)))
-           (number-of-splits (length (buffer-terminator2---non-minibuffer-windows))))
+           (number-of-splits (length (mod-buffer-terminator---non-minibuffer-windows))))
       ;; (with-current-buffer buffer
       ;;   (buffer-guardian-save-buffer))
 
@@ -381,17 +402,17 @@ By default, closing the last window in a tab does not close the tab."
 
       ;; Save and close the buffer
       (when kill-buffer
-        (buffer-terminator2-kill-non-visible-buffers buffer)))))
+        (mod-buffer-terminator-kill-non-visible-buffers buffer)))))
 
-(defun buffer-terminator2-close-window-kill-buffer ()
+(defun mod-buffer-terminator-close-window-kill-buffer ()
   "Save and kill the current buffer and close the current window.
 If the window is the last one in its tab-bar tab, the tab will also be closed.
 By default, closing the last window in a tab does not close the tab."
   (interactive)
   (let ((kill-buffer t))
-    (buffer-terminator2-close-window kill-buffer)))
+    (mod-buffer-terminator-close-window kill-buffer)))
 
-(defun only ()
+(defun mod-buffer-terminator-only ()
   "Kill all the other buffers."
   (interactive)
   (buffer-guardian-save-all-buffers)
@@ -399,22 +420,22 @@ By default, closing the last window in a tab does not close the tab."
              (fboundp 'tab-bar-close-other-tabs))
     (tab-bar-close-other-tabs))
   (delete-other-windows)
-  (buffer-terminator2-kill-all-buffers))
+  (mod-buffer-terminator-kill-all-buffers))
 
-(defun only-visible ()
+(defun mod-buffer-terminator-only-visible ()
   "Kill all the buffers that are not currently displayed in a window or tab."
   (interactive)
   (buffer-guardian-save-all-buffers)
-  (buffer-terminator2-kill-non-visible-buffers))
+  (mod-buffer-terminator-kill-non-visible-buffers))
 
 ;;; Evil
 
 (with-eval-after-load "evil"
-  (define-key evil-normal-state-map (kbd "<leader>ov") #'only-visible)
-  (define-key evil-normal-state-map (kbd "<leader>ey") #'empty)
-  (define-key evil-normal-state-map (kbd "<leader>eY") #'empty-all)
-  (define-key evil-normal-state-map (kbd "C-w c")   #'buffer-terminator2-close-window)
-  (define-key evil-normal-state-map (kbd "C-w C-c") #'buffer-terminator2-close-window))
+  (define-key evil-normal-state-map (kbd "<leader>ov") #'mod-buffer-terminator-only-visible)
+  (define-key evil-normal-state-map (kbd "<leader>ey") #'mod-buffer-terminator-empty)
+  (define-key evil-normal-state-map (kbd "<leader>eY") #'mod-buffer-terminator-empty-all)
+  (define-key evil-normal-state-map (kbd "C-w c")   #'mod-buffer-terminator-close-window)
+  (define-key evil-normal-state-map (kbd "C-w C-c") #'mod-buffer-terminator-close-window))
 
 (provide 'mod-buffer-terminator)
 
