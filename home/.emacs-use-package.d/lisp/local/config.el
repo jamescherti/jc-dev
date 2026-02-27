@@ -492,10 +492,16 @@
                            ;; TODO change
                            ;; (setq lightemacs-display-line-numbers-mode-add-hook-to nil)
                            ;; le-display-line-numbers  ;; mod-misc provides its own
-                           mod-defun
-                           mod-misc  ; misc=begin
-                           mod-misc2
 
+                           ;; Legacy (DEPRECATED)
+                           mod-defun
+                           mod-misc2
+                           mod-evil
+                           mod-better-vc
+                           mod-org
+
+                           ;; New
+                           mod-misc  ; misc=begin
                            ;; tmp-easysession
                            buffer-guardian
 
@@ -507,12 +513,9 @@
                            smartindent
                            battery-angel
                            mod-project
-                           mod-evil
                            mod-buffer-terminator
                            mod-toggle-term
-                           mod-better-vc
                            point-manager
-                           mod-org
 
                            mod-kirigami
                            ;; mod-kirigami-alternative

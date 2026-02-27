@@ -26,7 +26,7 @@
 ;;; Code:
 
 (require 'lightemacs-module)
-(require 'mod-defun)
+(require 'my-defun)
 (require 'le-corfu)
 (require 'le-cape)
 

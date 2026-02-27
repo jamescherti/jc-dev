@@ -27,7 +27,7 @@
 
 ;;; Require
 
-(require 'mod-defun)
+(require 'my-defun)
 
 ;;; fix ignore empty
 
