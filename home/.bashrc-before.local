@@ -34,6 +34,7 @@ JC_TRASH_CLI=1
 JC_EMACS_INTEGRATION=1
 JC_RESTORE_LAST_DIR=1
 JC_FASD=1
+JC_FIX_GPG_TTY=1
 
 if [[ -f ~/.profile ]]; then
   # shellcheck disable=SC1090

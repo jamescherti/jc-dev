@@ -66,6 +66,8 @@
 ;; compile-angel-native-compile-load is t
 (setq lightemacs-load-compiled-init-files t)
 
+(setq lightemacs-recentf-track-switch-to-buffer t)
+
 (setq compile-angel-optimize-regexps t)
 
 ;; TODO test this more. It does not seem stable.
@@ -562,6 +564,9 @@ any new ones."
         (easysession                   . "melpa")
         (flymake-ansible-lint          . "melpa")
         (flymake-bashate               . "melpa")
+
+        ;; To fix the window-start bug
+        (apheleia                      . "melpa")
 
         ;; The released version is too old (1 year)
         ;; TODO: Lightemacs?
