@@ -874,8 +874,9 @@ DIR is the directory."
         (save-excursion
           (deactivate-mark)))
 
-      (save-some-buffers t)
-      ;; (buffer-guardian-save-all-buffers)
+      (if (fboundp 'buffer-guardian-save-all-buffers)
+          (buffer-guardian-save-all-buffers)
+        (save-some-buffers t))
       (when (fboundp 'consult-ripgrep)
         (consult-ripgrep (or dir (buffer-cwd)) selection)))))
 
@@ -2614,7 +2615,6 @@ If COUNT is given, move COUNT - 1 lines downward first."
 (add-hook 'quick-sdcv-mode-hook 'goto-address-mode)
 
 (lightemacs-use-package quick-sdcv
-  ;; :ensure nil
   :commands (quick-sdcv-search-at-point
              quick-sdcv-search-input)
 
@@ -2646,7 +2646,6 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;; TODO Lightemacs
 (lightemacs-use-package quick-fasd
-  ;; :ensure nil
   :commands (quick-fasd-mode
              quick-fasd-find-path
              quick-fasd-add-path)
@@ -2669,14 +2668,11 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;;; ultisnips-mode
 
-(lightemacs-use-package ultisnips-mode
-  ;; :ensure nil
-  )
+(lightemacs-use-package ultisnips-mode)
 
 ;;; Use-package pathaction
 
 (lightemacs-use-package pathaction
-  :ensure nil
   :commands (pathaction-edit
              pathaction-run)
 
@@ -2694,7 +2690,9 @@ If COUNT is given, move COUNT - 1 lines downward first."
   (defun my-save-some-buffers ()
     "Prevent `save-some-buffers' from prompting by passing 1 to it."
     ;; (save-some-buffers 1)
-    (buffer-guardian-save-all-buffers))
+    (if (fboundp 'buffer-guardian-save-all-buffers)
+        (buffer-guardian-save-all-buffers)
+      (save-some-buffers t)))
 
   :init
   (with-eval-after-load 'evil
@@ -2734,31 +2732,6 @@ If COUNT is given, move COUNT - 1 lines downward first."
     (ignore-errors
       (when (fboundp 'bufferwizard-replace-symbol-at-point)
         (bufferwizard-replace-symbol-at-point))))))
-
-(lightemacs-use-package bufferwizard
-  ;; :ensure nil
-  ;; :vc (:url "https://github.com/jamescherti/bufferwizard.el"
-  ;;           :rev :newest)
-  :ensure nil
-  :commands (bufferwizard-clone-and-switch-to-indirect-buffer
-             bufferwizard-unhighlight
-             bufferwizard-toggle-highlight-at-point
-             bufferwizard-switch-to-base-buffer
-             bufferwizard-replace-symbol-at-point)
-
-  :init
-  ;; Indirect buffer
-  (evil-define-key 'normal 'global (kbd "<leader>ec") #'bufferwizard-clone-and-switch-to-indirect-buffer)
-  (evil-define-key 'normal 'global (kbd "<leader>eC") #'bufferwizard-switch-to-base-buffer)
-
-  ;; Rename
-  (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-bufferwizard-smart-rename)
-  (evil-define-key 'normal 'global (kbd "<leader>R") #'bufferwizard-replace-symbol-at-point)
-
-  ;; Highlight
-  ;; (evil-define-key 'normal 'global (kbd "C-h") #'bufferwizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eh") #'bufferwizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eH") #'bufferwizard-unhighlight))
 
 ;;; Provide
 

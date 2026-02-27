@@ -2210,18 +2210,18 @@ ORIG-FUN is the advised function.  DESC is the package description struct."
   "Open the current file in `dired' using an external command based on file type."
   (interactive nil dired-mode)
   (if (and (fboundp 'dired-get-file-for-visit)
-           (fboundp 'dired--find-possibly-alternative-file)
-           (let* ((file (dired-get-file-for-visit)))
-             (let ((shell-cmd (my-dired-get-file-open-command file)))
-               (if shell-cmd
-                   (progn
-                     ;; (message "[RUN] %s %s" shell-cmd file)
-                     (if (fboundp 'quick-fasd-add-path)
-                         (quick-fasd-add-path file)
-                       (message "Warning: Undefined: `quick-fasd-add-path'"))
-                     (call-process shell-cmd nil nil nil file))
-                 (dired--find-possibly-alternative-file file)))))
-      (error "Undefined: dired-get-file-for-visit or dired--find-possibly-alternative-file")))
+           (fboundp 'dired--find-possibly-alternative-file))
+      (let* ((file (dired-get-file-for-visit)))
+        (let ((shell-cmd (my-dired-get-file-open-command file)))
+          (if shell-cmd
+              (progn
+                ;; (message "[RUN] %s %s" shell-cmd file)
+                (if (fboundp 'quick-fasd-add-path)
+                    (quick-fasd-add-path file)
+                  (message "Warning: Undefined: `quick-fasd-add-path'"))
+                (call-process shell-cmd nil nil nil file))
+            (dired--find-possibly-alternative-file file))))
+    (error "Undefined: dired-get-file-for-visit or dired--find-possibly-alternative-file")))
 
 (with-eval-after-load 'dired
 
