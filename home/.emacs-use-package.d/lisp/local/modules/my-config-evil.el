@@ -2276,6 +2276,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
       (when (fboundp 'bufferwizard-replace-symbol-at-point)
         (bufferwizard-replace-symbol-at-point))))))
 
+(evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-bufferwizard-smart-rename)
 
 ;;; better vc
 
