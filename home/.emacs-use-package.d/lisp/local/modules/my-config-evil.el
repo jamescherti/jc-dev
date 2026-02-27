@@ -1522,12 +1522,6 @@ search direction (default: \='forward)."
   (when (fboundp 'vterm-send-key)
     (vterm-send-key (kbd "L") t t)))
 
-;;; server
-
-(setq server-client-instructions nil)
-(unless (daemonp)
-  (add-hook 'lightemacs-after-init-hook #'server-start))
-
 ;;; mode line
 
 (setq line-number-mode t)
@@ -1535,57 +1529,6 @@ search direction (default: \='forward)."
 (setq mode-line-position-column-line-format '("%l:%C"))
 (setq mode-line-percent-position nil)
 
-;;; Modeline
-(add-hook 'lightemacs-after-init-hook #'display-time-mode)
-(setq display-time-mail-function #'ignore)
-(setq display-time-mail-string "")
-(setq display-time-mail-directory nil)
-(setq display-time-use-mail-icon nil)
-(setq display-time-mail-face nil)
-(setq display-time-format " %Y-%m-%d  %I:%M %p")
-
-(defun mode-line-right ()
-  "Render the `mode-line-right-format'."
-  (let* ((mode-line-right-format '(mode-line-front-space
-                                   mode-line-misc-info
-                                   mode-line-end-spaces))
-         (formatted-line (format-mode-line mode-line-right-format)))
-    (list (propertize
-           " "
-           'display
-           `(space :align-to (+ 2
-                                (- right
-                                   (+ ,(string-width formatted-line) right-fringe
-                                      right-margin)))))
-          formatted-line)))
-
-(defun my-gc-cons-threshold-mode-line ()
-  "Return a short string with the current `gc-cons-threshold`."
-  (format " GC:%s" (cond
-                    ((= gc-cons-threshold most-positive-fixnum) "∞")
-                    (t (format "%sM" (/ gc-cons-threshold 1000000))))))
-
-(setq-default mode-line-format
-              '("%e"
-                mode-line-front-space
-                mode-line-modified
-                "  |  "
-                mode-line-buffer-identification
-                "  |  "
-                (vc-mode vc-mode)
-                (:eval
-                 (if (fboundp 'my-project-name)
-                     (let ((project-name (my-project-name)))
-                       (format "  |  Project:%s" (my-project-name)))
-                   "")
-                 )
-                "  |  "
-                mode-line-position
-                "  |  "
-                (:eval (my-gc-cons-threshold-mode-line))
-                ;; mode-line-modes
-                ;; Slow eval
-                (:eval (mode-line-right))))
 
 ;;; flymake fixes
 
@@ -1645,414 +1588,6 @@ ignored and logged as a warning. All other errors are re-raised."
   (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-toc)
   (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
 
-;;; hideshow
-
-(with-eval-after-load 'hideshow
-  ;; TODO lightemacs?
-  ;; Fringe
-  (define-fringe-bitmap 'hs-marker [0 24 24 126 126 24 24 0])
-  (defcustom hs-fringe-face 'hs-fringe-face
-    "*Specify face used to highlight the fringe on hidden regions."
-    :type 'face
-    :group 'hideshow)
-  (defface hs-fringe-face
-    '((t (:foreground "#888" :box (:line-width 2 :color "grey75"
-                                               :style released-button))))
-    "Face used to highlight the fringe on folded regions"
-    :group 'hideshow)
-  (defcustom hs-face 'hs-face
-    "*Specify the face to to use for the hidden region indicator"
-    :type 'face
-    :group 'hideshow)
-  (defface hs-face
-    '((t (:foreground "grey" :background unspecified :box nil)))
-    "Face to hightlight the ... area of hidden regions"
-    :group 'hideshow)
-
-  (defun display-code-line-counts (ov)
-    (when (eq 'code (overlay-get ov 'hs))
-      (let* (;;(marker-string "*fringe-dummy*")
-             ;; (marker-length (length marker-string))
-             (display-string (format "(%d)..."
-                                     (count-lines (overlay-start ov)
-                                                  (overlay-end ov)))))
-        (overlay-put ov 'help-echo "Hiddent text. C-c,= to show")
-        ;; (put-text-property 0 marker-length 'display
-        ;;                    (list 'left-fringe 'hs-marker 'hs-fringe-face)
-        ;;                    marker-string)
-        ;; (overlay-put ov 'before-string marker-string)
-        (put-text-property 0 (length display-string) 'face 'hs-face
-                           display-string)
-        (overlay-put ov 'display display-string))))
-  (setq hs-set-up-overlay 'display-code-line-counts))
-
-;;; auto insert if new file
-
-;; This is called by main.el
-(defun my/autoinsert-yas-expand()
-  "Replace text with Yasnippet template."
-  (when (fboundp 'yas-expand-snippet)
-    (condition-case nil
-        (progn
-          (funcall 'yas-expand-snippet (buffer-string) (point-min) (point-max))
-          (when (and (not (bobp))
-                     (fboundp 'evil-insert-state)
-                     (not (zerop (buffer-size))))
-            (evil-insert-state)))
-      (error
-       nil))))
-
-(defun my-auto-insert-if-new-file ()
-  "Auto-insert template only if the file is newly created and does not exist."
-  (when-let* ((file-name (buffer-file-name (buffer-base-buffer))))
-    (when (and (not (file-exists-p file-name))
-               (= (buffer-size) 0))
-      ;; Execute the default auto-insert function or custom logic here. For
-      ;; simplicity, we invoke `auto-insert` directly.
-      (condition-case nil
-          (progn
-            (when (bound-and-true-p yas-minor-mode) (auto-insert)))
-        ;; Ignore errors
-        (error
-         nil)))))
-
-(defun config-template-system ()
-  "Configure the template system."
-  ;; Add the custom function to `find-file-hook`
-  (add-hook 'find-file-hook 'my-auto-insert-if-new-file)
-
-  ;; :config
-  (let ((template-elisp-file (expand-file-name "main.el"
-                                               auto-insert-directory)))
-    (let ((inhibit-message t))
-      (load template-elisp-file :no-error :no-message))))
-
-(setq auto-insert 'other)
-(setq auto-insert-query nil)
-(setq auto-insert-alist nil)  ;; Will be changed by template-elisp-file
-(setq auto-insert-directory (expand-file-name "file-templates-auto/"
-                                              "~/.emacs-data/etc")) ;;; Or use custom, *NOTE* Trailing slash important
-(setq auto-insert-query nil) ;;; If you don't want to be prompted before insertion
-
-(add-hook 'lightemacs-after-init-hook 'config-template-system)
-
-
-;;===========================================================================
-;; Geometry
-;;===========================================================================
-;; TODO Migrate this to lightemacs
-(defvar my-frame-geometry-file (expand-file-name "frame-geometry"
-                                                 user-emacs-directory))
-
-(defvar my-frame-geometry-modified-p nil
-  "Was the frame geometry modified.")
-
-(defun my-frame-geometry-save ()
-  "Save the current frame's geometry."
-  (when (display-graphic-p)
-    (let ((inhibit-message t)
-          (frame (selected-frame))
-          (file my-frame-geometry-file))
-      (with-temp-buffer
-        (let ((make-backup-files nil)
-              (font (frame-parameter frame 'font))
-              (left (frame-parameter frame 'left))
-              (top (frame-parameter frame 'top))
-              (width (frame-parameter frame 'width))
-              (height (frame-parameter frame 'height))
-              (pixel-width (frame-pixel-width frame))
-              (pixel-height (frame-pixel-height frame)))
-          (insert
-           ";; -*- mode: emacs-lisp; lexical-binding: t; coding: utf-8-unix -*-\n")
-          (insert ";; Frame geometry file, automatically generated "
-                  "by 'my-frame-geometry*' functions.\n")
-          (insert
-           "(setq initial-frame-alist nil)\n"
-           (format "(add-to-list 'initial-frame-alist '(font . \"%s\"))\n"
-                   (replace-regexp-in-string "\"" "\\\\\"" font))
-           (when top
-             (format "(add-to-list 'initial-frame-alist '(top . %s))\n" top))
-           (when left
-             (format "(add-to-list 'initial-frame-alist '(left . %s))\n" left))
-           (when width
-             (format "(add-to-list 'initial-frame-alist '(width . %s))\n" width))
-           (when height
-             (format "(add-to-list 'initial-frame-alist '(height . %s))\n" height))
-           "\n"
-           (when pixel-width
-             (format "(setq my-frame-geometry-pixel-width %s)\n" pixel-width))
-           (when pixel-height
-             (format "(setq my-frame-geometry-pixel-height %s)\n" pixel-height)))
-          (when (file-writable-p file)
-            (let ((save-silently t))
-              (write-file file))))))))
-
-(defun my-frame-geometry-load-initial-frame-alist ()
-  "Load the previous frames geometry.
-Call it from \='early-init.el\='."
-  (let ((file my-frame-geometry-file)
-        (inhibit-message t))
-    (when (file-readable-p file)
-      (load (expand-file-name file) t t t))))
-
-(defun my-frame-geometry-set-pixel-width-height (&optional frame)
-  "Set the frame width and height.
-Call it from \='init.el\='.
-FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
-  (unless frame
-    (setq frame (selected-frame)))
-
-  (when (and (display-graphic-p)
-             (boundp 'my-frame-geometry-pixel-width)
-             (boundp 'my-frame-geometry-pixel-height))
-    (message "Set frame size: %sx%s"
-             my-frame-geometry-pixel-width
-             my-frame-geometry-pixel-height)
-    (set-frame-size frame
-                    my-frame-geometry-pixel-width
-                    my-frame-geometry-pixel-height
-                    t)))
-
-(defun my-set-frame-size-and-position (&optional frame)
-  "Set position and size of FRAME when it's the first frame."
-  (unless frame
-    (setq frame (selected-frame)))
-  (unless my-frame-geometry-modified-p
-    ;; when (eq frame (selected-frame))
-    (when (not (frame-parameter frame 'parent-frame))
-      (when (fboundp 'my-frame-geometry-set-pixel-width-height)
-        (setq my-frame-geometry-modified-p t)
-        (my-frame-geometry-set-pixel-width-height frame)))))
-
-(my-frame-geometry-load-initial-frame-alist)
-;; (setq initial-frame-alist nil)
-
-(add-hook 'kill-emacs-hook 'my-frame-geometry-save)
-;; (add-hook 'after-make-frame-functions #'my-set-frame-size-and-position)
-
-;; Issue with Emacs 31 and shut-up
-;; (with-eval-after-load "shut-up"
-;;   (with-no-warnings
-;;     (defun my-around-my-frame-geometry-save (fn &rest args)
-;;       "FN is the advised function. ARGS are the function arguments."
-;;       (shut-up
-;;         (apply fn args)))
-;;
-;;     (advice-add 'my-frame-geometry-save :around
-;;                 #'my-around-my-frame-geometry-save)))
-
-;;; quiet
-
-;; In addition to the shut-up package, this module provides the
-;; `lightemacs-shut-up-advice-add' function, which prevents a function from
-;; displaying messages.
-
-;; readme: In addition to the *shut-up* package, this module provides the
-;; `lightemacs-shut-up-advice-add` function, which attaches advice to a given
-;; function to suppress all of its output.
-
-(defun lightemacs--shut-up-funcall (fn &rest args)
-  "Call FN with ARGS while suppressing all output.
-This function evaluates FN with the given ARGS while redirecting output that
-would normally be sent to `standard-output' and suppressing messages produced by
-`message'. It also overrides `write-region' and `load' with custom
-implementations that prevent unintended output."
-  ;; I have an issue with shut-up TODO especially with straight
-  ;; (shut-up
-  ;;   (apply fn args))
-  (let ((inhibit-message t))
-    (apply fn args)
-    ;; (cl-letf
-    ;;     ;; Override `standard-output' (for `print'), `message',
-    ;;     ;; `write-region', `load'.
-    ;;     ((standard-output #'ignore)
-    ;;      ((symbol-function 'message) 'ignore)
-    ;;      ;; ((symbol-function 'write-region) 'shut-up-write-region)
-    ;;      ;; ((symbol-function 'write-region) 'shut-up-write-region)
-    ;;      ;; ((symbol-function 'load) 'shut-up-load)
-    ;;      )
-    ;;   (apply fn args))
-    ))
-
-;;;###autoload
-(defun lightemacs-shut-up-advice-add (fn)
-  "Advise the FN function so that all its output is suppressed.
-This attaches an around-advice to FN using `lightemacs--shut-up-funcall',
-ensuring that when FN is invoked, it produces no messages, does not write to
-`standard-output', and does not display output from `write-region' or `load'."
-  (advice-add fn :around #'lightemacs--shut-up-funcall))
-
-;;;###autoload
-(defun lightemacs-shut-up-advice-remove (fn)
-  "Remove the silence advice from the FN function.
-This detaches the around-advice previously installed by
-`lightemacs-shut-up-advice-add', restoring FN to its original behavior where
-messages and output are no longer suppressed."
-  (advice-remove fn #'lightemacs--shut-up-funcall))
-
-(with-eval-after-load 'undo-fu-session
-  (lightemacs-shut-up-advice-add 'undo-fu-session--recover-safe))
-
-(lightemacs-shut-up-advice-add 'evil-redo)
-(lightemacs-shut-up-advice-add 'evil-undo)
-
-(with-eval-after-load 'sh-script
-  (when (fboundp 'sh-set-shell)
-    (lightemacs-shut-up-advice-add 'sh-set-shell)))
-
-;; TODO silence it
-;; (lightemacs-shut-up-advice-add 'toggle-truncate-lines)
-
-;; (with-eval-after-load 'flyspell
-;;   (lightemacs-shut-up-advice-add 'flyspell-prog-mode)
-;;   (lightemacs-shut-up-advice-add 'flyspell-mode))
-
-;; (with-eval-after-load 'recentf
-;;   (lightemacs-shut-up-advice-add 'recentf-save-list)
-;;   (lightemacs-shut-up-advice-add 'recentf-cleanup)
-;;   (lightemacs-shut-up-advice-add 'recentf-mode))
-
-;;; recenter after jump
-
-
-(defvar lightemacs-maybe-recenter-after-jump t
-  "Non-nil enables recentering the window when the point jumps out of view.
-Recentering only occurs when `scroll-conservatively' is >= 101. The recenter
-position can be customized using `lightemacs-maybe-recenter-after-jump-value'.")
-
-(defvar lightemacs-maybe-recenter-after-jump-value 12
-  "The line position for recentering the window when the point jumps out of view.
-Only used when `lightemacs-maybe-recenter-after-jump' is non-nil and
-`scroll-conservatively' is >= 101. A numeric value indicates the number of lines
-from the top of the window; nil recenters in the middle.")
-
-(require 'le-core-defun)  ;; lightemacs-recenter-maybe
-
-(defun lightemacs-default-settings--recenter-maybe ()
-  "Recenter conditionally when `scroll-conservatively' is set to 101 or higher.
-This ensures that conservative scrolling is preserved while maintaining point
-visibility when navigation commands are executed."
-  (when (and lightemacs-maybe-recenter-after-jump
-             (>= scroll-conservatively 101))
-    (lightemacs-recenter-maybe lightemacs-maybe-recenter-after-jump-value)))
-
-(defun lightemacs-default-settings--recenter-maybe-adjust-arg ()
-  "Recenter conditionally when `scroll-conservatively' is set to 101 or higher.
-This ensures that conservative scrolling is preserved while maintaining point
-visibility when navigation commands are executed."
-  (when (and lightemacs-maybe-recenter-after-jump
-             (>= scroll-conservatively 101))
-    (lightemacs-recenter-maybe lightemacs-maybe-recenter-after-jump-value t)))
-
-(defun lightemacs-default-settings--advice-recenter-maybe-adjust-arg (fn &rest args)
-  "FN is the advised function. ARGS are the function arguments."
-  (unwind-protect
-      (apply fn args)
-    (lightemacs-default-settings--recenter-maybe-adjust-arg)))
-
-;; TODO use post-command-hook?
-
-(defun lightemacs-default-settings--advice-recenter-maybe (fn &rest args)
-  "FN is the advised function. ARGS are the function arguments."
-  (unwind-protect
-      (apply fn args)
-    (lightemacs-default-settings--recenter-maybe)))
-
-;; TODO use a loop to add to hooks and advice functions
-(with-eval-after-load 'flymake
-  (advice-add 'flymake-goto-next-error :around
-              #'lightemacs-default-settings--advice-recenter-maybe)
-  (advice-add 'flymake-goto-prev-error :around
-              #'lightemacs-default-settings--advice-recenter-maybe))
-
-(advice-add 'evil-goto-mark :around
-            #'lightemacs-default-settings--advice-recenter-maybe-adjust-arg)
-
-(advice-add 'evil-ex-search-previous :around
-            #'lightemacs-default-settings--advice-recenter-maybe-adjust-arg)
-(advice-add 'evil-ex-search-next :around
-            #'lightemacs-default-settings--advice-recenter-maybe-adjust-arg)
-
-;; When the user presses C-o
-(add-hook 'evil-jumps-post-jump-hook
-          #'lightemacs-default-settings--recenter-maybe-adjust-arg 70)
-
-(with-eval-after-load 'simple
-  (add-hook 'next-error-hook
-            #'lightemacs-default-settings--recenter-maybe-adjust-arg))
-
-(with-eval-after-load 'xref
-  (let ((xref-pulse-originally-present (memq 'xref-pulse-momentarily
-                                             xref-after-jump-hook)))
-    (remove-hook 'xref-after-jump-hook 'recenter)
-    (remove-hook 'xref-after-jump-hook 'xref-pulse-momentarily)
-
-    (add-hook 'xref-after-return-hook
-              #'lightemacs-default-settings--recenter-maybe 70)
-
-    (add-hook 'xref-after-jump-hook
-              'lightemacs-default-settings--recenter-maybe 70)
-    (when xref-pulse-originally-present
-      (add-hook 'xref-after-jump-hook 'xref-pulse-momentarily 71))))
-
-;;; Target hooks
-
-;;(setq-local package-lint-main-file
-;;            (file-name-nondirectory
-;;             (buffer-file-name (buffer-base-buffer))))
-
-(defun my-prevent-execution-only-when-code-checker-allowed (orig-fun &rest args)
-  "Execute ORIG-FUN with ARGS only if it is allowed.
-This function is intended for use as :around advice."
-  (when (and (fboundp 'my-code-checker-allowed-p)
-             (my-code-checker-allowed-p))
-    (apply orig-fun args)))
-
-(with-eval-after-load 'le-apheleia
-  (advice-add 'apheleia-mode :around
-              #'my-prevent-execution-only-when-code-checker-allowed))
-
-(with-eval-after-load 'le-flymake
-  (advice-add 'flymake-mode :around
-              #'my-prevent-execution-only-when-code-checker-allowed))
-
-;;; Scroll the window down
-
-(evil-define-command my-evil-scroll-line-down (count)
-  "Scroll the window COUNT lines downward.
-The key distinction from the main option is that this variant preserves the
-column layout, except when a point falls on the first visible line."
-  :repeat nil
-  :keep-visual t
-  (interactive "p")
-  ;; TODO pull request evil mode
-  (scroll-up count))
-
-(with-no-warnings
-  (define-key evil-normal-state-map (kbd "C-e") #'my-evil-scroll-line-down))
-
-;;; M-e/M-y: Scroll line up and down
-
-(evil-define-command evilcursor-scroll-line-up (count)
-  "Scroll the window COUNT lines upwards and move the cursor COUNT downwards."
-  :repeat nil
-  :keep-visual t
-  (interactive "p")
-  (let (scroll-preserve-screen-position)
-    (evil-scroll-line-down count)
-    (evil-next-line count)))
-
-(evil-define-command evilcursor-scroll-line-down (count)
-  "Scroll the window COUNT lines downwards and move the cursor COUNT upwards."
-  :repeat nil
-  :keep-visual t
-  (interactive "p")
-  (let (scroll-preserve-screen-position)
-    (evil-scroll-line-up count)
-    (evil-previous-line count)))
-
-(define-key evil-normal-state-map (kbd "M-e") 'evilcursor-scroll-line-up)
-(define-key evil-normal-state-map (kbd "M-y") 'evilcursor-scroll-line-down)
 
 ;;; Silence C-f
 
@@ -2763,6 +2298,44 @@ If COUNT is given, move COUNT - 1 lines downward first."
   (define-key evil-normal-state-map (kbd "<leader>vt") #'mod-better-vc-git-toplevel)
   (define-key evil-normal-state-map (kbd "<leader>vd") #'mod-better-vc-diff)
   (define-key evil-normal-state-map (kbd "<leader>vb") #'vc-print-branch-log))
+
+;;; Scroll the window down
+
+(evil-define-command my-evil-scroll-line-down (count)
+  "Scroll the window COUNT lines downward.
+The key distinction from the main option is that this variant preserves the
+column layout, except when a point falls on the first visible line."
+  :repeat nil
+  :keep-visual t
+  (interactive "p")
+  ;; TODO pull request evil mode
+  (scroll-up count))
+
+(with-no-warnings
+  (define-key evil-normal-state-map (kbd "C-e") #'my-evil-scroll-line-down))
+
+;;; M-e/M-y: Scroll line up and down
+
+(evil-define-command evilcursor-scroll-line-up (count)
+  "Scroll the window COUNT lines upwards and move the cursor COUNT downwards."
+  :repeat nil
+  :keep-visual t
+  (interactive "p")
+  (let (scroll-preserve-screen-position)
+    (evil-scroll-line-down count)
+    (evil-next-line count)))
+
+(evil-define-command evilcursor-scroll-line-down (count)
+  "Scroll the window COUNT lines downwards and move the cursor COUNT upwards."
+  :repeat nil
+  :keep-visual t
+  (interactive "p")
+  (let (scroll-preserve-screen-position)
+    (evil-scroll-line-up count)
+    (evil-previous-line count)))
+
+(define-key evil-normal-state-map (kbd "M-e") 'evilcursor-scroll-line-up)
+(define-key evil-normal-state-map (kbd "M-y") 'evilcursor-scroll-line-down)
 
 ;;; Provide
 
