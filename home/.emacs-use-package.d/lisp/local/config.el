@@ -68,7 +68,7 @@
 (setq lightemacs-load-compiled-init-files t)
 
 (setq lightemacs-optional-modules '(
-                                    ;; mod-misc2
+                                    mod-misc2
                                     ;; mod-defun
                                     ))
 
