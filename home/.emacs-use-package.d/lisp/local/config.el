@@ -3155,12 +3155,329 @@ session ends."
 
 (add-hook 'ediff-prepare-buffer-hook #'pkg-diff--setup-ediff-auto-text-scale)
 
-;;; Local variables
+;;; Better evil
+
+(defun my-save-buffers-kill-emacs ()
+  "Handle quitting Emacs with daemon-aware frame management."
+  (interactive)
+  (if (and (daemonp)
+           (fboundp 'easysession-save-session-and-close-frames))
+      (easysession-save-session-and-close-frames)
+    (save-buffers-kill-emacs)))
+
+(defun evilbuffer-switch-to-scratch-and-clear ()
+  "Switch to the *scratch* buffer."
+  (interactive)
+  (scratch-buffer))
+
+(defun evilbuffer-toggle-truncate-line ()
+  "Toggle truncate line."
+  (interactive)
+  (if truncate-lines
+      ;; When the text is wrapped
+      (progn
+        ;; (visual-line-mode 1)
+        ;; (setq-local my-was-visual-line-fill-column-mode
+        ;;             (and (boundp 'my-was-visual-line-fill-column-mode)
+        ;;                  my-was-visual-line-fill-column-mode))
+        ;; (when my-was-visual-line-fill-column-mode
+        ;;   (visual-line-fill-column-mode)
+        ;;   (setq-local my-was-visual-line-fill-column-mode nil))
+        (let ((inhibit-message t))
+          ;; Wrap
+          (toggle-truncate-lines 0)))
+    ;; When the text is truncated
+    ;; (visual-line-mode -1)
+    ;; (when (and (boundp 'visual-line-fill-column-mode)
+    ;;            visual-line-fill-column-mode)
+    ;;   (visual-line-fill-column-mode -1)
+    ;;   (setq-local my-was-visual-line-fill-column-mode t))
+    (let ((inhibit-message t))
+      ;; Truncate
+      (toggle-truncate-lines 1))))
+
+(defun evilbuffer-erase ()
+  "Delete the entire contents of the current buffer, even if it is read-only."
+  (interactive)
+  (let ((buffer-name (buffer-name))
+        (inhibit-read-only t))
+    ;; when (yes-or-no-p "Are you sure you want to erase the buffer?")
+    (erase-buffer)
+
+    (cond
+     ((string-prefix-p "*Ollama" buffer-name)
+      (cond
+       ((derived-mode-p 'org-mode)
+        (insert "* "))
+
+       ((or (derived-mode-p 'markdown-ts-mode)
+            (derived-mode-p 'markdown-mode))
+        (insert "# ")))
+
+      (when (fboundp 'evil-insert-state)
+        (evil-insert-state))))))
+
+(defun my-clear-highlights ()
+  "Clear highlight and related state in the buffer."
+  ;; Clear lazy highlights
+  (lazy-highlight-cleanup)
+
+  ;; Clear Evil mode highlights
+  (when (fboundp 'evil-ex-nohighlight)
+    (evil-ex-nohighlight))
+
+  ;; Update font lock to clear new highlights after functions are evaluated
+  (when (and (bound-and-true-p font-lock-mode)
+             (fboundp 'font-lock-update))
+    (font-lock-update)))
+
+(defun evilbuffer-clear-highlights ()
+  "Clear."
+  (interactive)
+
+  (save-window-excursion
+    (save-excursion
+      (cond
+       ((string= (buffer-name) "*Messages*")
+        (when (y-or-n-p "Delete the content of the *Messages* buffer?")
+          (let ((inhibit-read-only t))
+            (erase-buffer))))
+
+       ;; For some reason,
+       (t
+        (unless (derived-mode-p 'embark-collect-mode)
+          ;; Do not clear highlights during `embark-collect-mode' to prevent
+          ;; disruptive color changes.
+          (my-clear-highlights))
+
+        ;; If the current character lacks a font-lock face, ensure the entire
+        ;; buffer is fontified. This addresses an Org mode issue where point is
+        ;; inside a source block, but the #+BEGIN_SRC line is above the window
+        ;; start and thus not yet fontified.
+        ;; (when (and (bound-and-true-p font-lock-mode)
+        ;;            (not (get-text-property (point) 'face)))
+        ;;   (font-lock-ensure))
+        )))))
+
+(defun my-evil-disable-remove-spaces ()
+  "Disable automatic removal of trailing spaces in `evil-mode'."
+  (setq-local evil-maybe-remove-spaces nil))
+
+(with-eval-after-load 'evil
+  ;;; Automatic removal of spaces
+  (add-hook 'evil-insert-state-entry-hook #'my-evil-disable-remove-spaces)
+
+  (define-key evil-normal-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
+  (define-key evil-insert-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
+  (define-key evil-visual-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
+  (with-eval-after-load 'messages-buffer-mode
+    (define-key messages-buffer-mode-map (kbd "C-l") #'evilbuffer-clear-highlights))
+
+  (define-key evil-normal-state-map (kbd "<leader>wr") #'evilbuffer-toggle-truncate-line)
+  (define-key evil-normal-state-map (kbd "<leader>eB") #'evilbuffer-erase)
+
+  ;; TODO patch evil: this should restore point with :restore-point t
+  (when (fboundp 'evil-fill-and-move)
+    (with-no-warnings
+      (evil-define-operator my-evil-fill-and-move-operator (beg end)
+        "Fill text and move point to the end of the filled region BEG and END.
+This enhancement prevents the cursor from moving."
+        :move-point nil
+        :type line
+        :restore-point t
+        (save-excursion
+          (evil-fill-and-move beg end))))
+    (define-key evil-normal-state-map "gq" 'my-evil-fill-and-move-operator))
+
+  ;; It seems to only work when declared as default
+  (defun my-setup-evil-mode ()
+    "Removed: `git-rebase-mode' erc-mode circe-server-mode circe-chat-mode."
+    ;; circe-query-mode sauron-mode
+    (dolist (mode '(vterm-mode
+                    eat-mode
+                    ;;custom-mode
+                    ;; eshell-mode
+                    ;; term-mode
+                    ))
+      (add-to-list 'evil-emacs-state-modes mode)))
+  (add-hook 'evil-mode-hook 'my-setup-evil-mode)
+
+  (when (daemonp)
+    (global-set-key (kbd "C-x C-c") 'my-save-buffers-kill-emacs))
+
+  (define-key evil-normal-state-map (kbd "C-q") 'my-save-buffers-kill-emacs)
+
+  ;; (evil-select-search-module 'evil-search-module 'evil-search)
+
+  ;; Make goto mark use ' to restore the column
+  (define-key evil-motion-state-map "`" 'evil-goto-mark-line)
+  (define-key evil-motion-state-map "'" 'evil-goto-mark)
+
+  ;; Useful to insert a quote instead of two quotes when packages such as electric quote are activated
+  (define-key evil-insert-state-map (kbd "C-\"") (lambda () (interactive) (insert "\"")))
+
+  (global-set-key (kbd "M-c") nil)  ;; Change the word to uppercase in Emacs
+  (global-set-key (kbd "M-v") nil)  ;; scroll the buffer up by one screenful
+  (global-set-key (kbd "M-z") nil)  ;; Zap to char (delete text from the current cursor position up to a specific character)
+
+  (define-key evil-insert-state-map (kbd "C-a") nil)
+  (define-key evil-insert-state-map (kbd "A-DEL") 'evil-delete-backward-word)
+  (define-key evil-insert-state-map (kbd "C-<Backspace>") 'evil-delete-backward-word)
+  (define-key evil-normal-state-map (kbd "gdp") 'delete-pair)
+  (define-key evil-normal-state-map (kbd "<leader>p") 'delete-pair)
+  (define-key evil-normal-state-map (kbd "<leader>k") 'describe-key)
+  (define-key evil-insert-state-map (kbd "C-e") 'move-end-of-line)
+  (define-key evil-insert-state-map (kbd "C-b") 'move-beginning-of-line)
+
+
+  (define-key evil-visual-state-map (kbd "u") 'ignore) ;; Disable lower/upper case region
+  (define-key evil-visual-state-map (kbd "U") 'ignore) ;; Disable lower/upper case region
+  (define-key evil-visual-state-map (kbd "C-c") 'evil-yank)
+
+  (define-key evil-normal-state-map (kbd "<leader>gs") 'global-text-scale-adjust)
+  (define-key evil-normal-state-map (kbd "<leader>cf") 'my-temporary-file)
+  (define-key evil-normal-state-map (kbd "<leader>ce") 'my-temporary-diff)
+  (define-key evil-normal-state-map (kbd "<leader>t")  'my-tab-split)
+  (define-key evil-normal-state-map (kbd "<leader>T")  'tab-bar-change-tab-group)
+  (define-key evil-normal-state-map (kbd "<leader>em") 'toggle-menu-bar-mode-from-frame)
+  (define-key evil-normal-state-map (kbd "<leader>ww") 'my-wip)
+  (define-key evil-normal-state-map (kbd "<leader>W")  'my-wip)
+
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "gs") #'evilbuffer-switch-to-scratch-and-clear))
+
+  ;; (when (fboundp 'my-dabbrev-completion-backwards)
+  ;;   (setq evil-complete-next-func #'my-dabbrev-completion-backwards))
+  ;;
+  ;; (when (fboundp 'my-dabbrev-completion-forward)
+  ;;   (setq evil-complete-previous-func #'my-dabbrev-completion-forward))
+  ;; TODO use cape-dabbrev
+  ;; (define-key evil-insert-state-map (kbd "C-p") #'my-dabbrev-completion-backwards)
+  ;; (define-key evil-insert-state-map (kbd "C-n") #'my-dabbrev-completion-forward)
+
+  (defun my-dabbrev-completion-forward-all-buffers (arg)
+    (with-no-warnings
+      (let ((dabbrev-check-all-buffers t))
+        (dabbrev-completion arg)))))
+
+(provide 'config)
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 
-(provide 'config)
+;;; evilwindow: split and select
+
+(defun evilwindow-split-and-select-new-window (split-direction)
+  "Split the window in the specified direction then switch to the new window.
+SPLIT-DIRECTION is the direction (v or h).
+By using this function, Emacs and Evil can mimic the behavior of Vim when the
+user presses Ctrl-w v and Ctrl-w s. It prohibits Emacs from altering the cursor
+position when the user presses Ctrl-v or Ctrl-s to create a new split and
+guarantees that the new window is selected, as in Vim."
+  ;; Save current buffer's cursor position and view
+  (when (and (fboundp 'evil-window-vsplit)
+             (fboundp 'evil-window-split))
+    (let ((buf (current-buffer))
+          (pos (point))
+          (view (window-start)))
+      ;; Split the window
+      (if (equal split-direction "v")
+          (evil-window-vsplit)
+        (evil-window-split))
+      ;; Restore cursor and view of previous window
+      (with-current-buffer buf
+        (goto-char pos)
+        (set-window-start nil view t))
+      ;; Go back to the previous window
+      ;; (other-window 1)
+      )))
+
+(defun evilwindow-split-select-below ()
+  "Split the window horizontally then switch to the new window."
+  (interactive)
+  (evilwindow-split-and-select-new-window "h"))
+
+(defun evilwindow-split-select-right ()
+  "Split the window vertically then switch to the new window."
+  (interactive)
+  (evilwindow-split-and-select-new-window "v"))
+
+(defun evilwindow-edit-fold-and-open-first-fold (file-path)
+  "Edit, fold, and open the first fold of FILE-PATH."
+  (when (and (fboundp 'kirigami-close-folds)
+             (fboundp 'kirigami-open-fold)
+             (fboundp 'evil-goto-line))
+    (let ((file-buffer (find-buffer-visiting file-path)))
+      (if file-buffer (switch-to-buffer file-buffer)
+        (find-file file-path)
+        (kirigami-close-folds)
+        (kirigami-open-fold)
+        (evil-goto-line 1)))))
+
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "C-w v") #'evilwindow-split-select-right)
+  (define-key evil-normal-state-map (kbd "C-w s") #'evilwindow-split-select-below))
+
+;;; Move region
+
+(defvar move-region-skip-invisible t)
+
+(defun move-region (n)
+  "Move the current region up or down by N lines."
+  ;; (interactive "r\np")
+  (interactive)
+  (when (use-region-p)
+    ;; (region-to-linewise-region)
+    (let ((start (region-beginning))
+          (end (region-end)))
+      ;; Exit visual state explicitly before performing the operation. If we
+      ;; do not do this, Evil will automatically restore the original point
+      ;; and mark after the command finishes, overriding any cursor movement
+      ;; or region updates made within the function.
+      (when (fboundp 'evil-exit-visual-state)
+        (evil-exit-visual-state))
+
+      (let ((line-text (delete-and-extract-region start end)))
+        (if move-region-skip-invisible
+            (forward-visible-line n)
+          (forward-line n))
+        (let ((start (point))
+              ;; (length-text (length line-text))
+              )
+          (insert line-text)
+          ;; (backward-char)
+
+          (setq end (point))
+          (set-mark end)
+
+          (goto-char start)
+
+          ;; Ensure that the region remains active after the command finishes.
+          ;; In Emacs, the variable `deactivate-mark` controls whether the
+          ;; region is deactivated automatically at the end of a command. By
+          ;; default, it is set to `t` by many interactive commands, which
+          ;; causes the region to be cleared after execution. Setting
+          ;; `deactivate-mark` to `nil` prevents this automatic deactivation.
+          ;; This is necessary even when `activate-mark` is called explicitly,
+          ;; because without setting `deactivate-mark` to `nil`, the region may
+          ;; appear briefly and then vanish immediately after the function
+          ;; returns, giving the false impression that the selection failed.
+          (setq deactivate-mark nil)
+          (activate-mark))))))
+
+(defun move-region-up (&rest _)
+  "Move the current line up by N lines."
+  (interactive)
+  (move-region -1))
+
+(defun move-region-down (&rest _)
+  "Move the current line down by N lines."
+  (interactive)
+  (move-region 1))
+
+(with-eval-after-load 'evil
+  (define-key evil-visual-state-map (kbd "M-j") #'move-region-down)
+  (define-key evil-visual-state-map (kbd "M-k") #'move-region-up))
 
 ;;; config.el ends here
