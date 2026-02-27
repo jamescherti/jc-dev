@@ -25,6 +25,38 @@
 
 ;;; Code:
 
+(defun my-path-inside-p (path1 path2)
+  "Check if PATH2 is inside PATH1."
+  (let ((absolute-path1 (file-truename path1))
+        (absolute-path2 (file-truename path2)))
+    (string-prefix-p absolute-path1 absolute-path2)))
+
+(defun my-code-checker-allowed-p (&optional file-name)
+  "Return t if code checking is allowed for current buffer or specified file.
+
+If FILE-NAME is provided and non-nil, use it as the filename. Otherwise, use the
+buffer's associated file name.
+
+Returns: boolean: t if code checking is allowed, nil otherwise."
+  (if (bound-and-true-p config-buffer-enable-syntax-checkers)
+      t
+    (let* ((file-name (if file-name
+                          file-name
+                        (buffer-file-name (buffer-base-buffer))))
+           (base-name (when file-name
+                        (file-name-nondirectory file-name))))
+      (when (and file-name
+                 base-name
+                 (not (string-match-p "cookiecutter" file-name))
+                 (not (string-match-p "/forks/" file-name))
+                 (not (string-prefix-p "tmp-" base-name))
+                 (my-path-inside-p "~/src" file-name)
+                 (not (my-path-inside-p "~/src/other" file-name))
+                 (not (string-suffix-p "/PKGBUILD" file-name))
+                 (not (string-suffix-p ".ebuild" file-name)))
+        (setq-local config-buffer-enable-syntax-checkers t)
+        t))))
+
 (defun my-disable-fringe-truncation-arrow ()
   "Disable the truncation arrow."
   (unless (boundp 'fringe-indicator-alist)

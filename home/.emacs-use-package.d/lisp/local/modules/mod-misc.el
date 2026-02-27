@@ -6,6 +6,14 @@
 ;;; Code:
 
 ;; put it back. problem with vterm TODO
+
+;;; Require
+
+(require 'my-defun)
+(require 'lightemacs-use-package)
+
+;;; Lazy loader
+
 (lightemacs-use-package lazy-loader
   :ensure nil
   :commands lazy-loader-mode
@@ -26,6 +34,7 @@
             (vterm-send-string "\n")
             (vterm-send-return))
           buf))))))
+
 ;;; Themes config
 
 (when (fboundp 'lightemacs-theme-create-loader)
@@ -568,6 +577,209 @@ environment for accurate linting."
 (lightemacs-use-package jinja2-mode
   :commands jinja2-mode
   :mode ("\\.j2\\'" . jinja2-mode))
+
+;;; org
+
+;; Must be evaluated before Org is loaded
+(with-eval-after-load 'org
+  (if (and (fboundp 'treesit-language-available-p)
+           (treesit-language-available-p 'yaml))
+      (push (cons "yaml" 'yaml-ts) org-src-lang-modes)
+    (push (cons "yaml" 'yaml) org-src-lang-modes)))
+
+(defun my-org-agenda-switch-to-todos ()
+  "Open the Org Agenda directly showing all TODO items."
+  (interactive)
+  (let ((buffer (get-buffer "*Org Agenda*")))
+    (if buffer
+        (switch-to-buffer buffer)
+      (org-agenda nil "t"))))
+
+(defun my-org-move-todo-before-first-done ()
+  "Move the current TODO heading down, right before the first DONE heading.
+If there are no DONE headings, it will be moved below all TODO headings
+at the same level."
+  (interactive)
+  (if (and (fboundp 'org-at-heading-p)
+           (fboundp 'org-back-to-heading)
+           (fboundp 'org-get-todo-state)
+           (fboundp 'org-forward-heading-same-level)
+           (fboundp 'org-move-subtree-down))
+      (progn
+        (unless (org-at-heading-p)
+          (org-back-to-heading t))
+
+        ;; Only execute if the current heading is an active TODO state
+        (when (member (org-get-todo-state) org-not-done-keywords)
+          (let ((moving t))
+            (while moving
+              (let ((is-next-done
+                     (save-excursion
+                       (if (org-forward-heading-same-level 1)
+                           (member (org-get-todo-state) org-done-keywords)
+                         'no-next))))
+                (if (or (eq is-next-done 'no-next) is-next-done)
+                    (setq moving nil)
+                  (org-move-subtree-down 1)))))))
+    (error "Org functions are not defined")))
+
+(defun my-org-todo-and-toggle ()
+  "Toggle the current Org mode item's TODO/DONE."
+  (interactive)
+  (when (and (fboundp 'org-todo)
+             (fboundp 'org-hide-entry)
+             (fboundp 'org-get-todo-state))
+    (let ((column (current-column)))
+      (save-excursion
+        (beginning-of-visual-line)
+        (let ((current-state (org-get-todo-state)))
+          (if (or (not current-state) (string= current-state "DONE"))
+              (org-todo "TODO")
+            (my-org-move-todo-before-first-done)
+            (org-todo "DONE")))
+        (org-hide-entry))
+
+      (move-to-column column))))
+
+;; TODO lightemacs?
+(defun my-org-capture-switch-insert ()
+  "Switch to insert mode on org capture."
+  (when (and (bound-and-true-p evil-local-mode)
+             (fboundp 'evil-insert-state))
+    (funcall 'evil-insert-state)))
+(add-hook 'org-capture-mode-hook #'my-org-capture-switch-insert)
+(with-eval-after-load 'org
+  ;; The function inserts a new heading at the current cursor position, and
+  ;; prepends it with "TODO " if activated while on a "TODO" task, thus creating
+  ;; a new to-do item. In addition to that, for those utilizing evil-mode the
+  ;; function transitions the user into insert mode right after the "TODO "
+  ;; insertion.
+  (defun my-org-insert-heading-respect-content-and-prepend-todo ()
+    "Insert a new org heading respecting content and prepend it with TODO.
+  Additionally, ensure entry into insert state when evil-mode is active."
+    (interactive)
+    (when (and (fboundp 'org-entry-is-todo-p)
+               (fboundp 'org-entry-is-done-p)
+               (fboundp 'org-insert-heading-respect-content))
+      (let ((entry-is-todo (org-entry-is-todo-p))
+            (entry-is-done (org-entry-is-done-p)))
+        (when (and (bound-and-true-p evil-local-mode)
+                   (fboundp 'evil-insert-state))
+          (funcall 'evil-insert-state))
+        (org-insert-heading-respect-content)
+        (when (or entry-is-todo entry-is-done)
+          (just-one-space)
+          (insert "TODO")
+          (just-one-space)))))
+
+  (define-key org-mode-map (kbd "C-<return>")
+              'my-org-insert-heading-respect-content-and-prepend-todo)
+
+  (define-key org-mode-map (kbd "C-c C-e") 'org-babel-execute-maybe)
+  (define-key org-mode-map (kbd "C-c C-c") 'org-edit-src-code)
+  (define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit)
+  (define-key org-mode-map (kbd "C-c C-d") 'my-org-todo-and-toggle)
+
+  (define-key org-mode-map (kbd "M-h") nil)
+
+  ;; (defun org-todo-and-close-fold ()
+  ;;   "Mark the current Org mode item as TODO and close its subtree."
+  ;;   (interactive)
+  ;;   (org-todo 'done)
+  ;;   (org-hide-entry))
+
+  (defun org-toggle-emphasis ()
+    "Toggle hiding/showing of org emphasize markers."
+    (interactive)
+    (if org-hide-emphasis-markers
+        (set-variable 'org-hide-emphasis-markers nil)
+      (set-variable 'org-hide-emphasis-markers t)))
+
+  ;; (custom-set-faces
+  ;;  ;; Face used for todo keywords that indicate DONE items.
+  ;;  '(org-done ((t (:strike-through t))))
+  ;;  ;; Face used to indicate that a headline is DONE. This face is only used if
+  ;;  ;; ‘org-fontify-done-headline’ is set. If applies to the part of the headline
+  ;;  ;; after the DONE keyword.
+  ;;  '(org-headline-done ((t (:strike-through t)))))
+
+  ;; (set-face-attribute 'org-done nil :strike-through t)
+  ;; (set-face-attribute 'org-headline-done nil :strike-through t)
+
+  (face-spec-set 'org-done
+                 '((t (:strike-through t))))
+
+  (face-spec-set 'org-headline-done
+                 '((t (:strike-through t)))))
+
+(defun my-org-capture-move-cursor-end-line ()
+  "Move cursor to end line."
+  (when (eq major-mode 'org-mode)
+    (end-of-line)))
+
+(when (fboundp 'my-org-capture-move-cursor-end-line)
+  (add-hook 'org-capture-before-finalize-hook
+            #'my-org-capture-move-cursor-end-line))
+
+(with-eval-after-load 'org-agenda
+  (define-key org-agenda-keymap (kbd "<tab>") #'ignore)
+  (defun my-org-agenda-goto-in-same-window ()
+    "`org-agenda-goto` that opens the target buffer in the current window."
+    (interactive)
+    (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+      (when (fboundp 'org-agenda-goto)
+        (funcall 'org-agenda-goto))))
+
+  (setq org-agenda-file-regexp (replace-regexp-in-string
+                                "\\\\\\.org" "\\\\.org\\\\(\\\\.gpg\\\\)?"
+                                org-agenda-file-regexp)))
+
+
+;;; Jenkinsfile
+(lightemacs-use-package jenkinsfile-mode
+  :commands jenkinsfile-mode
+  :mode
+  (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
+   ("/Jenkinsfile\\'" . jenkinsfile-mode))
+  :init
+  ;; (add-to-list 'auto-mode-alist '("/Jenkinsfile.*\\'" . jenkinsfile-mode))
+  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile[^/]*\\'" . jenkinsfile-mode))
+  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile\\'" . jenkinsfile-mode))
+  )
+
+;;; BASIC
+(lightemacs-use-package basic-mode
+  :commands (cp437-dos
+             basic-qb45-mode)
+  :init
+  ;; (setq default-buffer-file-coding-system 'cp437-dos)
+
+  ;; Djgpp and rhide
+  (add-to-list 'file-coding-system-alist '("\\.C\\'" . cp437-dos))
+  (add-to-list 'file-coding-system-alist '("\\.H\\'" . cp437-dos))
+
+  (add-to-list 'file-coding-system-alist '("\\.[bB][aA][sS]\\'" . cp437-dos))
+
+  ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC code." t)
+  (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
+
+;;; ansible-doc
+
+(lightemacs-use-package ansible-doc
+  :commands ansible-doc)
+
+;;; Lua
+
+(unless (my-treesit-language-available-p 'markdown)
+  (lightemacs-use-package lua-mode
+    :commands lua-mode
+    :mode
+    ("\\.lua\\'" . lua-mode)
+    ;; :init
+    ;; (add-hook 'lua-mode-hook
+    ;;           #'(lambda ()
+    ;;               (my-set-tab-width 3)))
+    ))
 
 ;;; Provide
 
