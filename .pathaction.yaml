@@ -30,9 +30,14 @@
 
 
 actions:
+  - path_match: "*.el"
+    shell: true
+    command: "./home/.bin/update-emacs-config"
+    tags:
+      - install
+
   - path_match: "*"
     shell: true
     command: "export JC_DEV_UNATTENDED=1; $(type -P so || echo '') ./install.sh"
     tags:
-      - main
       - install

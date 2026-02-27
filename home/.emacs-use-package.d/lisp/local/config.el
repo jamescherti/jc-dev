@@ -70,6 +70,19 @@
 
 (setq compile-angel-optimize-regexps t)
 
+(with-eval-after-load 'compile-angel
+  ;; (setq compile-angel-verbose t)
+  ;; (setq compile-angel-debug t)
+
+  ;; Exclusions
+  (push "/file-templates-auto/main.el" compile-angel-excluded-files)
+  (push "/tmp-file.el" compile-angel-excluded-files)
+  (push "/.dir-settings.el" compile-angel-excluded-files)
+
+  ;; This is important because Emacs loads the early-init.elc, even if it is
+  ;; older than the early-init.el file
+  (push "/early-init.el" compile-angel-excluded-files))
+
 ;; TODO test this more. It does not seem stable.
 ;; (setq package-quickstart t)
 (setq package-native-compile nil)
@@ -636,10 +649,158 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 ;;; lightemacs-user-post-init
 
+(defun my-setup-evil ()
+  ;; Make `v$` exclude the final newline
+  (setq evil-v$-excludes-newline t)
+
+  ;; Prevent Evil state from being echoed, preserving Eldoc display in the
+  ;; minibuffer (If set to t, Eldoc output in the minibuffer will be overridden)
+  (setq evil-echo-state nil)
+
+  ;; Enable automatic horizontal split below
+  (setq evil-split-window-below t)
+
+  ;; Enable automatic vertical split to the right
+  (setq evil-vsplit-window-right t)
+
+  ;; Enable fine-grained undo behavior
+  (setq evil-want-fine-undo t)
+
+  ;; Required by evil-collection
+
+  ;; Do not move cursor back when exiting insert state
+  (setq evil-move-cursor-back nil)
+
+  ;; Only complete in the current buffer
+  (setq evil-complete-all-buffers nil)
+
+  (setq evil-command-window-height 8)
+  (setq evil-display-shell-error-in-message nil)
+
+  ;; Controls whether evil-collection defines Vim-unimpaired-style keybindings
+  ;; (setq evil-collection-want-unimpaired-p nil)
+  (setq evil-collection-calendar-want-org-bindings t)
+
+  (setq tooltip-hide-delay 20) ;; seconds
+  (setq tooltip-delay 0.4)
+  (setq tooltip-short-delay 0.08)
+
+  ;; TODO is this good?
+  (setq mouse-wheel-progressive-speed nil) ; disable acceleration of scrolling
+  (setq mouse-wheel-scroll-amount
+        '(1
+          ((shift) . hscroll) ((meta))
+          ((control meta) . global-text-scale)
+          ((control) . text-scale)))
+
+  (setq inhibit-mouse-button-numbers '(1 2 3))
+  (setq pixel-scroll-precision-use-momentum nil)
+
+  )
+
 (defun lightemacs-user-post-init ()
   "This function is executed right before loading modules."
+  (my-setup-evil)
+
   ;; Ensure load-path is accurate even after installing packages
   (my-add-packages-to-load-path)
+
+  (setq user-full-name "user"
+        user-mail-address "user@domain.ext")
+
+  ;; Ignore X resources
+  (advice-add #'x-apply-session-resources :override #'ignore)
+
+  (with-eval-after-load 'ediff
+    (add-hook 'ediff-startup-hook 'ediff-next-difference)
+    (add-hook 'ediff-quit-hook #'(lambda()
+                                   (with-eval-after-load 'winner
+                                     (when (and (bound-and-true-p winner-mode)
+                                                (fboundp 'winner-undo))
+                                       (winner-undo))))))
+  (setq ediff-keep-variants t)  ; Do not kill ediff buffers
+  (setq ediff-make-buffers-readonly-at-startup nil)
+  (setq ediff-confirm-copy t)
+  (setq diff-default-read-only t)
+
+  ;; This mimics the Magit's diff format by making the hunk header less cryptic,
+  ;; and on GUI frames also displays insertion and deletion indicators on the
+  ;; left fringe (if it's available).
+  ;;
+  ;; This is better for patches.
+  (setq diff-font-lock-prettify t)
+
+  ;; Use reliable file-based syntax highlighting when available and hunk-based
+  ;; syntax highlighting otherwise as a fallback.
+  (setq diff-font-lock-syntax 'hunk-also)
+
+  ;; (setq diff-advance-after-apply-hunk t)
+
+  ;; This sometimes interacts poorly with the undo mechanism
+  ;; (setq diff-update-on-the-fly t)
+
+  ;; Set this to nil if you want to do it on demand, with my `agitate' package
+  ;; (setq diff-refine nil)
+
+  (add-hook 'diff-mode-hook #'outline-minor-mode)
+
+  (setq vertico-count 13)
+  (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
+                                         "\\`/[^/|:]+:" "\\.gpg\\'"))
+  (add-hook 'embark-collect-mode-hook
+            #'(lambda()
+                ;; TODO: What sets this to t?
+                (setq make-window-start-visible nil)
+                (my-disable-fringe-truncation-arrow)))
+
+  (add-hook 'embark-collect-mode-hook
+            (lambda ()
+              "Disable auto-hscroll in embark-collect buffers."
+              (setq-local auto-hscroll-mode nil)))
+
+  (with-eval-after-load 'consult
+    (setq consult-fd-args
+          (concat (if lightemacs--fdfind-executable
+                      lightemacs--fdfind-executable
+                    "fd")
+                  ;; This config
+                  " --type f"
+
+                  ;; Lightemacs
+                  " --hidden --exclude .git --absolute-path"
+                  (if (memq system-type '(cygwin windows-nt ms-dos))
+                      " --path-separator=/"
+                    "")
+
+                  ;; Default
+                  " --full-path --color=never")))
+
+  (add-hook 'text-mode-hook #'(lambda () (setq-local indent-tabs-mode nil)))
+
+  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook lisp-interaction-mode-hook))
+    (add-hook hook #'(lambda ()
+                       (display-fill-column-indicator-mode)
+                       (if (fboundp 'my-set-tab-width)
+                           (my-set-tab-width 2)
+                         (error "Undefined: my-set-tab-width")))))
+
+  (setq read-process-output-max (* 32 1024 1024))
+
+  (unless (display-graphic-p)
+    (xterm-mouse-mode 1))
+
+  (windmove-default-keybindings)
+
+  ;; Conflict with XFCE C-m-h
+  (global-unset-key (kbd "C-M-h"))
+  (global-unset-key (kbd "C-M-l"))
+  (global-set-key [next] #'ignore)
+  (global-set-key [prior] #'ignore)
+  (global-set-key (kbd "M-SPC") #'ignore)  ; Disable cycle spacing
+  (global-set-key (kbd "C-SPC") #'ignore)  ; Disable C-SPC mark
+  (global-set-key (kbd "<C-prior>") 'my-tab-previous)
+  (global-set-key (kbd "<C-next>") 'my-tab-next)
+  ;; (global-set-key (kbd "C-?") 'help-command)
 
   ;; Non-nil means show the equivalent keybinding when M-x has one.
   ;; The value can be a length of time to show the message for.
@@ -808,10 +969,253 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+  (setq savehist-autosave-interval 650)
+
+  (setq markdown-gfm-use-electric-backquote nil)
+  (setq markdown-heading-scaling t)
+  (with-eval-after-load 'markdown-mode
+    (define-key markdown-mode-map (kbd "TAB") #'ignore))
+
+  (setq grep-use-null-device nil
+        grep-use-null-filename-separator nil
+        grep-use-headings nil)
+  (with-eval-after-load 'le-core-cli-tools
+    (setq grep-command
+          (concat (if lightemacs--ripgrep-executable
+                      lightemacs--ripgrep-executable
+                    "rg")
+                  ;; Lightemacs
+                  " --hidden -g !.git -g !.svn -g !.hg"
+
+                  ;; Default
+                  " --null --line-buffered --color=never --max-columns=1000"
+                  " --path-separator / --smart-case --no-heading"
+                  " --with-filename --line-number --search-zip")))
+
+  (add-hook 'sh-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'bash-ts-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'yaml-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'yaml-ts-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'python-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'python-ts-mode-hook 'outline-indent-minor-mode)
+
+  (add-hook 'conf-mode-hook 'outline-minor-mode)
+  (add-hook 'js-mode-hook 'outline-minor-mode)
+  (add-hook 'js-ts-mode-hook 'outline-minor-mode)
+  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
+  (add-hook 'grep-mode-hook 'outline-minor-mode)
+  (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
+  (add-hook 'markdown-mode-hook 'outline-minor-mode)
+
+  (with-eval-after-load 'savehist
+    (setq savehist-autosave-interval 650)
+
+    (defvar my-savehist-additional-variables-added nil)
+
+    (unless my-savehist-additional-variables-added
+      (setq savehist-additional-variables
+            (append
+             savehist-additional-variables
+             '(;; Record of all interactive commands entered
+               command-history
+
+               ;; Preserve jump history (used for C-o / C-i)
+               ;; evil-jumps-history
+
+               ;; Custom
+               lightemacs-theme-name)))
+      (setq my-savehist-additional-variables-added t))
+
+    ;; Moved it here because it does not work from :hook
+    ;; TODO replace this with easysession or with custom le-theme
+    (add-hook 'savehist-mode-hook
+              #'(lambda()
+                  (when (fboundp 'lightemacs-load-default-theme)
+                    (lightemacs-load-default-theme)))))
+
+  (setq easysession-save-pretty-print t)
+  (setq easysession-switch-to-exclude-current t)
+  (setq easysession-save-interval (* 14 60))
+  (add-hook 'easysession-before-reset-hook #'(lambda()
+                                               ;; Save all with no questions
+                                               (save-some-buffers t)))
+  (defun my-easysession-only-main-saved ()
+    "Only save the main session."
+    (when (and (fboundp 'easysession-get-session-name)
+               (string= "main" (funcall 'easysession-get-session-name)))
+      t))
+  (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
+  (add-hook 'easysession-new-session-hook 'easysession-reset)
+
+  (setq flymake-start-on-flymake-mode (when (> (num-processors) 8) t))
+  ;; (setq flymake-no-changes-timeout (when (> (num-processors) 8) 0.8))
+  (setq flymake-no-changes-timeout 0.8)
+  (setq flymake-start-on-save-buffer t)  ;; Do not enable or it will enable it on save
+  (setq flymake-suppress-zero-counters t)
+
+  (add-hook 'grep-mode-hook #'hs-line-mode)
+  (with-eval-after-load 'icomplete
+    (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit))
+
+  ;; Modify all of them
+  ;; ORIGINAL:               "[-–!|#%;>*·•‣⁃◦ 	]*"
+  ;; This prevents fill from adding - to every new line
+  (setq adaptive-fill-regexp "[  !|#%;>*·•‣⁃◦   ]*")
+
+  ;; Display the current line and column numbers in the mode line
+  ;; Non-nil if searches and matches should ignore case.
+  ;; nil means case is significant.
+  (setq-default case-fold-search nil)
+
+  (setq persist-text-scale-handle-file-renames t)
+
+  (setq vterm-timer-delay 0.001)  ;; Only works when added after :config
+  (setq vterm-max-scrollback 1)
+
+  (setq eat-enable-yank-to-terminal t
+        eat-enable-directory-tracking t
+        eat-enable-shell-command-history t
+        eat-enable-shell-prompt-annotation t
+        eat-term-scrollback-size nil)
+  (add-hook 'eat-mode-hook
+            #'(lambda ()
+                (my-disable-fringe-truncation-arrow)
+                (display-line-numbers-mode -1)
+                (setq-local show-paren-mode nil)
+                (setq-local line-number-mode nil)
+                (setq-local column-number-mode nil)))
+  (with-eval-after-load 'eat
+    (with-eval-after-load 'evil-collection
+      (defun evil-collection-enable-eat-toggle-send-escape ()
+        (unless (bound-and-true-p evil-collection-eat-send-escape-to-eat-p)
+          ;; Hide "Sending ESC to eat."
+          (let ((inhibit-message t))
+            (when (fboundp 'evil-collection-eat-toggle-send-escape)
+              (funcall 'evil-collection-eat-toggle-send-escape)))))
+      (add-hook 'eat-mode-hook 'evil-collection-enable-eat-toggle-send-escape)))
+
+  (setq show-paren-mode nil)
+
+  (setq icomplete-separator "\n")
+  (setq icomplete-delay-completions-threshold 0)
+  (setq icomplete-compute-delay 0)
+  (setq icomplete-prospects-height 10)
+  (setq icomplete-hide-common-prefix nil)
+  (setq icomplete-with-completion-tables t)
+  (setq icomplete-show-matches-on-no-input t)
+  (setq icomplete-max-delay-chars 0)
+  (setq icomplete-tidy-shadowed-file-names t)
+
+  (add-hook 'emacs-lisp-mode-hook
+            #'(lambda()
+                (setq-local dabbrev-case-fold-search t)
+                (setq-local case-fold-search t)))
+
+  ;; Control whether dabbrev searches should ignore case.
+  ;; Any other non-nil version means case is not significant.
+  ;; nil means case is significant.
+  (setq dabbrev-case-fold-search nil)
+
+  ;; Whether dabbrev applies the abbreviations’s case pattern to the expansion.
+  ;; A value of nil means preserve the expansion’s case pattern.
+  (setq dabbrev-case-replace nil)
+
+  (setq dabbrev-check-all-buffers nil)
+
+  ;; It configures dabbrev (dynamic abbreviation expansion) to search only in the
+  ;; current buffer when expanding abbreviations, instead of searching in other
+  ;; buffers as well.
+  ;; (setq dabbrev-check-other-buffers t)  ;; Default t
+
+  ;; (dabbrev-abbrev-char-regexp "\\\\sw\\\\|\\\\s_")
+  ;; (dabbrev-ignored-buffer-names '("*Messages*" "*Ibuffer*"))
+  ;; (dabbrev-limit 1000)
+  (setq dabbrev-case-distinction nil)
+
+  (setq epg-gpg-program "gpg2")
+  ;; (setq epa-pinentry-mode 'loopback)  ;; Obsolete
+
+  (setq epa-file-name-regexp "\\.\\(gpg\\|asc\\)\\(~\\|\\.~[0-9]+~\\)?\\'")
+
+  ;; Manually update the handler alist to recognize the new extension immediately
+  (setq file-name-handler-alist
+        (cons (cons epa-file-name-regexp #'epa-file-handler)
+              file-name-handler-alist))
+
+  (setq large-file-warning-threshold (* 100 1024 1024))  ; 100 Mb
+
+  ;; Add ( and ) to modes such as yaml-ts-mode
+  (defvar original-electric-pair-pairs '((40 . 41)   ;; ( and ) for yaml-ts-mode
+                                         (123 . 125) ;; { and } for elisp
+                                         ;; (91 . 93) ;; [ and ]
+                                         ;; Default:
+                                         (34 . 34) ;; Double quote
+                                         (8216 . 8217)
+                                         (8220 . 8221)))
+
+  ;; comments
+  (defvar original-electric-pair-text-pairs '((40 . 41) ;; ( and ) for yaml-ts-mode
+                                              (123 . 125) ;; { and } for elisp
+                                              (96 . 96) ;; ` and ` for elisp comments (instead of `')
+                                              ;; (91 . 93) ;; [ and ]
+                                              ;; Default:
+                                              (34 . 34) ;; Double quote
+                                              (8216 . 8217)
+                                              (8220 . 8221)))
+
+  (setq electric-pair-text-pairs original-electric-pair-text-pairs)
+  (setq electric-pair-pairs original-electric-pair-pairs)
+
+  (setq which-key-idle-delay 1.5)
+
+  ;; It defines the "en_US" spell-check dictionary locally, telling Emacs to use
+  ;; UTF-8 encoding, match words using alphabetic characters, allow apostrophes
+  ;; inside words, treat non-alphabetic characters as word boundaries, and pass
+  ;; -d en_US to the underlying spell-check program.
+  (setq ispell-local-dictionary-alist
+        '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)))
+
+  ;; Configures Aspell's suggestion mode to "ultra", which provides more
+  ;; aggressive and detailed suggestions for misspelled words. The language
+  ;; is set to "en_US" for US English, which can be replaced with your desired
+  ;; language code (e.g., "en_GB" for British English, "de_DE" for German).
+  (setq ispell-extra-args '("--sug-mode=ultra"
+                            "--lang=en_US"))
+
+  ;; If non-nil, add correction to abbreviation table.
+  (setq flyspell-abbrev-p nil)
+  ;; (setq flyspell-use-global-abbrev-table-p t)
+
+  (with-eval-after-load 'flyspell
+    ;; Remove strings from Flyspell
+    (setq flyspell-prog-text-faces (delq 'font-lock-string-face
+                                         flyspell-prog-text-faces))
+
+    ;; Remove doc from Flyspell
+    (setq flyspell-prog-text-faces (delq 'font-lock-doc-face
+                                         flyspell-prog-text-faces)))
+
+  (setq ispell-program-name "aspell")
+  (setq ispell-local-dictionary "en_US")
+
+  (with-eval-after-load 'which-key
+    (when (bound-and-true-p which-key-buffer-name)
+      (add-to-list 'winner-boring-buffers which-key-buffer-name)))
+
+  (with-eval-after-load 'le-aggressive-indent
+    (add-hook 'lua-mode-hook 'aggressive-indent-mode))
+
   (my-update-package-pinned-packages my-package-pinned-packages)
 
   ;; Add them a second time just in case one of them gets installed
   (my-add-packages-to-load-path)
+
+  ;; Abbrev
+  (add-hook 'markdown-mode-hook #'abbrev-mode)
+  (add-hook 'markdown-ts-mode-hook #'abbrev-mode)
+  (add-hook 'org-mode-hook #'abbrev-mode)
+  (define-abbrev-table 'global-abbrev-table
+    '(("i" "I")))
 
   ;; For some reason, post-init ignores this sometimes
   ;; Similar to the default configuration, but without spaces surrounding pairs
@@ -844,6 +1248,609 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
            gcs-done))
 
 (add-hook 'emacs-startup-hook #'display-startup-time 200)
+
+;;; Ignored errors
+
+(add-to-list 'debug-ignored-errors 'search-failed)
+(add-to-list 'debug-ignored-errors 'invalid-read-syntax)  ; Wrong syntax (PDF)
+
+
+(add-to-list 'debug-ignored-errors "This function supports only emacs-lisp-mode")
+
+(add-to-list 'debug-ignored-errors "Cannot find a suitable checker")
+
+;; (add-to-list 'debug-ignored-errors "Attempt to delete the sole visible or iconified frame")
+
+(add-to-list 'debug-ignored-errors "Already at top level of the outline")
+
+(add-to-list 'debug-ignored-errors "This buffer cannot use ‘imenu-default-create-index-function’")
+
+;; Debugger entered--Lisp error: (permission-denied "Setting current directory"
+;; "Permission denied" "/dir/")
+(add-to-list 'debug-ignored-errors 'permission-denied)
+
+;; Debugger entered--Lisp error: (invalid-regexp "Unmatched [ or [^")
+;;   evil-ex-search-find-next-pattern(("[\"" t t) forward)
+;;   evil-ex-find-next(("[\"" t t) forward t)
+;;   evil-ex-search-full-pattern("[\"" nil forward)
+;;   evil-ex-start-search(forward nil)
+;;   evil-ex-search-forward(nil)
+;;   funcall-interactively(evil-ex-search-forward nil)
+;;   command-execute(evil-ex-search-forward)
+(add-to-list 'debug-ignored-errors 'invalid-regexp)
+
+;; Debugger entered--Lisp error: (error "Accessing an empty ring")
+;;   error("Accessing an empty ring")
+;;   ring-ref((0 0 . [nil nil nil nil nil nil nil nil nil nil]) 0)
+;;   evil-repeat(nil nil)
+;;   funcall-interactively(evil-repeat nil nil)
+;;   command-execute(evil-repeat)
+(add-to-list 'debug-ignored-errors "Accessing an empty ring")
+
+;; goto last change
+;; ----------------
+;; Debugger entered--Lisp error: (error "Negative arg: Cannot reverse as the
+;; first operation")
+;; error("Negative arg: Cannot reverse as the first operation")
+;; goto-last-change(-)
+;; goto-last-change-reverse(nil)
+;; evil-goto-last-change-reverse(nil)
+;; funcall-interactively(evil-goto-last-change-reverse nil)
+;; command-execute(evil-goto-last-change-reverse)
+(add-to-list 'debug-ignored-errors "Negative arg: Cannot reverse as the first operation")
+
+;; goto-chg
+(add-to-list 'debug-ignored-errors "Buffer has not been changed")
+
+;; Paredit
+(add-to-list 'debug-ignored-errors "Mismatched parenthesis depth")
+(add-to-list 'debug-ignored-errors "Mismatched character quotation")
+(add-to-list 'debug-ignored-errors "Mismatched comment state:")
+(add-to-list 'debug-ignored-errors "Mismatched string state:")
+
+;; Outline next/previous heading
+(add-to-list 'debug-ignored-errors 'outline-before-first-heading)  ;; (outline-back-to-heading) and (show-children)
+(add-to-list 'debug-ignored-errors "No previous same-level heading")
+(add-to-list 'debug-ignored-errors "No following same-level heading")
+
+(add-to-list 'debug-ignored-errors "Bad diff region number")
+
+;;; Other settings
+
+;; Control ^ = Control
+;; Command = Fn/Globe
+;; Fn/Globe = Command
+(setq mac-command-modifier 'control)
+(setq mac-option-modifier 'meta)
+
+;; Ignore local variables that are declared in files
+;; https://www.gnu.org/software/emacs/manual/html_node/elisp/File-Local-Variables.html
+;; Enable loading variables from .dir-locals.el
+;; (setq enable-local-variables :safe)
+(setq enable-local-variables nil)
+(setq enable-local-eval nil)
+
+;;; ibuffer
+
+(setq ibuffer-filter-group-name-face '(:inherit (success bold)))
+(setq
+ ;; ibuffer-hidden-filter-groups nil
+
+ ;; The number of hours before a buffer is considered "old".
+ ibuffer-old-time 5
+
+ ;; If non-nil, then forward and backwards movement commands cycle.
+ ibuffer-movement-cycle nil
+
+ ibuffer-show-empty-filter-groups nil
+
+ ;; If non-nil, don’t ask for confirmation of "dangerous" operations.
+ ibuffer-expert t
+
+ ;; If non-nil, summarize Ibuffer columns.
+ ibuffer-display-summary nil
+
+ ;; If non-nil, display Ibuffer in another window by default.
+ ;; ibuffer-use-other-window nil
+
+ ibuffer-use-header-line nil
+ ;; ibuffer-default-shrink-to-minimum-size t
+
+ )
+
+(with-eval-after-load 'ibuffer
+  (progn
+    ;; Add size
+    (define-ibuffer-column size-h
+      (:name "Size" :inline t)
+      (cond
+       ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+       ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+       (t (format "%8d" (buffer-size)))))
+
+    (setq ibuffer-formats
+          '((mark modified read-only " "
+                  (name 55 55 :left :nil) " "
+                  (size-h 9 -1 :right) " "
+                  (mode 16 16 :left :elide) " "
+                  filename-and-process))))
+
+  (add-hook 'ibuffer-mode-hook
+            (lambda ()
+              (require 'ibuf-ext)
+              (when (fboundp 'ibuffer-switch-to-saved-filter-groups)
+                (ibuffer-switch-to-saved-filter-groups "default"))))
+
+  (setq ibuffer-saved-filter-groups
+        (quote (("default"
+                 ("Org" (or (name . "^\\*Calendar\\*$")
+                            (name . "^\\*Org Agenda")
+                            (name . "^ \\*Agenda")
+                            (mode . org-mode)
+                            (name . "^diary$")
+                            (mode . muse-mode)
+                            (mode . org-mode)
+                            (mode . org-agenda-mode)))
+
+                 ("Emacs" (or
+                           (name . "^\\*scratch\\*$")
+                           (name . "^\\*Messages\\*$")
+                           (name . "^\\*Warnings\\*$")
+                           (name . "^\\*Async-native-compile-log\\*$")
+                           (name . "^\\*dashboard\\*$")
+                           (name . "^\\*compilation\\*$")
+                           (name . "^\\*Backtrace\\*$")
+                           (name . "^\\*Packages\\*$")
+                           (name . "^\\*Customize\\*$")
+                           (name . "^\\*\\(Echo\\|Minibuf\\)")))
+
+                 ("Help" (or (name . "^\\*Help\\*$")
+                             (name . "^\\*Apropos\\*$")
+                             (name . "^\\*info\\*$")
+                             (mode . Man-mode)
+                             (mode . woman-mode)))
+
+                 ("Repl" (or (mode . gnuplot-comint-mode)
+                             (mode . inferior-emacs-lisp-mode)
+                             (mode . inferior-python-mode)))
+
+                 ("Term" (or (mode . term-mode)
+                             (mode . shell-mode)
+                             (mode . vterm-mode)
+                             (mode . compilation-mode)
+                             (mode . eshell-mode)))
+
+                 ("VC" (or (mode . diff-mode)
+                           (derived-mode . log-view-mode)))
+
+                 ("Starred" (starred-name))
+
+                 ("Programming" (and (derived-mode . prog-mode)
+                                     (not (starred-name))))
+
+                 ("Text" (and (derived-mode . text-mode)
+                              (not (starred-name))))
+
+                 ("Dired" (or (mode . dired-mode)
+                              (mode . sr-mode)))
+
+                 ("Other" (name . ".*"))
+
+                 ;; (add-hook 'ibuffer-mode-hook
+                 ;;           (lambda ()
+                 ;;             (ibuffer-switch-to-saved-filter-groups "custom")
+                 ;;             (setq ibuffer-hidden-filter-groups nil)))
+
+                 ;; ("Conf" (or (mode . yaml-mode)
+                 ;;             (mode . yaml-ts-mode)
+                 ;;             (mode . conf-mode)))
+
+                 ;; ("Coq" (or
+                 ;;         (mode . coq-mode)
+                 ;;         (name . "\\<coq\\>")
+                 ;;         (name . "_CoqProject")))
+                 ;; ("code" (or (mode . emacs-lisp-mode)
+                 ;;             (mode . yaml-mode)
+                 ;;             (mode . yaml-ts-mode)
+                 ;;             (mode . cperl-mode)
+                 ;;             (mode . c-mode)
+                 ;;             (mode . java-mode)
+                 ;;             (mode . idl-mode)
+                 ;;             (mode . web-mode)
+                 ;;             (mode . lisp-mode)
+                 ;;             (mode . js2-mode)
+                 ;;             (mode . c++-mode)
+                 ;;             (mode . lua-mode)
+                 ;;             (mode . cmake-mode)
+                 ;;             (mode . ruby-mode)
+                 ;;             (mode . css-mode)
+                 ;;             (mode . objc-mode)
+                 ;;             (mode . sql-mode)
+                 ;;             (mode . python-mode)
+                 ;;             (mode . php-mode)
+                 ;;             (mode . sh-mode)
+                 ;;             (mode . json-mode)
+                 ;;             (mode . scala-mode)
+                 ;;             (mode . go-mode)
+                 ;;             (mode . erlang-mode)))
+
+                 ;; ("Unsaved" (modified))
+                 ;; ("erc" (mode . erc-mode))
+                 ;; ("Browser" (or (mode . eww-mode)
+                 ;;                (mode . xwidget-webkit-mode)))
+                 ;; ("Mail" (or (mode . mail-mode)
+                 ;;             (mode . message-mode)
+                 ;;             (derived-mode . gnus-mode)))
+                 ;; ("Dict" (or (mode . fanyi-mode)
+                 ;;             (mode . dictionary-mode)))
+                 ;; ("Magit" (or (mode . magit-repolist-mode)
+                 ;;              (mode . magit-submodule-list-mode)
+                 ;;              (mode . git-rebase-mode)
+                 ;;              (derived-mode . magit-section-mode)
+                 ;;              (mode . vc-annotate-mode)))
+                 ;; ("IRC" (or (mode . rcirc-mode)
+                 ;;            (mode . erc-mode)))
+
+                 ;; ("gnus" (or (mode . message-mode)
+                 ;;             (mode . bbdb-mode)
+                 ;;             (mode . mail-mode)
+                 ;;             (mode . gnus-group-mode)
+                 ;;             (mode . gnus-summary-mode)
+                 ;;             (mode . gnus-article-mode)
+                 ;;             (name . "^\\.bbdb$")
+                 ;;             (name . "^\\.newsrc-dribble")))
+                 )))))
+
+;;; C-g
+
+;; NOTE: Issue. When I press C-g while selecting text, it moves the cursor
+(defun my/keyboard-quit-dwim ()
+  "Do-What-I-Mean behaviour for a general `keyboard-quit'.
+
+The generic `keyboard-quit' does not do the expected thing when
+the minibuffer is open.  Whereas we want it to close the
+minibuffer, even without explicitly focusing it.
+
+The DWIM behaviour of this command is as follows:
+
+- When the region is active, disable it.
+- When a minibuffer is open, but not focused, close the minibuffer.
+- When the Completions buffer is selected, close it.
+- In every other case use the regular `keyboard-quit'."
+  (interactive)
+  (cond
+   ((region-active-p)
+    (keyboard-quit))
+   ((derived-mode-p 'completion-list-mode)
+    (delete-completion-window))
+   ((> (minibuffer-depth) 0)
+    (abort-recursive-edit))
+   (t
+    (keyboard-quit))))
+
+(define-key global-map (kbd "C-g") #'my/keyboard-quit-dwim)
+
+;;; Setup scratch
+
+(defvar-local my-scratch-setup-done nil)
+
+(defun my-setup-scratch-buffer ()
+  "Setup the scratch buffer."
+  (let ((buffer (get-buffer "*scratch*")))
+    (when (buffer-live-p buffer)
+      (with-current-buffer buffer
+        (unless my-scratch-setup-done
+          (setq my-scratch-setup-done t)
+          (setq fill-column 60))))))
+
+(advice-add 'scratch-buffer :after #'my-setup-scratch-buffer)
+
+;;; Display line numbers
+
+(defun my-setup-display-line-numbers-mode ()
+  "Setup `display-line-numbers-mode'."
+  (cond
+   ((or (derived-mode-p 'markdown-mode)
+        (derived-mode-p 'org-mode))
+    (setq-local display-line-numbers-type 'relative)
+    (display-line-numbers-mode 1))
+
+   (t
+    ;; (setq-local display-line-numbers-type 'visual)
+    (display-line-numbers-mode 1))))
+
+;; TODO replace add hook with add-hook-text-editing-modes
+;; (add-hook-text-editing-modes 'my-setup-display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'my-setup-display-line-numbers-mode)
+(add-hook 'text-mode-hook #'my-setup-display-line-numbers-mode)
+(add-hook 'conf-mode-hook #'my-setup-display-line-numbers-mode)
+
+(add-hook 'helpful-mode-hook #'my-setup-display-line-numbers-mode)
+(add-hook 'dired-mode-hook #'my-setup-display-line-numbers-mode)
+(add-hook 'org-agenda-mode-hook #'my-setup-display-line-numbers-mode)
+
+;; TODO
+;; (setq lightemacs-display-line-numbers-mode-target-hooks nil)
+
+;; Use absolute numbers; 'relative and 'visual are significantly slower
+;; t=absolute
+;; (setq-default display-line-numbers-type t)
+(setq-default display-line-numbers-type 'visual)
+(setq display-line-numbers-grow-only t)  ; t is slow. Use nil.
+(setq display-line-numbers-current-absolute nil)  ;; t=line num / nil=0
+
+;;; Sync dictionary
+
+;; Silence: Truncate long lines disabled
+;; TODO: Should we execute it after inserting anything in the speller
+(defun run-sync-spell-dict-if-exists ()
+  "Run sync-spell-dict command if it exists."
+  (when (executable-find "sync-spell-dict")
+    (shell-command "sync-spell-dict >/dev/null 2>&1 & disown")))
+
+(add-hook 'kill-emacs-hook 'run-sync-spell-dict-if-exists)
+
+;;; apheleia
+
+(with-eval-after-load 'apheleia
+  (setq apheleia-mode-alist nil)
+  (setq apheleia-formatters nil)
+
+  ;; Elisp
+  (setf (alist-get 'lisp-indent apheleia-formatters)
+        'apheleia-indent-lisp-buffer)
+  (setf (alist-get 'emacs-lisp-mode apheleia-mode-alist) 'lisp-indent)
+
+  ;; Bash shell scripts
+  (setf (alist-get 'shfmt apheleia-formatters)
+        '("shfmt" "--binary-next-line"
+          "-filename" filepath
+          (when (and apheleia-formatters-respect-indent-level
+                     (boundp 'sh-basic-offset))
+            (list "-i" (number-to-string sh-basic-offset)))
+          "-"))
+
+  ;; Python
+  (setf (alist-get 'autopep8 apheleia-formatters)
+        '("autopep8"
+          "--max-line-length=79"
+          "--aggressive"
+          ;; "--aggressive"
+          "-"))
+  (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
+
+
+  (setf (alist-get 'bash-ts-mode apheleia-mode-alist) '(shfmt))
+  (setf (alist-get 'sh-mode apheleia-mode-alist) '(shfmt))
+
+  (setf (alist-get 'python-mode apheleia-mode-alist) '())
+  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '())
+  (setf (alist-get 'python-mode apheleia-mode-alist) '(isort autopep8))
+  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8))
+  )
+
+;;; Elisp
+
+(defun better-jump--setup-imenu-elisp ()
+  "Setup imenu."
+  (setq-local imenu-generic-expression
+              (cl-remove-if (lambda (item)
+                              (or (string= (car item) "Packages")
+                                  (string= (car item) "Variables")
+                                  (string= (car item) "Types")))
+                            imenu-generic-expression)))
+
+(add-hook 'emacs-lisp-mode-hook #'better-jump--setup-imenu-elisp)
+
+;;; vterm settings
+
+;; TODO lightemacs?
+(defun my-setup-vterm ()
+  "Better evil integration with `vterm'."
+  ;; https://www.reddit.com/r/emacs/comments/xyo2fo/orgmode_vterm_tmux/
+  ;; With the first line, you can use a binding like `M-SPC ESC` (`M-SPC`
+  ;; being the default alt-leader key) to switch the vterm buffer to evil
+  ;; normal state. Most of the time I don't use it, and simply interact with
+  ;; the vterm the same exact way I do with any other terminal.
+  (with-eval-after-load 'evil-collection
+    (when (and (not (bound-and-true-p evil-collection-vterm-send-escape-to-vterm-p))
+               (fboundp 'evil-collection-vterm-toggle-send-escape))
+      (let ((inhibit-message t))
+        ;; TODO add shut-up back?
+        (evil-collection-vterm-toggle-send-escape))))
+
+  (setq-local line-number-mode nil)
+  (setq-local column-number-mode nil)
+  (setq-local cursor-type 'bar)
+  (setq mode-line-format nil)
+
+  (when-let* ((proc (get-buffer-process (current-buffer))))
+    (set-process-query-on-exit-flag proc nil)))
+
+(with-eval-after-load 'evil
+  (add-to-list 'evil-emacs-state-modes 'vterm-mode))
+
+(add-hook 'vterm-mode-hook 'my-setup-vterm)
+
+(setq vterm-clear-scrollback-when-clearing t)
+
+(setq vterm-max-scrollback 100)
+;; (setq vterm-set-bold-hightbright t)
+;; (setq vterm-disable-bold t)
+;; (setq vterm-copy-exclude-prompt t)
+;; "C-x" "C-c" "C-g"
+(setq vterm-keymap-exceptions '("M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
+(setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
+
+(defun my-vterm--send-Alt-Shift-H ()
+  "Send Alt Shift H to vterm."
+  (interactive)
+  (when (fboundp 'vterm-send-key)
+    (vterm-send-key (kbd "H") t t)))
+
+(defun my-vterm--send-Alt-Shift-L ()
+  "Send Alt Shift L to vterm."
+  (interactive)
+  (when (fboundp 'vterm-send-key)
+    (vterm-send-key (kbd "L") t t)))
+
+;;; server
+
+(setq server-client-instructions nil)
+(unless (daemonp)
+  (add-hook 'lightemacs-after-init-hook #'server-start))
+
+;;; mode line
+
+(setq line-number-mode t)
+(setq column-number-mode t)
+(setq mode-line-position-column-line-format '("%l:%C"))
+(setq mode-line-percent-position nil)
+
+;;; Modeline
+(add-hook 'lightemacs-after-init-hook #'display-time-mode)
+(setq display-time-mail-function #'ignore)
+(setq display-time-mail-string "")
+(setq display-time-mail-directory nil)
+(setq display-time-use-mail-icon nil)
+(setq display-time-mail-face nil)
+(setq display-time-format " %Y-%m-%d  %I:%M %p")
+
+(defun mode-line-right ()
+  "Render the `mode-line-right-format'."
+  (let* ((mode-line-right-format '(mode-line-front-space
+                                   mode-line-misc-info
+                                   mode-line-end-spaces))
+         (formatted-line (format-mode-line mode-line-right-format)))
+    (list (propertize
+           " "
+           'display
+           `(space :align-to (+ 2
+                                (- right
+                                   (+ ,(string-width formatted-line) right-fringe
+                                      right-margin)))))
+          formatted-line)))
+
+(defun my-gc-cons-threshold-mode-line ()
+  "Return a short string with the current `gc-cons-threshold`."
+  (format " GC:%s" (cond
+                    ((= gc-cons-threshold most-positive-fixnum) "∞")
+                    (t (format "%sM" (/ gc-cons-threshold 1000000))))))
+
+(setq-default mode-line-format
+              '("%e"
+                mode-line-front-space
+                mode-line-modified
+                "  |  "
+                mode-line-buffer-identification
+                "  |  "
+                (vc-mode vc-mode)
+                (:eval
+                 (let ((project-name (my-project-name)))
+                   (format "  |  Project:%s" (my-project-name))))
+                "  |  "
+                mode-line-position
+                "  |  "
+                (:eval (my-gc-cons-threshold-mode-line))
+                ;; mode-line-modes
+                ;; Slow eval
+                (:eval (mode-line-right))))
+
+;;; flymake fixes
+
+;; TODO: Should this fail silently? (Patch Emacs)
+(defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
+  "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
+
+ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
+ARGS are the arguments passed to ORIG-FUN.
+
+If the error message contains \"find a suitable init function\", it is
+ignored and logged as a warning. All other errors are re-raised."
+  (condition-case err
+      (apply orig-fun args)
+    ((error)
+     (let ((error-message (error-message-string err)))
+       (if (string-match-p "find a suitable init function"
+                           error-message)
+           (let ((inhibit-message t))
+             (message "[WARNING] Flymake: %s: %s"
+                      buffer-file-name
+                      error-message))
+         (signal (car err) (cdr err)))))))
+
+(with-eval-after-load 'flymake-proc
+  (advice-add 'flymake-proc-legacy-flymake :around
+              #'my-flymake-proc-legacy-safe-advice))
+
+;;; Always current window
+
+(defun current-window-only--setup-display-buffer-alist ()
+  "Setup display buffer alist."
+  ;; (add-to-list 'display-buffer-alist '("\\*vc-diff\\*"
+  ;;                                      (display-buffer-same-window)))
+
+  ;; (add-to-list 'display-buffer-alist '("\\*vc-change-log\\*"
+  ;;                                      (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*Man"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*eat"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*Memory-Report\\*"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*helpful"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*Backtrace\\*"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*\\(Help\\|eldoc\\)\\*"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*[Hh]elp:"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*edit-indirect "
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*Proced\\*"
+                                       (display-buffer-same-window)))
+
+  ;; (add-to-list 'display-buffer-alist '("\\magit:"
+  ;;                                      (display-buffer-same-window)))
+
+  ;; This uses compile-goto-error
+  (add-to-list 'display-buffer-alist '("\\*Embark Export"
+                                       (display-buffer-same-window))))
+
+(defun always-current-window---display-buffer-from-compilation-p (_buffer-name _action)
+  "Display buffer from compilation."
+  (unless current-prefix-arg
+    (with-current-buffer (window-buffer)
+      (derived-mode-p 'compilation-mode))))
+
+(defun current-window-only-setup ()
+  "Make Emacs only use the current window."
+  ;; org-mode
+  (setq org-src-window-setup 'current-window) ;; Edit source in current window
+  (setq org-agenda-window-setup 'current-window)
+
+  ;; Open links in help windows (like links to files) in the current window
+  (setq help-window-keep-selected t)
+
+  ;; Compilation buffers. Also used by wgrep buffers / Embark export.
+  ;; (push '(always-current-window---display-buffer-from-compilation-p
+  ;;         display-buffer-same-window
+  ;;         (inhibit-same-window . nil))
+  ;;       display-buffer-alist)
+
+  (current-window-only--setup-display-buffer-alist))
+
+(current-window-only-setup)
 
 ;;; Local variables
 
