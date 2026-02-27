@@ -206,6 +206,20 @@ main() {
 
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     "$SCRIPT_DIR/data/settings/update-mimetypes.py"
+
+    "$SCRIPT_DIR/home/.bin/update-emacs-config"
+    "$SCRIPT_DIR/home/.bin/update-project-list"
+    mkdir -p ~/.local/share/applications/
+    {
+      echo "[Desktop Entry]"
+      echo "Name=x-startup-apps"
+      echo "Comment=x-startup-apps"
+      echo "Keywords=x-startup-apps"
+      echo "Exec=$HOME/.bin/xdevenv startup-apps"
+      echo "Icon=org.gnome.ArchiveManager"
+      echo "Type=Application"
+      echo "StartupNotify=false"
+    } >"$HOME/.config/autostart/x-startup-apps.desktop"
   fi
 
   # JC-DOTFILES
@@ -273,6 +287,11 @@ main() {
 
   "$SCRIPT_DIR/home/.bin/update-emacs-config"
   "$SCRIPT_DIR/home/.bin/update-project-list"
+  
+  # Fixes the issue where the terminal session is corrupt because of gpg agent
+  # gpgconf --kill gpg-agent || :
+  # pkill -x gpgconf || :
+  # pkill -x gpg-agent || :
 
   echo
   echo Success.
