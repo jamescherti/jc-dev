@@ -87,6 +87,9 @@
                            le-group-evil
                            le-persist-text-scale
 
+                           le-undo-fu
+                           le-undo-fu-session
+
                            ;; le-consult-dir
                            le-consult
                            ;; le-embark-consult
