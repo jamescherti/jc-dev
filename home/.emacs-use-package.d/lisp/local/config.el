@@ -67,11 +67,13 @@
 ;; compile-angel-native-compile-load is t
 (setq lightemacs-load-compiled-init-files t)
 
-(setq lightemacs-optional-modules '(mod-misc2
-                                    mod-defun
-                                    mod-evil
-                                    mod-better-vc
-                                    mod-org))
+(setq lightemacs-optional-modules '(
+                                    ;; mod-misc2
+                                    ;; mod-defun
+                                    ;; mod-evil
+                                    ;; mod-better-vc
+                                    ;; mod-org
+                                    ))
 
 (setq lightemacs-recentf-track-switch-to-buffer t)
 
@@ -494,11 +496,11 @@
                            ;; le-display-line-numbers  ;; mod-misc provides its own
 
                            ;; Legacy (DEPRECATED)
-                           mod-defun
-                           mod-misc2
-                           mod-evil
-                           mod-better-vc
-                           mod-org
+                           ;; mod-defun
+                           ;; mod-misc2
+                           ;; mod-evil
+                           ;; mod-better-vc
+                           ;; mod-org
 
                            ;; New
                            mod-misc  ; misc=begin
