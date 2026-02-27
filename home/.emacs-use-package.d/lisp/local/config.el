@@ -307,11 +307,8 @@
 (when (boundp 'trusted-content)
   (let ((dirs
          (list
-          ;; TODO Both paths?
-          "~/src/dotfiles/jc-dev"
-          (expand-file-name "~/src/dotfiles/jc-dev")
-          "~/src/emacs/"
-          (expand-file-name "~/src/emacs/"))))
+          "~/src/dotfiles/jc-dev/"
+          "~/src/emacs/")))
     (dolist (dir dirs)
       (when dir
         ;; Ensure the path ends with a slash so it registers as a directory
@@ -712,6 +709,15 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
   (setq inhibit-mouse-button-numbers '(1 2 3))
   (setq pixel-scroll-precision-use-momentum nil))
 
+(defun my-set-tab-width (width)
+  "Set the tab width.
+WIDTH is the tab width."
+  (setq-local indent-tabs-mode nil)
+  (setq-local tab-width width)
+  (setq-local standard-indent width)
+  ;; (setq-local evil-shift-width width)
+  )
+
 (defun my-setup-filetype ()
   "Setup filetype."
   (add-to-list 'auto-mode-alist '("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode))
@@ -796,6 +802,43 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+  ;; Prevent yasnippet from highlighting inserted fields, you need to modify the
+  ;; display face that it uses for overlays. This is done by changing the
+  ;; attributes of yas-field-highlight-face.
+  (defun my-clear-yasnippet-field-highlight (&rest _args)
+    "Clear yasnippet field highlight face to keep original syntax highlighting."
+    (when (facep 'yas-field-highlight-face)
+      (set-face-attribute 'yas-field-highlight-face nil
+                          :inherit 'unspecified
+                          :background 'unspecified
+                          :foreground 'unspecified
+                          :box 'unspecified
+                          :underline 'unspecified)))
+  ;; Apply the fix whenever a theme is loaded
+  (advice-add 'load-theme :after #'my-clear-yasnippet-field-highlight)
+  ;; Ensure it also applies when yasnippet is first loaded
+  (add-hook 'yas-minor-mode-hook #'my-clear-yasnippet-field-highlight)
+
+  (setq yas-snippet-dirs '())
+  (add-to-list 'yas-snippet-dirs
+               (expand-file-name "yasnippet/snippets" "~/.emacs-data/etc"))
+  (add-to-list 'yas-snippet-dirs
+               (expand-file-name "yasnippet/snippets-auto" "~/.emacs-data/etc"))
+
+  (with-eval-after-load 'yasnippet
+    ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
+    (define-key yas-minor-mode-map (kbd "C-f") 'yas-expand)
+
+    (setq yas-prompt-functions '(yas-no-prompt))  ; Do not ask the user
+
+    ;; (add-to-list 'yas-snippet-dirs
+    ;;              (expand-file-name "yasnippet/snippets" emacs-var-dir))
+    ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
+
+    ;; (define-key yas-keymap (kbd "RET") (yas-filtered-definition
+    ;;                                     'yas-next-field-or-maybe-expand))
+
+    )
 
   (setq hs-hide-comments-when-hiding-all nil)
   (setq hs-isearch-open t)  ;; Open both comments and code
@@ -2333,6 +2376,37 @@ ignored and logged as a warning. All other errors are re-raised."
         (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")))
 
+;;; markdown toc
+
+;;; Markdown
+
+(defun my-markdown-toc-gen-if-present ()
+  "Gen table of contents if present."
+  (when (and (fboundp 'markdown-toc--toc-already-present-p)
+             (fboundp 'markdown-toc-generate-toc)
+             (funcall 'markdown-toc--toc-already-present-p))
+    ;; atomic-change-group in Emacs creates a temporary “transaction” for buffer
+    ;; modifications: all changes made inside the group are treated as a single,
+    ;; atomic operation for undo purposes. This means that if the group
+    ;; completes successfully, all modifications are merged into one undo step,
+    ;; so pressing undo will revert everything in the group at once instead of
+    ;; step by step. If an error occurs inside the group, the changes are
+    ;; automatically rolled back, leaving the buffer unchanged. It also ensures
+    ;; that point and mark positions are preserved unless explicitly modified,
+    ;; which is why it’s useful for functions like markdown-toc-generate-toc
+    ;; where you want the buffer updated without losing your cursor location.
+    (atomic-change-group
+      (funcall 'markdown-toc-generate-toc))))
+
+(defun my-setup-markdown-toc ()
+  "Setup the markdown-toc package."
+  (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t))
+
+(when (fboundp 'my-setup-markdown-toc)
+  (add-hook 'gfm-mode-hook #'my-setup-markdown-toc)
+  (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-toc)
+  (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
+
 ;;; hideshow
 
 (with-eval-after-load 'hideshow
@@ -2373,6 +2447,56 @@ ignored and logged as a warning. All other errors are re-raised."
                            display-string)
         (overlay-put ov 'display display-string))))
   (setq hs-set-up-overlay 'display-code-line-counts))
+
+;;; auto insert if new file
+
+;; This is called by main.el
+(defun my/autoinsert-yas-expand()
+  "Replace text with Yasnippet template."
+  (when (fboundp 'yas-expand-snippet)
+    (condition-case nil
+        (progn
+          (funcall 'yas-expand-snippet (buffer-string) (point-min) (point-max))
+          (when (and (not (bobp))
+                     (fboundp 'evil-insert-state)
+                     (not (zerop (buffer-size))))
+            (evil-insert-state)))
+      (error
+       nil))))
+
+(defun my-auto-insert-if-new-file ()
+  "Auto-insert template only if the file is newly created and does not exist."
+  (when-let* ((file-name (buffer-file-name (buffer-base-buffer))))
+    (when (and (not (file-exists-p file-name))
+               (= (buffer-size) 0))
+      ;; Execute the default auto-insert function or custom logic here. For
+      ;; simplicity, we invoke `auto-insert` directly.
+      (condition-case nil
+          (progn
+            (when (bound-and-true-p yas-minor-mode) (auto-insert)))
+        ;; Ignore errors
+        (error
+         nil)))))
+
+(defun config-template-system ()
+  "Configure the template system."
+  ;; Add the custom function to `find-file-hook`
+  (add-hook 'find-file-hook 'my-auto-insert-if-new-file)
+
+  ;; :config
+  (let ((template-elisp-file (expand-file-name "main.el"
+                                               auto-insert-directory)))
+    (let ((inhibit-message t))
+      (load template-elisp-file :no-error :no-message))))
+
+(setq auto-insert 'other)
+(setq auto-insert-query nil)
+(setq auto-insert-alist nil)  ;; Will be changed by template-elisp-file
+(setq auto-insert-directory (expand-file-name "file-templates-auto/"
+                                              "~/.emacs-data/etc")) ;;; Or use custom, *NOTE* Trailing slash important
+(setq auto-insert-query nil) ;;; If you don't want to be prompted before insertion
+
+(add-hook 'lightemacs-after-init-hook 'config-template-system)
 
 ;;; Local variables
 

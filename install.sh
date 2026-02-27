@@ -243,11 +243,19 @@ config-startup-apps() {
 }
 
 config-lightemacs() {
-  git_clone \
-    https://github.com/jamescherti/lightemacs \
-    "$GIT_CLONE_DIR/lightemacs"
-  cd "$GIT_CLONE_DIR/lightemacs"
-  git checkout develop
+  if [[ -f ~/src/emacs/lightemacs/ ]]; then
+    cd ~/src/emacs/lightemacs/
+    if git-is-clean; then
+      git checkout develop
+      git pull --rebase
+    fi
+  else
+    git_clone \
+      https://github.com/jamescherti/lightemacs \
+      "$GIT_CLONE_DIR/lightemacs"
+    cd "$GIT_CLONE_DIR/lightemacs"
+    git checkout develop
+  fi
 
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     "$SCRIPT_DIR/home/.bin/update-emacs-config"
