@@ -498,6 +498,7 @@ This enhancement prevents the cursor from moving."
 
 (defun my-go-home ()
   "Go home."
+  (interactive)
   (if (fboundp 'my-wip)
       (my-wip)
     (find-file "~/")))
