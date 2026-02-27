@@ -5,6 +5,17 @@
 
 ;;; Code:
 
+(defun my-disable-fringe-truncation-arrow ()
+  "Disable the truncation arrow."
+  (unless (boundp 'fringe-indicator-alist)
+    (error "The fringe-indicator-alist was not declared"))
+  (setq fringe-indicator-alist
+        (seq-remove (lambda (item)
+                      (memq (car item) '(truncation continuation)))
+                    fringe-indicator-alist))
+  (push '(continuation nil nil) fringe-indicator-alist)
+  (push '(truncation nil nil) fringe-indicator-alist))
+
 (defun my-treesit-language-available-p (language)
   "Check if `treesit-ready-p' exists.
 LANGUAGE is the programming language."

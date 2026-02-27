@@ -807,29 +807,6 @@ WIDTH is the tab width."
     (add-hook 'sh-mode-hook #'setup-sh-mode)
     (add-hook 'bash-ts-mode-hook #'setup-sh-mode)))
 
-;; (defun my-disable-fringe-truncation-arrow ()
-;;   "Disable the truncation arrow."
-;;   (unless (boundp 'fringe-indicator-alist)
-;;     (error "The fringe-indicator-alist was not declared"))
-;;   (setq fringe-indicator-alist
-;;         (cl-remove-if (lambda (item)
-;;                         (memq (car item) '(truncation
-;;                                            continuation)))
-;;                       fringe-indicator-alist))
-;;   (push '(continuation nil nil) fringe-indicator-alist)
-;;   (push '(truncation nil nil) fringe-indicator-alist))
-
-(defun my-disable-fringe-truncation-arrow ()
-  "Disable the truncation arrow."
-  (unless (boundp 'fringe-indicator-alist)
-    (error "The fringe-indicator-alist was not declared"))
-  (setq fringe-indicator-alist
-        (seq-remove (lambda (item)
-                      (memq (car item) '(truncation continuation)))
-                    fringe-indicator-alist))
-  (push '(continuation nil nil) fringe-indicator-alist)
-  (push '(truncation nil nil) fringe-indicator-alist))
-
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
   ;; TODO: lightemacs?

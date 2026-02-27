@@ -31,6 +31,8 @@
 
 (require 'evil)
 (require 'my-defun)
+(require 'le-core-defun)  ; lightemacs-save-window-start
+(require 'lightemacs-use-package)  ; lightemacs-save-window-start
 
 ;;; Better evil
 
@@ -859,38 +861,32 @@ guarantees that the new window is selected, as in Vim."
 DIR is the directory."
   (interactive)
   (require 'consult)
-  (if (fboundp 'buffer-cwd)
-      (progn
-        (let ((selection (when (use-region-p)
-                           (buffer-substring-no-properties (region-beginning)
-                                                           (region-end))))
-              (consult-ripgrep-args (concat (if (fboundp 'consult-ripgrep-args)
-                                                consult-ripgrep-args
-                                              "")
-                                            " --threads "
-                                            (number-to-string (num-processors)))))
-          (when selection
-            (save-excursion
-              (deactivate-mark)))
+  (progn
+    (let ((selection (when (use-region-p)
+                       (buffer-substring-no-properties (region-beginning)
+                                                       (region-end))))
+          (consult-ripgrep-args (concat (if (fboundp 'consult-ripgrep-args)
+                                            consult-ripgrep-args
+                                          "")
+                                        " --threads "
+                                        (number-to-string (num-processors)))))
+      (when selection
+        (save-excursion
+          (deactivate-mark)))
 
-          (save-some-buffers t)
-          ;; (buffer-guardian-save-all-buffers)
-          (when (fboundp 'consult-ripgrep)
-            (consult-ripgrep (or dir (buffer-cwd)) selection)
-            (error "Undefined: consult-ripgrep"))))
-    (error "Undefined: buffer-cwd")))
+      (save-some-buffers t)
+      ;; (buffer-guardian-save-all-buffers)
+      (when (fboundp 'consult-ripgrep)
+        (consult-ripgrep (or dir (buffer-cwd)) selection)))))
 
 (defun my-consult-grep-project ()
   "Run `consult-fd` in the root directory of the current project."
   (interactive)
-  (if (fboundp 'buffer-cwd)
-      (progn
-        (require 'consult)
-        (let* ((project (project-current nil "."))
-               (project-root (when (and project (fboundp 'project-root))
-                               (project-root project))))
-          (my-consult-grep-dir (or project-root (buffer-cwd)))))
-    (error "Undefined: buffer-cwd")))
+  (require 'consult)
+  (let* ((project (project-current nil "."))
+         (project-root (when (and project (fboundp 'project-root))
+                         (project-root project))))
+    (my-consult-grep-dir (or project-root (buffer-cwd)))))
 
 ;; (evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-project)
 ;; (evil-define-key 'normal 'global (kbd "gr") 'my-consult-grep-dir)
@@ -1399,80 +1395,69 @@ If the parentheses are balanced, the function returns t."
 Inspired from `evil-ex-start-word-search'.
 The search matches the COUNT occurrence of the word. The DIRECTION argument
 should be either `forward' or `backward', determining the search direction."
-  (if (and (fboundp 'evil-ex-make-search-pattern)
-           (fboundp 'evil-push-search-history)
-           (fboundp 'evil-ex-delete-hl)
-           (fboundp 'evil-ex-search-next))
-      (progn
-        (setq evil-ex-search-count count
-              evil-ex-search-direction direction
-              evil-ex-search-pattern
-              (let (evil-ex-search-vim-style-regexp)
-                (evil-ex-make-search-pattern regex))
-              evil-ex-search-offset nil
-              evil-ex-last-was-search t)
-        ;; Update search history unless this pattern equals the previous pattern
-        (unless (equal regex (car evil-ex-search-history))
-          (push regex evil-ex-search-history))
-        (evil-push-search-history regex (eq direction 'forward))
-        (evil-ex-delete-hl 'evil-ex-search)
-        (evil-ex-search-next count))
-    (error "Undefined required evil functions")))
+  (setq evil-ex-search-count count
+        evil-ex-search-direction direction
+        evil-ex-search-pattern
+        (let (evil-ex-search-vim-style-regexp)
+          (evil-ex-make-search-pattern regex))
+        evil-ex-search-offset nil
+        evil-ex-last-was-search t)
+  ;; Update search history unless this pattern equals the previous pattern
+  (unless (equal regex (car evil-ex-search-history))
+    (push regex evil-ex-search-history))
+  (evil-push-search-history regex (eq direction 'forward))
+  (evil-ex-delete-hl 'evil-ex-search)
+  (evil-ex-search-next count))
 
 (defun evilbuffer-search-symbol (&optional direction)
   "Search for the symbol at point using Evil search.
 The DIRECTION argument can be either \='forward' or \='backward, determining the
 search direction (default: \='forward)."
   (interactive)
-  (if (and (fboundp 'evil-visual-state-p)
-           (fboundp 'evil-exit-visual-state)
-           (fboundp 'evil-ex-search))
-      (progn
-        ;; Both `save-window-excursion' and `save-excursion' are used here to ensure
-        ;; that performing the search does not move the cursor or change the visible
-        ;; portion of the buffer (`window-start'). This allows Evil's search functions
-        ;; to update highlights and internal search state while leaving the user's
-        ;; point and window view completely unchanged.
-        (save-window-excursion ; Preserve window-start
-          (save-excursion ; Preserve point and mark
-            (let* ((visual-p (evil-visual-state-p))
-                   (count 1)
-                   (direction (or direction 'forward))
-                   (text (if visual-p
-                             (let ((selection (buffer-substring-no-properties
-                                               (region-beginning)
-                                               (region-end))))
-                               (evil-exit-visual-state)
-                               selection)
-                           (thing-at-point 'symbol t)))
-                   (current-pattern (and evil-ex-search-pattern
-                                         (car evil-ex-search-pattern)))
-                   (regex (when text
-                            (if visual-p
-                                (regexp-quote text)
-                              (concat "\\_<" (regexp-quote text) "\\_>")))))
-              (when regex
-                (if (and current-pattern
-                         (string= regex (and evil-ex-search-pattern
-                                             (car evil-ex-search-pattern))))
-                    ;; Instead of calling le-evil--search-regexp for the same
-                    ;; keyword, just highlight the current keyword
-                    (condition-case err
-                        (progn
-                          (evil-ex-search 1))
-                      (search-failed
-                       nil))
+  ;; Both `save-window-excursion' and `save-excursion' are used here to ensure
+  ;; that performing the search does not move the cursor or change the visible
+  ;; portion of the buffer (`window-start'). This allows Evil's search functions
+  ;; to update highlights and internal search state while leaving the user's
+  ;; point and window view completely unchanged.
+  (save-window-excursion ; Preserve window-start
+    (save-excursion ; Preserve point and mark
+      (let* ((visual-p (evil-visual-state-p))
+             (count 1)
+             (direction (or direction 'forward))
+             (text (if visual-p
+                       (let ((selection (buffer-substring-no-properties
+                                         (region-beginning)
+                                         (region-end))))
+                         (evil-exit-visual-state)
+                         selection)
+                     (thing-at-point 'symbol t)))
+             (current-pattern (and evil-ex-search-pattern
+                                   (car evil-ex-search-pattern)))
+             (regex (when text
+                      (if visual-p
+                          (regexp-quote text)
+                        (concat "\\_<" (regexp-quote text) "\\_>")))))
+        (when regex
+          (if (and current-pattern
+                   (string= regex (and evil-ex-search-pattern
+                                       (car evil-ex-search-pattern))))
+              ;; Instead of calling le-evil--search-regexp for the same
+              ;; keyword, just highlight the current keyword
+              (condition-case err
                   (progn
-                    (if (eq direction 'forward)
-                        (goto-char (point-min))
-                      (goto-char (point-max)))
+                    (evil-ex-search 1))
+                (search-failed
+                 nil))
+            (progn
+              (if (eq direction 'forward)
+                  (goto-char (point-min))
+                (goto-char (point-max)))
 
-                    ;; let ((lightemacs-maybe-recenter-after-jump nil))
-                    (le-evil--search-regexp regex
-                                            direction
-                                            count))
-                  t))))))
-    (error "Undefined required functions")))
+              ;; let ((lightemacs-maybe-recenter-after-jump nil))
+              (le-evil--search-regexp regex
+                                      direction
+                                      count))
+            t))))))
 
 (defun le-evil--search-symbol-backwards ()
   "Search for the symbol at point using Evil search.
@@ -2485,6 +2470,295 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 (define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-line)
 (define-key evil-visual-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
+
+;;; Packages
+
+(lightemacs-use-package tabgo
+  :commands tabgo
+  :bind (("M-z" . tabgo)
+         ("M-t" . tabgo)))
+
+(evil-define-key 'normal 'global (kbd "gt") #'tabgo)
+
+;; TODO: Contribute to evil-match it to add tree-sitter
+(lightemacs-use-package evil-matchit
+  :commands evil-matchit-mode
+
+  :init
+  ;; Forces evil-matchit to prioritize the native `evil-jump-item' logic (which
+  ;; handles standard delimiters like braces and parenthesis) before attempting
+  ;; to match keywords or tags defined in matchit plugins.
+  (setq evilmi-always-simple-jump t)
+
+  (dolist (hook '(js-mode-hook
+                  json-mode-hook
+                  js2-mode-hook
+                  js3-mode-hook
+                  javascript-mode-hook
+                  js-ts-mode-hook
+                  rjsx-mode-hook
+                  js2-jsx-mode-hook
+                  react-mode-hook
+                  typescript-mode-hook
+                  typescript-tsx-mode-hook
+                  typescript-ts-mode-hook
+                  tsx-ts-mode-hook
+
+                  cmake-mode-hook
+                  cmake-ts-mode-hook
+
+                  css-ts-mode-hook
+                  css-mode-hook
+                  less-mode-hook
+                  scss-mode-hook
+
+                  diff-mode-hook
+
+                  java-mode-hook
+                  perl-mode-hook
+                  cperl-mode-hook
+                  go-mode-hook
+
+                  web-mode-hook
+                  html-mode-hook
+                  nxml-mode-hook
+                  nxhtml-mode-hook
+                  sgml-mode-hook
+                  php-mode-hook
+                  php-ts-mode-hook
+                  message-mode-hook
+                  mhtml-mode-hook
+
+                  org-mode-hook
+
+                  lua-mode-hook
+                  lua-ts-mode-hook
+
+                  python-mode-hook
+                  python-ts-mode-hook
+
+                  yaml-mode-hook
+                  yaml-ts-mode-hook
+
+                  c-ts-mode-hook
+                  c++-ts-mode-hook
+                  c-mode-hook
+                  c++-mode-hook
+
+                  sh-mode-hook
+                  bash-ts-mode-hook))
+    (add-hook hook #'evil-matchit-mode))
+
+  :config
+  (add-to-list 'debug-ignored-errors "Unbalanced parentheses")
+
+  (when (fboundp 'evilmi-load-plugin-rules)
+    (evilmi-load-plugin-rules '(cmake-ts-mode) '(cmake))
+    (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(c simple))
+
+    ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
+    ;; # evilmi BUG here: place the cursor on { and press %
+    ;; _jc_better_cd() {
+    (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
+
+    ;; (evilmi-load-plugin-rules '(cmake-ts-mode) '(simple cmake))
+    ;; (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(simple c))
+
+    (evilmi-load-plugin-rules '(css-ts-mode) '(simple))
+    (evilmi-load-plugin-rules '(php-ts-mode) '(simple template html))
+    (evilmi-load-plugin-rules '(lua-ts-mode) '(simple script))
+    (evilmi-load-plugin-rules '(python-ts-mode) '(simple python))
+    (evilmi-load-plugin-rules '(yaml-ts-mode) '(simple yaml))
+
+    ;; Loads the 'simple' plugin before the 'sh' plugin. The 'simple' plugin
+    ;; handles basic text matching for brackets and quotes. Placing it first
+    ;; ensures that [ ] pairs are matched immediately, preventing the 'sh'
+    ;; plugin from incorrectly interpreting them as part of the if/fi control
+    ;; flow structure.
+    ;; (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
+
+    )
+
+  ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
+  ;; # evilmi BUG here: place the cursor on { and press %
+  ;; (defun my/evilmi-jump-items-around (orig-fn &rest args)
+  ;;   "Advice to use `evil-jump-item' for ()[]{} and `evilmi-jump-items' otherwise."
+  ;;   (let ((char (char-after)))
+  ;;     (if (and char (member char '(?\( ?\) ?\[ ?\] ?\{ ?\})))
+  ;;         (evil-jump-item)
+  ;;       (apply orig-fn args))))
+  ;; (advice-add 'evilmi-jump-items :around #'my/evilmi-jump-items-around)
+
+  (with-eval-after-load 'evil
+    (require 'evil-matchit-evil-setup)))
+
+;;; Package: quick-sdcv
+
+(defun my-setup-quick-sdcv ()
+  "Setup quick-sdcv."
+  ;; (goto-address-mode 1)
+  (my-disable-fringe-truncation-arrow)
+
+  (let ((inhibit-message t))
+    (toggle-truncate-lines 0))
+
+  ;; Only show the first one
+  ;; (outline-minor-mode 1)
+  ;; (goto-char (point-min))
+  ;; (outline-hide-sublevels 1)
+  ;; (outline-hide-body)
+  ;; (outline-show-entry)
+  )
+
+(add-hook 'quick-sdcv-mode-hook 'my-setup-quick-sdcv)
+(add-hook 'quick-sdcv-mode-hook 'goto-address-mode)
+
+(lightemacs-use-package quick-sdcv
+  ;; :ensure nil
+  :commands (quick-sdcv-search-at-point
+             quick-sdcv-search-input)
+
+  :init
+  (setq quick-sdcv-ellipsis " ")
+  (setq quick-sdcv-unique-buffers t)
+  ;; (quick-sdcv-only-data-dir nil)
+  ;; (quick-sdcv-exact-search t)
+
+  (add-to-list 'display-buffer-alist '("\\*sdcv"
+                                       (display-buffer-same-window)))
+
+  ;; Dictionary lookup
+  ;; (add-hook 'quick-sdcv-mode-hook 'my-evil-quick-sdcv-search-at-point)
+  ;; (add-hook 'markdown-mode-hook 'my-evil-quick-sdcv-search-at-point)
+  ;; (add-hook 'org-mode-hook 'my-evil-quick-sdcv-search-at-point)
+  ;; (add-hook 'txt-file-mode-hook 'my-evil-quick-sdcv-search-at-point)
+  (dolist (mode-hook '(markdown-mode-hook
+                       org-mode-hook
+                       txt-file-mode-hook))
+    (add-hook mode-hook
+              (lambda ()
+                (setq-local evil-lookup-func 'quick-sdcv-search-at-point))))
+
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "<leader>ed") 'quick-sdcv-search-input)))
+
+;;; quick-fasd
+
+;; TODO Lightemacs
+(lightemacs-use-package quick-fasd
+  ;; :ensure nil
+  :commands (quick-fasd-mode
+             quick-fasd-find-path
+             quick-fasd-add-path)
+
+  :bind (("C-x C-d" . quick-fasd-find-path)
+         :map minibuffer-local-completion-map
+         ("C-x C-d" . quick-fasd-find-path))
+
+  :custom
+  (quick-fasd-auto-add-on-buffer-change t)
+  (quick-fasd-enable-initial-prompt nil)
+  (quick-fasd-command-args '("-d"))
+
+  :config
+  (quick-fasd-mode))
+
+(with-eval-after-load 'evil
+  (evil-define-key 'normal 'global (kbd "<leader>fd")
+    #'quick-fasd-find-path))
+
+;;; ultisnips-mode
+
+(lightemacs-use-package ultisnips-mode
+  ;; :ensure nil
+  )
+
+;;; Use-package pathaction
+
+(lightemacs-use-package pathaction
+  :ensure nil
+  :commands (pathaction-edit
+             pathaction-run)
+
+  :preface
+  (defun pathaction-install ()
+    "Install."
+    (interactive)
+    (pathaction-run "install"))
+
+  (defun pathaction-main ()
+    "Execute main the task."
+    (interactive)
+    (pathaction-run "main"))
+
+  (defun my-save-some-buffers ()
+    "Prevent `save-some-buffers' from prompting by passing 1 to it."
+    ;; (save-some-buffers 1)
+    (buffer-guardian-save-all-buffers))
+
+  :init
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
+    (define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main))
+
+  :config
+  (remove-hook 'pathaction-before-run-hook 'save-some-buffers)
+  (remove-hook 'pathaction-before-run-hook 'pathaction--save-buffer)
+  (add-hook 'pathaction-before-run-hook #'my-save-some-buffers))
+
+(add-hook 'ultisnips-mode-hook #'hs-minor-mode)
+
+;;; use-package bufferwizard
+
+(defun pkg-bufferwizard-smart-rename ()
+  "Smartly decide how to rename the symbol at point."
+  (interactive)
+  (cond
+   ;; Eglot or LSP-Mode
+   ((and (not (region-active-p))
+         (or (bound-and-true-p eglot--managed-mode)
+             (bound-and-true-p lsp-managed-mode)))
+    (let* ((from-string (thing-at-point 'symbol))
+           (to-string (read-string (format "Replace '%s' with: " from-string)
+                                   from-string nil from-string)))
+      (cond
+       ((and (bound-and-true-p lsp-managed-mode)
+             (fboundp 'lsp-rename))
+        (lsp-rename to-string))
+       ((and (bound-and-true-p eglot--managed-mode)
+             (fboundp 'eglot-rename))
+        (eglot-rename to-string)))))
+
+   ;; Replace string
+   (t
+    (ignore-errors
+      (when (fboundp 'bufferwizard-replace-symbol-at-point)
+        (bufferwizard-replace-symbol-at-point))))))
+
+(lightemacs-use-package bufferwizard
+  ;; :ensure nil
+  ;; :vc (:url "https://github.com/jamescherti/bufferwizard.el"
+  ;;           :rev :newest)
+  :ensure nil
+  :commands (bufferwizard-clone-and-switch-to-indirect-buffer
+             bufferwizard-unhighlight
+             bufferwizard-toggle-highlight-at-point
+             bufferwizard-switch-to-base-buffer
+             bufferwizard-replace-symbol-at-point)
+
+  :init
+  ;; Indirect buffer
+  (evil-define-key 'normal 'global (kbd "<leader>ec") #'bufferwizard-clone-and-switch-to-indirect-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>eC") #'bufferwizard-switch-to-base-buffer)
+
+  ;; Rename
+  (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-bufferwizard-smart-rename)
+  (evil-define-key 'normal 'global (kbd "<leader>R") #'bufferwizard-replace-symbol-at-point)
+
+  ;; Highlight
+  ;; (evil-define-key 'normal 'global (kbd "C-h") #'bufferwizard-toggle-highlight-at-point)
+  (evil-define-key 'normal 'global (kbd "<leader>eh") #'bufferwizard-toggle-highlight-at-point)
+  (evil-define-key 'normal 'global (kbd "<leader>eH") #'bufferwizard-unhighlight))
 
 ;;; Provide
 
