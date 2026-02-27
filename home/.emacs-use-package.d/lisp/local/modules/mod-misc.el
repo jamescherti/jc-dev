@@ -42,7 +42,9 @@
   :custom
   (lazy-loader-verbose nil)
   (lazy-loader-modules '(org vterm))
-  (lazy-loader-files (list file-path-todo))
+  (lazy-loader-files (delq nil
+                           (list (when (bound-and-true-p file-path-todo)
+                                   file-path-todo))))
   (lazy-loader-buffers
    '(("*tmux*" .
       (lambda ()
