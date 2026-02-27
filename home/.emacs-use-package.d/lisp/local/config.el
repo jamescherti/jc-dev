@@ -2998,6 +2998,163 @@ ORIG-FUN is the advised function.  DESC is the package description struct."
   ;; instead
   (advice-add 'dired-find-file :override #'my-dired-open-with-external-command))
 
+;;; Last resort hjkl
+
+(defun my-forward-char-same-line ()
+  "Forward char can go paste the ellipsis.
+This function prevents forward char from going to another line, which is
+generally one of the lines that are folded."
+  (interactive)
+  (ignore-errors
+    (if (or (derived-mode-p 'fundamental-mode)
+            (region-active-p))
+        (right-char)
+      (when (= (line-number-at-pos)
+               (save-excursion (right-char)
+                               (line-number-at-pos)))
+        (right-char)))))
+
+(defun my-backward-char-same-line ()
+  "Backward to the same line."
+  (interactive)
+  (ignore-errors
+    (if (or (derived-mode-p 'fundamental-mode)
+            (region-active-p))
+        (left-char)
+      (if (= (current-column) 0)
+          ;; Prevent the cursor from changing the line
+          (when (= (line-number-at-pos)
+                   (save-excursion (left-char)
+                                   (line-number-at-pos)))
+            (left-char))
+        ;; We can go to the previous line because the cursor could be next to an
+        ;; Ellipsis
+        (left-char)))))
+
+(with-eval-after-load 'eldoc
+  (eldoc-add-command 'my-backward-char-same-line)
+  (eldoc-add-command 'my-forward-char-same-line))
+
+;; Last resort hjkl
+(when (fboundp 'my-backward-char-same-line)
+  (global-set-key (kbd "M-h") #'my-backward-char-same-line))
+(when (fboundp 'my-forward-char-same-line)
+  (global-set-key (kbd "M-l") #'my-forward-char-same-line))
+
+;;; Persist text scale
+
+(defun my-window-redisplay ()
+  "Redisplay window."
+  (when (bound-and-true-p text-scale-mode-amount)
+    (let ((amount text-scale-mode-amount))
+      (when (or (not (bound-and-true-p
+                      my-window-redisplay-last-text-scale-amount))
+                (/= amount my-window-redisplay-last-text-scale-amount))
+        (setq-local my-window-redisplay-last-text-scale-amount amount)
+        (let ((window (selected-window)))
+          (cond
+           ((<= emacs-major-version 27)
+            (run-hook-with-args 'window-size-change-functions window))
+           ((> emacs-major-version 27)
+            (run-hook-with-args 'window-state-change-functions window)))))))
+
+  (run-hooks 'window-configuration-change-hook))
+
+(defun my-persist-text-scale-adjust ()
+  "Ensure the window is updated.
+I have identified an issue that affects Emacs packages such as eat (terminal)
+and visual-fill-column. Functions like `text-scale-increase`,
+`text-scale-decrease`, and `text-scale-set` do not trigger hooks like
+`window-configuration-change-hook`. As a result, the eat package does not
+immediately update the window when the text scale is changed, and
+visual-fill-column does not update the margin right away (it updates only after
+the window is resized). This function fixes these issues."
+  (when (or (derived-mode-p 'eat-mode)
+            (bound-and-true-p visual-fill-column-mode))
+    (my-window-redisplay)))
+
+(with-eval-after-load 'persist-text-scale
+  (defun my-persist-text-scale-function ()
+    ;; TODO: Add to the official?
+    ;;
+    ;; Corfu context menu adjusts the text size based on the size of the
+    ;; window from which the text completion is triggered. It should be
+    ;; ignored.
+    (let ((buffer-name (buffer-name)))
+      (cond
+       ((string= buffer-name " *transient*")
+        :ignore)
+
+       ;; TODO: add to the official one
+       ((string-prefix-p "*Embark Export:" buffer-name)
+        "c:embark-export")
+
+       ((string-prefix-p "*sdcv:" buffer-name)
+        "c:sdcv"))))
+
+  (defvar my-window-redisplay-last-text-scale-amount nil)
+
+  ;; Force windows update
+  (progn
+    (add-hook 'text-scale-mode-hook #'my-persist-text-scale-adjust))
+
+  (setq persist-text-scale-buffer-category-function 'my-persist-text-scale-function))
+
+;;; text scale ediff
+
+(defun pkg-diff--ediff-control-panel-window ()
+  "Return the window displaying the *Ediff Control Panel* buffer, if any."
+  (seq-find (lambda (win)
+              ;; The Ediff control panel buffer name may have suffixes like
+              ;; "<2>", e.g., "*Ediff Control Panel<2>*", if multiple sessions
+              ;; are active.
+              (string-prefix-p "*Ediff Control Panel"
+                               (buffer-name (window-buffer win))))
+            (window-list)))
+
+(defun pkg-diff--ediff-buffers ()
+  "Return list of live ediff buffers A, B, and C, if bound."
+  (when-let* ((window (pkg-diff--ediff-control-panel-window)))
+    (with-selected-window window
+      (delq nil
+            (list (and (bound-and-true-p ediff-buffer-A) ediff-buffer-A)
+                  (and (bound-and-true-p ediff-buffer-B) ediff-buffer-B)
+                  (and (bound-and-true-p ediff-buffer-C) ediff-buffer-C))))))
+
+(defun pkg-diff--ediff-auto-text-scale (&rest _)
+  "Synchronize text scale across all Ediff buffers based on Ediff buffer A."
+  (when (and (boundp 'text-scale-mode-hook)
+             (bound-and-true-p text-scale-mode-amount))
+    (let ((window (pkg-diff--ediff-control-panel-window)))
+      (if (not window)
+          (with-no-warnings
+            (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))
+        (let ((original-buf (current-buffer))
+              (original-buf-text-scale-amount text-scale-mode-amount))
+          (with-selected-window window
+            (when (and (bound-and-true-p ediff-buffer-A)
+                       (buffer-live-p ediff-buffer-A))
+              (with-current-buffer ediff-buffer-A
+                (dolist (buf (pkg-diff--ediff-buffers))
+                  (when (and (buffer-live-p buf)
+                             (not (eq buf original-buf)))
+                    (with-current-buffer buf
+                      (with-no-warnings
+                        (let ((text-scale-mode-hook
+                               (delq 'pkg-diff--ediff-auto-text-scale
+                                     text-scale-mode-hook)))
+                          (text-scale-set original-buf-text-scale-amount))))))))))))))
+
+(defun pkg-diff--setup-ediff-auto-text-scale ()
+  "Add a buffer-local hook to keep text scale synchronized during Ediff sessions.
+This installs `pkg-diff--ediff-auto-text-scale` on `text-scale-mode-hook` in
+each Ediff buffer when the session starts, and cleans up automatically when the
+session ends."
+  (with-no-warnings
+    (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
+
+(add-hook 'ediff-prepare-buffer-hook #'pkg-diff--setup-ediff-auto-text-scale)
+
 ;;; Local variables
 
 ;; Local variables:
