@@ -67,24 +67,11 @@
 ;; compile-angel-native-compile-load is t
 (setq lightemacs-load-compiled-init-files t)
 
-(setq lightemacs-optional-modules '(
+(setq lightemacs-optional-modules '(mod-misc2
                                     mod-defun
-                                    mod-misc
-                                    buffer-guardian
-                                    mod-lsp-mode
-
-                                    smartindent
-                                    battery-angel
-                                    mod-project
                                     mod-evil
-                                    mod-buffer-terminator
-                                    mod-toggle-term
                                     mod-better-vc
-                                    point-manager
-                                    mod-org
-
-                                    mod-kirigami
-                                    ))
+                                    mod-org))
 
 (setq lightemacs-recentf-track-switch-to-buffer t)
 
