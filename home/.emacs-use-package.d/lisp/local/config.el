@@ -369,8 +369,6 @@
 (setq stripspace-restore-column t)
 (setq stripspace-only-if-initially-clean t)
 
-(setq buffer-terminator-verbose 'inhibit-message)
-
 (setq lightemacs-reduce-messages t)
 (setq lightemacs-saveplace-recenter-after-find-file t)
 
@@ -666,7 +664,8 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 ;;; lightemacs-user-post-init
 
-(defun my-setup-evil ()
+(defun my-config-evil ()
+  "Setup evil."
   ;; Make `v$` exclude the final newline
   (setq evil-v$-excludes-newline t)
 
@@ -711,282 +710,256 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
           ((control) . text-scale)))
 
   (setq inhibit-mouse-button-numbers '(1 2 3))
-  (setq pixel-scroll-precision-use-momentum nil)
+  (setq pixel-scroll-precision-use-momentum nil))
+
+(defun my-setup-filetype ()
+  "Setup filetype."
+  (add-to-list 'auto-mode-alist '("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode))
+  (defun my-org-mode-setup ()
+    "When active, indent text according to outline structure."
+    ;; (auto-fill-mode -1)
+
+    ;; In org buffers we set `nobreak-char-display' to nil locally so that the
+    ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
+    ;; space. This suppresses the distinct glyph or face Emacs normally applies
+    ;; to NBSP, keeping the buffer free of distracting blue highlights while
+    ;; preserving the character's internal no-break semantics.
+    ;;
+    ;; Here is an example of what is highlighted: $5 billion-valued.
+    ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
+    ;; and the hyphen after n are rendered as highlighted glyphs.
+    (setq-local nobreak-char-display nil)
+
+    ;; TODO: bug. When jumping to org file from org agenda todo list,
+    ;; org-indent-mode is not enabled by default.
+    (when (fboundp 'org-indent-mode)
+      (org-indent-mode 1))
+
+    ;; (display-line-numbers-mode -1)
+
+    (when (derived-mode-p 'org-mode)
+      ;; It makes o not auto indent after a bullet list like * or -
+      (setq-local evil-auto-indent nil)
+
+      ;; (setq-local indent-line-function nil)
+      (setq-local search-invisible nil)
+
+      ;; Fixes a bug of jumping in org mode when scrolling many lines in my
+      ;; todo.org
+      ;; file
+      ;; TODO: bug?
+      ;; (setq-local scroll-margin 1)
+
+      ;; (toggle-truncate-lines 0)
+
+      ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
+      ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
+      ;; (custom-set-faces `(org-block-end-line ((t (:height 0.6 :extend t)))))
+      ))
+
+  (when (fboundp 'my-org-mode-setup)
+    (add-hook 'org-mode-hook #'my-org-mode-setup))
+
+  (setq org-agenda-start-on-weekday 1)  ; Monday
+  (setq org-clock-report-include-clocking-task t)
+
+  (setq sgml-basic-offset 2)  ;; HTML
+  (setq css-indent-offset 2)
+  (setq javascript-indent-level 2)
+  (setq html-indent-offset 2)
+  (setq sgml-basic-offset 2)
+  (setq lua-indent-level 3)
+  (setq yaml-indent-offset 2)
+
+  ;; python
+  (defun setup-python-mode ()
+    "Setup `python-mode'."
+    (display-fill-column-indicator-mode)
+    (my-set-tab-width 4)
+    (setq-local fill-column 79))
+
+  (add-hook 'python-mode-hook #'setup-python-mode)
+  (add-hook 'python-ts-mode-hook #'setup-python-mode)
+
+  ;; sh
+  (setq sh-basic-offset 2)
+  (defun setup-sh-mode ()
+    "Setup `sh-mode'."
+    (display-fill-column-indicator-mode)
+    (unless (string-suffix-p ".ebuild" (buffer-file-name (buffer-base-buffer)))
+      (my-set-tab-width sh-basic-offset)
+      (setq-local fill-column 80)))
+  (add-hook 'sh-mode-hook #'setup-sh-mode)
+  (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
 
   )
 
-(defun lightemacs-user-post-init ()
-  "This function is executed right before loading modules."
-  (my-setup-evil)
-
-  ;; Ensure load-path is accurate even after installing packages
-  (my-add-packages-to-load-path)
-
-  (setq user-full-name "user"
-        user-mail-address "user@domain.ext")
-
-  ;; Ignore X resources
-  (advice-add #'x-apply-session-resources :override #'ignore)
-
-  (with-eval-after-load 'ediff
-    (add-hook 'ediff-startup-hook 'ediff-next-difference)
-    (add-hook 'ediff-quit-hook #'(lambda()
-                                   (with-eval-after-load 'winner
-                                     (when (and (bound-and-true-p winner-mode)
-                                                (fboundp 'winner-undo))
-                                       (winner-undo))))))
-  (setq ediff-keep-variants t)  ; Do not kill ediff buffers
-  (setq ediff-make-buffers-readonly-at-startup nil)
-  (setq ediff-confirm-copy t)
-  (setq diff-default-read-only t)
-
-  ;; This mimics the Magit's diff format by making the hunk header less cryptic,
-  ;; and on GUI frames also displays insertion and deletion indicators on the
-  ;; left fringe (if it's available).
-  ;;
-  ;; This is better for patches.
-  (setq diff-font-lock-prettify t)
-
-  ;; Use reliable file-based syntax highlighting when available and hunk-based
-  ;; syntax highlighting otherwise as a fallback.
-  (setq diff-font-lock-syntax 'hunk-also)
-
-  ;; (setq diff-advance-after-apply-hunk t)
-
-  ;; This sometimes interacts poorly with the undo mechanism
-  ;; (setq diff-update-on-the-fly t)
-
-  ;; Set this to nil if you want to do it on demand, with my `agitate' package
-  ;; (setq diff-refine nil)
-
-  (add-hook 'diff-mode-hook #'outline-minor-mode)
-
-  (setq vertico-count 13)
-  (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
-                                         "\\`/[^/|:]+:" "\\.gpg\\'"))
-  (add-hook 'embark-collect-mode-hook
-            #'(lambda()
-                ;; TODO: What sets this to t?
-                (setq make-window-start-visible nil)
-                (my-disable-fringe-truncation-arrow)))
-
-  (add-hook 'embark-collect-mode-hook
-            (lambda ()
-              "Disable auto-hscroll in embark-collect buffers."
-              (setq-local auto-hscroll-mode nil)))
-
-  (with-eval-after-load 'consult
-    (setq consult-fd-args
-          (concat (if lightemacs--fdfind-executable
-                      lightemacs--fdfind-executable
-                    "fd")
-                  ;; This config
-                  " --type f"
-
-                  ;; Lightemacs
-                  " --hidden --exclude .git --absolute-path"
-                  (if (memq system-type '(cygwin windows-nt ms-dos))
-                      " --path-separator=/"
-                    "")
-
-                  ;; Default
-                  " --full-path --color=never")))
-
-  (add-hook 'text-mode-hook #'(lambda () (setq-local indent-tabs-mode nil)))
-
-  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook lisp-interaction-mode-hook))
-    (add-hook hook #'(lambda ()
-                       (display-fill-column-indicator-mode)
-                       (if (fboundp 'my-set-tab-width)
-                           (my-set-tab-width 2)
-                         (error "Undefined: my-set-tab-width")))))
-
-  (setq read-process-output-max (* 32 1024 1024))
-
-  (unless (display-graphic-p)
-    (xterm-mouse-mode 1))
-
-  (windmove-default-keybindings)
-
-  ;; Conflict with XFCE C-m-h
-  (global-unset-key (kbd "C-M-h"))
-  (global-unset-key (kbd "C-M-l"))
-  (global-set-key [next] #'ignore)
-  (global-set-key [prior] #'ignore)
-  (global-set-key (kbd "M-SPC") #'ignore)  ; Disable cycle spacing
-  (global-set-key (kbd "C-SPC") #'ignore)  ; Disable C-SPC mark
-  (global-set-key (kbd "<C-prior>") 'my-tab-previous)
-  (global-set-key (kbd "<C-next>") 'my-tab-next)
-  ;; (global-set-key (kbd "C-?") 'help-command)
-
-  ;; Non-nil means show the equivalent keybinding when M-x has one.
-  ;; The value can be a length of time to show the message for.
-  ;; If the value is non-nil and not a number, we wait 2 seconds.
-  (setq suggest-key-bindings nil)
-
-  ;; (setq tooltip-resize-echo-area t)
-  (setq-default line-spacing 0.05)
-  (setq enhanced-evil-paredit-handle-paste t)
-  (setq confirm-kill-emacs 'y-or-n-p)
-  (setq remote-file-name-inhibit-locks t)
-  (setq history-delete-duplicates t)
-  (setq comint-buffer-maximum-size 10000)
-  (setq shell-kill-buffer-on-exit t)
-  (setq widget-image-enable nil)
-  (setq mode-line-collapse-minor-modes t)  ;; Emacs 31
-  (setq abbrev-suggest t)
-  (setq copy-directory-create-symlink t)
-  (setq max-mini-window-height 0.33)
-  (setq echo-keystrokes-help nil) ; Emacs 30
-  (setq kept-old-versions 15)
-  (setq kept-new-versions 15)
-
-  ;; (setq suggest-key-bindings t)
-  ;; Many X desktop environments support a feature called the clipboard manager.
-  ;; If you exit Emacs while it is the current “owner” of the clipboard data, and
-  ;; there is a clipboard manager running, Emacs transfers the clipboard data to
-  ;; the clipboard manager so that it is not lost. In some circumstances, this may
-  ;; cause a delay when exiting Emacs; if you wish to prevent Emacs from
-  ;; transferring data to the clipboard manager, change the variable
-  ;; x-select-enable-clipboard-manager to nil.
-  (setq x-select-enable-clipboard-manager nil)
-
-  (setq select-enable-clipboard t)
-  (setq select-enable-primary nil)
-
-  ;; (setq yank-excluded-properties
-  ;;       '(category field follow-link fontified font-lock-face help-echo
-  ;;                  intangible invisible keymap local-map mouse-face read-only
-  ;;                  yank-handler))
-
-  ;; When I copy paste from an org buffer into the minibuffer, it somehow
-  ;; inherits the colors
-  (setq yank-excluded-properties t)
-
-  ;; Shows all options when running apropos. For more info,
-  ;; (use-package calendar
-  ;;   :ensure nil
-  ;;   :commands calendar
-  ;;   :custom
-  ;;   )
-  (setq calendar-week-start-day 1)
-
-  (setq echo-keystrokes 0)  ;; Do not show keystrokes in the mini buffer
-
-  (setq delete-pair-blink-delay 0)
-
-  ;; Other things
-  (setq tab-bar-close-tab-select 'right)
-
-  (setq history-length 200)
-
-  ;; (setq kill-ring-max 60)
-  (setq kill-ring-max 240)
-  (setq mark-ring-max 32)
-
-  ;; testing
-  (setq transient-detect-key-conflicts t)
-
-
-  (setq remote-file-name-inhibit-auto-save t
-        remote-file-name-inhibit-auto-save-visited t
-        ;; yank-pop-change-selection t
-        ;; kill-whole-line t
-        ;; list-matching-lines-jump-to-current-line t
-        ;; mouse-prefer-closest-glyph t
-        ;; next-error-message-highlight 'keep
-        ;; read-char-by-name-sort 'code
-        ;; revert-buffer-quick-short-answers t
-        ;; shift-select-mode 'permanent
-        ;; track-eol t
-
-        ;; The benefit of visual-order-cursor-movement t is that when editing text
-        ;; containing both left-to-right and right-to-left scripts, cursor
-        ;; movement aligns with how the text is visually presented on the screen.
-        ;; This means pressing C-f moves the cursor to the character visually to
-        ;; the right, and C-b moves it to the character visually to the left,
-        ;; regardless of the underlying logical (buffer) order. It provides a
-        ;; navigation model that matches human reading habits in mixed-script
-        ;; documents, reducing cognitive load and making cursor movement
-        ;; predictable in visually complex bidirectional contexts.
-        ;; visual-order-cursor-movement t
-
-        ;; what-cursor-show-names t
-        ;; help-enable-symbol-autoload t
-        ;; help-enable-completion-autoload t
-        ;; help-enable-symbol-autoload t
-        ;; help-window-select t
-        ;; help-clean-buttons t
-        ;; help-enable-variable-value-editing t
-        )
-
-  (setq completion-auto-select nil  ; Alternative: 'second-tab
-        completions-detailed t
-        completions-format 'vertical
-        ;; completions-format 'one-column
-        completions-group t
-        completions-group-sort 'alphabetical)
-
-  ;; TODO: minimal emacs?
-  (setq debugger-bury-or-kill 'kill)
-
-  (setq tramp-default-remote-shell "/bin/bash")
-
-
-  ;; (setq byte-compile-warnings
-  ;;       '(not
-  ;;         ;; free-vars   ;; Using variables not defined with defvar (catches typos)
-  ;;         unresolved  ;; Calling functions that aren't defined yet
-  ;;         ;; noruntime   ;; Using functions/macros only available at compile-time
-  ;;         lexical     ;; Missing "lexical-binding: t" header (the .dir-locals warning)
-  ;;         ;; make-local  ;; Variables being made buffer-local in potentially odd ways
-  ;;         obsolete
-  ;;         ))  ;; Use of deprecated functions slated for removal
-
-  ;; Update paths
-  (setq undo-fu-session-directory
-        (expand-file-name "undo-fu-session"
-                          my-shared-user-emacs-directory))
-
-  (setq savehist-file (expand-file-name "history" my-shared-user-emacs-directory))
-
-  (setq persist-text-scale-file (expand-file-name "persist-text-scale"
-                                                  my-shared-user-emacs-directory))
-
-  (setq prescient-save-file (expand-file-name "prescient-save.el"
-                                              my-shared-user-emacs-directory))
-
-  (setq backup-directory-alist
-        `(("." . ,(expand-file-name "backup" my-shared-user-emacs-directory))))
-  (setq tramp-backup-directory-alist backup-directory-alist)
-
-  (setq auto-save-list-file-prefix
-        (expand-file-name "autosave/" my-shared-user-emacs-directory))
-  (setq tramp-auto-save-directory
-        (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
-
-  (setq save-place-file (expand-file-name "saveplace" my-shared-user-emacs-directory))
-
-  (setq abbrev-file-name (expand-file-name "abbrev_defs" my-shared-user-emacs-directory))
-
-  (setq easysession-debug t)
-  (setq easysession-refresh-tab-bar t)
-
-  (setq easysession-directory
-        (expand-file-name "easysession" my-shared-user-emacs-directory))
-
-  (setq my-project-list-file-auto
-        (expand-file-name "projects-auto"
-                          my-shared-user-emacs-directory))
-
-  (setq recentf-save-file
-        (expand-file-name "recentf" my-shared-user-emacs-directory)))
-
-;;; lightemacs-user-init
-
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+  ;; The function that is called by default is `vc-shrink-buffer-window',
+  ;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
+  ;; This function shrinks height of WINDOW if its buffer doesn’t need so many
+  ;; lines. More precisely, shrink WINDOW vertically to be as small as possible,
+  ;; while still showing the full contents of its buffer. WINDOW must be a live
+  ;; window and defaults to the selected one.
+  (setq vc-diff-finish-functions nil)
+  (setq vc-handled-backends '(Git))
+  (setq vc-git-diff-switches '("--histogram"  ; Faster algorithm
+                               "--textconv"
+                               "--stat"
+
+                               ;; "--ignore-cr-at-eol"
+
+                               ;; Ignore changes in amount of white space.
+                               ;; For example these would be considered the same:
+                               ;; -foo    bar
+                               ;; +foo bar
+                               ;; "--ignore-space-change"
+
+                               ;; Ignore all white space.
+                               ;; "--ignore-all-space"
+                               "-w"
+
+                               ;; Ignore changes whose lines are all blank.
+                               ;; "--ignore-blank-lines"
+                               ))
+  ;; Allow completing Git revisions from all refs, not only branches.
+  (setq vc-git-revision-complete-only-branches nil)
+
+  ;; Keep related changes together when generating changelogs.
+  ;;
+  ;; When you run `add-change-log-entry' or generate a changelog,
+  ;; Emacs groups changes that belong to the same logical change together,
+  ;; rather than scattering them across separate entries.
+  ;;
+  ;; This results in cleaner, more coherent changelog entries,
+  ;; especially useful when editing multiple related files or making
+  ;; several small fixes that belong to a single change.
+  (setq add-log-keep-changes-together t)
+
+  ;; Hide "up-to-date" messages in vc-dir buffers when reverting, reducing noise
+  ;; (available since Emacs 31).
+  (setq vc-dir-hide-up-to-date-on-revert t)
+
+  ;; Ignore large, commonly untracked directories (like node_modules) in VC
+  ;; operations to improve performance.
+  (with-eval-after-load 'tramp
+    (setq vc-ignore-dir-regexp (format "%s\\|%s\\|%s"
+                                       vc-ignore-dir-regexp
+                                       tramp-file-name-regexp
+                                       "[/\\\\]node_modules")))
+
+  (setq kirigami-preserve-visual-position t)
+  (setq buffer-terminator-verbose 'inhibit-message)
+
+  ;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
+  ;; editing emphasis.
+  ;; TODO add again
+  (setq org-hide-emphasis-markers t)
+
+  ;; No extra indentation for source blocks. It keeps code aligned with text.
+  (setq org-edit-src-content-indentation 0)
+
+  ;; Fast todo selection without popup; efficient for experts but hides guidance
+  ;; for beginners.
+  (setq org-use-fast-todo-selection 'expert)
+
+  ;; Source block settings
+  (setq org-directory "~/src/wip/notes")
+  (setq org-edit-src-persistent-message nil)
+  (setq org-export-backends '(html texinfo md))
+
+  ;; Lists
+  (setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
+
+  (setq org-babel-load-languages '((emacs-lisp . t)
+                                   (shell . t)
+                                   (python . t)))
+
+  (setq org-tag-alist '((:startgroup)
+                        ;; Status
+                        ("next" . ?n)
+                        ("wip" . ?w)
+                        ("soon" . ?o)
+                        ("future" . ?f)
+                        ("maybe" . ?e)
+                        (:endgroup)
+
+                        (:startgroup)
+                        ;; Contexts
+                        ("@home" . ?h)
+                        ("@work" . ?r)
+                        ("@outside" . ?u)
+                        (:endgroup)
+
+                        (:startgroup)
+                        ;; Priorities
+                        ("high" . ?i)
+                        ("medium" . ?m)
+                        ("low" . ?l)
+                        (:endgroup)
+
+                        (:startgroup)
+                        ("quick" . ?q)
+                        ("mediumtime" . ?t)
+                        ("long" . ?g)
+                        (:endgroup)))
+
+
+  (setq org-src-lang-modes '(("python" . python)
+                             ("sh" . sh)
+                             ("bash" . sh)
+                             ("elisp" . emacs-lisp)))
+  ;; Tag colors
+  (setq org-tag-faces
+        '(("@home" . (:foreground "green" :weight bold))
+          ("@work" . (:foreground "green" :weight bold))
+          ("@outside" . (:foreground "green" :weight bold))
+          ("@computer" . (:foreground "green" :weight bold))
+          ("@phone" . (:foreground "green" :weight bold))
+
+          ("next" . (:foreground "cyan"  :weight bold))
+          ("wip" . (:foreground "cyan"  :weight bold))
+          ("soon" . (:foreground "cyan"  :weight bold))
+          ("future" . (:foreground "cyan"  :weight bold))
+          ("maybe" . (:foreground "cyan"  :weight bold))
+
+          ("high" . (:foreground "orange"    :weight bold))
+          ("medium" . (:foreground "orange"    :weight bold))
+          ("low" . (:foreground "orange"    :weight bold))
+
+          ("quick"        . (:foreground "red"        :weight bold))
+          ("medium-time"        . (:foreground "red"        :weight bold))
+          ("long"        . (:foreground "red"        :weight bold))
+
+          ;; ("meeting"   . (:foreground "yellow1"       :weight bold))
+          ;; ("CRITICAL"  . (:foreground "red1"          :weight bold))
+          ))
+
+  ;; Set tag column to 0 (tags appear immediately after heading); simplifies
+  ;; layout but may make long headings with tags harder to read.
+  (setq org-hide-block-startup t)
+
+  (setq project-switch-commands #'project-dired)
+  (setq project-vc-extra-root-markers '(".projectile"
+                                        ".dir-locals.el"
+                                        "requirements.txt"
+                                        "autogen.sh"
+                                        ".project"))
+
+
   (setq savehist-autosave-interval 650)
+  (setq tab-bar-history-limit 15)
+
+  (setq outline-blank-line t)
+
+  (setq vim-tab-bar-update-group-name-function #'(lambda(name)
+                                                   (concat " [" name "] ")))
+  (setq vim-tab-bar-show-groups nil)
+
+  (setq bufferfile-use-vc t)
+  ;; (setq bufferfile-delete-switch-to 'previous-buffer)
+  (setq bufferfile-delete-switch-to 'parent-directory)
 
   (setq markdown-gfm-use-electric-backquote nil)
   (setq markdown-heading-scaling t)
@@ -1253,7 +1226,272 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
           (?t . evil-surround-read-tag)
           (?< . evil-surround-read-tag)
           (?\C-f . evil-surround-prefix-function)
-          (?f . evil-surround-function))))
+          (?f . evil-surround-function)))
+
+  (my-config-evil)
+
+  ;; Ensure load-path is accurate even after installing packages
+  (my-add-packages-to-load-path)
+
+  (setq user-full-name "user"
+        user-mail-address "user@domain.ext")
+
+  ;; Ignore X resources
+  (advice-add #'x-apply-session-resources :override #'ignore)
+
+  (with-eval-after-load 'ediff
+    (add-hook 'ediff-startup-hook 'ediff-next-difference)
+    (add-hook 'ediff-quit-hook #'(lambda()
+                                   (with-eval-after-load 'winner
+                                     (when (and (bound-and-true-p winner-mode)
+                                                (fboundp 'winner-undo))
+                                       (winner-undo))))))
+  (setq ediff-keep-variants t)  ; Do not kill ediff buffers
+  (setq ediff-make-buffers-readonly-at-startup nil)
+  (setq ediff-confirm-copy t)
+  (setq diff-default-read-only t)
+
+  ;; This mimics the Magit's diff format by making the hunk header less cryptic,
+  ;; and on GUI frames also displays insertion and deletion indicators on the
+  ;; left fringe (if it's available).
+  ;;
+  ;; This is better for patches.
+  (setq diff-font-lock-prettify t)
+
+  ;; Use reliable file-based syntax highlighting when available and hunk-based
+  ;; syntax highlighting otherwise as a fallback.
+  (setq diff-font-lock-syntax 'hunk-also)
+
+  ;; (setq diff-advance-after-apply-hunk t)
+
+  ;; This sometimes interacts poorly with the undo mechanism
+  ;; (setq diff-update-on-the-fly t)
+
+  ;; Set this to nil if you want to do it on demand, with my `agitate' package
+  ;; (setq diff-refine nil)
+
+  (add-hook 'diff-mode-hook #'outline-minor-mode)
+
+  (setq vertico-count 13)
+  (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
+                                         "\\`/[^/|:]+:" "\\.gpg\\'"))
+  (add-hook 'embark-collect-mode-hook
+            #'(lambda()
+                ;; TODO: What sets this to t?
+                (setq make-window-start-visible nil)
+                (my-disable-fringe-truncation-arrow)))
+
+  (add-hook 'embark-collect-mode-hook
+            (lambda ()
+              "Disable auto-hscroll in embark-collect buffers."
+              (setq-local auto-hscroll-mode nil)))
+
+  (with-eval-after-load 'consult
+    (setq consult-fd-args
+          (concat (if lightemacs--fdfind-executable
+                      lightemacs--fdfind-executable
+                    "fd")
+                  ;; This config
+                  " --type f"
+
+                  ;; Lightemacs
+                  " --hidden --exclude .git --absolute-path"
+                  (if (memq system-type '(cygwin windows-nt ms-dos))
+                      " --path-separator=/"
+                    "")
+
+                  ;; Default
+                  " --full-path --color=never")))
+
+  (add-hook 'text-mode-hook #'(lambda () (setq-local indent-tabs-mode nil)))
+
+  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook lisp-interaction-mode-hook))
+    (add-hook hook #'(lambda ()
+                       (display-fill-column-indicator-mode)
+                       (if (fboundp 'my-set-tab-width)
+                           (my-set-tab-width 2)
+                         (error "Undefined: my-set-tab-width")))))
+
+  (setq read-process-output-max (* 32 1024 1024))
+
+  (unless (display-graphic-p)
+    (xterm-mouse-mode 1))
+
+  (windmove-default-keybindings)
+
+  ;; Conflict with XFCE C-m-h
+  (global-unset-key (kbd "C-M-h"))
+  (global-unset-key (kbd "C-M-l"))
+  (global-set-key [next] #'ignore)
+  (global-set-key [prior] #'ignore)
+  (global-set-key (kbd "M-SPC") #'ignore)  ; Disable cycle spacing
+  (global-set-key (kbd "C-SPC") #'ignore)  ; Disable C-SPC mark
+  (global-set-key (kbd "<C-prior>") 'my-tab-previous)
+  (global-set-key (kbd "<C-next>") 'my-tab-next)
+  ;; (global-set-key (kbd "C-?") 'help-command)
+
+  ;; Non-nil means show the equivalent keybinding when M-x has one.
+  ;; The value can be a length of time to show the message for.
+  ;; If the value is non-nil and not a number, we wait 2 seconds.
+  (setq suggest-key-bindings nil)
+
+  ;; (setq tooltip-resize-echo-area t)
+  (setq-default line-spacing 0.05)
+  (setq enhanced-evil-paredit-handle-paste t)
+  (setq confirm-kill-emacs 'y-or-n-p)
+  (setq remote-file-name-inhibit-locks t)
+  (setq history-delete-duplicates t)
+  (setq comint-buffer-maximum-size 10000)
+  (setq shell-kill-buffer-on-exit t)
+  (setq widget-image-enable nil)
+  (setq mode-line-collapse-minor-modes t)  ;; Emacs 31
+  (setq abbrev-suggest t)
+  (setq copy-directory-create-symlink t)
+  (setq max-mini-window-height 0.33)
+  (setq echo-keystrokes-help nil) ; Emacs 30
+  (setq kept-old-versions 15)
+  (setq kept-new-versions 15)
+
+  ;; (setq suggest-key-bindings t)
+  ;; Many X desktop environments support a feature called the clipboard manager.
+  ;; If you exit Emacs while it is the current “owner” of the clipboard data, and
+  ;; there is a clipboard manager running, Emacs transfers the clipboard data to
+  ;; the clipboard manager so that it is not lost. In some circumstances, this may
+  ;; cause a delay when exiting Emacs; if you wish to prevent Emacs from
+  ;; transferring data to the clipboard manager, change the variable
+  ;; x-select-enable-clipboard-manager to nil.
+  (setq x-select-enable-clipboard-manager nil)
+
+  (setq select-enable-clipboard t)
+  (setq select-enable-primary nil)
+
+  ;; (setq yank-excluded-properties
+  ;;       '(category field follow-link fontified font-lock-face help-echo
+  ;;                  intangible invisible keymap local-map mouse-face read-only
+  ;;                  yank-handler))
+
+  ;; When I copy paste from an org buffer into the minibuffer, it somehow
+  ;; inherits the colors
+  (setq yank-excluded-properties t)
+
+  ;; Shows all options when running apropos. For more info,
+  ;; (use-package calendar
+  ;;   :ensure nil
+  ;;   :commands calendar
+  ;;   :custom
+  ;;   )
+  (setq calendar-week-start-day 1)
+
+  (setq echo-keystrokes 0)  ;; Do not show keystrokes in the mini buffer
+
+  (setq delete-pair-blink-delay 0)
+
+  ;; Other things
+  (setq tab-bar-close-tab-select 'right)
+
+  (setq history-length 200)
+
+  ;; (setq kill-ring-max 60)
+  (setq kill-ring-max 240)
+  (setq mark-ring-max 32)
+
+  ;; testing
+  (setq transient-detect-key-conflicts t)
+
+
+  (setq remote-file-name-inhibit-auto-save t
+        remote-file-name-inhibit-auto-save-visited t
+        ;; yank-pop-change-selection t
+        ;; kill-whole-line t
+        ;; list-matching-lines-jump-to-current-line t
+        ;; mouse-prefer-closest-glyph t
+        ;; next-error-message-highlight 'keep
+        ;; read-char-by-name-sort 'code
+        ;; revert-buffer-quick-short-answers t
+        ;; shift-select-mode 'permanent
+        ;; track-eol t
+
+        ;; The benefit of visual-order-cursor-movement t is that when editing text
+        ;; containing both left-to-right and right-to-left scripts, cursor
+        ;; movement aligns with how the text is visually presented on the screen.
+        ;; This means pressing C-f moves the cursor to the character visually to
+        ;; the right, and C-b moves it to the character visually to the left,
+        ;; regardless of the underlying logical (buffer) order. It provides a
+        ;; navigation model that matches human reading habits in mixed-script
+        ;; documents, reducing cognitive load and making cursor movement
+        ;; predictable in visually complex bidirectional contexts.
+        ;; visual-order-cursor-movement t
+
+        ;; what-cursor-show-names t
+        ;; help-enable-symbol-autoload t
+        ;; help-enable-completion-autoload t
+        ;; help-enable-symbol-autoload t
+        ;; help-window-select t
+        ;; help-clean-buttons t
+        ;; help-enable-variable-value-editing t
+        )
+
+  (setq completion-auto-select nil  ; Alternative: 'second-tab
+        completions-detailed t
+        completions-format 'vertical
+        ;; completions-format 'one-column
+        completions-group t
+        completions-group-sort 'alphabetical)
+
+  ;; TODO: minimal emacs?
+  (setq debugger-bury-or-kill 'kill)
+
+  (setq tramp-default-remote-shell "/bin/bash")
+
+
+  ;; (setq byte-compile-warnings
+  ;;       '(not
+  ;;         ;; free-vars   ;; Using variables not defined with defvar (catches typos)
+  ;;         unresolved  ;; Calling functions that aren't defined yet
+  ;;         ;; noruntime   ;; Using functions/macros only available at compile-time
+  ;;         lexical     ;; Missing "lexical-binding: t" header (the .dir-locals warning)
+  ;;         ;; make-local  ;; Variables being made buffer-local in potentially odd ways
+  ;;         obsolete
+  ;;         ))  ;; Use of deprecated functions slated for removal
+
+  ;; Update paths
+  (setq undo-fu-session-directory
+        (expand-file-name "undo-fu-session"
+                          my-shared-user-emacs-directory))
+
+  (setq savehist-file (expand-file-name "history" my-shared-user-emacs-directory))
+
+  (setq persist-text-scale-file (expand-file-name "persist-text-scale"
+                                                  my-shared-user-emacs-directory))
+
+  (setq prescient-save-file (expand-file-name "prescient-save.el"
+                                              my-shared-user-emacs-directory))
+
+  (setq backup-directory-alist
+        `(("." . ,(expand-file-name "backup" my-shared-user-emacs-directory))))
+  (setq tramp-backup-directory-alist backup-directory-alist)
+
+  (setq auto-save-list-file-prefix
+        (expand-file-name "autosave/" my-shared-user-emacs-directory))
+  (setq tramp-auto-save-directory
+        (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
+
+  (setq save-place-file (expand-file-name "saveplace" my-shared-user-emacs-directory))
+
+  (setq abbrev-file-name (expand-file-name "abbrev_defs" my-shared-user-emacs-directory))
+
+  (setq easysession-debug t)
+  (setq easysession-refresh-tab-bar t)
+
+  (setq easysession-directory
+        (expand-file-name "easysession" my-shared-user-emacs-directory))
+
+  (setq my-project-list-file-auto
+        (expand-file-name "projects-auto"
+                          my-shared-user-emacs-directory))
+
+  (setq recentf-save-file
+        (expand-file-name "recentf" my-shared-user-emacs-directory)))
 
 ;;; Startup time
 
@@ -1868,6 +2106,95 @@ ignored and logged as a warning. All other errors are re-raised."
   (current-window-only--setup-display-buffer-alist))
 
 (current-window-only-setup)
+
+;;; tree sitter
+
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (html "https://github.com/tree-sitter/tree-sitter-html")
+        (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+        (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+        (java "https://github.com/tree-sitter/tree-sitter-java")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+        ;; TODO: add markdown to treesit auto
+        (markdown
+         ;; For split parsers like Markdown, the extra two fields are required:
+         ;; 1. "split_parser" indicates that this language uses a parser split
+         ;;    into multiple components.
+         ;; 2. The directory path (e.g., "tree-sitter-markdown/src") points to
+         ;;    the location of the parser source within the repository. Without
+         ;;    these, treesit would not be able to find and compile the parser
+         ;;    correctly.
+         ;;
+         ;; A split parser is a Tree-sitter parser that is divided into multiple
+         ;; smaller parsers instead of being a single file or module. Each
+         ;; smaller parser handles a part of the language, such as different
+         ;; syntaxes or embedded languages, and together they form the complete
+         ;; parser. This approach makes it easier to manage complex languages,
+         ;; like Markdown, which can contain code blocks, inline formatting, and
+         ;; other embedded languages. In Emacs, specifying "split_parser" and
+         ;; the source directory tells treesit how to find and build all the
+         ;; pieces correctly.
+         "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+         "split_parser"
+         "tree-sitter-markdown/src")
+        ;; TODO: add markdown-inline to treesit auto
+        (markdown-inline
+         "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+         "split_parser"
+         "tree-sitter-markdown-inline/src")
+        ;; TODO: add php to treesit auto
+        (php
+         "https://github.com/tree-sitter/tree-sitter-php"
+         "master"
+         "php/src")
+        (c "https://github.com/tree-sitter/tree-sitter-c")
+        (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+        (c-sharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
+        (commonlisp "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        (glsl "https://github.com/tree-sitter-grammars/tree-sitter-glsl")
+        (go "https://github.com/tree-sitter/tree-sitter-go")
+        (julia "https://github.com/tree-sitter/tree-sitter-julia")
+        (make "https://github.com/tree-sitter-grammars/tree-sitter-make")
+        (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+        (rust "https://github.com/tree-sitter/tree-sitter-rust")
+        (scala "https://github.com/tree-sitter/tree-sitter-scala")
+        (toml "https://github.com/tree-sitter/tree-sitter-toml")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript")
+        (typescript "https://github.com/tree-sitter/tree-sitter-typescript")
+        (vue "https://github.com/tree-sitter-grammars/tree-sitter-vue")
+
+        (heex "https://github.com/phoenixframework/tree-sitter-heex")
+        (janet "https://github.com/sogaiu/tree-sitter-janet-simple")
+        (kotlin "https://github.com/fwcd/tree-sitter-kotlin")
+        (latex "https://github.com/latex-lsp/tree-sitter-latex")
+        (magik "https://github.com/krn-robin/tree-sitter-magik")
+        (nix "https://github.com/nix-community/tree-sitter-nix")
+        (nu "https://github.com/nushell/tree-sitter-nu")
+        (org "https://github.com/milisims/tree-sitter-org")
+        (perl "https://github.com/ganezdragon/tree-sitter-perl")
+        (proto "https://github.com/mitchellh/tree-sitter-proto")
+        (r "https://github.com/r-lib/tree-sitter-r")
+        (sql "https://github.com/DerekStride/tree-sitter-sql")
+        (surface "https://github.com/connorlay/tree-sitter-surface")
+        (typst "https://github.com/uben0/tree-sitter-typst")
+        (verilog "https://github.com/gmlarumbe/tree-sitter-verilog")
+        (vhdl "https://github.com/alemuller/tree-sitter-vhdl")
+        (wast "https://github.com/wasm-lsp/tree-sitter-wasm")
+        (wat "https://github.com/wasm-lsp/tree-sitter-wasm")
+        (wgsl "https://github.com/mehmetoguzderin/tree-sitter-wgsl")
+        (awk "https://github.com/Beaglefoot/tree-sitter-awk")
+        (bibtex "https://github.com/latex-lsp/tree-sitter-bibtex")
+        (blueprint "https://github.com/huanie/tree-sitter-blueprint")
+        (clojure "https://github.com/sogaiu/tree-sitter-clojure")
+        (cmake "https://github.com/uyha/tree-sitter-cmake")
+        (dart "https://github.com/ast-grep/tree-sitter-dart")
+        (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
+        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")))
 
 ;;; Local variables
 
