@@ -106,7 +106,9 @@
 (setq native-comp-jit-compilation nil)
 
 (with-eval-after-load 'compile-angel
-  (compile-angel-exclude-directory "~/src/emacs/"))
+  (if (fboundp 'compile-angel-exclude-directory)
+      (compile-angel-exclude-directory "~/src/emacs/")
+    (error "Undefined: compile-angel-exclude-directory")))
 
 (setq compile-angel-enable-byte-compile t)
 (setq compile-angel-enable-native-compile t)
@@ -784,8 +786,9 @@ WIDTH is the tab width."
     (my-set-tab-width 4)
     (setq-local fill-column 79))
 
-  (add-hook 'python-mode-hook #'setup-python-mode)
-  (add-hook 'python-ts-mode-hook #'setup-python-mode)
+  (when (fboundp 'setup-python-mode)
+    (add-hook 'python-mode-hook #'setup-python-mode)
+    (add-hook 'python-ts-mode-hook #'setup-python-mode))
 
   ;; sh
   (setq sh-basic-offset 2)
@@ -795,10 +798,32 @@ WIDTH is the tab width."
     (unless (string-suffix-p ".ebuild" (buffer-file-name (buffer-base-buffer)))
       (my-set-tab-width sh-basic-offset)
       (setq-local fill-column 80)))
-  (add-hook 'sh-mode-hook #'setup-sh-mode)
-  (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
+  (when (fboundp 'setup-sh-mode)
+    (add-hook 'sh-mode-hook #'setup-sh-mode)
+    (add-hook 'bash-ts-mode-hook #'setup-sh-mode)))
 
-  )
+;; (defun my-disable-fringe-truncation-arrow ()
+;;   "Disable the truncation arrow."
+;;   (unless (boundp 'fringe-indicator-alist)
+;;     (error "The fringe-indicator-alist was not declared"))
+;;   (setq fringe-indicator-alist
+;;         (cl-remove-if (lambda (item)
+;;                         (memq (car item) '(truncation
+;;                                            continuation)))
+;;                       fringe-indicator-alist))
+;;   (push '(continuation nil nil) fringe-indicator-alist)
+;;   (push '(truncation nil nil) fringe-indicator-alist))
+
+(defun my-disable-fringe-truncation-arrow ()
+  "Disable the truncation arrow."
+  (unless (boundp 'fringe-indicator-alist)
+    (error "The fringe-indicator-alist was not declared"))
+  (setq fringe-indicator-alist
+        (seq-remove (lambda (item)
+                      (memq (car item) '(truncation continuation)))
+                    fringe-indicator-alist))
+  (push '(continuation nil nil) fringe-indicator-alist)
+  (push '(truncation nil nil) fringe-indicator-alist))
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
@@ -815,9 +840,12 @@ WIDTH is the tab width."
                           :box 'unspecified
                           :underline 'unspecified)))
   ;; Apply the fix whenever a theme is loaded
-  (advice-add 'load-theme :after #'my-clear-yasnippet-field-highlight)
+  (with-no-warnings
+    (advice-add 'load-theme :after #'my-clear-yasnippet-field-highlight))
+
   ;; Ensure it also applies when yasnippet is first loaded
-  (add-hook 'yas-minor-mode-hook #'my-clear-yasnippet-field-highlight)
+  (with-no-warnings
+    (add-hook 'yas-minor-mode-hook #'my-clear-yasnippet-field-highlight))
 
   (setq yas-snippet-dirs '())
   (add-to-list 'yas-snippet-dirs
@@ -933,7 +961,8 @@ WIDTH is the tab width."
     "Setup `conf-mode'."
     (setq-local evil-auto-indent nil)
     (setq-local indent-line-function #'ignore))
-  (add-hook 'conf-mode-hook #'my-setup-conf-mode)
+  (with-no-warnings
+    (add-hook 'conf-mode-hook #'my-setup-conf-mode))
 
   (setq markdown-toc-mode-map nil)
   (setq markdown-toc-header-toc-title "## Table of Contents")
@@ -1186,7 +1215,8 @@ WIDTH is the tab width."
   (setq flymake-start-on-save-buffer t)  ;; Do not enable or it will enable it on save
   (setq flymake-suppress-zero-counters t)
 
-  (add-hook 'grep-mode-hook #'hs-line-mode)
+  (with-no-warnings
+    (add-hook 'grep-mode-hook #'hs-line-mode))
   (with-eval-after-load 'icomplete
     (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit))
 
@@ -2029,14 +2059,23 @@ The DWIM behaviour of this command is as follows:
 
 ;;; Elisp
 
+;; (defun better-jump--setup-imenu-elisp ()
+;;   "Setup imenu."
+;;   (setq-local imenu-generic-expression
+;;               (cl-remove-if (lambda (item)
+;;                               (or (string= (car item) "Packages")
+;;                                   (string= (car item) "Variables")
+;;                                   (string= (car item) "Types")))
+;;                             imenu-generic-expression)))
+
 (defun better-jump--setup-imenu-elisp ()
   "Setup imenu."
   (setq-local imenu-generic-expression
-              (cl-remove-if (lambda (item)
-                              (or (string= (car item) "Packages")
-                                  (string= (car item) "Variables")
-                                  (string= (car item) "Types")))
-                            imenu-generic-expression)))
+              (seq-remove (lambda (item)
+                            (member (car item) '("Packages"
+                                                 "Variables"
+                                                 "Types")))
+                          imenu-generic-expression)))
 
 (add-hook 'emacs-lisp-mode-hook #'better-jump--setup-imenu-elisp)
 
@@ -2283,7 +2322,7 @@ ignored and logged as a warning. All other errors are re-raised."
   (current-window-only--setup-display-buffer-alist))
 
 (defun lightemacs-user-pre-init ()
-  "pre-init config."
+  "Pre-init config."
   (my-config-display-buffer-alist)
   (current-window-only-setup))
 
@@ -2498,6 +2537,467 @@ ignored and logged as a warning. All other errors are re-raised."
 
 (add-hook 'lightemacs-after-init-hook 'config-template-system)
 
+
+;;===========================================================================
+;; Geometry
+;;===========================================================================
+;; TODO Migrate this to lightemacs
+(defvar my-frame-geometry-file (expand-file-name "frame-geometry"
+                                                 user-emacs-directory))
+
+(defvar my-frame-geometry-modified-p nil
+  "Was the frame geometry modified.")
+
+(defun my-frame-geometry-save ()
+  "Save the current frame's geometry."
+  (when (display-graphic-p)
+    (let ((inhibit-message t)
+          (frame (selected-frame))
+          (file my-frame-geometry-file))
+      (with-temp-buffer
+        (let ((make-backup-files nil)
+              (font (frame-parameter frame 'font))
+              (left (frame-parameter frame 'left))
+              (top (frame-parameter frame 'top))
+              (width (frame-parameter frame 'width))
+              (height (frame-parameter frame 'height))
+              (pixel-width (frame-pixel-width frame))
+              (pixel-height (frame-pixel-height frame)))
+          (insert
+           ";; -*- mode: emacs-lisp; lexical-binding: t; coding: utf-8-unix -*-\n")
+          (insert ";; Frame geometry file, automatically generated "
+                  "by 'my-frame-geometry*' functions.\n")
+          (insert
+           "(setq initial-frame-alist nil)\n"
+           (format "(add-to-list 'initial-frame-alist '(font . \"%s\"))\n"
+                   (replace-regexp-in-string "\"" "\\\\\"" font))
+           (when top
+             (format "(add-to-list 'initial-frame-alist '(top . %s))\n" top))
+           (when left
+             (format "(add-to-list 'initial-frame-alist '(left . %s))\n" left))
+           (when width
+             (format "(add-to-list 'initial-frame-alist '(width . %s))\n" width))
+           (when height
+             (format "(add-to-list 'initial-frame-alist '(height . %s))\n" height))
+           "\n"
+           (when pixel-width
+             (format "(setq my-frame-geometry-pixel-width %s)\n" pixel-width))
+           (when pixel-height
+             (format "(setq my-frame-geometry-pixel-height %s)\n" pixel-height)))
+          (when (file-writable-p file)
+            (let ((save-silently t))
+              (write-file file))))))))
+
+(defun my-frame-geometry-load-initial-frame-alist ()
+  "Load the previous frames geometry.
+Call it from \='early-init.el\='."
+  (let ((file my-frame-geometry-file)
+        (inhibit-message t))
+    (when (file-readable-p file)
+      (load (expand-file-name file) t t t))))
+
+(defun my-frame-geometry-set-pixel-width-height (&optional frame)
+  "Set the frame width and height.
+Call it from \='init.el\='.
+FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
+  (unless frame
+    (setq frame (selected-frame)))
+
+  (when (and (display-graphic-p)
+             (boundp 'my-frame-geometry-pixel-width)
+             (boundp 'my-frame-geometry-pixel-height))
+    (message "Set frame size: %sx%s"
+             my-frame-geometry-pixel-width
+             my-frame-geometry-pixel-height)
+    (set-frame-size frame
+                    my-frame-geometry-pixel-width
+                    my-frame-geometry-pixel-height
+                    t)))
+
+(defun my-set-frame-size-and-position (&optional frame)
+  "Set position and size of FRAME when it's the first frame."
+  (unless frame
+    (setq frame (selected-frame)))
+  (unless my-frame-geometry-modified-p
+    ;; when (eq frame (selected-frame))
+    (when (not (frame-parameter frame 'parent-frame))
+      (when (fboundp 'my-frame-geometry-set-pixel-width-height)
+        (setq my-frame-geometry-modified-p t)
+        (my-frame-geometry-set-pixel-width-height frame)))))
+
+(my-frame-geometry-load-initial-frame-alist)
+;; (setq initial-frame-alist nil)
+
+(add-hook 'kill-emacs-hook 'my-frame-geometry-save)
+;; (add-hook 'after-make-frame-functions #'my-set-frame-size-and-position)
+
+;; Issue with Emacs 31 and shut-up
+;; (with-eval-after-load "shut-up"
+;;   (with-no-warnings
+;;     (defun my-around-my-frame-geometry-save (fn &rest args)
+;;       "FN is the advised function. ARGS are the function arguments."
+;;       (shut-up
+;;         (apply fn args)))
+;;
+;;     (advice-add 'my-frame-geometry-save :around
+;;                 #'my-around-my-frame-geometry-save)))
+
+;;; quiet
+
+;; In addition to the shut-up package, this module provides the
+;; `lightemacs-shut-up-advice-add' function, which prevents a function from
+;; displaying messages.
+
+;; readme: In addition to the *shut-up* package, this module provides the
+;; `lightemacs-shut-up-advice-add` function, which attaches advice to a given
+;; function to suppress all of its output.
+
+(defun lightemacs--shut-up-funcall (fn &rest args)
+  "Call FN with ARGS while suppressing all output.
+This function evaluates FN with the given ARGS while redirecting output that
+would normally be sent to `standard-output' and suppressing messages produced by
+`message'. It also overrides `write-region' and `load' with custom
+implementations that prevent unintended output."
+  ;; I have an issue with shut-up TODO especially with straight
+  ;; (shut-up
+  ;;   (apply fn args))
+  (let ((inhibit-message t))
+    (apply fn args)
+    ;; (cl-letf
+    ;;     ;; Override `standard-output' (for `print'), `message',
+    ;;     ;; `write-region', `load'.
+    ;;     ((standard-output #'ignore)
+    ;;      ((symbol-function 'message) 'ignore)
+    ;;      ;; ((symbol-function 'write-region) 'shut-up-write-region)
+    ;;      ;; ((symbol-function 'write-region) 'shut-up-write-region)
+    ;;      ;; ((symbol-function 'load) 'shut-up-load)
+    ;;      )
+    ;;   (apply fn args))
+    ))
+
+;;;###autoload
+(defun lightemacs-shut-up-advice-add (fn)
+  "Advise the FN function so that all its output is suppressed.
+This attaches an around-advice to FN using `lightemacs--shut-up-funcall',
+ensuring that when FN is invoked, it produces no messages, does not write to
+`standard-output', and does not display output from `write-region' or `load'."
+  (advice-add fn :around #'lightemacs--shut-up-funcall))
+
+;;;###autoload
+(defun lightemacs-shut-up-advice-remove (fn)
+  "Remove the silence advice from the FN function.
+This detaches the around-advice previously installed by
+`lightemacs-shut-up-advice-add', restoring FN to its original behavior where
+messages and output are no longer suppressed."
+  (advice-remove fn #'lightemacs--shut-up-funcall))
+
+(with-eval-after-load 'undo-fu-session
+  (lightemacs-shut-up-advice-add 'undo-fu-session--recover-safe))
+
+(with-eval-after-load 'evil
+  (lightemacs-shut-up-advice-add 'evil-redo)
+  (lightemacs-shut-up-advice-add 'evil-undo))
+
+(with-eval-after-load 'sh-script
+  (when (fboundp 'sh-set-shell)
+    (lightemacs-shut-up-advice-add 'sh-set-shell)))
+
+;; TODO silence it
+;; (lightemacs-shut-up-advice-add 'toggle-truncate-lines)
+
+;; (with-eval-after-load 'flyspell
+;;   (lightemacs-shut-up-advice-add 'flyspell-prog-mode)
+;;   (lightemacs-shut-up-advice-add 'flyspell-mode))
+
+;; (with-eval-after-load 'recentf
+;;   (lightemacs-shut-up-advice-add 'recentf-save-list)
+;;   (lightemacs-shut-up-advice-add 'recentf-cleanup)
+;;   (lightemacs-shut-up-advice-add 'recentf-mode))
+
+;;; recenter after jump
+
+
+(defvar lightemacs-maybe-recenter-after-jump t
+  "Non-nil enables recentering the window when the point jumps out of view.
+Recentering only occurs when `scroll-conservatively' is >= 101. The recenter
+position can be customized using `lightemacs-maybe-recenter-after-jump-value'.")
+
+(defvar lightemacs-maybe-recenter-after-jump-value 12
+  "The line position for recentering the window when the point jumps out of view.
+Only used when `lightemacs-maybe-recenter-after-jump' is non-nil and
+`scroll-conservatively' is >= 101. A numeric value indicates the number of lines
+from the top of the window; nil recenters in the middle.")
+
+(require 'le-core-defun)  ;; lightemacs-recenter-maybe
+
+(defun lightemacs-default-settings--recenter-maybe ()
+  "Recenter conditionally when `scroll-conservatively' is set to 101 or higher.
+This ensures that conservative scrolling is preserved while maintaining point
+visibility when navigation commands are executed."
+  (when (and lightemacs-maybe-recenter-after-jump
+             (>= scroll-conservatively 101))
+    (lightemacs-recenter-maybe lightemacs-maybe-recenter-after-jump-value)))
+
+(defun lightemacs-default-settings--recenter-maybe-adjust-arg ()
+  "Recenter conditionally when `scroll-conservatively' is set to 101 or higher.
+This ensures that conservative scrolling is preserved while maintaining point
+visibility when navigation commands are executed."
+  (when (and lightemacs-maybe-recenter-after-jump
+             (>= scroll-conservatively 101))
+    (lightemacs-recenter-maybe lightemacs-maybe-recenter-after-jump-value t)))
+
+(defun lightemacs-default-settings--advice-recenter-maybe-adjust-arg (fn &rest args)
+  "FN is the advised function. ARGS are the function arguments."
+  (unwind-protect
+      (apply fn args)
+    (lightemacs-default-settings--recenter-maybe-adjust-arg)))
+
+;; TODO use post-command-hook?
+
+(defun lightemacs-default-settings--advice-recenter-maybe (fn &rest args)
+  "FN is the advised function. ARGS are the function arguments."
+  (unwind-protect
+      (apply fn args)
+    (lightemacs-default-settings--recenter-maybe)))
+
+;; TODO use a loop to add to hooks and advice functions
+(with-eval-after-load 'flymake
+  (advice-add 'flymake-goto-next-error :around
+              #'lightemacs-default-settings--advice-recenter-maybe)
+  (advice-add 'flymake-goto-prev-error :around
+              #'lightemacs-default-settings--advice-recenter-maybe))
+
+(with-eval-after-load 'evil
+  (advice-add 'evil-goto-mark :around
+              #'lightemacs-default-settings--advice-recenter-maybe-adjust-arg)
+
+  (advice-add 'evil-ex-search-previous :around
+              #'lightemacs-default-settings--advice-recenter-maybe-adjust-arg)
+  (advice-add 'evil-ex-search-next :around
+              #'lightemacs-default-settings--advice-recenter-maybe-adjust-arg)
+
+  ;; When the user presses C-o
+  (add-hook 'evil-jumps-post-jump-hook
+            #'lightemacs-default-settings--recenter-maybe-adjust-arg 70))
+
+(with-eval-after-load 'simple
+  (add-hook 'next-error-hook
+            #'lightemacs-default-settings--recenter-maybe-adjust-arg))
+
+(with-eval-after-load 'xref
+  (let ((xref-pulse-originally-present (memq 'xref-pulse-momentarily
+                                             xref-after-jump-hook)))
+    (remove-hook 'xref-after-jump-hook 'recenter)
+    (remove-hook 'xref-after-jump-hook 'xref-pulse-momentarily)
+
+    (add-hook 'xref-after-return-hook
+              #'lightemacs-default-settings--recenter-maybe 70)
+
+    (add-hook 'xref-after-jump-hook
+              'lightemacs-default-settings--recenter-maybe 70)
+    (when xref-pulse-originally-present
+      (add-hook 'xref-after-jump-hook 'xref-pulse-momentarily 71))))
+
+;;; Target hooks
+
+;;(setq-local package-lint-main-file
+;;            (file-name-nondirectory
+;;             (buffer-file-name (buffer-base-buffer))))
+
+(defun my-prevent-execution-only-when-code-checker-allowed (orig-fun &rest args)
+  "Execute ORIG-FUN with ARGS only if it is allowed.
+This function is intended for use as :around advice."
+  (when (and (fboundp 'my-code-checker-allowed-p)
+             (my-code-checker-allowed-p))
+    (apply orig-fun args)))
+
+(with-eval-after-load 'le-apheleia
+  (advice-add 'apheleia-mode :around
+              #'my-prevent-execution-only-when-code-checker-allowed))
+
+(with-eval-after-load 'le-flymake
+  (advice-add 'flymake-mode :around
+              #'my-prevent-execution-only-when-code-checker-allowed))
+
+;;; Flymake
+
+(defun my-path-inside-p (path1 path2)
+  "Check if PATH2 is inside PATH1."
+  (let ((absolute-path1 (file-truename path1))
+        (absolute-path2 (file-truename path2)))
+    (string-prefix-p absolute-path1 absolute-path2)))
+
+(defun my-code-checker-allowed-p (&optional file-name)
+  "Return t if code checking is allowed for current buffer or specified file.
+
+If FILE-NAME is provided and non-nil, use it as the filename. Otherwise, use the
+buffer's associated file name.
+
+Returns: boolean: t if code checking is allowed, nil otherwise."
+  (if (bound-and-true-p config-buffer-enable-syntax-checkers)
+      t
+    (let* ((file-name (if file-name
+                          file-name
+                        (buffer-file-name (buffer-base-buffer))))
+           (base-name (when file-name
+                        (file-name-nondirectory file-name))))
+      (when (and file-name
+                 base-name
+                 (not (string-match-p "cookiecutter" file-name))
+                 (not (string-match-p "/forks/" file-name))
+                 (not (string-prefix-p "tmp-" base-name))
+                 (my-path-inside-p "~/src" file-name)
+                 (not (my-path-inside-p "~/src/other" file-name))
+                 (not (string-suffix-p "/PKGBUILD" file-name))
+                 (not (string-suffix-p ".ebuild" file-name)))
+        (setq-local config-buffer-enable-syntax-checkers t)
+        t))))
+
+(defun my-limit-package-lint-flymake-setup-a (orig-fn &rest args)
+  "Limit package lint flymake setup.
+ORIG-FN and ARGS is the functions and its arguments."
+  ;;(setq-local package-lint-main-file
+  ;;            (file-name-nondirectory
+  ;;             (buffer-file-name (buffer-base-buffer))))
+  (when (my-code-checker-allowed-p)
+    (let* ((filename (buffer-file-name (buffer-base-buffer)))
+           (basename (if filename (file-name-nondirectory filename) "")))
+      (when (and filename
+                 (not (string= basename ".dir-locals.el"))
+                 (not (string= basename ".dir-config.el"))
+                 (not (string= basename ".dir-settings.el"))
+                 (not (string= basename "init.el"))
+                 (not (string= basename "early-init.el"))
+                 (not (string-prefix-p "le-" basename)))
+        (apply orig-fn args)))))
+
+(with-eval-after-load 'le-package-lint-flymake
+  (advice-add 'package-lint-flymake-setup :around
+              #'my-limit-package-lint-flymake-setup-a))
+
+;; ignore pckage lint: The word "emacs" is redundant in Emacs package names.
+
+(defun my-package-lint-ignore (orig-fun desc)
+  "Bypass the \"emacs\" name check for files in a specific directory.
+ORIG-FUN is the advised function.  DESC is the package description struct."
+  (let ((target-dir (expand-file-name "~/src/emacs/lightemacs")))
+    (if (and (buffer-file-name (buffer-base-buffer))
+             (file-in-directory-p buffer-file-name target-dir))
+        ;; Condition met: return nil to skip the original function
+        nil
+      ;; Condition not met: execute the original function
+      (funcall orig-fun desc))))
+
+(with-eval-after-load 'package-lint
+  ;; Apply the :around advice to the specific package-lint function
+
+  (advice-add 'package-lint--check-package-summary :around
+              #'my-package-lint-ignore)
+
+  (advice-add 'package-lint--check-no-emacs-in-package-name :around
+              #'my-package-lint-ignore))
+
+
+
+;;; dired
+
+(defun my-dired-get-file-open-command (file-path)
+  "Return FILE-PATH corresponding command from `dired-guess-shell-alist-user'."
+  (let* ((case-fold-search nil)
+         (result (seq-find (lambda (pattern)
+                             (string-match-p (car pattern) file-path))
+                           dired-guess-shell-alist-user)))
+    (when result
+      (car (cdr result)))))
+
+(defun my-dired-open-with-external-command ()
+  "Open the current file in `dired' using an external command based on file type."
+  (interactive nil dired-mode)
+  (if (and (fboundp 'dired-get-file-for-visit)
+           (fboundp 'dired--find-possibly-alternative-file)
+           (let* ((file (dired-get-file-for-visit)))
+             (let ((shell-cmd (my-dired-get-file-open-command file)))
+               (if shell-cmd
+                   (progn
+                     ;; (message "[RUN] %s %s" shell-cmd file)
+                     (if (fboundp 'quick-fasd-add-path)
+                         (quick-fasd-add-path file)
+                       (message "Warning: Undefined: `quick-fasd-add-path'"))
+                     (call-process shell-cmd nil nil nil file))
+                 (dired--find-possibly-alternative-file file)))))
+      (error "Undefined: dired-get-file-for-visit or dired--find-possibly-alternative-file")))
+
+(with-eval-after-load 'dired
+
+  ;; --------------------------------------------------------------------------
+  ;; Functions
+  ;; --------------------------------------------------------------------------
+  (defun my-dired-home ()
+    "Dired home."
+    (interactive)
+    (dired "~/"))
+
+  ;; --------------------------------------------------------------------------
+  ;; Abbreviate dired header
+  ;; https://emacs.stackexchange.com/questions/33799/is-there-any-way-to-abbreviate-dired-header
+  ;;
+  ;; I modified it to make it only modify the first line
+  ;;
+  ;; NOTE: does not work. it sometimes changes where the directory is
+  ;; --------------------------------------------------------------------------
+  ;; TODO: Contribution to Emacs?
+  ;; (defvar dired-abbreviate-header t)
+  ;;
+  ;; (defun my-dired-readin-abbreviate-header (&rest _)
+  ;;   "Abbreviate home directory path to '~' in the first line of the buffer."
+  ;;   (when dired-abbreviate-header
+  ;;     (save-excursion
+  ;;       (goto-char (point-min))
+  ;;       (let ((inhibit-read-only t)
+  ;;             (case-fold-search nil)
+  ;;             (home (expand-file-name "~"))
+  ;;             (line-end (line-end-position)))
+  ;;         (while (search-forward home line-end t)
+  ;;           (replace-match "~" t t))))))
+  ;;
+  ;; (advice-add 'dired-readin :after 'my-dired-readin-abbreviate-header)
+
+  ;; --------------------------------------------------------------------------
+  ;; Using xdg-open/open/start for certain filetypes
+  ;; --------------------------------------------------------------------------
+  (defvar my-dired-xdg-open-cmd nil)
+
+  (defun my-dired-xdg-open ()
+    "Make Dired open the file under the cursor."
+    (interactive)
+    ;; Removed: (dired-get-filename nil t)
+    (if (fboundp 'dired-get-file-for-visit)
+        (let* ((file (dired-get-file-for-visit)))
+          (when my-dired-xdg-open-cmd
+            (call-process my-dired-xdg-open-cmd nil nil nil file)))
+      (error "Undefined: dired-get-file-for-visit")))
+
+  (when-let* ((cmd (cond (IS-MAC "open")
+                         (IS-LINUX "xdg-open")
+                         (IS-WINDOWS "start"))))
+    (when cmd
+      (setq my-dired-xdg-open-cmd cmd)
+      (setq dired-guess-shell-alist-user
+            `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
+              ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
+              ("\\.\\(?:xcf\\)\\'" ,cmd)
+              ("\\.tex\\'" ,cmd)
+              ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
+              ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)
+              ;; ("\\.csv\\'" ,cmd)
+              ;; ("\\.html?\\'" ,cmd)
+              ;; ("\\.md\\'" ,cmd)
+              ))))
+
+  ;; Advise `dired-find-file' to use `my-dired-open-with-external-command'
+  ;; instead
+  (advice-add 'dired-find-file :override #'my-dired-open-with-external-command))
+
 ;;; Local variables
 
 ;; Local variables:
@@ -2506,4 +3006,4 @@ ignored and logged as a warning. All other errors are re-raised."
 
 (provide 'config)
 
-;; config.el ends here
+;;; config.el ends here

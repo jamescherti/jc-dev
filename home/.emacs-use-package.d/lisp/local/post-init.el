@@ -30,10 +30,7 @@
 ;;; Code:
 
 (when (daemonp)
-  (message "[INIT] post-early-init"))
-
-;; (when (fboundp 'minimal-emacs-load-user-init)
-;;   (minimal-emacs-load-user-init "post-early-init2.el"))
+  (message "[INIT] post-init"))
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars lexical)
