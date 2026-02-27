@@ -177,15 +177,16 @@ OBJECT can be nil (current window), a window, or a frame."
 ;; -----------------------------------------------
 ;; PULSE
 ;; -----------------------------------------------
-(defun mod-kirigami-pulse (_action)
-  "Visually emphasize the current line after a Kirigami folding operation.
-ACTION identifies the completed folding operation and is ignored by
-this function. The function produces a brief, transient highlight on
-the line at point, providing visual feedback that the folding change
-has finished."
-  (pulse-momentary-highlight-one-line))
-
-(add-hook 'kirigami-post-action-functions #'mod-kirigami-pulse)
+;; (defun mod-kirigami-pulse (_action)
+;;   "Visually emphasize the current line after a Kirigami folding operation.
+;; ACTION identifies the completed folding operation and is ignored by
+;; this function. The function produces a brief, transient highlight on
+;; the line at point, providing visual feedback that the folding change
+;; has finished."
+;;   (pulse-momentary-highlight-one-line)
+;;   )
+;;
+;; (add-hook 'kirigami-post-action-functions #'mod-kirigami-pulse)
 
 
 (provide 'mod-kirigami)

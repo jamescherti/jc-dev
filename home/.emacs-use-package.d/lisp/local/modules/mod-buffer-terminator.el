@@ -125,11 +125,6 @@
      ;;                    buffer)))
      ;;  :keep)
 
-     (file-name
-      (cond
-       ((and file-name (string-suffix-p "/todo.org" file-name))
-        :keep)))
-
      (t
       (let ((buffer-name (buffer-name)))
         (cond

@@ -2733,6 +2733,37 @@ If COUNT is given, move COUNT - 1 lines downward first."
       (when (fboundp 'bufferwizard-replace-symbol-at-point)
         (bufferwizard-replace-symbol-at-point))))))
 
+
+;;; better vc
+
+(defun mod-better-vc-diff ()
+  "Save and call `vc-diff' silently."
+  (interactive)
+  (let ((inhibit-message t))
+    (when (fboundp 'buffer-guardian-save-buffer)
+      (buffer-guardian-save-buffer))
+    (vc-diff)))
+
+(defun mod-better-vc-git-toplevel ()
+  "Opens the directory returned by `git rev-parse --show-toplevel`."
+  (interactive)
+  (let ((git-toplevel (vc-root-dir)))
+    (cond
+     ((and git-toplevel (file-directory-p git-toplevel))
+      (find-file git-toplevel)
+      (user-error "Git top-level directory not found"))
+
+     (t
+      (user-error "Not a Git repository")))))
+
+(with-eval-after-load 'evil
+  ;; (evil-define-key 'normal 'global (kbd "<leader>vl") #'better-vc-version-diff-main)
+  ;; (evil-define-key 'normal 'global (kbd "<leader>vd") #'vc-print-log)
+  (define-key evil-normal-state-map (kbd "<leader>gt") #'mod-better-vc-git-toplevel)
+  (define-key evil-normal-state-map (kbd "<leader>vt") #'mod-better-vc-git-toplevel)
+  (define-key evil-normal-state-map (kbd "<leader>vd") #'mod-better-vc-diff)
+  (define-key evil-normal-state-map (kbd "<leader>vb") #'vc-print-branch-log))
+
 ;;; Provide
 
 (provide 'my-config-evil)

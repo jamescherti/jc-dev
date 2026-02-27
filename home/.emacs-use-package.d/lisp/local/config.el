@@ -507,6 +507,7 @@
                            ;; le-display-line-numbers  ;; mod-misc provides its own
                            mod-defun
                            mod-misc  ; misc=begin
+                           mod-misc2
 
                            ;; tmp-easysession
                            buffer-guardian
@@ -833,11 +834,7 @@ WIDTH is the tab width."
 
   (with-eval-after-load 'le-dired-filter
     (add-hook 'lightemacs-dired-filter-setup-hook
-              'dired-filter-by-git-ignored)
-
-    ;; (when lightemacs-dired-omit-parent-directory
-    ;;   (setq dired-omit-files (concat dired-omit-files "\\|^/home/work/\\.\\|~/\\.")))
-    )
+              'dired-filter-by-git-ignored))
 
   ;; Prevent yasnippet from highlighting inserted fields, you need to modify the
   ;; display face that it uses for overlays. This is done by changing the
