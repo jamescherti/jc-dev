@@ -33,6 +33,10 @@
 
 (setq debug-on-error t)
 
+(defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
+(defconst IS-MAC (eq system-type 'darwin))
+(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
+
 ;;---------------------------------------->TMP
 (defvar my-session-temp-directory
   (file-name-as-directory (make-temp-file "emacs-session-" t))
