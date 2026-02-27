@@ -30,6 +30,7 @@
 (require 'my-defun)
 (require 'le-core-defun)  ; lightemacs-save-window-start
 (require 'lightemacs-use-package)  ; lightemacs-save-window-start
+(require 'mod-project)
 
 ;;; Better evil
 
