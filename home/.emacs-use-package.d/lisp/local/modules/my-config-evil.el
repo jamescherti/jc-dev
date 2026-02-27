@@ -2251,6 +2251,30 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;;; use-package bufferwizard
 
+(when (eq lightemacs-package-manager 'use-package)
+  (lightemacs-use-package bufferwizard
+    :ensure nil
+    :vc (:url "https://github.com/jamescherti/bufferwizard.el"
+              :rev :newest)
+    :commands (bufferwizard-clone-and-switch-to-indirect-buffer
+               bufferwizard-unhighlight
+               bufferwizard-toggle-highlight-at-point
+               bufferwizard-switch-to-base-buffer
+               bufferwizard-replace-symbol-at-point)
+
+    :init
+    ;; Indirect buffer
+    (evil-define-key 'normal 'global (kbd "<leader>ec") #'bufferwizard-clone-and-switch-to-indirect-buffer)
+    (evil-define-key 'normal 'global (kbd "<leader>eC") #'bufferwizard-switch-to-base-buffer)
+
+    ;; Rename
+    (evil-define-key 'normal 'global (kbd "<leader>R") #'bufferwizard-replace-symbol-at-point)
+
+    ;; Highlight
+    ;; (evil-define-key 'normal 'global (kbd "C-h") #'bufferwizard-toggle-highlight-at-point)
+    (evil-define-key 'normal 'global (kbd "<leader>eh") #'bufferwizard-toggle-highlight-at-point)
+    (evil-define-key 'normal 'global (kbd "<leader>eH") #'bufferwizard-unhighlight)))
+
 (defun pkg-bufferwizard-smart-rename ()
   "Smartly decide how to rename the symbol at point."
   (interactive)
