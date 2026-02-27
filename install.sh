@@ -109,7 +109,7 @@ secure_dir() {
   fi
 }
 
-sync_home() {
+copy_dotfiles() {
   echo "---------------------------------------------------------------------"
   echo " UPDATE-HOME: $HOME"
   echo "---------------------------------------------------------------------"
@@ -317,18 +317,13 @@ config-pip-packages() {
 
 main() {
   init
-
   confirm
-  sync_home
 
+  copy_dotfiles
   config-jc-dotfiles
   config-bash-stdops
   config-lightvim
-  config-firefox
-  config-gnome
-  config-xfce
 
-  config-mimetypes
   config-project-list
   config-startup-apps
 
@@ -336,6 +331,11 @@ main() {
   config-files
 
   config-pip-packages
+
+  config-firefox
+  config-gnome
+  config-xfce
+  config-mimetypes
 
   echo
   echo Success.
