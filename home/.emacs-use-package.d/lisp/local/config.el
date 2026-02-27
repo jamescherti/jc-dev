@@ -70,9 +70,6 @@
 (setq lightemacs-optional-modules '(
                                     ;; mod-misc2
                                     ;; mod-defun
-                                    ;; mod-evil
-                                    ;; mod-better-vc
-                                    ;; mod-org
                                     ))
 
 (setq lightemacs-recentf-track-switch-to-buffer t)
@@ -390,7 +387,7 @@
                            le-undo-fu
                            le-undo-fu-session
                            le-vim-tab-bar
-                           ;; le-evil-commentary  ; I am using my own in mod-evil
+                           ;; le-evil-commentary  ; I am using my own
 
                            le-buffer-terminator
                            le-kirigami
@@ -497,10 +494,7 @@
 
                            ;; Legacy (DEPRECATED)
                            ;; mod-defun
-                           ;; mod-misc2
-                           ;; mod-evil
-                           ;; mod-better-vc
-                           ;; mod-org
+                           mod-misc2
 
                            ;; New
                            mod-misc  ; misc=begin

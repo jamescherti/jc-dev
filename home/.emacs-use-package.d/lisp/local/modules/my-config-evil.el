@@ -2345,6 +2345,34 @@ column layout, except when a point falls on the first visible line."
 (define-key evil-normal-state-map (kbd "M-e") 'evilcursor-scroll-line-up)
 (define-key evil-normal-state-map (kbd "M-y") 'evilcursor-scroll-line-down)
 
+;;; bufferfile
+
+(use-package bufferfile
+  :ensure t
+  :commands (bufferfile-copy
+             bufferfile-rename
+             bufferfile-delete
+             bufferfile-dired-do-rename)
+  :init
+  (evil-define-key 'normal 'global (kbd "<leader>ur") #'bufferfile-rename)
+  (evil-define-key 'normal 'global (kbd "<leader>ud") #'bufferfile-delete)
+  ;; Override Dired's rename behavior to use bufferfile rename functions,
+  ;; ensuring buffers visiting the renamed file are updated accordingly.
+  (with-eval-after-load 'dired
+    (define-key dired-mode-map (kbd "R") 'bufferfile-dired-do-rename))
+
+  :custom
+  (bufferfile-use-vc t)
+
+  ;; If non-nil, display messages during file renaming operations
+  (bufferfile-verbose nil)
+
+  ;; If non-nil, enable using version control (VC) when available
+  (bufferfile-use-vc nil)
+
+  ;; Specifies the action taken after deleting a file and killing its buffer.
+  (bufferfile-delete-switch-to 'parent-directory))
+
 ;;; Provide
 
 (provide 'my-config-evil)
