@@ -796,6 +796,7 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+
   (setq hs-hide-comments-when-hiding-all nil)
   (setq hs-isearch-open t)  ;; Open both comments and code
   (add-hook 'lua-mode-hook #'hs-minor-mode)
@@ -2137,33 +2138,41 @@ ignored and logged as a warning. All other errors are re-raised."
   (advice-add 'flymake-proc-legacy-flymake :around
               #'my-flymake-proc-legacy-safe-advice))
 
-;;; Display buffer alist
-
-(add-to-list 'display-buffer-alist
-             `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
-               display-buffer-in-side-window
-               (side . right)
-               (slot . 0)
-               (window-parameters . ((no-delete-other-windows . t)))
-               (window-width . 100)
-               (dedicated . t)))
-
-(add-to-list 'display-buffer-alist '("\\*CPU-Profiler-Report"
-                                     (display-buffer-at-bottom)))
-
-(add-to-list 'display-buffer-alist '("\\*Memory-Profiler-Report"
-                                     (display-buffer-at-bottom)))
-
-(add-to-list 'display-buffer-alist '("\\*Calendar\\*"
-                                     (display-buffer-at-bottom)))
-
-(add-to-list 'display-buffer-alist '("\\*tmux"
-                                     (display-buffer-same-window)))
-
-(add-to-list 'display-buffer-alist '("\\*grep\\*"
-                                     (display-buffer-same-window)))
-
 ;;; Always current window
+
+(defun my-config-display-buffer-alist ()
+  "Config display buffer alist."
+
+
+  ;; Display buffer alist
+
+  (add-to-list 'display-buffer-alist '("\\*pathaction:"
+                                       (display-buffer-at-bottom)
+                                       (window-height . 0.33)))
+
+  (add-to-list 'display-buffer-alist
+               `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
+                 display-buffer-in-side-window
+                 (side . right)
+                 (slot . 0)
+                 (window-parameters . ((no-delete-other-windows . t)))
+                 (window-width . 100)
+                 (dedicated . t)))
+
+  (add-to-list 'display-buffer-alist '("\\*CPU-Profiler-Report"
+                                       (display-buffer-at-bottom)))
+
+  (add-to-list 'display-buffer-alist '("\\*Memory-Profiler-Report"
+                                       (display-buffer-at-bottom)))
+
+  (add-to-list 'display-buffer-alist '("\\*Calendar\\*"
+                                       (display-buffer-at-bottom)))
+
+  (add-to-list 'display-buffer-alist '("\\*tmux"
+                                       (display-buffer-same-window)))
+
+  (add-to-list 'display-buffer-alist '("\\*grep\\*"
+                                       (display-buffer-same-window))))
 
 (defun current-window-only--setup-display-buffer-alist ()
   "Setup display buffer alist."
@@ -2230,7 +2239,10 @@ ignored and logged as a warning. All other errors are re-raised."
 
   (current-window-only--setup-display-buffer-alist))
 
-(current-window-only-setup)
+(defun lightemacs-user-pre-init ()
+  "pre-init config."
+  (my-config-display-buffer-alist)
+  (current-window-only-setup))
 
 ;;; tree sitter
 
