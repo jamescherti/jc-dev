@@ -3394,7 +3394,295 @@ session ends."
 
     (goto-char original-point)))
 
+(with-eval-after-load 'evil
+  (defun evileval-buffer ()
+    "Evaluate the current buffer and display a message."
+    (interactive)
+    (unless (derived-mode-p 'emacs-lisp-mode)
+      (user-error "This function supports only emacs-lisp-mode"))
+    (eval-buffer)
+    ;; (when (featurep package-name)
+    ;;   (unload-feature package-name t))
+    ;; (load (buffer-file-name (buffer-base-buffer)))
+    (message "Buffer evaluated!"))
 
+  (defun evileval-region ()
+    "Evaluate the current region and display a message."
+    (interactive)
+    (unless (or (derived-mode-p 'markdown-mode)
+                (derived-mode-p 'org-mode)
+                (derived-mode-p 'emacs-lisp-mode))
+      (error "This function supports only emacs-lisp-mode"))
+    (if (use-region-p)
+        (progn
+          (eval-region (region-beginning) (region-end))
+          (message "Region evaluated!"))
+      (message "No region selected!")))
+  (when (fboundp 'evil-define-key)
+    (evil-define-key 'normal 'global (kbd "<leader>er") 'evileval-region)
+    (evil-define-key 'normal 'global (kbd "<leader>eb") 'evileval-buffer))
+
+  ;; Goto end buffer
+  (define-key evil-normal-state-map "G" 'my-goto-end-of-buffer)
+
+  ;; Enhanced versions of `evil-shift-right' and `evil-shift-left' for visual
+  ;; mode. These functions shift the selected region to the right or left, then
+  ;; temporarily exit normal mode to ensure the visual selection is restored
+  ;; correctly. This provides a smoother experience when indenting multiple
+  ;; lines in Evil visual mode, preserving the selection and allowing repeated
+  ;; shifts without losing the highlighted region.
+  (defun lightemacs-evil-shift-right ()
+    "Shift the selected region to the right, preserving the selection."
+    (interactive)
+    (when (and (fboundp 'evil-shift-right)
+               (fboundp 'evil-normal-state)
+               (fboundp 'evil-visual-restore))
+      (evil-shift-right evil-visual-beginning evil-visual-end 1 nil)
+      (evil-normal-state)
+      (evil-visual-restore)))
+
+  (defun lightemacs-evil-shift-left ()
+    "Shift the selected region to the left, preserving the selection."
+    (interactive)
+    (when (and (fboundp 'evil-shift-left)
+               (fboundp 'evil-normal-state)
+               (fboundp 'evil-visual-restore))
+      (evil-shift-left evil-visual-beginning evil-visual-end 1 nil)
+      (evil-normal-state)
+      (evil-visual-restore)))
+  (if (fboundp 'evil-define-key)
+      (evil-define-key 'visual 'global
+        (kbd ">") 'lightemacs-evil-shift-right
+        (kbd "<") 'lightemacs-evil-shift-left))
+
+  ;; The `evil-search-next` and `evil-search-previous` functions can sometimes
+  ;; leave the buffer window scrolled horizontally. This advice adds an around
+  ;; advice to these functions that resets the horizontal scroll position
+  ;; (`set-window-hscroll`) to 0 when navigating using search, so the user is
+  ;; presented with the correct starting point for their next search.
+
+  (defun my-advice-search-next (orig-fun &rest args)
+    "Advice for search-next to reset horizontal scroll position.
+  ORIG-FUN is the function and ARGS the arguments."
+    (when (/= 0 (window-hscroll))
+      (set-window-hscroll nil 0))
+    (apply orig-fun args))
+
+  (defun my-advice-search-previous (orig-fun &rest args)
+    "Advice for search-previous to reset horizontal scroll position.
+  ORIG-FUN is the function and ARGS the arguments."
+    (when (/= 0 (window-hscroll))
+      (set-window-hscroll nil 0))
+    (apply orig-fun args))
+
+  (with-no-warnings
+    (advice-add 'search-next :around #'my-advice-search-next)
+    (advice-add 'search-previous :around #'my-advice-search-previous))
+
+  ;; Join the current line and the next one while preserving the cursor position.
+  (defun evilcursor-join-normal ()
+    "Join the current line and the next one while preserving the cursor position."
+    (interactive)
+    (when (fboundp 'evil-join)
+      (save-excursion
+        (evil-join (line-beginning-position) (line-end-position)))))
+  (when (fboundp 'evil-define-key)
+    (evil-define-key 'normal 'global (kbd "J") 'evilcursor-join-normal)
+    (evil-define-key 'visual 'global (kbd "J") 'evil-join))
+
+  ;; M-[ and M-]: Previous and next section
+  (defun my-evil-forward-section-end ()
+    "Move to the next section."
+    (interactive)
+    (execute-kbd-macro (read-kbd-macro "]]")))
+  (defun my-evil-backward-section-end ()
+    "Move to the previous section."
+    (interactive)
+    (execute-kbd-macro (read-kbd-macro "[[")))
+  (when (fboundp 'evil-define-key)
+    (evil-define-key 'normal 'global (kbd "<leader>j") #'my-uncomment-and-join-region)
+    (evil-define-key 'visual 'global (kbd "<leader>j") #'my-uncomment-and-join-region)
+    (when (display-graphic-p)
+      ;; Only on display-graphic-p because the M-[ issue occurs because modern
+      ;; terminals use "Escape sequences" beginning with the ESC [ characters (the
+      ;; byte-level equivalent of M-[) to communicate complex input like mouse
+      ;; movements, pixel-perfect clicks, and bracketed pastes. When you bind a
+      ;; custom command to M-[ in your Emacs configuration, you effectively
+      ;; "highjack" the prefix of these incoming messages; Emacs consumes the first
+      ;; two characters to trigger your function, leaving the remaining coordinate
+      ;; or paste data orphaned and uninterpreted. Consequently, the terminal’s
+      ;; attempt to say "the mouse clicked at these coordinates" is chopped up, and
+      ;; the tail end of that technical string—the "gibberish" you see—is dumped
+      ;; directly into your buffer as literal text. Would you like me to provide a
+      ;; snippet to identify exactly which command is currently "stealing" that M-[
+      ;; prefix?
+      (evil-define-key '(insert motion) 'global (kbd "M-[")
+        'my-evil-backward-section-end))
+    (evil-define-key '(insert motion) 'global (kbd "M-]")
+      'my-evil-forward-section-end))
+
+  ;; Do not fail when the kill-ring is empty
+  ;; To prevent the p command in Evil mode from failing when the paste ring
+  ;; (akin to the clipboard in Vim) is empty, you can redefine the paste
+  ;; function to check if the ring is empty before attempting to paste. Here’s
+  ;; how you can do it using Emacs Lisp:
+  (defun ignore-empty-ring-errors (orig-func &rest args)
+    "Ignore errors related to the empty ring when calling ORIG-FUNC with ARGS."
+    (condition-case nil
+        (apply orig-func args)
+      (error (message "Nothing to paste!") nil)))
+  (with-no-warnings
+    (advice-add 'evil-paste-after :around #'ignore-empty-ring-errors)
+    (advice-add 'evil-paste-before :around #'ignore-empty-ring-errors))
+
+  (define-key evil-normal-state-map (kbd "C-s") #'my-evil-save)
+  (define-key evil-insert-state-map (kbd "C-s") #'my-evil-save)
+  (define-key evil-visual-state-map (kbd "C-s") #'my-evil-save)
+
+  (defun evilclipboard-select-pasted ()
+    "Visually select last pasted text."
+    (interactive)
+    (when (and (fboundp 'evil-goto-mark)
+               (fboundp 'evil-visual-char))
+      (evil-goto-mark ?\[)
+      (evil-visual-char)
+      (evil-goto-mark ?\])))
+  (with-no-warnings
+    (define-key evil-normal-state-map (kbd "gp") #'evilclipboard-select-pasted)
+    (define-key evil-normal-state-map (kbd "<leader>gp") #'evilclipboard-select-pasted))
+
+  (setopt evil-want-Y-yank-to-eol t)
+
+  (when (fboundp 'evil-set-leader)
+    (evil-set-leader 'normal (kbd ","))
+    (evil-set-leader 'visual (kbd ",")))
+
+  (when (fboundp 'evil-define-key)
+    (evil-define-key 'normal 'global (kbd "<leader>ev") #'tab-bar-switch-to-tab)
+    (evil-define-key '(visual normal insert) 'global (kbd "M-p") #'project-switch-project)
+
+    (evil-define-key 'insert 'global (kbd "M-H") 'evil-backward-word-begin)
+    (evil-define-key 'insert 'global (kbd "M-L") 'evil-forward-word-begin)
+
+    (with-eval-after-load 'icomplete
+      (evil-define-key 'normal icomplete-fido-mode-map (kbd "j") 'icomplete-forward-completions)
+      (evil-define-key 'normal icomplete-fido-mode-map (kbd "k") 'icomplete-backward-completions)
+      (evil-define-key 'normal icomplete-fido-mode-map (kbd "<down>") 'icomplete-forward-completions)
+      (evil-define-key 'normal icomplete-fido-mode-map (kbd "<up>") 'icomplete-backward-completions)
+      (evil-define-key 'insert icomplete-fido-mode-map (kbd "M-j") 'icomplete-forward-completions)
+      (evil-define-key 'insert icomplete-fido-mode-map (kbd "M-k") 'icomplete-backward-completions))
+
+    (with-eval-after-load 'eat
+      ;; Causes problems
+      ;; (evil-define-key 'insert eat-mode-map (kbd "C-c")
+      ;;   #'eat-self-input)
+      (evil-define-key 'insert eat-mode-map (kbd "M-<left>") 'eat-self-input)
+      (evil-define-key 'insert eat-mode-map (kbd "M-<right>") 'eat-self-input)
+      (evil-define-key 'insert eat-mode-map (kbd "M-j") 'eat-self-input)
+      (evil-define-key 'insert eat-mode-map (kbd "M-k") 'eat-self-input)
+      (evil-define-key 'insert eat-mode-map (kbd "M-H") 'eat-self-input)
+      (evil-define-key 'insert eat-mode-map (kbd "M-L") 'eat-self-input))
+
+    (with-eval-after-load 'dired
+      (evil-define-key 'normal dired-mode-map (kbd "~") 'my-dired-home))
+
+    (evil-define-key 'normal 'global (kbd "<leader>im") 'inhibit-mouse-mode)
+    (evil-define-key 'normal 'global (kbd "<leader>ib") #'ibuffer))
+  ;;; Automatic removal of spaces
+  (add-hook 'evil-insert-state-entry-hook #'my-evil-disable-remove-spaces)
+
+  (define-key evil-normal-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
+  (define-key evil-insert-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
+  (define-key evil-visual-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
+  (with-eval-after-load 'messages-buffer-mode
+    (define-key messages-buffer-mode-map (kbd "C-l") #'evilbuffer-clear-highlights))
+
+  (define-key evil-normal-state-map (kbd "<leader>wr") #'evilbuffer-toggle-truncate-line)
+  (define-key evil-normal-state-map (kbd "<leader>eB") #'evilbuffer-erase)
+
+  ;; TODO patch evil: this should restore point with :restore-point t
+  (when (fboundp 'evil-fill-and-move)
+    (with-no-warnings
+      (evil-define-operator my-evil-fill-and-move-operator (beg end)
+        "Fill text and move point to the end of the filled region BEG and END.
+This enhancement prevents the cursor from moving."
+        :move-point nil
+        :type line
+        :restore-point t
+        (save-excursion
+          (evil-fill-and-move beg end))))
+    (define-key evil-normal-state-map "gq" 'my-evil-fill-and-move-operator))
+
+  ;; It seems to only work when declared as default
+  (defun my-setup-evil-mode ()
+    "Removed: `git-rebase-mode' erc-mode circe-server-mode circe-chat-mode."
+    ;; circe-query-mode sauron-mode
+    (dolist (mode '(vterm-mode
+                    eat-mode
+                    ;;custom-mode
+                    ;; eshell-mode
+                    ;; term-mode
+                    ))
+      (add-to-list 'evil-emacs-state-modes mode)))
+  (add-hook 'evil-mode-hook 'my-setup-evil-mode)
+
+  (when (daemonp)
+    (global-set-key (kbd "C-x C-c") 'my-save-buffers-kill-emacs))
+
+  (define-key evil-normal-state-map (kbd "C-q") 'my-save-buffers-kill-emacs)
+
+  ;; (evil-select-search-module 'evil-search-module 'evil-search)
+
+  ;; Make goto mark use ' to restore the column
+  (define-key evil-motion-state-map "`" 'evil-goto-mark-line)
+  (define-key evil-motion-state-map "'" 'evil-goto-mark)
+
+  ;; Useful to insert a quote instead of two quotes when packages such as electric quote are activated
+  (define-key evil-insert-state-map (kbd "C-\"") (lambda () (interactive) (insert "\"")))
+
+  (global-set-key (kbd "M-c") nil)  ;; Change the word to uppercase in Emacs
+  (global-set-key (kbd "M-v") nil)  ;; scroll the buffer up by one screenful
+  (global-set-key (kbd "M-z") nil)  ;; Zap to char (delete text from the current cursor position up to a specific character)
+
+  (define-key evil-insert-state-map (kbd "C-a") nil)
+  (define-key evil-insert-state-map (kbd "A-DEL") 'evil-delete-backward-word)
+  (define-key evil-insert-state-map (kbd "C-<Backspace>") 'evil-delete-backward-word)
+  (define-key evil-normal-state-map (kbd "gdp") 'delete-pair)
+  (define-key evil-normal-state-map (kbd "<leader>p") 'delete-pair)
+  (define-key evil-normal-state-map (kbd "<leader>k") 'describe-key)
+  (define-key evil-insert-state-map (kbd "C-e") 'move-end-of-line)
+  (define-key evil-insert-state-map (kbd "C-b") 'move-beginning-of-line)
+
+
+  (define-key evil-visual-state-map (kbd "u") 'ignore) ;; Disable lower/upper case region
+  (define-key evil-visual-state-map (kbd "U") 'ignore) ;; Disable lower/upper case region
+  (define-key evil-visual-state-map (kbd "C-c") 'evil-yank)
+
+  (define-key evil-normal-state-map (kbd "<leader>gs") 'global-text-scale-adjust)
+  (define-key evil-normal-state-map (kbd "<leader>cf") 'my-temporary-file)
+  (define-key evil-normal-state-map (kbd "<leader>ce") 'my-temporary-diff)
+  (define-key evil-normal-state-map (kbd "<leader>t")  'my-tab-split)
+  (define-key evil-normal-state-map (kbd "<leader>T")  'tab-bar-change-tab-group)
+  (define-key evil-normal-state-map (kbd "<leader>em") 'toggle-menu-bar-mode-from-frame)
+  (define-key evil-normal-state-map (kbd "<leader>ww") 'my-wip)
+  (define-key evil-normal-state-map (kbd "<leader>W")  'my-wip)
+
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "gs") #'evilbuffer-switch-to-scratch-and-clear))
+
+  ;; (when (fboundp 'my-dabbrev-completion-backwards)
+  ;;   (setq evil-complete-next-func #'my-dabbrev-completion-backwards))
+  ;;
+  ;; (when (fboundp 'my-dabbrev-completion-forward)
+  ;;   (setq evil-complete-previous-func #'my-dabbrev-completion-forward))
+  ;; TODO use cape-dabbrev
+  ;; (define-key evil-insert-state-map (kbd "C-p") #'my-dabbrev-completion-backwards)
+  ;; (define-key evil-insert-state-map (kbd "C-n") #'my-dabbrev-completion-forward)
+
+  (defun my-dabbrev-completion-forward-all-buffers (arg)
+    (with-no-warnings
+      (let ((dabbrev-check-all-buffers t))
+        (dabbrev-completion arg)))))
 
 (with-eval-after-load 'vertico
   (when (fboundp 'evil-define-key)
