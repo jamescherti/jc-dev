@@ -495,8 +495,14 @@ This enhancement prevents the cursor from moving."
 (define-key evil-normal-state-map (kbd "<leader>t")  'my-tab-split)
 (define-key evil-normal-state-map (kbd "<leader>T")  'tab-bar-change-tab-group)
 (define-key evil-normal-state-map (kbd "<leader>em") 'toggle-menu-bar-mode-from-frame)
-(define-key evil-normal-state-map (kbd "<leader>ww") 'my-wip)
-(define-key evil-normal-state-map (kbd "<leader>W")  'my-wip)
+
+(defun my-go-home ()
+  "Go home."
+  (if (fboundp 'my-wip)
+      (my-wip)
+    (find-file "~/")))
+(define-key evil-normal-state-map (kbd "<leader>ww") 'my-go-home)
+(define-key evil-normal-state-map (kbd "<leader>W")  'my-go-home)
 
 (define-key evil-normal-state-map (kbd "gs") 'evilbuffer-switch-to-scratch)
 
