@@ -30,18 +30,11 @@
 ;;; Code:
 
 (require 'evil)
+(require 'my-defun)
 
 ;;; Better evil
 
-(defun my-save-buffers-kill-emacs ()
-  "Handle quitting Emacs with daemon-aware frame management."
-  (interactive)
-  (if (and (daemonp)
-           (fboundp 'easysession-save-session-and-close-frames))
-      (easysession-save-session-and-close-frames)
-    (save-buffers-kill-emacs)))
-
-(defun evilbuffer-switch-to-scratch-and-clear ()
+(defun evilbuffer-switch-to-scratch ()
   "Switch to the *scratch* buffer."
   (interactive)
   (scratch-buffer))
@@ -306,14 +299,14 @@
 
 (defun my-advice-search-next (orig-fun &rest args)
   "Advice for search-next to reset horizontal scroll position.
-  ORIG-FUN is the function and ARGS the arguments."
+ORIG-FUN is the function and ARGS the arguments."
   (when (/= 0 (window-hscroll))
     (set-window-hscroll nil 0))
   (apply orig-fun args))
 
 (defun my-advice-search-previous (orig-fun &rest args)
   "Advice for search-previous to reset horizontal scroll position.
-  ORIG-FUN is the function and ARGS the arguments."
+ORIG-FUN is the function and ARGS the arguments."
   (when (/= 0 (window-hscroll))
     (set-window-hscroll nil 0))
   (apply orig-fun args))
@@ -505,7 +498,7 @@ This enhancement prevents the cursor from moving."
 (define-key evil-normal-state-map (kbd "<leader>ww") 'my-wip)
 (define-key evil-normal-state-map (kbd "<leader>W")  'my-wip)
 
-(define-key evil-normal-state-map (kbd "gs") 'evilbuffer-switch-to-scratch-and-clear)
+(define-key evil-normal-state-map (kbd "gs") 'evilbuffer-switch-to-scratch)
 
 ;; (when (fboundp 'my-dabbrev-completion-backwards)
 ;;   (setq evil-complete-next-func #'my-dabbrev-completion-backwards))
@@ -517,9 +510,9 @@ This enhancement prevents the cursor from moving."
 ;; (define-key evil-insert-state-map (kbd "C-n") 'my-dabbrev-completion-forward)
 
 (defun my-dabbrev-completion-forward-all-buffers (arg)
-  (with-no-warnings
-    (let ((dabbrev-check-all-buffers t))
-      (dabbrev-completion arg))))
+  "Advice around `dabbrev-completion', with the same ARG arguments."
+  (let ((dabbrev-check-all-buffers t))
+    (dabbrev-completion arg)))
 
 (with-eval-after-load 'vertico
   ;; TODO move somewhere else like mod-vertico-evil
@@ -612,24 +605,26 @@ This enhancement prevents the cursor from moving."
   "Improved `evil-goto-definition` to open folds correctly in outline mode.
 When IMENU-ONLY is nil it only uses imenu."
   (require 'xref)
-  (let ((previous-point (point))
-        (previous-point-marker (point-marker)))
-    ;; Try imenu first
-    (when (member 'evil-goto-definition-imenu evil-goto-definition-functions)
-      (let ((evil-goto-definition-functions '(evil-goto-definition-imenu)))
-        (evil-goto-definition))
+  (when (fboundp 'xref-push-marker-stack)
+    (let ((previous-point (point))
+          (previous-point-marker (point-marker)))
+      ;; Try imenu first
+      (when (member 'evil-goto-definition-imenu evil-goto-definition-functions)
+        (let ((evil-goto-definition-functions '(evil-goto-definition-imenu)))
+          (evil-goto-definition))
 
-      (when (not (eq previous-point (point)))
-        ;; Add it to the stack because it does not do it by default
-        (xref-push-marker-stack previous-point-marker)
-        (setq imenu-only t)))
+        (when (not (eq previous-point (point)))
+          ;; Add it to the stack because it does not do it by default
+          (xref-push-marker-stack previous-point-marker)
+          (setq imenu-only t)))
 
-    ;; Try the others
-    (unless imenu-only
-      (let ((evil-goto-definition-functions
-             (cl-remove 'evil-goto-definition-imenu
-                        evil-goto-definition-functions)))
-        (evil-goto-definition))))
+      ;; Try the others
+      (unless imenu-only
+        (let ((evil-goto-definition-functions
+               (cl-remove 'evil-goto-definition-imenu
+                          evil-goto-definition-functions)))
+          (evil-goto-definition)))))
+
   (error "Undefined required functions"))
 
 (defun eviljump-goto-definition (&optional force-all)
@@ -859,38 +854,43 @@ guarantees that the new window is selected, as in Vim."
 
 ;; (define-key evil-normal-state-map (kbd "C-p") 'consult-fd)
 
-
 (defun my-consult-grep-dir (&optional dir)
   "Execute ripgrep in the current directory, using the selection if available.
 DIR is the directory."
   (interactive)
   (require 'consult)
-  (let ((selection (when (use-region-p)
-                     (buffer-substring-no-properties (region-beginning)
-                                                     (region-end))))
-        (consult-ripgrep-args (concat (if (fboundp 'consult-ripgrep-args)
-                                          consult-ripgrep-args
-                                        "")
-                                      " --threads "
-                                      (number-to-string (num-processors)))))
-    (when selection
-      (save-excursion
-        (deactivate-mark)))
+  (if (fboundp 'buffer-cwd)
+      (progn
+        (let ((selection (when (use-region-p)
+                           (buffer-substring-no-properties (region-beginning)
+                                                           (region-end))))
+              (consult-ripgrep-args (concat (if (fboundp 'consult-ripgrep-args)
+                                                consult-ripgrep-args
+                                              "")
+                                            " --threads "
+                                            (number-to-string (num-processors)))))
+          (when selection
+            (save-excursion
+              (deactivate-mark)))
 
-    (save-some-buffers t)
-    ;; (buffer-guardian-save-all-buffers)
-    (when (fboundp 'consult-ripgrep)
-      (consult-ripgrep (or dir (buffer-cwd)) selection)
-      (error "Undefined: consult-ripgrep"))))
+          (save-some-buffers t)
+          ;; (buffer-guardian-save-all-buffers)
+          (when (fboundp 'consult-ripgrep)
+            (consult-ripgrep (or dir (buffer-cwd)) selection)
+            (error "Undefined: consult-ripgrep"))))
+    (error "Undefined: buffer-cwd")))
 
 (defun my-consult-grep-project ()
   "Run `consult-fd` in the root directory of the current project."
   (interactive)
-  (require 'consult)
-  (let* ((project (project-current nil "."))
-         (project-root (when (and project (fboundp 'project-root))
-                         (project-root project))))
-    (my-consult-grep-dir (or project-root (buffer-cwd)))))
+  (if (fboundp 'buffer-cwd)
+      (progn
+        (require 'consult)
+        (let* ((project (project-current nil "."))
+               (project-root (when (and project (fboundp 'project-root))
+                               (project-root project))))
+          (my-consult-grep-dir (or project-root (buffer-cwd)))))
+    (error "Undefined: buffer-cwd")))
 
 ;; (evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-project)
 ;; (evil-define-key 'normal 'global (kbd "gr") 'my-consult-grep-dir)
@@ -2029,6 +2029,462 @@ This function is intended for use as :around advice."
 (with-eval-after-load 'le-flymake
   (advice-add 'flymake-mode :around
               #'my-prevent-execution-only-when-code-checker-allowed))
+
+;;; Scroll the window down
+
+(evil-define-command my-evil-scroll-line-down (count)
+  "Scroll the window COUNT lines downward.
+The key distinction from the main option is that this variant preserves the
+column layout, except when a point falls on the first visible line."
+  :repeat nil
+  :keep-visual t
+  (interactive "p")
+  ;; TODO pull request evil mode
+  (scroll-up count))
+
+(with-no-warnings
+  (define-key evil-normal-state-map (kbd "C-e") #'my-evil-scroll-line-down))
+
+;;; M-e/M-y: Scroll line up and down
+
+(evil-define-command evilcursor-scroll-line-up (count)
+  "Scroll the window COUNT lines upwards and move the cursor COUNT downwards."
+  :repeat nil
+  :keep-visual t
+  (interactive "p")
+  (let (scroll-preserve-screen-position)
+    (evil-scroll-line-down count)
+    (evil-next-line count)))
+
+(evil-define-command evilcursor-scroll-line-down (count)
+  "Scroll the window COUNT lines downwards and move the cursor COUNT upwards."
+  :repeat nil
+  :keep-visual t
+  (interactive "p")
+  (let (scroll-preserve-screen-position)
+    (evil-scroll-line-up count)
+    (evil-previous-line count)))
+
+(define-key evil-normal-state-map (kbd "M-e") 'evilcursor-scroll-line-up)
+(define-key evil-normal-state-map (kbd "M-y") 'evilcursor-scroll-line-down)
+
+;;; Silence C-f
+
+(evil-define-command evilcursor-scroll-page-down (count)
+  "Scroll the window COUNT pages downwards.
+This prevents `evil-scroll-page-down' from displaying: End of buffer."
+  :repeat nil
+  :keep-visual t
+  (interactive "p")
+  (ignore-errors (evil-scroll-page-down count)))
+
+(evil-define-key 'motion 'global (kbd "C-f") #'evilcursor-scroll-page-down)
+
+;;; Backward char
+
+(evil-define-motion evilcursor-backward-char (count &optional crosslines noerror)
+  "Move cursor to the left by COUNT characters.
+Movement is restricted to the current line unless CROSSLINES is non-nil.
+If NOERROR is non-nil, don't signal an error upon reaching the beginning
+of the line or the buffer; just return nil."
+  :type exclusive
+  (interactive "<c>" (list evil-cross-lines
+                           (evil-kbd-macro-suppress-motion-error)))
+  (ignore-errors (evil-backward-char count crosslines noerror)))
+
+(evil-define-motion evilcursor-forward-char (count &optional crosslines noerror)
+  "Move cursor to the right by COUNT characters.
+Movement is restricted to the current line unless CROSSLINES is non-nil.
+If NOERROR is non-nil, don't signal an error upon reaching the end
+of the line or the buffer; just return nil."
+  :type exclusive
+  (interactive "<c>" (list evil-cross-lines
+                           (evil-kbd-macro-suppress-motion-error)))
+  (ignore-errors (evil-forward-char count crosslines noerror)))
+
+(evil-define-key 'motion 'global (kbd "l") #'evilcursor-forward-char)
+(evil-define-key 'motion 'global (kbd "h") #'evilcursor-backward-char)
+
+;;; Smart previous/next line
+
+(defun evilcursor--get-category-at-point ()
+  "Get the category at point."
+  (save-excursion
+    (beginning-of-line)
+    (when-let* ((prop (get-text-property
+                       (point)
+                       'category)))
+      (symbol-name prop))))
+
+(defun evilcursor-forward-line (n)
+  "Move N lines forward (backward if N is negative).
+More accurate than `evil-next-line' and `evil-previous-line' when lines are not
+truncated."
+  (interactive)
+  (unless n
+    (setq n 1))
+  (cond
+   ((minibufferp)
+    (let ((forwardp (> (or n 1) 0)))
+      (ignore-errors
+        ;; ignore-errors fixes issues with icomplete
+        (if forwardp
+            (next-line-or-history-element)
+          (previous-line-or-history-element)))))
+
+   ;; Not Minibuffer
+   (t
+    (let* ((count (abs n))
+           (forwardp (> (or n 1) 0))
+           (line-number-type (when (bound-and-true-p display-line-numbers-type)
+                               display-line-numbers-type))
+
+           ;; (evil-respect-visual-line-mode nil)
+           ;; (evil-track-eol nil)
+           ;; (track-eol nil)
+           ;; (next-line-add-newlines nil)
+           ;; (line-move-visual nil)
+           ;; (scroll-preserve-screen-position nil)
+
+           ;; (func-change-line (if forwardp
+           ;;                       #'next-line
+           ;;                     #'previous-line))
+           (func-change-line (if forwardp
+                                 #'evil-next-line
+                               #'evil-previous-line))
+           (func-change-line-visual (if forwardp
+                                        #'evil-next-visual-line
+                                      #'evil-previous-visual-line)))
+      (cond
+       ((eq major-mode 'embark-collect-mode)
+        (let ((previous-cat (evilcursor--get-category-at-point))
+              (point (point))
+              (current-cat nil)
+              (next-cat nil))
+          (funcall func-change-line count)
+          (setq current-cat (evilcursor--get-category-at-point))
+
+          (unless (= point (point))
+            (setq next-cat (save-excursion
+                             (funcall func-change-line count)
+                             (evilcursor--get-category-at-point)))
+
+            (when (and previous-cat
+                       current-cat
+                       next-cat
+                       (string= current-cat "embark-collect-group-button")
+                       (not (string= previous-cat "embark-collect-group-button"))
+                       (not (string= next-cat "embark-collect-group-button")))
+              (funcall func-change-line count)))))
+
+       ;; ((and (or (eq major-mode 'org-mode)
+       ;;           (derived-mode-p 'org-mode))
+       ;;       (bound-and-true-p org-indent-mode))
+       ;;
+       ;;  ;; (condition-case nil
+       ;;  ;;     ;; I added org-mode here because the indentation after a
+       ;;  ;;     ;; header is not taken into consideration with a simple
+       ;;  ;;     ;; next/previous line
+       ;;  ;;     (progn
+       ;;  ;;       (funcall func-change-line-visual count)
+       ;;  ;;       t)
+       ;;  ;;   (error nil))
+       ;;
+       ;;  ;; (when (condition-case nil
+       ;;  ;;           ;; I added org-mode here because the indentation after a
+       ;;  ;;           ;; header is not taken into consideration with a simple
+       ;;  ;;           ;; next/previous line
+       ;;  ;;           (progn
+       ;;  ;;             (funcall func-change-line-visual count)
+       ;;  ;;             t)
+       ;;  ;;         (error nil))
+       ;;  ;;   ;; When the cursor is placed inside the content of a folded heading,
+       ;;  ;;   ;; it should automatically move to the end of the heading instead of
+       ;;  ;;   ;; remaining within the hidden content, as this can be inconvenient
+       ;;  ;;   ;; when the heading is expanded.
+       ;;  ;;   (when (and (fboundp 'org-on-heading-p)
+       ;;  ;;              (org-on-heading-p t)
+       ;;  ;;              (save-excursion
+       ;;  ;;                (condition-case nil
+       ;;  ;;                    (progn
+       ;;  ;;                      (outline-back-to-heading)
+       ;;  ;;                      (end-of-line)
+       ;;  ;;                      (outline-invisible-p (point)))
+       ;;  ;;                  (error nil))))
+       ;;  ;;     (outline-back-to-heading)
+       ;;  ;;     (end-of-line)))
+       ;;  )
+
+       ((eq line-number-type 'visual)
+        (if (and truncate-lines (= count 1))
+            ;; This speeds-up scrolling because it does not take into
+            ;; consideration visual things
+            (progn
+              (funcall func-change-line-visual count)
+
+              ;; (funcall func-change-line count)
+              ;; (when (invisible-p (point))
+              ;;   (end-of-visible-line))
+              )
+          (funcall func-change-line-visual count)))
+
+       ((eq line-number-type 'relative)
+        (let (;; Do not ignore invisible when moving more than one line because
+              ;; the line numbers displayed by `display-line-numbers-mode' when
+              ;; display-line-numbers-type is relative doesn't ignore invisible
+              ;; lines.
+              (line-move-visual nil)
+              (line-move-ignore-invisible (when (< count 2) t)))
+          (if truncate-lines
+              (funcall func-change-line count)
+            (funcall (if (> count 1)
+                         func-change-line
+                       func-change-line-visual)
+                     count))))
+
+       ;; Absolute
+       ((eq line-number-type t)
+        (let ((line-move-ignore-invisible nil)
+              (line-move-visual nil))
+          ;; BUG fix? TODO Emacs / evil
+          (let ((count (if (> count 1)
+                           (1- count)
+                         count)))
+            ;; (line-number-at-pos nil t) returns the absolute line number,
+            ;; accounting for the narrowing offset automatically.
+            ;; TODO fix this, does not su pport narrowing
+            (let ((target count))
+              (funcall func-change-line target))
+            ;; Ignore narrowing (TODO bug fix?)
+            ;; (save-restriction
+            ;;   (widen)
+            ;;   (funcall func-change-line count))
+            )))
+
+       (t
+        (message
+         "Unsupported evilcursor-smart-next-line/evilcursor-smart-previous-line.")
+        ;; (funcall func-change-line count)
+        ))))))
+
+(evil-define-motion evilcursor-smart-next-line (count)
+  :type line
+  (unless count
+    (setq count 1))
+  (let ((inhibit-message t))
+    (evilcursor-forward-line count)))
+
+(evil-define-motion evilcursor-smart-previous-line (count)
+  :type line
+  (unless count
+    (setq count 1))
+  (let ((inhibit-message t))
+    (evilcursor-forward-line (* count -1))))
+
+(evil-define-key 'insert 'global (kbd "M-k") #'evilcursor-smart-previous-line)
+(evil-define-key 'insert 'global (kbd "M-j") #'evilcursor-smart-next-line)
+
+(evil-define-key 'normal 'global (kbd "k") #'evilcursor-smart-previous-line)
+(evil-define-key 'normal 'global (kbd "j") #'evilcursor-smart-next-line)
+(evil-define-key 'motion 'global (kbd "k") nil)
+(evil-define-key 'motion 'global (kbd "j") nil)
+
+;;; O: Evil Open Above
+
+(evil-define-command evilcursor-open-above (count)
+  "Insert a new line above point, using current line's indentation.
+The insertion will be repeated COUNT times.
+This command temporarily disables `electric-indent-mode` to prevent automatic
+re-indentation after inserting the copied indentation."
+  :suppress-operator t
+  (interactive "p")
+  (let ((indentation (buffer-substring-no-properties
+                      (line-beginning-position)
+                      (progn (back-to-indentation) (point))))
+        (electric-indent-mode nil))
+    (evil-narrow-to-field
+      (evil-open-above count)
+      (delete-horizontal-space t)
+      (insert indentation))))
+
+(define-key evil-normal-state-map "O" 'evilcursor-open-above)
+
+;;; Evil search forward without jumping
+
+(evil-define-motion my-evil-ex-search-forward (count)
+  "Start a forward search without jumping to the next item."
+  :jump t
+  :type exclusive
+  :repeat evil-repeat-ex-search
+  (save-excursion (evil-ex-search-forward count)))
+
+(evil-define-key 'normal 'global (kbd "C-/") #'my-evil-ex-search-forward)
+
+;;; Evil search key mappings for cursor
+
+(defun evilcursor-previous-history-element-and-move-end-of-line ()
+  "Previous history element and move to the end of the line."
+  (interactive)
+  (previous-history-element 1)
+  (move-end-of-line 1))
+
+(defun evilcursor-next-history-element-and-move-end-of-line ()
+  "Next history element and move to the end of the line."
+  (interactive)
+  (next-history-element 1)
+  (move-end-of-line 1))
+
+(define-key evil-eval-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
+(define-key evil-ex-completion-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
+(define-key evil-ex-search-keymap "\C-p" 'evilcursor-previous-history-element-and-move-end-of-line)
+(define-key evil-ex-search-keymap (kbd "M-k") 'evilcursor-previous-history-element-and-move-end-of-line)
+
+(define-key evil-eval-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
+(define-key evil-ex-completion-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
+(define-key evil-ex-search-keymap "\C-n" 'evilcursor-next-history-element-and-move-end-of-line)
+(define-key evil-ex-search-keymap (kbd "M-j") 'evilcursor-next-history-element-and-move-end-of-line)
+
+(define-key evil-eval-map (kbd "M-k") 'previous-complete-history-element)
+(define-key evil-ex-completion-map (kbd "M-k") 'previous-complete-history-element)
+(define-key evil-eval-map (kbd "M-j") 'next-complete-history-element)
+(define-key evil-ex-completion-map (kbd "M-j") 'next-complete-history-element)
+
+;;; Evil search next and previous
+
+(evil-define-motion evilcursor-find-char (count char)
+  "Move to the next COUNT'th occurrence of CHAR."
+  :type inclusive
+  (interactive "<c><C>")
+  (let ((evil-respect-visual-line-mode nil))
+    (evil-find-char count char)))
+
+(evil-define-motion evilcursor-find-char-backward (count char)
+  "Move to the previous COUNT'th occurrence of CHAR."
+  :type exclusive
+  (interactive "<c><C>")
+  (let ((evil-respect-visual-line-mode nil))
+    (evil-find-char-backward count char)))
+
+(evil-define-motion evilcursor-find-char-to (count char)
+  "Move before the next COUNT'th occurrence of CHAR."
+  :type inclusive
+  (interactive "<c><C>")
+  (let ((evil-respect-visual-line-mode nil))
+    (evil-find-char-to count char)))
+
+(evil-define-motion evilcursor-find-char-to-backward (count char)
+  "Move before the previous COUNT'th occurrence of CHAR."
+  :type exclusive
+  (interactive "<c><C>")
+  (let ((evil-respect-visual-line-mode nil))
+    (evil-find-char-to (- (or count 1)) char)))
+
+(define-key evil-motion-state-map "t" 'evilcursor-find-char-to)
+(define-key evil-motion-state-map "T" 'evilcursor-find-char-to-backward)
+(define-key evil-motion-state-map "f" 'evilcursor-find-char)
+(define-key evil-motion-state-map "F" 'evilcursor-find-char-backward)
+
+;;; n/N (and M-n and M-N): Search and recenter
+
+(evil-define-motion evilcursor-ex-search-next-recenter (count)
+  "Go to the next occurrence."
+  :type exclusive
+  (ignore-errors (evil-ex-search-next count))
+  (recenter nil))
+
+(evil-define-motion evilcursor-ex-search-previous-recenter (count)
+  "Go the the previous occurrence."
+  :type exclusive
+  (ignore-errors (evil-ex-search-previous count))
+  (recenter nil))
+
+(evil-define-motion evilcursor-ex-search-next (count)
+  "Go to the next occurrence."
+  :type exclusive
+  (ignore-errors (evil-ex-search-next count)))
+
+(evil-define-motion evilcursor-ex-search-previous (count)
+  "Go the the previous occurrence."
+  :type exclusive
+  (ignore-errors (evil-ex-search-previous count)))
+
+(evil-define-key 'motion 'global (kbd "n") #'evilcursor-ex-search-next)
+(evil-define-key 'motion 'global (kbd "N") #'evilcursor-ex-search-previous)
+
+(evil-define-key 'motion 'global (kbd "M-N") #'evilcursor-ex-search-previous-recenter)
+(evil-define-key 'motion 'global (kbd "M-n") #'evilcursor-ex-search-next-recenter)
+
+;;; Global keys
+
+(evil-define-motion my-evil-end-of-line (count)
+  "Move the cursor to the end of the current line.
+Never go beyond EOL.
+If COUNT is given, move COUNT - 1 lines downward first."
+  :type inclusive
+  (let ((evil-move-beyond-eol t))
+    (evil-end-of-line count)
+    ;; This prevents `evil-end-of-line' from setting `most-positive-fixnum' to
+    ;; the temporary column
+    (setq-local temporary-goal-column (current-column))))
+
+(with-eval-after-load 'evil
+  (define-key evil-motion-state-map "$" 'my-evil-end-of-line)
+  (define-key evil-motion-state-map [end] 'my-evil-end-of-line))
+
+;;; evil outline
+
+(with-eval-after-load "outline-indent"
+  (evil-define-key 'normal outline-mode-map (kbd "]]") nil)
+  (evil-define-key 'normal outline-mode-map (kbd "[[") nil))
+
+(defun my-evil-define-key-outline-indent-minor-mode ()
+  "Set `M-h' and `M-l' to decrease/increase the indentation level of blocks."
+  (evil-define-key 'normal 'local (kbd "M-h") 'outline-indent-shift-left)
+  (evil-define-key 'normal 'local (kbd "M-l") 'outline-indent-shift-right)
+
+  ;; Set `M-k` and `M-j` to move indented blocks up and down
+  (evil-define-key 'normal 'local (kbd "M-k") 'outline-indent-move-subtree-up)
+  (evil-define-key 'normal 'local (kbd "M-j") 'outline-indent-move-subtree-down)
+
+  (unless (derived-mode-p 'prog-mode)
+    ;; In prog-mode, [[, ]], gj, and gk provide navigation to the previous
+    ;; and next function, so there is no need to override them.
+    (evil-define-key 'normal 'local (kbd "]]") 'outline-indent-forward-same-level)
+    (evil-define-key 'normal 'local (kbd "[[") 'outline-indent-backward-same-level)
+    (evil-define-key 'normal 'local (kbd "gj") 'outline-indent-forward-same-level)
+    (evil-define-key 'normal 'local (kbd "gk") 'outline-indent-backward-same-level))
+
+  (evil-define-key 'normal 'local (kbd "gV") 'outline-indent-select)
+
+  ;; Set C-<return> to insert a new line with the same indentation
+  ;; level/depth as the current line just before the next heading
+  (evil-define-key '(normal insert) 'local (kbd "C-<return>")
+    (defun my-evil-outline-indent-insert-heading ()
+      (interactive)
+      (when (fboundp 'outline-indent-insert-heading)
+        (outline-indent-insert-heading)
+        (evil-insert-state)))))
+
+(add-hook 'outline-indent-minor-mode-hook
+          #'my-evil-define-key-outline-indent-minor-mode)
+
+;;; Toggle comment
+
+(evil-define-operator le-evil-toggle-comment-visual (beg end)
+  "Toggle comment from BEG to END."
+  (interactive "<r>")
+  (unless (derived-mode-p 'org-mode)
+    (comment-or-uncomment-region beg end)))
+
+(defun le-evil-toggle-comment-line ()
+  "Toggle comment in the current line."
+  (interactive)
+  (unless (derived-mode-p 'org-mode)
+    (comment-or-uncomment-region (line-beginning-position)
+                                 (line-end-position))))
+
+(define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-line)
+(define-key evil-visual-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
 
 ;;; Provide
 

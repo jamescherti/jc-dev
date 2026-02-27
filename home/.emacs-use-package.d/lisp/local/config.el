@@ -31,6 +31,8 @@
 
 ;;; Debug, native comp, and initial options
 
+(require 'my-defun)
+
 (setq debug-on-error t)
 
 (defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
@@ -757,7 +759,6 @@ WIDTH is the tab width."
       (setq-local search-invisible nil)
 
       ;; Fixes a bug of jumping in org mode when scrolling many lines in my
-      ;; todo.org
       ;; file
       ;; TODO: bug?
       ;; (setq-local scroll-margin 1)
@@ -831,6 +832,15 @@ WIDTH is the tab width."
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+  ;; TODO: lightemacs?
+  (with-eval-after-load 'treesit
+    (add-to-list 'treesit-extra-load-path
+                 (expand-file-name "tree-sitter" lightemacs-var-directory)))
+
+  (unless IS-MAC
+    ;; Mac Port
+    (add-to-list 'treesit-extra-load-path "/opt/local/lib"))
+
   (with-eval-after-load 'evil
     (require 'my-config-evil))
 
@@ -2659,6 +2669,390 @@ session ends."
         (dart "https://github.com/ast-grep/tree-sitter-dart")
         (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")))
+
+(defun my-treesit-update-language-grammar ()
+  "Update language grammar."
+  (interactive)
+  (treesit-install-language-grammar 'markdown)
+  (treesit-install-language-grammar 'markdown-inline)
+  (treesit-install-language-grammar 'python)
+  (treesit-install-language-grammar 'bash)
+  (treesit-install-language-grammar 'yaml)
+  (treesit-install-language-grammar 'json)
+  (treesit-install-language-grammar 'html)
+  (treesit-install-language-grammar 'lua)
+  (treesit-install-language-grammar 'c)
+  (treesit-install-language-grammar 'cpp)
+  (treesit-install-language-grammar 'dockerfile)
+  (treesit-install-language-grammar 'go)
+  (treesit-install-language-grammar 'java)
+  (treesit-install-language-grammar 'javascript)
+  (treesit-install-language-grammar 'php)
+  ;; (treesit-install-language-grammar 'toml)
+  ;; (treesit-install-language-grammar 'make)
+  )
+
+(defun my-setup-yaml-mode ()
+  "Config Yaml mode."
+  ;; TODO put it back
+  ;; (setq-local indent-line-function 'smartindent-indent-relative-to-visible)
+  t
+  )
+
+
+;; Highlight $variables
+;; This one works, but it also highlights the variable that are in comments
+(defvar sh-script-extra-font-lock-keywords
+  '(("\\$\\({#?\\)?\\([[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)"
+     (2 font-lock-variable-name-face prepend))))
+
+(defun sh-script-extra-font-lock-activate ()
+  "Activate additional font-locking for variables in double-quoted strings."
+  (font-lock-add-keywords nil sh-script-extra-font-lock-keywords))
+
+(add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
+(add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate)
+
+;; When auto-mode-alist is bypassed, use a hook function
+(defun ansible-detect-and-enable-mode ()
+  "Enable `ansible-mode' for YAML files in Ansible-related directories."
+  ;; This works better than auto-mode-alist
+  (when (and (not (derived-mode-p 'ansible-mode))
+             buffer-file-name
+             (string-match
+              my-ansible-file-regexp
+              buffer-file-name)
+             (fboundp 'ansible-mode))
+    (funcall 'ansible-mode)))
+
+(defun my-config-tree-sitter ()
+  "Config Tree Sitter."
+  (when (my-treesit-language-available-p 'c)
+    (push '(c-mode . c-ts-mode) major-mode-remap-alist))
+
+  (when (my-treesit-language-available-p 'cpp)
+    (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
+
+  (when (my-treesit-language-available-p 'go)
+    (add-to-list 'auto-mode-alist '("\.[gG][oO]\\'" . go-ts-mode)))
+
+  (when (my-treesit-language-available-p 'java)
+    (push '(java-mode . java-ts-mode) major-mode-remap-alist))
+
+  (when (my-treesit-language-available-p 'json)
+    (push '(js-json-mode . json-ts-mode) major-mode-remap-alist))
+
+  (if (my-treesit-language-available-p 'yaml)
+      (progn
+        (define-derived-mode ansible-mode yaml-ts-mode "Ansible"
+          "Major mode for editing Ansible files.")
+
+        (defun my-setup-ansible-mode ()
+          ;; (set-syntax-table (copy-syntax-table))
+
+          ;; For pip_pkg==1.0.0
+          (modify-syntax-entry ?= ".")
+
+          ;; Make / a punctuation (for, for example, strings like group/package)
+          (modify-syntax-entry ?/ ".")
+
+          ;; The vertical bar (|) is used in YAML for literal block scalars.
+          ;; Treating it as punctuation (instead of part of a word or symbol)
+          ;; ensures it is recognized for its structural role in defining
+          ;; literal block scalars rather than being incorrectly identified as
+          ;; part of a symbol or key.
+          (modify-syntax-entry ?| ".")
+
+          ;; Also treat $ as punctuation, as it is commonly used for embedding
+          ;; languages like Bash in Ansible files and for GitHub Actions
+          ;; variables.
+          ;; (modify-syntax-entry ?$ ".")
+
+          ;; Ensures that (.), (,) and (!) are treated as part of symbols or words
+          ;; within YAML documents. In YAML, these characters may be used as part
+          ;; of keys in quoted strings.
+          ;;
+          ;; (.) is for symbols such as: ansible.builtin.command
+          (modify-syntax-entry ?. "_")
+          (modify-syntax-entry ?, "_")
+          (modify-syntax-entry ?! "_"))
+        (when (fboundp 'my-setup-ansible-mode)
+          (add-hook 'ansible-mode-hook #'my-setup-ansible-mode))
+
+        ;; Remove the auto-mode-alist entry (Useful to prevent yaml-ts-mode from
+        ;; activating on ansible-mode)
+        (with-eval-after-load 'yaml-ts-mode
+          (setq auto-mode-alist
+                (rassq-delete-all 'yaml-ts-mode auto-mode-alist))
+
+          (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))
+
+        ;; Treesitter
+        (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode))
+    (when (fboundp 'yaml-mode)
+      (define-derived-mode ansible-mode yaml-mode "Ansible"
+        "Major mode for editing Ansible files.")))
+
+  (defvar my-ansible-file-regexp
+    (rx "/"
+        (group (or "tasks"
+                   "handlers"
+                   "vars"
+                   "defaults"
+                   "ansible"
+                   "playbooks"))
+        "/" (+ (not (any "/\\")))
+        "." (regexp "[yY][aA]?[mM][lL]")
+        string-end))
+
+  (add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-mode))
+
+  (add-hook 'yaml-mode-hook #'ansible-detect-and-enable-mode)
+  (add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-mode)
+
+  (if (my-treesit-language-available-p 'bash)
+      (progn
+        (push '(shell-script-mode . bash-ts-mode) major-mode-remap-alist)
+        (push '(sh-mode . bash-ts-mode) major-mode-remap-alist))
+    ;; use-package sh-mode
+    ;; :ensure nil
+    ;; :commands shell-script-mode
+    ;; :mode (("\\.sh\\'" . shell-script-mode)
+    ;;        ("\\.bash\\'" . shell-script-mode)
+    ;;        ("\\.pbs\\'" . shell-script-mode))
+    ;; :custom
+    (with-eval-after-load 'sh-script
+      (when (fboundp 'sh-indent-supported)
+        (sh-indent-supported (append sh-indent-supported '((bash . sh)))))))
+
+  (if (my-treesit-language-available-p 'javascript)
+      (progn
+        (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
+        (push '(js-mode . js-ts-mode) major-mode-remap-alist)
+        (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode)))
+    (progn
+      (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
+
+      ;; Not required
+      ;; (use-package js2-mode
+      ;;   :commands js2-mode
+      ;;   ;; :mode
+      ;;   ;; ("\\.js\\'" . js2-mode)
+      ;;   )
+      ))
+
+  (when (my-treesit-language-available-p 'python)
+    (progn
+      t
+      ;; (with-eval-after-load 'python
+      ;;   ;; TODO: should be put it back
+      ;;   ;; (setq auto-mode-alist (rassq-delete-all 'python-mode auto-mode-alist))
+      ;;
+      ;;   ;; Remove python-flymake error: "Cannot find suitable checker" when a Python
+      ;;   ;; script is loaded before eglot and the checker isn't found
+      ;;   (advice-add 'python-flymake :override #'ignore))
+      )
+    (push '(python-mode . python-ts-mode) major-mode-remap-alist))
+
+
+  (when (my-treesit-language-available-p 'markdown)
+    (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode)))
+
+  (when (my-treesit-language-available-p 'dockerfile)
+    (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR]\\'"
+                                    . dockerfile-ts-mode))
+    (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'"
+                                    . dockerfile-ts-mode)))
+  )
+
+(add-hook 'lightemacs-after-init-hook #'my-config-tree-sitter)
+
+;;; ansible
+
+(add-to-list 'display-buffer-alist '("\\*ansible-doc"
+                                     (display-buffer-same-window)))
+
+(progn
+  ;; Patch sent to ansible-doc. Merged, but not released yet.
+  ;; commit c6ccdf8069e8a257501394fe6900b5cf5961e625
+  ;; Author: James Cherti
+  ;; Date:   2025-04-15 10:32:51 -0400
+  ;; Prevent ANSI color codes from being inserted into the buffer
+  (defun ansible-doc--with-nocolor (orig-fun &rest args)
+    "Advice around `ansible-doc-revert-module-buffer' to disable colors.
+  Temporarily set the environment variable ANSIBLE_NOCOLOR=1 when
+  invoking the original function ORIG-FUN with ARGS."
+    (let ((process-environment (cons "ANSIBLE_NOCOLOR=1" process-environment)))
+      (apply orig-fun args)))
+  (with-eval-after-load 'ansible-doc
+    (when (fboundp 'ansible-doc-revert-module-buffer)
+      (advice-add 'ansible-doc-revert-module-buffer :around #'ansible-doc--with-nocolor))))
+
+(defun ansible-doc-symbol ()
+  "Show ansible doc of the current symbol."
+  (let ((inhibit-message t)
+        (symbol (thing-at-point 'symbol t)))
+    (when (and symbol (fboundp 'ansible-doc))
+      (ansible-doc symbol))))
+
+(defun ansible-doc-local-setup-buffer ()
+  "Setup `ansible-doc'."
+  (setq-local evil-lookup-func 'ansible-doc-symbol))
+
+(add-hook 'ansible-mode-hook 'ansible-doc-local-setup-buffer)
+
+;;; Highlight codetags
+
+;; TODO: do not do anything
+;; FIXME: Fix this
+;; BUG: there is a bug here
+;; XXX: Good job
+;; NOTE: This is important
+;; HACK! Bad
+
+(defvar highlight-codetags-keywords
+  '(("\\<\\(TODO\\|FIXME\\|BUG\\|XXX\\)\\>" 1 font-lock-warning-face prepend)
+    ("\\<\\(NOTE\\|HACK\\|DONE\\)\\>" 1 font-lock-doc-face prepend)))
+
+(define-minor-mode highlight-codetags-local-mode
+  "Highlight codetags like TODO, FIXME..."
+  :global nil
+  (if highlight-codetags-local-mode
+      (font-lock-add-keywords nil highlight-codetags-keywords)
+    (font-lock-remove-keywords nil highlight-codetags-keywords))
+
+  (when (bound-and-true-p font-lock-mode)
+    (if (fboundp 'font-lock-flush)
+        (font-lock-flush)
+      (with-no-warnings (font-lock-fontify-buffer)))))
+
+;;; Disable arrow in the fringe
+
+(defun my-minibuffer-mode-setup ()
+  "Setup minibuffer mode."
+  ;; Remove the arrow when the line is wrapped
+  (my-disable-fringe-truncation-arrow)
+  (setq-local truncate-lines t))
+
+(when (fboundp 'my-minibuffer-mode-setup)
+  (add-hook 'minibuffer-setup-hook #'my-minibuffer-mode-setup))
+
+(add-hook-text-editing-modes #'my-disable-fringe-truncation-arrow)
+
+(add-hook-text-editing-modes #'highlight-codetags-local-mode)
+
+;; Enable smerge
+(defun my-enable-smerge-maybe ()
+  "Enable `smerge'."
+  (when (and buffer-file-name (vc-backend buffer-file-name))
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^<<<<<<< " nil t)
+        (smerge-mode +1)))))
+
+(add-hook 'find-file-hook #'my-enable-smerge-maybe)
+
+;; Switch to `fundamental-mode' when `smerge-mode' is activated.
+(defun my-smerge-to-fundamental-mode ()
+  "Switch to `fundamental-mode' when `smerge-mode' is activated."
+  (when (and smerge-mode (not (eq major-mode 'fundamental-mode)))
+    (fundamental-mode)
+    (smerge-mode 1)))
+(add-hook 'smerge-mode-hook #'my-smerge-to-fundamental-mode)
+
+;;; Prune cache
+
+;; TODO lightemacs?
+;; TODO minimal-emacs.d?
+
+(defvar my-native-compile-prune-cache-done nil
+  "Flag to ensure native compile cache is pruned only once per session.")
+
+(defun my-native-compile-prune-cache ()
+  "Prune the native compile cache safely.
+This function checks for native compilation support and ensures the operation
+only runs once per session to avoid redundant I/O."
+  (interactive)
+  ;; Check if we have already run this session
+  (unless my-native-compile-prune-cache-done
+    ;; Check if native compilation is actually available
+    (when (and (fboundp 'native-comp-available-p)
+               (native-comp-available-p)
+               (fboundp 'native-compile-prune-cache))
+      ;; Set flag immediately to prevent re-entry
+      (setq my-native-compile-prune-cache-done t)
+      (message "[native-comp] Native compilation cache pruned")
+      (with-demoted-errors "Error pruning native cache: %S"
+        (native-compile-prune-cache)))))
+
+;; Only register the timer if native compilation is enabled
+(when (and (fboundp 'native-comp-available-p)
+           (native-comp-available-p))
+  ;; Run once after 5 minutes of idle time
+  (add-hook 'kill-emacs-hook 'my-native-compile-prune-cache)
+
+  ;; 5 minutes: This is the standard definition of "Away From Keyboard." If you
+  ;; haven't touched Emacs for 5 minutes, you have likely stepped away (coffee,
+  ;; meeting, etc.). This is the safest time to burn CPU cycles or disk I/O
+  ;; without affecting user experience.
+  (add-hook 'lightemacs-after-init-hook
+            #'(lambda()
+                (run-with-idle-timer (* 5 60) nil #'my-native-compile-prune-cache))))
+
+;;; Prune native comp tmp files
+
+(defun my-clean-native-comp-temp-files ()
+  "Delete temporary native compilation files from the temporary directory.
+This targets files matching `emacs-async-comp-*' and
+`emacs-int-comp-*' (including trampoline files) ending in .el."
+  (interactive)
+  (let* ((target-dir temporary-file-directory)
+         ;; Regex matches both emacs-async-comp- and emacs-int-comp-
+         ;;
+         ;; Async Compilation Files (emacs-async-comp-): These files are
+         ;; generated during the standard asynchronous native compilation of
+         ;; Emacs Lisp libraries.
+         ;;
+         ;; Internal/Trampoline Files (emacs-int-comp-): These
+         ;; files—specifically those matching your example
+         ;; emacs-int-comp-subr--trampoline—are generated to handle function
+         ;; advice on C primitives. The emacs-int-comp- files are specific to
+         ;; native compilation. They are not generated by other standard Emacs
+         ;; processes. Origin: Emacs primitives (functions written in C, like
+         ;; write-region or car) cannot be natively advised (modified) directly.
+         ;; When you use advice-add on a C primitive, Emacs must generate a
+         ;; "trampoline" function. This small bridge function calls the original
+         ;; C code while allowing Lisp-level advice to intervene.
+         (regexp "^emacs-\\(?:async\\|int\\)-comp-.*\\.el$")
+         ;; (regexp "^emacs-async-comp-.*\\.el$")
+         (files (directory-files target-dir t regexp)))
+    (dolist (file files)
+      ;; Check existence to avoid race conditions
+      ;; Safety Check: Explicitly verify the filename starts with "emacs"
+      ;; Uses file-name-nondirectory to ignore the path components.
+      (if (string-prefix-p "emacs-" (file-name-nondirectory file))
+          (progn
+            (delete-file file)
+            ;; (message "Deleted native-comp temp file: %s" file)
+            )
+        ;; (message "Safety check failed (skipping): %s" file)
+        ))))
+
+;; Run this function automatically when asynchronous native compilation finishes
+(add-hook 'native-comp-async-all-done-hook #'my-clean-native-comp-temp-files)
+;; (add-hook 'kill-emacs-hook #'my-clean-native-comp-temp-files)
+
+;;; vc
+
+(defun my-log-view-diff-stay (orig-fun &rest args)
+  "Advice to keep focus in the log buffer when showing diffs.
+ORIG-FUN - the original function being advised
+ARGS - the arguments passed to the original function"
+  (save-selected-window
+    (apply orig-fun args)))
+
+(with-eval-after-load 'log-view
+  (advice-add 'log-view-diff :around #'my-log-view-diff-stay))
 
 ;;; Provide
 
