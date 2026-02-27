@@ -228,7 +228,7 @@ config-project-list() {
 
 config-startup-apps() {
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
-    mkdir -p ~/.local/share/applications/
+    mkdir -p ~/.config/autostart
     {
       echo "[Desktop Entry]"
       echo "Name=x-startup-apps"
