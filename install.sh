@@ -123,9 +123,7 @@ sync_home() {
   rsync "${rsync_opts[@]}" "$SCRIPT_DIR/home/" "$HOME/"
 }
 
-main() {
-  init
-
+confirm() {
   if [[ "${JC_DEV_UNATTENDED:-}" = "" ]] \
     && [[ "${JC_DEV_UNATTENDED:-}" -eq 0 ]]; then
     echo
@@ -135,23 +133,18 @@ main() {
       exit 1
     fi
   fi
+}
 
-  sync_home
-
+config-jc-dotfiles() {
   # JC-DOTFILES
   git_clone \
     https://github.com/jamescherti/jc-dotfiles \
     "$GIT_CLONE_DIR/jc-dotfiles"
   cd "$GIT_CLONE_DIR/jc-dotfiles"
   JC_DOTFILES_UNATTENDED=1 ./install.sh
+}
 
-  # BASH-STDOPS
-  git_clone \
-    https://github.com/jamescherti/bash-stdops \
-    "$GIT_CLONE_DIR/bash-stdops"
-  cd "$GIT_CLONE_DIR/bash-stdops"
-  PREFIX="$HOME/.local" ./install.sh
-
+config-lightvim() {
   # LIGHTVIM
   git_clone \
     https://github.com/jamescherti/lightvim \
@@ -161,7 +154,9 @@ main() {
   rm -f ~/.config/nvim/init.vim
   cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.vimrc
   cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.config/nvim/init.vim
+}
 
+config-firefox() {
   # JC-FIREFOX-SETTINGS
   LIST_FIREFOX_DIRS=("$HOME/.mozilla/firefox"
     "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox")
@@ -174,7 +169,9 @@ main() {
       break
     fi
   done
+}
 
+config-gnome() {
   # JC-GNOME-SETTINGS
   if [[ $XDG_CURRENT_DESKTOP = GNOME ]]; then
     # JC-GNOME-SETTINGS
@@ -189,7 +186,9 @@ main() {
     ./settings-gnome-keyboard-shortcuts.sh
     ./settings-gnome.sh
   fi
+}
 
+config-xfce() {
   # JC-XFCE-SETTINGS
   if [[ $XDG_CURRENT_DESKTOP = XFCE ]]; then
     # JC-XFCE-SETTINGS
@@ -203,12 +202,32 @@ main() {
     cd "$SCRIPT_DIR/data/settings/settings-xfce4/"
     ./settings-xfce4.sh
   fi
+}
 
+config-bash-stdops() {
+  # BASH-STDOPS
+  git_clone \
+    https://github.com/jamescherti/bash-stdops \
+    "$GIT_CLONE_DIR/bash-stdops"
+  cd "$GIT_CLONE_DIR/bash-stdops"
+  PREFIX="$HOME/.local" ./install.sh
+
+}
+
+config-mimetypes() {
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     "$SCRIPT_DIR/data/settings/update-mimetypes.py"
+  fi
+}
 
-    "$SCRIPT_DIR/home/.bin/update-emacs-config"
+config-project-list() {
+  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     "$SCRIPT_DIR/home/.bin/update-project-list"
+  fi
+}
+
+config-startup-apps() {
+  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     mkdir -p ~/.local/share/applications/
     {
       echo "[Desktop Entry]"
@@ -221,14 +240,21 @@ main() {
       echo "StartupNotify=false"
     } >"$HOME/.config/autostart/x-startup-apps.desktop"
   fi
+}
 
-  # JC-DOTFILES
+config-lightemacs() {
   git_clone \
     https://github.com/jamescherti/lightemacs \
     "$GIT_CLONE_DIR/lightemacs"
   cd "$GIT_CLONE_DIR/lightemacs"
   git checkout develop
 
+  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
+    "$SCRIPT_DIR/home/.bin/update-emacs-config"
+  fi
+}
+
+config-files() {
   # Secure dirs
   secure_dir ~/.gnupg
   secure_dir ~/.ssh
@@ -253,7 +279,9 @@ main() {
     # rm -f ~/.git-templates/hooks
     ln -sf ~/.git-hooks/ ~/.git-templates/hooks
   fi
+}
 
+config-pip-packages() {
   # PIP
   MY_PIP_PACKAGES=()
   if ! type -P pathaction &>/dev/null; then
@@ -285,13 +313,29 @@ main() {
     fi
   fi
 
-  "$SCRIPT_DIR/home/.bin/update-emacs-config"
-  "$SCRIPT_DIR/home/.bin/update-project-list"
-  
-  # Fixes the issue where the terminal session is corrupt because of gpg agent
-  # gpgconf --kill gpg-agent || :
-  # pkill -x gpgconf || :
-  # pkill -x gpg-agent || :
+}
+
+main() {
+  init
+
+  confirm
+  sync_home
+
+  config-jc-dotfiles
+  config-bash-stdops
+  config-lightvim
+  config-firefox
+  config-gnome
+  config-xfce
+
+  config-mimetypes
+  config-project-list
+  config-startup-apps
+
+  config-lightemacs
+  config-files
+
+  config-pip-packages
 
   echo
   echo Success.
