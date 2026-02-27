@@ -3394,7 +3394,26 @@ session ends."
 
     (goto-char original-point)))
 
+(defun my-project-root-dir (&optional path)
+  "Search up the PATH for `project-root-markers'."
+  (when (fboundp 'project-root)
+    (when-let* ((project (project-current nil path))
+                (project-root (when project
+                                (project-root project))))
+      (directory-file-name project-root))))
+
+;; TODO lightemacs?
+(defun my-bash-stdops-sre ()
+  "Call sre."
+  (interactive)
+  (let ((project-dir (expand-file-name (my-project-root-dir))))
+    (unless project-dir
+      (user-error "Unable to find the project path: %s" project-dir))
+    (when (fboundp 'bash-stdops-project-sre)
+      (bash-stdops-project-sre nil nil project-dir))))
+
 (with-eval-after-load 'evil
+  ;; eval buffer
   (defun evileval-buffer ()
     "Evaluate the current buffer and display a message."
     (interactive)
@@ -3450,10 +3469,10 @@ session ends."
       (evil-shift-left evil-visual-beginning evil-visual-end 1 nil)
       (evil-normal-state)
       (evil-visual-restore)))
-  (if (fboundp 'evil-define-key)
-      (evil-define-key 'visual 'global
-        (kbd ">") 'lightemacs-evil-shift-right
-        (kbd "<") 'lightemacs-evil-shift-left))
+  (when (fboundp 'evil-define-key)
+    (evil-define-key 'visual 'global
+      (kbd ">") 'lightemacs-evil-shift-right
+      (kbd "<") 'lightemacs-evil-shift-left))
 
   ;; The `evil-search-next` and `evil-search-previous` functions can sometimes
   ;; leave the buffer window scrolled horizontally. This advice adds an around
@@ -3500,8 +3519,8 @@ session ends."
     (interactive)
     (execute-kbd-macro (read-kbd-macro "[[")))
   (when (fboundp 'evil-define-key)
-    (evil-define-key 'normal 'global (kbd "<leader>j") #'my-uncomment-and-join-region)
-    (evil-define-key 'visual 'global (kbd "<leader>j") #'my-uncomment-and-join-region)
+    (evil-define-key 'normal 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
+    (evil-define-key 'visual 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
     (when (display-graphic-p)
       ;; Only on display-graphic-p because the M-[ issue occurs because modern
       ;; terminals use "Escape sequences" beginning with the ESC [ characters (the
@@ -3535,9 +3554,9 @@ session ends."
     (advice-add 'evil-paste-after :around #'ignore-empty-ring-errors)
     (advice-add 'evil-paste-before :around #'ignore-empty-ring-errors))
 
-  (define-key evil-normal-state-map (kbd "C-s") #'my-evil-save)
-  (define-key evil-insert-state-map (kbd "C-s") #'my-evil-save)
-  (define-key evil-visual-state-map (kbd "C-s") #'my-evil-save)
+  (define-key evil-normal-state-map (kbd "C-s") 'my-evil-save)
+  (define-key evil-insert-state-map (kbd "C-s") 'my-evil-save)
+  (define-key evil-visual-state-map (kbd "C-s") 'my-evil-save)
 
   (defun evilclipboard-select-pasted ()
     "Visually select last pasted text."
@@ -3548,8 +3567,8 @@ session ends."
       (evil-visual-char)
       (evil-goto-mark ?\])))
   (with-no-warnings
-    (define-key evil-normal-state-map (kbd "gp") #'evilclipboard-select-pasted)
-    (define-key evil-normal-state-map (kbd "<leader>gp") #'evilclipboard-select-pasted))
+    (define-key evil-normal-state-map (kbd "gp") 'evilclipboard-select-pasted)
+    (define-key evil-normal-state-map (kbd "<leader>gp") 'evilclipboard-select-pasted))
 
   (setopt evil-want-Y-yank-to-eol t)
 
@@ -3557,9 +3576,14 @@ session ends."
     (evil-set-leader 'normal (kbd ","))
     (evil-set-leader 'visual (kbd ",")))
 
+  (with-eval-after-load 'eldoc
+    (eldoc-add-command-completions "evilcursor-"))
+
   (when (fboundp 'evil-define-key)
-    (evil-define-key 'normal 'global (kbd "<leader>ev") #'tab-bar-switch-to-tab)
-    (evil-define-key '(visual normal insert) 'global (kbd "M-p") #'project-switch-project)
+    (evil-define-key 'normal 'global (kbd "<leader>sre") 'my-bash-stdops-sre)
+
+    (evil-define-key 'normal 'global (kbd "<leader>ev") 'tab-bar-switch-to-tab)
+    (evil-define-key '(visual normal insert) 'global (kbd "M-p") 'project-switch-project)
 
     (evil-define-key 'insert 'global (kbd "M-H") 'evil-backward-word-begin)
     (evil-define-key 'insert 'global (kbd "M-L") 'evil-forward-word-begin)
@@ -3591,14 +3615,14 @@ session ends."
   ;;; Automatic removal of spaces
   (add-hook 'evil-insert-state-entry-hook #'my-evil-disable-remove-spaces)
 
-  (define-key evil-normal-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
-  (define-key evil-insert-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
-  (define-key evil-visual-state-map (kbd "C-l") #'evilbuffer-clear-highlights)
+  (define-key evil-normal-state-map (kbd "C-l") 'evilbuffer-clear-highlights)
+  (define-key evil-insert-state-map (kbd "C-l") 'evilbuffer-clear-highlights)
+  (define-key evil-visual-state-map (kbd "C-l") 'evilbuffer-clear-highlights)
   (with-eval-after-load 'messages-buffer-mode
-    (define-key messages-buffer-mode-map (kbd "C-l") #'evilbuffer-clear-highlights))
+    (define-key messages-buffer-mode-map (kbd "C-l") 'evilbuffer-clear-highlights))
 
-  (define-key evil-normal-state-map (kbd "<leader>wr") #'evilbuffer-toggle-truncate-line)
-  (define-key evil-normal-state-map (kbd "<leader>eB") #'evilbuffer-erase)
+  (define-key evil-normal-state-map (kbd "<leader>wr") 'evilbuffer-toggle-truncate-line)
+  (define-key evil-normal-state-map (kbd "<leader>eB") 'evilbuffer-erase)
 
   ;; TODO patch evil: this should restore point with :restore-point t
   (when (fboundp 'evil-fill-and-move)
@@ -3668,7 +3692,7 @@ This enhancement prevents the cursor from moving."
   (define-key evil-normal-state-map (kbd "<leader>W")  'my-wip)
 
   (with-eval-after-load 'evil
-    (define-key evil-normal-state-map (kbd "gs") #'evilbuffer-switch-to-scratch-and-clear))
+    (define-key evil-normal-state-map (kbd "gs") 'evilbuffer-switch-to-scratch-and-clear))
 
   ;; (when (fboundp 'my-dabbrev-completion-backwards)
   ;;   (setq evil-complete-next-func #'my-dabbrev-completion-backwards))
@@ -3676,8 +3700,8 @@ This enhancement prevents the cursor from moving."
   ;; (when (fboundp 'my-dabbrev-completion-forward)
   ;;   (setq evil-complete-previous-func #'my-dabbrev-completion-forward))
   ;; TODO use cape-dabbrev
-  ;; (define-key evil-insert-state-map (kbd "C-p") #'my-dabbrev-completion-backwards)
-  ;; (define-key evil-insert-state-map (kbd "C-n") #'my-dabbrev-completion-forward)
+  ;; (define-key evil-insert-state-map (kbd "C-p") 'my-dabbrev-completion-backwards)
+  ;; (define-key evil-insert-state-map (kbd "C-n") 'my-dabbrev-completion-forward)
 
   (defun my-dabbrev-completion-forward-all-buffers (arg)
     (with-no-warnings
@@ -3705,10 +3729,10 @@ This enhancement prevents the cursor from moving."
     (evil-define-key 'normal vertico-map (kbd "M-j") 'vertico-next))
 
   ;; I do not like it
-  ;; (define-key minibuffer-local-map (kbd "<up>") #'previous-history-element)
-  ;; (define-key minibuffer-local-map (kbd "<down>") #'next-history-element)
-  (define-key minibuffer-local-map (kbd "C-<up>") #'previous-history-element)
-  (define-key minibuffer-local-map (kbd "C-<down>") #'next-history-element)
+  ;; (define-key minibuffer-local-map (kbd "<up>") 'previous-history-element)
+  ;; (define-key minibuffer-local-map (kbd "<down>") 'next-history-element)
+  (define-key minibuffer-local-map (kbd "C-<up>") 'previous-history-element)
+  (define-key minibuffer-local-map (kbd "C-<down>") 'next-history-element)
 
   ;; Open in a NEW TAB
   (keymap-set vertico-map "C-t"
@@ -3765,8 +3789,8 @@ This enhancement prevents the cursor from moving."
       (evil-define-key 'insert vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L)))
 
   ;; Useful for nano
-  ;;(define-key vterm-mode-map (kbd "C-c") #'vterm--self-insert)
-  ;;(define-key vterm-mode-map (kbd "C-g") #'vterm--self-insert)
+  ;;(define-key vterm-mode-map (kbd "C-c") 'vterm--self-insert)
+  ;;(define-key vterm-mode-map (kbd "C-g") 'vterm--self-insert)
   (define-key vterm-mode-map (kbd "C-x") 'vterm--self-insert)
 
   (define-key vterm-mode-map (kbd "C-c C-c") 'vterm--self-insert)
@@ -3783,60 +3807,62 @@ This enhancement prevents the cursor from moving."
 
 ;;; evil jump
 
-(defun eviljump-goto-definition-try-imenu-first (imenu-only)
-  "Improved `evil-goto-definition` to open folds correctly in outline mode.
-When IMENU-ONLY is nil it only uses imenu."
-  (require 'xref)
-  (if (and (fboundp 'evil-goto-definition)
-           (fboundp 'xref-push-marker-stack))
-      (let ((previous-point (point))
-            (previous-point-marker (point-marker)))
-        ;; Try imenu first
-        (when (member 'evil-goto-definition-imenu evil-goto-definition-functions)
-          (let ((evil-goto-definition-functions '(evil-goto-definition-imenu)))
-            (evil-goto-definition))
-
-          (when (not (eq previous-point (point)))
-            ;; Add it to the stack because it does not do it by default
-            (xref-push-marker-stack previous-point-marker)
-            (setq imenu-only t)))
-
-        ;; Try the others
-        (unless imenu-only
-          (let ((evil-goto-definition-functions
-                 (cl-remove 'evil-goto-definition-imenu
-                            evil-goto-definition-functions)))
-            (evil-goto-definition))))
-    (error "Undefined required functions")))
-
-(defun eviljump-goto-definition (&optional force-all)
-  "Find definition and scroll line to top.
-When FORCE-ALL is non-nil, use all functions."
-  (interactive)
-  (lightemacs-recenter-if-out-of-view
-    (cond ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
-           (xref-find-definitions (thing-at-point 'symbol t)))
-
-          ((and (boundp 'lsp-mode) lsp-mode (fboundp 'lsp-find-definition))
-           (lsp-find-definition))
-
-          ((and (not force-all) (derived-mode-p 'emacs-lisp-mode))
-           ;; Do not jump to emacs.d. Only use imenu.
-           (eviljump-goto-definition-try-imenu-first t))
-
-          (t (eviljump-goto-definition-try-imenu-first nil)))))
-
-(defun eviljump-goto-definition-force ()
-  "Go to definition."
-  (interactive)
-  (eviljump-goto-definition t))
-
 (with-eval-after-load 'evil
+  (defun eviljump-goto-definition-try-imenu-first (imenu-only)
+    "Improved `evil-goto-definition` to open folds correctly in outline mode.
+When IMENU-ONLY is nil it only uses imenu."
+    (require 'xref)
+    (if (and (fboundp 'evil-goto-definition)
+             (fboundp 'xref-push-marker-stack))
+        (let ((previous-point (point))
+              (previous-point-marker (point-marker)))
+          ;; Try imenu first
+          (when (member 'evil-goto-definition-imenu evil-goto-definition-functions)
+            (let ((evil-goto-definition-functions '(evil-goto-definition-imenu)))
+              (evil-goto-definition))
+
+            (when (not (eq previous-point (point)))
+              ;; Add it to the stack because it does not do it by default
+              (xref-push-marker-stack previous-point-marker)
+              (setq imenu-only t)))
+
+          ;; Try the others
+          (unless imenu-only
+            (let ((evil-goto-definition-functions
+                   (cl-remove 'evil-goto-definition-imenu
+                              evil-goto-definition-functions)))
+              (evil-goto-definition))))
+      (error "Undefined required functions")))
+
+  (defun eviljump-goto-definition (&optional force-all)
+    "Find definition and scroll line to top.
+When FORCE-ALL is non-nil, use all functions."
+    (interactive)
+    (lightemacs-recenter-if-out-of-view
+      (cond ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
+             (xref-find-definitions (thing-at-point 'symbol t)))
+
+            ((and (boundp 'lsp-mode) lsp-mode (fboundp 'lsp-find-definition))
+             (lsp-find-definition))
+
+            ((and (not force-all) (derived-mode-p 'emacs-lisp-mode))
+             ;; Do not jump to emacs.d. Only use imenu.
+             (eviljump-goto-definition-try-imenu-first t))
+
+            (t (eviljump-goto-definition-try-imenu-first nil)))))
+
+  (defun eviljump-goto-definition-force ()
+    "Go to definition."
+    (interactive)
+    (eviljump-goto-definition t))
+
   (when (fboundp 'evil-define-key)
-    (evil-define-key 'normal 'global (kbd "<leader>d") #'eviljump-goto-definition)
-    (evil-define-key 'normal 'global (kbd "<leader>D") #'eviljump-goto-definition-force)
-    (evil-define-key 'normal 'global (kbd "gd") #'eviljump-goto-definition)
-    (evil-define-key 'normal 'global (kbd "gD") #'eviljump-goto-definition-force)))
+    (evil-define-key 'normal 'global (kbd "<leader>d") 'eviljump-goto-definition)
+    (evil-define-key 'normal 'global (kbd "<leader>D") 'eviljump-goto-definition-force)
+    ;; Causes bugs
+    ;; (evil-define-key 'normal 'global (kbd "gd") 'eviljump-goto-definition)
+    ;; (evil-define-key 'normal 'global (kbd "gD") 'eviljump-goto-definition-force)
+    ))
 
 ;;; Paste with current indentation
 
@@ -3920,12 +3946,12 @@ This function also restores window start and point when pasting multiple lines."
               (evilclipboard-paste-with-current-indentation)))))
     (error "Undefined required functions")))
 
-;; (define-key evil-insert-state-map (kbd "C-a p") #'evilclipboard-paste-with-current-indentation-restore-point)
-;; (define-key evil-insert-state-map (kbd "C-a C-p") #'evilclipboard-paste-with-current-indentation-restore-point)
+;; (define-key evil-insert-state-map (kbd "C-a p") 'evilclipboard-paste-with-current-indentation-restore-point)
+;; (define-key evil-insert-state-map (kbd "C-a C-p") 'evilclipboard-paste-with-current-indentation-restore-point)
 
 (with-eval-after-load 'evil
   (when (fboundp 'evil-define-key)
-    (evil-define-key 'insert 'global (kbd "C-v") #'evilclipboard-paste-with-current-indentation-restore-point)))
+    (evil-define-key 'insert 'global (kbd "C-v") 'evilclipboard-paste-with-current-indentation-restore-point)))
 
 ;;; Copy with without indentation
 
@@ -3949,7 +3975,7 @@ text by that amount."
 
 (with-eval-after-load 'evil
   (when (fboundp 'evil-define-key)
-    (evil-define-key 'visual 'global (kbd "C") #'evilclipboard-evil-yank-region-unindented)))
+    (evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)))
 
 ;;; evilwindow: split and select
 
@@ -4001,8 +4027,8 @@ guarantees that the new window is selected, as in Vim."
         (evil-goto-line 1)))))
 
 (with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "C-w v") #'evilwindow-split-select-right)
-  (define-key evil-normal-state-map (kbd "C-w s") #'evilwindow-split-select-below))
+  (define-key evil-normal-state-map (kbd "C-w v") 'evilwindow-split-select-right)
+  (define-key evil-normal-state-map (kbd "C-w s") 'evilwindow-split-select-below))
 
 ;;; evil: browse-url
 
@@ -4050,13 +4076,13 @@ guarantees that the new window is selected, as in Vim."
   (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
   (define-key evil-normal-state-map (kbd "<leader>m") 'consult-recent-file)
   (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
-  ;; (define-key evil-normal-state-map (kbd "<leadrr>B") #'switch-to-buffer)
+  ;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
   (define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
   (define-key evil-normal-state-map (kbd "M-/") 'consult-line)
 
   (define-key evil-normal-state-map (kbd "C-p") 'my-consult-fd-project)
 
-  ;; (define-key evil-normal-state-map (kbd "C-p") #'consult-fd)
+  ;; (define-key evil-normal-state-map (kbd "C-p") 'consult-fd)
   )
 
 (defun my-consult-grep-dir (&optional dir)
@@ -4103,13 +4129,13 @@ DIR is the directory."
 
 ;; TODO put this back?
 ;; (when (fboundp 'indentnav-backward-to-empty-line)
-;;   (evil-define-key 'normal 'local (kbd "{") #'indentnav-backward-to-empty-line))
+;;   (evil-define-key 'normal 'local (kbd "{") 'indentnav-backward-to-empty-line))
 ;; (when (fboundp 'indentnav-forward-to-empty-line)
-;;   (evil-define-key 'normal 'local (kbd "}") #'indentnav-forward-to-empty-line))
+;;   (evil-define-key 'normal 'local (kbd "}") 'indentnav-forward-to-empty-line))
 
 ;; Disable org cycle
 ;; TODO put this back
-;; (evil-define-key 'normal 'local (kbd "<tab>") #'ignore)
+;; (evil-define-key 'normal 'local (kbd "<tab>") 'ignore)
 
 (defun my-evil-delete-to-heading-star ()
   "Delete everything before the cursor except the first '*' and space.
@@ -4146,7 +4172,7 @@ word after the space that contains at least two uppercase characters."
       (evil-define-key '(normal) org-agenda-keymap (kbd "<leader>cd") 'org-agenda-todo)
       (evil-define-key '(normal) org-agenda-keymap (kbd "<tab>") 'org-agenda-set-tags)
       (evil-define-key '(normal motion) org-agenda-keymap (kbd "<leader>oo") 'org-agenda-set-tags)
-      ;; (evil-define-key '(normal motion) org-agenda-keymap (kbd "<tab>") #'org-agenda-goto)
+      ;; (evil-define-key '(normal motion) org-agenda-keymap (kbd "<tab>") 'org-agenda-goto)
       (evil-define-key '(normal motion) org-agenda-keymap (kbd "C-l")
         #'(lambda()
             (interactive)
@@ -4162,8 +4188,8 @@ word after the space that contains at least two uppercase characters."
       (evil-define-key 'normal org-mode-map (kbd "<leader>oo") 'org-set-tags-command)
       (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-babel-execute-maybe)
       (evil-define-key 'normal org-mode-map (kbd "<leader>cd") 'my-org-todo-and-toggle)
-      ;; (evil-define-key 'normal org-mode-map (kbd "<leader>xx") #'org-edit-src-code)
-      ;; (evil-define-key 'normal org-src-mode-map (kbd "<leader>xx") #'org-edit-src-exit)
+      ;; (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-edit-src-code)
+      ;; (evil-define-key 'normal org-src-mode-map (kbd "<leader>xx") 'org-edit-src-exit)
       )))
 
 ;;; cape: complete before point
@@ -4248,22 +4274,21 @@ on text following the cursor."
     (evil-define-key 'insert 'global (kbd "C-p") 'cape-dabbrev)
     (evil-define-key 'insert 'global (kbd "C-n") 'cape-dabbrev)))
 
-
 ;;; cape: evil
 
-(defun my-minibuffer-setup-dabbrev-evil ()
-  "Bind `C-p' and `C-n' to dabbrev completion in minibuffer using evil."
-  (when (fboundp 'evil-define-key)
-    (evil-define-key 'insert 'local
-      (kbd "C-p") 'cape-dabbrev
-      (kbd "C-n") 'cape-dabbrev))
-
-  ;; (when (and (boundp 'completion-at-point-functions)
-  ;;            (listp completion-at-point-functions))
-  ;;   (add-hook 'completion-at-point-functions #'cape-dabbrev nil t))
-  )
-
 (with-eval-after-load 'evil
+  (defun my-minibuffer-setup-dabbrev-evil ()
+    "Bind `C-p' and `C-n' to dabbrev completion in minibuffer using evil."
+    (when (fboundp 'evil-define-key)
+      (evil-define-key 'insert 'local
+        (kbd "C-p") 'cape-dabbrev
+        (kbd "C-n") 'cape-dabbrev))
+
+    ;; (when (and (boundp 'completion-at-point-functions)
+    ;;            (listp completion-at-point-functions))
+    ;;   (add-hook 'completion-at-point-functions #'cape-dabbrev nil t))
+    )
+
   (with-eval-after-load 'cape
     (when (fboundp 'evil-define-key)
       (evil-define-key 'insert 'global (kbd "C-x C-f") 'cape-file))))
@@ -4295,10 +4320,10 @@ on text following the cursor."
   ;;           #'(lambda()
   ;;               (with-eval-after-load "evil"
   ;;                 ;; Emulate Vim's C-x C-f
-  ;;                 (evil-define-key 'insert 'global (kbd "C-x C-f") #'cape-file))))
+  ;;                 (evil-define-key 'insert 'global (kbd "C-x C-f") 'cape-file))))
   (with-eval-after-load "evil"
     (when (fboundp 'evil-define-key)
-      (evil-define-key 'insert 'global (kbd "C-SPC") #'completion-at-point))
+      (evil-define-key 'insert 'global (kbd "C-SPC") 'completion-at-point))
 
     (unless (display-graphic-p)
       (define-key key-translation-map (kbd "C-@") (kbd "C-SPC")))
@@ -4337,15 +4362,15 @@ on text following the cursor."
   ;; (evil-insert-state)
   (recenter 0))
 
-(defun evilinferior-setup ()
-  "Set up keybinding for recentering in inferior modes."
-  ;; (evil-define-key 'normal 'local (kbd "M-k") #'comint-previous-input)
-  ;; (evil-define-key 'normal 'local (kbd "M-j") #'comint-next-input)
-  (when (fboundp 'evil-define-key)
-    (evil-define-key 'normal 'local (kbd "C-l") #'evilinferior-mode-clear)
-    (evil-define-key 'insert 'local (kbd "C-l") #'evilinferior-mode-clear)))
-
 (with-eval-after-load 'evil
+  (defun evilinferior-setup ()
+    "Set up keybinding for recentering in inferior modes."
+    ;; (evil-define-key 'normal 'local (kbd "M-k") 'comint-previous-input)
+    ;; (evil-define-key 'normal 'local (kbd "M-j") 'comint-next-input)
+    (when (fboundp 'evil-define-key)
+      (evil-define-key 'normal 'local (kbd "C-l") 'evilinferior-mode-clear)
+      (evil-define-key 'insert 'local (kbd "C-l") 'evilinferior-mode-clear)))
+
   ;; Python
   (add-hook 'inferior-python-mode-hook 'evilinferior-setup)
   (add-hook 'ielm-mode-hook 'evilinferior-setup)
@@ -4358,8 +4383,8 @@ on text following the cursor."
     (global-set-key (kbd "M-DEL") #'evil-delete-backward-word))
 
   (when (fboundp 'evil-define-key)
-    (evil-define-key 'normal 'global (kbd "<leader>ep") #'evilinferior-run-python)
-    (evil-define-key 'normal 'global (kbd "<leader>el") #'ielm)))
+    (evil-define-key 'normal 'global (kbd "<leader>ep") 'evilinferior-run-python)
+    (evil-define-key 'normal 'global (kbd "<leader>el") 'ielm)))
 
 ;;; evil intercept (TODO replace with global?)
 
@@ -4427,9 +4452,9 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 (with-eval-after-load 'evil
   (when (fboundp 'evil-define-key)
-    (evil-define-key 'visual 'global (kbd "<leader>fs") #'my-flyspell-region)
-    (evil-define-key 'normal 'global (kbd "<leader>fb") #'my-flyspell-buffer)
-    (evil-define-key 'normal 'global (kbd "<leader>fc") #'my-flyspell-clear)))
+    (evil-define-key 'visual 'global (kbd "<leader>fs") 'my-flyspell-region)
+    (evil-define-key 'normal 'global (kbd "<leader>fb") 'my-flyspell-buffer)
+    (evil-define-key 'normal 'global (kbd "<leader>fc") 'my-flyspell-clear)))
 
 ;;; Move region
 
@@ -4489,8 +4514,8 @@ In `prog-mode', this configures flyspell to check only comments and strings."
   (move-region 1))
 
 (with-eval-after-load 'evil
-  (define-key evil-visual-state-map (kbd "M-j") #'move-region-down)
-  (define-key evil-visual-state-map (kbd "M-k") #'move-region-up))
+  (define-key evil-visual-state-map (kbd "M-j") 'move-region-down)
+  (define-key evil-visual-state-map (kbd "M-k") 'move-region-up))
 
 ;;; check parens no jump
 
@@ -4587,8 +4612,8 @@ If the parentheses are balanced, the function returns t."
 
   ;; (setq-local evil-auto-indent nil)
 
-  ;; (evil-define-key 'normal 'local (kbd "TAB") #'ignore)
-  ;; (evil-define-key 'normal 'local (kbd "<tab>") #'ignore)
+  ;; (evil-define-key 'normal 'local (kbd "TAB") 'ignore)
+  ;; (evil-define-key 'normal 'local (kbd "<tab>") 'ignore)
 
   ;; DONE already added to markdown-mode (TODO not released yet)
   ;; Make / a punctuation (for, for example, strings like group/package) I
@@ -4603,19 +4628,19 @@ If the parentheses are balanced, the function returns t."
 
   ;; RET can sometimes check and uncheck boxes. This is not something I want.
   ;; NOTE: THIS IS WRONG. DO NOT ACTIVATE.
-  ;; (evil-define-key 'normal 'local (kbd "RET") #'ignore)
+  ;; (evil-define-key 'normal 'local (kbd "RET") 'ignore)
 
   ;; TODO reenable?
   ;; (when (fboundp 'indentnav-backward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "{") #'indentnav-backward-to-empty-line))
+  ;;   (evil-define-key 'normal 'local (kbd "{") 'indentnav-backward-to-empty-line))
   ;; (when (fboundp 'indentnav-forward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "}") #'indentnav-forward-to-empty-line))
+  ;;   (evil-define-key 'normal 'local (kbd "}") 'indentnav-forward-to-empty-line))
 
   ;; (when (fboundp 'indentnav-backward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "{") #'evil-backward-paragraph))
+  ;;   (evil-define-key 'normal 'local (kbd "{") 'evil-backward-paragraph))
   ;;
   ;; (when (fboundp 'indentnav-forward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "}") #'evil-forward-paragraph))
+  ;;   (evil-define-key 'normal 'local (kbd "}") 'evil-forward-paragraph))
 
   )
 
@@ -4714,11 +4739,11 @@ search direction (default: \='forward)."
 
 (with-eval-after-load 'evil
   ;; Key mappings
-  (define-key evil-normal-state-map (kbd "*") #'evilbuffer-search-symbol)
-  (define-key evil-visual-state-map (kbd "*") #'evilbuffer-search-symbol)
-  (define-key evil-normal-state-map (kbd "#") #'le-evil--search-symbol-backwards)
-  (define-key evil-visual-state-map (kbd "#") #'le-evil--search-symbol-backwards)
-  (define-key evil-visual-state-map (kbd "?") #'le-evil--search-symbol-backwards))
+  (define-key evil-normal-state-map (kbd "*") 'evilbuffer-search-symbol)
+  (define-key evil-visual-state-map (kbd "*") 'evilbuffer-search-symbol)
+  (define-key evil-normal-state-map (kbd "#") 'le-evil--search-symbol-backwards)
+  (define-key evil-visual-state-map (kbd "#") 'le-evil--search-symbol-backwards)
+  (define-key evil-visual-state-map (kbd "?") 'le-evil--search-symbol-backwards))
 
 ;;; Provide
 
