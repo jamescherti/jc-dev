@@ -796,6 +796,105 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+  (setq hs-hide-comments-when-hiding-all nil)
+  (setq hs-isearch-open t)  ;; Open both comments and code
+  (add-hook 'lua-mode-hook #'hs-minor-mode)
+
+  ;; This fixes the skipping when scrolling long org documents
+  ;; NOTE: MANAGED BY MINIMAL-EMACS
+  ;; (setq scroll-conservatively most-positive-fixnum)
+
+  ;; TODO put them back
+  ;;(setq eldoc-idle-delay 0.5)
+  ;;(setq eldoc-echo-area-display-truncation-message t)
+  ;; (setq eldoc-echo-area-prefer-doc-buffer nil)
+  (setq eldoc-echo-area-use-multiline-p nil)  ;; Prevent some errors from showing
+
+  (setq uniquify-buffer-name-style 'reverse)
+  (setq uniquify-separator "•")
+
+  (with-eval-after-load 'recentf
+    (setq recentf-exclude
+          (append recentf-exclude
+                  (list
+                   "^/\\(?:su\\|sudo\\)?:"
+                   "^~/\\.emacs"
+                   "^~/\\.src"
+                   "^~/src/forks/"
+                   "^~/\\.[a-z]*-?emacs"
+                   "^/opt/local/"
+                   "\\.tar$" "\\.tbz2$" "\\.tbz$" "\\.tgz$" "\\.bz2$" "\\.bz$"
+                   "\\.gz$" "\\.gzip$" "\\.xz$" "\\.zpaq$" "\\.lz$" "\\.lrz$"
+                   "\\.lzo$" "\\.lzma$" "\\.shar$" "\\.kgb$" "\\.zip$" "\\.Z$"
+                   "\\.7z$" "\\.rar$"
+
+                   ;; TODO lighemacs?
+                   "COMMIT_EDITMSG\\'"
+
+                   "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
+
+                   ;; TODO add lightemacs dir
+
+                   "-autoloads\\.el$"
+                   "autoload\\.el$"))))
+
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+  (setq modus-themes-italic-constructs t)
+  (setq modus-themes-bold-constructs t)
+  (setq modus-themes-mixed-fonts nil)
+  (setq modus-themes-prompts '(bold intense))
+
+  ;;; Simple text file
+  ;; To avoid text-mode interfering with other modes like org or markdown,
+  ;; I created a dedicated mode for *.txt files.
+  (define-derived-mode txt-file-mode text-mode "SimpleTextFile"
+    "Major mode for editing *.txt files.")
+  (defun setup-txt-file-mode ()
+    "Setup txt file mode."
+    ;; (setq-local evil-shift-width 2)
+    (setq-local indent-tabs-mode nil)
+    (setq-local tab-width 2)
+    (setq-local standard-indent 2))
+  (setq initial-major-mode 'txt-file-mode)
+  (push (cons "\\.[Tt][Xx][Tt]\\'" 'txt-file-mode) auto-mode-alist)
+  (push (cons "\\.[Tt][Xx][Tt]\\.[aA][sS][cC]\\'" 'txt-file-mode) auto-mode-alist)
+
+  (nconc auto-mode-alist
+         '(;; conf-mode
+           ;; ("\\.profile\\'" . conf-mode)  ; firejail profiles
+           ("^/etc/[^/]+" . conf-unix-mode)
+
+           ;; /etc/hosts and ansible /hosts
+
+           ;; Replace with git-modes
+           ;; ("/\\.gitignore" . conf-unix-mode)
+           ;; ("/\\.gitattributes" . conf-space-mode)
+
+           ;; Git
+
+           ;; hexl-mode
+           ;; ("\\.\\(?:hex\\|nes\\)\\'" . hexl-mode)
+
+           ;; txt-file-mode
+           ;; ("\\.log\\'" . txt-file-mode)
+           ))
+  (add-to-list 'auto-mode-alist '("/\\.gitconfig\\.local\\'" . gitconfig-mode))
+  (add-to-list 'auto-mode-alist '("/\\.gitignore\\.local\\'" . gitignore-mode))
+  (add-to-list 'auto-mode-alist '("/\\.gitattributes\\.local\\'" . gitattributes-mode))
+
+  (defun my-setup-conf-mode ()
+    "Setup `conf-mode'."
+    (setq-local evil-auto-indent nil)
+    (setq-local indent-line-function #'ignore))
+  (add-hook 'conf-mode-hook #'my-setup-conf-mode)
+
+  (setq markdown-toc-mode-map nil)
+  (setq markdown-toc-header-toc-title "## Table of Contents")
+  (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
+
   ;; The function that is called by default is `vc-shrink-buffer-window',
   ;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
   ;; This function shrinks height of WINDOW if its buffer doesn’t need so many
@@ -2038,6 +2137,32 @@ ignored and logged as a warning. All other errors are re-raised."
   (advice-add 'flymake-proc-legacy-flymake :around
               #'my-flymake-proc-legacy-safe-advice))
 
+;;; Display buffer alist
+
+(add-to-list 'display-buffer-alist
+             `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
+               display-buffer-in-side-window
+               (side . right)
+               (slot . 0)
+               (window-parameters . ((no-delete-other-windows . t)))
+               (window-width . 100)
+               (dedicated . t)))
+
+(add-to-list 'display-buffer-alist '("\\*CPU-Profiler-Report"
+                                     (display-buffer-at-bottom)))
+
+(add-to-list 'display-buffer-alist '("\\*Memory-Profiler-Report"
+                                     (display-buffer-at-bottom)))
+
+(add-to-list 'display-buffer-alist '("\\*Calendar\\*"
+                                     (display-buffer-at-bottom)))
+
+(add-to-list 'display-buffer-alist '("\\*tmux"
+                                     (display-buffer-same-window)))
+
+(add-to-list 'display-buffer-alist '("\\*grep\\*"
+                                     (display-buffer-same-window)))
+
 ;;; Always current window
 
 (defun current-window-only--setup-display-buffer-alist ()
@@ -2195,6 +2320,47 @@ ignored and logged as a warning. All other errors are re-raised."
         (dart "https://github.com/ast-grep/tree-sitter-dart")
         (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")))
+
+;;; hideshow
+
+(with-eval-after-load 'hideshow
+  ;; TODO lightemacs?
+  ;; Fringe
+  (define-fringe-bitmap 'hs-marker [0 24 24 126 126 24 24 0])
+  (defcustom hs-fringe-face 'hs-fringe-face
+    "*Specify face used to highlight the fringe on hidden regions."
+    :type 'face
+    :group 'hideshow)
+  (defface hs-fringe-face
+    '((t (:foreground "#888" :box (:line-width 2 :color "grey75"
+                                               :style released-button))))
+    "Face used to highlight the fringe on folded regions"
+    :group 'hideshow)
+  (defcustom hs-face 'hs-face
+    "*Specify the face to to use for the hidden region indicator"
+    :type 'face
+    :group 'hideshow)
+  (defface hs-face
+    '((t (:foreground "grey" :background unspecified :box nil)))
+    "Face to hightlight the ... area of hidden regions"
+    :group 'hideshow)
+
+  (defun display-code-line-counts (ov)
+    (when (eq 'code (overlay-get ov 'hs))
+      (let* (;;(marker-string "*fringe-dummy*")
+             ;; (marker-length (length marker-string))
+             (display-string (format "(%d)..."
+                                     (count-lines (overlay-start ov)
+                                                  (overlay-end ov)))))
+        (overlay-put ov 'help-echo "Hiddent text. C-c,= to show")
+        ;; (put-text-property 0 marker-length 'display
+        ;;                    (list 'left-fringe 'hs-marker 'hs-fringe-face)
+        ;;                    marker-string)
+        ;; (overlay-put ov 'before-string marker-string)
+        (put-text-property 0 (length display-string) 'face 'hs-face
+                           display-string)
+        (overlay-put ov 'display display-string))))
+  (setq hs-set-up-overlay 'display-code-line-counts))
 
 ;;; Local variables
 
