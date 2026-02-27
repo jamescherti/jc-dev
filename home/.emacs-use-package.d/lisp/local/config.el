@@ -76,7 +76,7 @@
 (with-eval-after-load 'compile-angel
   (compile-angel-exclude-directory "~/src/emacs/"))
 
-(setq compile-angel-enable-byte-compile nil)
+(setq compile-angel-enable-byte-compile t)
 (setq compile-angel-enable-native-compile t)
 (setq compile-angel-native-compile-load nil)
 ;; (setq compile-angel-exclude-core-emacs-directory
