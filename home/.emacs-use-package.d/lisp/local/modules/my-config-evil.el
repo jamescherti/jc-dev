@@ -1577,8 +1577,11 @@ search direction (default: \='forward)."
                 "  |  "
                 (vc-mode vc-mode)
                 (:eval
-                 (let ((project-name (my-project-name)))
-                   (format "  |  Project:%s" (my-project-name))))
+                 (if (fboundp 'my-project-name)
+                     (let ((project-name (my-project-name)))
+                       (format "  |  Project:%s" (my-project-name)))
+                   "")
+                 )
                 "  |  "
                 mode-line-position
                 "  |  "

@@ -72,7 +72,8 @@
 ;; compile-angel-native-compile-load is t
 (setq lightemacs-load-compiled-init-files t)
 
-(setq lightemacs-optional-modules '(mod-defun
+(setq lightemacs-optional-modules '(
+                                    mod-defun
                                     mod-misc
                                     buffer-guardian
                                     mod-lsp-mode
@@ -87,7 +88,8 @@
                                     point-manager
                                     mod-org
 
-                                    mod-kirigami))
+                                    mod-kirigami
+                                    ))
 
 (setq lightemacs-recentf-track-switch-to-buffer t)
 
