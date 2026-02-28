@@ -80,16 +80,13 @@
 EL-FILE is the *.el file."
   (if (string-prefix-p my-src-dir-prefix (file-truename el-file))
       (progn
-        (message "DEBUG ONLY NATIVE COMP: %s" el-file)
-        nil
-        ;; :native-comp
-        )
+        :native-comp)
     :continue))
 (setq compile-angel-predicate-function #'my-compile-angel-predicate)
 
 (with-eval-after-load 'compile-angel
-  ;; (setq compile-angel-verbose t)
-  ;; (setq compile-angel-debug t)
+  (setq compile-angel-verbose t)
+  (setq compile-angel-debug t)
 
   ;; Exclusions
   (push "/file-templates-auto/main.el" compile-angel-excluded-files)
@@ -661,9 +658,15 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
   ;; Apply the cached paths to load-path
   (seq-doseq (path my--package-load-path-cache)
-    (add-to-list 'load-path path)))
+    (push path load-path)
+    ;; (add-to-list 'load-path path)
+    ))
 
-;;; lightemacs-user-post-init
+;; (defun lightemacs-user-post-init ()
+;;   "User post init."
+;;   (my-add-packages-to-load-path))
+
+;;; config
 
 (defun my-evil-config ()
   "Setup evil."
@@ -1384,9 +1387,6 @@ WIDTH is the tab width."
 
   (my-update-package-pinned-packages my-package-pinned-packages)
 
-  ;; Add them a second time just in case one of them gets installed
-  (my-add-packages-to-load-path)
-
   ;; Abbrev
   (add-hook 'markdown-mode-hook #'abbrev-mode)
   (add-hook 'markdown-ts-mode-hook #'abbrev-mode)
@@ -1416,9 +1416,6 @@ WIDTH is the tab width."
           (?f . evil-surround-function)))
 
   (my-evil-config)
-
-  ;; Ensure load-path is accurate even after installing packages
-  (my-add-packages-to-load-path)
 
   (setq user-full-name "user"
         user-mail-address "user@domain.ext")
@@ -2521,8 +2518,11 @@ session ends."
 
   (current-window-only--setup-display-buffer-alist))
 
-(defun lightemacs-user-pre-init ()
+
+(defun lightemacs-user-pre-modules ()
   "Pre-init config."
+  ;; pre early init
+  (my-add-packages-to-load-path)
   (my-config-display-buffer-alist)
   (current-window-only-setup))
 
