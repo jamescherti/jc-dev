@@ -1190,7 +1190,7 @@ WIDTH is the tab width."
                   (when (fboundp 'lightemacs-load-default-theme)
                     (lightemacs-load-default-theme)))))
 
-  (setq easysession-save-pretty-print t)
+  ;; (setq easysession-save-pretty-print t)
   (setq easysession-switch-to-exclude-current t)
   (setq easysession-save-interval (* 14 60))
   (add-hook 'easysession-before-reset-hook #'(lambda()
