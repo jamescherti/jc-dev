@@ -1211,7 +1211,8 @@ WIDTH is the tab width."
   (setq flymake-suppress-zero-counters t)
 
   (with-no-warnings
-    (add-hook 'grep-mode-hook #'hs-line-mode))
+    (add-hook 'org-mode-hook 'hl-line-mode)
+    (add-hook 'grep-mode-hook 'hl-line-mode))
   (with-eval-after-load 'icomplete
     (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit))
 

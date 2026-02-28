@@ -2378,6 +2378,18 @@ column layout, except when a point falls on the first visible line."
 (evil-define-key 'normal 'global (kbd "<leader>ur") 'bufferfile-rename)
 (evil-define-key 'normal 'global (kbd "<leader>ud") 'bufferfile-delete)
 
+;;; Better grep
+
+(lightemacs-use-package mod-better-grep
+  :ensure nil
+  :commands mod-better-grep
+  ;; :init
+  ;; (with-eval-after-load 'evil
+  ;;   (evil-define-key 'normal 'global (kbd "<leader>gR") #'better-grep)
+  ;;   (evil-define-key 'normal 'global (kbd "<leader>gr") #'better-grep)
+  ;;   (add-hook 'on-first-input-hook #'fido-vertical-mode))
+  )
+
 ;;; Provide
 
 (provide 'my-config-evil)
