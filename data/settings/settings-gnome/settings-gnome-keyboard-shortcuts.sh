@@ -76,7 +76,7 @@ echo "Updateing GNOME shortcuts..."
 
 if type -P xdevenv &>/dev/null; then
   shortcut "xocrshot" "<Primary><Alt>O" "$HOME/.bin/xdevenv xocrshot"
-  # shortcut "Screenshot" "<Primary><Alt>C" "$HOME/.bin/xdevenv screenshot"
+  shortcut "Screenshot" "<Primary><Alt>C" "$HOME/.bin/xdevenv screenshot"
   shortcut "Editor" "<Primary><Alt>V" "$HOME/.bin/xdevenv editor"
   shortcut "Terminal" "<Primary><Alt>R" "$HOME/.bin/xdevenv terminal"
   shortcut "Web Browser" "<Primary><Alt>F" "$HOME/.bin/xdevenv web-browser"

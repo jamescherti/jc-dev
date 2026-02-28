@@ -630,26 +630,30 @@ When IMENU-ONLY is nil it only uses imenu."
         (let ((evil-goto-definition-functions
                (cl-remove 'evil-goto-definition-imenu
                           evil-goto-definition-functions)))
-          (evil-goto-definition)))))
-
-  (error "Undefined required functions"))
+          (evil-goto-definition))))))
 
 (defun eviljump-goto-definition (&optional force-all)
   "Find definition and scroll line to top.
 When FORCE-ALL is non-nil, use all functions."
   (interactive)
   (lightemacs-recenter-if-out-of-view
-    (cond ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
-           (xref-find-definitions (thing-at-point 'symbol t)))
+    (cond
+     ((and (fboundp 'eglot-managed-p)
+           (eglot-managed-p))
+      (xref-find-definitions (thing-at-point 'symbol t)))
 
-          ((and (boundp 'lsp-mode) lsp-mode (fboundp 'lsp-find-definition))
-           (lsp-find-definition))
+     ((and (boundp 'lsp-mode)
+           lsp-mode
+           (fboundp 'lsp-find-definition))
+      (lsp-find-definition))
 
-          ((and (not force-all) (derived-mode-p 'emacs-lisp-mode))
-           ;; Do not jump to emacs.d. Only use imenu.
-           (eviljump-goto-definition-try-imenu-first t))
+     ((and (not force-all)
+           (derived-mode-p 'emacs-lisp-mode))
+      ;; Do not jump to emacs.d. Only use imenu.
+      (eviljump-goto-definition-try-imenu-first t))
 
-          (t (eviljump-goto-definition-try-imenu-first nil)))))
+     (t
+      (eviljump-goto-definition-try-imenu-first nil)))))
 
 (defun eviljump-goto-definition-force ()
   "Go to definition."
@@ -831,11 +835,11 @@ guarantees that the new window is selected, as in Vim."
          (project-root (when (and project
                                   (fboundp 'project-root))
                          (project-root project)))
-         (consult-fd-args (concat (if (boundp 'consult-fd-args)
-                                      consult-fd-args
-                                    "")
-                                  " --threads "
-                                  (number-to-string (num-processors)))))
+         (consult-fd-args
+          (when (boundp 'consult-fd-args)
+            (concat consult-fd-args
+                    " --threads "
+                    (number-to-string (num-processors))))))
     (if (fboundp 'consult-fd)
         (consult-fd project-root)
       (error "Undefined: consult-fd"))))
@@ -870,11 +874,10 @@ DIR is the directory."
     (let ((selection (when (use-region-p)
                        (buffer-substring-no-properties (region-beginning)
                                                        (region-end))))
-          (consult-ripgrep-args (concat (if (fboundp 'consult-ripgrep-args)
-                                            consult-ripgrep-args
-                                          "")
-                                        " --threads "
-                                        (number-to-string (num-processors)))))
+          (consult-ripgrep-args (when consult-ripgrep-args
+                                  (concat consult-ripgrep-args
+                                          " --threads "
+                                          (number-to-string (num-processors))))))
       (when selection
         (save-excursion
           (deactivate-mark)))

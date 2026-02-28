@@ -803,6 +803,33 @@ at the same level."
     ;;               (my-set-tab-width 3)))
     ))
 
+;;; org-ibullets
+
+(lightemacs-use-package org-ibullets
+  :vc (:url "https://github.com/jamescherti/org-ibullets.el"
+            :rev :newest)
+  :ensure nil
+  :after org
+  :commands org-ibullets-mode
+  :hook (org-mode . org-ibullets-mode)
+  ;; :custom
+  ;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
+  )
+
+;;; Trust framework files
+
+(defcustom lightemacs-trust-framework-files nil
+  "If non-nil, append the Lightemacs core directory to `trusted-content'.
+This prevents Flymake warnings when viewing framework source files in Emacs 30+."
+  :type 'boolean
+  :group 'lightemacs)
+
+(when (and lightemacs-trust-framework-files
+           (boundp 'trusted-content)
+           (listp trusted-content))
+  (let ((dir (file-name-as-directory lightemacs-core-directory)))
+    (add-to-list 'trusted-content dir)))
+
 ;;; Provide
 
 (provide 'mod-misc)
