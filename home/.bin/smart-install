@@ -195,11 +195,11 @@ def smart_install_vim(project_name: str) -> bool:
     return True
 
 
-def smart_install_emacs_package(project_name: str) -> bool:
-    "Install an Emacs package that is located in the current directory."
-    dest = Path.home() / ".emacs.d/lisp/packages" / project_name
-    rsync(Path(".").resolve(), dest)
-    return True
+# def smart_install_emacs_package(project_name: str) -> bool:
+#     "Install an Emacs package that is located in the current directory."
+#     dest = Path.home() / ".emacs.d/lisp/packages" / project_name
+#     rsync(Path(".").resolve(), dest)
+#     return True
 
 
 def ext_exists(ext: str, recursive: bool = True) -> bool:
@@ -268,12 +268,12 @@ def smart_install(path: os.PathLike) -> bool:
 
         # 4: Emacs packages
         # ChangeLog.1 is the Emacs source code
-        elif (not Path("ChangeLog.1").is_file()
-              and (Path("README").is_file()
-                   or Path("README.org").is_file() or Path("COPYING").is_file()
-                   or Path("README.md").is_file()) and
-                ext_exists("el", False)):
-            return smart_install_emacs_package(project_name)
+        # elif (not Path("ChangeLog.1").is_file()
+        #       and (Path("README").is_file()
+        #            or Path("README.org").is_file() or Path("COPYING").is_file()
+        #            or Path("README.md").is_file()) and
+        #         ext_exists("el", False)):
+        #     return smart_install_emacs_package(project_name)
 
         if Path(".git").is_dir():
             break
