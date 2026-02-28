@@ -74,7 +74,18 @@
 
 (setq lightemacs-recentf-track-switch-to-buffer t)
 
-(setq compile-angel-optimize-regexps t)
+(defvar my-src-dir-prefix (file-name-as-directory (expand-file-name "~/src/")))
+(defun my-compile-angel-predicate (el-file)
+  "Compile Angel predicate.
+EL-FILE is the *.el file."
+  (if (string-prefix-p my-src-dir-prefix (file-truename el-file))
+      (progn
+        (message "DEBUG ONLY NATIVE COMP: %s" el-file)
+        nil
+        ;; :native-comp
+        )
+    :continue))
+(setq compile-angel-predicate-function #'my-compile-angel-predicate)
 
 (with-eval-after-load 'compile-angel
   ;; (setq compile-angel-verbose t)
@@ -94,10 +105,11 @@
 (setq package-native-compile nil)
 (setq native-comp-jit-compilation nil)
 
-(with-eval-after-load 'compile-angel
-  (if (fboundp 'compile-angel-exclude-directory)
-      (compile-angel-exclude-directory "~/src/emacs/")
-    (error "Undefined: compile-angel-exclude-directory")))
+;; I am using the predicate instead
+;; (with-eval-after-load 'compile-angel
+;;   (if (fboundp 'compile-angel-exclude-directory)
+;;       (compile-angel-exclude-directory "~/src/emacs/")
+;;     (error "Undefined: compile-angel-exclude-directory")))
 
 (setq compile-angel-enable-byte-compile t)
 (setq compile-angel-enable-native-compile t)
