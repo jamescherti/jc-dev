@@ -793,6 +793,12 @@ WIDTH is the tab width."
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+  ;; I find the default prefix for smerge-mode C-c^ cumbersome so I have changed
+  ;; it to C-cv
+  (setq smerge-command-prefix "\C-xc")
+  (setq smerge-diff-buffer-name "*smerge-diff*")
+  (setq smerge-refine-shadow-cursor nil)
+
   ;; TODO: lightemacs?
   (with-eval-after-load 'treesit
     (add-to-list 'treesit-extra-load-path
@@ -2871,7 +2877,8 @@ session ends."
 ;; Enable smerge
 (defun my-enable-smerge-maybe ()
   "Enable `smerge'."
-  (when (and buffer-file-name (vc-backend buffer-file-name))
+  (when (and buffer-file-name
+             (vc-backend buffer-file-name))
     (save-excursion
       (goto-char (point-min))
       (when (re-search-forward "^<<<<<<< " nil t)
