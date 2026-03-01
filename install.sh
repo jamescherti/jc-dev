@@ -289,10 +289,6 @@ enable-upgrade-pip-packages() {
 }
 
 config-pip-packages() {
-  run_every 172800 \
-    ~/.cache/jc-dev.pip-upgrade \
-    enable-upgrade-pip-packages
-
   # PIP
   MY_PIP_PACKAGES=()
   if ! type -P pathaction &>/dev/null; then
@@ -317,6 +313,10 @@ config-pip-packages() {
 
   local opts=()
 
+  run_every 172800 \
+    ~/.cache/jc-dev.pip-upgrade \
+    enable-upgrade-pip-packages
+
   if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]]; then
     opts+=(--upgrade)
   fi
@@ -329,7 +329,6 @@ config-pip-packages() {
       pip install "${opts[@]}" --user "${MY_PIP_PACKAGES[@]}"
     fi
   fi
-
 }
 
 run_every() {
