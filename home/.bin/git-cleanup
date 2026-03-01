@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Remove local Git branches that have already been merged.
+#
+# The script enumerates local branches merged into the current HEAD,
+# excludes a small set of long-lived branches, presents the candidate
+# branches for review, and deletes them only after explicit confirmation.
+#
+# Intended use:
+#   Interactive repository maintenance to reduce local branch clutter.
+#
+# Safety notes:
+#   - Operates on local branches only.
+#   - Deletion is gated by a confirmation prompt.
+#   - Behavior depends on the current branch used as the merge base.
+#
+# Requirements:
+#   - Git
+#   - Bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+
+set -e
+set -u
+
+cleanup_branches() {
+  local branches=()
+  local branch
+
+  while IFS= read -r branch; do
+    branches+=("$branch")
+  done < <(git branch --merged \
+    | grep -v '\* master\|main\|develop$' \
+    | sed -E 's/^[ \t]+//')
+
+  if [[ "${#branches[@]}" -eq 0 ]]; then
+    echo "No merged branches to delete."
+    exit 0
+  fi
+
+  echo
+  read -r -p "Delete the above branches? [y,n] " ANSWER
+  if [[ "$ANSWER" != "y" ]]; then
+    echo "Interrupted." >&2
+    exit 1
+  fi
+
+  for branch in "${branches[@]}"; do
+    git branch -D "$branch"
+  done
+}
+
+cleanup_branches
