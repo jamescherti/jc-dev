@@ -535,7 +535,6 @@ is-emacs-server-running() {
 
 smart-editor() {
   if type -P emacs &>/dev/null \
-    && pgrep --quiet --exact emacs \
     && is-emacs-server-running; then
     emacs-edit "$@"
   else

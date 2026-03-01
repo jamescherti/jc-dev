@@ -281,7 +281,16 @@ config-files() {
   fi
 }
 
+enable-upgrade-pip-packages() {
+  UPGRADE_PIP_PACKAGES=1
+}
+
 config-pip-packages() {
+  UPGRADE_PIP_PACKAGES=0
+  run_every 172800 \
+    ~/.cache/jc-dev.pip-upgrade \
+    enable-upgrade-pip-packages
+
   # PIP
   MY_PIP_PACKAGES=()
   if ! type -P pathaction &>/dev/null; then
@@ -304,12 +313,18 @@ config-pip-packages() {
     MY_PIP_PACKAGES+=(git-smartmv)
   fi
 
+  local opts=()
+
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]]; then
+    opts+=(--upgrade)
+  fi
+
   if [[ "${#MY_PIP_PACKAGES[@]}" -gt 1 ]]; then
     if [[ "${VIRTUAL_ENV:-}" ]]; then
       pip install --upgrade pip
-      pip install "${MY_PIP_PACKAGES[@]}"
+      pip install "${opts[@]}" "${MY_PIP_PACKAGES[@]}"
     else
-      pip install --user "${MY_PIP_PACKAGES[@]}"
+      pip install "${opts[@]}" --user "${MY_PIP_PACKAGES[@]}"
     fi
   fi
 
