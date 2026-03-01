@@ -426,8 +426,8 @@ main() {
     "$SCRIPT_DIR/home/.bin/update-emacs-config"
   fi
 
-  # run_every 1 ~/.cache/jc-dev.git_maintenance git_maintenance
-  git_maintenance
+  # 1 day = 86400
+  run_every 86400 ~/.cache/jc-dev.git_maintenance git_maintenance
 
   echo
   echo Success.
