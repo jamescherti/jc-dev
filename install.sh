@@ -141,8 +141,8 @@ config-jc-dotfiles() {
   git_clone \
     https://github.com/jamescherti/jc-dotfiles \
     "$GIT_CLONE_DIR/jc-dotfiles"
-  cd "$GIT_CLONE_DIR/jc-dotfiles"
-  JC_DOTFILES_UNATTENDED=1 ./install.sh
+  cd
+  JC_DOTFILES_UNATTENDED=1 "$GIT_CLONE_DIR/jc-dotfiles/install.sh"
 }
 
 config-lightvim() {
@@ -165,8 +165,7 @@ config-firefox() {
     if [[ -d "$firefox_dir" ]]; then
       git_clone https://github.com/jamescherti/jc-firefox-settings \
         "$GIT_CLONE_DIR/jc-firefox-settings"
-      cd "$GIT_CLONE_DIR/jc-firefox-settings"
-      ./install.sh
+      "$GIT_CLONE_DIR/jc-firefox-settings/install.sh"
       break
     fi
   done
@@ -179,13 +178,12 @@ config-gnome() {
     git_clone \
       https://github.com/jamescherti/jc-gnome-settings \
       "$GIT_CLONE_DIR/jc-gnome-settings"
-    cd "$GIT_CLONE_DIR/jc-gnome-settings"
-    ./jc-gnome-settings.sh
+    "$GIT_CLONE_DIR/jc-gnome-settings/jc-gnome-settings.sh"
 
     # LOCAL GNOME SETTINGS
-    cd "$SCRIPT_DIR/data/settings/settings-gnome/"
-    ./settings-gnome-keyboard-shortcuts.sh
-    ./settings-gnome.sh
+    local gnome_scripts_path="$SCRIPT_DIR/data/settings/settings-gnome"
+    "$gnome_scripts_path/settings-gnome-keyboard-shortcuts.sh"
+    "$gnome_scripts_path/settings-gnome.sh"
   fi
 }
 
@@ -212,7 +210,6 @@ config-bash-stdops() {
     "$GIT_CLONE_DIR/bash-stdops"
   cd "$GIT_CLONE_DIR/bash-stdops"
   PREFIX="$HOME/.local" ./install.sh
-
 }
 
 config-mimetypes() {
@@ -245,17 +242,15 @@ config-startup-apps() {
 
 config-lightemacs() {
   if [[ -f ~/src/emacs/lightemacs/ ]]; then
-    cd ~/src/emacs/lightemacs/
-    if git-is-clean; then
-      git checkout develop
-      git pull --rebase
+    if git-is-clean ~/src/emacs/lightemacs/; then
+      git -C ~/src/emacs/lightemacs/ checkout develop
+      git -C ~/src/emacs/lightemacs/ pull --rebase
     fi
   else
     git_clone \
       https://github.com/jamescherti/lightemacs \
       "$GIT_CLONE_DIR/lightemacs"
-    cd "$GIT_CLONE_DIR/lightemacs"
-    git checkout develop
+    git -C "$GIT_CLONE_DIR/lightemacs" checkout develop
   fi
 }
 
@@ -393,7 +388,7 @@ git_maintenance() {
 
   if [[ -d "$HOME/src" ]]; then
     # shellcheck disable=SC2016
-    git-find-repos \
+    "$SCRIPT_DIR/home/.bin/git-find-repos" \
       "$HOME/src" \
       --if-exec git-is-clean \
       --exec-bg git-maintenance
@@ -427,7 +422,9 @@ main() {
   fi
 
   # 1 day = 86400
-  run_every 86400 ~/.cache/jc-dev.git_maintenance git_maintenance
+  run_every 86400 \
+    ~/.cache/jc-dev.git_maintenance \
+    "$SCRIPT_DIR/home/.bin/git_maintenance"
 
   echo
   echo Success.

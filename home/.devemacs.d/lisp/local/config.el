@@ -74,11 +74,11 @@
 (setq lightemacs-dired-omit-parent-directory t)
 (setq lightemacs-cycle nil)
 
-(setq lightemacs-modules '(;;le-compile-angel
+(setq native-comp-jit-compilation nil)
+
+(setq lightemacs-modules '(le-compile-angel
 
                            le-autorevert
-                           ;; le-undo-fu
-                           ;; le-undo-fu-session
 
                            le-markdown-mode
                            le-org
@@ -87,8 +87,8 @@
                            le-group-evil
                            le-persist-text-scale
 
-                           le-undo-fu
-                           le-undo-fu-session
+                           ;; le-undo-fu
+                           ;; le-undo-fu-session
 
                            ;; le-consult-dir
                            le-consult
@@ -98,8 +98,7 @@
                            le-vertico
                            le-orderless
 
-                           ;; TODO
-                           ;; le-pathaction
+                           le-pathaction
 
                            ;; le-evil-visualstar
                            ;; le-git-modes
