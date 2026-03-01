@@ -1395,7 +1395,8 @@ WIDTH is the tab width."
   (add-hook 'markdown-ts-mode-hook #'abbrev-mode)
   (add-hook 'org-mode-hook #'abbrev-mode)
   (define-abbrev-table 'global-abbrev-table
-    '(("i" "I")))
+    '(("ot" "to")
+      ("i" "I")))
 
   ;; For some reason, post-init ignores this sometimes
   ;; Similar to the default configuration, but without spaces surrounding pairs
