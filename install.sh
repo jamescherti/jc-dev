@@ -58,7 +58,7 @@ init() {
     fi
   done
 
-  SCRIPT_DIR=$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")
+  SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
   mkdir -p "$GIT_CLONE_DIR"
 
   # Check if terminal supports color
