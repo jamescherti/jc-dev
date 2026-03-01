@@ -320,6 +320,95 @@ config-pip-packages() {
 
 }
 
+run_every() {
+  # Ensure we have at least 3 arguments
+  if [[ $# -lt 3 ]]; then
+    echo "Usage: run_every <seconds> <reference_file> <command...>" >&2
+    return 1
+  fi
+
+  local interval="$1"
+  local lock_file="$2"
+  shift 2
+  local command=("$@")
+
+  # Ensure the directory exists
+  mkdir -p "$(dirname "$lock_file")"
+
+  if [[ -f "$lock_file" ]]; then
+    local current_time
+    current_time=$(date +%s)
+    local last_run
+    last_run=$(stat -c %Y "$lock_file")
+    local elapsed
+    elapsed=$((current_time - last_run))
+
+    if [[ $elapsed -ge $interval ]]; then
+      "${command[@]}"
+      touch "$lock_file"
+    else
+      echo "[IGNORED] $*"
+    fi
+  else
+    # First time running: execute and create the file
+    "${command[@]}"
+    touch "$lock_file"
+  fi
+}
+
+git_maintenance() {
+  # The git fsck --full command is used to verify the integrity of a Git
+  # repository. Here’s a detailed breakdown of what it does:
+  #
+  # The git fsck --full command is a comprehensive utility for verifying the
+  # integrity of a Git repository. By performing a thorough examination of all
+  # objects and references within the repository, it ensures that all data is
+  # correctly linked and free from corruption. This command checks the
+  # consistency of blobs, trees, commits, and tags, as well as the validity of
+  # branch and tag references. The --full option makes the check more
+  # exhaustive, identifying any discrepancies or damaged objects and providing
+  # detailed reports on potential issues. It is especially useful for diagnosing
+  # repository problems after unexpected failures or for routine maintenance to
+  # ensure ongoing repository health.
+  # git find git fsck --full
+
+  # git gc: Runs garbage collection, which cleans up unnecessary files and
+  # optimizes the local repository.
+  #
+  # --aggressive: This option makes the garbage collection process more
+  # --thorough,
+  #
+  # --resulting in better compression of objects and a more optimized
+  # --repository.
+  #
+  # --However, it can be significantly slower and more resource-intensive than
+  # --the
+
+  # --default garbage collection.
+  #
+  # --prune=now: This option tells Git to remove all objects that are not
+  # --reachable from any reference, including those that are less than two weeks
+  # --old, which is the default. Using now removes all such objects immediately.
+  # git find git gc --aggressive --prune=now
+
+  if [[ -d "$HOME/src" ]]; then
+    echo "[INFO] Change Git index to 4"
+    # shellcheck disable=SC2016
+    git-find-repos \
+      "$HOME/src" \
+      --if-exec git-is-clean \
+      --exec-bg \
+      'git setup && sh -c \
+        "echo "[INFO] Git garbage collection"
+         git gc --prune=now
+
+         echo "[INFO] Git: Update index"
+         if [[ \"$(git update-index --show-index-version)\" != 4 ]]; then
+           git update-index --index-version=4;
+         fi"'
+  fi
+}
+
 main() {
   init
   confirm
@@ -345,6 +434,8 @@ main() {
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     "$SCRIPT_DIR/home/.bin/update-emacs-config"
   fi
+
+  run_every 10 ~/.cache/jc-dev.git_maintenance git_maintenance
 
   echo
   echo Success.
