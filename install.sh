@@ -289,33 +289,33 @@ enable-upgrade-pip-packages() {
 }
 
 config-pip-packages() {
+  run_every 172800 \
+    ~/.cache/jc-dev.pip-upgrade \
+    enable-upgrade-pip-packages
+
   # PIP
   MY_PIP_PACKAGES=()
-  if ! type -P pathaction &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P pathaction &>/dev/null; then
     MY_PIP_PACKAGES+=(pathaction)
   fi
 
-  if ! type -P ultyas &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P ultyas &>/dev/null; then
     MY_PIP_PACKAGES+=(ultyas)
   fi
 
-  if ! type -P git-commitflow &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P git-commitflow &>/dev/null; then
     MY_PIP_PACKAGES+=(git-commitflow)
   fi
 
-  if ! type -P batchfetch &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P batchfetch &>/dev/null; then
     MY_PIP_PACKAGES+=(batchfetch)
   fi
 
-  if ! type -P git-smartmv &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P git-smartmv &>/dev/null; then
     MY_PIP_PACKAGES+=(git-smartmv)
   fi
 
   local opts=()
-
-  run_every 172800 \
-    ~/.cache/jc-dev.pip-upgrade \
-    enable-upgrade-pip-packages
 
   if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]]; then
     opts+=(--upgrade)
