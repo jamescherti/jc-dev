@@ -26,6 +26,7 @@
 
 ;;; Debug, native comp, and initial options
 
+(require 'seq)
 (require 'my-defun)
 
 (setq debug-on-error t)
