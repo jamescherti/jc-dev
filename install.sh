@@ -392,20 +392,11 @@ git_maintenance() {
   # git find git gc --aggressive --prune=now
 
   if [[ -d "$HOME/src" ]]; then
-    echo "[INFO] Change Git index to 4"
     # shellcheck disable=SC2016
     git-find-repos \
       "$HOME/src" \
       --if-exec git-is-clean \
-      --exec-bg \
-      'git setup && sh -c \
-        "echo "[INFO] Git garbage collection"
-         git gc --prune=now
-
-         echo "[INFO] Git: Update index"
-         if [[ \"$(git update-index --show-index-version)\" != 4 ]]; then
-           git update-index --index-version=4;
-         fi"'
+      --exec-bg git-maintenance
   fi
 }
 
@@ -435,7 +426,8 @@ main() {
     "$SCRIPT_DIR/home/.bin/update-emacs-config"
   fi
 
-  run_every 60 ~/.cache/jc-dev.git_maintenance git_maintenance
+  # run_every 1 ~/.cache/jc-dev.git_maintenance git_maintenance
+  git_maintenance
 
   echo
   echo Success.
