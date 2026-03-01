@@ -281,12 +281,14 @@ config-files() {
   fi
 }
 
+UPGRADE_PIP_PACKAGES=0
+
 enable-upgrade-pip-packages() {
+  # shellcheck disable=SC2317
   UPGRADE_PIP_PACKAGES=1
 }
 
 config-pip-packages() {
-  UPGRADE_PIP_PACKAGES=0
   run_every 172800 \
     ~/.cache/jc-dev.pip-upgrade \
     enable-upgrade-pip-packages
