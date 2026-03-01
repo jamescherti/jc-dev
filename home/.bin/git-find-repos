@@ -371,7 +371,7 @@ def parse_args() -> argparse.Namespace:
         type=int,
         dest="max_workers",
         help="Maximum number of processors/workers to use",
-        default=(cpu_count() or 1) * 4
+        default=(cpu_count() or 1) * 2
     )
 
     return parser.parse_args()
