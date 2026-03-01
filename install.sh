@@ -116,6 +116,7 @@ copy_dotfiles() {
 
   local rsync_opts=(--archive
     --exclude '*.elc' --exclude '*.eln'
+    --exclude '*.git'
     --exclude='flymake_*' --exclude='flycheck_*')
 
   # rsync without delete
