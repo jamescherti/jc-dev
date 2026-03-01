@@ -257,10 +257,6 @@ config-lightemacs() {
     cd "$GIT_CLONE_DIR/lightemacs"
     git checkout develop
   fi
-
-  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
-    "$SCRIPT_DIR/home/.bin/update-emacs-config"
-  fi
 }
 
 config-files() {
@@ -345,6 +341,10 @@ main() {
   config-gnome
   config-xfce
   config-mimetypes
+
+  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
+    "$SCRIPT_DIR/home/.bin/update-emacs-config"
+  fi
 
   echo
   echo Success.
