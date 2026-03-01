@@ -49,11 +49,6 @@ from typing import List, Optional, Set, Tuple
 
 import colorama
 
-# Constants
-# fd benefits from physical cores, but thread pool waits on I/O (subprocesses)
-FD_THREADS = cpu_count() or 1
-MAX_WORKERS = FD_THREADS * 4
-
 
 @dataclass
 class CommandResult:
@@ -111,12 +106,14 @@ def git_toplevel(repo_path: Path) -> Optional[Path]:
         return None
 
 
-def git_fd_find_repo(path: Path) -> Set[Path]:
+def git_fd_find_repo(path: Path, max_workers: int) -> Set[Path]:
     """
     Find all Git repositories in 'path' using fd.
 
     :param path: The root directory to search for Git repositories.
     :type path: Path
+    :param max_workers: Maximum number of threads for fd.
+    :type max_workers: int
     :return: Set of paths to Git repositories.
     :rtype: Set[Path]
     """
@@ -125,7 +122,7 @@ def git_fd_find_repo(path: Path) -> Set[Path]:
         proc = subprocess.run(
             [
                 'fd', '--type', 'd', '--hidden', '--no-ignore',
-                '^\\.git$', "--threads", str(MAX_WORKERS), str(path)
+                '^\\.git$', "--threads", str(max_workers), str(path)
             ],
             capture_output=True,
             text=True,
@@ -269,12 +266,14 @@ def process_repo(repo_path: Path, exec_bg_cmd: Optional[str],
     return RepoContext(path=repo_path, bg_result=bg_result)
 
 
-def discover_repos(directory: Path) -> Set[Path]:
+def discover_repos(directory: Path, max_workers: int) -> Set[Path]:
     """
     Discover Git repositories starting from the given directory.
 
     :param directory: The root directory for search.
     :type directory: Path
+    :param max_workers: Maximum number of threads/workers.
+    :type max_workers: int
     :return: A set of repository root paths.
     :rtype: Set[Path]
     """
@@ -285,7 +284,7 @@ def discover_repos(directory: Path) -> Set[Path]:
 
     # 2. Search subdirectories
     if shutil.which("fd"):
-        return git_fd_find_repo(directory)
+        return git_fd_find_repo(directory, max_workers)
 
     return git_py_find_repo(directory)
 
@@ -293,7 +292,8 @@ def discover_repos(directory: Path) -> Set[Path]:
 def execute_parallel_tasks(
     repos: Set[Path],
     exec_bg: Optional[str],
-    if_exec: Optional[str]
+    if_exec: Optional[str],
+    max_workers: int
 ) -> List[RepoContext]:
     """
     Run discovery and background execution in parallel.
@@ -304,12 +304,14 @@ def execute_parallel_tasks(
     :type exec_bg: Optional[str]
     :param if_exec: Command string for conditional filtering.
     :type if_exec: Optional[str]
+    :param max_workers: Maximum number of threads for execution.
+    :type max_workers: int
     :return: List of processed repository contexts.
     :rtype: List[RepoContext]
     """
     results: List[RepoContext] = []
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
             executor.submit(
                 process_repo, repo, exec_bg, if_exec
@@ -364,6 +366,13 @@ def parse_args() -> argparse.Namespace:
         help=("Execute commands only if this check returns exit code 0."),
         default=None
     )
+    parser.add_argument(
+        "-j", "--jobs",
+        type=int,
+        dest="max_workers",
+        help="Maximum number of processors/workers to use",
+        default=(cpu_count() or 1) * 4
+    )
 
     return parser.parse_args()
 
@@ -412,13 +421,14 @@ def main() -> None:
     args = parse_args()
 
     # 1. Discover Repositories
-    repos = discover_repos(args.directory.resolve())
+    repos = discover_repos(args.directory.resolve(), args.max_workers)
 
     # 2. Parallel Processing (Filter + Background Exec)
     processed_repos = execute_parallel_tasks(
         repos,
         args.exec_bg,
-        args.if_exec
+        args.if_exec,
+        args.max_workers
     )
 
     execution_errors: List[Tuple[Path, CommandResult]] = []
