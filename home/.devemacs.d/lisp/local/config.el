@@ -98,7 +98,8 @@
                            le-vertico
                            le-orderless
 
-                           le-pathaction
+                           ;; TODO this module does not exist
+                           ;; le-pathaction
 
                            ;; le-evil-visualstar
                            ;; le-git-modes
