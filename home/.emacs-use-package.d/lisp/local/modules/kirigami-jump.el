@@ -101,9 +101,10 @@ If ENABLE is non-nil, install hooks. Otherwise remove them."
     (add-hook 'ediff-prepare-buffer-hook #'kirigami-jump--ediff-prepare-buffer)
 
     ;; TODO add this to kirigami
-    (if enable
-        (setq outline-isearch-open-invisible-function 'kirigami-jump--open-fold)
-      (setq outline-isearch-open-invisible-function 'outline-isearch-open-invisible))
+    ;; TODO it opens so many things. this is not usable
+    ;; (if enable
+    ;;     (setq outline-isearch-open-invisible-function 'kirigami-jump--open-fold)
+    ;;   (setq outline-isearch-open-invisible-function 'outline-isearch-open-invisible))
 
     ;; When pressing C-o for instance
     (with-eval-after-load 'evil

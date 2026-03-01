@@ -808,6 +808,8 @@ WIDTH is the tab width."
 
 (defun lightemacs-user-init ()
   "This function is executed right before loading modules."
+  ;; pre early init
+
   ;; I find the default prefix for smerge-mode C-c^ cumbersome so I have changed
   ;; it to C-cv
   (setq smerge-command-prefix "\C-xc")
@@ -839,9 +841,9 @@ WIDTH is the tab width."
   (global-set-key (kbd "C-k") 'my-tab-previous)
   (global-set-key (kbd "C-j") 'my-tab-next)
 
-  (with-eval-after-load 'le-dired-filter
-    (add-hook 'lightemacs-dired-filter-setup-hook
-              'dired-filter-by-git-ignored))
+  (setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
+                                             dired-filter-by-git-ignored
+                                             dired-filter-by-dot-files))
 
   ;; Prevent yasnippet from highlighting inserted fields, you need to modify the
   ;; display face that it uses for overlays. This is done by changing the
@@ -2518,10 +2520,8 @@ session ends."
 
   (current-window-only--setup-display-buffer-alist))
 
-
 (defun lightemacs-user-pre-modules ()
   "Pre-init config."
-  ;; pre early init
   (my-add-packages-to-load-path)
   (my-config-display-buffer-alist)
   (current-window-only-setup))
