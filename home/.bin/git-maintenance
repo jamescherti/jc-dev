@@ -29,12 +29,14 @@
 set -e
 set -u
 
-git setup
+if type -P git-setup &>/dev/null; then
+  git-setup
+fi
 
 echo "[INFO] Git garbage collection"
 git gc --prune=now
 
 echo "[INFO] Git: Update index"
-if [[ \"$(git update-index --show-index-version)\" != 4 ]]; then
+if [[ "$(git update-index --show-index-version)" != 4 ]]; then
   git update-index --index-version=4
 fi
