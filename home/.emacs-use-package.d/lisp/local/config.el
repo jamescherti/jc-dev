@@ -806,9 +806,11 @@ WIDTH is the tab width."
     (add-hook 'sh-mode-hook #'setup-sh-mode)
     (add-hook 'bash-ts-mode-hook #'setup-sh-mode)))
 
-(defun lightemacs-user-init ()
+(defun lightemacs-user-post-init ()
   "This function is executed right before loading modules."
   ;; pre early init
+  (setq uniquify-buffer-name-style 'reverse)
+  (setq uniquify-separator "•")
 
   ;; I find the default prefix for smerge-mode C-c^ cumbersome so I have changed
   ;; it to C-cv
@@ -899,9 +901,6 @@ WIDTH is the tab width."
   ;;(setq eldoc-echo-area-display-truncation-message t)
   ;; (setq eldoc-echo-area-prefer-doc-buffer nil)
   (setq eldoc-echo-area-use-multiline-p nil)  ;; Prevent some errors from showing
-
-  (setq uniquify-buffer-name-style 'reverse)
-  (setq uniquify-separator "•")
 
   (with-eval-after-load 'recentf
     (setq recentf-exclude
