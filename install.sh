@@ -295,23 +295,28 @@ config-pip-packages() {
 
   # PIP
   MY_PIP_PACKAGES=()
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P pathaction &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+    || ! type -P pathaction &>/dev/null; then
     MY_PIP_PACKAGES+=(pathaction)
   fi
 
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P ultyas &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+    || ! type -P ultyas &>/dev/null; then
     MY_PIP_PACKAGES+=(ultyas)
   fi
 
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P git-commitflow &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+    || ! type -P git-commitflow &>/dev/null; then
     MY_PIP_PACKAGES+=(git-commitflow)
   fi
 
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P batchfetch &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+    || ! type -P batchfetch &>/dev/null; then
     MY_PIP_PACKAGES+=(batchfetch)
   fi
 
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] && ! type -P git-smartmv &>/dev/null; then
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+    || ! type -P git-smartmv &>/dev/null; then
     MY_PIP_PACKAGES+=(git-smartmv)
   fi
 
@@ -323,9 +328,13 @@ config-pip-packages() {
 
   if [[ "${#MY_PIP_PACKAGES[@]}" -gt 1 ]]; then
     if [[ "${VIRTUAL_ENV:-}" ]]; then
+      printf "[PIP INSTALL] %s\n" "pip install --upgrade pip"
       pip install --upgrade pip
+
+      printf "[PIP INSTALL] %s\n" "pip install ${MY_PIP_PACKAGES[*]}"
       pip install "${opts[@]}" "${MY_PIP_PACKAGES[@]}"
     else
+      printf "[PIP INSTALL] %s\n" "pip install --user ${MY_PIP_PACKAGES[*]}"
       pip install "${opts[@]}" --user "${MY_PIP_PACKAGES[@]}"
     fi
   fi
