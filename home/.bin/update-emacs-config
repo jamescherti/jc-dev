@@ -26,7 +26,6 @@
 # SOFTWARE.
 #
 
-set -x
 set -euf -o pipefail
 
 # shellcheck disable=SC2317
