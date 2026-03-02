@@ -25,7 +25,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-
 """
 Module for discovering and managing Git repositories.
 
@@ -341,10 +340,6 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        "exec_cmd", metavar="N", type=str, nargs="*",
-        help="Execute the specific command"
-    )
-    parser.add_argument(
         "-C", "--directory",
         type=Path,
         default=Path("."),
@@ -370,9 +365,10 @@ def parse_args() -> argparse.Namespace:
         default=(cpu_count() or 1)
     )
     parser.add_argument(
-        "cmd_args",
-        nargs="+",
-        help="The command to execute. You can use -- to pass options."
+        "exec_cmd",
+        type=str,
+        nargs="*",
+        help="The command to execute in the foreground. You can use -- to pass options."
     )
 
     args: argparse.Namespace = parser.parse_args()
