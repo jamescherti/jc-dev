@@ -422,6 +422,7 @@ git_maintenance() {
     "$SCRIPT_DIR/home/.bin/git-find-repos" \
       -C "$SRC_DIR" \
       --if-exec git-is-clean \
+      --bg \
       -- \
       "$SCRIPT_DIR/home/.bin/git-regular-maintenance"
   fi
@@ -480,11 +481,13 @@ main() {
     #   --exec-bg 'sh -c "git checkout-default && git pull --ff-only"'
 
     git-find-repos -C "$SRC_DIR" \
+      --bg \
       --if-exec git-is-clean \
       -- \
       "$SCRIPT_DIR/.bin/git-pull-my-repo"
 
     git-find-repos -C "$SRC_DIR/emacs" \
+      --bg \
       --if-exec git-is-clean \
       -- \
       sh -c "git checkout develop && git pull --rebase"
