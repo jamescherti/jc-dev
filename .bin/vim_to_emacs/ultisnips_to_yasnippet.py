@@ -1,0 +1,186 @@
+#!/usr/bin/env python
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+"""Convert UltiSnips snippets to Yasnippet snippets."""
+
+import os
+from pathlib import Path
+
+from ultyas import UltisnipsSnippetsFile
+
+# from .yasnippet_sync import yasnippet_sync_snippets
+
+DEST_HOME = Path(os.environ.get("DEST_HOME", "~/")).expanduser()
+EMACS_D = DEST_HOME.joinpath(".emacs-data")
+
+ULTISNIPS_SNIPPETS_BASEDIR = \
+    Path("~/.vim/UltiSnips").expanduser()
+YASNIPPET_SNIPPETS_BASEDIR = \
+    EMACS_D.joinpath("etc/yasnippet/snippets-auto")
+EMACS_MODES = {
+    "ultisnips": {
+        "yasnippet-names": ["ultisnips-mode"],
+        # "convert-tabs-to": " " * 3,
+    },
+    "markdown": {
+        "yasnippet-names": ["markdown-mode", "gfm-mode"],
+        # "convert-tabs-to": " " * 3,
+    },
+    "lua": {
+        "yasnippet-names": ["lua-mode"],
+        "convert-tabs-to": " " * 3,
+    },
+    "python": {
+        "yasnippet-names": ["python-mode", "python-ts-mode"],
+        "convert-tabs-to": " " * 4,
+    },
+    "yaml": {
+        "yasnippet-names": ["yaml-mode", "yaml-ts-mode"],
+        "convert-tabs-to": " " * 2,
+    },
+    "jinja": {
+        "yasnippet-names": ["jinja2-mode"],
+        "convert-tabs-to": " " * 2,
+    },
+    "org": {
+        "yasnippet-names": ["org-mode"],
+        "convert-tabs-to": " " * 2,
+    },
+    "sh": {
+        "yasnippet-names": ["sh-mode", "bash-ts-mode"],
+        # "convert-tabs-to": " " * 2,
+    },
+    "elisp": {
+        "yasnippet-names": ["emacs-lisp-mode"],
+        "convert-tabs-to": " " * 2,
+    }
+}
+WHITELIST_MODES = ["python-mode", "sh-mode",
+                   "jinja2-mode", "emacs-lisp-mode", "prog-mode"]
+
+
+# def rsync_all_snippets():
+#     return 0
+#     home_dir = Path("~").expanduser()
+#     list_ignore_comment_vars = []  # ["expand-env"]
+#     list_ignore_filenames = [".yas-compiled-snippets.el", ".yas-setup.el"]
+#
+#     snippets_dir = \
+#         EMACS_D.joinpath("lisp/packages/emacs-ansible/snippets")
+#     if snippets_dir.is_dir():
+#         yasnippet_sync_snippets(
+#             snippets_dir,
+#             YASNIPPET_SNIPPETS_BASEDIR,
+#             whitelist_modes=WHITELIST_MODES,
+#             ignore_filenames=list_ignore_filenames,
+#             ignore_comment_vars=list_ignore_comment_vars,
+#             ignore_dest_paths=[
+#                 YASNIPPET_SNIPPETS_BASEDIR.joinpath("text-mode", "ansible",
+#                                                     "files", "copy"),
+#                 YASNIPPET_SNIPPETS_BASEDIR.joinpath("text-mode", "ansible",
+#                                                     "files", "file"),
+#                 YASNIPPET_SNIPPETS_BASEDIR.joinpath("text-mode", "ansible",
+#                                                     "system", "user"),
+#             ])
+#
+#     snippets_dir = \
+#         EMACS_D.joinpath("var/yasnippet/upstream.snippets/"
+#                          "common-lisp-snippets/snippets")
+#     if snippets_dir.is_dir():
+#         yasnippet_sync_snippets(
+#             snippets_dir,
+#             YASNIPPET_SNIPPETS_BASEDIR,
+#             whitelist_modes=WHITELIST_MODES,
+#             ignore_filenames=list_ignore_filenames,
+#             ignore_comment_vars=list_ignore_comment_vars,
+#         )
+#
+#     snippets_dir = EMACS_D.joinpath("var/yasnippet/upstream.snippets/"
+#                                     "yasnippet-snippets/snippets")
+#     if snippets_dir.is_dir():
+#         # TODO: put it in yasnippet sync snippets
+#         yasnippet_sync_snippets(
+#             snippets_dir / emacs_mode,
+#             YASNIPPET_SNIPPETS_BASEDIR,
+#             whitelist_modes=WHITELIST_MODES,
+#             ignore_filenames=list_ignore_filenames,
+#             ignore_comment_vars=list_ignore_comment_vars,
+#         )
+
+
+def ultisnips_to_yasnippet():
+    """The command-line interface."""
+    print("Ultisnips snippets:", ULTISNIPS_SNIPPETS_BASEDIR)
+    print("Yasnippet snippets:", YASNIPPET_SNIPPETS_BASEDIR)
+    print()
+    os.makedirs(YASNIPPET_SNIPPETS_BASEDIR, exist_ok=True)
+
+    # rsync_all_snippets()
+
+    for ultisnips_dir in ULTISNIPS_SNIPPETS_BASEDIR.glob("*.snippets"):
+        ultisnip_name = ultisnips_dir.stem
+        if ultisnip_name not in EMACS_MODES:
+            continue
+
+        convert_tabs_to = "$>"
+        yas_indent_line = "auto"
+        if "convert-tabs-to" in EMACS_MODES[ultisnip_name]:
+            if EMACS_MODES[ultisnip_name]["convert-tabs-to"]:
+                yas_indent_line = "fixed"
+                convert_tabs_to = \
+                    EMACS_MODES[ultisnip_name]["convert-tabs-to"]
+
+        all_yasnippet_names = EMACS_MODES[ultisnip_name]["yasnippet-names"]
+        if not all_yasnippet_names:
+            continue
+
+        first_yasnippet_name = all_yasnippet_names[0]
+
+        first = True
+        for yasnippet_name in all_yasnippet_names:
+            yasnippet_dir = YASNIPPET_SNIPPETS_BASEDIR.joinpath(yasnippet_name)
+            if first:
+                first = False
+
+                print("[CONVERT DIR]", ultisnips_dir, "to", yasnippet_dir)
+                ultisnips_snippet = UltisnipsSnippetsFile()
+                ultisnips_snippet.load(ultisnips_dir)
+
+                os.makedirs(yasnippet_dir, exist_ok=True)
+                ultisnips_snippet.convert_to_yasnippet(
+                    yasnippet_dir,
+                    yas_indent_line=yas_indent_line,
+                    convert_tabs_to=convert_tabs_to)
+            else:
+                # For the next ones, use the .yas-parents file
+                os.makedirs(yasnippet_dir, exist_ok=True)
+                with open(yasnippet_dir / ".yas-parents", "w",
+                          encoding="utf-8") as fhandler:
+                    print("[CREATE]", yasnippet_dir)
+                    fhandler.write(first_yasnippet_name)
+                    continue

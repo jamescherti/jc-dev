@@ -488,6 +488,10 @@ main() {
     ~/.cache/jc-dev.git_maintenance \
     git_maintenance
 
+  sync-spell-dict
+
+  "$SCRIPT_DIR/.bin/ultisnips-to-yasnippet.py"
+
   echo
   echo Success.
 }
