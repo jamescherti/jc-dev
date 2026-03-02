@@ -28,6 +28,8 @@
 
 EMACS_RUNNING=0
 
+RUN_EMACS_FORCE="${RUN_EMACS_FORCE:0}"
+
 # TODO change this in run-emacs and xdevenv-emacs using 1 file sourced
 if [[ -f /etc/profile ]]; then
   # shellcheck disable=SC1091
@@ -92,29 +94,38 @@ is-emacs-daemon() {
   return 1
 }
 
-if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-  echo "Error: File not found: '$RUN_EMACS_BIN'" >&2
-  exit 1
-fi
-
-if is-emacs-server-running; then
-  if is-emacs-daemon; then
-    exec "emacsclient" -c
+main() {
+  if [[ $RUN_EMACS_FORCE -ne 0 ]]; then
+    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
     exit 1
-  else
-    EMACS_RUNNING=1
   fi
-else
-  if [[ $EMACS_RUNNING -ne 0 ]]; then
-    if pgrep --quiet --exact emacs; then
+
+  if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+    echo "Error: File not found: '$RUN_EMACS_BIN'" >&2
+    exit 1
+  fi
+
+  if is-emacs-server-running; then
+    if is-emacs-daemon; then
+      exec "emacsclient" -c
+      exit 1
+    else
       EMACS_RUNNING=1
     fi
+  else
+    if [[ $EMACS_RUNNING -ne 0 ]]; then
+      if pgrep --quiet --exact emacs; then
+        EMACS_RUNNING=1
+      fi
+    fi
   fi
-fi
 
-if [[ $EMACS_RUNNING -ne 0 ]]; then
-  echo "Emacs is already running." >&2
-  exit 1
-else
-  exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
-fi
+  if [[ $EMACS_RUNNING -ne 0 ]]; then
+    echo "Emacs is already running." >&2
+    exit 1
+  else
+    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
+  fi
+}
+
+main "$@"

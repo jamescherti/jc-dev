@@ -33,5 +33,6 @@ export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
 #   export RUN_EMACS_BIN
 #   RUN_EMACS_BIN=$(type -P emacs)
 # fi
+export RUN_EMACS_FORCE=1
 
 exec run-emacs --init-directory ~/.devemacs.d "$@"
