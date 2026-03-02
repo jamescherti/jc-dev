@@ -192,6 +192,11 @@ EL-FILE is the *.el file."
                                      ;; benefits from improved inlining and loop
                                      ;; transformations without affecting
                                      ;; correctness.
+                                     ;;
+                                     ;; Aggressive enough for performance but
+                                     ;; stable; avoid -O3 or -Ofast since they
+                                     ;; can break numeric primitives in Emacs
+                                     ;; Lisp code.
                                      "-O2"
 
                                      ;; Disables generation of debug symbols.
@@ -199,8 +204,29 @@ EL-FILE is the *.el file."
                                      ;; for .eln files.
                                      "-g0"
 
+                                     ;; This also causes instability:
                                      ;; /usr/bin/ld: /tmp/ccps2Qse.o:
                                      ;; plugin needed to handle lto object
+                                     ;;
+                                     ;; This is a known issue with older
+                                     ;; versions of libgccjit failing to parse
+                                     ;; the "native" expansion correctly.
+                                     ;; Hardcoding "-march=skylake" and
+                                     ;; "-mtune=skylake" is a valid workaround.
+                                     ;; However, passing these to both the
+                                     ;; compiler and the driver is unnecessary.
+                                     ;; Passing CPU architecture flags to
+                                     ;; native-comp-driver-options is sufficient
+                                     ;; for the assembler and linker phases to
+                                     ;; optimize the binary output.
+                                     ;;
+                                     ;; Commented out. If your Emacs build
+                                     ;; already enables LTO
+                                     ;; (--enable-link-time-optimization), you
+                                     ;; do not need this here. Let the main
+                                     ;; build handle LTO across modules.
+                                     ;; Otherwise, enabling it here may cause
+                                     ;; linking issues.
                                      ;; "-flto=auto"
 
                                      ;; Omits the frame pointer on supported
@@ -214,17 +240,35 @@ EL-FILE is the *.el file."
                                      ;; infinity. Emacs uses IEEE-compliant
                                      ;; behavior, and this avoids undefined
                                      ;; behavior in numerical primitives.
+                                     ;;
+                                     ;; Emacs relies on IEEE floating-point
+                                     ;; behavior. Never enable -ffast-math or
+                                     ;; similar, as it can break native
+                                     ;; compilation semantics.
+                                     ;;
+                                     ;; This is the default behavior of GCC
+                                     ;; unless you explicitly p
                                      "-fno-finite-math-only"
 
                                      ;; Can improve performance in loops, but
                                      ;; sometimes increases binary size.
+                                     ;;
+                                     ;; Usually unnecessary for Emacs Lisp;
+                                     ;; increases binary size for negligible
+                                     ;; benefit. Leave disabled.
                                      ;; "-funroll-loops"
 
                                      ;; Allows the compiler to assume standard C
                                      ;; aliasing rules. Emacs native code
                                      ;; adheres to these rules, enabling better
                                      ;; load and store optimizations.
-                                     "-fstrict-aliasing"
+                                     ;;
+                                     ;; Standard C aliasing rules are respected
+                                     ;; by Emacs; allows minor optimizations.
+                                     ;;
+                                     ;; This is is automatically enabled by
+                                     ;; "-O2". You can safely remove it.
+                                     ;; "-fstrict-aliasing"
 
                                      ;; Generates code optimized for the local
                                      ;; CPU architecture. Improves instruction

@@ -43,7 +43,7 @@ NUM_PROC=$(nproc --ignore=1)
 # For example, on a Debian system with the current Git branch "emacs-30":
 # $EMACS_INSTALL_PREFIX/debian/branch-emacs-30
 # EMACS_INSTALL_PREFIX="$HOME/.local"
-EMACS_INSTALL_PREFIX="/opt/local"
+EMACS_INSTALL_PREFIX="/opt/local/$USER"
 
 # Append the operating system name to $EMACS_INSTALL_PREFIX.
 # For example, on a Debian system with the current Git branch "emacs-30",
@@ -261,6 +261,7 @@ CONFIGURE_ARGS=(
   # --without-toolkit-scroll-bars
   # --without-pgtk
 
+  --with-toolkit-scroll-bars
   --with-pgtk
 
   --without-ns
