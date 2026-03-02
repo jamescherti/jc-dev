@@ -14,8 +14,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -34,7 +34,6 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List
 
 from devops_helpers.prompt import prompt_text
 from packaging import version
@@ -55,14 +54,14 @@ class Release:
         """
         Initialize the release process and run the workflow.
         """
-        self.env: Dict[str, str] = os.environ.copy()
+        self.env: dict[str, str] = os.environ.copy()
         self.env["LC_ALL"] = "C"
 
         # Ensure we are on a release branch
         self.ensure_branch_main_or_master()
 
-        self.tags: List[str] = []
-        self.all_tag_variants: List[str] = []
+        self.tags: list[str] = []
+        self.all_tag_variants: list[str] = []
         self.load_git_tags()
 
         self.git_root = self.git_top_level()
@@ -218,10 +217,11 @@ class Release:
             line: str = self.run_get_firstline(
                 ["git", "rev-parse", "--show-toplevel"])
             return Path(line)
-        except (subprocess.CalledProcessError, IndexError):
-            raise PyReleaseError("The Git top level has not been found")
+        except (subprocess.CalledProcessError, IndexError) as err:
+            raise PyReleaseError("The Git top level has not been found") \
+                from err
 
-    def quick_run(self, cmd: List[str]) -> List[str]:
+    def quick_run(self, cmd: list[str]) -> list[str]:
         """
         Execute a command and return output lines.
 
@@ -232,14 +232,14 @@ class Release:
             cmd, env=self.env, timeout=60, text=True)
         return output.splitlines()
 
-    def run_get_firstline(self, cmd: List[str]) -> str:
+    def run_get_firstline(self, cmd: list[str]) -> str:
         """
         Execute a command and return the first line of output.
 
         :param cmd: The command to run.
         :returns: The first line of output.
         """
-        lines: List[str] = self.quick_run(cmd)
+        lines: list[str] = self.quick_run(cmd)
         return lines[0] if lines else ""
 
     def git_replace_string(self, previous_string: str,
@@ -252,13 +252,13 @@ class Release:
         """
         # Ensure sre excludes the pre-commit config if the tool supports it,
         # or we manually revert it via git checkout.
-        cmd: List[str] = ["sre", "-E", previous_string,
+        cmd: list[str] = ["sre", "-E", previous_string,
                           replacement_string, str(self.git_root)]
         print("[CMD]", cmd)
         subprocess.check_call(cmd)
 
         # Revert changes to sensitive files that should not be bumped
-        files_to_revert: List[str] = [
+        files_to_revert: list[str] = [
             "CHANGELOG.md", ".pre-commit-config.yaml"]
         for filename in files_to_revert:
             path: Path = self.git_root / filename
@@ -292,7 +292,8 @@ class Release:
                     if not self.confirm("Twine upload failed. Try again?"):
                         break
 
-        for push_cmd in [["git", "push"], ["git", "push", "--tags"]]:
+        for push_cmd in (("git", "push"),
+                         ("git", "push", "--tags")):
             while True:
                 try:
                     subprocess.check_call(push_cmd)
