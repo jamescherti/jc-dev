@@ -474,9 +474,13 @@ main() {
   # Git pull
   if [[ -d "$SRC_DIR" ]]; then
     # other than emacs projects
+    # git-find-repos "$SRC_DIR" \
+    #   --if-exec git-is-clean \
+    #   --exec-bg 'sh -c "git checkout-default && git pull --ff-only"'
+
     git-find-repos "$SRC_DIR" \
       --if-exec git-is-clean \
-      --exec-bg 'sh -c "git checkout-default && git pull --ff-only"'
+      --exec-bg "$SCRIPT_DIR/.bin/git-pull-my-repo"
 
     git-find-repos "$SRC_DIR/emacs" \
       --if-exec git-is-clean \

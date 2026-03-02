@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null | cut -d/ -f1)" 2>/dev/null | grep -q jamescherti; then
+    git checkout-default && git pull --ff-only
+fi
