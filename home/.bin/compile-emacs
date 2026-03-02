@@ -42,7 +42,8 @@ NUM_PROC=$(nproc --ignore=1)
 #   $EMACS_INSTALL_PREFIX/<OS>/<EMACS_VERSION>
 # For example, on a Debian system with the current Git branch "emacs-30":
 # $EMACS_INSTALL_PREFIX/debian/branch-emacs-30
-EMACS_INSTALL_PREFIX="$HOME/.local"
+# EMACS_INSTALL_PREFIX="$HOME/.local"
+EMACS_INSTALL_PREFIX="/opt/local"
 
 # Append the operating system name to $EMACS_INSTALL_PREFIX.
 # For example, on a Debian system with the current Git branch "emacs-30",
@@ -203,9 +204,21 @@ CONFIGURE_ARGS=(
   # be avoided by turning the mark trace buffer back off using the new
   # --disable-gc-mark-trace option.
   # https://lists.gnu.org/archive/html/emacs-devel/2024-09/msg00240.html
-  #
-  # MPS is still experimental and not what "maximum stable performance" means.
   --disable-gc-mark-trace
+
+  # MPS is still experimental and not what "maximum stable performance" means.
+  # --with-mps
+
+  # Remove support for Access Control Lists and Extended Attributes for slightly
+  # faster/simpler file I/O.
+  #
+  # If you are aiming for a lean, high-performance binary and don't use complex
+  # Access Control Lists or Extended Attributes on your files: This slightly
+  # reduces the overhead of file I/O operations and reduces the number of linked
+  # system libraries. If you are on a standard personal Linux setup, these are
+  # rarely needed inside Emacs.
+  --disable-acl
+  --disable-xattr
 
   # configure: WARNING: This configuration installs a 'movemail' program that
   # does not retrieve POP3 email. By default, Emacs 25 and earlier installed a
@@ -228,7 +241,8 @@ CONFIGURE_ARGS=(
   # provides a high-performance and standards-compliant regex implementation.
   --without-included-regex
 
-  --with-native-compilation=aot
+  # --with-native-compilation=aot
+  --with-native-compilation
   --with-modules
   --with-threads
 
