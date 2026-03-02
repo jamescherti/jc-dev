@@ -420,7 +420,7 @@ git_maintenance() {
 
     # shellcheck disable=SC2016
     "$SCRIPT_DIR/home/.bin/git-find-repos" \
-      "$SRC_DIR" \
+      -C "$SRC_DIR" \
       --if-exec git-is-clean \
       --exec-bg "$SCRIPT_DIR/home/.bin/git-regular-maintenance"
   fi
@@ -474,15 +474,15 @@ main() {
   # Git pull
   if [[ -d "$SRC_DIR" ]]; then
     # other than emacs projects
-    # git-find-repos "$SRC_DIR" \
+    # git-find-repos -C "$SRC_DIR" \
     #   --if-exec git-is-clean \
     #   --exec-bg 'sh -c "git checkout-default && git pull --ff-only"'
 
-    git-find-repos "$SRC_DIR" \
+    git-find-repos -C "$SRC_DIR" \
       --if-exec git-is-clean \
       --exec-bg "$SCRIPT_DIR/.bin/git-pull-my-repo"
 
-    git-find-repos "$SRC_DIR/emacs" \
+    git-find-repos -C "$SRC_DIR/emacs" \
       --if-exec git-is-clean \
       --exec-bg 'sh -c "git checkout develop && git pull --rebase"'
   fi

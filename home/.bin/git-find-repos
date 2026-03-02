@@ -336,16 +336,19 @@ def parse_args() -> argparse.Namespace:
     :return: Parsed arguments.
     :rtype: argparse.Namespace
     """
-    parser = argparse.ArgumentParser(
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="Find git repos and execute commands.",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        "directory",
+        "exec_cmd", metavar="N", type=str, nargs="*",
+        help="Execute the specific command"
+    )
+    parser.add_argument(
+        "-C", "--directory",
         type=Path,
         default=Path("."),
-        nargs="?",
-        help="Root directory to search"
+        help="Root directory to search (defaults to current directory)"
     )
     parser.add_argument(
         "-b", "--exec-bg",
@@ -354,16 +357,9 @@ def parse_args() -> argparse.Namespace:
         default=None
     )
     parser.add_argument(
-        "-e", "--exec",
-        type=str,
-        dest="exec_cmd",  # Renamed to avoid keyword conflict
-        help="Execute the specified command (sequential)",
-        default=None
-    )
-    parser.add_argument(
         "-i", "--if-exec",
         type=str,
-        help=("Execute commands only if this check returns exit code 0."),
+        help="Execute commands only if this check returns exit code 0.",
         default=None
     )
     parser.add_argument(
@@ -373,8 +369,15 @@ def parse_args() -> argparse.Namespace:
         help="Maximum number of processors/workers to use",
         default=(cpu_count() or 1)
     )
+    parser.add_argument(
+        "cmd_args",
+        nargs="+",
+        help="The command to execute. You can use -- to pass options."
+    )
 
-    return parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
+
+    return args
 
 
 def print_error_summary(errors: List[Tuple[Path, CommandResult]]) -> int:
@@ -450,7 +453,8 @@ def main() -> None:
         if args.exec_cmd:
             print(
                 f"{colorama.Fore.YELLOW}[EXEC] {repo_path}: "
-                f"{args.exec_cmd}{colorama.Fore.RESET}"
+                f"{subprocess.list2cmdline(args.exec_cmd)}"
+                f"{colorama.Fore.RESET}"
             )
 
             # Run interactively/sequentially (capture=False allows interaction)
@@ -461,19 +465,19 @@ def main() -> None:
                 # flow unless we want to capture for error summary. To match
                 # previous logic, we let it flow to stdout.
                 subprocess.check_call(
-                    shlex.split(args.exec_cmd),
+                    args.exec_cmd,
                     cwd=repo_path
                 )
             except subprocess.CalledProcessError as err:
                 # Construct a dummy result for the error summary
                 failed_res = CommandResult(
-                    command=shlex.split(args.exec_cmd),
+                    command=args.exec_cmd,
                     returncode=err.returncode
                 )
                 execution_errors.append((repo_path, failed_res))
             except FileNotFoundError:
                 failed_res = CommandResult(
-                    command=shlex.split(args.exec_cmd),
+                    command=args.exec_cmd,
                     returncode=127
                 )
                 execution_errors.append((repo_path, failed_res))

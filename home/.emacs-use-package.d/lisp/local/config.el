@@ -556,10 +556,10 @@ EL-FILE is the *.el file."
                            ;; tmp-easysession
                            buffer-guardian
 
-                           ;; mod-eglot
+                           mod-eglot
                            ;; TODO fix eldoc help more than one line. I only
                            ;; want 1 line
-                           mod-lsp-mode
+                           ;; mod-lsp-mode
 
                            smartindent
                            battery-angel
