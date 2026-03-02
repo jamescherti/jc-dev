@@ -490,7 +490,8 @@ main() {
 
   sync-spell-dict
 
-  "$SCRIPT_DIR/.bin/ultisnips-to-yasnippet.py"
+  update-emacs-snippets
+  update-emacs-templates
 
   echo
   echo Success.

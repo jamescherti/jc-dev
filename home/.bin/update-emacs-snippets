@@ -29,6 +29,7 @@
 """Convert UltiSnips snippets to Yasnippet snippets."""
 
 import os
+import sys
 from pathlib import Path
 
 from ultyas import UltisnipsSnippetsFile
@@ -184,3 +185,8 @@ def ultisnips_to_yasnippet():
                     print("[CREATE]", yasnippet_dir)
                     fhandler.write(first_yasnippet_name)
                     continue
+
+
+if __name__ == "__main__":
+    os.chdir(sys.path[0])
+    ultisnips_to_yasnippet()
