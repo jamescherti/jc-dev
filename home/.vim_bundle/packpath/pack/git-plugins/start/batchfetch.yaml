@@ -1,0 +1,114 @@
+---
+# Vim Plugins (start)
+
+options:
+  #clone_args: ["--depth", "1"]
+  # TODO Fix
+  exec_before: ["sh", "-c", "set -e; rm -fr .git/hooks; git reset --hard HEAD; git gc"]
+
+tasks:
+  # TODO the - key doesn't work
+  - git: https://github.com/justinmk/vim-dirvish
+    delete: true
+
+  #
+  # Color Schemes
+  #
+  - git: https://github.com/jamescherti/vim-tomorrow-night-deepblue
+
+  # - git: https://github.com/tomasr/molokai
+  - git: https://github.com/jamescherti/molokai
+    revision: c67bdfcdb31415aa0ade7f8c003261700a885476
+  # - git: https://github.com/NLKNguyen/papercolor-theme
+  - git: https://github.com/jamescherti/papercolor-theme
+    revision: 0cfe64ffb24c21a6101b5f994ca342a74c977aef
+  # - git: https://github.com/gosukiwi/vim-atom-dark
+  - git: https://github.com/jamescherti/vim-atom-dark
+    revision: 44feadcbeb2a8b2a21e373261a6293679f79da94
+  # - git: https://github.com/jceb/vim-orgmode
+  - git: https://github.com/jamescherti/vim-orgmode
+    revision: 83982349e45e6d27d186ad82050f86c3233a16f0
+  # - git: https://github.com/morhetz/gruvbox
+  - git: https://github.com/jamescherti/gruvbox
+    revision: f1ecde848f0cdba877acb0c740320568252cc482
+  # - git: https://github.com/arcticicestudio/nord-vim
+  - git: https://github.com/jamescherti/nord-vim
+    revision: f13f5dfbb784deddbc1d8195f34dfd9ec73e2295
+
+  #
+  # Misc
+  #
+  - git: https://github.com/jamescherti/vim-pathaction
+
+  # - git: https://github.com/aperezdc/vim-template
+  - git: https://github.com/jamescherti/vim-template
+    revision: df6d29a8549a13db026818c27a6b060978db7a3d
+
+  # - git: https://github.com/tpope/vim-surround
+  - git: https://github.com/jamescherti/vim-surround
+    revision: 3d188ed2113431cf8dac77be61b842acb64433d9
+
+  # - git: https://github.com/yegappan/mru
+  - git: https://github.com/jamescherti/vim-mru
+    path: mru
+    revision: dcba22de1201523acda1e1a60d6fc3d9d7b6a519
+
+  # - git: https://github.com/tpope/vim-commentary
+  - git: https://github.com/jamescherti/vim-commentary
+    revision: 64a654ef4a20db1727938338310209b6a63f60c9
+
+  # - git: https://github.com/Glench/Vim-Jinja2-Syntax
+  - git: https://github.com/jamescherti/Vim-Jinja2-Syntax
+    path: jinja2
+    revision: 2c17843b074b06a835f88587e1023ceff7e2c7d1
+
+  - git: https://github.com/jamescherti/vim-pythonmodeindent
+    revision: 7f5aee238861abbcc337c6044f65217ebadd0220
+
+  # - git: https://github.com/honza/vim-snippets
+  - git: https://github.com/jamescherti/vim-snippets
+    revision: f0a3184d9f90b96b044d5914625a25c554d7f301
+
+  # - git: https://github.com/machakann/vim-Verdin
+  - git: https://github.com/jamescherti/vim-Verdin
+    revision: b96fc398ffe09c9910bd469f22ee5170b5a46a12
+
+  # - git: https://github.com/sirver/ultisnips
+  - git: https://github.com/jamescherti/vim-ultisnips
+    path: ultisnips
+    revision: dbc458e110bb49299da76ec53f8b09b4f6dce28a
+
+  # Deleted themes
+  - git: https://github.com/altercation/vim-colors-solarized
+    delete: true
+  - git: https://github.com/rakr/vim-one
+    delete: true
+  - git: https://github.com/cocopon/iceberg.vim
+    delete: true
+
+  # Deleted plugins
+  - git: https://github.com/jamescherti/vim-jedipydoc
+    delete: true
+  - git: https://github.com/SidOfc/mkdx
+    delete: true
+  - git: https://github.com/jamescherti/vim-easysession
+    revision: main
+    delete: true
+  - git: https://github.com/jamescherti/vim-hjklmode
+    revision: develop
+    delete: true
+  - git: https://github.com/roginfarrer/vim-dirvish-dovish
+    delete: true
+  - git: https://github.com/embear/vim-localvimrc
+    delete: true
+  - git: https://github.com/davidhalter/jedi-vim
+    delete: true
+  - git: https://github.com/w0rp/ale  # Buggy
+    delete: true
+  - git: https://github.com/tpope/vim-sleuth
+    delete: true
+  - git: https://github.com/jamescherti/vim-python-pep8-indent
+    revision: fix_conflict_with_builtin_python_indent
+    delete: true
+  - git: https://github.com/tpope/vim-abolish
+    delete: true
