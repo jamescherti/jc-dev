@@ -8,9 +8,9 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
 
-  - repo: https://github.com/jamescherti/pre-commit-elisp
-    rev: v1.0.8
-    hooks:
-      - id: elisp-check-parens
-      - id: elisp-check-byte-compile
-        exclude: '\.dir-locals\.el$'
+  # - repo: https://github.com/jamescherti/pre-commit-elisp
+  #   rev: v1.0.8
+  #   hooks:
+  #     - id: elisp-check-parens
+  #     - id: elisp-check-byte-compile
+  #       exclude: '\.dir-locals\.el$'

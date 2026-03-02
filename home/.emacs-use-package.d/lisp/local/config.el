@@ -354,7 +354,8 @@ EL-FILE is the *.el file."
   (let ((dirs
          (list
           "~/src/dotfiles/jc-dev/"
-          "~/src/emacs/")))
+          "~/src/emacs/"
+          )))
     (dolist (dir dirs)
       (when dir
         ;; Ensure the path ends with a slash so it registers as a directory
@@ -578,6 +579,8 @@ EL-FILE is the *.el file."
 
 ;; (setq lightemacs-buffer-terminator-target-hooks '())
 
+(setq lightemacs-aggressive-indent-target-hooks '(emacs-lisp-mode-hook))
+
 (setq lightemacs-apheleia-target-hooks '(python-mode-hook
                                          python-ts-mode-hook
 
@@ -637,6 +640,9 @@ any new ones."
         (flymake-ansible-lint          . "melpa")
         (flymake-bashate               . "melpa")
 
+        (evil                          . "melpa")
+        (evil-collection               . "melpa")
+
         ;; To fix the window-start bug
         (apheleia                      . "melpa")
 
@@ -675,6 +681,16 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 `load-path\=', skipping any directories listed in
 `my-excluded-package-directories\='. Caches the result in
 `my--package-load-path-cache\=' to avoid redundant scanning."
+  ;; TODO remove
+  ;; (let ((default-directory (expand-file-name "~/src/forks/evil-collection/")))
+  ;;   (add-to-list 'load-path default-directory)
+  ;;   (push default-directory load-path)
+  ;;   (normal-top-level-add-subdirs-to-load-path))
+  (let ((default-directory (expand-file-name "~/src/forks/evil/")))
+    (add-to-list 'load-path default-directory)
+    (push default-directory load-path)
+    (normal-top-level-add-subdirs-to-load-path))
+
   ;; Build the cache if it is empty
   (unless my--package-load-path-cache
     (let ((items (condition-case nil
@@ -2127,7 +2143,6 @@ The DWIM behaviour of this command is as follows:
           "-"))
   (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
 
-
   (setf (alist-get 'bash-ts-mode apheleia-mode-alist) '(shfmt))
   (setf (alist-get 'sh-mode apheleia-mode-alist) '(shfmt))
 
@@ -3475,6 +3490,10 @@ This function is intended for use as :around advice."
   (when (and (fboundp 'my-code-checker-allowed-p)
              (my-code-checker-allowed-p))
     (apply orig-fun args)))
+
+(with-eval-after-load 'le-aggressive-indent
+  (advice-add 'aggressive-indent-mode :around
+              #'my-prevent-execution-only-when-code-checker-allowed))
 
 (with-eval-after-load 'le-apheleia
   (advice-add 'apheleia-mode :around

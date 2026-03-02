@@ -1041,8 +1041,20 @@ on text following the cursor."
 ;;
 ;; (evil-define-key 'insert 'global (kbd "C-p") 'my-cape-dabbrev-backwards)
 
-(evil-define-key 'insert 'global (kbd "C-p") 'cape-dabbrev)
-(evil-define-key 'insert 'global (kbd "C-n") 'cape-dabbrev)
+(defun my-cape-dabbrev ()
+  "Cape dabbrev."
+  (interactive)
+  (if (minibufferp)
+      (let (;; (dabbrev-check-other-buffers t)
+            ;; (dabbrev-case-replace t)
+            ;; (dabbrev-case-fold-search t)
+            ;; (dabbrev-case-distinction nil)
+            (dabbrev-check-all-buffers t))
+        (call-interactively 'cape-dabbrev))
+    (call-interactively 'cape-dabbrev)))
+
+(evil-define-key 'insert 'global (kbd "C-p") 'my-cape-dabbrev)
+(evil-define-key 'insert 'global (kbd "C-n") 'my-cape-dabbrev)
 
 ;;; cape: evil
 
@@ -1057,13 +1069,14 @@ on text following the cursor."
   ;;   (add-hook 'completion-at-point-functions #'cape-dabbrev nil t))
   )
 
+;; TODO lightemacs?
+(add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-dabbrev-evil)
+
 (with-eval-after-load 'cape
   (evil-define-key 'insert 'global (kbd "C-x C-f") 'cape-file))
 
 (with-eval-after-load 'cape
   ;; Emulate Vim's C-x C-f
-  ;; TODO lightemacs?
-  (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-dabbrev-evil)
 
   ;; Use symbol occurence to sort candidates
   ;;
