@@ -416,7 +416,7 @@ git_maintenance() {
     "$SCRIPT_DIR/home/.bin/git-find-repos" \
       "$HOME/src" \
       --if-exec git-is-clean \
-      --exec-bg git-maintenance
+      --exec-bg "$SCRIPT_DIR/home/.bin/git-maintenance"
   fi
 }
 
@@ -449,7 +449,7 @@ main() {
   # 1 day = 86400
   run_every 86400 \
     ~/.cache/jc-dev.git_maintenance \
-    "$SCRIPT_DIR/home/.bin/git_maintenance"
+    git_maintenance
 
   echo
   echo Success.
