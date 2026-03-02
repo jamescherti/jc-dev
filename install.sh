@@ -426,11 +426,29 @@ git_maintenance() {
   fi
 }
 
+config_gpg() {
+  chmod 700 "$HOME/.gnupg/"
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh/"
+
+  # ln -sf ~/.git
+  cp .gpg-agent.conf ~/.gnupg/gpg-agent.conf
+
+  local pinentry_bin
+  pinentry_bin=$(type -P pinentry-curses &>/dev/null)
+  if [[ $OSTYPE =~ linux ]] && [[ "$pinentry_bin" != "" ]]; then
+    # Linux specific. I added this condition because pinentry-curses does not
+    # work on macOS.
+    echo "pinentry-program /usr/bin/pinentry-curses" >>~/.gnupg/gpg-agent.conf
+  fi
+}
+
 main() {
   init
   confirm
 
   copy_dotfiles
+  config_gpg
   config-jc-dotfiles
   config-bash-stdops
 
