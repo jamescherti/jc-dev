@@ -681,15 +681,15 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 `load-path\=', skipping any directories listed in
 `my-excluded-package-directories\='. Caches the result in
 `my--package-load-path-cache\=' to avoid redundant scanning."
-  ;; TODO remove
   ;; (let ((default-directory (expand-file-name "~/src/forks/evil-collection/")))
   ;;   (add-to-list 'load-path default-directory)
   ;;   (push default-directory load-path)
   ;;   (normal-top-level-add-subdirs-to-load-path))
-  (let ((default-directory (expand-file-name "~/src/forks/evil/")))
-    (add-to-list 'load-path default-directory)
-    (push default-directory load-path)
-    (normal-top-level-add-subdirs-to-load-path))
+
+  ;; (let ((default-directory (expand-file-name "~/src/forks/evil/")))
+  ;;   (add-to-list 'load-path default-directory)
+  ;;   (push default-directory load-path)
+  ;;   (normal-top-level-add-subdirs-to-load-path))
 
   ;; Build the cache if it is empty
   (unless my--package-load-path-cache
