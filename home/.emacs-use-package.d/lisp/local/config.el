@@ -811,6 +811,8 @@ WIDTH is the tab width."
 (defun lightemacs-user-post-init ()
   "This function is executed right before loading modules."
   ;; pre early init
+  (my-setup-filetype)
+
   (setq uniquify-buffer-name-style 'reverse)
   (setq uniquify-separator "•")
 
