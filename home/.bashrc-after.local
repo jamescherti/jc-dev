@@ -168,29 +168,19 @@ alias git='_git_wrapper git'
 alias lrgit='_git_wrapper git-finder-exec git'
 
 _gm_wrapper() {
-  so git find-repos . --if-exec "sh -c '! git-is-clean'" "$@"
+  so git-find-repos -C . --if-exec "sh -c '! git-is-clean'" -- "$@"
 }
 
 _ga_wrapper() {
-  so git find-repos . "$@"
+  so git-find-repos -C . -- "$@"
 }
 
 _bg_git_find_repos_wrapper() {
-  local opts=()
-  if [[ $# -gt 0 ]]; then
-    opts+=(--bg "git $*")
-  fi
-
-  so git find-repos . "${opts[@]}"
+  so git-find-repos -C . --bg -- git "$@"
 }
 
 _git_find_repos_wrapper() {
-  local opts=()
-  if [[ $# -gt 0 ]]; then
-    opts+=(--exec "git $*")
-  fi
-
-  so git find-repos . "${opts[@]}"
+  so git-find-repos -C . -- "$@"
 }
 
 alias gm='_gm_wrapper'
