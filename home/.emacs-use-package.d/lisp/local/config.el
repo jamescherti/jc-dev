@@ -1439,6 +1439,8 @@ WIDTH is the tab width."
   (setq ediff-keep-variants t)  ; Do not kill ediff buffers
   (setq ediff-make-buffers-readonly-at-startup nil)
   (setq ediff-confirm-copy t)
+
+  ;; This seems to change ediff
   (setq diff-default-read-only t)
 
   ;; This mimics the Magit's diff format by making the hunk header less cryptic,

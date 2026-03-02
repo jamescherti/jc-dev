@@ -26,33 +26,31 @@
 # SOFTWARE.
 #
 
-set -euf -o pipefail
-
-if ! git remote -v | grep '/emacs '; then
-  echo "This is not an Emacs repository." >&2
-  exit 1
+# shellcheck disable=SC1091
+ID=unknown
+if [[ -f /etc/os-release ]]; then
+  # shellcheck disable=SC1091
+  source /etc/os-release
 fi
 
-SOFTWARE_NAME="emacs"
+set -euf
 
+SOFTWARE_NAME="emacs"
 NUM_PROC=$(nproc --ignore=1)
 
 # Emacs will be installed under the following path:
 #   $EMACS_INSTALL_PREFIX/<OS>/<EMACS_VERSION>
-#
 # For example, on a Debian system with the current Git branch "emacs-30":
 # $EMACS_INSTALL_PREFIX/debian/branch-emacs-30
 EMACS_INSTALL_PREFIX="$HOME/.local"
 
 # Append the operating system name to $EMACS_INSTALL_PREFIX.
-#
 # For example, on a Debian system with the current Git branch "emacs-30",
 # the resulting path prefix would be:
 #   $EMACS_INSTALL_PREFIX/debian/
 EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM=1
 
 # Append the emacs branch name to $EMACS_INSTALL_PREFIX.
-#
 # For example, on a Debian system with the current Git branch "emacs-30",
 # the resulting path prefix would be:
 #   $EMACS_INSTALL_PREFIX/debian/branch-emacs-30
@@ -82,41 +80,9 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 # -flto: Enables Link Time Optimization. Allows the compiler to perform
 #        whole-program optimizations, including cross-module inlining, dead code
 #        elimination, and constant propagation.
-#
-# LDFLAGS:
-# --------
-# -Wl,-O1: Basic linker-level optimizations (binary layout, symbol resolution).
-#
-# -Wl,--sort-common: Coalesces common symbols to reduce binary size and improve
-# layout.
-#
-# -Wl,--as-needed: Links shared libraries only if they are actually used,
-# reducing binary dependencies.
-#
-# -Wl,-z,pack-relative-relocs: Optimizes relative relocations in ELF binaries,
-#                              reducing startup time on glibc >= 2.35 (especially
-#                              relevant for x86_64).
-#
-# Note: These flags intentionally omit all security-hardening and debugging aids.
-#       Use only for trusted code and final performance builds.
-
-# shellcheck disable=SC1091
-source /etc/os-release
-
-# Force gcc
-# ID=debian
-
-# Semantic Interposition: Added -fno-semantic-interposition to CFLAGS. This
-# significantly speeds up position-independent executables (which Emacs uses for
-# native compilation) by allowing the compiler to optimize function calls within
-# the same shared object.
-#
-# -fno-semantic-interposition can slightly improve performance of .eln shared
-# objects under native compilation by allowing more aggressive inlining, though
-# gains are modest.
-#
-# REMOVED:  -fno-semantic-interposition
 export CFLAGS="-O2 -pipe -march=native -mtune=native -fomit-frame-pointer"
+export CXXFLAGS="$CFLAGS"
+
 if [[ $ID = DISABLEDarch ]]; then
   # Arch Linux
   export CC=clang
@@ -126,11 +92,12 @@ if [[ $ID = DISABLEDarch ]]; then
   export LD=ld.lld
   export RANLIB=ranlib
   export CFLAGS="$CFLAGS -flto=full"
+  export LDFLAGS="-flto=full"
 else
   # -O2                    # Safe, good optimization level; avoids some aggressive optimizations of -O3
   # -pipe                  # Speeds up compilation by using pipes instead of temporary files
-  # -march=native           # Uses CPU-specific instructions; improves performance on your machine but reduces portability
-  # -mtune=native           # Tunes instruction scheduling for your CPU
+  # -march=native          # Uses CPU-specific instructions; improves performance on your machine but reduces portability
+  # -mtune=native          # Tunes instruction scheduling for your CPU
   # Optimizes for your specific CPU.
   # Drawback: Reduces portability; binary may not run on older CPUs.
   # Action: Keep for personal builds; remove for distributing binaries.
@@ -141,11 +108,12 @@ else
   #                         Drawback: Makes debugging crashes and profiling harder.
   #                         Action: Keep it for release builds; remove it if you plan to debug or use profiling tools.
   #
-  # -flto=full              # Full link-time optimization; reduces binary size and can improve runtime performance
-  export CFLAGS="$CFLAGS -flto"
+  # -flto=auto              # Full link-time optimization; reduces binary size and can improve runtime performance
+  export CFLAGS="$CFLAGS -flto=auto"
+  export LDFLAGS="-flto=auto"
 fi
 
-# -Wl,-O2 – Instructs the linker to optimize layout of the binary. Helps reduce
+# -Wl,-O2 - Instructs the linker to optimize layout of the binary. Helps reduce
 # cache misses slightly.
 #
 # -Wl,--sort-common – Orders common symbols to improve memory locality. Small
@@ -158,14 +126,8 @@ fi
 # -Wl,-z,pack-relative-relocs – Reduces the size of relocations for
 # position-independent executables. Slightly reduces memory usage and can
 # improve startup speed.
-export LDFLAGS="-Wl,-O2 -Wl,--sort-common \
+export LDFLAGS="$LDFLAGS -Wl,-O2 -Wl,--sort-common \
   -Wl,--as-needed -Wl,-z,pack-relative-relocs"
-
-# Debian
-export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/10/include"
-export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/10"
-
-export CXXFLAGS="$CFLAGS"
 
 # The `--with-mps=yes` configure flag instructs Emacs to use the **Memory Pool
 # System (MPS)** for memory management instead of its default conservative
@@ -175,8 +137,10 @@ export CXXFLAGS="$CFLAGS"
 # Enabling this option requires that the MPS library and headers are installed
 # and accessible during compilation. While primarily experimental, using MPS can
 # improve performance and enable advanced memory management features, making it
-# particularly useful for custom Emacs builds such as those using the
+# useful for custom Emacs builds such as those using the
 # incremental garbage collection (IGC) framework.
+#
+# MPS is still experimental and not what "maximum stable performance" means.
 # TODO: try: --with-mps=yes
 #
 # Using the Memory Pool System (MPS) in Emacs introduces several drawbacks. It
@@ -189,7 +153,7 @@ export CXXFLAGS="$CFLAGS"
 # debugging or profiling tools may not fully support MPS, making memory issues
 # harder to diagnose.
 CONFIGURE_ARGS=(
-  # --without-all
+  --without-all
 
   # Enable internal assertions and type checks. Helpful during debugging or for
   # development builds.
@@ -198,7 +162,9 @@ CONFIGURE_ARGS=(
 
   --with-gnutls
 
-  --enable-link-time-optimization
+  # I already handle it with -flto
+  # --enable-link-time-optimization
+
   --disable-build-details
 
   # --disable-year2038: On a 64-bit Arch system, your time_t is already 64-bit.
@@ -221,17 +187,24 @@ CONFIGURE_ARGS=(
   # This avoids either: Rebuilding the entire project unnecessarily, or
   # Missing necessary recompilation (leading to incorrect builds).
   #
-  # Improved Build Efficiency Particularly beneficial in large codebases like
+  # Improved Build Efficiency, which is beneficial in large codebases like
   # Emacs, this option ensures that only modified and dependent files are
   # rebuilt. Over time, this saves significant build time.
-  --enable-autodepend
+  #
+  # NOTE: This is only useful for developers who are constantly modifying
+  # Emacs's own C source code. Since you are likely compiling a specific
+  # branch/tag and then using it, this just adds a tiny bit of overhead to the
+  # initial make process and generates extra .d files you don't need.
+  # --enable-autodepend
 
-  #  Enable GC_REMEMBER_LAST_MARKED by default (it was disabled in Emacs 29)
-  #  to make it easier to debug difficult-to-reproduce GC problems
-  #  encountered by users.  This increases GC costs by about 5 %, which can
-  #  be avoided by turning the mark trace buffer back off using the new
-  #  --disable-gc-mark-trace option.
-  #  https://lists.gnu.org/archive/html/emacs-devel/2024-09/msg00240.html
+  # Enable GC_REMEMBER_LAST_MARKED by default (it was disabled in Emacs 29)
+  # to make it easier to debug difficult-to-reproduce GC problems
+  # encountered by users.  This increases GC costs by about 5 %, which can
+  # be avoided by turning the mark trace buffer back off using the new
+  # --disable-gc-mark-trace option.
+  # https://lists.gnu.org/archive/html/emacs-devel/2024-09/msg00240.html
+  #
+  # MPS is still experimental and not what "maximum stable performance" means.
   --disable-gc-mark-trace
 
   # configure: WARNING: This configuration installs a 'movemail' program that
@@ -266,15 +239,14 @@ CONFIGURE_ARGS=(
 
   --without-xwidgets
 
-  --with-xdbe
-
+  # --with-xdbe
   # --with-x-toolkit=lucid
 
+  # --with-xdbe
   # --with-x-toolkit=gtk3
   # --without-toolkit-scroll-bars
   # --without-pgtk
 
-  --with-toolkit-scroll-bars
   --with-pgtk
 
   --without-ns
@@ -366,6 +338,9 @@ CONFIGURE_ARGS=(
   #
   # (That should speed up things like Org Roam or Magit Forge)
   --with-sqlite3
+
+  # Native JSON parsing via Jansson greatly increases performance for json-heavy tasks (like LSP).
+  --with-json
 
   # Pixel Precision Scrolling
   --with-xinput2
@@ -496,6 +471,11 @@ error_handler() {
 main() {
   trap "error_handler" ERR
   set -o errtrace
+
+  if ! git remote -v | grep '/emacs '; then
+    echo "This is not an Emacs repository." >&2
+    exit 1
+  fi
 
   # Append the OS family
   if [[ $EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM -ne 0 ]]; then
