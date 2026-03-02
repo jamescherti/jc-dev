@@ -488,9 +488,16 @@ main() {
     ~/.cache/jc-dev.git_maintenance \
     git_maintenance
 
+  echo
+  echo "[INFO] Update spell check dictionary"
   sync-spell-dict
 
+  echo
+  echo "[INFO] Update Emacs snippets"
   update-emacs-snippets
+
+  echo
+  echo "[INFO] Update Emacs templates"
   update-emacs-templates
 
   echo
