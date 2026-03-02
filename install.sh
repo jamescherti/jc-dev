@@ -32,6 +32,7 @@
 set -euf -o pipefail
 
 GIT_CLONE_DIR="$HOME/.jc-dev"
+SRC_DIR="$HOME/src"
 
 # shellcheck disable=SC2317
 error_handler() {
@@ -411,10 +412,10 @@ git_maintenance() {
   # --old, which is the default. Using now removes all such objects immediately.
   # git find git gc --aggressive --prune=now
 
-  if [[ -d "$HOME/src" ]]; then
+  if [[ -d "$SRC_DIR" ]]; then
     # shellcheck disable=SC2016
     "$SCRIPT_DIR/home/.bin/git-find-repos" \
-      "$HOME/src" \
+      "$SRC_DIR" \
       --if-exec git-is-clean \
       --exec-bg "$SCRIPT_DIR/home/.bin/git-maintenance"
   fi
@@ -427,6 +428,12 @@ main() {
   copy_dotfiles
   config-jc-dotfiles
   config-bash-stdops
+
+  # shellcheck disable=SC1090
+  source ~/.profile
+  # shellcheck disable=SC1090
+  source ~/.bashrc
+
   config-lightvim
 
   config-project-list
@@ -444,6 +451,19 @@ main() {
 
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     "$SCRIPT_DIR/home/.bin/update-emacs-config"
+  fi
+
+  # Git pull
+  if [[ -d "$SRC_DIR" ]]; then
+    # other than emacs projects
+    git-find-repos "$SRC_DIR" \
+      --if-exec git-is-clean \
+      --exec-bg 'sh -c "git checkout-default && git pull --ff-only"'
+
+    git-find-repos "$SRC_DIR/emacs" \
+      --if-exec git-is-clean \
+      --exec-bg 'sh -c "git checkout develop && git pull --rebase"'
+
   fi
 
   # 1 day = 86400
