@@ -151,23 +151,14 @@ _git_wrapper() {
       done
 
       if [[ $ssh_agent_needed -ne 0 ]]; then
-        local remote_origin
-        if remote_origin=$(git config --get remote.origin.url); then
-          if [[ $remote_origin == https* ]]; then
-            if [[ $cur_arg == pu* ]] && type -P so &>/dev/null; then
-              cmd_prefix+=(so)
-            fi
-          fi
-
-          break
-        fi
+        cmd_prefix+=(so)
       fi
     done
 
     # echo "[RUN]" "${cmd_prefix[@]}" "$@" >&2
     "${cmd_prefix[@]}" "$@"
   else
-    echo "[RUN]" "$@"
+    # echo "[RUN]" "$@"
     "$@"
   fi
 }
@@ -473,7 +464,7 @@ alias gs="git show" # avoid typo
 # alias e=devemacs
 
 # Aliases
-alias git-sync-upstream='preload-ssh-agent so git-sync-upstream'
+alias git-sync-upstream='so git-sync-upstream'
 alias git-sync='git-sync-upstream'
 alias c=wcalc
 
