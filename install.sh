@@ -415,7 +415,9 @@ git_maintenance() {
   # git find git gc --aggressive --prune=now
 
   if [[ -d "$SRC_DIR" ]]; then
-    rm ~/.bin/git-maintenance
+    # TODO remove this
+    rm -f ~/.bin/git-maintenance
+
     # shellcheck disable=SC2016
     "$SCRIPT_DIR/home/.bin/git-find-repos" \
       "$SRC_DIR" \
