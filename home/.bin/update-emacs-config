@@ -132,7 +132,12 @@ custom-emacs "emacs-straight" \
 # OTHER LIGHTEMACS
 # ------------------------------------------------------------------------------
 lightemacs-init-files "$DEST_DIR/.lightemacs.d"
-lightemacs-init-files "$DEST_DIR/.devemacs.d"
+
+if ! [[ -d "$DEST_DIR/.devemacs.d" ]]; then
+  # Only when it does not exist. This is supposed to always be stable.
+  lightemacs-init-files "$DEST_DIR/.devemacs.d"
+fi
+
 lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d"
 lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
 
