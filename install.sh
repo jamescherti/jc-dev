@@ -415,11 +415,12 @@ git_maintenance() {
   # git find git gc --aggressive --prune=now
 
   if [[ -d "$SRC_DIR" ]]; then
+    rm ~/.bin/git-maintenance
     # shellcheck disable=SC2016
     "$SCRIPT_DIR/home/.bin/git-find-repos" \
       "$SRC_DIR" \
       --if-exec git-is-clean \
-      --exec-bg "$SCRIPT_DIR/home/.bin/git-maintenance"
+      --exec-bg "$SCRIPT_DIR/home/.bin/git-regular-maintenance"
   fi
 }
 
