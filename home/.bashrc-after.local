@@ -176,7 +176,11 @@ _ga_wrapper() {
 }
 
 _bg_git_find_repos_wrapper() {
-  so git-find-repos -C . --bg -- git "$@"
+  if [[ $# -gt 1 ]]; then
+    so git-find-repos -C . --bg -- git "$@"
+  else
+    so git-find-repos -C . -- "$@"
+  fi
 }
 
 _git_find_repos_wrapper() {
