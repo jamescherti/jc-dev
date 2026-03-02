@@ -478,7 +478,7 @@ main() {
     # other than emacs projects
     # git-find-repos -C "$SRC_DIR" \
     #   --if-exec git-is-clean \
-    #   --exec-bg 'sh -c "git checkout-default && git pull --ff-only"'
+    #   --bg 'sh -c "git checkout-default && git pull --ff-only"'
 
     git-find-repos -C "$SRC_DIR" \
       --bg \

@@ -178,7 +178,7 @@ _ga_wrapper() {
 _bg_git_find_repos_wrapper() {
   local opts=()
   if [[ $# -gt 0 ]]; then
-    opts+=(--exec-bg "git $*")
+    opts+=(--bg "git $*")
   fi
 
   so git find-repos . "${opts[@]}"
