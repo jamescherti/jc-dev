@@ -25,6 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+
 """
 Module for discovering and managing Git repositories.
 
@@ -346,10 +347,10 @@ def parse_args() -> argparse.Namespace:
         help="Root directory to search (defaults to current directory)"
     )
     parser.add_argument(
-        "-b", "--exec-bg",
-        type=str,
-        help="Execute the specified command in the background (parallel)",
-        default=None
+        "-b", "--bg",
+        action="store_true",
+        help="Execute the command in the background (parallel)",
+        default=False
     )
     parser.add_argument(
         "-i", "--if-exec",
@@ -368,7 +369,7 @@ def parse_args() -> argparse.Namespace:
         "exec_cmd",
         type=str,
         nargs="*",
-        help="The command to execute in the foreground. You can use -- to pass options."
+        help="The command to execute. You can use -- to pass options."
     )
 
     args: argparse.Namespace = parser.parse_args()
@@ -419,13 +420,25 @@ def main() -> None:
 
     args = parse_args()
 
+    # Verify that the execution command exists
+    if args.exec_cmd and not shutil.which(args.exec_cmd[0]):
+        print(
+            f"Error: Command not found: '{args.exec_cmd[0]}'",
+            file=sys.stderr)
+        sys.exit(127)
+
     # 1. Discover Repositories
     repos = discover_repos(args.directory.resolve(), args.max_workers)
+
+    # Setup background command string if needed
+    exec_bg_cmd: Optional[str] = None
+    if args.bg and args.exec_cmd:
+        exec_bg_cmd = shlex.join(args.exec_cmd)
 
     # 2. Parallel Processing (Filter + Background Exec)
     processed_repos = execute_parallel_tasks(
         repos,
-        args.exec_bg,
+        exec_bg_cmd,
         args.if_exec,
         args.max_workers
     )
@@ -446,7 +459,7 @@ def main() -> None:
                 execution_errors.append((repo_path, context.bg_result))
 
         # Handle Foreground Execution
-        if args.exec_cmd:
+        if args.exec_cmd and not args.bg:
             print(
                 f"{colorama.Fore.YELLOW}[EXEC] {repo_path}: "
                 f"{subprocess.list2cmdline(args.exec_cmd)}"
@@ -479,7 +492,7 @@ def main() -> None:
                 execution_errors.append((repo_path, failed_res))
 
         # If no commands were run, just list the repo
-        if not args.exec_cmd and not args.exec_bg:
+        if not args.exec_cmd:
             print(repo_path)
 
     # 4. Final Error Summary

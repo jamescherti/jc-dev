@@ -422,7 +422,8 @@ git_maintenance() {
     "$SCRIPT_DIR/home/.bin/git-find-repos" \
       -C "$SRC_DIR" \
       --if-exec git-is-clean \
-      --exec-bg "$SCRIPT_DIR/home/.bin/git-regular-maintenance"
+      -- \
+      "$SCRIPT_DIR/home/.bin/git-regular-maintenance"
   fi
 }
 
@@ -480,11 +481,13 @@ main() {
 
     git-find-repos -C "$SRC_DIR" \
       --if-exec git-is-clean \
-      --exec-bg "$SCRIPT_DIR/.bin/git-pull-my-repo"
+      -- \
+      "$SCRIPT_DIR/.bin/git-pull-my-repo"
 
     git-find-repos -C "$SRC_DIR/emacs" \
       --if-exec git-is-clean \
-      --exec-bg 'sh -c "git checkout develop && git pull --rebase"'
+      -- \
+      sh -c "git checkout develop && git pull --rebase"
   fi
 
   # 1 day = 86400
