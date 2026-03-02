@@ -101,7 +101,7 @@ EL-FILE is the *.el file."
 
 ;; TODO test this more. It does not seem stable.
 ;; (setq package-quickstart t)
-(setq package-native-compile nil)
+(setq package-native-compile t)
 (setq native-comp-jit-compilation nil)
 
 ;; I am using the predicate instead
@@ -704,13 +704,9 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
   ;; Apply the cached paths to load-path
   (seq-doseq (path my--package-load-path-cache)
-    (push path load-path)
-    ;; (add-to-list 'load-path path)
+    ;; (push path load-path)
+    (add-to-list 'load-path path)
     ))
-
-;; (defun lightemacs-user-post-init ()
-;;   "User post init."
-;;   (my-add-packages-to-load-path))
 
 ;;; config
 
@@ -2571,10 +2567,18 @@ session ends."
   (current-window-only--setup-display-buffer-alist))
 
 (defun lightemacs-user-pre-modules ()
-  "Pre-init config."
+  "Pre-modules."
   (my-add-packages-to-load-path)
   (my-config-display-buffer-alist)
   (current-window-only-setup))
+
+(defun lightemacs-user-post-modules ()
+  "Post-modules."
+  (my-add-packages-to-load-path))
+
+;; (defun lightemacs-user-post-init ()
+;;   "User post init."
+;;   (my-add-packages-to-load-path))
 
 ;;; tree sitter
 

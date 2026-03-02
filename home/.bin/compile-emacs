@@ -241,8 +241,25 @@ CONFIGURE_ARGS=(
   # provides a high-performance and standards-compliant regex implementation.
   --without-included-regex
 
+  # The make process will be significantly longer (often 30 to 60 minutes
+  # depending on your CPU). It systematically iterates through every single .el
+  # file bundled with the Emacs distribution and compiles it into an .eln file
+  # before the installation is complete.
+  #Emacs is "born" fully optimized. Every built-in feature is already running
+  # as native machine code the very first time you launch it. There is no
+  # background "churn" for the standard library.
   # --with-native-compilation=aot
+
+  # When you use this flag alone, it enables Just-In-Time (JIT) compilation
+  # The Emacs C source compiles quickly. Only a absolute minimum set of Lisp
+  # files required to start the editor are natively compiled during the make
+  # process.
+  # When you first start Emacs and begin using various packages (like dired,
+  # magit, or org-mode), Emacs will notice those files are only available as
+  # byte-code (.elc). It will then spawn background processes to compile them
+  # into .eln files on the fly.
   --with-native-compilation
+
   --with-modules
   --with-threads
 
@@ -524,6 +541,7 @@ main() {
     echo "Interrupted." >&2
     exit 1
   fi
+  set -x
 
   # Avoid too many: *.~1~ files
   [[ -d .git/hooks ]] && rm -fr .git/hooks/*
@@ -535,6 +553,8 @@ main() {
   ./configure "${CONFIGURE_ARGS[@]}"
 
   make -j "$NUM_PROC"
+
+  test -f "$EMACS_INSTALL_PREFIX/bin/emacs" && rm -fr "$EMACS_INSTALL_PREFIX"
 
   # make install-strip: This is a variant of make install, but with the added step
   # of "stripping" the binaries. Stripping refers to removing debugging symbols
