@@ -51,6 +51,8 @@ init() {
     exit 1
   fi
 
+  export PATH="$HOME/.local/bin:$HOME/.bin:$PATH"
+
   local cmd
   for cmd in rsync pip python git readlink; do
     if ! type -P "$cmd" &>/dev/null; then
@@ -429,11 +431,6 @@ main() {
   config-jc-dotfiles
   config-bash-stdops
 
-  # shellcheck disable=SC1090
-  source ~/.profile
-  # shellcheck disable=SC1090
-  source ~/.bashrc
-
   config-lightvim
 
   config-project-list
@@ -463,7 +460,6 @@ main() {
     git-find-repos "$SRC_DIR/emacs" \
       --if-exec git-is-clean \
       --exec-bg 'sh -c "git checkout develop && git pull --rebase"'
-
   fi
 
   # 1 day = 86400

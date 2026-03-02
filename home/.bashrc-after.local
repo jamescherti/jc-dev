@@ -137,11 +137,6 @@ Jobs="\j"
 
 # Removed: --color=never
 
-preload-ssh-agent() {
-  [[ $# -eq 0 ]] && return 0
-  esa ssh-add-exec "$@" || return 1
-}
-
 _git_wrapper() {
   if type -P so &>/dev/null; then
     local cmd_prefix=()
@@ -164,7 +159,6 @@ _git_wrapper() {
             fi
           fi
 
-          cmd_prefix+=(preload-ssh-agent)
           break
         fi
       fi
@@ -183,11 +177,11 @@ alias git='_git_wrapper git'
 alias lrgit='_git_wrapper git-finder-exec git'
 
 _gm_wrapper() {
-  preload-ssh-agent git find-repos . --if-exec "sh -c '! git-is-clean'" "$@"
+  so git find-repos . --if-exec "sh -c '! git-is-clean'" "$@"
 }
 
 _ga_wrapper() {
-  preload-ssh-agent git find-repos . "$@"
+  so git find-repos . "$@"
 }
 
 _bg_git_find_repos_wrapper() {
@@ -196,7 +190,7 @@ _bg_git_find_repos_wrapper() {
     opts+=(--exec-bg "git $*")
   fi
 
-  preload-ssh-agent git find-repos . "${opts[@]}"
+  so git find-repos . "${opts[@]}"
 }
 
 _git_find_repos_wrapper() {
@@ -205,7 +199,7 @@ _git_find_repos_wrapper() {
     opts+=(--exec "git $*")
   fi
 
-  preload-ssh-agent git find-repos . "${opts[@]}"
+  so git find-repos . "${opts[@]}"
 }
 
 alias gm='_gm_wrapper'
@@ -236,7 +230,7 @@ alias mountall='sudo -i /bin/sh -c "/usr/bin/udiskie-mount -a; /usr/bin/udiskie-
 
 # Changed to command
 # alias qa='pathaction'
-alias qai='preload-ssh-agent pathaction -t install'
+alias qai='so pathaction -t install'
 
 alias_completion() {
   local func_name='alias_completion'
