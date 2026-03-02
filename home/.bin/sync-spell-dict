@@ -26,7 +26,7 @@
 # SOFTWARE.
 #
 
-set -euf -o pipefail
+set -euf
 
 UNIFIED_SPELL_FILE="$HOME/.sync-spell-dict"
 ASPELL_FILE="$HOME/.aspell.en.pws"
