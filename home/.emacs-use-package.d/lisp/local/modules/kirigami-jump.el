@@ -62,7 +62,11 @@
     (unless (region-active-p)
       (ignore-errors
         (when (not (memq command kirigami-jump-ignore-commands))
-          (kirigami-open-fold))))))
+          (save-excursion
+            ;; I put save excursion here in the hope it fixes the org mode
+            ;; cursor change when opened
+            ;; TODO should kirigami always save-excursion?
+            (kirigami-open-fold)))))))
 
 (defun kirigami-jump--around-outline-show-entry (fn &rest args)
   "FN is the advised function. ARGS are the function arguments."
@@ -98,7 +102,7 @@ If ENABLE is non-nil, install hooks. Otherwise remove them."
     (with-eval-after-load 'xref
       (funcall fn 'xref-after-jump-hook #'kirigami-jump--open-fold -80))
 
-    (add-hook 'ediff-prepare-buffer-hook #'kirigami-jump--ediff-prepare-buffer)
+    (funcall fn 'ediff-prepare-buffer-hook #'kirigami-jump--ediff-prepare-buffer)
 
     ;; TODO add this to kirigami
     ;; TODO it opens so many things. this is not usable
