@@ -99,8 +99,6 @@ endif
 
 " }}}
 
-" ------------------> end
-finish
 " Plugins config {{{
 
 " let g:font_default_name = get(g:, 'font_default_name', "Iosevka Semibold")

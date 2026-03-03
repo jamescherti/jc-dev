@@ -23,9 +23,7 @@
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 " SOFTWARE.
 
-" Alt Fixes {{{
-
-" Selection {{{
+" New after.vim {{{
 
 " Tell vim to remember certain things when we exit
 " if has('nvim')
@@ -34,29 +32,8 @@
 "   set viminfo='100,\"300,<50,s10,h,:20,n~/.viminfo
 " endif
 
-nnoremap <silent> ,a :ALENext<CR>
-nnoremap <silent> ,A :ALEPrevious<CR>
-nnoremap <silent> ,ea :ALEFix<CR>
-
-nnoremap ! :!
-
-nnoremap <leader>ee :call pathaction#run('main')<CR>
-nnoremap <leader>ei :call pathaction#run('install')<CR>
-
 autocmd FileType vim
   \ setlocal foldmethod=marker
-
-if has('patch-8.2.1978')
-  nnoremap > <cmd>call <SID>display_error('cnext')<CR>
-  nnoremap < <cmd>call <SID>display_error('cprevious')<CR>
-  nnoremap <C-S->> <cmd>call <SID>display_error('cnfile')<CR>
-  nnoremap <C-S-<> <cmd>call <SID>display_error('cpfile')<CR>
-else
-  nnoremap > :call <SID>display_error('cnext')<CR>
-  nnoremap < :call <SID>display_error('cprevious')<CR>
-  nnoremap <C-S->> :call <SID>display_error('cnfile')<CR>
-  nnoremap <C-S-<> :call <SID>display_error('cpfile')<CR>
-endif
 
 " indicators
 function! s:inv_cursorline_cursorcolumn(colorcolumn_enabled) abort
@@ -74,18 +51,6 @@ function! s:inv_cursorline_cursorcolumn(colorcolumn_enabled) abort
   endif
 endfunction
 
-nnoremap <F6> :echo "Use ,ec"<CR>
-nnoremap <F7> :echo "Use ,ec"<CR>
-" nnoremap <F6> :setlocal colorcolumn=0 nocursorline nocursorcolumn<CR>
-" nnoremap <F7> :setlocal cursorline cursorcolumn<CR>
-
-nnoremap ,ec <cmd>call <SID>inv_cursorline_cursorcolumn(0)<CR>
-nnoremap ,eC <cmd>call <SID>inv_cursorline_cursorcolumn(1)<CR>
-
-"set selection=exclusive
-" set virtualedit=onemore
-set virtualedit=all
-
 if !exists('g:colors_name') || empty(g:colors_name)
   let g:colors_name=''
   set background=dark
@@ -96,74 +61,48 @@ if !exists('g:colors_name') || empty(g:colors_name)
   syntax on
 endif
 
+" set virtualedit=all
+
+" }}}
+
+" Keybindings {{{
+
 " l = one more
 nnoremap $ $l
 
-""" vimrc.local{{{
-if filereadable(fnamemodify('~/.vimrc.local', ':p'))
-  source ~/.vimrc.local
+nnoremap ,ec <cmd>call <SID>inv_cursorline_cursorcolumn(0)<CR>
+nnoremap ,eC <cmd>call <SID>inv_cursorline_cursorcolumn(1)<CR>
+
+nnoremap <silent> ,a :ALENext<CR>
+nnoremap <silent> ,A :ALEPrevious<CR>
+nnoremap <silent> ,ea :ALEFix<CR>
+
+nnoremap ! :!
+
+nnoremap <leader>ee :call pathaction#run('main')<CR>
+nnoremap <leader>ei :call pathaction#run('install')<CR>
+
+if has('patch-8.2.1978')
+  nnoremap > <cmd>call <SID>display_error('cnext')<CR>
+  nnoremap < <cmd>call <SID>display_error('cprevious')<CR>
+  nnoremap <C-S->> <cmd>call <SID>display_error('cnfile')<CR>
+  nnoremap <C-S-<> <cmd>call <SID>display_error('cpfile')<CR>
+else
+  nnoremap > :call <SID>display_error('cnext')<CR>
+  nnoremap < :call <SID>display_error('cprevious')<CR>
+  nnoremap <C-S->> :call <SID>display_error('cnfile')<CR>
+  nnoremap <C-S-<> :call <SID>display_error('cpfile')<CR>
 endif
 
-if filereadable(fnamemodify('~/.vimrc.local2', ':p'))
-  source ~/.vimrc.local2
-endif
-""" }}}
-
-
- " }}}
-
-
-" ------------------> end
-  finish
-
-  " autocmd FileType python call buffer#change_tab(4) |
-  "       \ setlocal foldnestmax=2 cursorcolumn
-
-  " autocmd FileType vim,python,sh,cpp,c,lua,puppet,json,ruby,yaml,yaml.ansible
-  "   \ call buffer#auto_close_all_delimiters() |
-  "   \ setlocal foldlevel=1 foldmethod=indent
-  "
-  " autocmd FileType text,sh,puppet,json,ruby,yaml,yaml.ansible,vim
-  "   \ call buffer#change_tab(2)
-  " autocmd FileType lua,markdown call buffer#change_tab(4)
-
-
-" Keyboard mapping {{{
-
-" Mappings {{{
+nnoremap <F6> :echo "Use ,ec"<CR>
+nnoremap <F7> :echo "Use ,ec"<CR>
 
 " The following key mapping seems to make gvim hide its window
 nnoremap <C-z> <Nop>
-
 nnoremap ~ :edit ~/<CR>
 
 " More precise restore map
 nnoremap ' `
-
-" yank/paste/delete to a different register than the main one
-" because the main one is sometimes modified by plugins (UltiSnips?)
-" or when the user presses the wrong combination of keys.
-let g:alternative_register = 'm'
-
-" Does not work: gp
-
-" for item in ['<C-h>']
-"   execute printf('vnoremap %s "%s%s', item, g:alternative_register, item)
-" endfor
-
-" 'x',
-" for item in ['y', 'Y', 'X', 'd', 'D', 'c', 'C', 'zy', 's', 'S', 'p', 'P', 'zp', 'zP', '[P', ']P', '[p', ']p', 'gP']
-"   execute printf('nnoremap %s "%s%s', item, g:alternative_register, item)
-"   execute printf('vnoremap %s "%s%s', item, g:alternative_register, item)
-" endfor
-
-" Python: form string to list
-"nnoremap ,tls :s/.*/\='['.join(map(split(submatch(0), '\s\+'), '"''" .. v:val .. "''"'), ', ').']'<CR>
-"nnoremap ,tld :s/.*/\='['.join(map(split(submatch(0), '\s\+'), '''"'' .. v:val .. ''"'''), ', ').']'<CR>
-
-" Never use an important character like \ or , in pastetoggle because it will
-" be slowed down in insert mode.
-" set pastetoggle=,ep
 
 " Better visual search ()
 "
@@ -258,33 +197,6 @@ inoremap <A-p> <Esc>]p
 nnoremap <A-P> ]P
 inoremap <A-P> <Esc>]P
 
-" Next and previous buffer
-
-function! s:display_error(command) abort
-  try
-    execute a:command
-  catch
-    echo string(v:exception)
-    return
-  endtry
-
-  if foldclosed('.') != -1
-    " zv    View cursor line: Open just enough folds to make the line in which
-    " the cursor is located not folded.
-    "
-    " zz    Like "z.", but leave the cursor in the same column.  Careful: If
-    " caps-lock is on, this command becomes ZZ": write buffer and exit!
-    normal! zvzz
-  else
-    " zz    Like "z.", but leave the cursor in the same column.  Careful: If
-    " caps-lock is on, this command becomes ZZ": write buffer and exit!
-    normal! zz
-  endif
-endfunction
-
-" The 'patch-8.2.1978' adds the feature: '<cmd>'
-" nnoremap <silent> > :silent cnext<CR>
-" nnoremap <silent> < :silent cprevious<CR>
 nnoremap [b :bprevious<CR>
 nnoremap ]b :bnext<CR>
 nnoremap [B :bfirst<CR>
@@ -297,21 +209,6 @@ nnoremap <A-S-Down> :resize +1<CR>
 
 nnoremap <silent> ,n :enew<CR>
 
-" nnoremap ,i :call PythonAddImport(expand('<cword>'))<CR>
-
-if has('gui_running')
-  if executable('wmctrl')
-    nnoremap <silent> <F11>
-      \ :call system('wmctrl -x -a gvim.Gvim ' .
-      \              '-b toggle,fullscreen')<CR>:redraw!<CR>
-    nnoremap <silent> <F10>
-      \ :call system('wmctrl -x -a gvim.Gvim -b ' .
-      \              'toggle,maximized_vert,maximized_horz')<CR>:redraw!<CR>
-  else
-    nnoremap <F11> :echo 'Error: "wmctrl" does not exist.'<CR>
-  endif
-endif
-
 inoremap <CR> <CR><Space><BS>
 inoremap <C-CR> <C-CR><Space><BS>
 inoremap <S-CR> <S-CR><Space><BS>
@@ -323,6 +220,136 @@ inoremap <S-kEnter> <S-kEnter><Space><BS>
 inoremap <C-S-kEnter> <C-S-kEnter><Space><BS>
 
 inoremap <C-j> <C-j><Space><BS>
+
+vmap S{   <Plug>VSurround}gv
+vmap S(   <Plug>VSurround)gv
+vmap S[   <Plug>VSurround]gv
+
+nnoremap <silent> ,ggt
+  \ :packadd gitgutter<CR>:GitGutterToggle<CR>:echo "GitGutterToggle"<CR>
+nnoremap <silent> ,gge
+  \ :packadd gitgutter<CR>:GitGutterEnable<CR>:echo "GitGutterEnable"<CR>
+nnoremap <silent> ,ggn
+  \ :packadd gitgutter<CR>:GitGutterNextHunk<CR>:echo "GitGutterNextHunk"<CR>
+nnoremap <silent> ,ggp
+  \ :packadd gitgutter<CR>:GitGutterPrevHunk<CR>:echo "GitGutterPrevHunk"<CR>
+
+" For an unknown reason, gg opens the first fold. This mapping fixes it
+nnoremap <silent> gg :normal! gg<CR>
+" yank/paste/delete to a different register than the main one
+" because the main one is sometimes modified by plugins (UltiSnips?)
+" or when the user presses the wrong combination of keys.
+let g:alternative_register = 'm'
+
+" nnoremap <F6> :setlocal colorcolumn=0 nocursorline nocursorcolumn<CR>
+" nnoremap <F7> :setlocal cursorline cursorcolumn<CR>
+
+" End keybindings }}}
+
+""" vimrc.local{{{
+
+if filereadable(fnamemodify('~/.vimrc.local', ':p'))
+  source ~/.vimrc.local
+endif
+
+if filereadable(fnamemodify('~/.vimrc.local2', ':p'))
+  source ~/.vimrc.local2
+endif
+
+""" }}}
+
+
+
+
+
+
+
+
+" Alt Fixes {{{
+
+
+
+" ------------------> end
+
+" autocmd FileType python call buffer#change_tab(4) |
+"       \ setlocal foldnestmax=2 cursorcolumn
+
+" autocmd FileType vim,python,sh,cpp,c,lua,puppet,json,ruby,yaml,yaml.ansible
+"   \ call buffer#auto_close_all_delimiters() |
+"   \ setlocal foldlevel=1 foldmethod=indent
+"
+" autocmd FileType text,sh,puppet,json,ruby,yaml,yaml.ansible,vim
+"   \ call buffer#change_tab(2)
+" autocmd FileType lua,markdown call buffer#change_tab(4)
+
+
+" Keyboard mapping {{{
+
+" Mappings {{{
+
+" Does not work: gp
+
+" for item in ['<C-h>']
+"   execute printf('vnoremap %s "%s%s', item, g:alternative_register, item)
+" endfor
+
+" 'x',
+" for item in ['y', 'Y', 'X', 'd', 'D', 'c', 'C', 'zy', 's', 'S', 'p', 'P', 'zp', 'zP', '[P', ']P', '[p', ']p', 'gP']
+"   execute printf('nnoremap %s "%s%s', item, g:alternative_register, item)
+"   execute printf('vnoremap %s "%s%s', item, g:alternative_register, item)
+" endfor
+
+" Python: form string to list
+"nnoremap ,tls :s/.*/\='['.join(map(split(submatch(0), '\s\+'), '"''" .. v:val .. "''"'), ', ').']'<CR>
+"nnoremap ,tld :s/.*/\='['.join(map(split(submatch(0), '\s\+'), '''"'' .. v:val .. ''"'''), ', ').']'<CR>
+
+" Never use an important character like \ or , in pastetoggle because it will
+" be slowed down in insert mode.
+" set pastetoggle=,ep
+
+" Next and previous buffer
+
+" function! s:display_error(command) abort
+"   try
+"     execute a:command
+"   catch
+"     echo string(v:exception)
+"     return
+"   endtry
+"
+"   if foldclosed('.') != -1
+"     " zv    View cursor line: Open just enough folds to make the line in which
+"     " the cursor is located not folded.
+"     "
+"     " zz    Like "z.", but leave the cursor in the same column.  Careful: If
+"     " caps-lock is on, this command becomes ZZ": write buffer and exit!
+"     normal! zvzz
+"   else
+"     " zz    Like "z.", but leave the cursor in the same column.  Careful: If
+"     " caps-lock is on, this command becomes ZZ": write buffer and exit!
+"     normal! zz
+"   endif
+" endfunction
+
+" The 'patch-8.2.1978' adds the feature: '<cmd>'
+" nnoremap <silent> > :silent cnext<CR>
+" nnoremap <silent> < :silent cprevious<CR>
+
+" nnoremap ,i :call PythonAddImport(expand('<cword>'))<CR>
+
+"if has('gui_running')
+"  if executable('wmctrl')
+"    nnoremap <silent> <F11>
+"      \ :call system('wmctrl -x -a gvim.Gvim ' .
+"      \              '-b toggle,fullscreen')<CR>:redraw!<CR>
+"    nnoremap <silent> <F10>
+"      \ :call system('wmctrl -x -a gvim.Gvim -b ' .
+"      \              'toggle,maximized_vert,maximized_horz')<CR>:redraw!<CR>
+"  else
+"    nnoremap <F11> :echo 'Error: "wmctrl" does not exist.'<CR>
+"  endif
+"endif
+
 
 " }}}
 
@@ -341,21 +368,6 @@ inoremap <C-j> <C-j><Space><BS>
 " Use S instead
 " vmap ,s"   <Plug>VSurround"
 " vmap ,s'   <Plug>VSurround'
-vmap S{   <Plug>VSurround}gv
-vmap S(   <Plug>VSurround)gv
-vmap S[   <Plug>VSurround]gv
-
-nnoremap <silent> ,ggt
-  \ :packadd gitgutter<CR>:GitGutterToggle<CR>:echo "GitGutterToggle"<CR>
-nnoremap <silent> ,gge
-  \ :packadd gitgutter<CR>:GitGutterEnable<CR>:echo "GitGutterEnable"<CR>
-nnoremap <silent> ,ggn
-  \ :packadd gitgutter<CR>:GitGutterNextHunk<CR>:echo "GitGutterNextHunk"<CR>
-nnoremap <silent> ,ggp
-  \ :packadd gitgutter<CR>:GitGutterPrevHunk<CR>:echo "GitGutterPrevHunk"<CR>
-
-" For an unknown reason, gg opens the first fold. This mapping fixes it
-nnoremap <silent> gg :normal! gg<CR>
 
 " }}}
 
@@ -425,6 +437,7 @@ function! FixMetaKeysTerminal2() abort
   endwhile
 endfunction
 
+" TODO worth adding?
 " call FixMetaKeysTerminal()
 " call FixMetaKeysTerminal2()
 
