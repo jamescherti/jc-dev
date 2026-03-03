@@ -25,6 +25,26 @@
 
 ;;; Code:
 
+(defun my-tab-bar-switch-to-buffer (buffer)
+  "Switch to the tab containing a window with the specified BUFFER."
+  (let* ((target-tab (alist-get 'index (tab-bar-get-buffer-tab buffer t nil))))
+    (when target-tab
+      (tab-bar-select-tab (1+ target-tab))
+      (pop-to-buffer buffer)
+      t)))
+
+(defun my-tab-bar-find-file (filename)
+  "Switch to the tab and the window containing a file or directory named FILENAME.
+If FILENAME is a directory, find the buffer of the `dired'. If the file or
+directory is not open yet, open it in the current window."
+  (let ((buffer (if (file-directory-p filename)
+                    (dired-noselect filename)
+                  (or (get-file-buffer filename)
+                      (find-file-noselect filename)))))
+    (when (fboundp 'my-tab-bar-switch-to-buffer)
+      (when (and buffer (not (my-tab-bar-switch-to-buffer buffer)))
+        (switch-to-buffer buffer)))))
+
 (defun my-path-inside-p (path1 path2)
   "Check if PATH2 is inside PATH1."
   (let ((absolute-path1 (file-truename path1))

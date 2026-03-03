@@ -1367,6 +1367,11 @@ If the parentheses are balanced, the function returns t."
 
 ;;; markdown mode
 
+(with-eval-after-load 'markdown-mode
+  ;; (evil-define-key 'normal markdown-mode-map (kbd "TAB") #'ignore)
+  ;; (evil-define-key 'normal markdown-mode-map (kbd "<tab>") #'ignore)
+  (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block))
+
 (defun my-setup-markdown-mode ()
   "Setup markdown modes."
   ;; In gptel buffers we set `nobreak-char-display' to nil locally so that the
@@ -2416,6 +2421,53 @@ column layout, except when a point falls on the first visible line."
   ;;   (evil-define-key 'normal 'global (kbd "<leader>gr") #'better-grep)
   ;;   (add-hook 'on-first-input-hook #'fido-vertical-mode))
   )
+
+;;; lightemacs-dired-filter-toggle
+
+(with-eval-after-load 'dired
+  (require 'le-dired-filter)
+  (evil-define-key 'normal dired-mode-map (kbd "I") 'lightemacs-dired-filter-toggle))
+
+;;; flyspell
+
+(defun my-flyspell-region (beg end)
+  "Flyspell the region from BEG to END."
+  (interactive "r")
+  (flyspell-region beg end)
+  (message "Flyspell region done"))
+
+(defun my-flyspell-buffer ()
+  "Flyspell the whole buffer.
+In `prog-mode', this configures flyspell to check only comments and strings."
+  (interactive)
+  (save-excursion
+    (when (derived-mode-p 'prog-mode)
+      (setq flyspell-generic-check-word-predicate
+            'flyspell-generic-progmode-verify))
+    (flyspell-buffer))
+  (message "Flyspell buffer done"))
+
+(defun my-flyspell-clear ()
+  "Clear all Flyspell overlays from the current buffer."
+  (interactive)
+  (when (fboundp 'flyspell-delete-all-overlays)
+    (flyspell-delete-all-overlays)))
+
+(evil-define-key 'visual 'global (kbd "<leader>fs") #'my-flyspell-region)
+(evil-define-key 'normal 'global (kbd "<leader>fb") #'my-flyspell-buffer)
+(evil-define-key 'normal 'global (kbd "<leader>fc") #'my-flyspell-clear)
+
+;;; Do not display Search Failed in evil-ex
+(defun my-around-evil-ex-search-update-pattern-no-echo (fn &rest args)
+  "FN is the advised function. ARGS are the function arguments."
+  (cl-letf (((symbol-function #'evil-ex-echo)
+             (lambda (&rest _args) nil)))
+    (apply fn args)))
+
+(with-eval-after-load 'evil-search
+  (when (fboundp 'my-around-evil-ex-search-update-pattern-no-echo)
+    (advice-add 'evil-ex-search-update-pattern
+                :around #'my-around-evil-ex-search-update-pattern-no-echo)))
 
 ;;; Provide
 
