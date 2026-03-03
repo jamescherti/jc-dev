@@ -478,7 +478,14 @@ main() {
         show_window thunar thunar.Thunar thunar
       fi
     elif type -P nautilus &>/dev/null; then
-      show_window nautilus org.gnome.Nautilus.Org.gnome.Nautilus nautilus "$HOME"
+      if has_run_or_raise && is_gnome && is_wayland; then
+        gdbus call --session --dest org.gnome.Shell \
+          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+          ",gtk-launch org.gnome.Nautilus,nautilus,"
+      else
+        show_window nautilus thunar.Thunar thunar
+      fi
     elif type -P dolphin &>/dev/null; then
       show_window dolphin dolphin.dolphin dolphin "$HOME"
     elif type -P pcmanfm &>/dev/null; then
