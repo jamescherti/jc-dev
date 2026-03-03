@@ -1521,15 +1521,17 @@ WIDTH is the tab width."
   (add-hook 'diff-mode-hook #'outline-minor-mode)
 
   (setq vertico-count 13)
-  (add-to-list 'consult-buffer-filter "^\*helpful")
-  (add-to-list 'consult-buffer-filter "^\*sdcv")
-  (add-to-list 'consult-buffer-filter "^\*EGLOT")
-  (add-to-list 'consult-buffer-filter "^\*Help")
-  (add-to-list 'consult-buffer-filter "^\*scratch\*")
-  (add-to-list 'consult-buffer-filter "^\*tmux\*")
-  (add-to-list 'consult-buffer-filter "^todo.org$")
-  ;; (add-to-list 'consult-buffer-filter "^\**Async-native-compile-log\*")
-  (add-to-list 'consult-buffer-filter "^\*ansible-doc")
+  (with-eval-after-load 'consult
+    (add-to-list 'consult-buffer-filter "^\*helpful")
+    (add-to-list 'consult-buffer-filter "^\*sdcv")
+    (add-to-list 'consult-buffer-filter "^\*EGLOT")
+    (add-to-list 'consult-buffer-filter "^\*Help")
+    (add-to-list 'consult-buffer-filter "^\*scratch\*")
+    (add-to-list 'consult-buffer-filter "^\*tmux\*")
+    (add-to-list 'consult-buffer-filter "^todo.org$")
+    (add-to-list 'consult-buffer-filter "^\*Async-native-compile-log\*")
+    (add-to-list 'consult-buffer-filter "^\*Compile-Log\*")
+    (add-to-list 'consult-buffer-filter "^\*ansible-doc"))
 
   (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
                                          "\\`/[^/|:]+:" "\\.gpg\\'"))
@@ -1916,6 +1918,13 @@ Returns:
 
   (setq ibuffer-saved-filter-groups
         (quote (("default"
+
+                 ("Programming" (and (derived-mode . prog-mode)
+                                     (not (starred-name))))
+
+                 ("Text" (and (derived-mode . text-mode)
+                              (not (starred-name))))
+
                  ("Org" (or (name . "^\\*Calendar\\*$")
                             (name . "^\\*Org Agenda")
                             (name . "^ \\*Agenda")
@@ -1929,6 +1938,7 @@ Returns:
                            (name . "^\\*scratch\\*$")
                            (name . "^\\*Messages\\*$")
                            (name . "^\\*Warnings\\*$")
+                           (name . "^\\*Compile-Log\\*$")
                            (name . "^\\*Async-native-compile-log\\*$")
                            (name . "^\\*dashboard\\*$")
                            (name . "^\\*compilation\\*$")
@@ -1947,22 +1957,16 @@ Returns:
                              (mode . inferior-emacs-lisp-mode)
                              (mode . inferior-python-mode)))
 
-                 ("Term" (or (mode . term-mode)
-                             (mode . shell-mode)
-                             (mode . vterm-mode)
-                             (mode . compilation-mode)
-                             (mode . eshell-mode)))
-
                  ("VC" (or (mode . diff-mode)
                            (derived-mode . log-view-mode)))
 
                  ("Starred" (starred-name))
 
-                 ("Programming" (and (derived-mode . prog-mode)
-                                     (not (starred-name))))
-
-                 ("Text" (and (derived-mode . text-mode)
-                              (not (starred-name))))
+                 ("Term" (or (mode . term-mode)
+                             (mode . shell-mode)
+                             (mode . vterm-mode)
+                             (mode . compilation-mode)
+                             (mode . eshell-mode)))
 
                  ("Dired" (or (mode . dired-mode)
                               (mode . sr-mode)))
