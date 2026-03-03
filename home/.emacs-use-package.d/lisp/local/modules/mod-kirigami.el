@@ -128,16 +128,15 @@ OBJECT can be nil (current window), a window, or a frame."
 ;; (add-hook 'outline-minor-mode-hook #'kirigami--outline-enable-immediate-fix)
 ;; (add-hook 'outline-mode-hook #'kirigami--outline-enable-immediate-fix)
 
-(with-eval-after-load 'kirigami
-  (require 'kirigami-jump)
-  (when (fboundp 'kirigami-jump-mode)
-    (kirigami-jump-mode))
+(require 'kirigami-jump)
+(when (fboundp 'kirigami-jump-mode)
+  (kirigami-jump-mode))
 
 
-  (with-eval-after-load 'evil
-    (require 'kirigami-evil)
-    (when (fboundp 'kirigami-evil-mode)
-      (kirigami-evil-mode))))
+(with-eval-after-load 'evil
+  (require 'kirigami-evil)
+  (when (fboundp 'kirigami-evil-mode)
+    (kirigami-evil-mode)))
 
 ;; (with-eval-after-load 'evil
 ;;   (require 'kirigami-evil)

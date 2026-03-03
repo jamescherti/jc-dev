@@ -77,7 +77,8 @@ is nil or differs from the current point."
     (unless (region-active-p)
       ;; Check if the current point differs from the stored point
       (when (and (not (memq command kirigami-jump-ignore-commands))
-                 (not (eq (point) kirigami-jump--last-opened-point)))
+                 (or (not kirigami-jump--last-opened-point)
+                     (not (eq (point) kirigami-jump--last-opened-point))))
         ;; Update the buffer-local variable before opening the fold
         (setq kirigami-jump--last-opened-point (point))
 
@@ -86,6 +87,7 @@ is nil or differs from the current point."
         (add-hook 'post-command-hook #'kirigami-jump--reset-last-point -40 t)
 
         (ignore-errors
+          (message "[KIRIGAMI] Open fold: %s" (buffer-name))
           (kirigami-open-fold))))))
 
 (defun kirigami-jump--around-outline-show-entry (fn &rest args)
