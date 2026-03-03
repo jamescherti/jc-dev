@@ -494,9 +494,9 @@ main() {
   fi
 
   # 1 day = 86400
-  run_every 86400 \
-    ~/.cache/jc-dev.git_maintenance \
-    git_maintenance
+  # run_every 86400 \
+  #   ~/.cache/jc-dev.git_maintenance \
+  #   git_maintenance
 
   echo
   echo "[INFO] Update spell check dictionary"

@@ -86,16 +86,14 @@ tasks:
   - git: https://github.com/cocopon/iceberg.vim
     delete: true
 
+  - git: https://github.com/jamescherti/vim-easysession
+    revision: main
+  - git: https://github.com/jamescherti/vim-hjklmode
+    revision: develop
   # Deleted plugins
   - git: https://github.com/jamescherti/vim-jedipydoc
     delete: true
   - git: https://github.com/SidOfc/mkdx
-    delete: true
-  - git: https://github.com/jamescherti/vim-easysession
-    revision: main
-    delete: true
-  - git: https://github.com/jamescherti/vim-hjklmode
-    revision: develop
     delete: true
   - git: https://github.com/roginfarrer/vim-dirvish-dovish
     delete: true
