@@ -1528,8 +1528,11 @@ WIDTH is the tab width."
     (add-to-list 'consult-buffer-filter "^\*Help")
     (add-to-list 'consult-buffer-filter "^\*scratch\*")
     (add-to-list 'consult-buffer-filter "^\*tmux\*")
+    (add-to-list 'consult-buffer-filter "^\*Warnings\*")
     (add-to-list 'consult-buffer-filter "^todo.org$")
+    (add-to-list 'consult-buffer-filter "^\*Native-compile-Log\*")
     (add-to-list 'consult-buffer-filter "^\*Async-native-compile-log\*")
+    (add-to-list 'consult-buffer-filter "^tmp-")
     (add-to-list 'consult-buffer-filter "^\*Compile-Log\*")
     (add-to-list 'consult-buffer-filter "^\*ansible-doc"))
 

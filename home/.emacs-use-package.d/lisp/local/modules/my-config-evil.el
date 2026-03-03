@@ -858,7 +858,21 @@ guarantees that the new window is selected, as in Vim."
 (define-key evil-normal-state-map (kbd "<leader>m") 'consult-recent-file)
 (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 ;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
-(define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
+
+(defun my-consult-buffer ()
+  "My consult buffer."
+  (interactive)
+  (when (fboundp 'consult-buffer)
+    (let ((orig-buffer-list (symbol-function 'buffer-list)))
+      (cl-letf (((symbol-function 'buffer-list)
+                 (lambda (&optional frame)
+                   (seq-filter (lambda (buf)
+                                 (not (with-current-buffer buf
+                                        (derived-mode-p 'dired-mode))))
+                               (funcall orig-buffer-list frame)))))
+        (consult-buffer)))))
+
+(define-key evil-normal-state-map (kbd "<leader>B") 'my-consult-buffer)
 (define-key evil-normal-state-map (kbd "M-/") 'consult-line)
 
 (define-key evil-normal-state-map (kbd "C-p") 'my-consult-fd-project)

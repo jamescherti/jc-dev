@@ -1,6 +1,8 @@
 # -*- mode: snippet -*-
-# name: a
-# key: a
+# name: s
+# key: s
 # expand-env: ((yas-indent-line 'auto))
 # --
-\${${1:1}:${2:text}}
+snippet ${1:}
+${2:}
+endsnippet
