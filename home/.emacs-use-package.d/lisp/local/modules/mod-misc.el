@@ -516,15 +516,19 @@ environment for accurate linting."
 (lightemacs-use-package vimrc-mode
   :commands vimrc-mode
   :mode
-  ("\\.vim\\(rc\\)?\\'" . vimrc-mode)
-  ("\\.vimrc.local?\\'" . vimrc-mode)
-  ("\\.lvimrc?\\'" . vimrc-mode)
-  :init
-  (add-hook 'vimrc-mode-hook #'(lambda ()
-                                 (setq-local indent-tabs-mode nil)
-                                 (if (fboundp 'my-set-tab-width)
-                                     (my-set-tab-width 2)
-                                   (error "Undefined: my-set-tab-width")))))
+  ("/\\.vim\\(rc\\)?\\'" . vimrc-mode))
+
+(add-hook 'vimrc-mode-hook #'(lambda ()
+                               (setq-local indent-tabs-mode nil)
+                               (if (fboundp 'my-set-tab-width)
+                                   (my-set-tab-width 2)
+                                 (error "Undefined: my-set-tab-width"))))
+
+;; ("/\\.vimrc.local?\\'" . vimrc-mode)
+;; March .vimrc, .vimrc.local, .vim-after, .vim-before...
+;; ("/\\.l?vim[^/]*\\'" . vimrc-mode)
+;; ("/\\.lvimrc?\\'" . vimrc-mode)
+(add-to-list 'auto-mode-alist '("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode))
 
 ;;; exec file form shell
 
@@ -583,16 +587,11 @@ environment for accurate linting."
     ;;   (web-mode-css-indent-offset 2)
     ;;   (web-mode-code-indent-offset 2))
 
-    (lightemacs-use-package sgml-mode
+    (use-package sgml-mode
       :ensure nil
       :commands (sgml-mode
-                 sgml-electric-tag-pair-mode
-                 sgml-name-8bit-mode)
-      :hook
-      (html-mode . sgml-electric-tag-pair-mode)
-      (mhtml-mode . sgml-electric-tag-pair-mode)
-      (html-mode . sgml-name-8bit-mode)
-      (mhtml-mode . sgml-name-8bit-mode))))
+                 sgml-electric-tag-pair-mode)
+      :hook ((html-mode mhtml-mode) . sgml-electric-tag-pair-mode))))
 
 ;;; jinja2-mode and csv-mode
 
