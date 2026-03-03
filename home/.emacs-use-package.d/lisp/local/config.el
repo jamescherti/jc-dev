@@ -954,7 +954,7 @@ WIDTH is the tab width."
 
   ;; This fixes the skipping when scrolling long org documents
   ;; NOTE: MANAGED BY MINIMAL-EMACS
-  ;; (setq scroll-conservatively most-positive-fixnum)
+  (setq scroll-conservatively most-positive-fixnum)
 
   ;; TODO put them back
   ;;(setq eldoc-idle-delay 0.5)
@@ -1521,6 +1521,16 @@ WIDTH is the tab width."
   (add-hook 'diff-mode-hook #'outline-minor-mode)
 
   (setq vertico-count 13)
+  (add-to-list 'consult-buffer-filter "^\*helpful")
+  (add-to-list 'consult-buffer-filter "^\*sdcv")
+  (add-to-list 'consult-buffer-filter "^\*EGLOT")
+  (add-to-list 'consult-buffer-filter "^\*Help")
+  (add-to-list 'consult-buffer-filter "^\*scratch\*")
+  (add-to-list 'consult-buffer-filter "^\*tmux\*")
+  (add-to-list 'consult-buffer-filter "^todo.org$")
+  ;; (add-to-list 'consult-buffer-filter "^\**Async-native-compile-log\*")
+  (add-to-list 'consult-buffer-filter "^\*ansible-doc")
+
   (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
                                          "\\`/[^/|:]+:" "\\.gpg\\'"))
   (add-hook 'embark-collect-mode-hook

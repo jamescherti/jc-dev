@@ -54,19 +54,39 @@
 
 (defvar kirigami-jump-ignore-commands '(evil-goto-first-line))
 
-(defun kirigami-jump--open-fold (&rest _)
-  "Ensure the current heading and body are fully visible."
+(defvar-local kirigami-jump--last-opened-point nil
+  "Buffer-local record coco of the point where the last fold was opened.")
+
+(defun kirigami-jump--reset-last-point ()
+  "Reset the last opened point state upon cursor movement.
+This function runs on `post-command-hook'. When the cursor moves away from
+`kirigami-jump--last-opened-point', it resets the variable to nil and removes
+itself from the hook to conserve resources."
+  (when kirigami-jump--last-opened-point
+    (setq kirigami-jump--last-opened-point nil)
+    (remove-hook 'post-command-hook #'kirigami-jump--reset-last-point t)))
+
+(defun kirigami-jump--open-fold (&rest _args)
+  "Ensure the current heading and body are fully visible.
+
+This command will only open the fold if `kirigami-jump--last-opened-point'
+is nil or differs from the current point."
   (interactive)
   (let ((command this-command)
         (inhibit-message t))
     (unless (region-active-p)
-      (ignore-errors
-        (when (not (memq command kirigami-jump-ignore-commands))
-          (save-excursion
-            ;; I put save excursion here in the hope it fixes the org mode
-            ;; cursor change when opened
-            ;; TODO should kirigami always save-excursion?
-            (kirigami-open-fold)))))))
+      ;; Check if the current point differs from the stored point
+      (when (and (not (memq command kirigami-jump-ignore-commands))
+                 (not (eq (point) kirigami-jump--last-opened-point)))
+        ;; Update the buffer-local variable before opening the fold
+        (setq kirigami-jump--last-opened-point (point))
+
+        ;; Add to post-command-hook to ensure the "gate" resets when the user
+        ;; moves manually
+        (add-hook 'post-command-hook #'kirigami-jump--reset-last-point -40 t)
+
+        (ignore-errors
+          (kirigami-open-fold))))))
 
 (defun kirigami-jump--around-outline-show-entry (fn &rest args)
   "FN is the advised function. ARGS are the function arguments."
@@ -92,8 +112,9 @@
   "Function to run when the Ediff Control Panel is started."
   ;; (current-buffer) is the Ediff Control Panel
   (message "Ediff session started.")
-  (ignore-errors
-    (kirigami-open-folds)))
+  (let ((inhibit-message t))
+    (ignore-errors
+      (kirigami-open-folds))))
 
 (defun kirigami-jump--set-hooks (enable)
   "Enable or disable hooks and advices for automatic unfolding.
