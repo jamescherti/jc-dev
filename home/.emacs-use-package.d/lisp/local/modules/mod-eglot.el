@@ -51,7 +51,7 @@
 ;; python--flymake-parse-output(#<buffer allowed_paths.py> #<process python-flymake> #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>))
 ;; #f(compiled-function (proc event) #<bytecode 0xe03bcdda4f319e9>)(#<process python-flymake> "finished\n")
 (defun my-remove-python-flymake ()
-  "Remove 'python-flymake' from 'flymake-diagnostic-functions'."
+  "Remove `python-flymake' from `flymake-diagnostic-functions'."
   (remove-hook 'flymake-diagnostic-functions 'python-flymake t))
 
 (add-hook 'python-mode-hook #'my-remove-python-flymake)
