@@ -1455,50 +1455,75 @@ should be either `forward' or `backward', determining the search direction."
 The DIRECTION argument can be either \='forward' or \='backward, determining the
 search direction (default: \='forward)."
   (interactive)
-  ;; Both `save-window-excursion' and `save-excursion' are used here to ensure
-  ;; that performing the search does not move the cursor or change the visible
-  ;; portion of the buffer (`window-start'). This allows Evil's search functions
-  ;; to update highlights and internal search state while leaving the user's
-  ;; point and window view completely unchanged.
-  (save-window-excursion ; Preserve window-start
-    (save-excursion ; Preserve point and mark
-      (let* ((visual-p (evil-visual-state-p))
-             (count 1)
-             (direction (or direction 'forward))
-             (text (if visual-p
-                       (let ((selection (buffer-substring-no-properties
-                                         (region-beginning)
-                                         (region-end))))
-                         (evil-exit-visual-state)
-                         selection)
-                     (thing-at-point 'symbol t)))
-             (current-pattern (and evil-ex-search-pattern
-                                   (car evil-ex-search-pattern)))
-             (regex (when text
-                      (if visual-p
-                          (regexp-quote text)
-                        (concat "\\_<" (regexp-quote text) "\\_>")))))
-        (when regex
-          (if (and current-pattern
-                   (string= regex (and evil-ex-search-pattern
-                                       (car evil-ex-search-pattern))))
-              ;; Instead of calling le-evil--search-regexp for the same
-              ;; keyword, just highlight the current keyword
-              (condition-case err
-                  (progn
-                    (evil-ex-search 1))
-                (search-failed
-                 nil))
-            (progn
-              (if (eq direction 'forward)
-                  (goto-char (point-min))
-                (goto-char (point-max)))
+  (let* ((visual-p (evil-visual-state-p))
+         (count 1)
+         (direction (or direction 'forward))
+         (text (if visual-p
+                   (let ((selection (buffer-substring-no-properties
+                                     (region-beginning)
+                                     (region-end))))
+                     (evil-exit-visual-state)
+                     selection)
+                 (thing-at-point 'symbol t)))
+         (bounds (unless visual-p
+                   (bounds-of-thing-at-point 'symbol)))
+         (bnd-start (if visual-p
+                        (region-beginning)
+                      (car bounds)))
+         (bnd-end (if visual-p
+                      (region-end)
+                    (cdr bounds)))
+         (current-pattern (and evil-ex-search-pattern
+                               (car evil-ex-search-pattern)))
+         (regex (when text
+                  (if visual-p
+                      (regexp-quote text)
+                    (concat "\\_<" (regexp-quote text) "\\_>")))))
+    (when regex
+      (if (and current-pattern
+               (string= regex current-pattern))
+          ;; Instead of calling `le-evil--search-regexp' for the same keyword,
+          ;; just highlight the current keyword
+          (condition-case err
+              (progn
+                ;; Both `save-window-excursion' and `save-excursion' are used
+                ;; here to ensure that performing the search does not move the
+                ;; cursor or change the visible portion of the buffer
+                ;; (`window-start'). This allows Evil's search functions to
+                ;; update highlights and internal search state while leaving the
+                ;; user's point and window view completely unchanged.
+                (save-window-excursion
+                  (save-excursion
+                    (evil-ex-search 1))))
+            (search-failed
+             nil))
+        ;; Both `save-window-excursion' and `save-excursion' are used here to
+        ;; ensure that performing the search does not move the cursor or change
+        ;; the visible portion of the buffer (`window-start'). This allows
+        ;; Evil's search functions to update highlights and internal search
+        ;; state while leaving the user's point and window view completely
+        ;; unchanged.
+        (save-window-excursion
+          (save-excursion
+            ;; Search from the beginning or from the end
+            (if (eq direction 'forward)
+                (goto-char (point-min))
+              (goto-char (point-max)))
 
-              ;; let ((lightemacs-maybe-recenter-after-jump nil))
-              (le-evil--search-regexp regex
-                                      direction
-                                      count))
-            t))))))
+            (le-evil--search-regexp regex
+                                    direction
+                                    count))))
+
+      ;; When `le-evil--search-regexp' executes, Evil updates
+      ;; `evil-ex-search-match-beg' and `evil-ex-search-match-end' to the
+      ;; distant location it just found. You have to manually overwrite those
+      ;; internal variables with your original coordinates so the highlight
+      ;; applies to the text currently under your point.
+      (when (and bnd-start bnd-end)
+        (setq evil-ex-search-match-beg bnd-start
+              evil-ex-search-match-end bnd-end)
+        (when (boundp 'evil-ex-search-pattern)
+          (evil-ex-search-activate-highlight evil-ex-search-pattern))))))
 
 (defun le-evil--search-symbol-backwards ()
   "Search for the symbol at point using Evil search.
