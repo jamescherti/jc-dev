@@ -25,6 +25,14 @@
 
 ;;; Code:
 
+(defun my-project-root-dir (&optional path)
+  "Search up the PATH for `project-root-markers'."
+  (when (fboundp 'project-root)
+    (when-let* ((project (project-current nil path))
+                (project-root (when project
+                                (project-root project))))
+      (directory-file-name project-root))))
+
 (defun my-tab-bar-switch-to-buffer (buffer)
   "Switch to the tab containing a window with the specified BUFFER."
   (let* ((target-tab (alist-get 'index (tab-bar-get-buffer-tab buffer t nil))))

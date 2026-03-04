@@ -220,14 +220,6 @@
 
     (goto-char original-point)))
 
-(defun my-project-root-dir (&optional path)
-  "Search up the PATH for `project-root-markers'."
-  (when (fboundp 'project-root)
-    (when-let* ((project (project-current nil path))
-                (project-root (when project
-                                (project-root project))))
-      (directory-file-name project-root))))
-
 ;; TODO lightemacs?
 (defun my-bash-stdops-sre ()
   "Call sre."
