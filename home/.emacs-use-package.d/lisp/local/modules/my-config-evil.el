@@ -1197,35 +1197,6 @@ on text following the cursor."
 
 (my-intercept-mode 1)
 
-;;; flyspell region or buffer
-
-(defun my-flyspell-region (beg end)
-  "Flyspell the region from BEG to END."
-  (interactive "r")
-  (flyspell-region beg end)
-  (message "Flyspell region done"))
-
-(defun my-flyspell-buffer ()
-  "Flyspell the whole buffer.
-In `prog-mode', this configures flyspell to check only comments and strings."
-  (interactive)
-  (save-excursion
-    (when (derived-mode-p 'prog-mode)
-      (setq flyspell-generic-check-word-predicate
-            'flyspell-generic-progmode-verify))
-    (flyspell-buffer))
-  (message "Flyspell buffer done"))
-
-(defun my-flyspell-clear ()
-  "Clear all Flyspell overlays from the current buffer."
-  (interactive)
-  (when (fboundp 'flyspell-delete-all-overlays)
-    (flyspell-delete-all-overlays)))
-
-(evil-define-key 'visual 'global (kbd "<leader>fs") 'my-flyspell-region)
-(evil-define-key 'normal 'global (kbd "<leader>fb") 'my-flyspell-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>fc") 'my-flyspell-clear)
-
 ;;; Move region
 
 (defvar move-region-skip-invisible t)
