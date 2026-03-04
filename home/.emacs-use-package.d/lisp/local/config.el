@@ -2868,19 +2868,6 @@ session ends."
       ;;   )
       ))
 
-  (when (my-treesit-language-available-p 'python)
-    (progn
-      t
-      ;; (with-eval-after-load 'python
-      ;;   ;; TODO: should be put it back
-      ;;   ;; (setq auto-mode-alist (rassq-delete-all 'python-mode auto-mode-alist))
-      ;;
-      ;;   ;; Remove python-flymake error: "Cannot find suitable checker" when a Python
-      ;;   ;; script is loaded before eglot and the checker isn't found
-      ;;   (advice-add 'python-flymake :override #'ignore))
-      )
-    (push '(python-mode . python-ts-mode) major-mode-remap-alist))
-
 
   (when (my-treesit-language-available-p 'markdown)
     (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode)))

@@ -30,6 +30,16 @@
 (require 'lightemacs-use-package)
 (require 'my-defun)
 
+(when (my-treesit-language-available-p 'python)
+  (progn
+    (with-eval-after-load 'python
+      ;; (setq auto-mode-alist (rassq-delete-all 'python-mode auto-mode-alist))
+
+      ;; Remove python-flymake error: "Cannot find suitable checker" when a
+      ;; Python script is loaded before eglot and the checker isn't found
+      (advice-add 'python-flymake :override #'ignore)))
+  (push '(python-mode . python-ts-mode) major-mode-remap-alist))
+
 ;;; fix ignore empty
 
 (defun my/jsonrpc--continue-ignore-empty (orig-fun conn id &optional cont result error)
