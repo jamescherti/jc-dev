@@ -26,6 +26,11 @@
 
 ;;; Debug, native comp, and initial options
 
+;; TODO test this more. It does not seem stable.
+;; (setq package-quickstart t)
+(setq package-native-compile nil)
+(setq native-comp-jit-compilation nil)
+
 (require 'seq)
 (require 'my-defun)
 
@@ -94,11 +99,6 @@ EL-FILE is the *.el file."
   ;; This is important because Emacs loads the early-init.elc, even if it is
   ;; older than the early-init.el file
   (push "/early-init.el" compile-angel-excluded-files))
-
-;; TODO test this more. It does not seem stable.
-;; (setq package-quickstart t)
-(setq package-native-compile t)
-(setq native-comp-jit-compilation nil)
 
 ;; I am using the predicate instead
 ;; (with-eval-after-load 'compile-angel

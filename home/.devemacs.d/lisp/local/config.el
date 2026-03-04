@@ -30,6 +30,15 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
+;;; Add some paths (copy paste)
+(require 'lightemacs)
+;; (require 'le-core-paths)
+;; (add-to-list 'load-path (expand-file-name "modules/"
+;;                                           lightemacs-local-directory))
+;; (add-to-list 'load-path lightemacs-local-modules-directory)
+;; (add-to-list 'load-path lightemacs-core-directory)
+;; (add-to-list 'load-path lightemacs-modules-directory)
+
 ;;; External config
 
 (load (expand-file-name "~/.config.el") :no-error :nosuffix)
