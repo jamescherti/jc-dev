@@ -27,6 +27,7 @@
 
 ;;; Require
 
+(require 'lightemacs-use-package)
 (require 'my-defun)
 
 ;;; fix ignore empty
@@ -60,17 +61,6 @@ ERROR is the error (if any)."
 ;;     (let ((inhibit-message t))
 ;;       (when (fboundp 'eglot-format-buffer)
 ;;         (eglot-format-buffer)))))
-
-(defun my-setup-eglot-mode ()
-  "Setup `eglot-mode'."
-  (when (my-code-checker-allowed-p)
-    (eglot-ensure)
-
-    ;; Apheleia takes care of this
-    ;; (when (fboundp 'my-eglot-format-buffer)
-    ;;   (add-hook 'before-save-hook #'my-eglot-format-buffer 90 t))
-
-    ))
 
 ;; TODO lightemacs?
 ;; The LSP server assumes that the candidates are retrieved on every change to
@@ -106,6 +96,17 @@ ERROR is the error (if any)."
   (with-eval-after-load 'cape
     (advice-add 'eglot-completion-at-point :around 'cape-wrap-buster)))
 
+(defun my-setup-eglot-mode ()
+  "Setup `eglot-mode'."
+  (when (my-code-checker-allowed-p)
+    (eglot-ensure)
+
+    ;; Apheleia takes care of this
+    ;; (when (fboundp 'my-eglot-format-buffer)
+    ;;   (add-hook 'before-save-hook #'my-eglot-format-buffer 90 t))
+
+    ))
+
 (lightemacs-use-package eglot
   :ensure nil
   :commands (eglot
@@ -116,15 +117,15 @@ ERROR is the error (if any)."
              eglot-rename
              eglot-format-buffer)
 
-  :hook ((python-mode . my-setup-eglot-mode)
-         (python-ts-mode . my-setup-eglot-mode))
-
   :config
   ;; Remove eglot from the modeline
   (setq mode-line-misc-info
         (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
 
   :init
+  (add-hook 'python-ts-mode-hook #'my-setup-eglot-mode)
+  (add-hook 'python-mode-hook #'my-setup-eglot-mode)
+
   ;; (setq eglot-prefer-plaintext nil)
 
   ;; Allow edits without confirmation

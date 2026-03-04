@@ -87,7 +87,6 @@ is nil or differs from the current point."
         (add-hook 'post-command-hook #'kirigami-jump--reset-last-point -40 t)
 
         (ignore-errors
-          (message "[KIRIGAMI] Open fold: %s" (buffer-name))
           (kirigami-open-fold))))))
 
 (defun kirigami-jump--around-outline-show-entry (fn &rest args)
