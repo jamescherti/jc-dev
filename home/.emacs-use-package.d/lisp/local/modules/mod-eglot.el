@@ -35,10 +35,27 @@
     (with-eval-after-load 'python
       ;; (setq auto-mode-alist (rassq-delete-all 'python-mode auto-mode-alist))
 
+      ;; TODO is this better than the remove-hook later?
       ;; Remove python-flymake error: "Cannot find suitable checker" when a
       ;; Python script is loaded before eglot and the checker isn't found
-      (advice-add 'python-flymake :override #'ignore)))
+      ;; (advice-add 'python-flymake :override #'ignore)
+
+      ))
   (push '(python-mode . python-ts-mode) major-mode-remap-alist))
+
+;; Debugger entered--Lisp error: (error "Can’t find state for python-flymake in ‘flymake--state’")
+;; error("Can't find state for %s in `flymake--state'" python-flymake)
+;; flymake--handle-report(python-flymake backend-token7 nil)
+;; apply(flymake--handle-report python-flymake backend-token7 nil)
+;; #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>)(nil)
+;; python--flymake-parse-output(#<buffer allowed_paths.py> #<process python-flymake> #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>))
+;; #f(compiled-function (proc event) #<bytecode 0xe03bcdda4f319e9>)(#<process python-flymake> "finished\n")
+(defun my-remove-python-flymake ()
+  "Remove 'python-flymake' from 'flymake-diagnostic-functions'."
+  (remove-hook 'flymake-diagnostic-functions 'python-flymake t))
+
+(add-hook 'python-mode-hook #'my-remove-python-flymake)
+(add-hook 'python-ts-mode-hook #'my-remove-python-flymake)
 
 ;;; fix ignore empty
 
