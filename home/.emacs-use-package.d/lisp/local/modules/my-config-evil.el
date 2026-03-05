@@ -376,6 +376,13 @@ ORIG-FUN is the function and ARGS the arguments."
 
 (evil-set-leader 'normal (kbd ","))
 (evil-set-leader 'visual (kbd ","))
+(with-eval-after-load 'ibuffer
+  (evil-define-key 'normal ibuffer-mode-map (kbd ",") nil)
+
+  ;; Conflict between evil and `ibuffer-mode-map'
+  ;; For some reason, this is not enough TODO
+  ;; (define-key ibuffer-mode-map (kbd ",") nil)
+  )
 
 (with-eval-after-load 'eldoc
   (eldoc-add-command-completions "evilcursor-"))

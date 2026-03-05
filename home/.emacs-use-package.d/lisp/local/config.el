@@ -2101,6 +2101,7 @@ The DWIM behaviour of this command is as follows:
 (add-hook 'prog-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'text-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'conf-mode-hook #'my-setup-display-line-numbers-mode)
+(add-hook 'ibuffer-mode-hook #'my-setup-display-line-numbers-mode)
 
 (add-hook 'helpful-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'dired-mode-hook #'my-setup-display-line-numbers-mode)
