@@ -38,7 +38,7 @@
 (setq compile-angel-on-load-mode-compile-once nil)
 
 (setq compile-angel-reload-compiled-version t)
-(setq compile-angel-native-compile-load nil)
+;; (setq compile-angel-native-compile-load 'late)
 
 (require 'seq)
 (require 'my-defun)
@@ -2076,7 +2076,9 @@ The DWIM behaviour of this command is as follows:
     (keyboard-quit))
    ((derived-mode-p 'completion-list-mode)
     (delete-completion-window))
-   ((> (minibuffer-depth) 0)
+   ((and (minibufferp)
+         (> (minibuffer-depth) 0))
+    ;; Fixes vertico: Not in most nested command loop (Evil insert mode)
     (abort-recursive-edit))
    (t
     (keyboard-quit))))
