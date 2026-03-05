@@ -1741,6 +1741,7 @@ WIDTH is the tab width."
 
   (setq easysession-debug t)
   (setq easysession-refresh-tab-bar t)
+  (setq buffer-terminator-refresh-tab-bar t)
 
   (setq easysession-directory
         (expand-file-name "easysession" my-shared-user-emacs-directory))
