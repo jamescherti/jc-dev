@@ -647,6 +647,7 @@ any new ones."
         (flymake-ansible-lint          . "melpa")
         (flymake-bashate               . "melpa")
 
+        (visual-fill-column            . "melpa")
         (evil                          . "melpa")
         (evil-collection               . "melpa")
 

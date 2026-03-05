@@ -50,17 +50,18 @@
         ;;             (and (boundp 'my-was-visual-line-fill-column-mode)
         ;;                  my-was-visual-line-fill-column-mode))
         ;; (when my-was-visual-line-fill-column-mode
-        ;;   (visual-line-fill-column-mode)
+        ;;   (visual-line-fill-column-mode 1)
         ;;   (setq-local my-was-visual-line-fill-column-mode nil))
         (let ((inhibit-message t))
           ;; Wrap
           (toggle-truncate-lines 0)))
     ;; When the text is truncated
-    ;; (visual-line-mode -1)
+    ;; (visual-line-mode 1)
     ;; (when (and (boundp 'visual-line-fill-column-mode)
     ;;            visual-line-fill-column-mode)
     ;;   (visual-line-fill-column-mode -1)
     ;;   (setq-local my-was-visual-line-fill-column-mode t))
+
     (let ((inhibit-message t))
       ;; Truncate
       (toggle-truncate-lines 1))))

@@ -832,18 +832,26 @@ at the same level."
 (lightemacs-use-package visual-fill-column
   :commands visual-fill-column-for-vline
   :hook
-  ((visual-line-mode .  visual-fill-column-for-vline)
-   (prog-mode . visual-line-mode)
-   (text-mode . visual-line-mode))
+  (
+   ;; (visual-line-mode .  visual-fill-column-for-vline)
+   ;; (prog-mode . visual-line-mode)
+   ;; (text-mode . visual-line-mode)
+
+   (prog-mode . visual-fill-column-mode)
+   (text-mode . visual-fill-column-mode)
+   ((markdown-mode org-mode) . (lambda()
+                                 (setq fill-column 120))))
 
   :custom
   ;; Global settings
   (visual-fill-column-center-text nil)
   (visual-fill-column-enable-sensible-window-split t)
-  :config
+  ;; :config
   ;; TODO does this replace my config?
+  ;; THIS DOES NOT WORK
   ;; Fix for text scaling (C-x C-+ / C-x C--)
-  (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
+  ;; (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust)
+  )
 
 ;;; Trust framework files
 
