@@ -31,6 +31,15 @@
 (setq package-native-compile nil)
 (setq native-comp-jit-compilation nil)
 
+(setq compile-angel-verbose t)
+(setq compile-angel-debug t)
+(setq compile-angel-enable-byte-compile nil)
+(setq compile-angel-enable-native-compile t)
+(setq compile-angel-on-load-mode-compile-once nil)
+
+(setq compile-angel-reload-compiled-version t)
+(setq compile-angel-native-compile-load nil)
+
 (require 'seq)
 (require 'my-defun)
 
@@ -106,17 +115,16 @@ EL-FILE is the *.el file."
 ;;       (compile-angel-exclude-directory "~/src/emacs/")
 ;;     (error "Undefined: compile-angel-exclude-directory")))
 
-(setq compile-angel-enable-byte-compile t)
-(setq compile-angel-enable-native-compile t)
-(setq compile-angel-native-compile-load nil)
 ;; (setq compile-angel-exclude-core-emacs-directory
 ;;       ;; Emacs was compiled with native-compile aot
 ;;       (when (and (fboundp 'subr-native-elisp-p)
 ;;                  (subr-native-elisp-p (symbol-function 'find-file)))
 ;;         t))
 
-(setq compile-angel-verbose t)
-(setq compile-angel-debug nil)
+
+(setq lightemacs-dtrt-indent-excluded-modes '(emacs-lisp-mode
+                                              python-mode
+                                              python-ts-mode))
 
 ;; To stop vterm from asking for confirmation and force it to compile the
 ;; module automatically, you need to set the vterm-always-compile-module
@@ -521,7 +529,9 @@ EL-FILE is the *.el file."
                            ;; le-ace-window
                            le-bufferfile
                            le-diff-hl
+
                            le-dtrt-indent
+
                            le-dumb-jump
                            le-expand-region
                            le-git-modes
@@ -1725,6 +1735,12 @@ WIDTH is the tab width."
 
   (setq prescient-save-file (expand-file-name "prescient-save.el"
                                               my-shared-user-emacs-directory))
+  (with-eval-after-load 'compile-angel
+    (when (fboundp 'compile-angel-exclude-file)
+      (compile-angel-exclude-file
+       (expand-file-name "prescient-save.el"
+                         my-shared-user-emacs-directory))))
+
 
   (setq backup-directory-alist
         `(("." . ,(expand-file-name "backup" my-shared-user-emacs-directory))))
