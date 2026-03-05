@@ -138,15 +138,6 @@ def git_fd_find_repo(path: Path, max_workers: int) -> set[Path]:
 
     # Use a set comprehension to remove duplicates and normalize paths
     # efficiently
-    # return {
-    #     Path(git_dir).parent
-    #     for git_dir in proc.stdout.split('\n')
-    #     # if git_dir
-    # }
-
-    # TODO put this back?
-    # Use a set comprehension to remove duplicates and normalize paths
-    # efficiently
     return {
         Path(git_dir).parent
         for git_dir in proc.stdout.splitlines()
