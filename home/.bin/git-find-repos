@@ -14,8 +14,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -45,7 +45,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import Optional
 
 import colorama
 
@@ -56,7 +56,7 @@ class CommandResult:
     Data class to store the result of a subprocess command execution.
 
     :param command: The command that was executed.
-    :type command: List[str]
+    :type command: list[str]
     :param returncode: The exit status of the command.
     :type returncode: int
     :param stdout: Standard output content.
@@ -64,7 +64,7 @@ class CommandResult:
     :param stderr: Standard error content.
     :type stderr: str
     """
-    command: List[str]
+    command: list[str]
     returncode: int
     stdout: str = ""
     stderr: str = ""
@@ -106,7 +106,7 @@ def git_toplevel(repo_path: Path) -> Optional[Path]:
         return None
 
 
-def git_fd_find_repo(path: Path, max_workers: int) -> Set[Path]:
+def git_fd_find_repo(path: Path, max_workers: int) -> set[Path]:
     """
     Find all Git repositories in 'path' using fd.
 
@@ -114,39 +114,53 @@ def git_fd_find_repo(path: Path, max_workers: int) -> Set[Path]:
     :type path: Path
     :param max_workers: Maximum number of threads for fd.
     :type max_workers: int
-    :return: Set of paths to Git repositories.
-    :rtype: Set[Path]
+    :return: set of paths to Git repositories.
+    :rtype: set[Path]
     """
+    path_str = str(path)
     try:
         # Use fd to find .git directories efficiently
         proc = subprocess.run(
             [
-                'fd', '--type', 'd', '--hidden', '--no-ignore',
-                '^\\.git$', "--threads", str(max_workers), str(path)
+                'fd', '--type', 'd', '--hidden',
+                '--no-ignore', '^\\.git$',
+                '--absolute-path',
+                '--threads', str(max_workers),
+                path_str
             ],
             capture_output=True,
             text=True,
             check=True
         )
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return set()
+    except (subprocess.CalledProcessError, FileNotFoundError) as err:
+        print(f"Error: {err}", file=sys.stderr)
+        sys.exit(1)
 
     # Use a set comprehension to remove duplicates and normalize paths
     # efficiently
+    # return {
+    #     Path(git_dir).parent
+    #     for git_dir in proc.stdout.split('\n')
+    #     # if git_dir
+    # }
+
+    # TODO put this back?
+    # Use a set comprehension to remove duplicates and normalize paths
+    # efficiently
     return {
-        Path(git_dir).parent.resolve()
+        Path(git_dir).parent
         for git_dir in proc.stdout.splitlines()
     }
 
 
-def git_py_find_repo(root: Path) -> Set[Path]:
+def git_py_find_repo(root: Path) -> set[Path]:
     """
     Recursively find all Git repositories under the root path using Python.
 
     :param root: Directory to search under.
     :type root: Path
-    :return: Set of paths to Git repositories.
-    :rtype: Set[Path]
+    :return: set of paths to Git repositories.
+    :rtype: set[Path]
     """
     return {
         git_dir.parent.resolve()
@@ -182,29 +196,19 @@ def run_command_get_output(repo_path: Path, cmd_str: str,
             stderr=f"Error: Command not found: '{cmd_list[0]}'\n"
         )
 
-    try:
-        proc = subprocess.run(
-            cmd_list,
-            cwd=repo_path,
-            capture_output=capture,
-            text=True,
-            check=False
-        )
-        return CommandResult(
-            command=cmd_list,
-            returncode=proc.returncode,
-            stdout=proc.stdout if proc.stdout else "",
-            stderr=proc.stderr if proc.stderr else ""
-        )
-    except KeyboardInterrupt:
-        raise
-    # TODO: Useless
-    # except Exception as err:
-    #     return CommandResult(
-    #         command=cmd_list,
-    #         returncode=1,
-    #         stderr=str(err)
-    #     )
+    proc = subprocess.run(
+        cmd_list,
+        cwd=repo_path,
+        capture_output=capture,
+        text=True,
+        check=False
+    )
+    return CommandResult(
+        command=cmd_list,
+        returncode=proc.returncode,
+        stdout=proc.stdout if proc.stdout else "",
+        stderr=proc.stderr if proc.stderr else ""
+    )
 
 
 def format_bg_output(repo_path: Path, result: CommandResult) -> str:
@@ -266,7 +270,7 @@ def process_repo(repo_path: Path, exec_bg_cmd: Optional[str],
     return RepoContext(path=repo_path, bg_result=bg_result)
 
 
-def discover_repos(directory: Path, max_workers: int) -> Set[Path]:
+def discover_repos(directory: Path, max_workers: int) -> set[Path]:
     """
     Discover Git repositories starting from the given directory.
 
@@ -275,7 +279,7 @@ def discover_repos(directory: Path, max_workers: int) -> Set[Path]:
     :param max_workers: Maximum number of threads/workers.
     :type max_workers: int
     :return: A set of repository root paths.
-    :rtype: Set[Path]
+    :rtype: set[Path]
     """
     # 1. Check if the directory itself is inside a repo
     toplevel = git_toplevel(directory)
@@ -290,26 +294,26 @@ def discover_repos(directory: Path, max_workers: int) -> Set[Path]:
 
 
 def execute_parallel_tasks(
-    repos: Set[Path],
+    repos: set[Path],
     exec_bg: Optional[str],
     if_exec: Optional[str],
     max_workers: int
-) -> List[RepoContext]:
+) -> list[RepoContext]:
     """
     Run discovery and background execution in parallel.
 
-    :param repos: Set of repositories to process.
-    :type repos: Set[Path]
+    :param repos: set of repositories to process.
+    :type repos: set[Path]
     :param exec_bg: Command string for background execution.
     :type exec_bg: Optional[str]
     :param if_exec: Command string for conditional filtering.
     :type if_exec: Optional[str]
     :param max_workers: Maximum number of threads for execution.
     :type max_workers: int
-    :return: List of processed repository contexts.
-    :rtype: List[RepoContext]
+    :return: list of processed repository contexts.
+    :rtype: list[RepoContext]
     """
-    results: List[RepoContext] = []
+    results: list[RepoContext] = []
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
@@ -377,12 +381,12 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def print_error_summary(errors: List[Tuple[Path, CommandResult]]) -> int:
+def print_error_summary(errors: list[tuple[Path, CommandResult]]) -> int:
     """
     Print a summary of execution errors.
 
-    :param errors: List of tuples containing path and result.
-    :type errors: List[Tuple[Path, CommandResult]]
+    :param errors: list of tuples containing path and result.
+    :type errors: list[tuple[Path, CommandResult]]
     :return: The final exit code (1 if errors exist, else 0).
     :rtype: int
     """
@@ -430,7 +434,7 @@ def main() -> None:
     # 1. Discover Repositories
     repos = discover_repos(args.directory.resolve(), args.max_workers)
 
-    # Setup background command string if needed
+    # setup background command string if needed
     exec_bg_cmd: Optional[str] = None
     if args.bg and args.exec_cmd:
         exec_bg_cmd = shlex.join(args.exec_cmd)
@@ -443,7 +447,7 @@ def main() -> None:
         args.max_workers
     )
 
-    execution_errors: List[Tuple[Path, CommandResult]] = []
+    execution_errors: list[tuple[Path, CommandResult]] = []
 
     # 3. Main Loop: Display results and run sequential commands
     for context in processed_repos:
