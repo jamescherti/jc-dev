@@ -495,7 +495,7 @@ main() {
       --bg \
       --if-exec git-is-clean \
       -- \
-      sh -c "git checkout develop && git pull --rebase"
+      sh -c "git checkout develop && git pull --rebase && git push"
   fi
 
   # 1 day = 86400
