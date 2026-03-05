@@ -97,9 +97,6 @@ git_clone() {
     git -C "$dir" fetch --all --prune
     git -C "$dir" clean -fxd
 
-    # modern git 2.22+
-    # branch=$(git -C "$dir" branch --show-current)
-
     local branch
     branch=$(git -C "$dir" symbolic-ref --short HEAD)
 
