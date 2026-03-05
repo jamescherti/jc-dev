@@ -96,7 +96,15 @@ git_clone() {
   else
     git -C "$dir" fetch --all --prune
     git -C "$dir" clean -fxd
-    git -C "$dir" reset --hard '@{upstream}'
+
+    # modern git 2.22+
+    # branch=$(git -C "$dir" branch --show-current)
+
+    local branch
+    branch=$(git -C "$dir" symbolic-ref --short HEAD)
+
+    # Reset explicitly to the matching branch on origin
+    git -C "$dir" reset --hard "origin/$branch"
   fi
 }
 
