@@ -39,6 +39,7 @@
 
 ;; (setq compile-angel-reload-compiled-version t)
 (setq compile-angel-native-compile-load 'late)
+(setq compile-angel-ignore-native-load-errors t)
 
 (require 'seq)
 (require 'my-defun)
