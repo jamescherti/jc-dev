@@ -827,6 +827,24 @@ at the same level."
   ;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
   )
 
+;;; visual-fill-column
+
+(lightemacs-use-package visual-fill-column
+  :commands visual-fill-column-for-vline
+  :hook
+  ((visual-line-mode .  visual-fill-column-for-vline)
+   (prog-mode . visual-line-mode)
+   (text-mode . visual-line-mode))
+
+  :custom
+  ;; Global settings
+  (visual-fill-column-center-text nil)
+  (visual-fill-column-enable-sensible-window-split t)
+  :config
+  ;; TODO does this replace my config?
+  ;; Fix for text scaling (C-x C-+ / C-x C--)
+  (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
+
 ;;; Trust framework files
 
 (defcustom lightemacs-trust-framework-files nil
