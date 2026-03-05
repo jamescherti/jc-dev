@@ -503,13 +503,25 @@ environment for accurate linting."
         shell-pop-shell-type (quote ("ansi-term" "*ansi-term*"
                                      (lambda nil
                                        (ansi-term shell-pop-term-shell))))
+
+
         ;; shell-pop-shell-type (cond
         ;;                       ((eq system-type 'gnu/linux)
         ;;                        '("vterm" "*vterm*" #'vterm))
         ;;                       (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
         ;;                       (t '("terminal" "*terminal*"
         ;;                            (lambda () (term shell-pop-term-shell)))))
-        ))
+        )
+
+  :preface
+  (defun my-around-shell-pop (fn &rest args)
+    "FN is the advised function. ARGS are the function arguments."
+    (with-temp-file "~/.bash_lastdir"
+      (insert (expand-file-name default-directory)))
+    (apply fn args))
+
+  :config
+  (advice-add 'shell-pop :around #'my-around-shell-pop))
 
 ;;; Vimrc mode
 

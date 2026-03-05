@@ -37,8 +37,8 @@
 (setq compile-angel-enable-native-compile t)
 (setq compile-angel-on-load-mode-compile-once nil)
 
-(setq compile-angel-reload-compiled-version t)
-;; (setq compile-angel-native-compile-load 'late)
+;; (setq compile-angel-reload-compiled-version t)
+(setq compile-angel-native-compile-load 'late)
 
 (require 'seq)
 (require 'my-defun)
@@ -3000,7 +3000,10 @@ session ends."
 ;; TODO lightemacs?
 ;; TODO minimal-emacs.d?
 
-(defvar my-native-compile-prune-cache-done nil
+(defvar my-native-compile-prune nil
+  "Prune.")
+
+(defvar my-native-compile--prune-cache-done nil
   "Flag to ensure native compile cache is pruned only once per session.")
 
 (defun my-native-compile-prune-cache ()
@@ -3009,19 +3012,20 @@ This function checks for native compilation support and ensures the operation
 only runs once per session to avoid redundant I/O."
   (interactive)
   ;; Check if we have already run this session
-  (unless my-native-compile-prune-cache-done
+  (unless my-native-compile--prune-cache-done
     ;; Check if native compilation is actually available
     (when (and (fboundp 'native-comp-available-p)
                (native-comp-available-p)
                (fboundp 'native-compile-prune-cache))
       ;; Set flag immediately to prevent re-entry
-      (setq my-native-compile-prune-cache-done t)
+      (setq my-native-compile--prune-cache-done t)
       (message "[native-comp] Native compilation cache pruned")
       (with-demoted-errors "Error pruning native cache: %S"
         (native-compile-prune-cache)))))
 
 ;; Only register the timer if native compilation is enabled
-(when (and (fboundp 'native-comp-available-p)
+(when (and my-native-compile-prune
+           (fboundp 'native-comp-available-p)
            (native-comp-available-p))
   ;; Run once after 5 minutes of idle time
   (add-hook 'kill-emacs-hook 'my-native-compile-prune-cache)

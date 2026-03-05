@@ -383,6 +383,7 @@ ORIG-FUN is the function and ARGS the arguments."
   ;; For some reason, this is not enough TODO
   ;; (define-key ibuffer-mode-map (kbd ",") nil)
   )
+(evil-define-key 'normal 'global (kbd "<leader>q") #'ibuffer)
 
 (with-eval-after-load 'eldoc
   (eldoc-add-command-completions "evilcursor-"))
