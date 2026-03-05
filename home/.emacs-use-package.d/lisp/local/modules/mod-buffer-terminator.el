@@ -57,7 +57,7 @@
                                           "*Compile-Log*"
                                           "*Warnings*"
                                           "*Ollama*"
-                                          "*Non-Native-Compiled*"
+                                          ;; "*Non-Native-Compiled*"
                                           "*compile-angel:debug*"
                                           "*vc*"
                                           "*Help*"
