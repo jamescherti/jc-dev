@@ -33,11 +33,13 @@
 (setq package-native-compile nil)
 (setq native-comp-jit-compilation nil)
 
+(setq straight-disable-native-compile nil)
+
 (setq compile-angel-verbose nil)
 (setq compile-angel-debug nil)
 (setq compile-angel-enable-byte-compile nil)
 (setq compile-angel-enable-native-compile t)
-(setq compile-angel-on-load-mode-compile-once nil)
+(setq compile-angel-on-load-mode-compile-once t)
 
 ;; (setq compile-angel-reload-compiled-version t)
 (setq compile-angel-native-compile-load t)
