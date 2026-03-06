@@ -629,7 +629,7 @@ EL-FILE is the *.el file."
 ;;; straight
 
 (defvar my-straight-default-profile (expand-file-name
-                                     "~/.emacs-data/etc/default.el")
+                                     "~/.emacs-data/etc/straight-profile.el")
   "The default straight profile.")
 (setq straight-profiles
       `((nil . ,my-straight-default-profile)))
