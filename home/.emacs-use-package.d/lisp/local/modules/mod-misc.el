@@ -845,7 +845,8 @@ at the same level."
   :if (display-graphic-p)
   :demand t
   :init
-  (setq olivetti-body-width 80)
+  (setq olivetti-body-width 120)
+  (setq-default olivetti-body-width 120)
   (setq olivetti-minimum-body-width 60)
   ;; :custom-face
   ;; (olivetti-fringe ((t :background unspecified)))
@@ -855,8 +856,9 @@ at the same level."
          (ibuffer-mode . (lambda()
                            (setq-local olivetti-body-width 200)))
          (ibuffer-mode . olivetti-mode)
-         ((markdown-mode org-mode) . (lambda()
-                                       (setq-local olivetti-body-width 120)))))
+         ;; ((markdown-mode org-mode) . (lambda()
+         ;;                               (setq-local olivetti-body-width 120)))
+         ))
 
 ;;; Perfect margin
 
