@@ -28,11 +28,11 @@
 
 ;;; Indent style
 
-(setq indent-tabs-mode t)
-(defun my-disable-indent-tabs-mode ()
-  "Disable `indent-tabs-mode'."
-  (setq-local indent-tabs-mode nil))
-(add-hook 'emacs-lisp-mode-hook #'my-disable-indent-tabs-mode)
+;; (setq indent-tabs-mode nil)
+;; (defun my-disable-indent-tabs-mode ()
+;;   "Disable `indent-tabs-mode'."
+;;   (setq-local indent-tabs-mode nil))
+;; (add-hook 'emacs-lisp-mode-hook #'my-disable-indent-tabs-mode)
 
 ;; Bind the `RET` (Return) key to `comment-indent-new-line`.
 ;; This ensures that pressing Enter within a comment context will both insert a
@@ -40,6 +40,13 @@
 ;; facilitating more consistent formatting of multi-line comments.
 (global-set-key (kbd "C-<return>") #'newline-and-indent)
 (global-set-key (kbd "RET") #'comment-indent-new-line)
+(electric-indent-mode -1)
+
+;; (defun my-disable-electric-indent-mode ()
+;;   "Disable electric indent mode."
+;;   (electric-indent-mode -1))
+;;
+;; (add-hook 'lightemacs-after-init-hook #'my-disable-electric-indent-mode)
 
 ;; TODO: Contribute to Emacs?
 ;; Values that are ignored by indent-according-to-mode.
@@ -55,7 +62,13 @@
 ;; `indent-line-ignored-functions'. The following code fixes the problem and
 ;; ensures that text is properly indented using `indent-relative' or
 ;; `indent-relative-first-indent-point'.
-(setq indent-line-ignored-functions '())
+
+;; (defun my-indent-line-dont-ignore-functions ()
+;;   "Dont ignore function in `indent-line-ignored-functions'."
+;;   (setq-local indent-line-ignored-functions '()))
+
+;; (add-hook 'ansible-mode-hook #'my-indent-line-dont-ignore-functions)
+;; (add-hook 'ansible-mode-hook #'my-indent-line-dont-ignore-functions)
 
 ;; This loses indentation
 ;; (push #'smartindent-relative indent-line-ignored-functions)
@@ -70,7 +83,10 @@ the current column, indent the current line to match that position. If no
 previous non-blank line exists or the current line is already indented properly,
 align the line to the nearest tab stop."
   ;; (indent-relative :first-only :unindented-ok)
-  (let ((point (point)))
+  (when indent-line-ignored-functions
+    (setq-local indent-line-ignored-functions '()))
+
+  (let ((orig-point (point)))
     (unwind-protect
         ;; first-only: Indent the current line like the previous nonblank line.
         ;; Indent to the first indentation position in the previous nonblank
@@ -79,16 +95,45 @@ align the line to the nearest tab stop."
         ;; unindented-ok: controls whether indent-relative is allowed to do
         ;; nothing when it cannot find a sensible indentation target.
         (indent-relative :first-only :unindented-ok)
-      ;; Point hasn't changed
-      (when (eq point (point))
-        (cond
-         ;; TODO Indent when the next non blank line is not indented
 
-         ;; Insert a tab when the user presses tab
+      (when (= orig-point (point))
+        (cond
+         ;; Indent when the user presses tab
          ((eq last-command-event ?\t)
-          (tab-to-tab-stop)))))))
+          (tab-to-tab-stop))))
+
+      ;; This is useful for Yaml
+      ;; - name: Create file /etc/profile.d/mozilla-custom-wayland.sh
+      ;;   ansible.builtin.copy: |     <-------------- Press enter here
+      ;;     |     <------- Same indentation as next line
+      ;;     dest: /etc/profile.d/mozilla-custom-wayland.sh
+      (let ((previous-indentation (save-excursion
+                                    (let ((start-point (point)))
+                                      (forward-line -1)
+                                      (when (/= start-point (point))
+                                        (current-indentation)))))
+            (cur-indentation (progn
+                               (current-indentation)))
+            (next-indentation (save-excursion
+                                (let ((start-point (point)))
+                                  (forward-line 1)
+                                  (when (/= start-point (point))
+                                    (current-indentation))))))
+        (when (and previous-indentation
+                   next-indentation
+                   (> next-indentation cur-indentation))
+          (indent-line-to next-indentation))))))
 
 (setq-default indent-line-function #'smartindent-relative)
+
+;; (defun my-set-indent-line-relative ()
+;;   "Indent-line relative."
+;;   (setq-local indent-line-functions #'smartindent-relative))
+;;
+;; (add-hook 'bash-ts-mode-hook #'my-set-indent-line-relative)
+;; (add-hook 'sh-mode-hook #'my-set-indent-line-relative)
+;; (add-hook 'python-mode-hook #'my-set-indent-line-relative)
+;; (add-hook 'python-ts-mode-hook #'my-set-indent-line-relative)
 
 (defun smartindent-indent-relative-to-visible ()
   "Indent to the next indent point in the previous visible, non-empty line.
