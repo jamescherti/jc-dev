@@ -626,7 +626,15 @@ EL-FILE is the *.el file."
         conf-toml-mode-hook
         markdown-mode-hook))
 
-;;; Packages
+;;; straight
+
+(defvar my-straight-default-profile (expand-file-name
+                                     "~/.emacs-data/etc/default.el")
+  "The default straight profile.")
+(setq straight-profiles
+      `((nil . ,my-straight-default-profile)))
+
+;;; Packages: use-package
 
 ;; (defun my-package-pin (package repository)
 ;;   (setq package-pinned-packages
