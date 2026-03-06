@@ -30,11 +30,12 @@
 
 
 actions:
-  - path_match: "*.el"
-    shell: true
-    command: "./home/.bin/update-emacs-config"
-    tags:
-      - install
+  # This is not enough
+  # - path_match: "*.el"
+  #   shell: true
+  #   command: "./home/.bin/update-emacs-config"
+  #   tags:
+  #     - install
 
   - path_match: "*"
     shell: true
