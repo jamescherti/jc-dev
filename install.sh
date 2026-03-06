@@ -479,24 +479,25 @@ main() {
   fi
 
   # Git pull
-  if [[ -d "$SRC_DIR" ]]; then
-    # other than emacs projects
-    # git-find-repos -C "$SRC_DIR" \
-    #   --if-exec git-is-clean \
-    #   --bg 'sh -c "git checkout-default && git pull --ff-only"'
-
-    git-find-repos -C "$SRC_DIR" \
-      --bg \
-      --if-exec git-is-clean \
-      -- \
-      "$SCRIPT_DIR/.bin/git-pull-my-repo"
-
-    git-find-repos -C "$SRC_DIR/emacs" \
-      --bg \
-      --if-exec git-is-clean \
-      -- \
-      sh -c "git checkout develop && git pull --rebase && git push"
-  fi
+  # TODO move to home-update
+  # if [[ -d "$SRC_DIR" ]]; then
+  #   # other than emacs projects
+  #   # git-find-repos -C "$SRC_DIR" \
+  #   #   --if-exec git-is-clean \
+  #   #   --bg 'sh -c "git checkout-default && git pull --ff-only"'
+  #
+  #   git-find-repos -C "$SRC_DIR" \
+  #     --bg \
+  #     --if-exec git-is-clean \
+  #     -- \
+  #     "$SCRIPT_DIR/.bin/git-pull-my-repo"
+  #
+  #   git-find-repos -C "$SRC_DIR/emacs" \
+  #     --bg \
+  #     --if-exec git-is-clean \
+  #     -- \
+  #     sh -c "git checkout develop && git pull --rebase && git push"
+  # fi
 
   # 1 day = 86400
   # run_every 86400 \
