@@ -39,9 +39,10 @@
 (setq straight-disable-autoloads t)
 
 ;; TODO lightemacs package manager variable to disable autoloads
-(with-eval-after-load 'elpaca
-  (setq elpaca-build-steps (remove 'elpaca--generate-autoloads-async
-                                   elpaca-build-steps)))
+;; Buggy?
+;; (with-eval-after-load 'elpaca
+;;   (setq elpaca-build-steps (remove 'elpaca--generate-autoloads-async
+;;                                    elpaca-build-steps)))
 
 (setq compile-angel-verbose nil)
 (setq compile-angel-debug nil)
@@ -636,11 +637,12 @@ EL-FILE is the *.el file."
   "Update `package-pinned-packages\=' with the entries in PINNED-PACKAGES.
 This replaces existing entries that match the provided packages and appends
 any new ones."
-  (setq package-pinned-packages (append pinned-packages
-                                        (seq-remove
-                                         (lambda (pkg)
-                                           (assq (car pkg) pinned-packages))
-                                         package-pinned-packages))))
+  (when (eq lightemacs-package-manager 'use-package)
+    (setq package-pinned-packages (append pinned-packages
+                                          (seq-remove
+                                           (lambda (pkg)
+                                             (assq (car pkg) pinned-packages))
+                                           package-pinned-packages)))))
 
 (setq my-package-pinned-packages
       '((buffer-terminator             . "melpa")

@@ -31,7 +31,7 @@
 (require 'lightemacs-use-package)
 
 (lightemacs-use-package project
-  ;; :ensure nil
+  :ensure nil
   :commands (;; project-try-vc
              ;; project-remember-project
              ;; project-current
