@@ -384,55 +384,6 @@ run_every() {
   fi
 }
 
-git_maintenance() {
-  # The git fsck --full command is used to verify the integrity of a Git
-  # repository. Here’s a detailed breakdown of what it does:
-  #
-  # The git fsck --full command is a comprehensive utility for verifying the
-  # integrity of a Git repository. By performing a thorough examination of all
-  # objects and references within the repository, it ensures that all data is
-  # correctly linked and free from corruption. This command checks the
-  # consistency of blobs, trees, commits, and tags, as well as the validity of
-  # branch and tag references. The --full option makes the check more
-  # exhaustive, identifying any discrepancies or damaged objects and providing
-  # detailed reports on potential issues. It is especially useful for diagnosing
-  # repository problems after unexpected failures or for routine maintenance to
-  # ensure ongoing repository health.
-  # git find git fsck --full
-
-  # git gc: Runs garbage collection, which cleans up unnecessary files and
-  # optimizes the local repository.
-  #
-  # --aggressive: This option makes the garbage collection process more
-  # --thorough,
-  #
-  # --resulting in better compression of objects and a more optimized
-  # --repository.
-  #
-  # --However, it can be significantly slower and more resource-intensive than
-  # --the
-
-  # --default garbage collection.
-  #
-  # --prune=now: This option tells Git to remove all objects that are not
-  # --reachable from any reference, including those that are less than two weeks
-  # --old, which is the default. Using now removes all such objects immediately.
-  # git find git gc --aggressive --prune=now
-
-  if [[ -d "$SRC_DIR" ]]; then
-    # TODO remove this
-    rm -f ~/.bin/git-maintenance
-
-    # shellcheck disable=SC2016
-    "$SCRIPT_DIR/home/.bin/git-find-repos" \
-      -C "$SRC_DIR" \
-      --if-exec git-is-clean \
-      --bg \
-      -- \
-      "$SCRIPT_DIR/home/.bin/git-regular-maintenance"
-  fi
-}
-
 config_gpg() {
   chmod 700 "$HOME/.gnupg/"
   mkdir -p "$HOME/.ssh"
@@ -477,32 +428,6 @@ main() {
   if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
     "$SCRIPT_DIR/home/.bin/update-emacs-config"
   fi
-
-  # Git pull
-  # TODO move to home-update
-  # if [[ -d "$SRC_DIR" ]]; then
-  #   # other than emacs projects
-  #   # git-find-repos -C "$SRC_DIR" \
-  #   #   --if-exec git-is-clean \
-  #   #   --bg 'sh -c "git checkout-default && git pull --ff-only"'
-  #
-  #   git-find-repos -C "$SRC_DIR" \
-  #     --bg \
-  #     --if-exec git-is-clean \
-  #     -- \
-  #     "$SCRIPT_DIR/.bin/git-pull-my-repo"
-  #
-  #   git-find-repos -C "$SRC_DIR/emacs" \
-  #     --bg \
-  #     --if-exec git-is-clean \
-  #     -- \
-  #     sh -c "git checkout develop && git pull --rebase && git push"
-  # fi
-
-  # 1 day = 86400
-  # run_every 86400 \
-  #   ~/.cache/jc-dev.git_maintenance \
-  #   git_maintenance
 
   echo
   echo "[INFO] Update spell check dictionary"
