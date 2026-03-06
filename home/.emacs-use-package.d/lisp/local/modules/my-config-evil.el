@@ -1358,7 +1358,7 @@ If the parentheses are balanced, the function returns t."
   (setq-local nobreak-char-display nil)
 
   ;; visual-line-mode is slow?
-  (visual-line-mode 1)
+  ;; (visual-line-mode 1)
 
   (let ((inhibit-message t))
     (toggle-truncate-lines 0))
