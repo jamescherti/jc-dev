@@ -38,6 +38,9 @@
 ;; TODO minimal emacs?
 (setq straight-disable-autoloads t)
 
+;; Fix autoload modus-themes.
+(autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
+
 ;; TODO lightemacs package manager variable to disable autoloads
 ;; Buggy?
 ;; (with-eval-after-load 'elpaca
