@@ -841,24 +841,24 @@ at the same level."
 ;; olivetti: Sometimes struggles with side-pane elements. For example, if you
 ;; enable line numbers, Olivetti might push them into the middle of the screen
 ;; right next to the text block, which can look jarring.
-(lightemacs-use-package olivetti
-  :if (display-graphic-p)
-  :demand t
-  :init
-  (setq olivetti-body-width 120)
-  (setq-default olivetti-body-width 120)
-  (setq olivetti-minimum-body-width 60)
-  ;; :custom-face
-  ;; (olivetti-fringe ((t :background unspecified)))
-  :hook ((text-mode . olivetti-mode)
-         (prog-mode . olivetti-mode)
-         (dired-mode . olivetti-mode)
-         (ibuffer-mode . (lambda()
-                           (setq-local olivetti-body-width 200)))
-         (ibuffer-mode . olivetti-mode)
-         ;; ((markdown-mode org-mode) . (lambda()
-         ;;                               (setq-local olivetti-body-width 120)))
-         ))
+;; (lightemacs-use-package olivetti
+;;   :if (display-graphic-p)
+;;   :demand t
+;;   :init
+;;   (setq olivetti-body-width 120)
+;;   (setq-default olivetti-body-width 120)
+;;   (setq olivetti-minimum-body-width 60)
+;;   ;; :custom-face
+;;   ;; (olivetti-fringe ((t :background unspecified)))
+;;   :hook ((text-mode . olivetti-mode)
+;;          (prog-mode . olivetti-mode)
+;;          (dired-mode . olivetti-mode)
+;;          (ibuffer-mode . (lambda()
+;;                            (setq-local olivetti-body-width 200)))
+;;          (ibuffer-mode . olivetti-mode)
+;;          ;; ((markdown-mode org-mode) . (lambda()
+;;          ;;                               (setq-local olivetti-body-width 120)))
+;;          ))
 
 ;;; Perfect margin
 

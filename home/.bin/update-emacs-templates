@@ -131,7 +131,8 @@ def convert_vim_templates_to_emacs():
 
 def main():
     """The command-line interface."""
-    convert_vim_templates_to_emacs()
+    if VIM_TEMPLATES_PATH.is_dir():
+        convert_vim_templates_to_emacs()
 
 
 if __name__ == "__main__":
