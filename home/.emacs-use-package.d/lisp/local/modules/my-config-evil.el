@@ -2269,7 +2269,6 @@ If COUNT is given, move COUNT - 1 lines downward first."
         (buffer-guardian-save-all-buffers)
       (save-some-buffers t)))
 
-  :init
   (with-eval-after-load 'evil
     (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
     (define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main))

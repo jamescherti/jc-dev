@@ -35,6 +35,14 @@
 
 (setq straight-disable-native-compile nil)
 
+;; TODO minimal emacs?
+(setq straight-disable-autoloads t)
+
+;; TODO lightemacs package manager variable to disable autoloads
+(with-eval-after-load 'elpaca
+  (setq elpaca-build-steps (remove 'elpaca--generate-autoloads-async
+                                   elpaca-build-steps)))
+
 (setq compile-angel-verbose nil)
 (setq compile-angel-debug nil)
 (setq compile-angel-enable-byte-compile nil)
@@ -686,6 +694,37 @@ any new ones."
 
 (defvar my--package-load-path-cache nil
   "Internal cache storing the list of discovered package directories.")
+
+(setq straight-recipe-overrides nil)
+;; (add-to-list 'straight-recipe-overrides
+;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
+;; Tell straight.el to treat it as a built-in Emacs package
+(dolist (item '(be-quiet
+                bufferfile
+                buffer-terminator
+                bufferwizard
+                compile-angel
+                cursorcolumn
+                dir-config
+                easysession
+                enhanced-evil-paredit
+                flymake-ansible-lint
+                flymake-bashate
+                inhibit-mouse
+                kirigami
+                org-ibullets
+                outline-indent
+                outline-yaml
+                pathaction
+                persist-text-scale
+                quick-fasd
+                quick-sdcv
+                stripspace
+                tomorrow-night-deepblue-theme
+                ultisnips-mode
+                vim-tab-bar))
+  (add-to-list 'straight-recipe-overrides
+               (list item :type 'built-in)))
 
 (defun my-add-packages-to-load-path ()
   "Add my packages to `load-path\=' dynamically.
