@@ -865,8 +865,11 @@ at the same level."
   :init
   (setq perfect-margin-visible-width 120)
   ;; auto-center everything --i.e., do not ignore any kind of windows
-  ;; (setq perfect-margin-ignore-filters nil)
-  ;; (setq perfect-margin-ignore-regexps nil)
+  (setq perfect-margin-ignore-filters '(window-minibuffer-p))
+  (setq perfect-margin-ignore-regexps '(
+                                        "^minibuf"
+                                        ;; "^[[:space:]]*\\*"
+                                        ))
   :hook
   (lightemacs-after-init . perfect-margin-mode))
 
