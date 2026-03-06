@@ -29,7 +29,6 @@
 (require 'my-defun)
 (require 'le-core-paths)
 (require 'lightemacs-use-package)
-(require 'cl-lib)
 
 (lightemacs-use-package project
   ;; :ensure nil
@@ -117,7 +116,7 @@ The selection is limited to projects already listed in the project database; see
                   project--list))
 
     ;; Remove duplicate projects
-    (setq project--list (cl-remove-duplicates project--list :test 'equal))))
+    (setq project--list (delete-dups project--list))))
 
 ;;; Load project list
 

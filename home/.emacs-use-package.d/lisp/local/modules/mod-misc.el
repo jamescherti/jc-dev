@@ -29,7 +29,6 @@
 
 ;;; Require
 
-(require 'cl-lib)
 (require 'my-defun)
 (require 'lightemacs-use-package)
 
@@ -760,6 +759,7 @@ at the same level."
   (defun my-org-agenda-goto-in-same-window ()
     "`org-agenda-goto` that opens the target buffer in the current window."
     (interactive)
+    (require 'cl-lib)
     (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
       (when (fboundp 'org-agenda-goto)
         (funcall 'org-agenda-goto))))
