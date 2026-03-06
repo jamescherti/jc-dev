@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(setq use-package-statistics t)
+
 ;;; Debug, native comp, and initial options
 
 ;; TODO test this more. It does not seem stable.
@@ -31,8 +33,8 @@
 (setq package-native-compile nil)
 (setq native-comp-jit-compilation nil)
 
-(setq compile-angel-verbose t)
-(setq compile-angel-debug t)
+(setq compile-angel-verbose nil)
+(setq compile-angel-debug nil)
 (setq compile-angel-enable-byte-compile nil)
 (setq compile-angel-enable-native-compile t)
 (setq compile-angel-on-load-mode-compile-once nil)
