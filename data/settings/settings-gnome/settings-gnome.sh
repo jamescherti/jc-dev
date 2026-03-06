@@ -72,7 +72,7 @@ gset org.gnome.desktop.interface document-font-name 'DejaVu Sans 10'
 gset org.gnome.desktop.interface font-name 'DejaVu Sans 10'
 gset org.gnome.desktop.interface monospace-font-name 'Iosevka Bold 10'
 gset org.gnome.desktop.interface font-antialiasing 'rgba' # rgba / grayscale
-gset org.gnome.desktop.interface font-hinting 'medium'    # slight / medium / full
+gset org.gnome.desktop.interface font-hinting 'slight'    # slight / medium / full
 # gset org.gnome.desktop.interface gtk-theme Adwaita-dark   # HighContrastInverse / Adwaita-dark
 gset org.gnome.desktop.wm.preferences titlebar-font 'DejaVu Sans 10'
 # gset org.gnome.desktop.interface icon-theme Adwaita
