@@ -148,14 +148,15 @@
 
 ;;; Golden-ratio
 
-(lightemacs-use-package golden-ratio
-  :commands (golden-ratio
-             golden-ratio-mode
-             golden-ratio-toggle-widescreen
-             golden-ratio-adjust)
-  ;; :hook
-  ;; (add-hook 'after-init-hook #'golden-ratio-mode)
-  )
+;; package cl is deprecated
+;; (lightemacs-use-package golden-ratio
+;;   :commands (golden-ratio
+;;              golden-ratio-mode
+;;              golden-ratio-toggle-widescreen
+;;              golden-ratio-adjust)
+;;   ;; :hook
+;;   ;; (add-hook 'after-init-hook #'golden-ratio-mode)
+;;   )
 
 
 ;;; Focus
@@ -827,6 +828,24 @@ at the same level."
   ;; :custom
   ;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
   )
+
+;;; olivetti
+
+;; perfect-margin: Specifically built to play nicely with tools that live on the
+;; edges of your windows, such as line numbers, minimap, and treemacs. It
+;; dynamically calculates the margins to keep the text centered without
+;; displacing these side-pane elements.
+;;
+;; olivetti: Sometimes struggles with side-pane elements. For example, if you
+;; enable line numbers, Olivetti might push them into the middle of the screen
+;; right next to the text block, which can look jarring.
+(lightemacs-use-package olivetti
+  :init
+  (setq olivetti-body-width 80)
+  :hook ((text-mode . olivetti-mode)
+         (prog-mode . olivetti-mode)
+         ((markdown-mode org-mode) . (lambda()
+                                       (setq olivetti-body-width 80)))))
 
 ;;; visual-fill-column
 
