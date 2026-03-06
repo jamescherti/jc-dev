@@ -75,7 +75,8 @@
   (lightemacs-theme-create-loader "tango" 'modus-themes)
   (lightemacs-theme-create-loader "tsdh-light" 'modus-themes)
 
-  (lightemacs-theme-create-loader "tomorrow-night-deepblue" 'tomorrow-night-deepblue-theme)
+  (lightemacs-theme-create-loader "tomorrow-night-deepblue"
+                                  'tomorrow-night-deepblue-theme)
 
   ;;(use-package tomorrow-night-deepblue-theme
   ;;  :config
@@ -795,7 +796,8 @@ at the same level."
 
   (add-to-list 'file-coding-system-alist '("\\.[bB][aA][sS]\\'" . cp437-dos))
 
-  ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC code." t)
+  ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
+  ;; code." t)
   (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
 
 ;;; ansible-doc
@@ -845,7 +847,7 @@ at the same level."
   :hook ((text-mode . olivetti-mode)
          (prog-mode . olivetti-mode)
          ((markdown-mode org-mode) . (lambda()
-                                       (setq olivetti-body-width 80)))))
+                                       (setq-local olivetti-body-width 120)))))
 
 ;;; visual-fill-column
 
