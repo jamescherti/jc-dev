@@ -108,17 +108,12 @@ align the line to the nearest tab stop."
       ;;     |     <------- Same indentation as next line
       ;;     dest: /etc/profile.d/mozilla-custom-wayland.sh
       (let ((previous-indentation (save-excursion
-                                    (let ((start-point (point)))
-                                      (forward-line -1)
-                                      (when (/= start-point (point))
-                                        (current-indentation)))))
-            (cur-indentation (progn
-                               (current-indentation)))
+                                    (when (= 0 (forward-line -1))
+                                      (current-indentation))))
+            (cur-indentation (current-indentation))
             (next-indentation (save-excursion
-                                (let ((start-point (point)))
-                                  (forward-line 1)
-                                  (when (/= start-point (point))
-                                    (current-indentation))))))
+                                (when (= 0 (forward-line 1))
+                                  (current-indentation)))))
         (when (and previous-indentation
                    next-indentation
                    (> next-indentation cur-indentation))
