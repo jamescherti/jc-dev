@@ -36,7 +36,5 @@ JC_RESTORE_LAST_DIR=1
 JC_FASD=1
 JC_FIX_GPG_TTY=1
 
-if [[ -f ~/.profile ]]; then
-  # shellcheck disable=SC1090
-  source ~/.profile
-fi
+# shellcheck disable=SC1090
+source ~/.profile >/dev/null 2>&1

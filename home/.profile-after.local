@@ -26,12 +26,11 @@
 # SOFTWARE.
 #
 
-append_path "$HOME/.bin"
-export PYTHONPATH="$HOME/.bin/python_modules:$PYTHONPATH"
-
 # The default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
 umask 022
+
+export PYTHONPATH="$HOME/.bin/python_modules:$PYTHONPATH"
 
 export PYTHONPYCACHEPREFIX="$HOME/.cache/python_cache"
 # mkdir -p "$PYTHONPYCACHEPREFIX" >/dev/null 2>&1
@@ -175,7 +174,7 @@ export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
 
 export JC_DOTFILES_UNATTENDED=1
-export EFFICIENT_VIM_CONFIG_UNATTENDED=1
+export JC_DEV_UNATTENDED=1
 
 export BATCHFETCH_CHECK_UNTRACKED=1
 export BATCHFETCH_JOBS=5
@@ -185,3 +184,5 @@ export BATCHFETCH_JOBS=5
 SSH_AGENT_PID=""
 # shellcheck disable=SC2034
 SSH_AUTH_SOCK=""
+
+jc_env_path_prepend PATH "$HOME/.bin"

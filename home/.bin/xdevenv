@@ -38,14 +38,6 @@ load_bashrc() {
   set +e
   set +u
   # shellcheck disable=SC1090
-  _SH_PROFILE_LOCAL_LOADED=""
-  _JC_PROFILE_LOADED=""
-  if [[ -f ~/.profile ]]; then
-    # shellcheck disable=SC1090
-    source ~/.profile
-  fi
-
-  _JC_BASHRC_LOADED=""
   source ~/.bashrc
   set -e
   set -u

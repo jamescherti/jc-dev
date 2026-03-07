@@ -26,10 +26,6 @@
 # SOFTWARE.
 #
 
-# Reload Emacs paths
-# shellcheck disable=SC1090
-source ~/.profile-after.local
-
 # When exiting tools like the Python REPL using Ctrl+D, it is easy to press it
 # one too many times, sending an End-of-File (EOF) signal to Bash, which logs
 # you out immediately.
