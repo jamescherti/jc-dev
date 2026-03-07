@@ -3037,8 +3037,12 @@ session ends."
   (add-hook 'minibuffer-setup-hook #'my-minibuffer-mode-setup))
 
 (add-hook-text-editing-modes #'my-disable-fringe-truncation-arrow)
+(with-eval-after-load 'consult
+  (add-hook 'consult-preview-allowed-hooks #'my-disable-fringe-truncation-arrow))
 
 (add-hook-text-editing-modes #'highlight-codetags-local-mode)
+(with-eval-after-load 'consult
+  (add-hook 'consult-preview-allowed-hooks #'highlight-codetags-local-mode))
 
 ;; Enable smerge
 (defun my-enable-smerge-maybe ()

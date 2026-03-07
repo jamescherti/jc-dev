@@ -842,10 +842,10 @@ at the same level."
 ;; enable line numbers, Olivetti might push them into the middle of the screen
 ;; right next to the text block, which can look jarring.
 (lightemacs-use-package olivetti
-  :if (display-graphic-p)
+  ;; :if (display-graphic-p)
   :commands olivetti-mode
   :init
-  (setq olivetti-body-width 120)
+  (setq olivetti-body-width 110)
   (setq olivetti-minimum-body-width 60)
 
   :preface
@@ -854,16 +854,25 @@ at the same level."
     (when (derived-mode-p 'ibuffer-mode)
       (setq-local olivetti-body-width 150))
 
-    (run-with-idle-timer 0 nil #'(lambda()
-                                   (olivetti-mode 1))))
+    ;; This ensures that olivetti works well with session managers such as
+    ;; easysession.
+    (if (bound-and-true-p easysession-load-in-progress)
+        (run-with-idle-timer
+         0 nil
+         #'(lambda()
+             (unless (bound-and-true-p olivetti-mode)
+               (olivetti-mode 1))))
+      (olivetti-mode 1)))
 
   :init
-  ;; This ensures that olivetti works well with session managers such as
-  ;; easysession.
-  (add-hook 'text-mode-hook #'my-setup-olivetti-mode)
-  (add-hook 'prog-mode-hook #'my-setup-olivetti-mode)
-  (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
-  (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode))
+  (with-eval-after-load 'consult
+    (add-hook 'consult-preview-allowed-hooks #'my-setup-olivetti-mode))
+  (add-hook 'find-file-hook #'my-setup-olivetti-mode)
+  ;; (add-hook 'text-mode-hook #'my-setup-olivetti-mode)
+  ;; (add-hook 'prog-mode-hook #'my-setup-olivetti-mode)
+  ;; (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
+  (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode)
+  )
 
 ;;; Perfect margin
 
