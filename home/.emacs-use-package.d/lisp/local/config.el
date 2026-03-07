@@ -33,10 +33,15 @@
 (setq package-native-compile nil)
 (setq native-comp-jit-compilation nil)
 
-(setq straight-disable-native-compile nil)
+(defun user-post-early-init ()
+  "Post early init."
+  (setq use-package-compute-statistics t))
 
-;; TODO minimal emacs?
-(setq straight-disable-autoloads t)
+(when (eq lightemacs-package-manager 'straight)
+  (setq straight-disable-native-compile nil)
+
+  ;; TODO minimal emacs?
+  (setq straight-disable-autoloads t))
 
 ;; Fix autoload modus-themes.
 (autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
@@ -158,7 +163,7 @@ EL-FILE is the *.el file."
 ;;     (run-at-time 5 nil (lambda ()
 ;;                          (require 'le-compile-angel))))
 ;;
-;;   (add-hook 'emacs-startup-hook #'my-delayed-native-compilation))
+;;   (add-hook 'lightemacs-emacs-startup-hook #'my-delayed-native-compilation))
 
 ;; Native compilation ignore
 ;; (let ((deny-list '(
@@ -425,7 +430,7 @@ EL-FILE is the *.el file."
 ;; (defun my-restore-vc-handled-backends ()
 ;;   "Restore VC backends."
 ;;   (setq vc-handled-backends '(Git)))
-;; (add-hook 'emacs-startup-hook #'my-restore-vc-handled-backends 120)
+;; (add-hook 'lightemacs-emacs-startup-hook #'my-restore-vc-handled-backends 120)
 
 ;;; Lightemacs modules and parameters
 
@@ -708,11 +713,12 @@ any new ones."
 (defvar my--package-load-path-cache nil
   "Internal cache storing the list of discovered package directories.")
 
-(setq straight-recipe-overrides nil)
-(add-to-list 'straight-recipe-overrides
-             '(bufferwizard
-               :type git :host github
-               :repo "jamescherti/bufferwizard.el"))
+(when (eq lightemacs-package-manager 'straight)
+  (setq straight-recipe-overrides nil)
+  (add-to-list 'straight-recipe-overrides
+               '(bufferwizard
+                 :type git :host github
+                 :repo "jamescherti/bufferwizard.el")))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
@@ -743,8 +749,9 @@ any new ones."
                 vim-tab-bar))
   (when (file-exists-p (expand-file-name (concat (symbol-name item) ".el")
                                          "~/src/emacs"))
-    (add-to-list 'straight-recipe-overrides
-                 (list item :type 'built-in))))
+    (when (eq lightemacs-package-manager 'straight)
+      (add-to-list 'straight-recipe-overrides
+                   (list item :type 'built-in)))))
 
 (defun my-add-packages-to-load-path ()
   "Add my packages to `load-path\=' dynamically.
@@ -1863,7 +1870,7 @@ Returns:
            (float-time (time-subtract after-init-time before-init-time))
            gcs-done))
 
-(add-hook 'emacs-startup-hook #'display-startup-time 200)
+(add-hook 'lightemacs-emacs-startup-hook #'display-startup-time 200)
 
 ;;; Ignored errors
 

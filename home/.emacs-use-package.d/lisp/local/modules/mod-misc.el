@@ -156,7 +156,7 @@
 ;;              golden-ratio-toggle-widescreen
 ;;              golden-ratio-adjust)
 ;;   ;; :hook
-;;   ;; (add-hook 'after-init-hook #'golden-ratio-mode)
+;;   ;; (add-hook 'lightemacs-after-init-hook #'golden-ratio-mode)
 ;;   )
 
 
@@ -336,7 +336,7 @@
 ;;         consult-async-refresh-delay 0.2))
 ;;
 ;; (setq battery-angel-verbose nil)
-;; (add-hook 'emacs-startup-hook #'battery-angel-mode 90)
+;; (add-hook 'lightemacs-emacs-startup-hook #'battery-angel-mode 90)
 ;; (add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
 ;; (add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
 
@@ -467,7 +467,8 @@ environment for accurate linting."
             (append elisp-flymake-byte-compile-load-path load-path))
       (setq lightemacs-flymake--setup-elisp-done t))))
 
-(add-hook 'emacs-startup-hook #'lightemacs-flymake-initialize-elisp-path 99)
+(add-hook 'lightemacs-emacs-startup-hook
+          #'lightemacs-flymake-initialize-elisp-path 99)
 
 ;;; flyspell-lazy
 

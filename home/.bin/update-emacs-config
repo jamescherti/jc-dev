@@ -104,11 +104,10 @@ custom-emacs() {
 
   shift
 
-  cp -a "$EMACS_BASE/lisp/local/config.el" \
-    "$dest_dir/lisp/local/config.el"
   if [[ $# -gt 0 ]]; then
     printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
   fi
+  cat "$EMACS_BASE/lisp/local/config.el" >>"$dest_dir/lisp/local/config.el"
 }
 
 # ------------------------------------------------------------------------------

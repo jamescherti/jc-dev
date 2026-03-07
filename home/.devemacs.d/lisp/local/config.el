@@ -58,7 +58,7 @@
 ;;       ido-confirm-unique-completion nil
 ;;       ido-create-new-buffer 'always
 ;;       ido-use-virtual-buffers t)
-;; (add-hook 'after-init-hook #'ido-mode)
+;; (add-hook 'lightemacs-after-init-hook #'ido-mode)
 
 ;;; Emacs
 
