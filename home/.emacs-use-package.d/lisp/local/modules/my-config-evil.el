@@ -1110,12 +1110,10 @@ on text following the cursor."
 
 ;;; evil corfu
 
+;; TODO lightemacs?
+(evil-define-key 'insert 'global (kbd "C-x C-f") 'cape-file)
+
 (with-eval-after-load 'corfu
-  ;; (add-hook 'evil-mode-hook
-  ;;           #'(lambda()
-  ;;               (with-eval-after-load "evil"
-  ;;                 ;; Emulate Vim's C-x C-f
-  ;;                 (evil-define-key 'insert 'global (kbd "C-x C-f") 'cape-file))))
   (with-eval-after-load "evil"
     (evil-define-key 'insert 'global (kbd "C-SPC") 'completion-at-point)
 

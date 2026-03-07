@@ -32,7 +32,6 @@
 set -euf -o pipefail
 
 GIT_CLONE_DIR="$HOME/.jc-dev"
-SRC_DIR="$HOME/src"
 
 # shellcheck disable=SC2317
 error_handler() {
@@ -440,6 +439,16 @@ main() {
   echo
   echo "[INFO] Update Emacs templates"
   update-emacs-templates
+
+  if [[ -f /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    source /etc/os-release
+
+    if [[ $ID = arch ]] && [[ $XDG_CURRENT_DESKTOP != "" ]]; then
+      echo "[INFO] Install Arch Linux desktop files"
+      rsync -a "$SCRIPT_DIR/data/dist/arch/" "$HOME/"
+    fi
+  fi
 
   echo
   echo Success.
