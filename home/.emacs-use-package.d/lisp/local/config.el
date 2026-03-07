@@ -709,6 +709,10 @@ any new ones."
   "Internal cache storing the list of discovered package directories.")
 
 (setq straight-recipe-overrides nil)
+(add-to-list 'straight-recipe-overrides
+             '(bufferwizard
+               :type git :host github
+               :repo "jamescherti/bufferwizard.el"))
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
 ;; Tell straight.el to treat it as a built-in Emacs package
