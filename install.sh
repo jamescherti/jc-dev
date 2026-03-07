@@ -180,7 +180,7 @@ config-firefox() {
 
 config-gnome() {
   # JC-GNOME-SETTINGS
-  if [[ $XDG_CURRENT_DESKTOP = GNOME ]]; then
+  if [[ "${XDG_CURRENT_DESKTOP:-}" = GNOME ]]; then
     # JC-GNOME-SETTINGS
     git_clone \
       https://github.com/jamescherti/jc-gnome-settings \
@@ -196,7 +196,7 @@ config-gnome() {
 
 config-xfce() {
   # JC-XFCE-SETTINGS
-  if [[ $XDG_CURRENT_DESKTOP = XFCE ]]; then
+  if [[ "${XDG_CURRENT_DESKTOP:-}" = XFCE ]]; then
     # JC-XFCE-SETTINGS
     git_clone \
       https://github.com/jamescherti/jc-xfce-settings \
@@ -444,7 +444,7 @@ main() {
     # shellcheck disable=SC1091
     source /etc/os-release
 
-    if [[ $ID = arch ]] && [[ $XDG_CURRENT_DESKTOP != "" ]]; then
+    if [[ $ID = arch ]] && [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
       echo "[INFO] Install Arch Linux desktop files"
       rsync -a "$SCRIPT_DIR/data/dist/arch/" "$HOME/"
     fi

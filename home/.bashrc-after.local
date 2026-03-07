@@ -26,6 +26,10 @@
 # SOFTWARE.
 #
 
+if [[ -z "$BASH" ]]; then
+  return
+fi
+
 # When exiting tools like the Python REPL using Ctrl+D, it is easy to press it
 # one too many times, sending an End-of-File (EOF) signal to Bash, which logs
 # you out immediately.
@@ -38,6 +42,26 @@ unset IGNOREEOF
 
 # Ensure your TMOUT is set to your desired timeout in seconds (e.g., 1 hour)
 export TMOUT=3600
+
+if [[ $UID != 0 ]]; then
+  TMOUT=300
+else
+  TMOUT=120
+fi
+
+# Reset the SSH agent
+SSH_AGENT_PID=""
+SSH_AUTH_SOCK=""
+
+#-----------------------------------------> INTERACTIVE
+case $- in
+*i*)
+  # Interactive
+  ;;
+*)
+  return
+  ;;
+esac
 
 # Custom function to handle manual Ctrl+D keystrokes
 handle_ctrl_d() {
@@ -113,12 +137,6 @@ bind -x '"\C-d": handle_ctrl_d'
 # On_IPurple="\[\033[10;95m\]" # Purple
 # On_ICyan="\[\033[0;106m\]"   # Cyan
 # On_IWhite="\[\033[0;107m\]"  # White
-
-if [[ $_BASHRC_AFTER_LOADED != '' ]]; then
-  return
-else
-  _BASHRC_AFTER_LOADED=1
-fi
 
 INPUTRC=~/.inputrc
 # Various variables you might want for your PS1 prompt instead
@@ -355,16 +373,6 @@ switch_to_project() {
 }
 
 alias p=switch_to_project
-
-if [[ $UID != 0 ]]; then
-  TMOUT=300
-else
-  TMOUT=120
-fi
-
-# Reset the SSH agent
-SSH_AGENT_PID=""
-SSH_AUTH_SOCK=""
 
 loop() {
   if [[ $# -lt 1 ]]; then

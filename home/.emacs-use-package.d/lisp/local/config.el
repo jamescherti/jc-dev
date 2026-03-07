@@ -449,7 +449,7 @@ EL-FILE is the *.el file."
 
 ;; Enable native-compilation and byte-compilation
 
-(setq lightemacs-modules '(le-compile-angel  ;;moved it down
+(setq lightemacs-modules '(;;le-compile-angel  ;;moved it down
                            le-theme
                            le-default-settings
                            le-default-keybindings

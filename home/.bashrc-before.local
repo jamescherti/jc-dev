@@ -35,6 +35,3 @@ JC_EMACS_INTEGRATION=1
 JC_RESTORE_LAST_DIR=1
 JC_FASD=1
 JC_FIX_GPG_TTY=1
-
-# shellcheck disable=SC1090
-source ~/.profile >/dev/null 2>&1
