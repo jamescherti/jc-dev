@@ -30,6 +30,6 @@ OSFAMILY=$(~/.local/bin/osid)
 export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
 
 EMACS_D="$HOME/.emacs-elpaca.d/"
-export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache:"
+export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
 
 exec run-emacs --init-directory "$EMACS_D" "$@"
