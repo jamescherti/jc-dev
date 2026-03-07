@@ -59,6 +59,86 @@ export VIM_PERSISTENT_SESSION_ENABLED=0
 #------------------------------------------------------------------------------
 # CUSTOM ENV
 #------------------------------------------------------------------------------
+path_remove() {
+  # Validate to avoid, for example, `path_remove 'PATH; rm -rf /' /tmp`
+  case $1 in
+  *[!A-Za-z0-9_]* | '') return 1 ;;
+  esac
+
+  eval "_pr_val=\${$1}"
+  _pr_new=""
+
+  while [ -n "$_pr_val" ]; do
+    # Extract the first path component using POSIX parameter
+    # expansion.
+    _pr_dir="${_pr_val%%:*}"
+
+    # This avoids an infinite loop when no : exists.
+    if [ "$_pr_val" = "$_pr_dir" ]; then
+      _pr_val=""
+    else
+      _pr_val="${_pr_val#*:}"
+    fi
+
+    # Reconstruction
+    if [ "$_pr_dir" != "$2" ] && [ -n "$_pr_dir" ]; then
+      _pr_new="${_pr_new}${_pr_new:+:}${_pr_dir}"
+    fi
+  done
+
+  eval "${1}=\"\$_pr_new\""
+  eval "export ${1}"
+  unset _pr_val _pr_new _pr_dir
+}
+
+# Usage: path_append VAR "/path/to/dir"
+path_append() {
+  # Validate to avoid, for example, `path_append 'PATH; rm -rf /' /tmp`
+  case $1 in
+  *[!A-Za-z0-9_]* | '')
+    return 1
+    ;;
+  esac
+
+  path_remove "$1" "$2"
+
+  eval "_pa_val=\${$1}"
+
+  if [ -z "$_pa_val" ]; then
+    eval "$1=\$2"
+  else
+    eval "$1=\$_pa_val:\$2"
+  fi
+
+  eval "export $1"
+
+  unset _pa_val
+}
+
+# Usage: path_prepend VAR "/path/to/dir"
+path_prepend() {
+  # Validate to avoid, for example, path_remove 'PATH; rm -rf /' /tmp
+  case $1 in
+  *[!A-Za-z0-9_]* | '')
+    return 1
+    ;;
+  esac
+
+  path_remove "$1" "$2"
+
+  eval "_pp_val=\${$1}"
+
+  if [ -z "$_pp_val" ]; then
+    eval "$1=\$2"
+  else
+    eval "$1=\$2:\$_pp_val"
+  fi
+
+  eval "export $1"
+
+  unset _pp_val
+}
+
 custom_env() {
   # Validation
   if [ -z "$1" ] || { [ "$1" != "list" ] && [ -z "$2" ]; }; then
@@ -98,67 +178,64 @@ custom_env() {
   "load")
     echo "[load-custom-env] $_ce_resolved_path"
 
-    if command -v _jc_add_local_path >/dev/null 2>&1; then
-      _jc_add_local_path "$_ce_resolved_path"
-    else
-      # Fallback if your helper function isn't loaded
-      export PATH="$_ce_resolved_path/bin:$PATH"
-    fi
+    # Fallback if your helper function isn't loaded
+    prepend_var PATH "$_ce_resolved_path/bin"
 
     # Shared libraries
-    if [ -d "$_ce_resolved_path/lib" ]; then
-      export LD_LIBRARY_PATH="$_ce_resolved_path/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-    fi
+    # if [ -d "$_ce_resolved_path/lib" ]; then
+    #   prepend_var LD_LIBRARY_PATH "$_ce_resolved_path/lib"
+    # fi
 
-    if [ -d "$_ce_resolved_path/lib64" ]; then
-      export LD_LIBRARY_PATH="$_ce_resolved_path/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-    fi
+    # if [ -d "$_ce_resolved_path/lib64" ]; then
+    #   prepend_var LD_LIBRARY_PATH "$_ce_resolved_path/lib64"
+    # fi
 
     # XDG data directories (desktop entries, icons, mime types)
     # if [ -d "$_ce_resolved_path/share" ]; then
     #   if [ -z "$XDG_DATA_DIRS" ]; then
-    #     export XDG_DATA_DIRS="$_ce_resolved_path/share:/usr/local/share:/usr/share"
     #   else
-    #     export XDG_DATA_DIRS="$_ce_resolved_path/share:$XDG_DATA_DIRS"
+    #     prepend_var XDG_DATA_DIRS "$_ce_resolved_path/share"
     #   fi
     # fi
 
     # XDG config directories
     # if [ -d "$_ce_resolved_path/etc/xdg" ]; then
     #   if [ -z "$XDG_CONFIG_DIRS" ]; then
-    #     export XDG_CONFIG_DIRS="$_ce_resolved_path/etc/xdg:/etc/xdg"
     #   else
-    #     export XDG_CONFIG_DIRS="$_ce_resolved_path/etc/xdg:$XDG_CONFIG_DIRS"
+    #     prepend_var XDG_CONFIG_DIRS "$_ce_resolved_path/etc/xdg"
     #   fi
     # fi
 
-    # Man pages (trailing colon ensures system default man paths are appended)
-    if [ -d "$_ce_resolved_path/share/man" ]; then
-      export MANPATH="$_ce_resolved_path/share/man:${MANPATH}"
-    fi
-
-    # Info pages (trailing colon ensures system default info paths are appended)
-    if [ -d "$_ce_resolved_path/share/info" ]; then
-      export INFOPATH="$_ce_resolved_path/share/info:${INFOPATH}"
-    fi
-
-    # Pkg-config
-    if [ -d "$_ce_resolved_path/lib/pkgconfig" ]; then
-      export PKG_CONFIG_PATH="$_ce_resolved_path/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-    fi
-
-    if [ -d "$_ce_resolved_path/share/pkgconfig" ]; then
-      export PKG_CONFIG_PATH="$_ce_resolved_path/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-    fi
-
-    C/C++ includes
-    if [ -d "$_ce_resolved_path/include" ]; then
-      export C_INCLUDE_PATH="$_ce_resolved_path/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
-      export CPLUS_INCLUDE_PATH="$_ce_resolved_path/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
-    fi
-
-    CMake
-    export CMAKE_PREFIX_PATH="$_ce_resolved_path${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
+    # # Man pages (trailing colon ensures system default man paths are appended)
+    # if [ -d "$_ce_resolved_path/share/man" ]; then
+    #   prepend_var MANPATH "$_ce_resolved_path/share/man"
+    #   case "$MANPATH" in *:) ;; *) MANPATH="${MANPATH}:" ;; esac
+    # fi
+    #
+    # # Info pages (trailing colon ensures system default info paths are appended)
+    # if [ -d "$_ce_resolved_path/share/info" ]; then
+    #   prepend_var INFOPATH "$_ce_resolved_path/share/info"
+    #   case "$INFOPATH" in *:) ;; *) INFOPATH="${INFOPATH}:" ;; esac
+    # fi
+    #
+    # # Pkg-config
+    # if [ -d "$_ce_resolved_path/lib/pkgconfig" ]; then
+    #   prepend_var PKG_CONFIG_PATH "$_ce_resolved_path/lib/pkgconfig"
+    # fi
+    #
+    # if [ -d "$_ce_resolved_path/share/pkgconfig" ]; then
+    #   prepend_var PKG_CONFIG_PATH "$_ce_resolved_path/share/pkgconfig"
+    # fi
+    #
+    # # C/C++ includes
+    # if [ -d "$_ce_resolved_path/include" ]; then
+    #   prepend_var C_INCLUDE_PATH "$_ce_resolved_path/include"
+    #
+    #   prepend_var CPLUS_INCLUDE_PATH "$_ce_resolved_path/include"
+    # fi
+    #
+    # # CMake
+    # prepend_var CMAKE_PREFIX_PATH "$_ce_resolved_path"
     ;;
   *)
     echo "Error: Unknown action '$1'. Use 'list' or 'load'." >&2

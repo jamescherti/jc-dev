@@ -463,8 +463,6 @@ This enhancement prevents the cursor from moving."
 
 (define-key evil-normal-state-map (kbd "C-q") 'my-save-buffers-kill-emacs)
 
-;; (evil-select-search-module 'evil-search-module 'evil-search)
-
 ;; Make goto mark use ' to restore the column
 (define-key evil-motion-state-map "`" 'evil-goto-mark-line)
 (define-key evil-motion-state-map "'" 'evil-goto-mark)

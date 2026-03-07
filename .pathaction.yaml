@@ -31,11 +31,20 @@
 
 actions:
   # This is not enough
-  # - path_match: "*.el"
-  #   shell: true
-  #   command: "./home/.bin/update-emacs-config"
-  #   tags:
-  #     - install
+  - path_match: "{{ cwd }}/home/*"
+    shell: true
+    command:
+      - 'rsync'
+      - '--archive'
+      - --exclude='*.elc'
+      - --exclude='*.eln'
+      - --exclude='*.git'
+      - --exclude='flymake_*'
+      - --exclude='flycheck_*'
+      - "{{ cwd }}/home/"
+      - "{{ env.HOME }}/"
+    tags:
+      - install
 
   - path_match: "*"
     shell: true

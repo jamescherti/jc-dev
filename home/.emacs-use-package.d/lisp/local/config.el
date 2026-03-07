@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-(setq use-package-statistics t)
+;; (setq use-package-statistics t)
 
 ;;; Debug, native comp, and initial options
 
@@ -631,11 +631,11 @@ EL-FILE is the *.el file."
 
 ;;; straight
 
-(defvar my-straight-default-profile (expand-file-name
-                                     "~/.emacs-data/etc/straight-profile.el")
-  "The default straight profile.")
-(setq straight-profiles
-      `((nil . ,my-straight-default-profile)))
+;; (defvar my-straight-default-profile (expand-file-name
+;;                                      "~/.emacs-data/etc/straight-profile.el")
+;;   "The default straight profile.")
+;; (setq straight-profiles
+;;       `((nil . ,my-straight-default-profile)))
 
 ;;; Packages: use-package
 
@@ -713,6 +713,7 @@ any new ones."
              '(bufferwizard
                :type git :host github
                :repo "jamescherti/bufferwizard.el"))
+
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
 ;; Tell straight.el to treat it as a built-in Emacs package
@@ -740,8 +741,10 @@ any new ones."
                 tomorrow-night-deepblue-theme
                 ultisnips-mode
                 vim-tab-bar))
-  (add-to-list 'straight-recipe-overrides
-               (list item :type 'built-in)))
+  (when (file-exists-p (expand-file-name (concat (symbol-name item) ".el")
+                                         "~/src/emacs"))
+    (add-to-list 'straight-recipe-overrides
+                 (list item :type 'built-in))))
 
 (defun my-add-packages-to-load-path ()
   "Add my packages to `load-path\=' dynamically.
