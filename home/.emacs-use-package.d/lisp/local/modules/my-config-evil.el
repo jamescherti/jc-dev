@@ -2057,116 +2057,116 @@ If COUNT is given, move COUNT - 1 lines downward first."
 (evil-define-key 'normal 'global (kbd "gt") #'tabgo)
 
 ;; TODO: Contribute to evil-match it to add tree-sitter
-(lightemacs-use-package evil-matchit
-  :commands evil-matchit-mode
-
-  :init
-  ;; Forces evil-matchit to prioritize the native `evil-jump-item' logic (which
-  ;; handles standard delimiters like braces and parenthesis) before attempting
-  ;; to match keywords or tags defined in matchit plugins.
-  (setq evilmi-always-simple-jump t)
-
-  (dolist (hook '(js-mode-hook
-                  json-mode-hook
-                  js2-mode-hook
-                  js3-mode-hook
-                  javascript-mode-hook
-                  js-ts-mode-hook
-                  rjsx-mode-hook
-                  js2-jsx-mode-hook
-                  react-mode-hook
-                  typescript-mode-hook
-                  typescript-tsx-mode-hook
-                  typescript-ts-mode-hook
-                  tsx-ts-mode-hook
-
-                  cmake-mode-hook
-                  cmake-ts-mode-hook
-
-                  css-ts-mode-hook
-                  css-mode-hook
-                  less-mode-hook
-                  scss-mode-hook
-
-                  diff-mode-hook
-
-                  java-mode-hook
-                  perl-mode-hook
-                  cperl-mode-hook
-                  go-mode-hook
-
-                  web-mode-hook
-                  html-mode-hook
-                  nxml-mode-hook
-                  nxhtml-mode-hook
-                  sgml-mode-hook
-                  php-mode-hook
-                  php-ts-mode-hook
-                  message-mode-hook
-                  mhtml-mode-hook
-
-                  org-mode-hook
-
-                  lua-mode-hook
-                  lua-ts-mode-hook
-
-                  python-mode-hook
-                  python-ts-mode-hook
-
-                  yaml-mode-hook
-                  yaml-ts-mode-hook
-
-                  c-ts-mode-hook
-                  c++-ts-mode-hook
-                  c-mode-hook
-                  c++-mode-hook
-
-                  sh-mode-hook
-                  bash-ts-mode-hook))
-    (add-hook hook #'evil-matchit-mode))
-
-  :config
-  (add-to-list 'debug-ignored-errors "Unbalanced parentheses")
-
-  (when (fboundp 'evilmi-load-plugin-rules)
-    (evilmi-load-plugin-rules '(cmake-ts-mode) '(cmake))
-    (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(c simple))
-
-    ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
-    ;; # evilmi BUG here: place the cursor on { and press %
-    ;; _jc_better_cd() {
-    (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
-
-    ;; (evilmi-load-plugin-rules '(cmake-ts-mode) '(simple cmake))
-    ;; (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(simple c))
-
-    (evilmi-load-plugin-rules '(css-ts-mode) '(simple))
-    (evilmi-load-plugin-rules '(php-ts-mode) '(simple template html))
-    (evilmi-load-plugin-rules '(lua-ts-mode) '(simple script))
-    (evilmi-load-plugin-rules '(python-ts-mode) '(simple python))
-    (evilmi-load-plugin-rules '(yaml-ts-mode) '(simple yaml))
-
-    ;; Loads the 'simple' plugin before the 'sh' plugin. The 'simple' plugin
-    ;; handles basic text matching for brackets and quotes. Placing it first
-    ;; ensures that [ ] pairs are matched immediately, preventing the 'sh'
-    ;; plugin from incorrectly interpreting them as part of the if/fi control
-    ;; flow structure.
-    ;; (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
-
-    )
-
-  ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
-  ;; # evilmi BUG here: place the cursor on { and press %
-  ;; (defun my/evilmi-jump-items-around (orig-fn &rest args)
-  ;;   "Advice to use `evil-jump-item' for ()[]{} and `evilmi-jump-items' otherwise."
-  ;;   (let ((char (char-after)))
-  ;;     (if (and char (member char '(?\( ?\) ?\[ ?\] ?\{ ?\})))
-  ;;         (evil-jump-item)
-  ;;       (apply orig-fn args))))
-  ;; (advice-add 'evilmi-jump-items :around #'my/evilmi-jump-items-around)
-
-  (with-eval-after-load 'evil
-    (require 'evil-matchit-evil-setup)))
+;; (lightemacs-use-package evil-matchit
+;;   :commands evil-matchit-mode
+;;
+;;   :init
+;;   ;; Forces evil-matchit to prioritize the native `evil-jump-item' logic (which
+;;   ;; handles standard delimiters like braces and parenthesis) before attempting
+;;   ;; to match keywords or tags defined in matchit plugins.
+;;   (setq evilmi-always-simple-jump t)
+;;
+;;   (dolist (hook '(js-mode-hook
+;;                   json-mode-hook
+;;                   js2-mode-hook
+;;                   js3-mode-hook
+;;                   javascript-mode-hook
+;;                   js-ts-mode-hook
+;;                   rjsx-mode-hook
+;;                   js2-jsx-mode-hook
+;;                   react-mode-hook
+;;                   typescript-mode-hook
+;;                   typescript-tsx-mode-hook
+;;                   typescript-ts-mode-hook
+;;                   tsx-ts-mode-hook
+;;
+;;                   cmake-mode-hook
+;;                   cmake-ts-mode-hook
+;;
+;;                   css-ts-mode-hook
+;;                   css-mode-hook
+;;                   less-mode-hook
+;;                   scss-mode-hook
+;;
+;;                   diff-mode-hook
+;;
+;;                   java-mode-hook
+;;                   perl-mode-hook
+;;                   cperl-mode-hook
+;;                   go-mode-hook
+;;
+;;                   web-mode-hook
+;;                   html-mode-hook
+;;                   nxml-mode-hook
+;;                   nxhtml-mode-hook
+;;                   sgml-mode-hook
+;;                   php-mode-hook
+;;                   php-ts-mode-hook
+;;                   message-mode-hook
+;;                   mhtml-mode-hook
+;;
+;;                   org-mode-hook
+;;
+;;                   lua-mode-hook
+;;                   lua-ts-mode-hook
+;;
+;;                   python-mode-hook
+;;                   python-ts-mode-hook
+;;
+;;                   yaml-mode-hook
+;;                   yaml-ts-mode-hook
+;;
+;;                   c-ts-mode-hook
+;;                   c++-ts-mode-hook
+;;                   c-mode-hook
+;;                   c++-mode-hook
+;;
+;;                   sh-mode-hook
+;;                   bash-ts-mode-hook))
+;;     (add-hook hook #'evil-matchit-mode))
+;;
+;;   :config
+;;   (add-to-list 'debug-ignored-errors "Unbalanced parentheses")
+;;
+;;   (when (fboundp 'evilmi-load-plugin-rules)
+;;     (evilmi-load-plugin-rules '(cmake-ts-mode) '(cmake))
+;;     (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(c simple))
+;;
+;;     ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
+;;     ;; # evilmi BUG here: place the cursor on { and press %
+;;     ;; _jc_better_cd() {
+;;     (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
+;;
+;;     ;; (evilmi-load-plugin-rules '(cmake-ts-mode) '(simple cmake))
+;;     ;; (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(simple c))
+;;
+;;     (evilmi-load-plugin-rules '(css-ts-mode) '(simple))
+;;     (evilmi-load-plugin-rules '(php-ts-mode) '(simple template html))
+;;     (evilmi-load-plugin-rules '(lua-ts-mode) '(simple script))
+;;     (evilmi-load-plugin-rules '(python-ts-mode) '(simple python))
+;;     (evilmi-load-plugin-rules '(yaml-ts-mode) '(simple yaml))
+;;
+;;     ;; Loads the 'simple' plugin before the 'sh' plugin. The 'simple' plugin
+;;     ;; handles basic text matching for brackets and quotes. Placing it first
+;;     ;; ensures that [ ] pairs are matched immediately, preventing the 'sh'
+;;     ;; plugin from incorrectly interpreting them as part of the if/fi control
+;;     ;; flow structure.
+;;     ;; (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
+;;
+;;     )
+;;
+;;   ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
+;;   ;; # evilmi BUG here: place the cursor on { and press %
+;;   ;; (defun my/evilmi-jump-items-around (orig-fn &rest args)
+;;   ;;   "Advice to use `evil-jump-item' for ()[]{} and `evilmi-jump-items' otherwise."
+;;   ;;   (let ((char (char-after)))
+;;   ;;     (if (and char (member char '(?\( ?\) ?\[ ?\] ?\{ ?\})))
+;;   ;;         (evil-jump-item)
+;;   ;;       (apply orig-fn args))))
+;;   ;; (advice-add 'evilmi-jump-items :around #'my/evilmi-jump-items-around)
+;;
+;;   (with-eval-after-load 'evil
+;;     (require 'evil-matchit-evil-setup)))
 
 ;;; Package: quick-sdcv
 

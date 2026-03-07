@@ -60,65 +60,120 @@ export VIM_PERSISTENT_SESSION_ENABLED=0
 # CUSTOM ENV
 #------------------------------------------------------------------------------
 custom_env() {
-  # Use local variables to avoid polluting the global shell namespace
-  local action="$1"
-  local env_name="$2"
-  local base_path="${CUSTOM_ENV_BASE_PATH}"
-  local requested_path
-  local resolved_path
-
-  # 1. Validation
-  if [ -z "$action" ] || { [ "$action" != "list" ] && [ -z "$env_name" ]; }; then
+  # Validation
+  if [ -z "$1" ] || { [ "$1" != "list" ] && [ -z "$2" ]; }; then
     echo "Usage: custom_env <list|load> [env]" >&2
     return 1
   fi
 
-  if [ -z "$base_path" ] || [ ! -d "$base_path" ]; then
-    echo "Error: \$CUSTOM_ENV_BASE_PATH is not set or not a directory: $base_path" >&2
+  if [ -z "$CUSTOM_ENV_BASE_PATH" ] || [ ! -d "$CUSTOM_ENV_BASE_PATH" ]; then
+    echo "Error: \$CUSTOM_ENV_BASE_PATH is not set or not a " \
+      "directory: $CUSTOM_ENV_BASE_PATH" >&2
     return 1
   fi
 
-  # 2. Path Construction
-  requested_path="${base_path}"
-  if [ -n "$env_name" ]; then
-    requested_path="${base_path}/${env_name}"
+  # Path Construction
+  if [ -n "$2" ]; then
+    _ce_requested_path="${CUSTOM_ENV_BASE_PATH}/${2}"
+  else
+    _ce_requested_path="${CUSTOM_ENV_BASE_PATH}"
   fi
 
-  # 3. Path Resolution
-  resolved_path=$(realpath "$requested_path" 2>/dev/null)
+  # Path Resolution
+  _ce_resolved_path=$(realpath "$_ce_requested_path" 2>/dev/null)
 
-  if [ -z "$resolved_path" ] || [ ! -d "$resolved_path" ]; then
+  if [ -z "$_ce_resolved_path" ] || [ ! -d "$_ce_resolved_path" ]; then
     # Use requested_path here so the error message is actually helpful
-    echo "Error: No such directory: $requested_path" >&2
+    echo "Error: No such directory: $_ce_requested_path" >&2
+    unset _ce_requested_path _ce_resolved_path
     return 1
   fi
 
-  # 4. Actions
-  case "$action" in
+  # Actions
+  case "$1" in
   "list")
-    echo "'${resolved_path}':"
-    ls -1 "$resolved_path"
+    echo "'${_ce_resolved_path}':"
+    ls -1 "$_ce_resolved_path"
     ;;
   "load")
-    echo "[load-custom-env] $resolved_path"
-    if declare -f _jc_add_local_path >/dev/null; then
-      _jc_add_local_path "$resolved_path"
+    echo "[load-custom-env] $_ce_resolved_path"
+
+    if command -v _jc_add_local_path >/dev/null 2>&1; then
+      _jc_add_local_path "$_ce_resolved_path"
     else
       # Fallback if your helper function isn't loaded
-      export PATH="$resolved_path/bin:$PATH"
+      export PATH="$_ce_resolved_path/bin:$PATH"
     fi
+
+    # Shared libraries
+    if [ -d "$_ce_resolved_path/lib" ]; then
+      export LD_LIBRARY_PATH="$_ce_resolved_path/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    fi
+
+    if [ -d "$_ce_resolved_path/lib64" ]; then
+      export LD_LIBRARY_PATH="$_ce_resolved_path/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    fi
+
+    # XDG data directories (desktop entries, icons, mime types)
+    # if [ -d "$_ce_resolved_path/share" ]; then
+    #   if [ -z "$XDG_DATA_DIRS" ]; then
+    #     export XDG_DATA_DIRS="$_ce_resolved_path/share:/usr/local/share:/usr/share"
+    #   else
+    #     export XDG_DATA_DIRS="$_ce_resolved_path/share:$XDG_DATA_DIRS"
+    #   fi
+    # fi
+
+    # XDG config directories
+    # if [ -d "$_ce_resolved_path/etc/xdg" ]; then
+    #   if [ -z "$XDG_CONFIG_DIRS" ]; then
+    #     export XDG_CONFIG_DIRS="$_ce_resolved_path/etc/xdg:/etc/xdg"
+    #   else
+    #     export XDG_CONFIG_DIRS="$_ce_resolved_path/etc/xdg:$XDG_CONFIG_DIRS"
+    #   fi
+    # fi
+
+    # Man pages (trailing colon ensures system default man paths are appended)
+    if [ -d "$_ce_resolved_path/share/man" ]; then
+      export MANPATH="$_ce_resolved_path/share/man:${MANPATH}"
+    fi
+
+    # Info pages (trailing colon ensures system default info paths are appended)
+    if [ -d "$_ce_resolved_path/share/info" ]; then
+      export INFOPATH="$_ce_resolved_path/share/info:${INFOPATH}"
+    fi
+
+    # Pkg-config
+    if [ -d "$_ce_resolved_path/lib/pkgconfig" ]; then
+      export PKG_CONFIG_PATH="$_ce_resolved_path/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+    fi
+
+    if [ -d "$_ce_resolved_path/share/pkgconfig" ]; then
+      export PKG_CONFIG_PATH="$_ce_resolved_path/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+    fi
+
+    C/C++ includes
+    if [ -d "$_ce_resolved_path/include" ]; then
+      export C_INCLUDE_PATH="$_ce_resolved_path/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
+      export CPLUS_INCLUDE_PATH="$_ce_resolved_path/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
+    fi
+
+    CMake
+    export CMAKE_PREFIX_PATH="$_ce_resolved_path${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
     ;;
   *)
-    echo "Error: Unknown action '$action'. Use 'list' or 'load'." >&2
+    echo "Error: Unknown action '$1'. Use 'list' or 'load'." >&2
+    unset _ce_requested_path _ce_resolved_path
     return 1
     ;;
   esac
+
+  unset _ce_requested_path _ce_resolved_path
 }
 
 OSFAMILY=$(osid 2>/dev/null)
 if [ -n "$USER" ] && [ -n "$OSFAMILY" ]; then
   CUSTOM_ENV_BASE_PATH="/opt/local/$USER/$OSFAMILY"
-  custom_env load emacs/tag-emacs-30.2 &>/dev/null
+  custom_env load emacs/tag-emacs-30.2 >/dev/null 2>&1
 fi
 
 # AI env var hugging face
