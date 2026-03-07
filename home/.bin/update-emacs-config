@@ -104,6 +104,7 @@ custom-emacs() {
 
   shift
 
+  > "$dest_dir/lisp/local/config.el"
   if [[ $# -gt 0 ]]; then
     printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
   fi

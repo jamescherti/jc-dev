@@ -315,6 +315,7 @@ EL-FILE is the *.el file."
                                      ))
 (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
 
+(message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :nosuffix)
 
 ;;; Options

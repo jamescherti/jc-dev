@@ -29,4 +29,7 @@
 OSFAMILY=$(osid)
 export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
 
+EMACS_D="$HOME/.emacs-master.d/"
+export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache:"
+
 exec run-emacs --init-directory ~/.emacs-master.d/ "$@"
