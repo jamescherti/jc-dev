@@ -86,8 +86,7 @@ path_remove() {
     fi
   done
 
-  eval "${1}=\"\$_pr_new\""
-  eval "export ${1}"
+  eval "export ${1}=\"\$_pr_new\""
   unset _pr_val _pr_new _pr_dir
 }
 
@@ -105,19 +104,19 @@ path_append() {
   eval "_pa_val=\${$1}"
 
   if [ -z "$_pa_val" ]; then
-    eval "$1=\$2"
+    eval "$1=\"\$2\""
   else
-    eval "$1=\$_pa_val:\$2"
+    eval "$1=\"\$_pa_val:\$2\""
   fi
 
-  eval "export $1"
+  eval 'export $1'
 
   unset _pa_val
 }
 
 # Usage: path_prepend VAR "/path/to/dir"
 path_prepend() {
-  # Validate to avoid, for example, path_remove 'PATH; rm -rf /' /tmp
+  # Validate to avoid, for example, `path_prepend 'PATH; rm -rf /' /tmp`
   case $1 in
   *[!A-Za-z0-9_]* | '')
     return 1
@@ -129,12 +128,12 @@ path_prepend() {
   eval "_pp_val=\${$1}"
 
   if [ -z "$_pp_val" ]; then
-    eval "$1=\$2"
+    eval "$1=\"\$2\""
   else
-    eval "$1=\$2:\$_pp_val"
+    eval "$1=\"\$2:\$_pp_val\""
   fi
 
-  eval "export $1"
+  eval 'export $1'
 
   unset _pp_val
 }
@@ -179,22 +178,38 @@ custom_env() {
     echo "[load-custom-env] $_ce_resolved_path"
 
     # Fallback if your helper function isn't loaded
-    prepend_var PATH "$_ce_resolved_path/bin"
+    path_prepend PATH "$_ce_resolved_path/bin"
 
     # Shared libraries
-    # if [ -d "$_ce_resolved_path/lib" ]; then
-    #   prepend_var LD_LIBRARY_PATH "$_ce_resolved_path/lib"
-    # fi
+    if [ -d "$_ce_resolved_path/lib" ]; then
+      path_prepend LD_LIBRARY_PATH "$_ce_resolved_path/lib"
+    fi
 
-    # if [ -d "$_ce_resolved_path/lib64" ]; then
-    #   prepend_var LD_LIBRARY_PATH "$_ce_resolved_path/lib64"
-    # fi
+    if [ -d "$_ce_resolved_path/lib64" ]; then
+      path_prepend LD_LIBRARY_PATH "$_ce_resolved_path/lib64"
+    fi
+
+    # # Man pages (trailing colon ensures system default man paths are appended)
+    if [ -d "$_ce_resolved_path/share/man" ]; then
+      path_prepend MANPATH "$_ce_resolved_path/share/man"
+    fi
+
+    # Info pages (trailing colon ensures system default info paths are appended)
+    if [ -d "$_ce_resolved_path/share/info" ]; then
+      path_prepend INFOPATH "$_ce_resolved_path/share/info"
+    fi
+
+    # C/C++ includes
+    if [ -d "$_ce_resolved_path/include" ]; then
+      path_prepend C_INCLUDE_PATH "$_ce_resolved_path/include"
+      path_prepend CPLUS_INCLUDE_PATH "$_ce_resolved_path/include"
+    fi
 
     # XDG data directories (desktop entries, icons, mime types)
     # if [ -d "$_ce_resolved_path/share" ]; then
     #   if [ -z "$XDG_DATA_DIRS" ]; then
     #   else
-    #     prepend_var XDG_DATA_DIRS "$_ce_resolved_path/share"
+    #     path_prepend XDG_DATA_DIRS "$_ce_resolved_path/share"
     #   fi
     # fi
 
@@ -202,40 +217,21 @@ custom_env() {
     # if [ -d "$_ce_resolved_path/etc/xdg" ]; then
     #   if [ -z "$XDG_CONFIG_DIRS" ]; then
     #   else
-    #     prepend_var XDG_CONFIG_DIRS "$_ce_resolved_path/etc/xdg"
+    #     path_prepend XDG_CONFIG_DIRS "$_ce_resolved_path/etc/xdg"
     #   fi
     # fi
 
-    # # Man pages (trailing colon ensures system default man paths are appended)
-    # if [ -d "$_ce_resolved_path/share/man" ]; then
-    #   prepend_var MANPATH "$_ce_resolved_path/share/man"
-    #   case "$MANPATH" in *:) ;; *) MANPATH="${MANPATH}:" ;; esac
-    # fi
-    #
-    # # Info pages (trailing colon ensures system default info paths are appended)
-    # if [ -d "$_ce_resolved_path/share/info" ]; then
-    #   prepend_var INFOPATH "$_ce_resolved_path/share/info"
-    #   case "$INFOPATH" in *:) ;; *) INFOPATH="${INFOPATH}:" ;; esac
-    # fi
-    #
-    # # Pkg-config
+    # Pkg-config
     # if [ -d "$_ce_resolved_path/lib/pkgconfig" ]; then
-    #   prepend_var PKG_CONFIG_PATH "$_ce_resolved_path/lib/pkgconfig"
+    #   path_prepend PKG_CONFIG_PATH "$_ce_resolved_path/lib/pkgconfig"
     # fi
     #
     # if [ -d "$_ce_resolved_path/share/pkgconfig" ]; then
-    #   prepend_var PKG_CONFIG_PATH "$_ce_resolved_path/share/pkgconfig"
+    #   path_prepend PKG_CONFIG_PATH "$_ce_resolved_path/share/pkgconfig"
     # fi
-    #
-    # # C/C++ includes
-    # if [ -d "$_ce_resolved_path/include" ]; then
-    #   prepend_var C_INCLUDE_PATH "$_ce_resolved_path/include"
-    #
-    #   prepend_var CPLUS_INCLUDE_PATH "$_ce_resolved_path/include"
-    # fi
-    #
-    # # CMake
-    # prepend_var CMAKE_PREFIX_PATH "$_ce_resolved_path"
+
+    # CMake
+    # path_prepend CMAKE_PREFIX_PATH "$_ce_resolved_path"
     ;;
   *)
     echo "Error: Unknown action '$1'. Use 'list' or 'load'." >&2
