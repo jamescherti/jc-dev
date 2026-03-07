@@ -130,6 +130,12 @@ fi
 export LDFLAGS="$LDFLAGS -Wl,-O2 -Wl,--sort-common \
   -Wl,--as-needed -Wl,-z,pack-relative-relocs"
 
+
+if [[ $ID == "debian" ]] && [[ $VERSION_ID = "13" ]]; then
+  export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
+  export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
+fi
+
 # The `--with-mps=yes` configure flag instructs Emacs to use the **Memory Pool
 # System (MPS)** for memory management instead of its default conservative
 # garbage collector. MPS is a modular, high-performance garbage collection
