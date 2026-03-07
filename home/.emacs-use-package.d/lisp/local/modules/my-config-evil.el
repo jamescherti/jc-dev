@@ -1430,21 +1430,22 @@ search direction (default: \='forward)."
   (let* ((visual-p (evil-visual-state-p))
          (count 1)
          (direction (or direction 'forward))
-         (text (if visual-p
-                   (let ((selection (buffer-substring-no-properties
-                                     (region-beginning)
-                                     (region-end))))
-                     (evil-exit-visual-state)
-                     selection)
-                 (thing-at-point 'symbol t)))
          (bounds (unless visual-p
                    (bounds-of-thing-at-point 'symbol)))
+         ;; Fetch boundaries before evil-exit-visual-state deactivates the region
          (bnd-start (if visual-p
                         (region-beginning)
                       (car bounds)))
          (bnd-end (if visual-p
                       (region-end)
                     (cdr bounds)))
+         (text (if visual-p
+                   (let ((selection (buffer-substring-no-properties
+                                     bnd-start
+                                     bnd-end)))
+                     (evil-exit-visual-state)
+                     selection)
+                 (thing-at-point 'symbol t)))
          (current-pattern (and evil-ex-search-pattern
                                (car evil-ex-search-pattern)))
          (regex (when text
@@ -1466,7 +1467,8 @@ search direction (default: \='forward)."
                 ;; user's point and window view completely unchanged.
                 (save-window-excursion
                   (save-excursion
-                    (evil-ex-search 1))))
+                    ;; Use evil-ex-search-next instead of the interactive evil-ex-search
+                    (evil-ex-search-next count))))
             (search-failed
              nil))
         ;; Both `save-window-excursion' and `save-excursion' are used here to
