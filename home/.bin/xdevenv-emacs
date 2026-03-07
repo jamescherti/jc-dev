@@ -118,6 +118,7 @@ start-or-raise-emacs() {
 main() {
     # cleanup-emacs
     # Check if Emacs server is running
+    cd
     start-or-raise-emacs "$@"
 }
 
