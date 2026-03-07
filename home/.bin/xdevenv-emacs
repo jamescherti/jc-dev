@@ -34,11 +34,11 @@ HOME=$(eval echo "~$USER")
 set -e
 set -u
 
-# EMACS_BIN="$HOME/.bin/run-emacs-use-package"
+EMACS_BIN="$HOME/.bin/run-emacs-use-package"
 # # EMACS_BIN="$HOME/.bin/run-emacs-30"
 # EMACS_BIN="$HOME/.bin/run-emacs-master"
 # EMACS_BIN="$HOME/.bin/run-emacs-straight"
-EMACS_BIN="$HOME/.bin/run-emacs-elpaca"
+# EMACS_BIN="$HOME/.bin/run-emacs-elpaca"
 
 is_wayland() {
     [[ $XDG_SESSION_TYPE = wayland ]] || return 1

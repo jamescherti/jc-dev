@@ -279,66 +279,66 @@
 
 ;;; battery angel
 
-(require 'battery-angel)
-
-(defvar battery-angel--manage-compile-angel nil)
-
-(defun setup-battery-angel-on-ac ()
-  "This is called on AC."
-  ;; (when battery-angel-verbose
-  ;;   (message "Applying AC parameters"))
-
-  (setq auto-revert-interval 3)
-
-  ;; Flymake
-  (setq flymake-start-on-flymake-mode
-        (when (> (num-processors) 8)
-          t))
-
-  (setq flymake-no-changes-timeout
-        (when (> (num-processors) 8)
-          0.8))
-
-  (when (and battery-angel--manage-compile-angel
-             (fboundp 'compile-angel-on-load-mode)
-             (not compile-angel-on-load-mode))
-    (compile-angel-on-load-mode 1))
-
-  ;; Fast Consult
-  (setq consult-async-input-debounce 0.02
-        consult-async-input-throttle 0.05
-        consult-async-refresh-delay 0.02))
-
-(defun setup-battery-angel-on-bat ()
-  "This is called on BAT."
-  ;; (when battery-angel-verbose
-  ;;   (message "Applying BAT parameters"))
-
-  (setq auto-revert-interval 10)
-
-  ;; Flymake
-  (setq flymake-start-on-flymake-mode nil)
-  (setq flymake-no-changes-timeout nil)
-
-  (when (and battery-angel--manage-compile-angel
-             (fboundp 'compile-angel-on-load-mode)
-             compile-angel-on-load-mode)
-    ;; (setq battery-angel--manage-compile-angel t)
-    (compile-angel-on-load-mode -1))
-
-  ;; Default consult parameters
-  ;; (setq consult-async-input-debounce 0.1
-  ;;       consult-async-input-throttle 0.2
-  ;;       consult-async-refresh-delay 0.1)
-
-  (setq consult-async-input-debounce 0.2
-        consult-async-input-throttle 0.5
-        consult-async-refresh-delay 0.2))
-
-(setq battery-angel-verbose nil)
-(add-hook 'emacs-startup-hook #'battery-angel-mode 90)
-(add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
-(add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
+;; (require 'battery-angel)
+;;
+;; (defvar battery-angel--manage-compile-angel nil)
+;;
+;; (defun setup-battery-angel-on-ac ()
+;;   "This is called on AC."
+;;   ;; (when battery-angel-verbose
+;;   ;;   (message "Applying AC parameters"))
+;;
+;;   (setq auto-revert-interval 3)
+;;
+;;   ;; Flymake
+;;   (setq flymake-start-on-flymake-mode
+;;         (when (> (num-processors) 8)
+;;           t))
+;;
+;;   (setq flymake-no-changes-timeout
+;;         (when (> (num-processors) 8)
+;;           0.8))
+;;
+;;   (when (and battery-angel--manage-compile-angel
+;;              (fboundp 'compile-angel-on-load-mode)
+;;              (not compile-angel-on-load-mode))
+;;     (compile-angel-on-load-mode 1))
+;;
+;;   ;; Fast Consult
+;;   (setq consult-async-input-debounce 0.02
+;;         consult-async-input-throttle 0.05
+;;         consult-async-refresh-delay 0.02))
+;;
+;; (defun setup-battery-angel-on-bat ()
+;;   "This is called on BAT."
+;;   ;; (when battery-angel-verbose
+;;   ;;   (message "Applying BAT parameters"))
+;;
+;;   (setq auto-revert-interval 10)
+;;
+;;   ;; Flymake
+;;   (setq flymake-start-on-flymake-mode nil)
+;;   (setq flymake-no-changes-timeout nil)
+;;
+;;   (when (and battery-angel--manage-compile-angel
+;;              (fboundp 'compile-angel-on-load-mode)
+;;              compile-angel-on-load-mode)
+;;     ;; (setq battery-angel--manage-compile-angel t)
+;;     (compile-angel-on-load-mode -1))
+;;
+;;   ;; Default consult parameters
+;;   ;; (setq consult-async-input-debounce 0.1
+;;   ;;       consult-async-input-throttle 0.2
+;;   ;;       consult-async-refresh-delay 0.1)
+;;
+;;   (setq consult-async-input-debounce 0.2
+;;         consult-async-input-throttle 0.5
+;;         consult-async-refresh-delay 0.2))
+;;
+;; (setq battery-angel-verbose nil)
+;; (add-hook 'emacs-startup-hook #'battery-angel-mode 90)
+;; (add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
+;; (add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
 
 ;;; buffer guardian
 
