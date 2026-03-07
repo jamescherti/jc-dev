@@ -15,7 +15,8 @@ Actions=new-window;new-instance;
 
 [Desktop Action new-window]
 Name=New Window
-Exec=emacsclient --alternate-editor= --create-frame %F
+# Exec=emacsclient --alternate-editor= --create-frame %F
+Exec=emacs-edit %F
 
 [Desktop Action new-instance]
 Name=New Instance
