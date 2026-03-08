@@ -99,7 +99,6 @@ main() {
       exit 1
     fi
   else
-    # Emacs server is not running
     if [[ $EMACS_RUNNING -ne 0 ]]; then
       if pgrep --quiet --exact emacs; then
         EMACS_RUNNING=1
