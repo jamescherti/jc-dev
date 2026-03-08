@@ -53,13 +53,13 @@
 
 (setq compile-angel-verbose t)
 (setq compile-angel-debug t)
-(setq compile-angel-enable-byte-compile nil)
-(setq compile-angel-enable-native-compile t)
+;; (setq compile-angel-enable-byte-compile nil)
+;; (setq compile-angel-enable-native-compile nil)
 ;; (setq compile-angel-on-load-mode-compile-once nil)
 
+;; Experimental
 ;; (setq compile-angel-reload-compiled-version t)
-(setq compile-angel-native-compile-load t)
-(setq compile-angel-native-elisp-load-ignore-errors nil)
+;; (setq compile-angel-native-compile-load t)
 
 (require 'seq)
 (require 'my-defun)
@@ -108,14 +108,16 @@
 (setq lightemacs-recentf-track-switch-to-buffer t)
 
 (defvar my-src-dir-prefix (file-name-as-directory (expand-file-name "~/src/")))
-(defun my-compile-angel-predicate (el-file)
-  "Compile Angel predicate.
-EL-FILE is the *.el file."
-  (if (string-prefix-p my-src-dir-prefix (file-truename el-file))
-      (progn
-        :native-comp)
-    :continue))
-(setq compile-angel-predicate-function #'my-compile-angel-predicate)
+;; (defun my-compile-angel-predicate (el-file)
+;;   "Compile Angel predicate.
+;; EL-FILE is the *.el file."
+;;   (if (string-prefix-p my-src-dir-prefix (file-truename el-file))
+;;       (progn
+;;         :continue
+;;         ;; :native-comp
+;;         )
+;;     :continue))
+;; (setq compile-angel-predicate-function #'my-compile-angel-predicate)
 
 (with-eval-after-load 'compile-angel
   ;; Exclusions
@@ -138,7 +140,6 @@ EL-FILE is the *.el file."
 ;;       (when (and (fboundp 'subr-native-elisp-p)
 ;;                  (subr-native-elisp-p (symbol-function 'find-file)))
 ;;         t))
-
 
 (setq lightemacs-dtrt-indent-excluded-modes '(emacs-lisp-mode
                                               python-mode

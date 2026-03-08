@@ -33,16 +33,9 @@ actions:
   # This is not enough
   - path_match: "{{ cwd }}/home/*"
     shell: true
-    command:
-      - 'rsync'
-      - '--archive'
-      - --exclude='*.elc'
-      - --exclude='*.eln'
-      - --exclude='*.git'
-      - --exclude='flymake_*'
-      - --exclude='flycheck_*'
-      - "{{ cwd }}/home/"
-      - "{{ env.HOME }}/"
+    list_commands:
+      - ['rsync', '--archive', "--exclude='*.elc'", "--exclude='*.eln'", "--exclude='*.git'", "--exclude='flymake_*'", "--exclude='flycheck_*'", "{{ cwd }}/home/", "{{ env.HOME }}/"]
+      - update-emacs-config
     tags:
       - install
 
