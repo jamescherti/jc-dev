@@ -51,8 +51,8 @@
 ;;   (setq elpaca-build-steps (remove 'elpaca--generate-autoloads-async
 ;;                                    elpaca-build-steps)))
 
-(setq compile-angel-verbose nil)
-(setq compile-angel-debug nil)
+(setq compile-angel-verbose t)
+(setq compile-angel-debug t)
 (setq compile-angel-enable-byte-compile nil)
 (setq compile-angel-enable-native-compile t)
 (setq compile-angel-on-load-mode-compile-once t)
