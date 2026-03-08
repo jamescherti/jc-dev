@@ -2349,6 +2349,7 @@ ORIG-FN and ARGS is the functions and its arguments."
 ORIG-FUN is the advised function.  DESC is the package description struct."
   (let ((target-dir (expand-file-name "~/src/emacs/lightemacs")))
     (if (and (buffer-file-name (buffer-base-buffer))
+             (buffer-file-name (buffer-base-buffer))
              (file-in-directory-p buffer-file-name target-dir))
         ;; Condition met: return nil to skip the original function
         nil

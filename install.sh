@@ -389,10 +389,10 @@ config_gpg() {
   chmod 700 "$HOME/.ssh/"
 
   # ln -sf ~/.git
-  cp .gpg-agent.conf ~/.gnupg/gpg-agent.conf
+  cp "$SCRIPT_DIR/.gpg-agent.conf" ~/.gnupg/gpg-agent.conf
 
   local pinentry_bin
-  pinentry_bin=$(type -P pinentry-curses &>/dev/null)
+  pinentry_bin=$(type -P pinentry-curses)
   if [[ $OSTYPE =~ linux ]] && [[ "$pinentry_bin" != "" ]]; then
     # Linux specific. I added this condition because pinentry-curses does not
     # work on macOS.
@@ -405,8 +405,8 @@ main() {
   confirm
 
   copy_dotfiles
-  config_gpg
   config-jc-dotfiles
+  config_gpg
   config-bash-stdops
 
   config-lightvim
