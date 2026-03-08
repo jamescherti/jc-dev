@@ -28,9 +28,10 @@
 
 set -euf -o pipefail
 
-EMACSCLIENT_TIMEOUT=3
-EMACS_NEW_TAB=1
+EMACSCLIENT_TIMEOUT="${EMACSCLIENT_TIMEOUT:-3}"
+EMACS_NEW_TAB="${EMACS_NEW_TAB:-1}"
 INSIDE_RUN_EMACS="${INSIDE_RUN_EMACS:-}"
+MAX_WAIT_SECONDS=30
 
 if [[ $# -eq 0 ]]; then
   echo "Usage: $0 file"
@@ -38,7 +39,7 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # Requirements
-for CMD in emacs emacsclient; do
+for CMD in emacs emacsclient run-emacs-use-package; do
   if ! type -P "$CMD" &>/dev/null; then
     echo "Error: $CMD not found in \$PATH" >&2
     exit 1
@@ -51,13 +52,13 @@ run-emacsclient() {
 }
 
 run-emacs-without-args() {
-  # Do not use EMACS_ARGS
   run-emacs-use-package &>/dev/null || return "$?"
 }
 
 emacs-open-in-a-new-tab() {
-  [[ $EMACS_NEW_TAB -ne 0 ]] \
-    && run-emacsclient --suppress-output --eval '(tab-bar-new-tab) '
+  if [[ "$EMACS_NEW_TAB" -ne 0 ]]; then
+    run-emacsclient --suppress-output --eval '(tab-bar-new-tab)'
+  fi
   run-emacsclient --suppress-output "$@"
 }
 
@@ -73,23 +74,42 @@ else
   run-emacs-without-args &
   disown
 
+  wait_cycles=0
+  max_cycles=$((MAX_WAIT_SECONDS * 10))
+
+  # Wait for Emacs standard initialization
   while true; do
+    if [[ "$wait_cycles" -ge "$max_cycles" ]]; then
+      echo "Error: Timeout waiting for Emacs core to initialize." >&2
+      exit 1
+    fi
+
     AFTER_EMACS_INIT=$(run-emacsclient -e "(when after-init-time t)" || true)
-    if [[ $AFTER_EMACS_INIT = t ]]; then
+    # Check for both literal t and quoted "t"
+    if [[ "$AFTER_EMACS_INIT" == "t" ]] || [[ "$AFTER_EMACS_INIT" == '"t"' ]]; then
       break
     fi
     sleep 0.1
+    ((wait_cycles++))
   done
 
   # EasySession: Wait until the session is loaded
+  wait_cycles=0
   while true; do
+    if [[ "$wait_cycles" -ge "$max_cycles" ]]; then
+      echo "Error: Timeout waiting for EasySession to load." >&2
+      exit 1
+    fi
+
     SESSION_LOADED=$(
       run-emacsclient \
         -e "(and (boundp 'easysession--current-session-name)
                  easysession--current-session-name)" 2>/dev/null || true
     )
 
-    if [[ $SESSION_LOADED != "" ]] && [[ $SESSION_LOADED != nil ]]; then
+    if [[ "$SESSION_LOADED" != "" ]] \
+      && [[ "$SESSION_LOADED" != "nil" ]] \
+      && [[ "$SESSION_LOADED" != '"nil"' ]]; then
       break
     fi
 
