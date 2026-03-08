@@ -24,6 +24,45 @@
 
 ;;; Code:
 
+;;; put elc files in a separate dir
+
+;; TODO lightemacs?
+(defvar my-elc-cache-directory (expand-file-name "elc-cache/"
+                                                 user-emacs-directory)
+  "Directory to store byte-compiled .elc files.")
+
+(defun my-elc-cache-dest-file (filename)
+  "Determine the cache destination for the byte-compiled FILENAME."
+  (let* ((expanded (expand-file-name filename))
+         ;; Strip the root slash so it appends properly to the cache directory
+         (relative (replace-regexp-in-string "^/" "" expanded))
+         (dest (expand-file-name (concat relative "c") my-elc-cache-directory)))
+    (make-directory (file-name-directory dest) t)
+    dest))
+
+;; ;; Redirect the byte compiler output
+;; (with-eval-after-load 'bytecomp
+;;   (setq byte-compile-dest-file-function #'my-elc-cache-dest-file))
+;;
+;; (defun my-load-from-elc-cache-advice (orig-fun file &optional noerror nomessage nosuffix must-suffixes)
+;;   "Advice to load .elc from `my-elc-cache-directory' if available and newer."
+;;   (let* ((found-file (if (file-name-absolute-p file)
+;;                          file
+;;                        (locate-file file load-path (unless nosuffix (get-load-suffixes)))))
+;;          (cached-elc (when found-file
+;;                        (let ((rel (replace-regexp-in-string "^/" "" (expand-file-name found-file))))
+;;                          (expand-file-name (concat (file-name-sans-extension rel) ".elc") my-elc-cache-directory)))))
+;;     (if (and cached-elc
+;;              (file-exists-p cached-elc)
+;;              (file-newer-than-file-p cached-elc found-file))
+;;         ;; Load the cached .elc file
+;;         (apply orig-fun cached-elc noerror nomessage nosuffix must-suffixes)
+;;       ;; Fallback to standard loading
+;;       (apply orig-fun file noerror nomessage nosuffix must-suffixes))))
+;;
+;; ;; Advise `load' to check the cache directory first
+;; (advice-add 'load :around #'my-load-from-elc-cache-advice)
+
 ;;; Debug, native comp, and initial options
 
 ;; TODO test this more. It does not seem stable.

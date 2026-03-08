@@ -27,12 +27,10 @@
 #
 
 OSFAMILY=$(~/.local/bin/osid)
-
 export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
-# if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-#   export RUN_EMACS_BIN
-#   RUN_EMACS_BIN=$(type -P emacs)
-# fi
-export RUN_EMACS_FORCE=1
 
-exec run-emacs --init-directory ~/.devemacs.d "$@"
+EMACS_D="$HOME/.devemacs.d/"
+export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
+
+export RUN_EMACS_FORCE=1
+exec run-emacs --init-directory "$EMACS_D" "$@"

@@ -30,6 +30,25 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
+;; (defun my-load-from-elc-cache-advice (orig-fun file &optional noerror nomessage nosuffix must-suffixes)
+;;   "Advice to load .elc from `my-elc-cache-directory' if available and newer."
+;;   (let* ((found-file (if (file-name-absolute-p file)
+;;                          file
+;;                        (locate-file file load-path (unless nosuffix (get-load-suffixes)))))
+;;          (cached-elc (when found-file
+;;                        (let ((rel (replace-regexp-in-string "^/" "" (expand-file-name found-file))))
+;;                          (expand-file-name (concat (file-name-sans-extension rel) ".elc") my-elc-cache-directory)))))
+;;     (if (and cached-elc
+;;              (file-exists-p cached-elc)
+;;              (file-newer-than-file-p cached-elc found-file))
+;;         ;; Load the cached .elc file
+;;         (apply orig-fun cached-elc noerror nomessage nosuffix must-suffixes)
+;;       ;; Fallback to standard loading
+;;       (apply orig-fun file noerror nomessage nosuffix must-suffixes))))
+
+;; Advise `load' to check the cache directory first
+;; (advice-add 'load :around #'my-load-from-elc-cache-advice)
+
 ;;; Add some paths (copy paste)
 (require 'lightemacs)
 ;; (add-to-list 'load-path (expand-file-name "modules/"
