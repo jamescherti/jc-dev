@@ -55,7 +55,7 @@
 (setq compile-angel-debug t)
 (setq compile-angel-enable-byte-compile nil)
 (setq compile-angel-enable-native-compile t)
-(setq compile-angel-on-load-mode-compile-once t)
+;; (setq compile-angel-on-load-mode-compile-once nil)
 
 ;; (setq compile-angel-reload-compiled-version t)
 (setq compile-angel-native-compile-load t)
