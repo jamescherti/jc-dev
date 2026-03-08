@@ -38,45 +38,44 @@ export LSP_USE_PLISTS=true
 ORIG_CWD=$(pwd)
 
 # shellcheck disable=SC1090
-pushd . &>/dev/null # In case .profile or .bashrc modify the current directory
+# In case .profile or .bashrc modify the current directory
+pushd . &>/dev/null
 
 if [[ -f ~/.profile ]]; then
   # shellcheck disable=SC1090
-  source ~/.profile >/dev/null 2>&1
+  source ~/.profile &>/dev/null
 fi
 
 if [[ -f ~/.bashrc ]]; then
   # shellcheck disable=SC1090
-  source ~/.bashrc # In case .profile or .bashrc modify the current directory
+  source ~/.bashrc &>/dev/null
 fi
 
+# In case .profile or .bashrc modify the current directory
 popd &>/dev/null
 
-if [[ $RUN_EMACS_BIN = "" ]]; then
-  RUN_EMACS_BIN="emacs"
-fi
-
-set -euf
+set -euf -o pipefail
 
 EMACS_ARGS_DICT=(
   --no-site-file
   --no-site-lisp
   --no-splash
   --no-x-resources
-  --no-loadup
   --chdir "$ORIG_CWD"
+  #
+  # Removed: --no-loadup
+  #
+  # The --no-loadup option in GNU Emacs prevents Emacs from loading its standard
+  # startup file loadup.el. This file normally initializes a large portion of
+  # the core environment. Using this option therefore has significant side
+  # effects.
+  #
+  # --no-loadup
 )
 
 is-emacs-server-running() {
   # Hide output; return 0 if successful, 1 if connection fails
   emacsclient -e "(+ 1 1)" &>/dev/null
-}
-
-is-emacs-daemon() {
-  local result
-  # Fallback to echo "nil" if the server is not ready or errors out
-  result=$(emacsclient -e "(daemonp)" 2>/dev/null || echo "nil")
-  [[ "$result" == "t" ]]
 }
 
 main() {
@@ -91,26 +90,12 @@ main() {
   fi
 
   if is-emacs-server-running; then
-    if is-emacs-daemon; then
-      # Correctly pass arguments ($@) so files actually open in the client
-      exec emacsclient -c "$@"
-    else
-      echo "Emacs server is running, but not as a daemon." >&2
-      exit 1
-    fi
+    emacs-edit "$@"
+  elif ! pgrep --quiet --exact emacs; then
+    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
   else
-    if [[ $EMACS_RUNNING -ne 0 ]]; then
-      if pgrep --quiet --exact emacs; then
-        EMACS_RUNNING=1
-      fi
-    fi
-  fi
-
-  if [[ $EMACS_RUNNING -ne 0 ]]; then
     echo "Emacs is already running." >&2
     exit 1
-  else
-    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
   fi
 }
 
