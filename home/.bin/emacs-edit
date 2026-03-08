@@ -28,8 +28,9 @@
 
 set -euf -o pipefail
 
-EMACS_TIMEOUT=3
+EMACSCLIENT_TIMEOUT=3
 EMACS_NEW_TAB=1
+INSIDE_RUN_EMACS="${INSIDE_RUN_EMACS:-}"
 
 if [[ $# -eq 0 ]]; then
   echo "Usage: $0 file"
@@ -45,13 +46,13 @@ for CMD in emacs emacsclient; do
 done
 
 run-emacsclient() {
-  emacsclient --no-wait "--timeout=$EMACS_TIMEOUT" "$@" 2>/dev/null \
+  emacsclient --no-wait "--timeout=$EMACSCLIENT_TIMEOUT" "$@" 2>/dev/null \
     || return "$?"
 }
 
 run-emacs-without-args() {
   # Do not use EMACS_ARGS
-  emacs &>/dev/null || return "$?"
+  run-emacs-use-package &>/dev/null || return "$?"
 }
 
 emacs-open-in-a-new-tab() {
@@ -62,8 +63,13 @@ emacs-open-in-a-new-tab() {
 
 # Edit
 if run-emacsclient --suppress-output -e t; then
-  emacs-open-in-a-new-tab "$@"
+  emacs-open-in-a-new-tab "$@" || :
 else
+  if [[ $INSIDE_RUN_EMACS != "" ]]; then
+    echo "Error: Already inside run-emacs" >&2
+    exit 1
+  fi
+
   run-emacs-without-args &
   disown
 
@@ -91,5 +97,5 @@ else
   done
 
   # Open the file in a new tab
-  emacs-open-in-a-new-tab "$@"
+  emacs-open-in-a-new-tab "$@" || :
 fi

@@ -29,6 +29,7 @@
 # Safely assign default values
 RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-emacs}"
+export INSIDE_RUN_EMACS=1
 
 # Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
 # lsp-use-plists flag. plists provide better performance in deserialization and
