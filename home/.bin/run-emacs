@@ -25,11 +25,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-set -x
 
-EMACS_RUNNING=0
-
-RUN_EMACS_FORCE="${RUN_EMACS_FORCE:0}"
+# Safely assign default values
+RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
+RUN_EMACS_BIN="${RUN_EMACS_BIN:-emacs}"
 
 # Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
 # lsp-use-plists flag. plists provide better performance in deserialization and
@@ -57,7 +56,7 @@ if [[ $RUN_EMACS_BIN = "" ]]; then
   RUN_EMACS_BIN="emacs"
 fi
 
-set -euf -o pipefail
+set -euf
 
 EMACS_ARGS_DICT=(
   --no-site-file
@@ -69,38 +68,38 @@ EMACS_ARGS_DICT=(
 )
 
 is-emacs-server-running() {
-  local result
-  result=$(emacsclient -e "(+ 1 1)" 2>/dev/null)
-  [[ $result = 2 ]] && return 0
-  return 1
+  # Hide output; return 0 if successful, 1 if connection fails
+  emacsclient -e "(+ 1 1)" &>/dev/null
 }
 
 is-emacs-daemon() {
   local result
-  result=$(emacsclient -e "(daemonp)" 2>/dev/null)
-  [[ $result = t ]] && return 0
-  return 1
+  # Fallback to echo "nil" if the server is not ready or errors out
+  result=$(emacsclient -e "(daemonp)" 2>/dev/null || echo "nil")
+  [[ "$result" == "t" ]]
 }
 
 main() {
-  if [[ $RUN_EMACS_FORCE -ne 0 ]]; then
+  if [[ "$RUN_EMACS_FORCE" -ne 0 ]]; then
     exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
-    exit 1
   fi
 
-  if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-    echo "Error: File not found: '$RUN_EMACS_BIN'" >&2
+  # Correctly check if the binary exists in the system PATH
+  if ! type -P "$RUN_EMACS_BIN" &>/dev/null; then
+    echo "Error: Command not found in PATH: '$RUN_EMACS_BIN'" >&2
     exit 1
   fi
 
   if is-emacs-server-running; then
     if is-emacs-daemon; then
-      exec "emacsclient" -c
-      exit 1
+      # Correctly pass arguments ($@) so files actually open in the client
+      exec emacsclient -c "$@"
     else
-      EMACS_RUNNING=1
+      echo "Emacs server is running, but not as a daemon." >&2
+      exit 1
     fi
   else
+    # Emacs server is not running
     if [[ $EMACS_RUNNING -ne 0 ]]; then
       if pgrep --quiet --exact emacs; then
         EMACS_RUNNING=1
