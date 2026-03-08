@@ -24,9 +24,6 @@
 
 ;;; Code:
 
-(when (eq lightemacs-package-manager 'builtin-package)
-  (setq use-package-statistics t))
-
 ;;; Debug, native comp, and initial options
 
 ;; TODO test this more. It does not seem stable.
@@ -34,9 +31,10 @@
 (setq package-native-compile nil)
 (setq native-comp-jit-compilation nil)
 
-(defun user-post-early-init ()
+(defun lightemacs-user-post-early-init ()
   "Post early init."
-  (setq use-package-compute-statistics t))
+  (when (eq lightemacs-package-manager 'builtin-package)
+    (setq use-package-compute-statistics t)))
 
 (when (eq lightemacs-package-manager 'straight)
   (setq straight-disable-native-compile nil)
