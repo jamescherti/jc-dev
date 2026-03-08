@@ -36,7 +36,11 @@ RUN_EMACS_FORCE="${RUN_EMACS_FORCE:0}"
 export LSP_USE_PLISTS=true
 
 # shellcheck disable=SC1090
-source ~/.profile >/dev/null 2>&1
+pwd >"$HOME/.bash_lastdir" # Also loaded by ~/.profile
+if [[ -f ~/.profile ]]; then
+  # shellcheck disable=SC1090
+  source ~/.profile >/dev/null 2>&1
+fi
 
 if [[ -f ~/.bashrc ]]; then
   # shellcheck disable=SC1090
