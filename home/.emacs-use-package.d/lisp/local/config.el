@@ -40,10 +40,10 @@
     (make-directory (file-name-directory dest) t)
     dest))
 
-;; ;; Redirect the byte compiler output
-;; (with-eval-after-load 'bytecomp
-;;   (setq byte-compile-dest-file-function #'my-elc-cache-dest-file))
-;;
+;; Redirect the byte compiler output
+(with-eval-after-load 'bytecomp
+  (setq byte-compile-dest-file-function #'my-elc-cache-dest-file))
+
 ;; (defun my-load-from-elc-cache-advice (orig-fun file &optional noerror nomessage nosuffix must-suffixes)
 ;;   "Advice to load .elc from `my-elc-cache-directory' if available and newer."
 ;;   (let* ((found-file (if (file-name-absolute-p file)
