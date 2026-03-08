@@ -869,10 +869,10 @@ at the same level."
   (with-eval-after-load 'consult
     (add-hook 'consult-preview-allowed-hooks #'my-setup-olivetti-mode))
   (add-hook 'find-file-hook #'my-setup-olivetti-mode)
+  (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
+  (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode)
   ;; (add-hook 'text-mode-hook #'my-setup-olivetti-mode)
   ;; (add-hook 'prog-mode-hook #'my-setup-olivetti-mode)
-  ;; (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
-  (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode)
   )
 
 ;;; Perfect margin
