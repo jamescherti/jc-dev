@@ -25,6 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+set -x
 
 EMACS_RUNNING=0
 
@@ -35,8 +36,11 @@ RUN_EMACS_FORCE="${RUN_EMACS_FORCE:0}"
 # also put less presure than hash-tables.
 export LSP_USE_PLISTS=true
 
+ORIG_CWD=$(pwd)
+
 # shellcheck disable=SC1090
-pwd >"$HOME/.bash_lastdir" # Also loaded by ~/.profile
+pushd . &>/dev/null # In case .profile or .bashrc modify the current directory
+
 if [[ -f ~/.profile ]]; then
   # shellcheck disable=SC1090
   source ~/.profile >/dev/null 2>&1
@@ -44,8 +48,10 @@ fi
 
 if [[ -f ~/.bashrc ]]; then
   # shellcheck disable=SC1090
-  source ~/.bashrc
+  source ~/.bashrc # In case .profile or .bashrc modify the current directory
 fi
+
+popd &>/dev/null
 
 if [[ $RUN_EMACS_BIN = "" ]]; then
   RUN_EMACS_BIN="emacs"
@@ -59,16 +65,8 @@ EMACS_ARGS_DICT=(
   --no-splash
   --no-x-resources
   --no-loadup
-  --chdir "$HOME"
+  --chdir "$ORIG_CWD"
 )
-
-run-renice-all() {
-  # TODO: Conflict with ananicy
-  if [[ -f /usr/local/bin/renice-all ]] && type -P sudo &>/dev/null; then
-    (sleep 5 && sudo /usr/local/bin/renice-all) &
-    disown
-  fi
-}
 
 is-emacs-server-running() {
   local result
