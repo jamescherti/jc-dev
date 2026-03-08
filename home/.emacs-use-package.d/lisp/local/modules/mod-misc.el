@@ -501,9 +501,9 @@ environment for accurate linting."
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
   :init
+  (setq shell-pop-term-shell "/bin/bash")
   (setq shell-pop-window-size 30
         shell-pop-default-directory "~/src"
-        shell-pop-term-shell "/bin/bash"
         shell-pop-shell-type (quote ("ansi-term" "*ansi-term*"
                                      (lambda nil
                                        (ansi-term shell-pop-term-shell))))
