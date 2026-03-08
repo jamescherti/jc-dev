@@ -30,19 +30,13 @@ EMACS_RUNNING=0
 
 RUN_EMACS_FORCE="${RUN_EMACS_FORCE:0}"
 
-# TODO change this in run-emacs and xdevenv-emacs using 1 file sourced
-# if [[ -f /etc/profile ]]; then
-#   # shellcheck disable=SC1091
-#   source /etc/profile
-# fi
-#
-# if [[ -f /etc/bash.bashrc ]]; then
-#   # shellcheck disable=SC1091
-#   source /etc/bash.bashrc
-# fi
+# Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
+# lsp-use-plists flag. plists provide better performance in deserialization and
+# also put less presure than hash-tables.
+export LSP_USE_PLISTS=true
 
-# # shellcheck disable=SC1090
-# source ~/.profile >/dev/null 2>&1
+# shellcheck disable=SC1090
+source ~/.profile >/dev/null 2>&1
 
 if [[ -f ~/.bashrc ]]; then
   # shellcheck disable=SC1090
@@ -63,11 +57,6 @@ EMACS_ARGS_DICT=(
   --no-loadup
   --chdir "$HOME"
 )
-
-# Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
-# lsp-use-plists flag. plists provide better performance in deserialization and
-# also put less presure than hash-tables.
-export LSP_USE_PLISTS=true
 
 run-renice-all() {
   # TODO: Conflict with ananicy
