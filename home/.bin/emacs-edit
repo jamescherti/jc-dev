@@ -30,8 +30,9 @@ set -euf -o pipefail
 
 EMACSCLIENT_TIMEOUT="${EMACSCLIENT_TIMEOUT:-3}"
 EMACS_NEW_TAB="${EMACS_NEW_TAB:-1}"
-INSIDE_RUN_EMACS="${INSIDE_RUN_EMACS:-}"
 MAX_WAIT_SECONDS=30
+EMACS_BIN=run-emacs-use-package
+DISABLE_RUN_EMACS="${DISABLE_RUN_EMACS:-}"
 
 if [[ $# -eq 0 ]]; then
   echo "Usage: $0 file"
@@ -39,7 +40,7 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # Requirements
-for CMD in emacs emacsclient run-emacs-use-package; do
+for CMD in "$EMACS_BIN" emacsclient; do
   if ! type -P "$CMD" &>/dev/null; then
     echo "Error: $CMD not found in \$PATH" >&2
     exit 1
@@ -51,27 +52,36 @@ run-emacsclient() {
     || return "$?"
 }
 
-run-emacs-without-args() {
-  run-emacs-use-package &>/dev/null || return "$?"
-}
-
 emacs-open-in-a-new-tab() {
   if [[ "$EMACS_NEW_TAB" -ne 0 ]]; then
-    run-emacsclient --suppress-output --eval '(tab-bar-new-tab)'
+    run-emacsclient --suppress-output --eval '(tab-bar-new-tab)' || :
   fi
-  run-emacsclient --suppress-output "$@"
+
+  run-emacsclient --suppress-output "$@" || :
+}
+
+is-emacs-server-running() {
+  # Hide output; return 0 if successful, 1 if connection fails
+  emacsclient -e "(+ 1 1)" &>/dev/null
 }
 
 # Edit
-if run-emacsclient --suppress-output -e t; then
-  emacs-open-in-a-new-tab "$@" || :
+if is-emacs-server-running; then
+  EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
+
+  # emacs-open-in-a-new-tab "$@" || :
+  if [[ $EMACS_DAEMON == "t" ]]; then
+    run-emacsclient -c "$@" || :
+  else
+    run-emacsclient "$@" || :
+  fi
 else
-  if [[ $INSIDE_RUN_EMACS != "" ]]; then
+  if [[ $DISABLE_RUN_EMACS != "" ]] && [[ $DISABLE_RUN_EMACS -ne 0 ]]; then
     echo "Error: Already inside run-emacs" >&2
     exit 1
   fi
 
-  run-emacs-without-args &
+  "$EMACS_BIN" &>/dev/null &
   disown
 
   wait_cycles=0
@@ -84,7 +94,7 @@ else
       exit 1
     fi
 
-    AFTER_EMACS_INIT=$(run-emacsclient -e "(when after-init-time t)" || true)
+    AFTER_EMACS_INIT=$(run-emacsclient -e "(when after-init-time t)" || :)
     # Check for both literal t and quoted "t"
     if [[ "$AFTER_EMACS_INIT" == "t" ]] || [[ "$AFTER_EMACS_INIT" == '"t"' ]]; then
       break
@@ -104,7 +114,7 @@ else
     SESSION_LOADED=$(
       run-emacsclient \
         -e "(and (boundp 'easysession--current-session-name)
-                 easysession--current-session-name)" 2>/dev/null || true
+                 easysession--current-session-name)" 2>/dev/null || :
     )
 
     if [[ "$SESSION_LOADED" != "" ]] \
@@ -114,6 +124,7 @@ else
     fi
 
     sleep 0.1
+    ((wait_cycles++))
   done
 
   # Open the file in a new tab

@@ -26,36 +26,16 @@
 # SOFTWARE.
 #
 
+set -euf -o pipefail
+
 # Safely assign default values
 RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-emacs}"
-export INSIDE_RUN_EMACS=1
 
 # Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
 # lsp-use-plists flag. plists provide better performance in deserialization and
 # also put less presure than hash-tables.
 export LSP_USE_PLISTS=true
-
-ORIG_CWD=$(pwd)
-
-# shellcheck disable=SC1090
-# In case .profile or .bashrc modify the current directory
-pushd . &>/dev/null
-
-if [[ -f ~/.profile ]]; then
-  # shellcheck disable=SC1090
-  source ~/.profile &>/dev/null
-fi
-
-if [[ -f ~/.bashrc ]]; then
-  # shellcheck disable=SC1090
-  source ~/.bashrc &>/dev/null
-fi
-
-# In case .profile or .bashrc modify the current directory
-popd &>/dev/null
-
-set -euf -o pipefail
 
 EMACS_ARGS_DICT=(
   --no-site-file
@@ -80,23 +60,35 @@ is-emacs-server-running() {
 }
 
 main() {
-  if [[ "$RUN_EMACS_FORCE" -ne 0 ]]; then
-    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
-  fi
-
   # Correctly check if the binary exists in the system PATH
   if ! type -P "$RUN_EMACS_BIN" &>/dev/null; then
     echo "Error: Command not found in PATH: '$RUN_EMACS_BIN'" >&2
     exit 1
   fi
 
-  if is-emacs-server-running; then
-    emacs-edit "$@"
-  elif ! pgrep --quiet --exact emacs; then
-    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
+  ORIG_CWD=$(pwd)
+
+  # shellcheck disable=SC1090
+  # In case .profile or .bashrc modify the current directory
+  pushd . &>/dev/null
+
+  if [[ -f ~/.profile ]]; then
+    # shellcheck disable=SC1090
+    source ~/.profile &>/dev/null
+  fi
+
+  if [[ -f ~/.bashrc ]]; then
+    # shellcheck disable=SC1090
+    source ~/.bashrc &>/dev/null
+  fi
+
+  # In case .profile or .bashrc modify the current directory
+  popd &>/dev/null
+
+  if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
+    :
   else
-    echo "Emacs is already running." >&2
-    exit 1
+    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
   fi
 }
 
