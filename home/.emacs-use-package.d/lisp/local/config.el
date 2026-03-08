@@ -29,7 +29,7 @@
 ;; TODO test this more. It does not seem stable.
 ;; (setq package-quickstart t)
 (setq package-native-compile nil)
-(setq native-comp-jit-compilation nil)
+(setq native-comp-jit-compilation t)
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."
