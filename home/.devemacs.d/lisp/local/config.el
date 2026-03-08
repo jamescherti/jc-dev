@@ -32,7 +32,6 @@
 
 ;;; Add some paths (copy paste)
 (require 'lightemacs)
-;; (require 'le-core-paths)
 ;; (add-to-list 'load-path (expand-file-name "modules/"
 ;;                                           lightemacs-local-directory))
 ;; (add-to-list 'load-path lightemacs-local-modules-directory)

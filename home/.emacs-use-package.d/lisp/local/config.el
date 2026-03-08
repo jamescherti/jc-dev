@@ -24,7 +24,8 @@
 
 ;;; Code:
 
-;; (setq use-package-statistics t)
+(when (eq lightemacs-package-manager 'builtin-package)
+  (setq use-package-statistics t))
 
 ;;; Debug, native comp, and initial options
 
@@ -3509,7 +3510,7 @@ Only used when `lightemacs-maybe-recenter-after-jump' is non-nil and
 `scroll-conservatively' is >= 101. A numeric value indicates the number of lines
 from the top of the window; nil recenters in the middle.")
 
-(require 'le-core-defun)  ;; lightemacs-recenter-maybe
+(require 'lightemacs)  ;; lightemacs-recenter-maybe
 
 (defun lightemacs-default-settings--recenter-maybe ()
   "Recenter conditionally when `scroll-conservatively' is set to 101 or higher.

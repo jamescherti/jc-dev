@@ -27,7 +27,7 @@
 ;;; use-package project
 
 (require 'my-defun)
-(require 'le-core-paths)
+(require 'le-core-defaults)
 (require 'lightemacs-use-package)
 
 (lightemacs-use-package project
