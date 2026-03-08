@@ -25,6 +25,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+set -x
+
+# shellcheck disable=SC1090
+# In case .profile or .bashrc modify the current directory
+pushd . &>/dev/null
+
+if [[ -f ~/.profile ]]; then
+  # shellcheck disable=SC1090
+  source ~/.profile &>/dev/null || true
+fi
+
+if [[ -f ~/.bashrc ]]; then
+  # shellcheck disable=SC1090
+  source ~/.bashrc &>/dev/null || true
+fi
+
+# In case .profile or .bashrc modify the current directory
+popd &>/dev/null
 
 set -euf -o pipefail
 
@@ -37,6 +55,7 @@ RUN_EMACS_BIN="${RUN_EMACS_BIN:-emacs}"
 # also put less presure than hash-tables.
 export LSP_USE_PLISTS=true
 
+ORIG_CWD=$(pwd)
 EMACS_ARGS_DICT=(
   --no-site-file
   --no-site-lisp
@@ -65,25 +84,6 @@ main() {
     echo "Error: Command not found in PATH: '$RUN_EMACS_BIN'" >&2
     exit 1
   fi
-
-  ORIG_CWD=$(pwd)
-
-  # shellcheck disable=SC1090
-  # In case .profile or .bashrc modify the current directory
-  pushd . &>/dev/null
-
-  if [[ -f ~/.profile ]]; then
-    # shellcheck disable=SC1090
-    source ~/.profile &>/dev/null
-  fi
-
-  if [[ -f ~/.bashrc ]]; then
-    # shellcheck disable=SC1090
-    source ~/.bashrc &>/dev/null
-  fi
-
-  # In case .profile or .bashrc modify the current directory
-  popd &>/dev/null
 
   if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
     :

@@ -28,32 +28,23 @@
 
 set -euf -o pipefail
 
-EMACSCLIENT_TIMEOUT="${EMACSCLIENT_TIMEOUT:-3}"
-EMACS_NEW_TAB="${EMACS_NEW_TAB:-1}"
-MAX_WAIT_SECONDS=30
-EMACS_BIN=run-emacs-use-package
-DISABLE_RUN_EMACS="${DISABLE_RUN_EMACS:-}"
+EMACS_EDIT_TIMEOUT="${EMACS_EDIT_TIMEOUT:-3}"
+EMACS_EDIT_NEW_TAB="${EMACS_EDIT_NEW_TAB:-1}"
+EMACS_EDIT_WAIT_SECONDS=30
+EMACS_EDIT_EMACS_BIN=run-emacs-use-package
 
 if [[ $# -eq 0 ]]; then
   echo "Usage: $0 file"
   exit 1
 fi
 
-# Requirements
-for CMD in "$EMACS_BIN" emacsclient; do
-  if ! type -P "$CMD" &>/dev/null; then
-    echo "Error: $CMD not found in \$PATH" >&2
-    exit 1
-  fi
-done
-
 run-emacsclient() {
-  emacsclient --no-wait "--timeout=$EMACSCLIENT_TIMEOUT" "$@" 2>/dev/null \
+  emacsclient --no-wait "--timeout=$EMACS_EDIT_TIMEOUT" "$@" 2>/dev/null \
     || return "$?"
 }
 
 emacs-open-in-a-new-tab() {
-  if [[ "$EMACS_NEW_TAB" -ne 0 ]]; then
+  if [[ "$EMACS_EDIT_NEW_TAB" != "0" ]]; then
     run-emacsclient --suppress-output --eval '(tab-bar-new-tab)' || :
   fi
 
@@ -65,68 +56,75 @@ is-emacs-server-running() {
   emacsclient -e "(+ 1 1)" &>/dev/null
 }
 
-# Edit
-if is-emacs-server-running; then
-  EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
+main() {
+  # Requirements
+  for CMD in "$EMACS_EDIT_EMACS_BIN" emacsclient; do
+    if ! type -P "$CMD" &>/dev/null; then
+      echo "Error: $CMD not found in \$PATH" >&2
+      exit 1
+    fi
+  done
 
-  # emacs-open-in-a-new-tab "$@" || :
-  if [[ $EMACS_DAEMON == "t" ]]; then
-    run-emacsclient -c "$@" || :
+  # Edit
+  if is-emacs-server-running; then
+    EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
+
+    # emacs-open-in-a-new-tab "$@" || :
+    if [[ $EMACS_DAEMON == "t" ]]; then
+      run-emacsclient -c "$@" || :
+    else
+      run-emacsclient "$@" || :
+    fi
   else
-    run-emacsclient "$@" || :
-  fi
-else
-  if [[ $DISABLE_RUN_EMACS != "" ]] && [[ $DISABLE_RUN_EMACS -ne 0 ]]; then
-    echo "Error: Already inside run-emacs" >&2
-    exit 1
-  fi
+    "$EMACS_EDIT_EMACS_BIN" &>/dev/null &
+    disown
 
-  "$EMACS_BIN" &>/dev/null &
-  disown
+    wait_cycles=0
+    max_cycles=$((EMACS_EDIT_WAIT_SECONDS * 10))
 
-  wait_cycles=0
-  max_cycles=$((MAX_WAIT_SECONDS * 10))
+    # Wait for Emacs standard initialization
+    while true; do
+      if [[ "$wait_cycles" -ge "$max_cycles" ]]; then
+        echo "Error: Timeout waiting for Emacs core to initialize." >&2
+        exit 1
+      fi
 
-  # Wait for Emacs standard initialization
-  while true; do
-    if [[ "$wait_cycles" -ge "$max_cycles" ]]; then
-      echo "Error: Timeout waiting for Emacs core to initialize." >&2
-      exit 1
-    fi
+      AFTER_EMACS_INIT=$(run-emacsclient -e "(when after-init-time t)" || :)
+      # Check for both literal t and quoted "t"
+      if [[ "$AFTER_EMACS_INIT" == "t" ]] || [[ "$AFTER_EMACS_INIT" == '"t"' ]]; then
+        break
+      fi
+      sleep 0.1
+      ((wait_cycles++))
+    done
 
-    AFTER_EMACS_INIT=$(run-emacsclient -e "(when after-init-time t)" || :)
-    # Check for both literal t and quoted "t"
-    if [[ "$AFTER_EMACS_INIT" == "t" ]] || [[ "$AFTER_EMACS_INIT" == '"t"' ]]; then
-      break
-    fi
-    sleep 0.1
-    ((wait_cycles++))
-  done
+    # EasySession: Wait until the session is loaded
+    wait_cycles=0
+    while true; do
+      if [[ "$wait_cycles" -ge "$max_cycles" ]]; then
+        echo "Error: Timeout waiting for EasySession to load." >&2
+        exit 1
+      fi
 
-  # EasySession: Wait until the session is loaded
-  wait_cycles=0
-  while true; do
-    if [[ "$wait_cycles" -ge "$max_cycles" ]]; then
-      echo "Error: Timeout waiting for EasySession to load." >&2
-      exit 1
-    fi
-
-    SESSION_LOADED=$(
-      run-emacsclient \
-        -e "(and (boundp 'easysession--current-session-name)
+      SESSION_LOADED=$(
+        run-emacsclient \
+          -e "(and (boundp 'easysession--current-session-name)
                  easysession--current-session-name)" 2>/dev/null || :
-    )
+      )
 
-    if [[ "$SESSION_LOADED" != "" ]] \
-      && [[ "$SESSION_LOADED" != "nil" ]] \
-      && [[ "$SESSION_LOADED" != '"nil"' ]]; then
-      break
-    fi
+      if [[ "$SESSION_LOADED" != "" ]] \
+        && [[ "$SESSION_LOADED" != "nil" ]] \
+        && [[ "$SESSION_LOADED" != '"nil"' ]]; then
+        break
+      fi
 
-    sleep 0.1
-    ((wait_cycles++))
-  done
+      sleep 0.1
+      ((wait_cycles++))
+    done
 
-  # Open the file in a new tab
-  emacs-open-in-a-new-tab "$@" || :
-fi
+    # Open the file in a new tab
+    emacs-open-in-a-new-tab "$@" || :
+  fi
+}
+
+main "$@"
