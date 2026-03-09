@@ -275,8 +275,9 @@ WIDTH is the tab width."
   "This function is executed right before loading modules."
   ;; pre early init
 
-  (add-to-list 'warning-suppress-types '(treesit))
-  (add-to-list 'warning-suppress-log-types '(treesit))
+  ;; TODO eval after load
+  ;; (add-to-list 'warning-suppress-types '(treesit))
+  ;; (add-to-list 'warning-suppress-log-types '(treesit))
 
   (my-setup-filetype)
 

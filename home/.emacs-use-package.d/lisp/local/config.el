@@ -93,8 +93,46 @@
         (make-directory (file-name-directory dest) t)
         dest))))
 
+;; TODO
+;; The provided Emacs Lisp snippet successfully intercepts
+;; the byte-compiler and writes the .elc files to your
+;; custom elc-cache/ directory. However, Emacs is still
+;; loading the .el files because of a disconnect between the
+;; compiler and the loader. Setting
+;; byte-compile-dest-file-function only changes the output
+;; destination for the compilation process. It does not
+;; update the load-path or instruct the load function on
+;; where to find those newly relocated .elc files. When
+;; Emacs evaluates (require 'feature) or (load "library"),
+;; it searches the directories listed in your load-path
+;; variable. Because the nested directories inside your
+;; elc-cache/ are not in the load-path, Emacs cannot see the
+;; compiled files. It falls back to the original
+;; directories, finds the uncompiled .el files, and loads
+;; them instead. To make Emacs use your out-of-tree .elc
+;; files, you need to bridge this gap. You have two main
+;; approaches: Modify the Load Path: You can write a
+;; function that recursively finds all directories inside
+;; my-elc-cache-directory and prepends them to your
+;; load-path. This allows the default Emacs load function to
+;; find the cached .elc files before checking the original
+;; source directories. Advise the Load Function: You can use
+;; advice-add on the load function to intercept every load
+;; request. The advice would check if a matching .elc file
+;; exists in your cache directory and, if so, dynamically
+;; rewrite the file path before passing it to the original
+;; load function. As a side note regarding your
+;; configuration, since you have enabled native compilation
+;; ((setq native-comp-jit-compilation t)), Emacs
+;; automatically handles out-of-tree caching for natively
+;; compiled .eln files via native-comp-eln-load-path.
+;; Keeping .elc files alongside their .el sources is the
+;; standard design in Emacs, which is why out-of-tree
+;; byte-compilation requires extra configuration to work
+;; correctly.
+;;
 ;; Redirect the byte compiler output
-(setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
+;; (setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
 
 ;;; Other settings
 
