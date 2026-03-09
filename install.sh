@@ -424,9 +424,7 @@ main() {
   config-xfce
   config-mimetypes
 
-  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
-    "$SCRIPT_DIR/home/.bin/update-emacs-config"
-  fi
+  "$SCRIPT_DIR/home/.bin/update-emacs-config"
 
   echo
   echo "[INFO] Update spell check dictionary"

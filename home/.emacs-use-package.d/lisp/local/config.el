@@ -26,8 +26,6 @@
 
 ;;; Debug, native comp, and initial options
 
-(setq native-comp-async-report-warnings-errors t)
-
 ;; TODO test this more. It does not seem stable.
 ;; (setq package-quickstart t)
 (setq package-native-compile nil)
@@ -35,6 +33,7 @@
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."
+  (setq native-comp-async-report-warnings-errors t)
   (when (eq lightemacs-package-manager 'builtin-package)
     (setq use-package-compute-statistics t)))
 
@@ -659,6 +658,8 @@
 
                            le-easysession
 
+                           mod-misc
+
                            ;; My modules
                            ;;------------------------------
 
@@ -688,8 +689,6 @@
 
                            mod-kirigami
                            ;; mod-kirigami-alternative
-
-                           mod-misc
 
                            ;; le-treesit-auto
                            ))

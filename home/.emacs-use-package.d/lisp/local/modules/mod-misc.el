@@ -3299,6 +3299,7 @@ environment for accurate linting."
 
 (lightemacs-use-package stillness-mode
   :commands stillness-mode
+  :after dash
   :hook (lightemacs-after-init . stillness-mode))
 
 ;;; shell-pop
