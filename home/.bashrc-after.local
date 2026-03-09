@@ -532,3 +532,9 @@ smart-editor() {
 alias vim=smart-editor
 
 alias bf="batchfetch"
+
+if ! type -P so &>/dev/null; then
+  so() {
+    :
+  }
+fi
