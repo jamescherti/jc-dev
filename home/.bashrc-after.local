@@ -535,6 +535,6 @@ alias bf="batchfetch"
 
 if ! type -P so &>/dev/null; then
   so() {
-    :
+    "$@" || return "$?"
   }
 fi
