@@ -26,6 +26,8 @@
 
 ;;; Debug, native comp, and initial options
 
+(setq native-comp-async-report-warnings-errors t)
+
 ;; TODO test this more. It does not seem stable.
 ;; (setq package-quickstart t)
 (setq package-native-compile nil)
@@ -36,12 +38,12 @@
   (when (eq lightemacs-package-manager 'builtin-package)
     (setq use-package-compute-statistics t)))
 
-(when (eq lightemacs-package-manager 'straight)
-  (setq straight-disable-native-compile nil)
-
-  ;; Causes issues
-  ;; (setq straight-disable-autoloads t)
-  )
+;;(when (eq lightemacs-package-manager 'straight)
+;;  (setq straight-disable-native-compile nil)
+;;
+;;  ;; Causes issues
+;;  ;; (setq straight-disable-autoloads t)
+;;  )
 
 ;;; byte-compile
 
@@ -72,16 +74,19 @@
                          ;; Fallback for older Emacs versions
                          (byte-compile-dest-file filename))))
     ;; Ignore Emacs's built-in files
-    (if (or (and my-elc-cache--emacs-lisp-directory
-                 (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
-            ;; early-init has no way to guess the elc-cache path before it is
-            ;; loaded before config.el
-            (string-suffix-p "/init.el" true-file)
-            (string-suffix-p "/early-init.el" true-file)
-            (string-suffix-p "/config.el" true-file)
-            ;; Ignore files already in the cache directory to prevent recursive
-            ;; paths
-            (string-prefix-p my-elc-cache-directory true-file))
+    (if (or
+         ;; (and my-elc-cache--emacs-lisp-directory
+         ;;      (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
+         ;; early-init has no way to guess the elc-cache path before it is
+         ;; loaded before config.el
+         ;; (string-suffix-p "/init.el" true-file)
+         ;; (string-suffix-p "/early-init.el" true-file)
+         ;; (string-suffix-p "/config.el" true-file)
+         (not (string-prefix-p (file-truename "~/src/") true-file))
+         ;; Ignore files already in the cache directory to prevent recursive
+         ;; paths
+         ;; (string-prefix-p my-elc-cache-directory true-file)
+         )
         ;; Return the normal destination
         default-dest
       ;; Map the third-party file into the cache directory
@@ -132,7 +137,7 @@
 ;; correctly.
 ;;
 ;; Redirect the byte compiler output
-;; (setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
+(setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
 
 ;;; Other settings
 
