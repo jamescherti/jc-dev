@@ -28,7 +28,7 @@
 
 OSFAMILY=$(osid)
 export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
-if [[ -f "$RUN_EMACS_BIN" ]]; then
+if ! [[ -f "$RUN_EMACS_BIN" ]]; then
   RUN_EMACS_BIN=emacs
 fi
 
