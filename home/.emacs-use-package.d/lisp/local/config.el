@@ -29,7 +29,7 @@
 ;; TODO test this more. It does not seem stable.
 ;; (setq package-quickstart t)
 (setq package-native-compile nil)
-(setq native-comp-jit-compilation t)
+(setq native-comp-jit-compilation nil)
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."
@@ -153,7 +153,7 @@
 
 ;; Experimental
 ;; (setq compile-angel-reload-compiled-version t)
-;; (setq compile-angel-native-compile-load t)
+(setq compile-angel-native-compile-load t)
 
 (require 'seq)
 (require 'my-defun)
@@ -721,35 +721,37 @@
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
 ;; Tell straight.el to treat it as a built-in Emacs package
-(dolist (item '(be-quiet
-                bufferfile
-                buffer-terminator
-                bufferwizard
-                compile-angel
-                cursorcolumn
-                dir-config
-                easysession
-                enhanced-evil-paredit
-                flymake-ansible-lint
-                flymake-bashate
-                inhibit-mouse
-                kirigami
-                org-ibullets
-                outline-indent
-                outline-yaml
-                pathaction
-                persist-text-scale
-                quick-fasd
-                quick-sdcv
-                stripspace
-                tomorrow-night-deepblue-theme
-                ultisnips-mode
-                vim-tab-bar))
-  (when (file-exists-p (expand-file-name (concat (symbol-name item) ".el")
-                                         "~/src/emacs"))
-    (when (eq lightemacs-package-manager 'straight)
-      (add-to-list 'straight-recipe-overrides
-                   (list item :type 'built-in)))))
+
+;; NOTE DISABLED to avoid .elc conflicts
+;; (dolist (item '(be-quiet
+;;                 bufferfile
+;;                 buffer-terminator
+;;                 bufferwizard
+;;                 compile-angel
+;;                 cursorcolumn
+;;                 dir-config
+;;                 easysession
+;;                 enhanced-evil-paredit
+;;                 flymake-ansible-lint
+;;                 flymake-bashate
+;;                 inhibit-mouse
+;;                 kirigami
+;;                 org-ibullets
+;;                 outline-indent
+;;                 outline-yaml
+;;                 pathaction
+;;                 persist-text-scale
+;;                 quick-fasd
+;;                 quick-sdcv
+;;                 stripspace
+;;                 tomorrow-night-deepblue-theme
+;;                 ultisnips-mode
+;;                 vim-tab-bar))
+;;   (when (file-exists-p (expand-file-name (concat (symbol-name item) ".el")
+;;                                          "~/src/emacs"))
+;;     (when (eq lightemacs-package-manager 'straight)
+;;       (add-to-list 'straight-recipe-overrides
+;;                    (list item :type 'built-in)))))
 
 (defun my-add-packages-to-load-path ()
   "Add my packages to `load-path\=' dynamically.
