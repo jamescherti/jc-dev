@@ -76,8 +76,9 @@
                  (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
             ;; early-init has no way to guess the elc-cache path before it is
             ;; loaded before config.el
-            (string-suffix-p "/init.el" filename)
-            (string-suffix-p "/early-init.el" filename)
+            (string-suffix-p "/init.el" true-file)
+            (string-suffix-p "/early-init.el" true-file)
+            (string-suffix-p "/config.el" true-file)
             ;; Ignore files already in the cache directory to prevent recursive
             ;; paths
             (string-prefix-p my-elc-cache-directory true-file))
