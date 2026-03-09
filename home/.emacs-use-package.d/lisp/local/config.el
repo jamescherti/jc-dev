@@ -24,45 +24,6 @@
 
 ;;; Code:
 
-;;; put elc files in a separate dir
-
-;; TODO lightemacs?
-(defvar my-elc-cache-directory (expand-file-name "elc-cache/"
-                                                 user-emacs-directory)
-  "Directory to store byte-compiled .elc files.")
-
-(defun my-elc-cache-dest-file (filename)
-  "Determine the cache destination for the byte-compiled FILENAME."
-  (let* ((expanded (expand-file-name filename))
-         ;; Strip the root slash so it appends properly to the cache directory
-         (relative (replace-regexp-in-string "^/" "" expanded))
-         (dest (expand-file-name (concat relative "c") my-elc-cache-directory)))
-    (make-directory (file-name-directory dest) t)
-    dest))
-
-;; Redirect the byte compiler output
-(with-eval-after-load 'bytecomp
-  (setq byte-compile-dest-file-function #'my-elc-cache-dest-file))
-
-;; (defun my-load-from-elc-cache-advice (orig-fun file &optional noerror nomessage nosuffix must-suffixes)
-;;   "Advice to load .elc from `my-elc-cache-directory' if available and newer."
-;;   (let* ((found-file (if (file-name-absolute-p file)
-;;                          file
-;;                        (locate-file file load-path (unless nosuffix (get-load-suffixes)))))
-;;          (cached-elc (when found-file
-;;                        (let ((rel (replace-regexp-in-string "^/" "" (expand-file-name found-file))))
-;;                          (expand-file-name (concat (file-name-sans-extension rel) ".elc") my-elc-cache-directory)))))
-;;     (if (and cached-elc
-;;              (file-exists-p cached-elc)
-;;              (file-newer-than-file-p cached-elc found-file))
-;;         ;; Load the cached .elc file
-;;         (apply orig-fun cached-elc noerror nomessage nosuffix must-suffixes)
-;;       ;; Fallback to standard loading
-;;       (apply orig-fun file noerror nomessage nosuffix must-suffixes))))
-;;
-;; ;; Advise `load' to check the cache directory first
-;; (advice-add 'load :around #'my-load-from-elc-cache-advice)
-
 ;;; Debug, native comp, and initial options
 
 ;; TODO test this more. It does not seem stable.
@@ -81,6 +42,60 @@
   ;; Causes issues
   ;; (setq straight-disable-autoloads t)
   )
+
+;;; byte-compile
+
+(defvar my-elc-cache--emacs-lisp-directory
+  ;; Directory where Emacs's own *.el and *.elc Lisp files are installed.
+  (if (bound-and-true-p lisp-directory)
+      ;; Always use `file-truename'
+      (file-truename lisp-directory)
+    (when-let* ((library-path (locate-library "simple")))
+      ;; Always use `file-truename'
+      (file-name-directory (file-truename library-path)))))
+
+;; TODO lightemacs?
+(defvar my-elc-cache-directory
+  ;; This has to be `file-truename'
+  (file-truename (expand-file-name "elc-cache/" user-emacs-directory))
+  "Directory to store byte-compiled .elc files.")
+
+(defun my-elc-cache-dest-file (filename)
+  "Determine the cache destination for the byte-compiled FILENAME."
+  (let* ((true-file (file-truename filename))
+         ;; FIX: Temporarily disable the hook variable to prevent infinite
+         ;; recursion
+         (byte-compile-dest-file-function nil)
+         ;; Use Emacs's native compiler functions to safely handle .gz and .elc
+         (default-dest (if (fboundp 'byte-compile-default-dest-file)
+                           (byte-compile-default-dest-file filename)
+                         ;; Fallback for older Emacs versions
+                         (byte-compile-dest-file filename))))
+    ;; Ignore Emacs's built-in files
+    (if (or (and my-elc-cache--emacs-lisp-directory
+                 (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
+            ;; early-init has no way to guess the elc-cache path before it is
+            ;; loaded before config.el
+            (string-suffix-p "/init.el" filename)
+            (string-suffix-p "/early-init.el" filename)
+            ;; Ignore files already in the cache directory to prevent recursive
+            ;; paths
+            (string-prefix-p my-elc-cache-directory true-file))
+        ;; Return the normal destination
+        default-dest
+      ;; Map the third-party file into the cache directory
+      (let* ((expanded-dest (expand-file-name default-dest))
+             ;; Strip the leading slash so it appends properly to the cache
+             ;; directory
+             (relative (replace-regexp-in-string "^/" "" expanded-dest))
+             (dest (expand-file-name relative my-elc-cache-directory)))
+        (make-directory (file-name-directory dest) t)
+        dest))))
+
+;; Redirect the byte compiler output
+(setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
+
+;;; Other settings
 
 ;; Fix autoload modus-themes.
 ;; (autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
@@ -983,6 +998,10 @@ WIDTH is the tab width."
 (defun lightemacs-user-post-init ()
   "This function is executed right before loading modules."
   ;; pre early init
+
+  (add-to-list 'warning-suppress-types '(treesit))
+  (add-to-list 'warning-suppress-log-types '(treesit))
+
   (my-setup-filetype)
 
   (setq uniquify-buffer-name-style 'reverse)

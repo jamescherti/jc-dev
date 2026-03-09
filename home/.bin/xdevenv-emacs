@@ -34,7 +34,8 @@ HOME=$(eval echo "~$USER")
 set -e
 set -u
 
-EMACS_BIN="$HOME/.bin/run-emacs-use-package"
+# EMACS_BIN="$HOME/.bin/run-emacs-use-package"
+EMACS_BIN="$HOME/.bin/emacs-edit"
 # # EMACS_BIN="$HOME/.bin/run-emacs-30"
 # EMACS_BIN="$HOME/.bin/run-emacs-master"
 # EMACS_BIN="$HOME/.bin/run-emacs-straight"
@@ -119,7 +120,7 @@ main() {
     # cleanup-emacs
     # Check if Emacs server is running
     cd
-    start-or-raise-emacs "$@"
+    start-or-raise-emacs
 }
 
 main "$@"

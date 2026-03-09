@@ -248,7 +248,7 @@ config-startup-apps() {
 }
 
 config-lightemacs() {
-  if [[ -f ~/src/emacs/lightemacs/ ]]; then
+  if [[ -d ~/src/emacs/lightemacs/ ]]; then
     if git-is-clean ~/src/emacs/lightemacs/; then
       git -C ~/src/emacs/lightemacs/ checkout develop
       git -C ~/src/emacs/lightemacs/ pull --rebase
