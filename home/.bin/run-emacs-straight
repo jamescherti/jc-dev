@@ -28,6 +28,9 @@
 
 OSFAMILY=$(~/.local/bin/osid)
 export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
+if [[ -f "$RUN_EMACS_BIN" ]]; then
+  RUN_EMACS_BIN=emacs
+fi
 
 EMACS_D="$HOME/.emacs-straight.d/"
 export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"

@@ -34,6 +34,9 @@
 (require 'seq)
 (require 'my-defun)
 
+;; Optional
+(require 'mod-misc2 nil t)
+
 ;;; Target hooks
 
 ;; (setq lightemacs-buffer-terminator-target-hooks '())

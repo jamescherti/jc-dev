@@ -136,8 +136,8 @@
 
 ;;; Other settings
 
-;; Fix autoload modus-themes.
-;; (autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
+;; Fix autoload modus-themes (straight)
+(autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
 
 ;; TODO lightemacs package manager variable to disable autoloads
 ;; Buggy?
@@ -192,11 +192,6 @@
 ;; TODO find out why early-init and init is compiled when
 ;; compile-angel-native-compile-load is t
 (setq lightemacs-load-compiled-init-files t)
-
-(setq lightemacs-optional-modules '(
-                                    mod-misc2
-                                    ;; mod-defun
-                                    ))
 
 (setq lightemacs-recentf-track-switch-to-buffer t)
 
@@ -669,7 +664,6 @@
 
                            ;; Legacy (DEPRECATED)
                            ;; mod-defun
-                           mod-misc2
 
                            ;; New
                            ;; tmp-easysession
