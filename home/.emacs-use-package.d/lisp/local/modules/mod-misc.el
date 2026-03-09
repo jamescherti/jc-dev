@@ -37,6 +37,15 @@
 ;; Optional
 (require 'mod-misc2 nil t)
 
+;;; gc sentinel
+
+(lightemacs-use-package gcsentinel
+  :ensure nil
+  :commands gcsentinel-mode
+  :init
+  (add-hook 'lightemacs-emacs-startup-hook #'gcsentinel-mode 200)
+  (setq gcsentinel-low-cons-threshold minimal-emacs-gc-cons-threshold))
+
 ;;; Target hooks
 
 ;; (setq lightemacs-buffer-terminator-target-hooks '())
