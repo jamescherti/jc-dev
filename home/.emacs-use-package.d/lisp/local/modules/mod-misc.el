@@ -3144,7 +3144,7 @@ This function is intended for use as :around advice."
   :commands buffer-guardian-mode
 
   :hook
-  (emacs-startup . buffer-guardian-mode)
+  (lightemacs-emacs-startup . buffer-guardian-mode)
 
   :init
   (setq buffer-guardian-verbose nil)
