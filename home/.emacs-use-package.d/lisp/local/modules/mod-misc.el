@@ -31,6 +31,8 @@
 
 (require 'my-defun)
 (require 'lightemacs-use-package)
+(require 'seq)
+(require 'my-defun)
 
 ;;; Target hooks
 

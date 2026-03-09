@@ -153,10 +153,9 @@
 
 ;; Experimental
 ;; (setq compile-angel-reload-compiled-version t)
-(setq compile-angel-native-compile-load t)
+;; (setq compile-angel-native-compile-load t)
 
 (require 'seq)
-(require 'my-defun)
 
 (setq debug-on-error t)
 
