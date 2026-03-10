@@ -1528,7 +1528,7 @@ The DWIM behaviour of this command is as follows:
   (cond
    ((or (derived-mode-p 'markdown-mode)
         (derived-mode-p 'org-mode))
-    (setq-local display-line-numbers-type 'relative)
+    ;; (setq-local display-line-numbers-type 'relative)
     (display-line-numbers-mode 1))
 
    (t
@@ -3739,6 +3739,44 @@ This prevents Flymake warnings when viewing framework source files in Emacs
            (listp trusted-content))
   (let ((dir (file-name-as-directory lightemacs-core-directory)))
     (add-to-list 'trusted-content dir)))
+
+;;; track eol (TODO light emacs)
+
+;; Set evil-track-eol to track-eol (nil, by default)
+;;
+;; When this is set to nil, it prevents the cursor from landing on invisible
+;; text (folded Org-mode subtrees) when moving vertically from a longer line
+;; to a shorter visible heading.
+;;
+;; (Setting evil-track-eol to nil is necessary because when it is enabled, the
+;; cursor is forced to the logical end of a line during vertical movement. In
+;; modes such as Org-mode or outline, this causes the point to bypass visible
+;; heading text and land on hidden characters within a folded subtree. By
+;; disabling this behavior, the cursor is prevented from becoming trapped in
+;; invisible metadata or folded content, ensuring that up and down navigation
+;; respects the visual boundaries of the document rather than its underlying
+;; logical structure.)
+(setq evil-track-eol nil)
+
+;; When navigating vertically with visual line movement commands such as
+;; previous-visual-line or next-visual-line (or evil-previous-visual-line and
+;; evil-next-visual-line when using Evil), the cursor may enter invisible text
+;; if folded regions are present.
+;;
+;; This behavior occurs under the following conditions:
+;; - End-of-line tracking is enabled and the cursor originates from a longer
+;;   line. During vertical movement, the cursor attempts to preserve its
+;;   logical column position, which can correspond to a location inside hidden
+;;   content on the target line.
+;; - line-move-ignore-invisible is set to nil, causing Emacs to include hidden
+;;   or folded text during vertical movement rather than skipping it.
+;;
+;; The following ensures that vertical navigation never lands in invisible
+;; text within folded regions, add the following to your configuration:
+(setq track-eol nil)
+;; (setq evil-track-eol track-eol)
+(setq line-move-ignore-invisible t)
+
 
 ;;; Provide
 

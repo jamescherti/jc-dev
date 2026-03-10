@@ -1675,6 +1675,29 @@ of the line or the buffer; just return nil."
                        'category)))
       (symbol-name prop))))
 
+;; TODO should this be part of Emacs ? PATCH
+(defun evilcursor--after-vertical-movement ()
+  "Run this after a vertical movement."
+  (when (invisible-p (line-beginning-position))
+    (vertical-motion 0)
+    ;; TODO Which is faster: end-of-line or goto-char?
+    ;; (goto-char (line-end-position))
+    (end-of-line)))
+
+(evil-define-motion evilcursor-next-visual-line (count)
+  "Move the cursor COUNT screen lines down."
+  :type exclusive
+  (let ((line-move-visual t))
+    (evil-line-move (or count 1)))
+  (evilcursor--after-vertical-movement))
+
+(evil-define-motion evilcursor-previous-visual-line (count)
+  "Move the cursor COUNT screen lines up."
+  :type exclusive
+  (let ((line-move-visual t))
+    (evil-line-move (- (or count 1))))
+  (evilcursor--after-vertical-movement))
+
 (defun evilcursor-forward-line (n)
   "Move N lines forward (backward if N is negative).
 More accurate than `evil-next-line' and `evil-previous-line' when lines are not
@@ -1684,12 +1707,12 @@ truncated."
     (setq n 1))
   (cond
    ((minibufferp)
-    (let ((forwardp (> (or n 1) 0)))
+    ;; ignore-errors fixes issues with icomplete
+    (if (> (or n 1) 0)
+        (ignore-errors
+          (next-line-or-history-element))
       (ignore-errors
-        ;; ignore-errors fixes issues with icomplete
-        (if forwardp
-            (next-line-or-history-element)
-          (previous-line-or-history-element)))))
+        (previous-line-or-history-element))))
 
    ;; Not Minibuffer
    (t
@@ -1700,26 +1723,28 @@ truncated."
 
            ;; (evil-respect-visual-line-mode nil)
 
-           ;; (next-line-add-newlines nil)
-           ;; (line-move-visual nil)
-           ;; (scroll-preserve-screen-position nil)
+           ;; TODO enable?
+           ;; (evil-track-eol nil)
+           ;; (track-eol nil)
+           ;; (line-move-ignore-invisible t)
 
            (func-change-line (if forwardp
                                  #'evil-next-line
                                #'evil-previous-line))
            (func-change-line-visual (if forwardp
-                                        #'evil-next-visual-line
-                                      #'evil-previous-visual-line)))
+                                        #'evilcursor-next-visual-line
+                                      #'evilcursor-previous-visual-line)))
       (cond
+       ;; TODO patch embark
        ((eq major-mode 'embark-collect-mode)
         (let ((previous-cat (evilcursor--get-category-at-point))
-              (point (point))
+              (start-point (point))
               (current-cat nil)
               (next-cat nil))
           (funcall func-change-line count)
           (setq current-cat (evilcursor--get-category-at-point))
 
-          (unless (= point (point))
+          (unless (= start-point (point))
             (setq next-cat (save-excursion
                              (funcall func-change-line count)
                              (evilcursor--get-category-at-point)))
@@ -1771,50 +1796,112 @@ truncated."
        ;;  )
 
        ((eq line-number-type 'visual)
-        (if (and truncate-lines (= count 1))
-            ;; This speeds-up scrolling because it does not take into
-            ;; consideration visual things
-            (progn
-              (funcall func-change-line-visual count)
+        (funcall func-change-line-visual count)
 
-              ;; (funcall func-change-line count)
-              ;; (when (invisible-p (point))
-              ;;   (end-of-visible-line))
-              )
-          (funcall func-change-line-visual count)))
+        ;; (if (or truncate-lines
+        ;;         (= count 1))
+        ;;     ;; This speeds-up scrolling because it does not take into
+        ;;     ;; consideration visual things
+        ;;     (progn
+        ;;       ;; (let ((line-move-visual t))
+        ;;       ;;   (if (> n 0)
+        ;;       ;;       (progn
+        ;;       ;;         (call-interactively 'next-line count)
+        ;;       ;;         (when (get-char-property (point) 'invisible)
+        ;;       ;;           (let ((prev-visible (previous-single-char-property-change (point) 'invisible nil (point-min))))
+        ;;       ;;             (when prev-visible
+        ;;       ;;               (goto-char prev-visible))))
+        ;;       ;;         )
+        ;;       ;;     (call-interactively 'previous-line count)))
+        ;;
+        ;;       ;; Fixes kirigami/outline/org...
+        ;;       (funcall func-change-line-visual count)
+        ;;
+        ;;
+        ;;       ;; (funcall func-change-line count)
+        ;;       )
+        ;;   (funcall func-change-line-visual count))
+        )
 
        ((eq line-number-type 'relative)
-        (let (;; Do not ignore invisible when moving more than one line because
-              ;; the line numbers displayed by `display-line-numbers-mode' when
-              ;; display-line-numbers-type is relative doesn't ignore invisible
-              ;; lines.
-              (line-move-visual nil)
-              (line-move-ignore-invisible (when (< count 2) t)))
-          (if truncate-lines
-              (funcall func-change-line count)
-            (funcall (if (> count 1)
-                         func-change-line
-                       func-change-line-visual)
-                     count))))
+        (funcall func-change-line count)
+
+        ;; TODO patch?
+        ;; Long lines do not wrap; they disappear off the right edge of the
+        ;; window. Because there is no line wrapping, one logical line
+        ;; corresponds exactly to one vertical visual line on the screen. Using
+        ;; func-change-line (logical movement) here is faster and avoids the
+        ;; overhead of calculating visual screen lines.
+        ;; (if (or truncate-lines (truncated-partial-width-window-p))
+        ;;     (funcall func-change-line count)
+        ;;   ;; When truncate-lines is nil: Long lines wrap to the next visual
+        ;;   ;; line. To navigate these wrapped lines intuitively, you must use
+        ;;   ;; func-change-line-visual. If you used logical movement here,
+        ;;   ;; pressing down once could jump the cursor past several lines of
+        ;;   ;; wrapped text.
+        ;;   (funcall func-change-line-visual count))
+
+        ;;
+        ;; (funcall (if (> count 1)
+        ;;              func-change-line
+        ;;            func-change-line-visual)
+        ;;          count)
+        ;; (let (;; Do not ignore invisible when moving more than one line because
+        ;;       ;; the line numbers displayed by `display-line-numbers-mode' when
+        ;;       ;; display-line-numbers-type is relative doesn't ignore invisible
+        ;;       ;; lines.
+        ;;       (line-move-visual nil)
+        ;;       ;; (line-move-ignore-invisible (when (< count 2) t))
+        ;;       )
+        ;;   (if truncate-lines
+        ;;       (funcall func-change-line count)
+        ;;     (funcall (if (> count 1)
+        ;;                  func-change-line
+        ;;                func-change-line-visual)
+        ;;              count)))
+        )
 
        ;; Absolute
+       ;; ((eq line-number-type t)
+       ;;  (let ((line-move-visual nil))
+       ;;    ;; Force logical line movement to match absolute line numbers.
+       ;;    ;; Emacs natively handles narrowing bounds, so no widen/save-restriction is needed.
+       ;;    (funcall func-change-line count)))
        ((eq line-number-type t)
-        (let ((line-move-ignore-invisible nil)
-              (line-move-visual nil))
-          ;; BUG fix? TODO Emacs / evil
-          (let ((count (if (> count 1)
-                           (1- count)
-                         count)))
-            ;; (line-number-at-pos nil t) returns the absolute line number,
-            ;; accounting for the narrowing offset automatically.
-            ;; TODO fix this, does not su pport narrowing
-            (let ((target count))
-              (funcall func-change-line target))
-            ;; Ignore narrowing (TODO bug fix?)
-            ;; (save-restriction
-            ;;   (widen)
-            ;;   (funcall func-change-line count))
-            )))
+        ;; TODO doesn't work when count > 1
+        (funcall func-change-line count)
+
+        ;; (let ((start-line (line-number-at-pos))
+        ;;       (line-move-ignore-invisible t)
+        ;;       (line-move-visual nil)
+        ;;       (evil-respect-visual-line-mode nil)
+        ;;       (track-eol nil)
+        ;;       (evil-track-eol nil))
+        ;;   ;; TODO Patch to Emacs / evil?
+        ;;   (if (buffer-narrowed-p)
+        ;;       (goto-char
+        ;;        (save-restriction
+        ;;          (widen)
+        ;;          (goto-char (point-min))
+        ;;          (funcall func-change-line count)
+        ;;          ;; (forward-line n)
+        ;;          ;; The point is now at the absolute target line. When this
+        ;;          ;; block ends, save-restriction restores the narrowing. If
+        ;;          ;; the point is outside the restored narrowing, Emacs will
+        ;;          ;; automatically handle the display or you can manually clamp
+        ;;          ;; it.
+        ;;          (point)))
+        ;;     ;; (line-number-at-pos nil t) returns the absolute line number,
+        ;;     ;; accounting for the narrowing offset automatically.
+        ;;     ;; TODO fix this, does not support narrowing
+        ;;     ;; (funcall func-change-line (if (> n 0)
+        ;;     ;;                               ;; Previous
+        ;;     ;;                               (1+ (- count start-line))
+        ;;     ;;                             ;; Next
+        ;;     ;;                             (- count start-line)))
+        ;;     )
+        ;;   )
+        )
 
        (t
         (message
