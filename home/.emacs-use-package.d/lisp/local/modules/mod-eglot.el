@@ -27,7 +27,7 @@
 
 ;;; Require
 
-(require 'lightemacs-use-package)
+(eval-and-compile (require 'lightemacs-use-package))
 (require 'my-defun)
 
 (when (my-treesit-language-available-p 'python)

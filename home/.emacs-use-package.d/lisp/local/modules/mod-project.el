@@ -28,7 +28,7 @@
 
 (require 'my-defun)
 (require 'le-core-defaults)
-(require 'lightemacs-use-package)
+(eval-and-compile (require 'lightemacs-use-package))
 
 (lightemacs-use-package project
   :ensure nil

@@ -29,7 +29,7 @@
 (require 'evil)
 (require 'my-defun)
 (require 'lightemacs)  ; lightemacs-save-window-start
-(require 'lightemacs-use-package)  ; lightemacs-save-window-start
+(eval-and-compile (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'mod-project)
 
 ;;; Better evil

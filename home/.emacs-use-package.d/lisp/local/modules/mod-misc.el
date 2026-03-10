@@ -30,7 +30,8 @@
 ;;; Require
 
 (require 'my-defun)
-(require 'lightemacs-use-package)
+(eval-and-compile
+  (require 'lightemacs-use-package))
 (require 'seq)
 (require 'my-defun)
 

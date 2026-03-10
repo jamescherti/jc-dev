@@ -27,7 +27,7 @@
 ;;; Code:
 
 (require 'buffer-guardian)
-(require 'lightemacs-use-package)
+(eval-and-compile (require 'lightemacs-use-package))
 
 (defvar mod-buffer-terminator-keep-buffer-regexp nil)
 (setq mod-buffer-terminator-keep-buffer-regexp '("\\`\\(?: \\)?\\*eldoc for .*\\*\\'"

@@ -25,7 +25,7 @@
 
 ;;; Code:
 
-(require 'lightemacs-use-package)
+(eval-and-compile (require 'lightemacs-use-package))
 (require 'my-defun)
 (require 'le-corfu)
 (require 'le-cape)

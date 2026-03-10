@@ -26,7 +26,7 @@
 
 ;;; Code:
 
-(require 'lightemacs-use-package)
+(eval-and-compile (require 'lightemacs-use-package))
 
 ;; Important for kirigami jump to load
 (require 'kirigami)
