@@ -3291,10 +3291,11 @@ environment for accurate linting."
 
 ;;; git-timemachine
 
-(lightemacs-use-package git-timemachine
-  :commands git-timemachine
-  :bind (:map vc-prefix-map
-              ("t" . git-timemachine)))
+;; Fails with elpaca
+;; (lightemacs-use-package git-timemachine
+;;   :commands git-timemachine
+;;   :bind (:map vc-prefix-map
+;;               ("t" . git-timemachine)))
 
 ;;; stillness-mode
 
