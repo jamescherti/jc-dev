@@ -34,8 +34,9 @@
 (defun lightemacs-user-post-early-init ()
   "Post early init."
   (setq native-comp-async-report-warnings-errors t)
-  (when (eq lightemacs-package-manager 'builtin-package)
-    (setq use-package-compute-statistics t)))
+  ;; (when (eq lightemacs-package-manager 'builtin-package)
+  ;;   (setq use-package-compute-statistics t))
+  )
 
 ;;(when (eq lightemacs-package-manager 'straight)
 ;;  (setq straight-disable-native-compile nil)
