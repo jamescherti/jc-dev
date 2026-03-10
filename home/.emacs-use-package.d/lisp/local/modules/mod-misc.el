@@ -1099,7 +1099,6 @@ WIDTH is the tab width."
         ;; read-char-by-name-sort 'code
         ;; revert-buffer-quick-short-answers t
         ;; shift-select-mode 'permanent
-        ;; track-eol t
 
         ;; The benefit of visual-order-cursor-movement t is that when editing text
         ;; containing both left-to-right and right-to-left scripts, cursor

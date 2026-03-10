@@ -1699,15 +1699,11 @@ truncated."
                                display-line-numbers-type))
 
            ;; (evil-respect-visual-line-mode nil)
-           ;; (evil-track-eol nil)
-           ;; (track-eol nil)
+
            ;; (next-line-add-newlines nil)
            ;; (line-move-visual nil)
            ;; (scroll-preserve-screen-position nil)
 
-           ;; (func-change-line (if forwardp
-           ;;                       #'next-line
-           ;;                     #'previous-line))
            (func-change-line (if forwardp
                                  #'evil-next-line
                                #'evil-previous-line))
