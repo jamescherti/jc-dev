@@ -938,6 +938,36 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
       (easysession-save-session-and-close-frames)
     (save-buffers-kill-emacs)))
 
+(defun my-interesting-buffer-p ()
+  "Return t if this buffer is considered a file/directory."
+  (let ((buffer-name (buffer-name))
+        (file-name (buffer-file-name (buffer-base-buffer))))
+    (when (or (string-prefix-p "*Ollama" buffer-name)
+              (string-prefix-p "*sdcv:" buffer-name)
+              (not (or (string-prefix-p "*" buffer-name)
+                       (string-prefix-p " " buffer-name)
+                       (and file-name
+                            (string-suffix-p "/todo.org" file-name)))))
+      t)))
+
+(defun my-smart-previous-interesting-buffer ()
+  "Switch to the previous buffer that is a file, Dired, or vterm."
+  (interactive)
+  (let ((current-buffer (current-buffer)))
+    (previous-buffer)
+    (while (and (not (my-interesting-buffer-p))
+                (not (eq (current-buffer) current-buffer)))
+      (previous-buffer))))
+
+(defun my-smart-next-interesting-buffer ()
+  "Switch to the next buffer that is a file, Dired, or vterm."
+  (interactive)
+  (let ((current-buffer (current-buffer)))
+    (next-buffer)
+    (while (and (not (my-interesting-buffer-p))
+                (not (eq (current-buffer) current-buffer)))
+      (next-buffer))))
+
 ;;; Provide
 (provide 'my-defun)
 
