@@ -1328,9 +1328,12 @@ Returns:
  ibuffer-use-header-line nil
  ;; ibuffer-default-shrink-to-minimum-size t
 
- )
+ ;; Prevent long file names from wrapping when using olivetti
+ ibuffer-truncate-lines t)
+
 
 (with-eval-after-load 'ibuffer
+
   (progn
     ;; Add size
     (define-ibuffer-column size-h
@@ -1346,6 +1349,11 @@ Returns:
                   (size-h 9 -1 :right) " "
                   (mode 16 16 :left :elide) " "
                   filename-and-process))))
+
+  (add-hook 'ibuffer-hook
+            (lambda ()
+              ;; For some reason, ibuffer-truncate-lines doesn't work (TODO)
+              (toggle-truncate-lines 1)))
 
   (add-hook 'ibuffer-mode-hook
             (lambda ()
