@@ -26,6 +26,16 @@
 
 ;;; Debug, native comp, and initial options
 
+(let ((user-dir (file-truename lightemacs-user-directory)))
+  (cond
+   ((string= user-dir
+             (file-truename "~/.emacs-elpaca.d/"))
+    (setq lightemacs-package-manager 'elpaca))
+   ((string= user-dir
+             (file-truename "~/.emacs-straight.d/"))
+    (setq lightemacs-package-manager 'straight))))
+
+
 ;; TODO test this more. It does not seem stable.
 ;; (setq package-quickstart t)
 (setq package-native-compile nil)
