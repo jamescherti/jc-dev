@@ -104,6 +104,7 @@
 (setq native-comp-jit-compilation nil)
 
 (setq lightemacs-modules '(le-compile-angel
+                           le-pathaction
 
                            le-autorevert
 

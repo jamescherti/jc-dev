@@ -2245,33 +2245,30 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;;; Use-package pathaction
 
-(lightemacs-use-package pathaction
-  :commands (pathaction-edit
-             pathaction-run)
+(defun pathaction-install ()
+  "Install."
+  (interactive)
+  (when (fboundp 'pathaction-run)
+    (pathaction-run "install")))
 
-  :preface
-  (defun pathaction-install ()
-    "Install."
-    (interactive)
-    (pathaction-run "install"))
+(defun pathaction-main ()
+  "Execute main the task."
+  (interactive)
+  (when (fboundp 'pathaction-run)
+    (pathaction-run "main")))
 
-  (defun pathaction-main ()
-    "Execute main the task."
-    (interactive)
-    (pathaction-run "main"))
+(defun my-save-some-buffers ()
+  "Prevent `save-some-buffers' from prompting by passing 1 to it."
+  ;; (save-some-buffers 1)
+  (if (fboundp 'buffer-guardian-save-all-buffers)
+      (buffer-guardian-save-all-buffers)
+    (save-some-buffers t)))
 
-  (defun my-save-some-buffers ()
-    "Prevent `save-some-buffers' from prompting by passing 1 to it."
-    ;; (save-some-buffers 1)
-    (if (fboundp 'buffer-guardian-save-all-buffers)
-        (buffer-guardian-save-all-buffers)
-      (save-some-buffers t)))
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
+  (define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main))
 
-  (with-eval-after-load 'evil
-    (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
-    (define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main))
-
-  :config
+(with-eval-after-load 'pathaction
   (remove-hook 'pathaction-before-run-hook 'save-some-buffers)
   (remove-hook 'pathaction-before-run-hook 'pathaction--save-buffer)
   (add-hook 'pathaction-before-run-hook #'my-save-some-buffers))
