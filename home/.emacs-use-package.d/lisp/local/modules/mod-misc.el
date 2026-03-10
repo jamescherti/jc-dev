@@ -689,6 +689,7 @@ WIDTH is the tab width."
                ;; evil-jumps-history
 
                ;; Custom
+               lightemacs-theme-package
                lightemacs-theme-name)))
       (setq my-savehist-additional-variables-added t))
 

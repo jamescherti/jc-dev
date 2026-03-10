@@ -48,12 +48,14 @@
   ;;   (setq use-package-compute-statistics t))
   )
 
-;;(when (eq lightemacs-package-manager 'straight)
-;;  (setq straight-disable-native-compile nil)
-;;
-;;  ;; Causes issues
-;;  ;; (setq straight-disable-autoloads t)
-;;  )
+(when (eq lightemacs-package-manager 'straight)
+  ;; TODO compile angel readme?
+  (setq straight-disable-native-compile t)
+  (setq straight-disable-compile t)
+
+  ;; Causes issues
+  ;; (setq straight-disable-autoloads t)
+  )
 
 ;;; byte-compile
 
@@ -152,7 +154,7 @@
 ;;; Other settings
 
 ;; Fix autoload modus-themes (straight)
-(autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
+;; (autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
 
 ;; TODO lightemacs package manager variable to disable autoloads
 ;; Buggy?
