@@ -31,6 +31,7 @@ set -u
 
 ATEXIT_DONE=0
 atexit() {
+  trap - EXIT INT TERM
   local errno="$?"
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     disable_screensaver false

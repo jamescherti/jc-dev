@@ -36,6 +36,7 @@ TOTAL_CLEANUPS=0
 
 ATEXIT_DONE=0
 atexit() {
+  trap - EXIT INT TERM
   local errno="$?"
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     if [[ $TOTAL_CLEANUPS -eq 0 ]]; then
