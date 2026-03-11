@@ -40,7 +40,6 @@
 (when (eq lightemacs-package-manager 'builtin-package)
   (setq package-quickstart t))
 
-(setq package-native-compile nil)
 (setq native-comp-jit-compilation nil)
 
 (defun lightemacs-user-post-early-init ()
@@ -50,6 +49,7 @@
   ;;   (setq use-package-compute-statistics t))
   )
 
+(setq package-native-compile t)
 (when (eq lightemacs-package-manager 'straight)
   ;; TODO compile angel readme?
   (setq straight-disable-native-compile t)
