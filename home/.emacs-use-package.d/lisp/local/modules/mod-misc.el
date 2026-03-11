@@ -463,6 +463,16 @@ WIDTH is the tab width."
   (add-to-list 'auto-mode-alist '("/\\.gitignore\\.local\\'" . gitignore-mode))
   (add-to-list 'auto-mode-alist '("/\\.gitattributes\\.local\\'" . gitattributes-mode))
 
+  ;; This regular expression matches the full file path for any .conf file
+  ;; residing within either /etc/fonts/ or .config/fontconfig/ and maps them
+  ;; directly to xml-mode.
+  (add-to-list 'auto-mode-alist '("/etc/fonts/.*\\.conf\\'" . xml-mode))
+  (add-to-list 'auto-mode-alist
+               (cons (concat
+                      (regexp-quote (expand-file-name "~/.config/fontconfig/"))
+                      ".*\\.conf\\'")
+                     'xml-mode))
+
   (defun my-setup-conf-mode ()
     "Setup `conf-mode'."
     (setq-local evil-auto-indent nil)
