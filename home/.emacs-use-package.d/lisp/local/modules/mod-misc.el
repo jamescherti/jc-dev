@@ -718,12 +718,12 @@ WIDTH is the tab width."
   (add-hook 'easysession-before-reset-hook #'(lambda()
                                                ;; Save all with no questions
                                                (save-some-buffers t)))
-  (defun my-easysession-only-main-saved ()
-    "Only save the main session."
-    (when (and (fboundp 'easysession-get-session-name)
-               (string= "main" (funcall 'easysession-get-session-name)))
-      t))
-  (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
+  ;; (defun my-easysession-only-main-saved ()
+  ;;   "Only save the main session."
+  ;;   (when (and (fboundp 'easysession-get-session-name)
+  ;;              (string= "main" (funcall 'easysession-get-session-name)))
+  ;;     t))
+  ;; (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
   (add-hook 'easysession-new-session-hook 'easysession-reset)
 
   (setq flymake-start-on-flymake-mode (when (> (num-processors) 8) t))
