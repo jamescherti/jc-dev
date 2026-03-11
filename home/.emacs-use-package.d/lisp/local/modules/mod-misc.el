@@ -290,9 +290,11 @@ WIDTH is the tab width."
   "This function is executed right before loading modules."
   ;; pre early init
 
-  ;; TODO eval after load
-  ;; (add-to-list 'warning-suppress-types '(treesit))
-  ;; (add-to-list 'warning-suppress-log-types '(treesit))
+  ;; ■ Warning (treesit): Cannot activate tree-sitter, because language grammar
+  ;; for yaml is unavailable (not-found): ...
+  (with-eval-after-load 'warnings
+    (add-to-list 'warning-suppress-types '(treesit))
+    (add-to-list 'warning-suppress-log-types '(treesit)))
 
   (my-setup-filetype)
 
@@ -1353,6 +1355,7 @@ Returns:
   (add-hook 'ibuffer-hook
             (lambda ()
               ;; For some reason, ibuffer-truncate-lines doesn't work (TODO)
+              (my-disable-fringe-truncation-arrow)
               (toggle-truncate-lines 1)))
 
   (add-hook 'ibuffer-mode-hook
