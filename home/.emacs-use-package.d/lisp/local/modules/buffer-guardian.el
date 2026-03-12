@@ -22,6 +22,23 @@
 
 ;;; Commentary:
 
+;; TODO:
+;; buffer-guardian-max-buffer-size Enforce maximum buffer size limits to prevent
+;; the package from saving extremely large files. This prevents Emacs from
+;; hanging or slowing down when automatically saving massive log files or
+;; datasets in the background.
+;;
+;; TODO:
+;; Exclude files using regular expressions: The buffer-guardian-exclude variable
+;; accepts a list of regular expressions. If a file path matches any regex in
+;; this list, buffer-guardian ignores the buffer entirely.
+;;
+;; TODO:
+;; Evaluate an extensible list of predicate functions to decide whether to save
+;; a buffer by running through a list of functions defined in
+;; buffer-guardian-predicates. Because it is a list of distinct lambda
+;; functions, it is very easy to append your own custom rules.
+
 ;; Buffer guardian.
 
 ;;; Code:
