@@ -45,6 +45,9 @@
 (defun lightemacs-user-post-early-init ()
   "Post early init."
   (setq native-comp-async-report-warnings-errors t)
+
+  ;; Ignore X resources
+  (advice-add #'x-apply-session-resources :override #'ignore)
   ;; (when (eq lightemacs-package-manager 'builtin-package)
   ;;   (setq use-package-compute-statistics t))
   )

@@ -61,7 +61,10 @@
                                           "*compile-angel:debug*"
                                           "*vc*"
                                           "*Help*"
+
+                                          ;; Internal ediff buffers
                                           "*Ediff Registry*"
+                                          "*ediff-"
 
                                           "*Flymake log*"
                                           "*Async-native-compile-log*"

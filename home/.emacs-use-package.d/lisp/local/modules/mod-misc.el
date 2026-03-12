@@ -920,9 +920,6 @@ WIDTH is the tab width."
   (setq user-full-name "user"
         user-mail-address "user@domain.ext")
 
-  ;; Ignore X resources
-  (advice-add #'x-apply-session-resources :override #'ignore)
-
   (with-eval-after-load 'ediff
     (defun my/ediff-kill-control-buffer ()
       "Kill the Ediff control buffer and temporary buffers upon quitting.
