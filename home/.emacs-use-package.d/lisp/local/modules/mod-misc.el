@@ -924,8 +924,37 @@ WIDTH is the tab width."
   (advice-add #'x-apply-session-resources :override #'ignore)
 
   (with-eval-after-load 'ediff
+    (defun my/ediff-kill-control-buffer ()
+      "Kill the Ediff control buffer and temporary buffers upon quitting.
+    Safely handles multiple concurrent Ediff sessions and numbered buffers."
+      ;; Keep the fallback logic for the local control buffer
+      (when (and (boundp 'ediff-control-buffer)
+                 (buffer-live-p ediff-control-buffer))
+        (kill-buffer ediff-control-buffer))
+
+      ;; Check if there are any other active Ediff sessions
+      (let ((active-ediffs (seq-filter
+                            (lambda (buf)
+                              (with-current-buffer buf
+                                (eq major-mode 'ediff-control-mode)))
+                            (buffer-list))))
+        ;; If this is the last one (or zero left), kill the shared buffers
+        (when (<= (length active-ediffs) 1)
+          (dolist (buf (buffer-list))
+            (let ((name (buffer-name buf)))
+              ;; We are using `string-prefix-p' because Ediff sometimes creates
+              ;; variants of these names such as *ediff-diffs<2>*.
+              (when (or (string-prefix-p "*ediff-errors" name)
+                        (string-prefix-p "*ediff-diff" name)
+                        (string-prefix-p "*ediff-fine-diff" name)
+                        (string-prefix-p "*Ediff Registry" name))
+                (kill-buffer buf)))))))
+
     (add-hook 'ediff-startup-hook 'ediff-next-difference)
     (add-hook 'ediff-quit-hook #'(lambda()
+                                   (when (fboundp 'my/ediff-kill-control-buffer)
+                                     (my/ediff-kill-control-buffer))
+
                                    (with-eval-after-load 'winner
                                      (when (and (bound-and-true-p winner-mode)
                                                 (fboundp 'winner-undo))
@@ -1232,6 +1261,10 @@ Returns:
 (add-hook 'lightemacs-emacs-startup-hook #'display-startup-time 200)
 
 ;;; Ignored errors
+
+;; Org + vertico preview error: Debugger entered--Lisp error: (error "rx ‘**’
+;; range error")
+(add-to-list 'debug-ignored-errors "\\`rx [‘']\\*\\*[’'] range error")
 
 (add-to-list 'debug-ignored-errors 'search-failed)
 (add-to-list 'debug-ignored-errors 'invalid-read-syntax)  ; Wrong syntax (PDF)
@@ -3670,6 +3703,9 @@ at the same level."
   (setq olivetti-body-width 110)
   (setq olivetti-minimum-body-width 60)
 
+  ;; Removes the default `visual-line-mode'
+  (setq olivetti-mode-on-hook nil)
+
   :preface
   (defun my-setup-olivetti-mode ()
     "Setup `olivetti-mode'."
@@ -3804,6 +3840,11 @@ The result is displayed in a pretty-printed temporary buffer."
           (goto-char (point-min)))
         (read-only-mode 1)
         (display-buffer (current-buffer))))))
+
+;;; so long
+
+;; (setq so-long-threshold 10000)
+(add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
 
 ;;; Provide
 
