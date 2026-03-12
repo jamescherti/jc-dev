@@ -149,23 +149,30 @@ Set this variable to nil to disable advising altogether.")
 (defvar buffer-guardian--bkp-save-some-buffers-default-predicate nil)
 
 (defun buffer-guardian-exclude-p (filename)
-  "Return non-nil if FILENAME doesn't match any of the `buffer-guardian-exclude'."
+  "Return non-nil if FILENAME matches any of the `buffer-guardian-exclude'."
   (seq-some (lambda (regexp)
               (string-match-p regexp filename))
             buffer-guardian-exclude))
 
 (defun buffer-guardian-predicate (&optional include-non-file-visiting)
-  "Default buffer-guardian predicate.
-When INCLUDE-NON-FILE-VISITING is non-nil, also include other buffers (e.g., org
-src)."
+  "Determine if the current buffer should be automatically saved.
+
+If INCLUDE-NON-FILE-VISITING is non-nil, the predicate recognizes and returns
+specialized symbols for 'org-src and 'edit-indirect buffers.
+
+Returns: 'org-src, 'edit-indirect, t, or nil."
   (let* ((file-name (buffer-file-name)))
-    (when (buffer-modified-p)
+    (when (and (buffer-modified-p)
+               ;; Global Exclusion check first
+               (not (buffer-guardian-exclude-p file-name)))
       (cond
+       ;; Max size check
        ((and buffer-guardian-max-buffer-size
              (> buffer-guardian-max-buffer-size 0)
              (> (buffer-size) buffer-guardian-max-buffer-size))
         nil)
 
+       ;; Specialized buffers
        ((and include-non-file-visiting
              (fboundp 'org-src-edit-buffer-p)
              (funcall 'org-src-edit-buffer-p))
@@ -175,29 +182,24 @@ src)."
              (bound-and-true-p edit-indirect--overlay))
         'edit-indirect)
 
-       ((buffer-guardian-exclude-p file-name)
-        nil)
-
-       ;; File-visiting buffer
+       ;; Standard File-visiting logic
        (file-name
         (and
-         ;; Remote or local that is writable
          (if (file-remote-p file-name)
              (not buffer-guardian-inhibit-saving-remote-files)
            (file-writable-p file-name))
-         ;; File exists
          (if buffer-guardian-inhibit-saving-nonexistent-files
              (file-exists-p file-name)
            t)))
 
+       ;; Custom predicates
        ((seq-some (lambda (pred)
                     (condition-case err
                         (funcall pred)
                       (error
-                       (display-warning
-                        'buffer-guardian
-                        (format "Predicate failed with error: %S" err)
-                        :warning)
+                       (display-warning 'buffer-guardian
+                                        (format "Predicate failed: %S" err)
+                                        :warning)
                        nil)))
                   buffer-guardian-predicates)
         t)))))
