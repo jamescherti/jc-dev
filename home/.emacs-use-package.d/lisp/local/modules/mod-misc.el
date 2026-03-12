@@ -2946,8 +2946,7 @@ This function is intended for use as :around advice."
           (derived-mode-p 'yaml-ts-mode)
           (derived-mode-p 'ansible-mode))
       ;; Yaml/Ansible
-      ;; (flyspell-prog-mode)
-      t
+      (flyspell-prog-mode)
     ;; Other (e.g., Markdown)
     (let ((file-name (buffer-file-name (buffer-base-buffer))))
       (when (and file-name
@@ -2958,8 +2957,7 @@ This function is intended for use as :around advice."
         ;; (run-with-idle-timer 1 nil #'flyspell-mode 1)
         (flyspell-mode 1)))))
 
-;; (add-hook 'markdown-mode-hook #'flyspell-mode)
-;; (add-hook 'prog-mode-hook 'flyspell-prog-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
 (add-hook 'text-mode-hook 'my-setup-flyspell-text-mode)
 
 ;;; Golden-ratio
@@ -3313,10 +3311,13 @@ environment for accurate linting."
 
 ;;; shell-pop
 
+
 (lightemacs-use-package shell-pop
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
   :init
+  (setq shell-pop-autocd-to-working-dir t)
+
   (setq shell-pop-term-shell "/bin/bash")
   (setq shell-pop-window-size 40
         ;; shell-pop-default-directory "~/src"
