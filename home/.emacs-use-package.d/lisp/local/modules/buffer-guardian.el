@@ -43,6 +43,8 @@
 
 ;;; Code:
 
+(require 'seq)
+
 (defcustom buffer-guardian-verbose nil
   "Enable verbose mode to log when a buffer is automatically saved."
   :type 'boolean
@@ -84,18 +86,38 @@ If set to nil, this feature is disabled."
   :group 'buffer-guardian)
 
 (defcustom buffer-guardian-inhibit-saving-remote-files t
-  "If non-nil, `buffer-guardian` will not auto-save remote files.
-When set to nil, remote files will be included in the auto-save process.
-This setting is used by `buffer-guardian-predicate`."
+  "If non-nil, `buffer-guardian' will not auto-save remote files.
+When set to nil, remote files will be included in the auto-save process. This
+setting is used by `buffer-guardian-predicate'."
   :type 'boolean
   :group 'buffer-guardian)
 
 (defcustom buffer-guardian-inhibit-saving-nonexistent-files t
-  "If non-nil, `buffer-guardian` will not save files that do not exist on disk.
+  "If non-nil, `buffer-guardian' will not save files that do not exist on disk.
 When set to nil, buffers visiting nonexistent files can still be saved.
-This setting is used by `buffer-guardian-predicate`."
+This setting is used by `buffer-guardian-predicate'."
   :type 'boolean
   :group 'buffer-guardian)
+
+(defcustom buffer-guardian-exclude nil
+  "A list of regexps for buffer file name excluded from buffer-guardian.
+When a buffer file name matches any of the regexps it is ignored."
+  :group 'buffer-guardian
+  :type '(repeat (choice regexp)))
+
+(defcustom buffer-guardian-max-buffer-size nil
+  "Maximal size of buffer (in characters), for which buffer-guardian work.
+Exists mostly because saving constantly huge buffers can be slow in some cases.
+Set to 0 or nil to disable."
+  :group 'buffer-guardian
+  :type 'integer)
+
+(defcustom buffer-guardian-predicates nil
+  "Predicates, which return nil, when the buffer doesn't need to be saved.
+Predicate functions don't take any arguments. If a predicate doesn't know
+whether this buffer needs to be saved or not, then it must return t."
+  :group 'buffer-guardian
+  :type '(repeat function))
 
 (defcustom buffer-guardian-hooks-auto-save-all-buffers
   '(mouse-leave-buffer-hook)
@@ -126,13 +148,24 @@ Set this variable to nil to disable advising altogether.")
 (defvar buffer-guardian--list-advised-functions nil)
 (defvar buffer-guardian--bkp-save-some-buffers-default-predicate nil)
 
+(defun buffer-guardian-include-p (filename)
+  "Return non-nil if FILENAME doesn't match any of the `buffer-guardian-exclude'."
+  (not (seq-some (lambda (regexp)
+                   (string-match-p regexp filename))
+                 buffer-guardian-exclude)))
+
 (defun buffer-guardian-predicate (&optional include-non-file-visiting)
   "Default buffer-guardian predicate.
-When INCLUDE-NON-FILE-VISITING is non-nil, also include other
-buffers (e.g., org src)."
+When INCLUDE-NON-FILE-VISITING is non-nil, also include other buffers (e.g., org
+src)."
   (let* ((file-name (buffer-file-name)))
     (when (buffer-modified-p)
       (cond
+       ((and buffer-guardian-max-buffer-size
+             (> buffer-guardian-max-buffer-size 0)
+             (> (buffer-size) buffer-guardian-max-buffer-size))
+        nil)
+
        ((and include-non-file-visiting
              (fboundp 'org-src-edit-buffer-p)
              (funcall 'org-src-edit-buffer-p))
@@ -152,7 +185,11 @@ buffers (e.g., org src)."
          ;; File exists
          (if buffer-guardian-inhibit-saving-nonexistent-files
              (file-exists-p file-name)
-           t)))))))
+           t)))
+
+
+       ((seq-some #'funcall buffer-guardian-predicates)
+        t)))))
 
 (defun buffer-guardian-save-buffer-maybe (&optional buffer)
   "Save BUFFER if it is visiting a file that is existing on the disk.
@@ -226,23 +263,23 @@ save the buffer without prompting or displaying messages."
   "Save current buffers."
   (buffer-guardian-save-buffer-maybe (current-buffer)))
 
-(defun buffer-guardian--advice-around-save-some-buffers (original
-                                                         &optional
-                                                         _arg pred)
-  "Make `save-some-buffers' never ask questions and always use the predicate.
-ORIGINAL is the function. ARG and PRED are the `save-some-buffers' arguments."
-  (let ((save-silently (not buffer-guardian-verbose)))
-    (funcall original
-             t  ;  Non-nil means save all with no questions.
-             (if (eq pred t)
-                 ;; If PRED is t, the `buffer-guardian-predicate' is ignored.
-                 ;; Functions like `save-buffers-kill-emacs' are problematic in
-                 ;; this case as they bypass the predicate by passing t to PRED.
-                 ;; We rely on the safety of the buffer-guardian predicate,
-                 ;; which is why we change PRED back to nil to ensure that the
-                 ;; `buffer-guardian-predicate' is always used.
-                 nil
-               pred))))
+;; (defun buffer-guardian--advice-around-save-some-buffers (original
+;;                                                          &optional
+;;                                                          _arg pred)
+;;   "Make `save-some-buffers' never ask questions and always use the predicate.
+;; ORIGINAL is the function. ARG and PRED are the `save-some-buffers' arguments."
+;;   (let ((save-silently (not buffer-guardian-verbose)))
+;;     (funcall original
+;;              t  ;  Non-nil means save all with no questions.
+;;              (if (eq pred t)
+;;                  ;; If PRED is t, the `buffer-guardian-predicate' is ignored.
+;;                  ;; Functions like `save-buffers-kill-emacs' are problematic in
+;;                  ;; this case as they bypass the predicate by passing t to PRED.
+;;                  ;; We rely on the safety of the buffer-guardian predicate,
+;;                  ;; which is why we change PRED back to nil to ensure that the
+;;                  ;; `buffer-guardian-predicate' is always used.
+;;                  nil
+;;                pred))))
 
 (defun buffer-guardian--on-focus-change ()
   "Run `buffer-guardian-save-all-buffers' when Emacs loses focus."
@@ -287,8 +324,9 @@ ORIGINAL is the function. ARG and PRED are the `save-some-buffers' arguments."
           ;; `buffer-guardian-inhibit-saving-nonexistent-files' is:
           ;; - nil: all file-visiting buffers are saved.
           ;; - non-nil: only file-visiting buffers that exist on disk are saved.
-          (advice-add 'save-some-buffers :around
-                      #'buffer-guardian--advice-around-save-some-buffers))
+          ;; (advice-add 'save-some-buffers :around
+          ;;             #'buffer-guardian--advice-around-save-some-buffers)
+          )
 
         ;; Minibuffer setup
         ;; ----------------
@@ -335,8 +373,8 @@ ORIGINAL is the function. ARG and PRED are the `save-some-buffers' arguments."
     ;; ------
     (setq save-some-buffers-default-predicate
           buffer-guardian--bkp-save-some-buffers-default-predicate)
-    (advice-remove 'save-some-buffers
-                   #'buffer-guardian--advice-around-save-some-buffers)
+    ;; (advice-remove 'save-some-buffers
+    ;;                #'buffer-guardian--advice-around-save-some-buffers)
 
     ;; Minibuffer setup
     ;; ----------------
