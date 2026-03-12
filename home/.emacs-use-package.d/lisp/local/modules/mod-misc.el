@@ -3755,20 +3755,6 @@ This prevents Flymake warnings when viewing framework source files in Emacs
 
 ;;; track eol (TODO light emacs)
 
-;; Set evil-track-eol to track-eol (nil, by default)
-;;
-;; When this is set to nil, it prevents the cursor from landing on invisible
-;; text (folded Org-mode subtrees) when moving vertically from a longer line
-;; to a shorter visible heading.
-;;
-;; (Setting evil-track-eol to nil is necessary because when it is enabled, the
-;; cursor is forced to the logical end of a line during vertical movement. In
-;; modes such as Org-mode or outline, this causes the point to bypass visible
-;; heading text and land on hidden characters within a folded subtree. By
-;; disabling this behavior, the cursor is prevented from becoming trapped in
-;; invisible metadata or folded content, ensuring that up and down navigation
-;; respects the visual boundaries of the document rather than its underlying
-;; logical structure.)
 (setq evil-track-eol nil)
 
 ;; When navigating vertically with visual line movement commands such as
@@ -3787,9 +3773,37 @@ This prevents Flymake warnings when viewing framework source files in Emacs
 ;; The following ensures that vertical navigation never lands in invisible
 ;; text within folded regions, add the following to your configuration:
 (setq track-eol nil)
+
 ;; (setq evil-track-eol track-eol)
 (setq line-move-ignore-invisible t)
 
+;;; macrostep
+
+;; Buggy
+;; (lightemacs-use-package macrostep
+;;   :bind (:map emacs-lisp-mode-map
+;;               ("C-c e" . macrostep-expand)
+;;               :map lisp-interaction-mode-map
+;;               ("C-c e" . macrostep-expand)))
+
+(defun my-macroexpand ()
+  "Expand the macro at point one level at a time.
+If the result is still a macro, subsequent calls will expand the next level.
+The result is displayed in a pretty-printed temporary buffer."
+  (interactive)
+  (let* ((sexp (sexp-at-point))
+         (expansion (macroexpand-1 sexp)))
+    (if (equal sexp expansion)
+        (message "No further expansion possible.")
+      (with-current-buffer (get-buffer-create "*Macro Expansion*")
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (emacs-lisp-mode)
+          (insert (pp-to-string expansion))
+          (indent-region (point-min) (point-max))
+          (goto-char (point-min)))
+        (read-only-mode 1)
+        (display-buffer (current-buffer))))))
 
 ;;; Provide
 
