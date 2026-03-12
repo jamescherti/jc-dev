@@ -124,7 +124,7 @@ any new ones."
 
         (visual-fill-column            . "melpa")
 
-        ;; lighteamcs?
+        ;; lightemacs?
         (undo-fu                       . "melpa")
         (undo-fu-session               . "melpa")
 
