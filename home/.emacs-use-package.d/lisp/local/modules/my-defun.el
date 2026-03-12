@@ -653,7 +653,9 @@ TO-STRING."
                             (format "Project: %s\nText before: %s\nText after: "
                                     path from-string)
                             from-string))))
-        (save-some-buffers t)
+        (if (fboundp 'buffer-guardian-save-all-buffers)
+            (buffer-guardian-save-all-buffers)
+          (save-some-buffers t))
         (call-process "sre" nil t nil from-string to-string path)))))
 
 ;;; indentnav

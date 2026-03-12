@@ -130,8 +130,9 @@ FN-SWITCH is a function called to switch to the buffer."
 
      ;; Switch to the terminal
      (term-buf
-      ;; (save-some-buffers t)
-      (buffer-guardian-save-all-buffers)
+      (if (fboundp 'buffer-guardian-save-all-buffers)
+          (buffer-guardian-save-all-buffers)
+        (save-some-buffers t))
       (funcall fn-switch)
 
       ;; Fix the default directory if it does not exist

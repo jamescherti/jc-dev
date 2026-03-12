@@ -60,13 +60,13 @@
   :type 'boolean
   :group 'buffer-guardian)
 
-(defcustom buffer-guardian-unattended-built-in-save-some-buffers nil
-  "Ensure `save-some-buffers' never prompts and always saves buffers."
-  :type 'boolean
-  :group 'buffer-guardian)
+;; (defcustom buffer-guardian-unattended-built-in-save-some-buffers nil
+;;   "Ensure `save-some-buffers' never prompts and always saves buffers."
+;;   :type 'boolean
+;;   :group 'buffer-guardian)
 
 (defcustom buffer-guardian-save-all-buffers-interval nil
-  "Interval in seconds for automatically calling `save-some-buffers'.
+  "Interval in seconds for automatically saving all buffers.
 This allows you to periodically save all file visiting buffers at once,
 repeating the operation at the specified interval.
 
@@ -146,7 +146,7 @@ Set this variable to nil to disable advising altogether.")
   "Timer object for saving all buffers when the user is idle.")
 
 (defvar buffer-guardian--list-advised-functions nil)
-(defvar buffer-guardian--bkp-save-some-buffers-default-predicate nil)
+;; (defvar buffer-guardian--bkp-save-some-buffers-default-predicate nil)
 
 (defun buffer-guardian-exclude-p (filename)
   "Return non-nil if FILENAME matches any of the `buffer-guardian-exclude'."
@@ -320,25 +320,25 @@ save the buffer without prompting or displaying messages."
           (dolist (hook buffer-guardian-hooks-auto-save-all-buffers)
             (add-hook hook #'buffer-guardian-save-all-buffers)))
 
-        (when buffer-guardian-unattended-built-in-save-some-buffers
-          (setq buffer-guardian--bkp-save-some-buffers-default-predicate
-                save-some-buffers-default-predicate)
-          ;; Default predicate for `save-some-buffers'. This prevents
-          ;; `save-some-buffers' from prompting about certain files that you'd
-          ;; typically prefer not to save.
-          (setq save-some-buffers-default-predicate
-                #'buffer-guardian-predicate)
-
-          ;; Advice
-          ;; ------
-          ;; Ensure `save-some-buffers' never prompts and always saves
-          ;; file-visiting buffers. When
-          ;; `buffer-guardian-inhibit-saving-nonexistent-files' is:
-          ;; - nil: all file-visiting buffers are saved.
-          ;; - non-nil: only file-visiting buffers that exist on disk are saved.
-          ;; (advice-add 'save-some-buffers :around
-          ;;             #'buffer-guardian--advice-around-save-some-buffers)
-          )
+        ;; (when buffer-guardian-unattended-built-in-save-some-buffers
+        ;;   (setq buffer-guardian--bkp-save-some-buffers-default-predicate
+        ;;         save-some-buffers-default-predicate)
+        ;;   ;; Default predicate for `save-some-buffers'. This prevents
+        ;;   ;; `save-some-buffers' from prompting about certain files that you'd
+        ;;   ;; typically prefer not to save.
+        ;;   (setq save-some-buffers-default-predicate
+        ;;         #'buffer-guardian-predicate)
+        ;;
+        ;;   ;; Advice
+        ;;   ;; ------
+        ;;   ;; Ensure `save-some-buffers' never prompts and always saves
+        ;;   ;; file-visiting buffers. When
+        ;;   ;; `buffer-guardian-inhibit-saving-nonexistent-files' is:
+        ;;   ;; - nil: all file-visiting buffers are saved.
+        ;;   ;; - non-nil: only file-visiting buffers that exist on disk are saved.
+        ;;   ;; (advice-add 'save-some-buffers :around
+        ;;   ;;             #'buffer-guardian--advice-around-save-some-buffers)
+        ;;   )
 
         ;; Minibuffer setup
         ;; ----------------
@@ -384,8 +384,8 @@ save the buffer without prompting or displaying messages."
 
     ;; Advice
     ;; ------
-    (setq save-some-buffers-default-predicate
-          buffer-guardian--bkp-save-some-buffers-default-predicate)
+    ;; (setq save-some-buffers-default-predicate
+    ;;       buffer-guardian--bkp-save-some-buffers-default-predicate)
     ;; (advice-remove 'save-some-buffers
     ;;                #'buffer-guardian--advice-around-save-some-buffers)
 

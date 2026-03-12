@@ -710,9 +710,12 @@ WIDTH is the tab width."
   ;; (setq easysession-save-pretty-print t)
   (setq easysession-switch-to-exclude-current t)
   (setq easysession-save-interval (* 14 60))
-  (add-hook 'easysession-before-reset-hook #'(lambda()
-                                               ;; Save all with no questions
-                                               (save-some-buffers t)))
+  (add-hook 'easysession-before-reset-hook
+            #'(lambda()
+                ;; Save all with no questions
+                (if (fboundp 'buffer-guardian-save-all-buffers)
+                    (buffer-guardian-save-all-buffers)
+                  (save-some-buffers t))))
   ;; (defun my-easysession-only-main-saved ()
   ;;   "Only save the main session."
   ;;   (when (and (fboundp 'easysession-get-session-name)
@@ -3170,7 +3173,7 @@ This function is intended for use as :around advice."
   (setq buffer-guardian-save-all-buffers-interval (* 60 5))
   (setq buffer-guardian-save-all-buffers-idle 25)
 
-  (setq buffer-guardian-unattended-built-in-save-some-buffers t)
+  ;; (setq buffer-guardian-unattended-built-in-save-some-buffers t)
 
   ;; super-save-hook-triggers use add hook
   ;; TODO: mouse-leave-buffer-hook
