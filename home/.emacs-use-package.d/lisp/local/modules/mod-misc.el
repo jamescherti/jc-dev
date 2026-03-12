@@ -106,6 +106,7 @@ any new ones."
 
 (setq my-package-pinned-packages
       '((buffer-terminator             . "melpa")
+        (dir-config                    . "melpa")
         (enhanced-evil-paredit         . "melpa")
         (dir-config                    . "melpa")
         (outline-indent                . "melpa")
@@ -122,19 +123,13 @@ any new ones."
         (flymake-bashate               . "melpa")
 
         (visual-fill-column            . "melpa")
-        (evil                          . "melpa")
-        (evil-collection               . "melpa")
+
+        ;; lighteamcs?
+        (undo-fu                       . "melpa")
+        (undo-fu-session               . "melpa")
 
         ;; To fix the window-start bug
         (apheleia                      . "melpa")
-
-        ;; The released version is too old (1 year)
-        ;; TODO: Lightemacs?
-        (markdown-mode                 . "melpa")
-
-        ;; Last release: 2024. Too old. TODO
-        (lsp-mode                      . "melpa")
-        (lsp-ui                        . "melpa")
 
         ;; 3 months ago
         ;; (gptel                         . "melpa")
