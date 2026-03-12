@@ -3331,8 +3331,8 @@ environment for accurate linting."
   :bind (("<f2>" . shell-pop))
   :init
   (setq shell-pop-term-shell "/bin/bash")
-  (setq shell-pop-window-size 30
-        shell-pop-default-directory "~/src"
+  (setq shell-pop-window-size 40
+        ;; shell-pop-default-directory "~/src"
         shell-pop-shell-type (quote ("ansi-term" "*ansi-term*"
                                      (lambda nil
                                        (ansi-term shell-pop-term-shell))))
