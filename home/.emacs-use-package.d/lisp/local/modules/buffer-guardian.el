@@ -188,7 +188,16 @@ src)."
            t)))
 
 
-       ((seq-some #'funcall buffer-guardian-predicates)
+       ((seq-some (lambda (pred)
+                    (condition-case err
+                        (funcall pred)
+                      (error
+                       (display-warning
+                        'buffer-guardian
+                        (format "Predicate failed with error: %S" err)
+                        :warning)
+                       nil)))
+                  buffer-guardian-predicates)
         t)))))
 
 (defun buffer-guardian-save-buffer-maybe (&optional buffer)
@@ -211,8 +220,7 @@ By default, it only saves when the file exists on the disk."
             (funcall 'edit-indirect--commit))
 
            (predicate-result
-            (let ((save-silently (not buffer-guardian-verbose))
-                  (inhibit-message (not buffer-guardian-verbose)))
+            (let ((inhibit-message (not buffer-guardian-verbose)))
               (if (verify-visited-file-modtime (current-buffer))
                   (save-buffer)
                 (message
@@ -264,8 +272,8 @@ save the buffer without prompting or displaying messages."
   (buffer-guardian-save-buffer-maybe (current-buffer)))
 
 ;; (defun buffer-guardian--advice-around-save-some-buffers (original
-;;                                                          &optional
-;;                                                          _arg pred)
+;;                                                         &optional
+;;                                                         _arg pred)
 ;;   "Make `save-some-buffers' never ask questions and always use the predicate.
 ;; ORIGINAL is the function. ARG and PRED are the `save-some-buffers' arguments."
 ;;   (let ((save-silently (not buffer-guardian-verbose)))
@@ -363,6 +371,7 @@ save the buffer without prompting or displaying messages."
               (advice-add
                func :before
                #'buffer-guardian--before-advice-save-current-buffer)))))
+
     ;; Hook triggers
     ;; -------------
     (when buffer-guardian-hooks-auto-save-all-buffers
@@ -405,5 +414,8 @@ save the buffer without prompting or displaying messages."
           (advice-remove
            func #'buffer-guardian--before-advice-save-current-buffer))))))
 
+  ;;; Provide
+
 (provide 'buffer-guardian)
+
 ;;; buffer-guardian.el ends here
