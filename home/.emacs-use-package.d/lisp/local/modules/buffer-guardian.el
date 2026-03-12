@@ -148,11 +148,11 @@ Set this variable to nil to disable advising altogether.")
 (defvar buffer-guardian--list-advised-functions nil)
 (defvar buffer-guardian--bkp-save-some-buffers-default-predicate nil)
 
-(defun buffer-guardian-include-p (filename)
+(defun buffer-guardian-exclude-p (filename)
   "Return non-nil if FILENAME doesn't match any of the `buffer-guardian-exclude'."
-  (not (seq-some (lambda (regexp)
-                   (string-match-p regexp filename))
-                 buffer-guardian-exclude)))
+  (seq-some (lambda (regexp)
+              (string-match-p regexp filename))
+            buffer-guardian-exclude))
 
 (defun buffer-guardian-predicate (&optional include-non-file-visiting)
   "Default buffer-guardian predicate.
@@ -175,6 +175,9 @@ src)."
              (bound-and-true-p edit-indirect--overlay))
         'edit-indirect)
 
+       ((buffer-guardian-exclude-p file-name)
+        nil)
+
        ;; File-visiting buffer
        (file-name
         (and
@@ -186,7 +189,6 @@ src)."
          (if buffer-guardian-inhibit-saving-nonexistent-files
              (file-exists-p file-name)
            t)))
-
 
        ((seq-some (lambda (pred)
                     (condition-case err
