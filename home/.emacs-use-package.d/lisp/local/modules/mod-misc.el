@@ -1203,8 +1203,30 @@ WIDTH is the tab width."
         `(("." . ,(expand-file-name "backup" my-shared-user-emacs-directory))))
   (setq tramp-backup-directory-alist backup-directory-alist)
 
+  ;;-------------------------------------> BLOCK CHANGE AUTO SAVE PATH
   (setq auto-save-list-file-prefix
         (expand-file-name "autosave/" my-shared-user-emacs-directory))
+  (setq tramp-auto-save-directory
+        (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
+  (setq auto-save-file-name-transforms
+        `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+           ,(file-name-concat auto-save-list-file-prefix "tramp-\\2-") sha1)
+          ("\\`/\\([^/]+/\\)*\\([^/]+\\)\\'"
+           ,(file-name-concat auto-save-list-file-prefix "\\2-") sha1)))
+
+
+
+
+
+
+
+  (when auto-save-default
+    (let ((auto-save-dir (file-name-directory auto-save-list-file-prefix)))
+      (unless (file-exists-p auto-save-dir)
+        (with-file-modes #o700
+          (make-directory auto-save-dir t)))))
+  ;;-------------------------------------> BLOCK CHANGE AUTO SAVE PATH
+
   (setq tramp-auto-save-directory
         (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
 
@@ -3188,99 +3210,102 @@ This function is intended for use as :around advice."
 
 ;;; buffer guardian
 
-(lightemacs-use-package buffer-guardian
-  :ensure nil
-  :commands buffer-guardian-mode
+;; (lightemacs-use-package buffer-guardian
+;;   :ensure nil
+;;   :commands buffer-guardian-mode
+;;
+;;   :hook
+;;   (lightemacs-emacs-startup . buffer-guardian-mode)
+;;
+;;   :init
+;;   (setq buffer-guardian-verbose nil)
+;;
+;;   (setq buffer-guardian-save-on-focus-change t)
+;;   (setq buffer-guardian-save-on-minibuffer t)
+;;   (setq buffer-guardian-save-all-buffers-interval (* 60 5))
+;;   (setq buffer-guardian-save-all-buffers-idle 25)
+;;
+;;   ;; (setq buffer-guardian-unattended-built-in-save-some-buffers t)
+;;
+;;   ;; super-save-hook-triggers use add hook
+;;   ;; TODO: mouse-leave-buffer-hook
+;;   ;; (setq buffer-guardian-trigger-hooks '(mouse-leave-buffer-hook))
+;;
+;;   ;; TODO  Change this to a function `buffer-guardian-advice-add'
+;;   (setq buffer-guardian-functions-auto-save-current-buffer
+;;         '(windmove-up
+;;           windmove-down
+;;           windmove-left
+;;
+;;           windmove-right
+;;
+;;           tab-previous
+;;           tab-next
+;;           tab-close
+;;           tab-new
+;;
+;;           my-tab-previous
+;;           my-tab-next
+;;
+;;           next-buffer
+;;           previous-buffer
+;;
+;;           save-buffers-kill-emacs
+;;
+;;           save-buffers-kill-terminal
+;;
+;;           switch-to-buffer
+;;           pop-to-buffer
+;;           other-window
+;;           delete-window
+;;
+;;           other-frame
+;;           delete-frame
+;;           make-frame
+;;
+;;           kill-this-buffer))
+;;
+;;   ;; Auto save
+;;   ;; ---------
+;;   ;; Auto-save safeguards against crashes or data loss. The
+;;   ;;  `recover-file' or `recover-session' functions can be used to restore
+;;   ;;  auto-saved data.
+;;   ;;
+;;   ;; Emacs periodically saves all files that you are visiting; this is
+;;   ;; called auto-saving. Auto-saving prevents you from losing more than a
+;;   ;; limited amount of work if the system crashes. By default, auto-saves
+;;   ;; happen every 300 keystrokes, or after around 30 seconds of idle time.
+;;   ;; See Auto-Saving: Protection Against Disasters in The GNU Emacs
+;;   ;; Manual, for information on auto-save for users. Here we describe the
+;;   ;; functions used to implement auto-saving and the variables that
+;;   ;; control them.
+;;   ;; (setq auto-save-interval 0)  ; Disabled
+;;   ;; (setq auto-save-timeout 0)  ; Disabled
+;;
+;;   ;; Test without this to see if auto-save-visited is affected by it
+;;   ;; (setq auto-save-no-message (not buffer-guardian-verbose))
+;;
+;;   ;; Disable auto-saving
+;;   ;; (setq auto-save-default nil)
+;;
+;;   ;; Auto save visited (Disabled by default)
+;;   ;; ---------------------------------------
+;;   ;; When auto-save-visited-mode is enabled, Emacs will auto-save
+;;   ;; file-visiting buffers after a certain amount of of idle time.
+;;   ;;
+;;   ;; Predicate function for `auto-save-visited-mode'.
+;;   ;; If non-nil, the value should be a function with no arguments; it
+;;   ;; will be called once in each file-visiting buffer when it's time to
+;;   ;; auto-save. A buffer will be saved only if the predicate function
+;;   ;; returns a non-nil value.
+;;   (setq remote-file-name-inhibit-auto-save-visited t)
+;;   (setq auto-save-visited-interval 10)
+;;
+;;   ;; (setq auto-save-visited-predicate #'buffer-guardian-predicate)
+;;   ;; (auto-save-visited-mode 1)
+;;   )
 
-  :hook
-  (lightemacs-emacs-startup . buffer-guardian-mode)
-
-  :init
-  (setq buffer-guardian-verbose nil)
-
-  (setq buffer-guardian-save-on-focus-change t)
-  (setq buffer-guardian-save-on-minibuffer t)
-  (setq buffer-guardian-save-all-buffers-interval (* 60 5))
-  (setq buffer-guardian-save-all-buffers-idle 25)
-
-  ;; (setq buffer-guardian-unattended-built-in-save-some-buffers t)
-
-  ;; super-save-hook-triggers use add hook
-  ;; TODO: mouse-leave-buffer-hook
-  ;; (setq buffer-guardian-trigger-hooks '(mouse-leave-buffer-hook))
-
-  ;; TODO  Change this to a function `buffer-guardian-advice-add'
-  (setq buffer-guardian-functions-auto-save-current-buffer
-        '(windmove-up
-          windmove-down
-          windmove-left
-
-          windmove-right
-
-          tab-previous
-          tab-next
-          tab-close
-          tab-new
-
-          my-tab-previous
-          my-tab-next
-
-          next-buffer
-          previous-buffer
-
-          save-buffers-kill-emacs
-
-          save-buffers-kill-terminal
-
-          switch-to-buffer
-          pop-to-buffer
-          other-window
-          delete-window
-
-          other-frame
-          delete-frame
-          make-frame
-
-          kill-this-buffer))
-
-  ;; Auto save
-  ;; ---------
-  ;; Auto-save safeguards against crashes or data loss. The
-  ;;  `recover-file' or `recover-session' functions can be used to restore
-  ;;  auto-saved data.
-  ;;
-  ;; Emacs periodically saves all files that you are visiting; this is
-  ;; called auto-saving. Auto-saving prevents you from losing more than a
-  ;; limited amount of work if the system crashes. By default, auto-saves
-  ;; happen every 300 keystrokes, or after around 30 seconds of idle time.
-  ;; See Auto-Saving: Protection Against Disasters in The GNU Emacs
-  ;; Manual, for information on auto-save for users. Here we describe the
-  ;; functions used to implement auto-saving and the variables that
-  ;; control them.
-  (setq auto-save-interval 0)  ; Disabled
-  (setq auto-save-timeout 0)  ; Disabled
-
-  ;; Test without this to see if auto-save-visited is affected by it
-  (setq auto-save-no-message (not buffer-guardian-verbose))
-
-  ;; Disable auto-saving
-  ;; (setq auto-save-default nil)
-
-  ;; Auto save visited (Disabled by default)
-  ;; ---------------------------------------
-  ;; When auto-save-visited-mode is enabled, Emacs will auto-save
-  ;; file-visiting buffers after a certain amount of of idle time.
-  ;;
-  ;; Predicate function for `auto-save-visited-mode'.
-  ;; If non-nil, the value should be a function with no arguments; it
-  ;; will be called once in each file-visiting buffer when it's time to
-  ;; auto-save. A buffer will be saved only if the predicate function
-  ;; returns a non-nil value.
-  (setq remote-file-name-inhibit-auto-save-visited t)
-  (setq auto-save-visited-interval 10)
-  ;; (setq auto-save-visited-predicate #'buffer-guardian-predicate)
-  ;; (auto-save-visited-mode 1)
-  )
+(auto-save-visited-mode 1)
 
 ;;; Rainbow
 
@@ -3693,41 +3718,41 @@ at the same level."
 ;; olivetti: Sometimes struggles with side-pane elements. For example, if you
 ;; enable line numbers, Olivetti might push them into the middle of the screen
 ;; right next to the text block, which can look jarring.
-(lightemacs-use-package olivetti
-  ;; :if (display-graphic-p)
-  :commands olivetti-mode
-  :init
-  (setq olivetti-body-width 110)
-  (setq olivetti-minimum-body-width 60)
-
-  ;; Removes the default `visual-line-mode'
-  (setq olivetti-mode-on-hook nil)
-
-  :preface
-  (defun my-setup-olivetti-mode ()
-    "Setup `olivetti-mode'."
-    (when (derived-mode-p 'ibuffer-mode)
-      (setq-local olivetti-body-width 150))
-
-    ;; This ensures that olivetti works well with session managers such as
-    ;; easysession.
-    (if (bound-and-true-p easysession-load-in-progress)
-        (run-with-idle-timer
-         0 nil
-         #'(lambda()
-             (unless (bound-and-true-p olivetti-mode)
-               (olivetti-mode 1))))
-      (olivetti-mode 1)))
-
-  :init
-  (with-eval-after-load 'consult
-    (add-hook 'consult-preview-allowed-hooks #'my-setup-olivetti-mode))
-  (add-hook 'find-file-hook #'my-setup-olivetti-mode)
-  (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
-  (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode)
-  ;; (add-hook 'text-mode-hook #'my-setup-olivetti-mode)
-  ;; (add-hook 'prog-mode-hook #'my-setup-olivetti-mode)
-  )
+;; (lightemacs-use-package olivetti
+;;   ;; :if (display-graphic-p)
+;;   :commands olivetti-mode
+;;   :init
+;;   (setq olivetti-body-width 110)
+;;   (setq olivetti-minimum-body-width 60)
+;;
+;;   ;; Removes the default `visual-line-mode'
+;;   (setq olivetti-mode-on-hook nil)
+;;
+;;   :preface
+;;   (defun my-setup-olivetti-mode ()
+;;     "Setup `olivetti-mode'."
+;;     (when (derived-mode-p 'ibuffer-mode)
+;;       (setq-local olivetti-body-width 150))
+;;
+;;     ;; This ensures that olivetti works well with session managers such as
+;;     ;; easysession.
+;;     (if (bound-and-true-p easysession-load-in-progress)
+;;         (run-with-idle-timer
+;;          0 nil
+;;          #'(lambda()
+;;              (unless (bound-and-true-p olivetti-mode)
+;;                (olivetti-mode 1))))
+;;       (olivetti-mode 1)))
+;;
+;;   :init
+;;   (with-eval-after-load 'consult
+;;     (add-hook 'consult-preview-allowed-hooks #'my-setup-olivetti-mode))
+;;   (add-hook 'find-file-hook #'my-setup-olivetti-mode)
+;;   (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
+;;   (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode)
+;;   ;; (add-hook 'text-mode-hook #'my-setup-olivetti-mode)
+;;   ;; (add-hook 'prog-mode-hook #'my-setup-olivetti-mode)
+;;   )
 
 ;;; Perfect margin
 
@@ -3842,6 +3867,39 @@ The result is displayed in a pretty-printed temporary buffer."
 
 ;; (setq so-long-threshold 10000)
 (add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
+
+;;; auto save
+
+(defvar-local auto-recover-prompted nil
+  "Flag to prevent infinite recovery loops.")
+
+(defun auto-recover-prompt-on-visit ()
+  "Prompt to recover the auto-save file if it is newer."
+  (let ((auto-save-file (make-auto-save-file-name)))
+    ;; Check if we have already prompted and ensure we are not currently
+    ;; reverting
+    (when (and buffer-file-name
+               (not (buffer-base-buffer))
+               (not auto-recover-prompted)
+               (not revert-buffer-in-progress-p)
+               (file-exists-p auto-save-file)
+               (file-newer-than-file-p auto-save-file buffer-file-name))
+      ;; Set the flag to true immediately so it cannot fire again for this
+      ;; buffer
+      (setq auto-recover-prompted t)
+      (run-with-timer
+       0 nil
+       (lambda (buf)
+         (when (buffer-live-p buf)
+           (with-current-buffer buf
+             (when (y-or-n-p
+                    (format
+                     "An auto-save file is newer than '%s'. Start recovery? "
+                     buffer-file-name))
+               (call-interactively #'recover-this-file)))))
+       (current-buffer)))))
+
+(add-hook 'find-file-hook #'auto-recover-prompt-on-visit)
 
 ;;; Provide
 
