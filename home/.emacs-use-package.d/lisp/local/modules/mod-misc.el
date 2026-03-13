@@ -3306,6 +3306,8 @@ This function is intended for use as :around advice."
 ;;   )
 
 (auto-save-visited-mode 1)
+;; (setq auto-save-interval 1)
+;; (setq auto-save-timeout 1)
 
 ;;; Rainbow
 
@@ -3870,36 +3872,45 @@ The result is displayed in a pretty-printed temporary buffer."
 
 ;;; auto save
 
-(defvar-local auto-recover-prompted nil
-  "Flag to prevent infinite recovery loops.")
-
-(defun auto-recover-prompt-on-visit ()
-  "Prompt to recover the auto-save file if it is newer."
-  (let ((auto-save-file (make-auto-save-file-name)))
-    ;; Check if we have already prompted and ensure we are not currently
-    ;; reverting
-    (when (and buffer-file-name
-               (not (buffer-base-buffer))
-               (not auto-recover-prompted)
-               (not revert-buffer-in-progress-p)
-               (file-exists-p auto-save-file)
-               (file-newer-than-file-p auto-save-file buffer-file-name))
-      ;; Set the flag to true immediately so it cannot fire again for this
-      ;; buffer
-      (setq auto-recover-prompted t)
-      (run-with-timer
-       0 nil
-       (lambda (buf)
-         (when (buffer-live-p buf)
-           (with-current-buffer buf
-             (when (y-or-n-p
-                    (format
-                     "An auto-save file is newer than '%s'. Start recovery? "
-                     buffer-file-name))
-               (call-interactively #'recover-this-file)))))
-       (current-buffer)))))
-
-(add-hook 'find-file-hook #'auto-recover-prompt-on-visit)
+;; TODO find a better way
+;; (defvar-local auto-recover-prompted nil
+;;   "Flag to prevent infinite recovery loops.")
+;;
+;; (defun auto-recover-prompt-on-visit ()
+;;   "Prompt to recover the auto-save file if it is newer."
+;;   (remove-hook 'find-file-hook #'auto-recover-prompt-on-visit)
+;;   (let ((auto-save-file (make-auto-save-file-name)))
+;;     ;; Check if we have already prompted and ensure we are not currently
+;;     ;; reverting
+;;     ;; let ((find-file-hook (seq-remove
+;;     ;;                       ;; This prevents an infinite loop
+;;     ;;                       (lambda(hook)
+;;     ;;                         (when (eq hook 'auto-recover-prompt-on-visit)
+;;     ;;                           t))
+;;     ;;                       find-file-hook)))
+;;     (when (and buffer-file-name
+;;                (not (buffer-base-buffer))
+;;                (not auto-recover-prompted)
+;;                (not revert-buffer-in-progress-p)
+;;                (file-exists-p auto-save-file)
+;;                (file-newer-than-file-p auto-save-file buffer-file-name))
+;;       (ignore find-file-hook)
+;;       ;; Set the flag to true immediately so it cannot fire again for this
+;;       ;; buffer
+;;       (setq auto-recover-prompted t)
+;;       (run-with-timer
+;;        0 nil
+;;        (lambda (buf)
+;;          (when (buffer-live-p buf)
+;;            (with-current-buffer buf
+;;              (when (y-or-n-p
+;;                     (format
+;;                      "An auto-save file is newer than '%s'. Start recovery? "
+;;                      buffer-file-name))
+;;                (call-interactively #'recover-this-file)))))
+;;        (current-buffer)))))
+;;
+;; (add-hook 'find-file-hook #'auto-recover-prompt-on-visit 90)
 
 ;;; Provide
 
