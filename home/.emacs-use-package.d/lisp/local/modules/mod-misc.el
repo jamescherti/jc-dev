@@ -3145,6 +3145,11 @@ This function is intended for use as :around advice."
 ;; (lightemacs-use-package ztree
 ;;   :commands ztree-diff)
 
+;;; auto revert
+
+(setq ;; revert-without-query (list ".")  ; Do not prompt
+ auto-revert-stop-on-user-input nil)
+
 ;;; battery angel
 
 ;; (require 'battery-angel)
