@@ -22,7 +22,6 @@
 
 ;;; Commentary:
 
-
 ;;; Code:
 
 ;; put it back. problem with vterm TODO
@@ -34,6 +33,36 @@
   (require 'lightemacs-use-package))
 (require 'seq)
 (require 'my-defun)
+
+;;; testing
+
+(setq window-resize-pixelwise t)
+
+;; removed
+;; (setq tramp-completion-reread-directory-timeout 50)
+;; (setq remote-file-name-inhibit-cache 50)
+
+;; Removed it from m.e
+;; (setq next-screen-context-lines 0): Setting this to 0 can make it
+;; disorienting to track your position when paging down. The default value of 2
+;; provides better visual continuity when reading large files.
+;; TODO check again
+;;
+;; Number of lines of continuity when scrolling by screenfuls.
+;; (setq next-screen-context-lines 0)
+
+;; removed from minimal-emacs.d
+;; (setq savehist-save-minibuffer-history t)
+;; (setq window-resize-pixelwise nil)
+;; (setq x-stretch-cursor nil)
+;; (setq recentf-exclude nil)
+
+;; Disable visual indicators in the fringe for buffer boundaries and empty lines
+;; (setq-default indicate-buffer-boundaries nil)
+;; (setq-default indicate-empty-lines nil)
+
+;; Number of lines of margin at the top and bottom of a window.
+;; (setq scroll-margin 0)
 
 ;; Optional
 (require 'mod-misc2 nil t)
