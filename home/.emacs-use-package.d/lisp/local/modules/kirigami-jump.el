@@ -72,6 +72,7 @@ itself from the hook to conserve resources."
 This command will only open the fold if `kirigami-jump--last-opened-point'
 is nil or differs from the current point."
   (interactive)
+  (message "[KIRIGAMI] JUMP OPEN FOLD")
   (let ((command this-command)
         (inhibit-message t))
     (unless (region-active-p)

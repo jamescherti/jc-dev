@@ -2084,10 +2084,6 @@ If COUNT is given, move COUNT - 1 lines downward first."
   (evil-define-key 'normal 'local (kbd "M-h") 'outline-indent-shift-left)
   (evil-define-key 'normal 'local (kbd "M-l") 'outline-indent-shift-right)
 
-  ;; Set `M-k` and `M-j` to move indented blocks up and down
-  (evil-define-key 'normal 'local (kbd "M-k") 'outline-indent-move-subtree-up)
-  (evil-define-key 'normal 'local (kbd "M-j") 'outline-indent-move-subtree-down)
-
   (unless (derived-mode-p 'prog-mode)
     ;; In prog-mode, [[, ]], gj, and gk provide navigation to the previous
     ;; and next function, so there is no need to override them.

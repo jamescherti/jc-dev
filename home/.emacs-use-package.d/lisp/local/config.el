@@ -553,7 +553,7 @@
 (setq lightemacs-debug t)
 (setq lightemacs-verbose t)
 
-(when (<= emacs-major-version 31)
+(when (< emacs-major-version 31)
   (setq package-install-upgrade-built-in t))
 
 (setq lightemacs-dired-omit-parent-directory t)
