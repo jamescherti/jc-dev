@@ -3264,7 +3264,7 @@ This function is intended for use as :around advice."
   (setq auto-save-no-message (not buffer-guardian-verbose))
 
   ;; Disable auto-saving
-  (setq auto-save-default nil)
+  ;; (setq auto-save-default nil)
 
   ;; Auto save visited (Disabled by default)
   ;; ---------------------------------------
