@@ -72,23 +72,26 @@ itself from the hook to conserve resources."
 This command will only open the fold if `kirigami-jump--last-opened-point'
 is nil or differs from the current point."
   (interactive)
-  (message "[KIRIGAMI] JUMP OPEN FOLD")
-  (let ((command this-command)
-        (inhibit-message t))
-    (unless (region-active-p)
-      ;; Check if the current point differs from the stored point
-      (when (and (not (memq command kirigami-jump-ignore-commands))
-                 (or (not kirigami-jump--last-opened-point)
-                     (not (eq (point) kirigami-jump--last-opened-point))))
-        ;; Update the buffer-local variable before opening the fold
-        (setq kirigami-jump--last-opened-point (point))
+  ;; TODO why is this called on minibuffer when i search and or replace with
+  ;; evil?
+  (unless (minibufferp)
+    (message "[KIRIGAMI] JUMP OPEN FOLD")
+    (let ((command this-command)
+          (inhibit-message t))
+      (unless (region-active-p)
+        ;; Check if the current point differs from the stored point
+        (when (and (not (memq command kirigami-jump-ignore-commands))
+                   (or (not kirigami-jump--last-opened-point)
+                       (not (eq (point) kirigami-jump--last-opened-point))))
+          ;; Update the buffer-local variable before opening the fold
+          (setq kirigami-jump--last-opened-point (point))
 
-        ;; Add to post-command-hook to ensure the "gate" resets when the user
-        ;; moves manually
-        (add-hook 'post-command-hook #'kirigami-jump--reset-last-point -40 t)
+          ;; Add to post-command-hook to ensure the "gate" resets when the user
+          ;; moves manually
+          (add-hook 'post-command-hook #'kirigami-jump--reset-last-point -40 t)
 
-        (ignore-errors
-          (kirigami-open-fold))))))
+          (ignore-errors
+            (kirigami-open-fold)))))))
 
 (defun kirigami-jump--around-outline-show-entry (fn &rest args)
   "FN is the advised function. ARGS are the function arguments."
