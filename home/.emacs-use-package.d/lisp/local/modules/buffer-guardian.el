@@ -107,7 +107,7 @@ work is not lost when Emacs loses focus or the mouse leaves the current buffer."
   :type '(repeat symbol))
 
 ;; TODO this should be changed by the window change hook, maybe?
-(defvar buffer-guardian-functions-auto-save-current-buffer nil
+(defvar buffer-guardian-functions-auto-save-current-buffer '()
   "List of function symbols to be advised by `buffer-guardian'.
 
 A :before advice will be added to each function in this list so that save the
@@ -292,7 +292,8 @@ OBJECT can be a frame or a window."
           (with-selected-window window
             (when-let* ((buffer (window-buffer)))
               (when (and (buffer-live-p buffer)
-                         (not (eq buffer buffer-guardian--previous-buffer)))
+                         (or (not buffer-guardian--previous-buffer)
+                             (not (eq buffer buffer-guardian--previous-buffer))))
                 ;; Save previous buffers
                 (when buffer-guardian--previous-buffer
                   (message "BEGIN SAVE")

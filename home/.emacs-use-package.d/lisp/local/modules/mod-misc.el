@@ -3282,12 +3282,11 @@ This function is intended for use as :around advice."
 
   ;; :config
   ;; (setq buffer-guardian-functions-auto-save-current-buffer
-  ;;       '(windmove-up
-  ;;         windmove-down
-  ;;         windmove-left
-  ;;
-  ;;         windmove-right
-  ;;
+  ;;       '(
+  ;; windmove-up
+  ;; windmove-down
+  ;; windmove-left
+  ;; windmove-right
   ;;         tab-previous
   ;;         tab-next
   ;;         tab-close
