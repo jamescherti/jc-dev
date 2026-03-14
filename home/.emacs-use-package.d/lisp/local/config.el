@@ -695,21 +695,11 @@
 
                            ;; New
                            ;; tmp-easysession
-                           buffer-guardian
 
-                           mod-eglot
                            ;; TODO fix eldoc help more than one line. I only
                            ;; want 1 line
                            ;; mod-lsp-mode
 
-                           smartindent
-                           battery-angel
-                           mod-project
-                           mod-buffer-terminator
-                           mod-toggle-term
-                           point-manager
-
-                           mod-kirigami
                            ;; mod-kirigami-alternative
 
                            ;; le-treesit-auto

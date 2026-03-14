@@ -538,3 +538,5 @@ if ! type -P so &>/dev/null; then
     "$@" || return "$?"
   }
 fi
+
+alias emacs-batch="emacs --batch --init-directory=~/.emacs-use-package.d/ -l ~/.emacs-use-package.d/early-init.el -l ~/.emacs-use-package.d/init.el"

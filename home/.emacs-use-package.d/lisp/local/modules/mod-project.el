@@ -97,7 +97,8 @@ The selection is limited to projects already listed in the project database; see
                                  'project--dir-history))))
       project-dir)))
 
-(setq project-prompter #'my-project-prompt-project-dir)
+(unless noninteractive
+  (setq project-prompter #'my-project-prompt-project-dir))
 
 ;;; Project cleanup forward slash and duplicates
 

@@ -255,6 +255,7 @@
         (eval-region (region-beginning) (region-end))
         (message "Region evaluated!"))
     (message "No region selected!")))
+
 (evil-define-key 'normal 'global (kbd "<leader>er") 'evileval-region)
 (evil-define-key 'normal 'global (kbd "<leader>eb") 'evileval-buffer)
 

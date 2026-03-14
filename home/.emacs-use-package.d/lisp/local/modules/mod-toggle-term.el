@@ -307,8 +307,10 @@ user to press a key before finishing execution."
   (toggle-term-tmux-default-bash
    (toggle-term-tmux-default-bash "gpl" :wait-for-key)))
 
-(with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "<leader>et") #'toggle-term-tmux-default-bash))
+(unless noninteractive
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "<leader>et")
+                #'toggle-term-tmux-default-bash)))
 
 (provide 'mod-toggle-term)
 

@@ -38,9 +38,10 @@
 ;; This ensures that pressing Enter within a comment context will both insert a
 ;; new line and correctly indent it to match the comment's indentation level,
 ;; facilitating more consistent formatting of multi-line comments.
-(global-set-key (kbd "C-<return>") #'newline-and-indent)
-(global-set-key (kbd "RET") #'comment-indent-new-line)
-(electric-indent-mode -1)
+(unless noninteractive
+  (global-set-key (kbd "C-<return>") #'newline-and-indent)
+  (global-set-key (kbd "RET") #'comment-indent-new-line)
+  (electric-indent-mode -1))
 
 ;; (defun my-disable-electric-indent-mode ()
 ;;   "Disable electric indent mode."

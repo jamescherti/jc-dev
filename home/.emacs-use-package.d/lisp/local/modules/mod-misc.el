@@ -36,7 +36,17 @@
 
 ;;; testing
 
-(setq window-resize-pixelwise t)
+;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
+;; absolute top or bottom line of the window. If this is set to a positive
+;; integer (like 3 or 5), Emacs will force the screen to scroll before you reach
+;; the edge.
+;; (setq scroll-margin 0)
+
+;; If you hate the "0.5 character" margin you mentioned earlier, be careful.
+;; Using window-resize-pixelwise can actually create that half-character look at
+;; the bottom of your windows more often, because the window height is no longer
+;; forced to be a multiple of your line height.
+;; (setq window-resize-pixelwise t)
 
 ;; removed
 ;; (setq tramp-completion-reread-directory-timeout 50)
@@ -47,6 +57,9 @@
 ;; disorienting to track your position when paging down. The default value of 2
 ;; provides better visual continuity when reading large files.
 ;; TODO check again
+
+;; (add-hook 'lightemacs-after-init-hook #'window-divider-mode)
+
 ;;
 ;; Number of lines of continuity when scrolling by screenfuls.
 ;; (setq next-screen-context-lines 0)
@@ -63,9 +76,6 @@
 
 ;; Number of lines of margin at the top and bottom of a window.
 ;; (setq scroll-margin 0)
-
-;; Optional
-(require 'mod-misc2 nil t)
 
 ;;; gc sentinel
 
@@ -340,21 +350,23 @@ WIDTH is the tab width."
     ;; Mac Port
     (add-to-list 'treesit-extra-load-path "/opt/local/lib"))
 
-  (with-eval-after-load 'evil
-    (require 'my-config-evil))
+  (unless noninteractive
+    (with-eval-after-load 'evil
+      (require 'my-config-evil)))
 
-  (global-set-key (kbd "M-RET") 'toggle-term-tmux)
-  (global-set-key (kbd "M-<enter>") 'toggle-term-tmux)
-  (global-set-key (kbd "M-<return>") 'toggle-term-tmux)
-  (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
-  (global-set-key (kbd "M-i") 'my-next-interesting-buffer)
-  ;; (global-set-key (kbd "M-=") 'global-text-scale-adjust)
-  (global-set-key (kbd "C--") 'text-scale-decrease)
-  (global-set-key (kbd "C-+") 'text-scale-increase)
-  (global-set-key (kbd "C-S-k") 'my-tab-bar-move-tab-backward)
-  (global-set-key (kbd "C-S-j") 'my-tab-bar-move-tab)
-  (global-set-key (kbd "C-k") 'my-tab-previous)
-  (global-set-key (kbd "C-j") 'my-tab-next)
+  (unless noninteractive
+    (global-set-key (kbd "M-RET") 'toggle-term-tmux)
+    (global-set-key (kbd "M-<enter>") 'toggle-term-tmux)
+    (global-set-key (kbd "M-<return>") 'toggle-term-tmux)
+    (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
+    (global-set-key (kbd "M-i") 'my-next-interesting-buffer)
+    ;; (global-set-key (kbd "M-=") 'global-text-scale-adjust)
+    (global-set-key (kbd "C--") 'text-scale-decrease)
+    (global-set-key (kbd "C-+") 'text-scale-increase)
+    (global-set-key (kbd "C-S-k") 'my-tab-bar-move-tab-backward)
+    (global-set-key (kbd "C-S-j") 'my-tab-bar-move-tab)
+    (global-set-key (kbd "C-k") 'my-tab-previous)
+    (global-set-key (kbd "C-j") 'my-tab-next))
 
   (setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
                                              dired-filter-by-git-ignored
@@ -388,7 +400,8 @@ WIDTH is the tab width."
 
   (with-eval-after-load 'yasnippet
     ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
-    (define-key yas-minor-mode-map (kbd "C-f") 'yas-expand)
+    (unless noninteractive
+      (define-key yas-minor-mode-map (kbd "C-f") 'yas-expand))
 
     (setq yas-prompt-functions '(yas-no-prompt))  ; Do not ask the user
 
@@ -675,8 +688,9 @@ WIDTH is the tab width."
 
   (setq markdown-gfm-use-electric-backquote nil)
   (setq markdown-heading-scaling t)
-  (with-eval-after-load 'markdown-mode
-    (define-key markdown-mode-map (kbd "TAB") #'ignore))
+  (unless noninteractive
+    (with-eval-after-load 'markdown-mode
+      (define-key markdown-mode-map (kbd "TAB") #'ignore)))
 
   (setq grep-use-null-device nil
         grep-use-null-filename-separator nil
@@ -762,8 +776,9 @@ WIDTH is the tab width."
   (with-no-warnings
     (add-hook 'org-mode-hook 'hl-line-mode)
     (add-hook 'grep-mode-hook 'hl-line-mode))
-  (with-eval-after-load 'icomplete
-    (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit))
+  (unless noninteractive
+    (with-eval-after-load 'icomplete
+      (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit)))
 
   ;; Modify all of them
   ;; ORIGINAL:               "[-–!|#%;>*·•‣⁃◦ 	]*"
@@ -1073,18 +1088,20 @@ WIDTH is the tab width."
   (unless (display-graphic-p)
     (xterm-mouse-mode 1))
 
-  (windmove-default-keybindings)
 
-  ;; Conflict with XFCE C-m-h
-  (global-unset-key (kbd "C-M-h"))
-  (global-unset-key (kbd "C-M-l"))
-  (global-set-key [next] #'ignore)
-  (global-set-key [prior] #'ignore)
-  (global-set-key (kbd "M-SPC") #'ignore)  ; Disable cycle spacing
-  (global-set-key (kbd "C-SPC") #'ignore)  ; Disable C-SPC mark
-  (global-set-key (kbd "<C-prior>") 'my-tab-previous)
-  (global-set-key (kbd "<C-next>") 'my-tab-next)
-  ;; (global-set-key (kbd "C-?") 'help-command)
+  (unless noninteractive
+    (windmove-default-keybindings)
+    ;; Conflict with XFCE C-m-h
+    (global-unset-key (kbd "C-M-h"))
+    (global-unset-key (kbd "C-M-l"))
+    (global-set-key [next] #'ignore)
+    (global-set-key [prior] #'ignore)
+    (global-set-key (kbd "M-SPC") #'ignore)  ; Disable cycle spacing
+    (global-set-key (kbd "C-SPC") #'ignore)  ; Disable C-SPC mark
+    (global-set-key (kbd "<C-prior>") 'my-tab-previous)
+    (global-set-key (kbd "<C-next>") 'my-tab-next)
+    ;; (global-set-key (kbd "C-?") 'help-command)
+    )
 
   ;; Non-nil means show the equivalent keybinding when M-x has one.
   ;; The value can be a length of time to show the message for.
@@ -1907,10 +1924,11 @@ generally one of the lines that are folded."
   (eldoc-add-command 'my-forward-char-same-line))
 
 ;; Last resort hjkl
-(when (fboundp 'my-backward-char-same-line)
-  (global-set-key (kbd "M-h") #'my-backward-char-same-line))
-(when (fboundp 'my-forward-char-same-line)
-  (global-set-key (kbd "M-l") #'my-forward-char-same-line))
+(unless noninteractive
+  (when (fboundp 'my-backward-char-same-line)
+    (global-set-key (kbd "M-h") #'my-backward-char-same-line))
+  (when (fboundp 'my-forward-char-same-line)
+    (global-set-key (kbd "M-l") #'my-forward-char-same-line)))
 
 ;;; Persist text scale
 
@@ -2727,10 +2745,11 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
         (setq my-frame-geometry-modified-p t)
         (my-frame-geometry-set-pixel-width-height frame)))))
 
-(my-frame-geometry-load-initial-frame-alist)
-;; (setq initial-frame-alist nil)
+(unless noninteractive
+  (my-frame-geometry-load-initial-frame-alist)
+  ;; (setq initial-frame-alist nil)
+  (add-hook 'kill-emacs-hook 'my-frame-geometry-save))
 
-(add-hook 'kill-emacs-hook 'my-frame-geometry-save)
 ;; (add-hook 'after-make-frame-functions #'my-set-frame-size-and-position)
 
 ;; Issue with Emacs 31 and shut-up
@@ -2885,8 +2904,9 @@ visibility when navigation commands are executed."
               #'lightemacs-default-settings--advice-recenter-maybe-adjust-arg))
 
 ;; When the user presses C-o
-(add-hook 'evil-jumps-post-jump-hook
-          #'lightemacs-default-settings--recenter-maybe-adjust-arg 70)
+(unless noninteractive
+  (add-hook 'evil-jumps-post-jump-hook
+            #'lightemacs-default-settings--recenter-maybe-adjust-arg 70))
 
 (with-eval-after-load 'simple
   (add-hook 'next-error-hook
@@ -3104,9 +3124,10 @@ This function is intended for use as :around advice."
 
   (add-hook 'ansible-mode-hook #'my-setup-flymake-ansible-lint)
 
-  (with-eval-after-load 'flymake
-    (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
-    (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error))
+  (unless noninteractive
+    (with-eval-after-load 'flymake
+      (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
+      (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)))
 
   (setq flymake-ansible-lint-args
         '("--offline"
@@ -3615,15 +3636,16 @@ at the same level."
           (insert "TODO")
           (just-one-space)))))
 
-  (define-key org-mode-map (kbd "C-<return>")
-              'my-org-insert-heading-respect-content-and-prepend-todo)
+  (unless noninteractive
+    (define-key org-mode-map (kbd "C-<return>")
+                'my-org-insert-heading-respect-content-and-prepend-todo)
 
-  (define-key org-mode-map (kbd "C-c C-e") 'org-babel-execute-maybe)
-  (define-key org-mode-map (kbd "C-c C-c") 'org-edit-src-code)
-  (define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit)
-  (define-key org-mode-map (kbd "C-c C-d") 'my-org-todo-and-toggle)
+    (define-key org-mode-map (kbd "C-c C-e") 'org-babel-execute-maybe)
+    (define-key org-mode-map (kbd "C-c C-c") 'org-edit-src-code)
+    (define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit)
+    (define-key org-mode-map (kbd "C-c C-d") 'my-org-todo-and-toggle)
 
-  (define-key org-mode-map (kbd "M-h") nil)
+    (define-key org-mode-map (kbd "M-h") nil))
 
   ;; (defun org-todo-and-close-fold ()
   ;;   "Mark the current Org mode item as TODO and close its subtree."
@@ -3665,7 +3687,8 @@ at the same level."
             #'my-org-capture-move-cursor-end-line))
 
 (with-eval-after-load 'org-agenda
-  (define-key org-agenda-keymap (kbd "<tab>") #'ignore)
+  (unless noninteractive
+    (define-key org-agenda-keymap (kbd "<tab>") #'ignore))
   (defun my-org-agenda-goto-in-same-window ()
     "`org-agenda-goto` that opens the target buffer in the current window."
     (interactive)
@@ -3940,6 +3963,22 @@ The result is displayed in a pretty-printed temporary buffer."
 ;;        (current-buffer)))))
 ;;
 ;; (add-hook 'find-file-hook #'auto-recover-prompt-on-visit 90)
+
+;;; Other modules
+
+(unless noninteractive
+  ;; Optional
+  (require 'mod-misc2 nil t)
+
+  (require 'mod-toggle-term)
+  (require 'mod-kirigami)
+  (require 'mod-project)
+  (require 'mod-buffer-terminator)
+  (require 'buffer-guardian)
+  (require 'mod-eglot)
+  (require 'smartindent)
+  ;; (require 'battery-angel)
+  (require 'point-manager))
 
 ;;; Provide
 

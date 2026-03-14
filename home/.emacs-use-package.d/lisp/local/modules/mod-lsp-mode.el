@@ -43,7 +43,8 @@
              (my-code-checker-allowed-p))
     (lsp-deferred))
 
-  (setq-local evil-lookup-func #'evil-lookup-lsp))
+  (unless noninteractive
+    (setq-local evil-lookup-func #'evil-lookup-lsp)))
 
 (lightemacs-use-package lsp-mode
   :commands (lsp-mode
