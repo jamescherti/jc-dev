@@ -3400,42 +3400,37 @@ environment for accurate linting."
 
 (lightemacs-use-package stillness-mode
   :commands stillness-mode
-  :after dash
   :hook (lightemacs-after-init . stillness-mode))
 
 ;;; shell-pop
 
+;; shell-pop-default-directory "~/src"
+;; shell-pop-shell-type (cond
+;;                       ((eq system-type 'gnu/linux)
+;;                        '("vterm" "*vterm*" #'vterm))
+;;                       (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
+;;                       (t '("terminal" "*terminal*"
+;;                            (lambda () (term shell-pop-term-shell)))))
 
 (lightemacs-use-package shell-pop
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
   :init
   (setq shell-pop-autocd-to-working-dir t)
-
   (setq shell-pop-term-shell "/bin/bash")
-  (setq shell-pop-window-size 40
-        ;; shell-pop-default-directory "~/src"
-        shell-pop-shell-type (quote ("ansi-term" "*ansi-term*"
-                                     (lambda nil
-                                       (ansi-term shell-pop-term-shell))))
+  (setq shell-pop-window-size 40)
+  (setq shell-pop-shell-type '("ansi-term"
+                               "*ansi-term*"
+                               (lambda ()
+                                 (ansi-term shell-pop-term-shell)))))
 
-
-        ;; shell-pop-shell-type (cond
-        ;;                       ((eq system-type 'gnu/linux)
-        ;;                        '("vterm" "*vterm*" #'vterm))
-        ;;                       (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
-        ;;                       (t '("terminal" "*terminal*"
-        ;;                            (lambda () (term shell-pop-term-shell)))))
-        )
-
-  :preface
-  (defun my-around-shell-pop (fn &rest args)
-    "FN is the advised function. ARGS are the function arguments."
-    (with-temp-file "~/.bash_lastdir"
-      (insert (expand-file-name default-directory)))
-    (apply fn args))
-
-  :config
+;; shell-pop: Change the default directory
+(defun my-around-shell-pop (fn &rest args)
+  "FN is the advised function. ARGS are the function arguments."
+  (with-temp-file "~/.bash_lastdir"
+    (insert (expand-file-name default-directory)))
+  (apply fn args))
+(with-eval-after-load 'shell-pop
   (advice-add 'shell-pop :around #'my-around-shell-pop))
 
 ;;; Vimrc mode

@@ -75,7 +75,7 @@ is nil or differs from the current point."
   ;; TODO why is this called on minibuffer when i search and or replace with
   ;; evil?
   (unless (minibufferp)
-    (message "[KIRIGAMI] JUMP OPEN FOLD")
+    ;; (message "[KIRIGAMI] JUMP OPEN FOLD")
     (let ((command this-command)
           (inhibit-message t))
       (unless (region-active-p)
