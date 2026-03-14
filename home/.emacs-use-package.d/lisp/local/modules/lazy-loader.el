@@ -143,9 +143,8 @@ focus state changes."
   (if lazy-loader-mode
       (progn
         (lazy-loader--start-idle-timer)
-        (when (display-graphic-p)
-          (add-function :after after-focus-change-function
-                        #'lazy-loader--on-focus-change)))
+        (add-function :after after-focus-change-function
+                      #'lazy-loader--on-focus-change))
     (lazy-loader--stop-idle-timer)
     (lazy-loader-disable-focus-hook)))
 

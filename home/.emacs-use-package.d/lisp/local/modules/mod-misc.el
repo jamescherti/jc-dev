@@ -36,6 +36,8 @@
 
 ;;; testing
 
+(setq global-auto-revert-non-file-buffers nil)
+
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
 ;; integer (like 3 or 5), Emacs will force the screen to scroll before you reach

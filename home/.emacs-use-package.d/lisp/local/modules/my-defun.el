@@ -29,6 +29,36 @@
 (defconst IS-MAC (eq system-type 'darwin))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
+(defun buffer-guardian-save-buffer ()
+  "Save the current buffer.
+
+If the buffer is visiting a file and has a base buffer, save that base buffer.
+
+Before saving, check if the visited file has been modified outside of Emacs. If
+so, prompt the user for confirmation and revert the buffer if confirmed. Then
+save the buffer without prompting or displaying messages."
+  (interactive)
+  (when (fboundp 'buffer-guardian-save-buffer-maybe)
+    (let ((buffer (or (buffer-base-buffer) (current-buffer)))
+          (file-name (buffer-file-name (buffer-base-buffer)))
+          (buffer-guardian-inhibit-saving-nonexistent-files nil))
+      (ignore buffer-guardian-inhibit-saving-nonexistent-files)
+      (when buffer
+        (cond
+         (file-name
+          (with-current-buffer buffer
+            ;; Was the file modified outside of Emacs? Revert buffer
+            (unless (verify-visited-file-modtime (current-buffer))
+              (when (yes-or-no-p (format "Discard edits and reread from '%s'?"
+                                         file-name))
+                (revert-buffer :ignore-auto :noconfirm)))
+
+            ;; Save buffer
+            (buffer-guardian-save-buffer-maybe)))
+
+         (t
+          (buffer-guardian-save-buffer-maybe)))))))
+
 (defun my-save-all-buffers ()
   "Save all buffers."
   (if (fboundp 'buffer-guardian-save-all-buffers)
