@@ -1,4 +1,4 @@
-;;; buffer-guardian.el --- Auto save -*- lexical-binding: t -*-
+;;; buffer-guardian.el --- Save your work without thinking about it -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 
-;; Buffer guardian.
+;; Save your work without thinking about it
 
 ;;; Code:
 
@@ -296,8 +296,8 @@ OBJECT can be a frame or a window."
                              (not (eq buffer buffer-guardian--previous-buffer))))
                 ;; Save previous buffers
                 (when buffer-guardian--previous-buffer
-                  (message "BEGIN SAVE")
-                  (message "SAVE: %S" buffer-guardian--previous-buffer)
+                  ;; (message "[BUFFER-WINDOW DEBUG] SAVE: %S"
+                  ;;          buffer-guardian--previous-buffer)
 
                   (when (buffer-live-p buffer-guardian--previous-buffer)
                     (buffer-guardian-save-buffer-maybe buffer-guardian--previous-buffer))
@@ -307,6 +307,12 @@ OBJECT can be a frame or a window."
 
                 ;; Push the current buffer
                 (setq buffer-guardian--previous-buffer buffer)))))))))
+
+(defvar buffer-guardian--previous-window nil)
+
+(defun buffer-guardian--window-selection-change (object)
+  "Run on window change in OBJECT (frame or window)."
+  (buffer-guardian--window-buffer-change-functions object))
 
 ;;;###autoload
 (define-minor-mode buffer-guardian-mode
@@ -326,6 +332,8 @@ OBJECT can be a frame or a window."
         ;; TODO variable to configure this
         (add-hook 'window-buffer-change-functions
                   #'buffer-guardian--window-buffer-change-functions)
+        (add-hook 'window-selection-change-functions
+                  #'buffer-guardian--window-selection-change)
 
         ;; Minibuffer setup
         ;; ----------------
