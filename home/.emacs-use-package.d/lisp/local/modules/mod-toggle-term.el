@@ -130,9 +130,7 @@ FN-SWITCH is a function called to switch to the buffer."
 
      ;; Switch to the terminal
      (term-buf
-      (if (fboundp 'buffer-guardian-save-all-buffers)
-          (buffer-guardian-save-all-buffers)
-        (save-some-buffers t))
+      (my-save-all-buffers)
       (funcall fn-switch)
 
       ;; Fix the default directory if it does not exist
@@ -276,10 +274,7 @@ Returns: None. It resets the tmux session and optionally switches to it."
 This function runs the `git-commitflow` command in the tmux session and
 waits for the user to press a key before finishing execution."
   (interactive)
-  (when (buffer-modified-p)
-    ;; (let ((save-silently t))
-    ;;   (save-buffer))
-    (buffer-guardian-save-buffer))
+  (my-save-buffer)
   (toggle-term-tmux-default-bash "git-commitflow" :wait-for-key))
 
 (defun cip ()
@@ -288,10 +283,7 @@ waits for the user to press a key before finishing execution."
 This function runs the `git cip` command in the tmux session and waits for
 the user to press a key before finishing execution."
   (interactive)
-  (when (buffer-modified-p)
-    ;; (let ((save-silently t))
-    ;;   (save-buffer))
-    (buffer-guardian-save-buffer))
+  (my-save-buffer)
   (toggle-term-tmux-default-bash "git cip" :wait-for-key))
 
 (defun gpl ()
@@ -300,10 +292,7 @@ the user to press a key before finishing execution."
 This function runs the `gpl` command in the tmux session and waits for the
 user to press a key before finishing execution."
   (interactive)
-  (when (buffer-modified-p)
-    ;; (let ((save-silently t))
-    ;;   (save-buffer))
-    (buffer-guardian-save-buffer))
+  (my-save-buffer)
   (toggle-term-tmux-default-bash
    (toggle-term-tmux-default-bash "gpl" :wait-for-key)))
 

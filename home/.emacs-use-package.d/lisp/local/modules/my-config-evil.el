@@ -896,9 +896,7 @@ DIR is the directory."
         (save-excursion
           (deactivate-mark)))
 
-      (if (fboundp 'buffer-guardian-save-all-buffers)
-          (buffer-guardian-save-all-buffers)
-        (save-some-buffers t))
+      (my-save-all-buffers)
       (when (fboundp 'consult-ripgrep)
         (consult-ripgrep (or dir (buffer-cwd)) selection)))))
 
@@ -2340,9 +2338,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
 (defun my-save-some-buffers ()
   "Prevent `save-some-buffers' from prompting by passing 1 to it."
   ;; (save-some-buffers 1)
-  (if (fboundp 'buffer-guardian-save-all-buffers)
-      (buffer-guardian-save-all-buffers)
-    (save-some-buffers t)))
+  (my-save-all-buffers))
 
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
@@ -2417,8 +2413,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
   "Save and call `vc-diff' silently."
   (interactive)
   (let ((inhibit-message t))
-    (when (fboundp 'buffer-guardian-save-buffer)
-      (buffer-guardian-save-buffer))
+    (my-save-buffer)
     (vc-diff)))
 
 (defun mod-better-vc-git-toplevel ()

@@ -29,6 +29,21 @@
 (defconst IS-MAC (eq system-type 'darwin))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
+(defun my-save-all-buffers ()
+  "Save all buffers."
+  (if (fboundp 'buffer-guardian-save-all-buffers)
+      (buffer-guardian-save-all-buffers)
+    (save-some-buffers t)))
+
+(defun my-save-buffer ()
+  "Save the current buffer."
+  ;; The buffer guardian version checks if the file on disk has been modified
+  ;; and prompts the user to reload it
+  (when (buffer-modified-p)
+    (if (fboundp 'buffer-guardian-save-buffer)
+        (buffer-guardian-save-buffer)
+      (save-buffer))))
+
 (defun my-project-root-dir (&optional path)
   "Search up the PATH for `project-root-markers'."
   (when (fboundp 'project-root)
@@ -653,9 +668,7 @@ TO-STRING."
                             (format "Project: %s\nText before: %s\nText after: "
                                     path from-string)
                             from-string))))
-        (if (fboundp 'buffer-guardian-save-all-buffers)
-            (buffer-guardian-save-all-buffers)
-          (save-some-buffers t))
+        (my-save-all-buffers)
         (call-process "sre" nil t nil from-string to-string path)))))
 
 ;;; indentnav

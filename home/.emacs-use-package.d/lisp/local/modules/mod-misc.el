@@ -756,9 +756,7 @@ WIDTH is the tab width."
   (add-hook 'easysession-before-reset-hook
             #'(lambda()
                 ;; Save all with no questions
-                (if (fboundp 'buffer-guardian-save-all-buffers)
-                    (buffer-guardian-save-all-buffers)
-                  (save-some-buffers t))))
+                (my-save-all-buffers)))
   ;; (defun my-easysession-only-main-saved ()
   ;;   "Only save the main session."
   ;;   (when (and (fboundp 'easysession-get-session-name)
@@ -3363,6 +3361,13 @@ This function is intended for use as :around advice."
 (auto-save-visited-mode 1)
 ;; (setq auto-save-interval 1)
 ;; (setq auto-save-timeout 1)
+
+;; Make (save-some-buffers 1) only save buffers when they exist in the disk
+
+(setq save-some-buffers-default-predicate
+      (lambda ()
+        (and buffer-file-name
+             (file-exists-p buffer-file-name))))
 
 ;;; Rainbow
 
