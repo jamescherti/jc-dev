@@ -128,7 +128,7 @@ work is not lost when Emacs loses focus or the mouse leaves the current buffer."
   :group 'buffer-guardian
   :type '(repeat symbol))
 
-(defvar buffer-guardian-functions-auto-save-current-buffer nil
+(defvar buffer-guardian-functions-auto-save-current-buffer '()
   "List of function symbols to be advised by `buffer-guardian'.
 
 A :before advice will be added to each function in this list so that save the

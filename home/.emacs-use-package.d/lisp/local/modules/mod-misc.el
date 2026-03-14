@@ -3263,111 +3263,80 @@ This function is intended for use as :around advice."
 
 ;;; buffer guardian
 
-;; (lightemacs-use-package buffer-guardian
-;;   :ensure nil
-;;   :commands buffer-guardian-mode
-;;
-;;   :hook
-;;   (lightemacs-emacs-startup . buffer-guardian-mode)
-;;
-;;   :init
-;;   (setq buffer-guardian-verbose nil)
-;;
-;;   (setq buffer-guardian-save-on-focus-change t)
-;;   (setq buffer-guardian-save-on-minibuffer t)
-;;   (setq buffer-guardian-save-all-buffers-interval (* 60 5))
-;;   (setq buffer-guardian-save-all-buffers-idle 25)
-;;
-;;   ;; (setq buffer-guardian-unattended-built-in-save-some-buffers t)
-;;
-;;   ;; super-save-hook-triggers use add hook
-;;   ;; TODO: mouse-leave-buffer-hook
-;;   ;; (setq buffer-guardian-trigger-hooks '(mouse-leave-buffer-hook))
-;;
-;;   ;; TODO  Change this to a function `buffer-guardian-advice-add'
-;;   (setq buffer-guardian-functions-auto-save-current-buffer
-;;         '(windmove-up
-;;           windmove-down
-;;           windmove-left
-;;
-;;           windmove-right
-;;
-;;           tab-previous
-;;           tab-next
-;;           tab-close
-;;           tab-new
-;;
-;;           my-tab-previous
-;;           my-tab-next
-;;
-;;           next-buffer
-;;           previous-buffer
-;;
-;;           save-buffers-kill-emacs
-;;
-;;           save-buffers-kill-terminal
-;;
-;;           switch-to-buffer
-;;           pop-to-buffer
-;;           other-window
-;;           delete-window
-;;
-;;           other-frame
-;;           delete-frame
-;;           make-frame
-;;
-;;           kill-this-buffer))
-;;
-;;   ;; Auto save
-;;   ;; ---------
-;;   ;; Auto-save safeguards against crashes or data loss. The
-;;   ;;  `recover-file' or `recover-session' functions can be used to restore
-;;   ;;  auto-saved data.
-;;   ;;
-;;   ;; Emacs periodically saves all files that you are visiting; this is
-;;   ;; called auto-saving. Auto-saving prevents you from losing more than a
-;;   ;; limited amount of work if the system crashes. By default, auto-saves
-;;   ;; happen every 300 keystrokes, or after around 30 seconds of idle time.
-;;   ;; See Auto-Saving: Protection Against Disasters in The GNU Emacs
-;;   ;; Manual, for information on auto-save for users. Here we describe the
-;;   ;; functions used to implement auto-saving and the variables that
-;;   ;; control them.
-;;   ;; (setq auto-save-interval 0)  ; Disabled
-;;   ;; (setq auto-save-timeout 0)  ; Disabled
-;;
-;;   ;; Test without this to see if auto-save-visited is affected by it
-;;   ;; (setq auto-save-no-message (not buffer-guardian-verbose))
-;;
-;;   ;; Disable auto-saving
-;;   ;; (setq auto-save-default nil)
-;;
-;;   ;; Auto save visited (Disabled by default)
-;;   ;; ---------------------------------------
-;;   ;; When auto-save-visited-mode is enabled, Emacs will auto-save
-;;   ;; file-visiting buffers after a certain amount of of idle time.
-;;   ;;
-;;   ;; Predicate function for `auto-save-visited-mode'.
-;;   ;; If non-nil, the value should be a function with no arguments; it
-;;   ;; will be called once in each file-visiting buffer when it's time to
-;;   ;; auto-save. A buffer will be saved only if the predicate function
-;;   ;; returns a non-nil value.
-;;   (setq remote-file-name-inhibit-auto-save-visited t)
-;;   (setq auto-save-visited-interval 10)
-;;
-;;   ;; (setq auto-save-visited-predicate #'buffer-guardian-predicate)
-;;   ;; (auto-save-visited-mode 1)
-;;   )
+(lightemacs-use-package buffer-guardian
+  :ensure nil
+  :commands buffer-guardian-mode
 
-(auto-save-visited-mode 1)
-;; (setq auto-save-interval 1)
-;; (setq auto-save-timeout 1)
+  :hook
+  (lightemacs-emacs-startup . buffer-guardian-mode)
 
-;; Make (save-some-buffers 1) only save buffers when they exist in the disk
+  :init
+  (setq buffer-guardian-verbose nil)
 
-(setq save-some-buffers-default-predicate
-      (lambda ()
-        (and buffer-file-name
-             (file-exists-p buffer-file-name))))
+
+
+  ;; (setq buffer-guardian-save-on-focus-change t)
+  ;; (setq buffer-guardian-save-on-minibuffer t)
+  ;; (setq buffer-guardian-save-all-buffers-interval (* 60 5))
+  ;; (setq buffer-guardian-save-all-buffers-idle 25)
+
+  :config
+  (setq buffer-guardian-functions-auto-save-current-buffer
+        '(windmove-up
+          windmove-down
+          windmove-left
+
+          windmove-right
+
+          tab-previous
+          tab-next
+          tab-close
+          tab-new
+
+          tab-previous
+          tab-next
+
+          next-buffer
+          previous-buffer
+
+          save-buffers-kill-emacs
+          save-buffers-kill-terminal
+
+          switch-to-buffer
+          pop-to-buffer
+          other-window
+          delete-window
+
+          other-frame
+          delete-frame
+          make-frame
+
+          kill-this-buffer))
+
+  ;; (push 'my-tab-previous buffer-guardian-functions-auto-save-current-buffer)
+  ;; (push 'my-tab-next buffer-guardian-functions-auto-save-current-buffer)
+  )
+
+;; Simpler alternative to bg
+(progn
+  (setq remote-file-name-inhibit-auto-save-visited t)
+  (setq auto-save-visited-interval 30)
+  ;; (auto-save-visited-mode 1)
+
+  ;; Make (save-some-buffers 1) only save buffers when they exist in the disk
+
+  ;; Focus
+  ;; (defun my-save-on-focus-change ()
+  ;;   "Save all buffers when Emacs loses focus."
+  ;;   (when (not (frame-focus-state))
+  ;;     (my-save-all-buffers)))
+  ;; (add-function :after after-focus-change-function #'my-save-on-focus-change)
+
+  ;; Save some buffers
+  (setq save-some-buffers-default-predicate
+        (lambda ()
+          (and buffer-file-name
+               (file-exists-p buffer-file-name)))))
 
 ;;; Rainbow
 
