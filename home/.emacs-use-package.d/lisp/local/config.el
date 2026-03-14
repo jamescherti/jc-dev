@@ -205,7 +205,8 @@
 (add-hook 'kill-emacs-hook #'my-cleanup-session-temp-directory)
 ;;---------------------------------------->TMP
 
-(setq minimal-emacs-frame-title-format "Lightemacs")
+(unless noninteractive
+  (setq minimal-emacs-frame-title-format "Lightemacs"))
 
 ;; Which kind of warnings and errors to report from async native compilation.
 ;; (setq native-comp-async-warnings-errors-kind 'important)
@@ -427,26 +428,27 @@
 
 ;;; Options
 
-;; Define your preferred font name here
-;; (defvar my-font-choice "Iosevka Term")
-;; (defconst my-font-choice "Iosevka SS08")
-;; (defvar my-font-choice "Iosevka Term-13")
-;; (add-to-list 'default-frame-alist `(font . ,my-font-choice))
-(setq lightemacs-theme-default-font "Iosevka Term-13")
+(unless noninteractive
+  ;; Define your preferred font name here
+  ;; (defvar my-font-choice "Iosevka Term")
+  ;; (defconst my-font-choice "Iosevka SS08")
+  ;; (defvar my-font-choice "Iosevka Term-13")
+  ;; (add-to-list 'default-frame-alist `(font . ,my-font-choice))
+  (setq lightemacs-theme-default-font "Iosevka Term-13")
 
-;; Check if the font exists on the system before applying it
-;; NOTE doesn't work?
-;; (if (find-font (font-spec :name my-font-choice))
-;;     ;; TODO: Concat -13 to `my-font-choice'
-;;     (add-to-list 'default-frame-alist `(font . ,my-font-choice))
-;;   (message "Warning: Font '%s' not found. Using system default." my-font-choice))
+  ;; Check if the font exists on the system before applying it
+  ;; NOTE doesn't work?
+  ;; (if (find-font (font-spec :name my-font-choice))
+  ;;   ;; TODO: Concat -13 to `my-font-choice'
+  ;;   (add-to-list 'default-frame-alist `(font . ,my-font-choice))
+  ;;  (message "Warning: Font '%s' not found. Using system default." my-font-choice))
 
-;; (add-to-list 'default-frame-alist '(font . "Iosevka Term-13"))
+  ;; (add-to-list 'default-frame-alist '(font . "Iosevka Term-13"))
 
-;; TODO: Lightemacs?
-(let ((no-border '(internal-border-width . 0)))
-  (add-to-list 'default-frame-alist no-border)
-  (add-to-list 'initial-frame-alist no-border))
+  ;; TODO: Lightemacs?
+  (let ((no-border '(internal-border-width . 0)))
+    (add-to-list 'default-frame-alist no-border)
+    (add-to-list 'initial-frame-alist no-border)))
 
 ;; (unless (display-graphic-p)
 ;;   (add-to-list 'default-frame-alist '(inhibit-double-buffering . t)))
@@ -560,8 +562,9 @@
 (setq lightemacs-cycle nil)
 (setq lightemacs-native-comp-excluded-cpus 1)
 
-(setq lightemacs-theme-name 'tomorrow-night-deepblue)
-(setq lightemacs-theme-package 'tomorrow-night-deepblue-theme)
+(unless noninteractive
+  (setq lightemacs-theme-name 'tomorrow-night-deepblue)
+  (setq lightemacs-theme-package 'tomorrow-night-deepblue-theme))
 
 ;; Enable native-compilation and byte-compilation
 
@@ -815,81 +818,81 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 (defun my-config-display-buffer-alist ()
   "Config display buffer alist."
+  (unless noninteractive
+    ;; Display buffer alist
 
+    (add-to-list 'display-buffer-alist '("\\*pathaction:"
+                                         (display-buffer-at-bottom)
+                                         (window-height . 0.33)))
 
-  ;; Display buffer alist
+    (add-to-list 'display-buffer-alist
+                 `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
+                   display-buffer-in-side-window
+                   (side . right)
+                   (slot . 0)
+                   (window-parameters . ((no-delete-other-windows . t)))
+                   (window-width . 100)
+                   (dedicated . t)))
 
-  (add-to-list 'display-buffer-alist '("\\*pathaction:"
-                                       (display-buffer-at-bottom)
-                                       (window-height . 0.33)))
+    (add-to-list 'display-buffer-alist '("\\*CPU-Profiler-Report"
+                                         (display-buffer-at-bottom)))
 
-  (add-to-list 'display-buffer-alist
-               `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
-                 display-buffer-in-side-window
-                 (side . right)
-                 (slot . 0)
-                 (window-parameters . ((no-delete-other-windows . t)))
-                 (window-width . 100)
-                 (dedicated . t)))
+    (add-to-list 'display-buffer-alist '("\\*Memory-Profiler-Report"
+                                         (display-buffer-at-bottom)))
 
-  (add-to-list 'display-buffer-alist '("\\*CPU-Profiler-Report"
-                                       (display-buffer-at-bottom)))
+    (add-to-list 'display-buffer-alist '("\\*Calendar\\*"
+                                         (display-buffer-at-bottom)))
 
-  (add-to-list 'display-buffer-alist '("\\*Memory-Profiler-Report"
-                                       (display-buffer-at-bottom)))
+    (add-to-list 'display-buffer-alist '("\\*tmux"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*Calendar\\*"
-                                       (display-buffer-at-bottom)))
-
-  (add-to-list 'display-buffer-alist '("\\*tmux"
-                                       (display-buffer-same-window)))
-
-  (add-to-list 'display-buffer-alist '("\\*grep\\*"
-                                       (display-buffer-same-window))))
+    (add-to-list 'display-buffer-alist '("\\*grep\\*"
+                                         (display-buffer-same-window)))))
 
 ;;; Always current window
 
 (defun current-window-only--setup-display-buffer-alist ()
   "Setup display buffer alist."
-  ;; (add-to-list 'display-buffer-alist '("\\*vc-diff\\*"
-  ;;                                      (display-buffer-same-window)))
+  (unless noninteractive
+    ;; (add-to-list 'display-buffer-alist '("\\*vc-diff\\*"
+    ;;                                      (display-buffer-same-window)))
 
-  ;; (add-to-list 'display-buffer-alist '("\\*vc-change-log\\*"
-  ;;                                      (display-buffer-same-window)))
+    ;; (add-to-list 'display-buffer-alist '("\\*vc-change-log\\*"
+    ;;                                      (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*Man"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*Man"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*eat"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*eat"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*Memory-Report\\*"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*Memory-Report\\*"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*helpful"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*helpful"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*Backtrace\\*"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*Backtrace\\*"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*\\(Help\\|eldoc\\)\\*"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*\\(Help\\|eldoc\\)\\*"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*[Hh]elp:"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*[Hh]elp:"
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*edit-indirect "
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*edit-indirect "
+                                         (display-buffer-same-window)))
 
-  (add-to-list 'display-buffer-alist '("\\*Proced\\*"
-                                       (display-buffer-same-window)))
+    (add-to-list 'display-buffer-alist '("\\*Proced\\*"
+                                         (display-buffer-same-window)))
 
-  ;; (add-to-list 'display-buffer-alist '("\\magit:"
-  ;;                                      (display-buffer-same-window)))
+    ;; (add-to-list 'display-buffer-alist '("\\magit:"
+    ;;                                      (display-buffer-same-window)))
 
-  ;; This uses compile-goto-error
-  (add-to-list 'display-buffer-alist '("\\*Embark Export"
-                                       (display-buffer-same-window))))
+    ;; This uses compile-goto-error
+    (add-to-list 'display-buffer-alist '("\\*Embark Export"
+                                         (display-buffer-same-window)))))
 
 (defun always-current-window---display-buffer-from-compilation-p (_buffer-name _action)
   "Display buffer from compilation."
