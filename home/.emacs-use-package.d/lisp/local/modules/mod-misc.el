@@ -1592,27 +1592,29 @@ Returns:
 
 ;;; C-g
 
-;; (defun my/keyboard-quit-dwim ()
-;;   "Do-What-I-Mean behaviour for a general 'keyboard-quit'.
-;;
-;; The DWIM behaviour of this command is as follows:
-;;
-;; - When the region is active, disable it.
-;; - When the Completions buffer is selected, close it.
-;; - When a minibuffer is active (even if not focused), abort it.
-;; - In every other case use the regular 'keyboard-quit'."
-;;   (interactive)
-;;   (cond
-;;    ((region-active-p)
-;;     (keyboard-quit))
-;;    ((derived-mode-p 'completion-list-mode)
-;;     (delete-completion-window))
-;;    ((active-minibuffer-window)
-;;     (abort-recursive-edit))
-;;    (t
-;;     (keyboard-quit))))
-;;
-;; (define-key global-map (kbd "C-g") #'my/keyboard-quit-dwim)
+;; This fixes the behavior when C-g is pressed during a search using '/'.
+;; Pressing C-g returns the cursor to its location before the search began.
+(defun my/keyboard-quit-dwim ()
+  "Do-What-I-Mean behaviour for a general `keyboard-quit'.
+
+The DWIM behaviour of this command is as follows:
+
+- When the region is active, disable it.
+- When the Completions buffer is selected, close it.
+- When a minibuffer is active (even if not focused), abort it.
+- In every other case use the regular `keyboard-quit'."
+  (interactive)
+  (cond
+   ((region-active-p)
+    (keyboard-quit))
+   ((derived-mode-p 'completion-list-mode)
+    (delete-completion-window))
+   ((active-minibuffer-window)
+    (abort-recursive-edit))
+   (t
+    (keyboard-quit))))
+
+(define-key global-map (kbd "C-g") #'my/keyboard-quit-dwim)
 
 ;;; Setup scratch
 
@@ -3273,48 +3275,49 @@ This function is intended for use as :around advice."
   :init
   (setq buffer-guardian-verbose nil)
 
-
-
   ;; (setq buffer-guardian-save-on-focus-change t)
   ;; (setq buffer-guardian-save-on-minibuffer t)
   ;; (setq buffer-guardian-save-all-buffers-interval (* 60 5))
   ;; (setq buffer-guardian-save-all-buffers-idle 25)
 
-  :config
-  (setq buffer-guardian-functions-auto-save-current-buffer
-        '(windmove-up
-          windmove-down
-          windmove-left
-
-          windmove-right
-
-          tab-previous
-          tab-next
-          tab-close
-          tab-new
-
-          tab-previous
-          tab-next
-
-          next-buffer
-          previous-buffer
-
-          save-buffers-kill-emacs
-          save-buffers-kill-terminal
-
-          switch-to-buffer
-          pop-to-buffer
-          other-window
-          delete-window
-
-          other-frame
-          delete-frame
-          make-frame
-
-          kill-this-buffer))
-
+  ;; :config
+  ;; (setq buffer-guardian-functions-auto-save-current-buffer
+  ;;       '(windmove-up
+  ;;         windmove-down
+  ;;         windmove-left
+  ;;
+  ;;         windmove-right
+  ;;
+  ;;         tab-previous
+  ;;         tab-next
+  ;;         tab-close
+  ;;         tab-new
+  ;;
+  ;;         tab-previous
+  ;;         tab-next
+  ;;
+  ;;         next-buffer
+  ;;         previous-buffer
+  ;;
+  ;;         save-buffers-kill-emacs
+  ;;         save-buffers-kill-terminal
+  ;;
+  ;;         switch-to-buffer
+  ;;         pop-to-buffer
+  ;;         other-window
+  ;;         delete-window
+  ;;
+  ;;         other-frame
+  ;;         delete-frame
+  ;;         make-frame
+  ;;
+  ;;         kill-this-buffer))
+  ;;
   ;; (push 'my-tab-previous buffer-guardian-functions-auto-save-current-buffer)
   ;; (push 'my-tab-next buffer-guardian-functions-auto-save-current-buffer)
+
+  ;; (with-eval-after-load 'tabgo
+  ;;   (push 'tabgo buffer-guardian-functions-auto-save-current-buffer))
   )
 
 ;; Simpler alternative to bg

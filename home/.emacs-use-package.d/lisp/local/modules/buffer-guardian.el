@@ -22,23 +22,6 @@
 
 ;;; Commentary:
 
-;; TODO:
-;; buffer-guardian-max-buffer-size Enforce maximum buffer size limits to prevent
-;; the package from saving extremely large files. This prevents Emacs from
-;; hanging or slowing down when automatically saving massive log files or
-;; datasets in the background.
-;;
-;; TODO:
-;; Exclude files using regular expressions: The buffer-guardian-exclude variable
-;; accepts a list of regular expressions. If a file path matches any regex in
-;; this list, buffer-guardian ignores the buffer entirely.
-;;
-;; TODO:
-;; Evaluate an extensible list of predicate functions to decide whether to save
-;; a buffer by running through a list of functions defined in
-;; buffer-guardian-predicates. Because it is a list of distinct lambda
-;; functions, it is very easy to append your own custom rules.
-
 ;; Buffer guardian.
 
 ;;; Code:
@@ -128,7 +111,8 @@ work is not lost when Emacs loses focus or the mouse leaves the current buffer."
   :group 'buffer-guardian
   :type '(repeat symbol))
 
-(defvar buffer-guardian-functions-auto-save-current-buffer '()
+;; TODO this should be changed by the window change hook, maybe?
+(defvar buffer-guardian-functions-auto-save-current-buffer nil
   "List of function symbols to be advised by `buffer-guardian'.
 
 A :before advice will be added to each function in this list so that save the
@@ -306,6 +290,52 @@ save the buffer without prompting or displaying messages."
       (when (buffer-live-p buffer)
         (buffer-guardian-save-buffer-maybe buffer)))))
 
+(defvar buffer-guardian--previous-buffers nil)
+
+(defun buffer-guardian--window-buffer-change-functions (&optional object)
+  "Function called by `window-buffer-change-functions'.
+OBJECT can be a frame or a window."
+  (when (bound-and-true-p persist-text-scale-mode)
+    (let* ((is-frame (frame-live-p object))
+           (frame (if is-frame
+                      object
+                    (selected-frame)))
+           (window (cond
+                    ;; Frame
+                    (is-frame
+                     (with-selected-frame object
+                       (selected-window)))
+                    ;; Window
+                    ((window-live-p object)
+                     object)
+                    ;; Current window
+                    (t
+                     (selected-window)))))
+      (when (and frame window)
+        (with-selected-frame frame
+          (with-selected-window window
+            (when-let* ((buffer (window-buffer)))
+              (when (buffer-live-p buffer)
+                ;; Save previous buffers
+                (when buffer-guardian--previous-buffers
+                  (message "BEGIN SAVE")
+                  (message "SAVE: %S" buffer-guardian--previous-buffers)
+
+                  ;; TODO don't use a list, just setq
+                  (when (> (length buffer-guardian--previous-buffers) 2)
+                    (message "WARNING: More than 2 buffers in list"))
+
+                  (dolist (previous-buf buffer-guardian--previous-buffers)
+                    (when (buffer-live-p previous-buf)
+                      (buffer-guardian-save-buffer-maybe previous-buf)))
+
+                  ;; Reset
+                  (setq buffer-guardian--previous-buffers nil))
+
+                ;; Push the current buffer
+                (unless (memq buffer buffer-guardian--previous-buffers)
+                  (push buffer buffer-guardian--previous-buffers))))))))))
+
 ;;;###autoload
 (define-minor-mode buffer-guardian-mode
   "Toggle `buffer-guardian-mode'."
@@ -319,6 +349,11 @@ save the buffer without prompting or displaying messages."
         (when buffer-guardian-hooks-auto-save-all-buffers
           (dolist (hook buffer-guardian-hooks-auto-save-all-buffers)
             (add-hook hook #'buffer-guardian-save-all-buffers)))
+
+        ;; Window buffer change
+        ;; TODO variable to configure this
+        (add-hook 'window-buffer-change-functions
+                  #'buffer-guardian--window-buffer-change-functions)
 
         ;; (when buffer-guardian-unattended-built-in-save-some-buffers
         ;;   (setq buffer-guardian--bkp-save-some-buffers-default-predicate
@@ -381,6 +416,10 @@ save the buffer without prompting or displaying messages."
     (when buffer-guardian-hooks-auto-save-all-buffers
       (dolist (hook buffer-guardian-hooks-auto-save-all-buffers)
         (remove-hook hook #'buffer-guardian-save-all-buffers)))
+
+    ;; Window buffer change
+    (remove-hook 'window-buffer-change-functions
+                 #'buffer-guardian--window-buffer-change-functions)
 
     ;; Advice
     ;; ------

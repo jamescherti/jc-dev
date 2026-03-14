@@ -660,7 +660,7 @@
                            ;; le-yaml-ts-mode
 
                            le-avy
-                           ;; le-ace-window
+                           le-ace-window
                            le-bufferfile
                            le-diff-hl
 
