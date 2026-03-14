@@ -43,11 +43,6 @@
   :type 'boolean
   :group 'buffer-guardian)
 
-;; (defcustom buffer-guardian-unattended-built-in-save-some-buffers nil
-;;   "Ensure `save-some-buffers' never prompts and always saves buffers."
-;;   :type 'boolean
-;;   :group 'buffer-guardian)
-
 (defcustom buffer-guardian-save-all-buffers-interval nil
   "Interval in seconds for automatically saving all buffers.
 This allows you to periodically save all file visiting buffers at once,
@@ -130,7 +125,6 @@ Set this variable to nil to disable advising altogether.")
   "Timer object for saving all buffers when the user is idle.")
 
 (defvar buffer-guardian--list-advised-functions nil)
-;; (defvar buffer-guardian--bkp-save-some-buffers-default-predicate nil)
 
 (defun buffer-guardian-exclude-p (filename)
   "Return non-nil if FILENAME matches any of the `buffer-guardian-exclude'."
@@ -142,9 +136,9 @@ Set this variable to nil to disable advising altogether.")
   "Determine if the current buffer should be automatically saved.
 
 If INCLUDE-NON-FILE-VISITING is non-nil, the predicate recognizes and returns
-specialized symbols for 'org-src and 'edit-indirect buffers.
+specialized symbols for \='org-src and \='edit-indirect buffers.
 
-Returns: 'org-src, 'edit-indirect, t, or nil."
+Returns: \='org-src, \='edit-indirect, t, or nil."
   (let* ((file-name (buffer-file-name)))
     (when (and (buffer-modified-p)
                ;; Global Exclusion check first
@@ -259,24 +253,6 @@ save the buffer without prompting or displaying messages."
   "Save current buffers."
   (buffer-guardian-save-buffer-maybe (current-buffer)))
 
-;; (defun buffer-guardian--advice-around-save-some-buffers (original
-;;                                                         &optional
-;;                                                         _arg pred)
-;;   "Make `save-some-buffers' never ask questions and always use the predicate.
-;; ORIGINAL is the function. ARG and PRED are the `save-some-buffers' arguments."
-;;   (let ((save-silently (not buffer-guardian-verbose)))
-;;     (funcall original
-;;              t  ;  Non-nil means save all with no questions.
-;;              (if (eq pred t)
-;;                  ;; If PRED is t, the `buffer-guardian-predicate' is ignored.
-;;                  ;; Functions like `save-buffers-kill-emacs' are problematic in
-;;                  ;; this case as they bypass the predicate by passing t to PRED.
-;;                  ;; We rely on the safety of the buffer-guardian predicate,
-;;                  ;; which is why we change PRED back to nil to ensure that the
-;;                  ;; `buffer-guardian-predicate' is always used.
-;;                  nil
-;;                pred))))
-
 (defun buffer-guardian--on-focus-change ()
   "Run `buffer-guardian-save-all-buffers' when Emacs loses focus."
   (when (and buffer-guardian-save-on-focus-change
@@ -290,7 +266,7 @@ save the buffer without prompting or displaying messages."
       (when (buffer-live-p buffer)
         (buffer-guardian-save-buffer-maybe buffer)))))
 
-(defvar buffer-guardian--previous-buffers nil)
+(defvar buffer-guardian--previous-buffer nil)
 
 (defun buffer-guardian--window-buffer-change-functions (&optional object)
   "Function called by `window-buffer-change-functions'.
@@ -315,26 +291,21 @@ OBJECT can be a frame or a window."
         (with-selected-frame frame
           (with-selected-window window
             (when-let* ((buffer (window-buffer)))
-              (when (buffer-live-p buffer)
+              (when (and (buffer-live-p buffer)
+                         (not (eq buffer buffer-guardian--previous-buffer)))
                 ;; Save previous buffers
-                (when buffer-guardian--previous-buffers
+                (when buffer-guardian--previous-buffer
                   (message "BEGIN SAVE")
-                  (message "SAVE: %S" buffer-guardian--previous-buffers)
+                  (message "SAVE: %S" buffer-guardian--previous-buffer)
 
-                  ;; TODO don't use a list, just setq
-                  (when (> (length buffer-guardian--previous-buffers) 2)
-                    (message "WARNING: More than 2 buffers in list"))
-
-                  (dolist (previous-buf buffer-guardian--previous-buffers)
-                    (when (buffer-live-p previous-buf)
-                      (buffer-guardian-save-buffer-maybe previous-buf)))
+                  (when (buffer-live-p buffer-guardian--previous-buffer)
+                    (buffer-guardian-save-buffer-maybe buffer-guardian--previous-buffer))
 
                   ;; Reset
-                  (setq buffer-guardian--previous-buffers nil))
+                  (setq buffer-guardian--previous-buffer nil))
 
                 ;; Push the current buffer
-                (unless (memq buffer buffer-guardian--previous-buffers)
-                  (push buffer buffer-guardian--previous-buffers))))))))))
+                (setq buffer-guardian--previous-buffer buffer)))))))))
 
 ;;;###autoload
 (define-minor-mode buffer-guardian-mode
@@ -354,26 +325,6 @@ OBJECT can be a frame or a window."
         ;; TODO variable to configure this
         (add-hook 'window-buffer-change-functions
                   #'buffer-guardian--window-buffer-change-functions)
-
-        ;; (when buffer-guardian-unattended-built-in-save-some-buffers
-        ;;   (setq buffer-guardian--bkp-save-some-buffers-default-predicate
-        ;;         save-some-buffers-default-predicate)
-        ;;   ;; Default predicate for `save-some-buffers'. This prevents
-        ;;   ;; `save-some-buffers' from prompting about certain files that you'd
-        ;;   ;; typically prefer not to save.
-        ;;   (setq save-some-buffers-default-predicate
-        ;;         #'buffer-guardian-predicate)
-        ;;
-        ;;   ;; Advice
-        ;;   ;; ------
-        ;;   ;; Ensure `save-some-buffers' never prompts and always saves
-        ;;   ;; file-visiting buffers. When
-        ;;   ;; `buffer-guardian-inhibit-saving-nonexistent-files' is:
-        ;;   ;; - nil: all file-visiting buffers are saved.
-        ;;   ;; - non-nil: only file-visiting buffers that exist on disk are saved.
-        ;;   ;; (advice-add 'save-some-buffers :around
-        ;;   ;;             #'buffer-guardian--advice-around-save-some-buffers)
-        ;;   )
 
         ;; Minibuffer setup
         ;; ----------------
@@ -420,13 +371,6 @@ OBJECT can be a frame or a window."
     ;; Window buffer change
     (remove-hook 'window-buffer-change-functions
                  #'buffer-guardian--window-buffer-change-functions)
-
-    ;; Advice
-    ;; ------
-    ;; (setq save-some-buffers-default-predicate
-    ;;       buffer-guardian--bkp-save-some-buffers-default-predicate)
-    ;; (advice-remove 'save-some-buffers
-    ;;                #'buffer-guardian--advice-around-save-some-buffers)
 
     ;; Minibuffer setup
     ;; ----------------
