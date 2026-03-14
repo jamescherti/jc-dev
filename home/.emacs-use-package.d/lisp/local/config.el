@@ -811,8 +811,7 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
   ;; Apply the cached paths to load-path
   (seq-doseq (path my--package-load-path-cache)
     ;; (push path load-path)
-    (add-to-list 'load-path path)
-    ))
+    (add-to-list 'load-path path)))
 
 ;;; display buffer alist
 
@@ -902,20 +901,21 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 
 (defun current-window-only-setup ()
   "Make Emacs only use the current window."
-  ;; org-mode
-  (setq org-src-window-setup 'current-window) ;; Edit source in current window
-  (setq org-agenda-window-setup 'current-window)
+  (unless noninteractive
+    ;; org-mode
+    (setq org-src-window-setup 'current-window) ;; Edit source in current window
+    (setq org-agenda-window-setup 'current-window)
 
-  ;; Open links in help windows (like links to files) in the current window
-  (setq help-window-keep-selected t)
+    ;; Open links in help windows (like links to files) in the current window
+    (setq help-window-keep-selected t)
 
-  ;; Compilation buffers. Also used by wgrep buffers / Embark export.
-  ;; (push '(always-current-window---display-buffer-from-compilation-p
-  ;;         display-buffer-same-window
-  ;;         (inhibit-same-window . nil))
-  ;;       display-buffer-alist)
+    ;; Compilation buffers. Also used by wgrep buffers / Embark export.
+    ;; (push '(always-current-window---display-buffer-from-compilation-p
+    ;;         display-buffer-same-window
+    ;;         (inhibit-same-window . nil))
+    ;;       display-buffer-alist)
 
-  (current-window-only--setup-display-buffer-alist))
+    (current-window-only--setup-display-buffer-alist)))
 
 ;; (defun lightemacs-user-post-init ()
 ;;   "User post init."
