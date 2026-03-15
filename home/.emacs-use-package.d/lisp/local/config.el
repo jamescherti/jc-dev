@@ -423,8 +423,8 @@
                                      ))
 (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
 
-(message "LOADING config.el")
-(load (expand-file-name "~/.config.el") :no-error :nosuffix)
+;; (message "LOADING config.el")
+(load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
 ;;; Options
 

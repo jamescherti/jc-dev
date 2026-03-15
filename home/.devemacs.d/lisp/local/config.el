@@ -60,9 +60,9 @@
 
 ;;; External config
 
-(message "LOAD: config.el")
+;; (message "LOAD: config.el")
 
-(load (expand-file-name "~/.config.el") :no-error :nosuffix)
+(load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
 ;;; Optimization
 
