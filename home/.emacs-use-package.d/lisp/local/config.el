@@ -26,6 +26,8 @@
 
 ;;; Debug, native comp, and initial options
 
+(setq lightemacs-easysession-load-session-on-startup nil)
+
 (let ((user-dir (file-truename lightemacs-user-directory)))
   (cond
    ((string= user-dir
