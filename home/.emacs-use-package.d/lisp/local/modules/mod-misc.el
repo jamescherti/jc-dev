@@ -1592,32 +1592,6 @@ Returns:
                  ;;             (name . "^\\.newsrc-dribble")))
                  )))))
 
-;;; C-g
-
-;; This fixes the behavior when C-g is pressed during a search using '/'.
-;; Pressing C-g returns the cursor to its location before the search began.
-(defun my/keyboard-quit-dwim ()
-  "Do-What-I-Mean behaviour for a general `keyboard-quit'.
-
-The DWIM behaviour of this command is as follows:
-
-- When the region is active, disable it.
-- When the Completions buffer is selected, close it.
-- When a minibuffer is active (even if not focused), abort it.
-- In every other case use the regular `keyboard-quit'."
-  (interactive)
-  (cond
-   ((region-active-p)
-    (keyboard-quit))
-   ((derived-mode-p 'completion-list-mode)
-    (delete-completion-window))
-   ((active-minibuffer-window)
-    (abort-recursive-edit))
-   (t
-    (keyboard-quit))))
-
-(define-key global-map (kbd "C-g") #'my/keyboard-quit-dwim)
-
 ;;; Setup scratch
 
 (defvar-local my-scratch-setup-done nil)
