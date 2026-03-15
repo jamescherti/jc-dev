@@ -525,7 +525,7 @@ smart-editor() {
     && is-emacs-server-running; then
     emacs-edit "$@"
   elif type -P devemacs &>/dev/null; then
-    devemacs "$@"
+    devemacs -nw "$@"
   else
     vim "$@"
   fi
