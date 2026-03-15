@@ -131,17 +131,6 @@
   "Disable automatic removal of trailing spaces in `evil-mode'."
   (setq-local evil-maybe-remove-spaces nil))
 
-(defun my-evil-save ()
-  "Save."
-  (interactive)
-  (let ((inhibit-message t)
-        (save-silently t))
-    (save-buffer))
-  ;; (if (fboundp 'buffer-guardian-save-buffer)
-  ;;     (buffer-guardian-save-buffer)
-  ;;   (save-buffer))
-  )
-
 (defun my-goto-end-of-buffer (&rest _)
   "Go to the end of the buffer."
   (interactive)
@@ -367,7 +356,7 @@ ORIG-FUN is the function and ARGS the arguments."
   (advice-add 'evil-paste-before :around #'ignore-empty-ring-errors))
 
 (evil-define-key '(normal insert visual) 'global (kbd "C-s")
-  #'my-evil-save)
+  #'my-save-buffer)
 
 (defun evilclipboard-select-pasted ()
   "Visually select last pasted text."

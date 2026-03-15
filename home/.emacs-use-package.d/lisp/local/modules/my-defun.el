@@ -61,18 +61,33 @@ save the buffer without prompting or displaying messages."
 
 (defun my-save-all-buffers ()
   "Save all buffers."
-  (if (fboundp 'buffer-guardian-save-all-buffers)
-      (buffer-guardian-save-all-buffers)
-    (save-some-buffers t)))
+  (cond
+   ((fboundp 'buffer-guardian-save-all-buffers)
+    (buffer-guardian-save-all-buffers))
+
+   (t
+    (save-some-buffers t))))
 
 (defun my-save-buffer ()
   "Save the current buffer."
   ;; The buffer guardian version checks if the file on disk has been modified
   ;; and prompts the user to reload it
-  (when (buffer-modified-p)
-    (if (fboundp 'buffer-guardian-save-buffer)
-        (buffer-guardian-save-buffer)
-      (save-buffer))))
+  (interactive)
+  (cond
+   ((bound-and-true-p gptel-mode)
+    nil)
+
+   ((string= (buffer-name) "*scratch*")
+    nil)
+
+   ((buffer-modified-p)
+    (let ((inhibit-message t)
+          (save-silently t))
+      (save-buffer))
+    ;; (if (fboundp 'buffer-guardian-save-buffer)
+    ;;     (buffer-guardian-save-buffer)
+    ;;   (save-buffer))
+    )))
 
 (defun my-project-root-dir (&optional path)
   "Search up the PATH for `project-root-markers'."
