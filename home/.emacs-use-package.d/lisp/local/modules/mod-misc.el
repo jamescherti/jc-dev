@@ -1047,104 +1047,71 @@ WIDTH is the tab width."
 
   (dolist (err '("\\`rx ['']\\*\\*[''] range error"
                  search-failed
+
                  ;; Wrong syntax (PDF)
                  invalid-read-syntax
+
                  "This function supports only emacs-lisp-mode"
+
                  "Cannot find a suitable checker"
+
                  ;; "Attempt to delete the sole visible or iconified frame"
+                 ;; (push "Attempt to delete the sole visible or iconified frame" debug-ignored-errors)
+
                  "Already at top level of the outline"
+
                  "This buffer cannot use 'imenu-default-create-index-function'"
-                 ;; Debugger entered--Lisp error: (permission-denied "Setting
-                 ;; current directory" "Permission denied" "/dir/")
+
+                 ;; Debugger entered--Lisp error: (permission-denied "Setting current directory"
+                 ;; "Permission denied" "/dir/")
                  permission-denied
-                 ;; Debugger entered--Lisp error: (invalid-regexp "Unmatched [
-                 ;; or [^")
+
+                 ;; Debugger entered--Lisp error: (invalid-regexp "Unmatched [ or [^")
+                 ;;  evil-ex-search-find-next-pattern(("[\"" t t) forward)
+                 ;;  evil-ex-find-next(("[\"" t t) forward t)
+                 ;;  evil-ex-search-full-pattern("[\"" nil forward)
+                 ;;  evil-ex-start-search(forward nil)
+                 ;;  evil-ex-search-forward(nil)
+                 ;;  funcall-interactively(evil-ex-search-forward nil)
+                 ;;  command-execute(evil-ex-search-forward)
                  invalid-regexp
-                 ;; Debugger entered--Lisp error: (error "Accessing an empty
-                 ;; ring")
+
+                 ;; Debugger entered--Lisp error: (error "Accessing an empty ring")
+                 ;;  error("Accessing an empty ring")
+                 ;;  ring-ref((0 0 . [nil nil nil nil nil nil nil nil nil nil]) 0)
+                 ;;  evil-repeat(nil nil)
+                 ;;  funcall-interactively(evil-repeat nil nil)
+                 ;;  command-execute(evil-repeat)
                  "Accessing an empty ring"
-                 ;; goto last change: (error "Negative arg: Cannot reverse as
-                 ;; the first operation")
+
+                 ;; goto last change
+                 ;; ----------------
+                 ;; Debugger entered--Lisp error: (error "Negative arg: Cannot reverse as the first operation")
+                 ;; error("Negative arg: Cannot reverse as the first operation")
+                 ;; goto-last-change(-)
+                 ;; goto-last-change-reverse(nil)
+                 ;; evil-goto-last-change-reverse(nil)
+                 ;; funcall-interactively(evil-goto-last-change-reverse nil)
+                 ;; command-execute(evil-goto-last-change-reverse)
                  "Negative arg: Cannot reverse as the first operation"
+
                  ;; goto-chg
                  "Buffer has not been changed"
+
                  ;; Paredit
                  "Mismatched parenthesis depth"
                  "Mismatched character quotation"
                  "Mismatched comment state:"
                  "Mismatched string state:"
+
                  ;; Outline next/previous heading
                  ;; (outline-back-to-heading) and (show-children)
                  outline-before-first-heading
                  "No previous same-level heading"
                  "No following same-level heading"
+
                  "Bad diff region number"))
     (push err debug-ignored-errors))
-  (push "\\`rx ['']\\*\\*[''] range error" debug-ignored-errors)
-
-  (push 'search-failed debug-ignored-errors)
-  (push 'invalid-read-syntax debug-ignored-errors)  ; Wrong syntax (PDF)
-
-
-  (push "This function supports only emacs-lisp-mode" debug-ignored-errors)
-
-  (push "Cannot find a suitable checker" debug-ignored-errors)
-
-  ;; (push "Attempt to delete the sole visible or iconified frame" debug-ignored-errors)
-
-  (push "Already at top level of the outline" debug-ignored-errors)
-
-  (push "This buffer cannot use 'imenu-default-create-index-function'" debug-ignored-errors)
-
-  ;; Debugger entered--Lisp error: (permission-denied "Setting current directory"
-  ;; "Permission denied" "/dir/")
-  (push 'permission-denied debug-ignored-errors)
-
-  ;; Debugger entered--Lisp error: (invalid-regexp "Unmatched [ or [^")
-  ;;   evil-ex-search-find-next-pattern(("[\"" t t) forward)
-  ;;   evil-ex-find-next(("[\"" t t) forward t)
-  ;;   evil-ex-search-full-pattern("[\"" nil forward)
-  ;;   evil-ex-start-search(forward nil)
-  ;;   evil-ex-search-forward(nil)
-  ;;   funcall-interactively(evil-ex-search-forward nil)
-  ;;   command-execute(evil-ex-search-forward)
-  (push 'invalid-regexp debug-ignored-errors)
-
-  ;; Debugger entered--Lisp error: (error "Accessing an empty ring")
-  ;;   error("Accessing an empty ring")
-  ;;   ring-ref((0 0 . [nil nil nil nil nil nil nil nil nil nil]) 0)
-  ;;   evil-repeat(nil nil)
-  ;;   funcall-interactively(evil-repeat nil nil)
-  ;;   command-execute(evil-repeat)
-  (push "Accessing an empty ring" debug-ignored-errors)
-
-  ;; goto last change
-  ;; ----------------
-  ;; Debugger entered--Lisp error: (error "Negative arg: Cannot reverse as the
-  ;; first operation")
-  ;; error("Negative arg: Cannot reverse as the first operation")
-  ;; goto-last-change(-)
-  ;; goto-last-change-reverse(nil)
-  ;; evil-goto-last-change-reverse(nil)
-  ;; funcall-interactively(evil-goto-last-change-reverse nil)
-  ;; command-execute(evil-goto-last-change-reverse)
-  (push "Negative arg: Cannot reverse as the first operation" debug-ignored-errors)
-
-  ;; goto-chg
-  (push "Buffer has not been changed" debug-ignored-errors)
-
-  ;; Paredit
-  (push "Mismatched parenthesis depth" debug-ignored-errors)
-  (push "Mismatched character quotation" debug-ignored-errors)
-  (push "Mismatched comment state:" debug-ignored-errors)
-  (push "Mismatched string state:" debug-ignored-errors)
-
-  ;; Outline next/previous heading
-  (push 'outline-before-first-heading debug-ignored-errors)  ;; (outline-back-to-heading) and (show-children)
-  (push "No previous same-level heading" debug-ignored-errors)
-  (push "No following same-level heading" debug-ignored-errors)
-
-  (push "Bad diff region number" debug-ignored-errors)
 
   (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
                                          "\\`/[^/|:]+:" "\\.gpg\\'"))
