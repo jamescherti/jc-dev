@@ -391,7 +391,7 @@ main() {
       redshift -o
     fi
 
-    bg_run "$0" pwd-manager
+    bg_run "$0" keepassxc --minimized
     # bg_run "$0" web-browser
     # bg_run "$0" editor
     bg_run "$0" terminal
