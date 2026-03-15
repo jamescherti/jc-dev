@@ -811,87 +811,48 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
   ;; Apply the cached paths to load-path
   (seq-doseq (path my--package-load-path-cache)
     ;; (push path load-path)
-    (add-to-list 'load-path path)))
+    (push path load-path)))
 
 ;;; display buffer alist
 
 (defun my-config-display-buffer-alist ()
-  "Config display buffer alist."
+  "Config display buffer alist using push for performance."
   (unless noninteractive
-    ;; Display buffer alist
+    (dolist (entry
+             '(("\\*pathaction:" (display-buffer-at-bottom) (window-height . 0.33))
+               ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
+               ("\\*Memory-Profiler-Report" (display-buffer-at-bottom))
+               ("\\*Calendar\\*" (display-buffer-at-bottom))
+               ("\\*tmux" (display-buffer-same-window))
+               ("\\*grep\\*" (display-buffer-same-window))))
+      (push entry display-buffer-alist))
 
-    (add-to-list 'display-buffer-alist '("\\*pathaction:"
-                                         (display-buffer-at-bottom)
-                                         (window-height . 0.33)))
-
-    (add-to-list 'display-buffer-alist
-                 `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
-                   display-buffer-in-side-window
-                   (side . right)
-                   (slot . 0)
-                   (window-parameters . ((no-delete-other-windows . t)))
-                   (window-width . 100)
-                   (dedicated . t)))
-
-    (add-to-list 'display-buffer-alist '("\\*CPU-Profiler-Report"
-                                         (display-buffer-at-bottom)))
-
-    (add-to-list 'display-buffer-alist '("\\*Memory-Profiler-Report"
-                                         (display-buffer-at-bottom)))
-
-    (add-to-list 'display-buffer-alist '("\\*Calendar\\*"
-                                         (display-buffer-at-bottom)))
-
-    (add-to-list 'display-buffer-alist '("\\*tmux"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*grep\\*"
-                                         (display-buffer-same-window)))))
+    ;; Handle the complex Org entry separately or add it to the list above
+    (push `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
+            display-buffer-in-side-window
+            (side . right)
+            (slot . 0)
+            (window-parameters . ((no-delete-other-windows . t)))
+            (window-width . 100)
+            (dedicated . t))
+          display-buffer-alist)))
 
 ;;; Always current window
 
 (defun current-window-only--setup-display-buffer-alist ()
-  "Setup display buffer alist."
+  "Setup display buffer alist using push for performance."
   (unless noninteractive
-    ;; (add-to-list 'display-buffer-alist '("\\*vc-diff\\*"
-    ;;                                      (display-buffer-same-window)))
-
-    ;; (add-to-list 'display-buffer-alist '("\\*vc-change-log\\*"
-    ;;                                      (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*Man"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*eat"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*Memory-Report\\*"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*helpful"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*Backtrace\\*"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*\\(Help\\|eldoc\\)\\*"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*[Hh]elp:"
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*edit-indirect "
-                                         (display-buffer-same-window)))
-
-    (add-to-list 'display-buffer-alist '("\\*Proced\\*"
-                                         (display-buffer-same-window)))
-
-    ;; (add-to-list 'display-buffer-alist '("\\magit:"
-    ;;                                      (display-buffer-same-window)))
-
-    ;; This uses compile-goto-error
-    (add-to-list 'display-buffer-alist '("\\*Embark Export"
-                                         (display-buffer-same-window)))))
+    (dolist (regexp '("\\*Man"
+                      "\\*eat"
+                      "\\*Memory-Report\\*"
+                      "\\*helpful"
+                      "\\*Backtrace\\*"
+                      "\\*\\(Help\\|eldoc\\)\\*"
+                      "\\*[Hh]elp:"
+                      "\\*edit-indirect "
+                      "\\*Proced\\*"
+                      "\\*Embark Export"))
+      (push `(,regexp (display-buffer-same-window)) display-buffer-alist))))
 
 (defun always-current-window---display-buffer-from-compilation-p (_buffer-name _action)
   "Display buffer from compilation."

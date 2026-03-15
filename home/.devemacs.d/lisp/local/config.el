@@ -53,11 +53,14 @@
 (require 'lightemacs)
 ;; (add-to-list 'load-path (expand-file-name "modules/"
 ;;                                           lightemacs-local-directory))
+;; TOTO replace them with push
 ;; (add-to-list 'load-path lightemacs-local-modules-directory)
 ;; (add-to-list 'load-path lightemacs-core-directory)
 ;; (add-to-list 'load-path lightemacs-modules-directory)
 
 ;;; External config
+
+(message "LOAD: config.el")
 
 (load (expand-file-name "~/.config.el") :no-error :nosuffix)
 
@@ -85,7 +88,7 @@
 ;; (setq debug-on-error t)
 (when debug-on-error
   ;; TODO le-default config?
-  (add-to-list 'debug-ignored-errors 'search-failed))
+  (push 'search-failed debug-ignored-errors))
 
 (setq enable-dir-local-variables t)
 (setq enable-local-variables :safe)
