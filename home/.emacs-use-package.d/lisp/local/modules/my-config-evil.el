@@ -1197,14 +1197,35 @@ on text following the cursor."
   (kbd "M-o") 'my-previous-interesting-buffer
   (kbd "M-i") 'my-next-interesting-buffer
   ;; (kbd "M-=") 'global-text-scale-adjust
-  (kbd "C--") 'text-scale-decrease
-  (kbd "C-+") 'text-scale-increase
+
+  ;; handled by le-default-keybindings.el
+  ;; (kbd "C--") 'text-scale-decrease
+  ;; (kbd "C-+") 'text-scale-increase
+
   (kbd "C-S-k") 'my-tab-bar-move-tab-backward
   (kbd "C-S-j") 'my-tab-bar-move-tab
   (kbd "C-k") 'my-tab-previous
   (kbd "C-j") 'my-tab-next)
 
 (my-intercept-mode 1)
+
+;; Doesn't work
+;; (require 'le-default-keybindings)  ; `lightemacs-keymap-override-map'
+;; (unless noninteractive
+;;   (dolist (binding '(("C--" . text-scale-decrease)
+;;                      ("C-+" . text-scale-increase)
+;;                      ("M-RET" . toggle-term-tmux)
+;;                      ("M-<enter>" . toggle-term-tmux)
+;;                      ("M-<return>" . toggle-term-tmux)
+;;                      ("M-o" . my-previous-interesting-buffer)
+;;                      ("M-i" . my-next-interesting-buffer)
+;;                      ("C-S-k" . my-tab-bar-move-tab-backward)
+;;                      ("C-S-j" . my-tab-bar-move-tab)
+;;                      ("C-k" . my-tab-previous)
+;;                      ("C-j" . my-tab-next)))
+;;     (let ((key (car binding))
+;;           (cmd (cdr binding)))
+;;       (evil-define-key* 'normal lightemacs-keymap-override-map (kbd key) cmd))))
 
 ;;; Move region
 
