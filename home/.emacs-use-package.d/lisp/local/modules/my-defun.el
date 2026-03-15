@@ -68,6 +68,7 @@ save the buffer without prompting or displaying messages."
    (t
     (save-some-buffers t))))
 
+;; TODO move this to buffer-guardian. I fixed version of the previous func
 (defun my-save-buffer ()
   "Save the current buffer."
   ;; The buffer guardian version checks if the file on disk has been modified
@@ -80,6 +81,26 @@ save the buffer without prompting or displaying messages."
    ((string= (buffer-name) "*scratch*")
     nil)
 
+   ;; Special buffer
+   ((and
+     (let ((buffer-name (buffer-name)))
+       (when buffer-name
+         (and (or (string-prefix-p " " buffer-name)
+                  (and (string-prefix-p "*" buffer-name)
+                       (string-suffix-p "*" buffer-name))
+                  (derived-mode-p 'special-mode)
+                  (minibufferp (current-buffer)))
+              (not (buffer-file-name (buffer-base-buffer))))))
+
+     (not (and buffer-guardian-handle-org-src
+               (fboundp 'org-src-edit-buffer-p)
+               (funcall 'org-src-edit-buffer-p)))
+
+     (not (and buffer-guardian-handle-edit-indirect
+               (bound-and-true-p edit-indirect--overlay))))
+    nil)
+
+   ;; Other
    ((buffer-modified-p)
     (let ((inhibit-message t)
           (save-silently t))
