@@ -3199,8 +3199,8 @@ This function is intended for use as :around advice."
 
 ;;; auto revert
 
-(setq ;; revert-without-query (list ".")  ; Do not prompt
- auto-revert-stop-on-user-input nil)
+;; (setq ;; revert-without-query (list ".")  ; Do not prompt
+;;  auto-revert-stop-on-user-input nil)
 
 ;;; battery angel
 

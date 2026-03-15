@@ -134,9 +134,13 @@
 (defun my-evil-save ()
   "Save."
   (interactive)
-  (if (fboundp 'buffer-guardian-save-buffer)
-      (buffer-guardian-save-buffer)
-    (save-buffer)))
+  (let ((inhibit-message t)
+        (save-silently t))
+    (save-buffer))
+  ;; (if (fboundp 'buffer-guardian-save-buffer)
+  ;;     (buffer-guardian-save-buffer)
+  ;;   (save-buffer))
+  )
 
 (defun my-goto-end-of-buffer (&rest _)
   "Go to the end of the buffer."
@@ -362,7 +366,8 @@ ORIG-FUN is the function and ARGS the arguments."
   (advice-add 'evil-paste-after :around #'ignore-empty-ring-errors)
   (advice-add 'evil-paste-before :around #'ignore-empty-ring-errors))
 
-(evil-define-key '(normal insert visual) 'global (kbd "C-s") #'my-evil-save)
+(evil-define-key '(normal insert visual) 'global (kbd "C-s")
+  #'my-evil-save)
 
 (defun evilclipboard-select-pasted ()
   "Visually select last pasted text."
