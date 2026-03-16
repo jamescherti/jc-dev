@@ -3247,8 +3247,8 @@ This function is intended for use as :around advice."
 (lightemacs-use-package buffer-guardian
   :ensure nil
   :commands buffer-guardian-mode
-  :vc (:url "https://github.com/jamescherti/buffer-guardian.el"
-            :rev :newest)
+  ;; :vc (:url "https://github.com/jamescherti/buffer-guardian.el"
+  ;;           :rev :newest)
 
   :hook
   (lightemacs-emacs-startup . buffer-guardian-mode)
