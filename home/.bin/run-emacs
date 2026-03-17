@@ -47,7 +47,7 @@ set -euf -o pipefail
 
 # Safely assign default values
 RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
-RUN_EMACS_BIN="${RUN_EMACS_BIN:-emacs}"
+RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
 
 # Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
 # lsp-use-plists flag. plists provide better performance in deserialization and
@@ -78,6 +78,11 @@ is-emacs-server-running() {
 }
 
 main() {
+  if [[ $RUN_EMACS_BIN == "" ]]; then
+    echo "Error: \$RUN_EMACS_BIN is not set or empty." >&2
+    exit 1
+  fi
+
   # Correctly check if the binary exists in the system PATH
   if ! RUN_EMACS_BIN=$(type -P "$RUN_EMACS_BIN" 2>/dev/null); then
     echo "Error: Command not found in PATH: '$RUN_EMACS_BIN'" >&2

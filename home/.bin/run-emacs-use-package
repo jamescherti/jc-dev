@@ -30,10 +30,12 @@ OSFAMILY=$(~/.local/bin/osid)
 # Never change this to master
 export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-30/bin/emacs"
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-  export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
-  if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-    RUN_EMACS_BIN=emacs
-  fi
+  #   export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
+  #   if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+  #     RUN_EMACS_BIN=emacs
+  #   fi
+  echo "Error: Not found: $RUN_EMACS_BIN" >&2
+  exit 1
 fi
 
 EMACS_D="$HOME/.emacs-use-package.d/"
