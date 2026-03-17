@@ -96,7 +96,8 @@ main() {
   if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
     :
   else
-    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
+    echo "[RUN] $(which emacs) $*"
+    exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
   fi
 }
 

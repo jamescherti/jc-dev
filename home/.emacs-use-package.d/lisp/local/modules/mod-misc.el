@@ -481,7 +481,7 @@ WIDTH is the tab width."
 
   (nconc auto-mode-alist
          '(;; conf-mode
-           ;; ("\\.profile\\'" . conf-mode)  ; firejail profiles
+           ("\\.profile\\'" . conf-mode)  ; firejail profiles
            ("^/etc/[^/]+" . conf-unix-mode)
 
            ;; /etc/hosts and ansible /hosts

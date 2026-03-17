@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -u
+set -e
+
+# unset TMUX &>/dev/null
+
+if [[ -d ~/.gnupg ]]; then
+  mkdir -p "$HOME/.gnupg_firejail/"
+  type -P rsync &>/dev/null \
+    && rsync -ar --delete --delete-excluded \
+      --exclude 'S.*' --exclude '*~' \
+      "$HOME/.gnupg/" "$HOME/.gnupg_firejail/"
+  chmod 700 "$HOME/.gnupg_firejail/"
+  export GNUPGHOME="$HOME/.gnupg_firejail"
+fi
+
+unset GPG_AGENT_INFO &>/dev/null || true
+
+FIREJAIL_EMACS_PROFILE="$HOME/.firejail_profiles/emacs.profile"
+
+exec firejail "--profile=$FIREJAIL_EMACS_PROFILE" emacs "$@"

@@ -1,0 +1,3 @@
+include wget.profile
+
+read-write /mnt/sand

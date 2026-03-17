@@ -13,7 +13,7 @@ Actions=new-window;new-instance;
 
 [Desktop Action new-window]
 Name=New Window
-Exec=emacsclient --alternate-editor= --create-frame --eval "(message-mailto (pop server-eval-args-left))" %u
+Exec=firejail emacsclient --alternate-editor= --create-frame --eval "(message-mailto (pop server-eval-args-left))" %u
 
 [Desktop Action new-instance]
 Name=New Instance
