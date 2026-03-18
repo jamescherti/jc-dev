@@ -62,10 +62,12 @@
 
 ;; (message "LOAD: config.el")
 
-(setq minimal-emacs-inhibit-redisplay-during-startup t)
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
 ;;; Optimization
+
+(setq minimal-emacs-inhibit-message-during-startup t)
+(setq minimal-emacs-inhibit-redisplay-during-startup t)
 
 (setq site-run-file nil)
 (setq inhibit-default-init t)
