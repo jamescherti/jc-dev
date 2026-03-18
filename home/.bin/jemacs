@@ -3,7 +3,9 @@
 set -u
 set -e
 
-# unset TMUX &>/dev/null
+# When jemacs runs inside a tmux session, ensure Emacs does not attempt to
+# connect to an unreachable session outside firejail
+unset TMUX &>/dev/null
 
 if [[ -d ~/.gnupg ]]; then
   mkdir -p "$HOME/.gnupg_firejail/"
