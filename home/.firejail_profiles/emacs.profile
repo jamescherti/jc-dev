@@ -37,7 +37,7 @@ blacklist ${HOME}/.var
 
 # Disabled by disable-common.inc
 noblacklist ${PATH}/hostname
-noblacklist ${HOME}/.ssh
+blacklist ${HOME}/.ssh
 
 blacklist ${HOME}/.gnupg
 
