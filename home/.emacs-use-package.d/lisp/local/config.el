@@ -26,6 +26,7 @@
 
 ;;; Debug, native comp, and initial options
 
+(setq minimal-emacs-inhibit-redisplay-during-startup t)
 (setq lightemacs-easysession-load-session-on-startup t)
 
 (let ((user-dir (file-truename lightemacs-user-directory)))
