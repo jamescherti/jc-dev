@@ -65,11 +65,16 @@ main() {
     EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
 
     # emacs-open-in-a-new-tab "$@" || :
-    if [[ $EMACS_DAEMON == "t" ]]; then
-      run-emacsclient -c "$@" || :
-    else
-      run-emacsclient "$@" || :
-    fi
+    run-emacsclient "$@" || :
+
+    # Issue: It creates a a new frame
+    # if [[ $EMACS_DAEMON == "t" ]]; then
+    #   run-emacsclient -c "$@" || :
+    #   exit 0
+    # else
+    #   run-emacsclient "$@" || :
+    #   exit 0
+    # fi
   else
     "$EMACS_EDIT_EMACS_BIN" &>/dev/null &
     disown

@@ -97,7 +97,8 @@ main() {
     :
   else
     echo "[RUN] $(which emacs) $*"
-    exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
+    exec emacs "${EMACS_ARGS_DICT[@]}" "$@"
+    # exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
   fi
 }
 
