@@ -26,6 +26,8 @@
 # SOFTWARE.
 #
 
+EMACS_EDIT_TIMEOUT="${EMACS_EDIT_TIMEOUT:-3}"
+
 # shellcheck disable=SC1090
 # In case .profile or .bashrc modify the current directory
 pushd . &>/dev/null
@@ -72,6 +74,12 @@ EMACS_ARGS_DICT=(
   # --no-loadup
 )
 
+set -x
+run-emacsclient() {
+  emacsclient --no-wait "--timeout=$EMACS_EDIT_TIMEOUT" "$@" 2>/dev/null \
+    || return "$?"
+}
+
 is-emacs-server-running() {
   # Hide output; return 0 if successful, 1 if connection fails
   emacsclient -e "(+ 1 1)" &>/dev/null
@@ -97,7 +105,7 @@ main() {
     EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
 
     if [[ $EMACS_DAEMON == "t" ]]; then
-      run-emacsclient -c "$@" || :
+      run-emacsclient -c || :
     fi
 
     exit 0

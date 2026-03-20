@@ -34,8 +34,7 @@ HOME=$(eval echo "~$USER")
 set -e
 set -u
 
-# EMACS_BIN="$HOME/.bin/run-emacs-use-package"
-EMACS_BIN="$HOME/.bin/emacs-edit"
+EMACS_BIN="$HOME/.bin/run-emacs-use-package"
 # # EMACS_BIN="$HOME/.bin/run-emacs-30"
 # EMACS_BIN="$HOME/.bin/run-emacs-master"
 # EMACS_BIN="$HOME/.bin/run-emacs-straight"
@@ -85,7 +84,7 @@ show_window() {
 }
 
 start-or-raise-emacs() {
-    if pgrep --quiet --exact emacs; then
+    if pgrep --exact emacs &>/dev/null; then
         if is_wayland; then
             if is_gnome && has_run_or_raise; then
                 gdbus call --session --dest org.gnome.Shell \

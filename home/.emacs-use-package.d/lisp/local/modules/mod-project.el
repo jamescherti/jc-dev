@@ -157,7 +157,7 @@ The selection is limited to projects already listed in the project database; see
 (defun my-project--maybe-append (file mtime-var)
   "Append projects from FILE if it exists and has changed.
 MTIME-VAR is a symbol storing the last known modification time."
-  (when (file-exists-p file)
+  (when (file-regular-p file)
     (let ((attrs (file-attributes file))
           (mtime (symbol-value mtime-var)))
       (unless (equal (file-attribute-modification-time attrs) mtime)
