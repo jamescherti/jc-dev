@@ -94,7 +94,13 @@ main() {
   export PATH="$emacs_dir:$PATH"
 
   if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
-    :
+    EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
+
+    if [[ $EMACS_DAEMON == "t" ]]; then
+      run-emacsclient -c "$@" || :
+    fi
+
+    exit 0
   else
     echo "[RUN] $(which emacs) $*"
     exec emacs "${EMACS_ARGS_DICT[@]}" "$@"
