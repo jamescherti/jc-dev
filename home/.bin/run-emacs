@@ -74,7 +74,6 @@ EMACS_ARGS_DICT=(
   # --no-loadup
 )
 
-set -x
 run-emacsclient() {
   emacsclient --no-wait "--timeout=$EMACS_EDIT_TIMEOUT" "$@" 2>/dev/null \
     || return "$?"
