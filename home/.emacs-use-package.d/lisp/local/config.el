@@ -171,7 +171,7 @@
 ;;                                    elpaca-build-steps)))
 
 (setq compile-angel-verbose t)
-(setq compile-angel-debug t)
+(setq compile-angel-debug nil)
 ;; (setq compile-angel-enable-byte-compile nil)
 ;; (setq compile-angel-enable-native-compile nil)
 ;; (setq compile-angel-on-load-mode-compile-once nil)
