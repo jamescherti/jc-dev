@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'seq)
+
 ;;; Debug, native comp, and initial options
 
 (setq minimal-emacs-inhibit-redisplay-during-startup t)
@@ -179,8 +181,6 @@
 ;; Experimental
 ;; (setq compile-angel-reload-compiled-version t)
 ;; (setq compile-angel-native-compile-load t)
-
-(require 'seq)
 
 (setq debug-on-error t)
 
