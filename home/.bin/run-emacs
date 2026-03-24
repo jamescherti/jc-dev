@@ -74,7 +74,7 @@ EMACS_ARGS_DICT=(
   # --no-loadup
 )
 
-run-emacsclient() {
+run-emacsclient-nowait() {
   emacsclient --no-wait "--timeout=$EMACS_EDIT_TIMEOUT" "$@" 2>/dev/null \
     || return "$?"
 }
@@ -101,10 +101,10 @@ main() {
   export PATH="$emacs_dir:$PATH"
 
   if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
-    EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
+    EMACS_DAEMON=$(run-emacsclient-nowait -e '(daemonp)' || :)
 
     if [[ $EMACS_DAEMON == "t" ]]; then
-      run-emacsclient -c || :
+      emacsclient -c
     fi
 
     exit 0
