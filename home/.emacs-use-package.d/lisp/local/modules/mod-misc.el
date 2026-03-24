@@ -1110,6 +1110,13 @@ WIDTH is the tab width."
                  "No previous same-level heading"
                  "No following same-level heading"
 
+                 ;; Debugger entered--Lisp error: (error "Last directory")
+                 ;;   error("%s directory" "Last")
+                 ;;   dired-next-subdir(1)
+                 ;;   funcall-interactively(dired-next-subdir 1)
+                 ;;   command-execute(dired-next-subdir)
+                 "Last directory"
+
                  "Bad diff region number"))
     (push err debug-ignored-errors))
 
@@ -1328,12 +1335,6 @@ WIDTH is the tab width."
            ,(file-name-concat auto-save-list-file-prefix "tramp-\\2-") sha1)
           ("\\`/\\([^/]+/\\)*\\([^/]+\\)\\'"
            ,(file-name-concat auto-save-list-file-prefix "\\2-") sha1)))
-
-
-
-
-
-
 
   (when auto-save-default
     (let ((auto-save-dir (file-name-directory auto-save-list-file-prefix)))
