@@ -201,7 +201,7 @@ show_window() {
   local win_name="$2"
 
   if is_wayland; then
-    if pgrep --quiet -x "$proc_name"; then
+    if pgrep -x "$proc_name" &>/dev/null; then
       echo "[IGNORE] The process $proc_name is already running"
       return 0
     fi
@@ -256,7 +256,7 @@ show_window_maximized() {
 }
 
 show_window_maximized_devilspie() {
-  if pgrep --quiet -x devilspie2; then
+  if pgrep -x devilspie2 &>/dev/null; then
     show_window "$@" || return 1
     return 0
   fi
@@ -521,7 +521,7 @@ main() {
     ;;
 
   emacs-terminal)
-    if pgrep --quiet -x emacs; then
+    if pgrep -x emacs &>/dev/null; then
       "$0" emacs
       emacsclient --no-wait -e '(best-tmux-run)'
       exit 0
@@ -724,7 +724,7 @@ main() {
   suspend)
     local process
     for process in emerge pacman wget curl aria2c apt-get git scp rsync borg; do
-      if pgrep --quiet -x "$process"; then
+      if pgrep -x "$process" &>/dev/null; then
         notify "You cannot suspend because of '$process'"
         exit 1
       fi
