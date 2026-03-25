@@ -651,7 +651,9 @@ main() {
     ;;
 
   emacs)
-    exec ~/.bin/xdevenv-emacs
+    ~/.bin/xdevenv-emacs &
+    disown
+    exit
     ;;
 
   vim)
@@ -683,8 +685,10 @@ main() {
   editor)
     load_bashrc
     # echo "--cycle -i --multi --exact --bind alt-j:down,alt-k:up"
-    exec "$0" emacs
     # exec "$0" vim
+    "$0" emacs &
+    disown
+    exit
     ;;
 
   gdm-change-user)
