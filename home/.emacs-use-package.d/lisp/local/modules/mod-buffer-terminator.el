@@ -296,7 +296,7 @@ BUFFERS is a buffer or a list of alive buffers."
   (let* ((buffer-terminator-protect-unsaved-file-buffers nil)
          (rules `((call-function . mod-buffer-terminator--file-buffer)
                   (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
-                  (keep-buffer-property . process)
+                  ;; (keep-buffer-property . process)
                   ;; (keep-buffer-property . special)
                   (keep-buffer-name . ,mod-buffer-terminator-always-keep)
                   (keep-buffer-name-regexp . ,mod-buffer-terminator-keep-buffer-regexp)
