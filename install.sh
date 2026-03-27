@@ -422,7 +422,6 @@ main() {
   config-firefox
   config-gnome
   config-xfce
-  config-mimetypes
 
   "$SCRIPT_DIR/home/.bin/update-emacs-config"
 
@@ -446,7 +445,15 @@ main() {
       echo "[INFO] Install Arch Linux desktop files"
       rsync -a "$SCRIPT_DIR/data/dist/arch/" "$HOME/"
     fi
+
+    # TODO adapt this for debian
+    if [[ $ID = debian ]] && [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
+      echo "[INFO] Install Arch Linux desktop files"
+      rsync -a "$SCRIPT_DIR/data/dist/arch/" "$HOME/"
+    fi
   fi
+
+  config-mimetypes
 
   echo
   echo Success.
