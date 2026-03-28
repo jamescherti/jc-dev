@@ -29,6 +29,11 @@
 (defconst IS-MAC (eq system-type 'darwin))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
+(defun my-default-font ()
+  "Display the default font."
+  (interactive)
+  (message "%s" (frame-parameter nil 'font)))
+
 (defun buffer-guardian-save-buffer ()
   "Save the current buffer.
 
