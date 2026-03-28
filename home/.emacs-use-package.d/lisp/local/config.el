@@ -437,6 +437,9 @@
   ;; (defconst my-font-choice "Iosevka SS08")
   ;; (defvar my-font-choice "Iosevka Term-13")
   ;; (add-to-list 'default-frame-alist `(font . ,my-font-choice))
+  ;; (setq lightemacs-theme-default-font "Iosevka Term-13")
+  ;; (setq lightemacs-theme-default-font "DejaVu Sans")
+  ;; (setq lightemacs-theme-default-font "Iosevka Term")
   (setq lightemacs-theme-default-font "Iosevka Term-13")
 
   ;; Check if the font exists on the system before applying it
