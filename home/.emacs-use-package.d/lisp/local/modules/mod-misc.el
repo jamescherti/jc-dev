@@ -1058,6 +1058,8 @@ WIDTH is the tab width."
                  ;; "Attempt to delete the sole visible or iconified frame"
                  ;; (push "Attempt to delete the sole visible or iconified frame" debug-ignored-errors)
 
+                 "Selecting deleted buffer"
+
                  "Already at top level of the outline"
 
                  "This buffer cannot use 'imenu-default-create-index-function'"
