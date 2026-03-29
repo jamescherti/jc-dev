@@ -2715,6 +2715,7 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 ;;; org
 
+;; TODO patch?
 (defun my-org-move-subtree-preserve-column-advice (orig-fun &rest args)
   "Advice to preserve the column when moving Org subtrees.
 ORIG-FUN and ARGS is the function and its arguments."
