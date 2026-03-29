@@ -27,9 +27,11 @@
 ;;; Code:
 
 (require 'evil)
+(require 'evil-collection)
 (require 'my-defun)
 (require 'lightemacs)  ; lightemacs-save-window-start
-(eval-and-compile (require 'lightemacs-use-package))  ; lightemacs-save-window-start
+(eval-and-compile
+  (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'mod-project)
 
 ;;; Better evil
@@ -2616,6 +2618,12 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 ;; Restore Ctrl-c Ctrl-c to close programs
 (with-eval-after-load 'term
+  (with-eval-after-load 'evil-collection-term
+    ;; Unbind Escape in Insert state so it passes directly to the shell process
+    (evil-collection-define-key 'insert 'term-raw-map
+      (kbd "<escape>") nil
+      (kbd "ESC") nil))
+
   ;; Change the default escape prefix to C-x
   ;; This allows C-c to be sent directly to the underlying shell
   (add-hook 'term-mode-hook (lambda ()

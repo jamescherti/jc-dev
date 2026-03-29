@@ -354,7 +354,8 @@ WIDTH is the tab width."
 
   (unless noninteractive
     (with-eval-after-load 'evil
-      (require 'my-config-evil)))
+      (with-eval-after-load 'evil-collection
+        (require 'my-config-evil))))
 
   (unless noninteractive
     ;; (global-set-key (kbd "M-RET") 'toggle-term-tmux)
