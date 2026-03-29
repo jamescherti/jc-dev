@@ -3399,7 +3399,7 @@ environment for accurate linting."
   :init
   (setq shell-pop-autocd-to-working-dir t)
   (setq shell-pop-term-shell "/bin/bash")
-  (setq shell-pop-window-size 40)
+  (setq shell-pop-window-size 80)
   (setq shell-pop-shell-type '("ansi-term"
                                "*ansi-term*"
                                (lambda ()
@@ -3939,6 +3939,46 @@ The result is displayed in a pretty-printed temporary buffer."
   (require 'smartindent)
   ;; (require 'battery-angel)
   (require 'point-manager))
+
+;;; term
+
+;; Configuration for M-x shell
+(setq explicit-shell-file-name "bash")
+(add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+
+;; Configuration for M-x term and ansi-term
+(setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
+
+;; Increase the scrollback history
+(setq term-buffer-maximum-size 10000)
+
+;; (defun my-term-setup ()
+;;   "Configuration for term and `ansi-term' buffers."
+;;   ;; Disable UI elements that interfere with terminal rendering
+;;   (display-line-numbers-mode -1)
+;;   (hl-line-mode -1)
+;;
+;;   ;; Bind paste to work correctly in raw mode
+;;   ;; (define-key term-raw-map (kbd "C-y") 'term-paste)
+;;
+;;   ;; Toggle easily between line mode and char (raw) mode
+;;   (define-key term-raw-map (kbd "C-c C-j") 'term-line-mode)
+;;   (define-key term-mode-map (kbd "C-c C-k") 'term-char-mode))
+;;
+;; (add-hook 'term-mode-hook #'my-term-setup)
+
+;; Automatically close the buffer when the terminal session ends
+;; TODO lightemacs
+(defun my-term-close-on-exit (process _event)
+  "Close the buffer when PROCESS finishes with EVENT."
+  (when (memq (process-status process) '(exit signal))
+    (kill-buffer (process-buffer process))))
+(defun my-term-exec-hook ()
+  "Attach the sentinel to the terminal process."
+  (let ((proc (get-buffer-process (current-buffer))))
+    (when proc
+      (set-process-sentinel proc #'my-term-close-on-exit))))
+(add-hook 'term-exec-hook #'my-term-exec-hook)
 
 ;;; Provide
 
