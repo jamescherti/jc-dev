@@ -298,8 +298,13 @@ user to press a key before finishing execution."
 
 (unless noninteractive
   (with-eval-after-load 'evil
+    ;; (define-key evil-normal-state-map (kbd "<leader>et")
+    ;;             #'toggle-term-tmux-default-bash)
+
     (define-key evil-normal-state-map (kbd "<leader>et")
-                #'toggle-term-tmux-default-bash)))
+                'shell-pop)
+
+    ))
 
 (provide 'mod-toggle-term)
 

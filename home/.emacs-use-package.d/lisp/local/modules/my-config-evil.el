@@ -1180,9 +1180,12 @@ on text following the cursor."
    state))
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
-  (kbd "M-RET") 'toggle-term-tmux
-  (kbd "M-<enter>") 'toggle-term-tmux
-  (kbd "M-<return>") 'toggle-term-tmux
+  ;; (kbd "M-RET") 'toggle-term-tmux
+  ;; (kbd "M-<enter>") 'toggle-term-tmux
+  ;; (kbd "M-<return>") 'toggle-term-tmux
+  (kbd "M-RET") 'shell-pop
+  (kbd "M-<enter>") 'shell-pop
+  (kbd "M-<return>") 'shell-pop
   (kbd "M-o") 'my-previous-interesting-buffer
   (kbd "M-i") 'my-next-interesting-buffer
   ;; (kbd "M-=") 'global-text-scale-adjust
@@ -2552,6 +2555,163 @@ In `prog-mode', this configures flyspell to check only comments and strings."
   (when (fboundp 'my-around-evil-ex-search-update-pattern-no-echo)
     (advice-add 'evil-ex-search-update-pattern
                 :around #'my-around-evil-ex-search-update-pattern-no-echo)))
+
+
+;;; term
+
+;; Configuration for M-x shell
+(setq explicit-shell-file-name "bash")
+(add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+
+;; Configuration for M-x term and ansi-term
+(setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
+
+;; Increase the scrollback history
+(setq term-buffer-maximum-size 10000)
+
+(defun my-term-setup ()
+  "Configuration for term and `ansi-term' buffers."
+  ;; Disable hscroll-margin in shell buffers to prevent visual jumping when the
+  ;; cursor approaches the left or right edges of the window.
+  (setq-local hscroll-margin 0)
+
+  ;; Setting scroll-margin to 0 prevents visual glitching and cursor jumping
+  ;; when using a terminal emulator inside Emacs.
+  (setq-local scroll-margin 0)
+
+  (setq-local scroll-conservatively most-positive-fixnum)
+  (setq-local fast-but-imprecise-scrolling t)
+
+  (setq-local mode-line-format nil)
+
+  ;; (setq-local transient-mark-mode nil)
+  ;; (auto-fill-mode -1)
+
+  ;; ;; Disable UI elements that interfere with terminal rendering
+  ;; (display-line-numbers-mode -1)
+  ;; (hl-line-mode -1)
+  ;;
+  ;; ;; Bind paste to work correctly in raw mode
+  ;; ;; (define-key term-raw-map (kbd "C-y") 'term-paste)
+  ;;
+  ;; ;; Toggle easily between line mode and char (raw) mode
+  ;; (define-key term-raw-map (kbd "C-c C-j") 'term-line-mode)
+  ;; (define-key term-mode-map (kbd "C-c C-k") 'term-char-mode)
+  )
+
+(add-hook 'term-mode-hook #'my-term-setup)
+
+;; Automatically close the buffer when the terminal session ends
+;; TODO lightemacs
+(defun my-term-close-on-exit (process _event)
+  "Close the buffer when PROCESS finishes with EVENT."
+  (when (memq (process-status process) '(exit signal))
+    (kill-buffer (process-buffer process))))
+(defun my-term-exec-hook ()
+  "Attach the sentinel to the terminal process."
+  (let ((proc (get-buffer-process (current-buffer))))
+    (when proc
+      (set-process-sentinel proc #'my-term-close-on-exit))))
+(add-hook 'term-exec-hook #'my-term-exec-hook)
+
+;; Restore Ctrl-c Ctrl-c to close programs
+(with-eval-after-load 'term
+  ;; Change the default escape prefix to C-x
+  ;; This allows C-c to be sent directly to the underlying shell
+  (add-hook 'term-mode-hook (lambda ()
+                              (when (fboundp 'term-set-escape-char)
+                                (term-set-escape-char ?\C-x))))
+
+  ;; Map C-c to send the raw character in Evil insert and emacs states
+  (evil-define-key
+    '(insert emacs) term-raw-map (kbd "C-c C-c") 'term-send-raw)
+
+  ;; Bind M-j and M-k to Evil window navigation in the terminal
+  (evil-define-key '(insert emacs) term-raw-map
+    (kbd "M-j") 'term-send-raw-meta
+    (kbd "M-k") 'term-send-raw-meta))
+
+;; ;; Revert to the native Emacs terminal identifier
+;; (setq term-term-name "eterm-color")
+
+;; (with-eval-after-load 'term
+;;   (let ((map term-raw-map)
+;;         (exceptions '(( "M-RET" . org-meta-return)
+;;                       ( "M-x"   . execute-extended-command)
+;;                       ( "M-o"   . other-window)
+;;                       ( "C-y"   . term-paste)
+;;                       ( "M-y"   . yank-pop))))
+;;
+;;     ;; 1. Handle specific command exceptions
+;;     (dolist (exception exceptions)
+;;       (define-key map (kbd (car exception)) (cdr exception)))
+;;
+;;     ;; 2. Handle prefixes (C-x, C-c)
+;;     ;; Setting these to nil allows them to "fall through" to your global bindings
+;;     (define-key map (kbd "C-x") nil)
+;;
+;;     ;; NOTE: C-c is the default 'term-escape-char'.
+;;     ;; If you want C-c to work as a normal Emacs prefix,
+;;     ;; you must move the escape char to something else first.
+;;     (setq term-escape-char [?\C-q]) ; Moves escape to C-q
+;;     (define-key map (kbd "C-c") nil)))
+
+;; (setq evil-collection-term-sync-state-and-mode-p t)
+;; (with-eval-after-load 'evil-collection
+;;   (evil-collection-init '(term)))
+
+;; (define-key term-raw-map (kbd "C-y") 'term-send-raw)
+;; (define-key term-raw-map (kbd "C-p") 'term-send-raw)
+;; (define-key term-raw-map (kbd "C-n") 'term-send-raw)
+;; (define-key term-raw-map (kbd "C-s") 'term-send-raw)
+;; (define-key term-raw-map (kbd "C-r") 'term-send-raw)
+;; (define-key term-raw-map (kbd "M-d") (lambda () (interactive) (term-send-raw-string "\ed")))
+;; (define-key term-raw-map (kbd "<C-backspace>") (lambda () (interactive) (term-send-raw-string "\e\C-?")))
+;; (define-key term-raw-map (kbd "M-p") (lambda () (interactive) (term-send-raw-string "\ep")))
+;; (define-key term-raw-map (kbd "M-n") (lambda () (interactive) (term-send-raw-string "\en")))
+;; (define-key term-raw-map (kbd "C-S-y") 'term-paste)
+;; (define-key term-raw-map (kbd "M-x") nil) ;unbind M-x
+;; (define-key term-raw-map (kbd "C-]") nil)
+
+;; (with-eval-after-load 'term
+;;   ;; Change the escape character to C-q (standard is C-c)
+;;   (setq term-escape-char [?\C-q])
+;;
+;;   ;; Now that C-c is free, explicitly tell term-mode to send it to the shell.
+;;   ;; This allows you to interrupt processes (SIGINT) with a single C-c.
+;;   (define-key term-raw-map (kbd "C-c") #'term-send-raw))
+
+;; Tell external apps you are using a standard 256-color terminal
+;; NOTE: doesn't work
+;; (setq term-term-name "xterm-256color")
+
+;; Enable the translation of 256-color codes in term-mode buffers
+;; (This requires the eterm-256color package to be installed)
+;; (use-package eterm-256color
+;;   :hook (term-mode . eterm-256color-mode))
+;; ;; Use eterm-256color to handle complex output and build the correct terminfo
+;; (use-package eterm-256color
+;;   :ensure t
+;;   :hook (term-mode . eterm-256color-mode))
+
+;; Pass function keys directly to the underlying shell in term-mode
+;; (setq term-bind-function-keys t)
+
+;; Instruct Emacs to inform child processes that truecolor is supported
+;; (setenv "COLORTERM" "truecolor")
+
+;; Use a standard TERM string so command-line applications output colors correctly
+;; (setenv "TERM" "xterm-256color")
+;; (setq term-term-name "xterm-256color")
+
+;; Activate the newly upgraded native ANSI color filter for M-x shell
+;; (add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+
+;; xterm color
+;; (lightemacs-use-package xterm-color
+;;   ;; :custom
+;;   ;; (compilation-environment '("TERM=xterm-256color"))
+;;   )
 
 ;;; Provide
 

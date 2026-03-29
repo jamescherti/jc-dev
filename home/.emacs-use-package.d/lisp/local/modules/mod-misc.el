@@ -357,9 +357,14 @@ WIDTH is the tab width."
       (require 'my-config-evil)))
 
   (unless noninteractive
-    (global-set-key (kbd "M-RET") 'toggle-term-tmux)
-    (global-set-key (kbd "M-<enter>") 'toggle-term-tmux)
-    (global-set-key (kbd "M-<return>") 'toggle-term-tmux)
+    ;; (global-set-key (kbd "M-RET") 'toggle-term-tmux)
+    ;; (global-set-key (kbd "M-<enter>") 'toggle-term-tmux)
+    ;; (global-set-key (kbd "M-<return>") 'toggle-term-tmux)
+
+    (global-set-key (kbd "M-RET") 'shell-pop)
+    (global-set-key (kbd "M-<enter>") 'shell-pop)
+    (global-set-key (kbd "M-<return>") 'shell-pop)
+
     (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
     (global-set-key (kbd "M-i") 'my-next-interesting-buffer)
     ;; (global-set-key (kbd "M-=") 'global-text-scale-adjust)
@@ -2942,21 +2947,22 @@ This function is intended for use as :around advice."
   (lightemacs-after-init . lazy-loader-mode)
   :custom
   (lazy-loader-verbose nil)
-  (lazy-loader-modules '(org vterm))
+  (lazy-loader-modules '(org term))
   (lazy-loader-files (delq nil
                            (list (when (bound-and-true-p file-path-todo)
                                    file-path-todo))))
-  (lazy-loader-buffers
-   '(("*tmux*" .
-      (lambda ()
-        (let ((buf (get-buffer-create "*tmux*")))
-          (with-current-buffer buf
-            (vterm-mode)
-
-            (vterm-send-string "tmux-session -l emacs")
-            (vterm-send-string "\n")
-            (vterm-send-return))
-          buf))))))
+  ;; (lazy-loader-buffers
+  ;;  '(("*tmux*" .
+  ;;     (lambda ()
+  ;;       (let ((buf (get-buffer-create "*tmux*")))
+  ;;         (with-current-buffer buf
+  ;;           (vterm-mode)
+  ;;
+  ;;           (vterm-send-string "tmux-session -l emacs")
+  ;;           (vterm-send-string "\n")
+  ;;           (vterm-send-return))
+  ;;         buf)))))
+  )
 
 ;;; Themes config
 
@@ -3397,13 +3403,27 @@ environment for accurate linting."
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
   :init
+  (setq shell-pop-window-position "bottom")
+  ;; (setq shell-pop-window-position "full")
+  (setq shell-pop-full-span nil)
   (setq shell-pop-autocd-to-working-dir t)
   (setq shell-pop-term-shell "/bin/bash")
   (setq shell-pop-window-size 80)
+  ;; (setq shell-pop-last-shell-buffer-index 0)
+  ;; (setq shell-pop-shell-type '("eshell" "*eshell*" (lambda nil (eshell))))
+  ;; (setq shell-pop-universal-key "C-`")
+  ;; (setq shell-pop-shell-type '("vterm" "*vterm*"
+  ;;                              (lambda nil (vterm shell-pop-term-shell))))
   (setq shell-pop-shell-type '("ansi-term"
                                "*ansi-term*"
                                (lambda ()
-                                 (ansi-term shell-pop-term-shell)))))
+                                 (ansi-term shell-pop-term-shell))))
+
+  ;; Disable the built-in window restoration
+  (setq shell-pop-restore-window-configuration nil)
+
+  ;; Execute winner-undo via the provided hook
+  (add-hook 'shell-pop-out-hook 'winner-undo))
 
 ;; shell-pop: Change the default directory
 (defun my-around-shell-pop (fn &rest args)
@@ -3413,6 +3433,18 @@ environment for accurate linting."
   (apply fn args))
 (with-eval-after-load 'shell-pop
   (advice-add 'shell-pop :around #'my-around-shell-pop))
+
+;; Ensure switching to insert mode
+(defun my-shell-pop-to-insert-state ()
+  "Ensure the terminal is in char-mode and Evil is in insert state."
+  ;; If using term/ansi-term, this lets keys pass to the shell
+  (when (derived-mode-p 'term-mode)
+    (term-char-mode))
+  ;; Force Evil into insert state
+  (when (fboundp 'evil-insert-state)
+    (evil-insert-state)))
+
+(add-hook 'shell-pop-in-after-hook #'my-shell-pop-to-insert-state)
 
 ;;; Vimrc mode
 
@@ -3930,7 +3962,7 @@ The result is displayed in a pretty-printed temporary buffer."
   ;; Optional
   (require 'mod-misc2 nil t)
 
-  (require 'mod-toggle-term)
+  ;; (require 'mod-toggle-term)
   (require 'mod-kirigami)
   (require 'mod-project)
   (require 'mod-buffer-terminator)
@@ -3940,45 +3972,24 @@ The result is displayed in a pretty-printed temporary buffer."
   ;; (require 'battery-angel)
   (require 'point-manager))
 
-;;; term
+;;; xterm color
 
-;; Configuration for M-x shell
-(setq explicit-shell-file-name "bash")
-(add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+;; Set the environment variable so Bash knows it can send 256 colors
+;; (setenv "TERM" "xterm-256color")
 
-;; Configuration for M-x term and ansi-term
-(setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
-
-;; Increase the scrollback history
-(setq term-buffer-maximum-size 10000)
-
-;; (defun my-term-setup ()
-;;   "Configuration for term and `ansi-term' buffers."
-;;   ;; Disable UI elements that interfere with terminal rendering
-;;   (display-line-numbers-mode -1)
-;;   (hl-line-mode -1)
+;; (with-eval-after-load 'shell
+;;   ;; Remove the default ansi-color filter
+;;   (setq comint-output-filter-functions
+;;         (remove 'ansi-color-process-output comint-output-filter-functions))
 ;;
-;;   ;; Bind paste to work correctly in raw mode
-;;   ;; (define-key term-raw-map (kbd "C-y") 'term-paste)
+;;   (defun my-shell-xterm-color-setup ()
+;;     "Configure xterm-color for M-x shell."
+;;     ;; Disable the built-in comint color handling
+;;     (setq-local ansi-color-for-comint-mode nil)
+;;     ;; Apply the xterm-color filter to process standard output
+;;     (add-hook 'comint-preoutput-filter-functions #'xterm-color-filter nil t))
 ;;
-;;   ;; Toggle easily between line mode and char (raw) mode
-;;   (define-key term-raw-map (kbd "C-c C-j") 'term-line-mode)
-;;   (define-key term-mode-map (kbd "C-c C-k") 'term-char-mode))
-;;
-;; (add-hook 'term-mode-hook #'my-term-setup)
-
-;; Automatically close the buffer when the terminal session ends
-;; TODO lightemacs
-(defun my-term-close-on-exit (process _event)
-  "Close the buffer when PROCESS finishes with EVENT."
-  (when (memq (process-status process) '(exit signal))
-    (kill-buffer (process-buffer process))))
-(defun my-term-exec-hook ()
-  "Attach the sentinel to the terminal process."
-  (let ((proc (get-buffer-process (current-buffer))))
-    (when proc
-      (set-process-sentinel proc #'my-term-close-on-exit))))
-(add-hook 'term-exec-hook #'my-term-exec-hook)
+;;   (add-hook 'shell-mode-hook #'my-shell-xterm-color-setup))
 
 ;;; Provide
 
