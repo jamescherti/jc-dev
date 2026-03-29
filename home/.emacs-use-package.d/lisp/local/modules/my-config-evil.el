@@ -2713,6 +2713,22 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 ;;   ;; (compilation-environment '("TERM=xterm-256color"))
 ;;   )
 
+;;; org
+
+(defun my-org-move-subtree-preserve-column-advice (orig-fun &rest args)
+  "Advice to preserve the column when moving Org subtrees.
+ORIG-FUN and ARGS is the function and its arguments."
+  (let ((col (current-column)))
+    (condition-case nil
+        (apply orig-fun args)
+      (error nil))
+    (move-to-column col)))
+
+;; Apply the advice to both up and down movements
+(with-eval-after-load 'org
+  (advice-add 'org-move-subtree-up :around #'my-org-move-subtree-preserve-column-advice)
+  (advice-add 'org-move-subtree-down :around #'my-org-move-subtree-preserve-column-advice))
+
 ;;; Provide
 
 (provide 'my-config-evil)
