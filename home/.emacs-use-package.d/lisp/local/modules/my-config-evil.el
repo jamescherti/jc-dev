@@ -2788,12 +2788,12 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 ;;   ;; Bind specifically for Evil's insert state in the terminal
 ;;   (evil-define-key 'insert term-raw-map (kbd "M-h") #'my-ansi-term-send-m-h))
 
-;; (with-eval-after-load 'term
-;;   ;; (define-key term-raw-map (kbd "M-x") nil)  ; unbind M-x
-;;
-;;   (define-key term-raw-map (kbd "C-s") 'term-send-raw)
-;;   (evil-define-key 'insert term-raw-map (kbd "C-s") nil)
-;;   ) ;; unbind isearch
+(with-eval-after-load 'term
+  ;; (define-key term-raw-map (kbd "M-x") nil)  ; unbind M-x
+
+  (define-key term-raw-map (kbd "C-s") 'term-send-raw)
+  (evil-define-key 'insert term-raw-map (kbd "C-s") nil)
+  ) ;; unbind isearch
 ;;
 ;; (with-eval-after-load 'term
 ;;   ;; 1. Define the keys in the native term-raw-map
