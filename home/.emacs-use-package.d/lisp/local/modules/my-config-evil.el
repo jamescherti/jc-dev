@@ -2849,6 +2849,147 @@ ORIG-FUN and ARGS is the function and its arguments."
   (advice-add 'org-move-subtree-up :around #'my-org-move-subtree-preserve-column-advice)
   (advice-add 'org-move-subtree-down :around #'my-org-move-subtree-preserve-column-advice))
 
+;;; Only yank visible text
+
+;; (defun evilbuffer-buffer-substring-visible (beg end)
+;;   "Return the visible text between BEG and END, excluding invisible regions."
+;;   (let (parts)
+;;     (save-excursion
+;;       (goto-char beg)
+;;       (while (< (point) end)
+;;         (let ((next (next-single-char-property-change (point) 'invisible nil end)))
+;;           (unless (invisible-p (point))
+;;             (push (buffer-substring-no-properties (point) next) parts))
+;;           (goto-char next))))
+;;     (apply #'concat (nreverse parts))))
+
+;; TODO article
+(defun evilbuffer-buffer-substring-visible (beg end)
+  "Return the visible text between BEG and END, excluding invisible regions."
+  (let ((text ""))
+    (save-excursion
+      (goto-char beg)
+      (while (< (point) end)
+        (let* ((next (next-single-char-property-change (point) 'invisible nil end))
+               (invis (invisible-p (point))))
+          (unless invis
+            (setq text (concat text (buffer-substring-no-properties (point) next))))
+          (goto-char next))))
+    text))
+
+(defun evilbuffer-substring--filter-visible (beg end &optional delete)
+  "Filter for `filter-buffer-substring-function' that preserves visible text.
+
+BEG and END specify the region bounds. If DELETE is non-nil, the region is
+deleted and its text is returned. Otherwise, the function returns only the
+visible text between BEG and END, excluding regions with the invisible text
+property.
+
+This function also respects the obsolete wrapper hook
+`filter-buffer-substring-functions' via `with-wrapper-hook'. No filtering occurs
+unless a wrapper hook is active."
+  (subr--with-wrapper-hook-no-warnings
+   filter-buffer-substring-function (beg end delete)
+   (cond
+    (delete
+     (save-excursion
+       (goto-char beg)
+       (delete-and-extract-region beg end)))
+
+    (t
+     (evilbuffer-buffer-substring-visible beg end)))))
+
+;; Useful for yanking =text= in org mode. I do not want to include invisible
+;; text
+;; Disable
+;; (setq filter-buffer-substring-function 'evilbuffer-substring--filter-visible)
+
+;;; better outline
+
+;;; outline M-j and M-k
+
+(defun my-patched-outline-move-subtree-down (&optional arg)
+  "Move the current subtree down past ARG headlines of the same level."
+  (interactive "p")
+  ;; TODO: PATCH3: Restore column
+  (when (and (fboundp 'outline-back-to-heading)
+             (fboundp 'outline-end-of-subtree)
+             (fboundp 'outline-end-of-heading)
+             (fboundp 'outline-hide-subtree))
+    (let ((column (current-column)))
+      (unwind-protect
+          (progn
+            (outline-back-to-heading)
+            (let* ((movfunc (if (> arg 0) 'outline-get-next-sibling
+                              'outline-get-last-sibling))
+                   ;; Find the end of the subtree to be moved as well as the point
+                   ;; to move it to, adding a newline if necessary, to ensure
+                   ;; these points are at bol on the line below the subtree.
+                   (end-point-func (lambda ()
+                                     (let ((outline-blank-line nil))
+                                       (outline-end-of-subtree))
+                                     (if (eq (char-after) ?\n) (forward-char 1)
+                                       (if (and (eobp) (not (bolp))) (insert "\n")))
+                                     (point)))
+                   (beg (point))
+                   (folded (save-match-data
+                             (outline-end-of-heading)
+                             (outline-invisible-p)))
+                   (end (save-match-data
+                          (funcall end-point-func)))
+                   (ins-point (make-marker))
+                   (cnt (abs arg)))
+              ;; Find insertion point, with error handling.
+              (goto-char beg)
+              (while (> cnt 0)
+                (or (funcall movfunc)
+                    (progn (goto-char beg)
+                           (user-error "Cannot move past superior level")))
+                (setq cnt (1- cnt)))
+              (if (> arg 0)
+                  ;; Moving forward - still need to move over subtree.
+                  (funcall end-point-func))
+              (move-marker ins-point (point))
+              (insert (delete-and-extract-region beg end))
+              (goto-char ins-point)
+              (if folded (outline-hide-subtree))
+              (move-marker ins-point nil)))
+        ;; TODO: PATCH3: Restore column
+        (unless (= (current-column) column)
+          (move-to-column column))))))
+
+(defun my-patched-outline-move-subtree-up (&optional arg)
+  "Move the current subtree up past ARG sibling headlines.
+Preserve the cursor column and adjust any trailing blank space after the moved
+heading."
+  (interactive "p")
+  (my-patched-outline-move-subtree-down (- (prefix-numeric-value arg))))
+
+;; Bind these to your preferred keys in org-mode-map
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "M-<up>") 'org-move-subtree-up)
+  (define-key org-mode-map (kbd "M-<down>") 'org-move-subtree-down))
+
+(defun my-setup-outline-minor-mode-keymap ()
+  "Setup `outline-minor-mode'."
+  (cond
+   ((derived-mode-p 'org-mode)
+    (evil-define-key 'normal 'local (kbd "M-k") 'org-move-subtree-up)
+    (evil-define-key 'normal 'local (kbd "M-j") 'org-move-subtree-down))
+
+   ((bound-and-true-p outline-indent-minor-mode)
+    (evil-define-key 'normal 'local (kbd "M-k") 'outline-indent-move-subtree-up)
+    (evil-define-key 'normal 'local (kbd "M-j") 'outline-indent-move-subtree-down))
+
+   ((bound-and-true-p outline-minor-mode)
+    ;; Set `M-k` and `M-j` to move indented blocks up and down
+    (evil-define-key 'normal 'local (kbd "M-k") 'my-patched-outline-move-subtree-up)
+    (evil-define-key 'normal 'local (kbd "M-j") 'my-patched-outline-move-subtree-down))))
+
+(add-hook 'org-mode-hook #'my-setup-outline-minor-mode-keymap)
+(add-hook 'outline-indent-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
+(add-hook 'outline-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
+
 ;;; Provide
 
 (provide 'my-config-evil)

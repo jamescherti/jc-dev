@@ -4022,6 +4022,78 @@ The result is displayed in a pretty-printed temporary buffer."
 ;;
 ;;   (add-hook 'shell-mode-hook #'my-shell-xterm-color-setup))
 
+;;; straight
+
+(defun my-copy-straight-profile-advice (orig-fun &rest args)
+  "Advise `straight-freeze-versions' to copy the profile.
+ORIG-FUN and ARGS is the advised function and its arguments.
+This uses an around advice to trap errors and verify file timestamps."
+  (condition-case err
+      (let ((result (apply orig-fun args))
+            (source (expand-file-name my-straight-default-profile))
+            (destination
+             (expand-file-name
+              "~/src/dotfiles/jc-dev/home/.emacs-data/etc/straight-profile.el")))
+        ;; (message "%s:%s"
+        ;;          (file-exists-p source)
+        ;;          (file-newer-than-file-p source destination))
+        (when (and (file-regular-p source)
+                   (file-newer-than-file-p source destination))
+          (copy-file source destination t)
+          (message "Copied %s to %s" source destination))
+        result)
+    (error
+     (message "straight-freeze-versions failed: %s" (error-message-string err))
+     (signal (car err) (cdr err)))))
+
+(when (fboundp 'straight-freeze-versions)
+  (advice-add 'straight-freeze-versions :around #'my-copy-straight-profile-advice))
+
+;;; Lazily load buffers (TODO easysession)
+
+(defvar-local my-lazy-load-buffer--filename nil)
+(defvar-local my-lazy-load-buffer--window-start nil)
+(defvar-local my-lazy-load-buffer--point nil)
+
+(defun my-lazy-generate-file-restore-buffer (buffer-name
+                                             filename
+                                             point
+                                             window-start)
+  "Create BUFFER-NAME with a button to load FILENAME when activated.
+
+This function creates a buffer named BUFFER-NAME that contains a button labeled
+[Restore]. When the user activates this button, the buffer is replaced with the
+contents of FILENAME using `find-file-noselect', and the window's point and
+start position are restored to the values given by POINT and WINDOW-START.
+
+If BUFFER-NAME already exists, an error is raised to prevent overwriting.
+
+This is useful for deferred loading of file buffers, allowing the user to
+explicitly trigger file loading only when desired."
+  (interactive)
+  (when (get-buffer buffer-name)
+    (error "The buffer `%s' is not supposed to exist" filename))
+  (let ((new-buffer (get-buffer-create buffer-name)))
+    (with-current-buffer new-buffer
+      (setq my-lazy-load-buffer--filename new-buffer)
+      (setq my-lazy-load-buffer--window-start window-start)
+      (setq my-lazy-load-buffer--point point)
+      (insert (format-message "This window displayed `%s'.\n" filename))
+      (when filename
+        (insert-button
+         "[Restore]" 'action
+         (lambda (_button)
+           (let ((window (selected-window))
+                 (temporary-buffer (current-buffer)))
+             (set-window-buffer window (find-file-noselect filename))
+             (unless (eq (window-buffer) temporary-buffer)
+               (kill-buffer temporary-buffer))
+             (set-window-start window my-lazy-load-buffer--window-start t)
+             (set-window-point window my-lazy-load-buffer--point))))
+        (insert "\n"))
+      (goto-char (point-min))
+      (special-mode))))
+
 ;;; Provide
 
 (provide 'mod-misc)
