@@ -468,7 +468,9 @@ alias gs="git show" # avoid typo
 # Aliases
 alias git-sync-upstream='so git-sync-upstream'
 alias git-sync='git-sync-upstream'
-alias c=wcalc
+alias c=cd
+
+alias ca=wcalc
 
 alias s='esa ssh-add-exec ssh'
 alias home-update="so esa ssh-add-exec home-update"
