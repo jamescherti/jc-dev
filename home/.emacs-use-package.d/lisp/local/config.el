@@ -682,7 +682,7 @@
                            le-indent-bars
                            le-stripspace
 
-                           ;; le-vterm
+                           le-vterm
                            ;; le-eat
 
                            le-persist-text-scale

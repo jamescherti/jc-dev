@@ -2851,6 +2851,22 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 ;;; term setup
 
+;; (with-eval-after-load 'term
+;;   (with-eval-after-load 'evil
+;;     ;; 1. Prevent Evil from intercepting ESC in native term-raw-map
+;;     (evil-define-key 'insert term-raw-map (kbd "ESC") nil)
+;;     (evil-define-key 'insert term-raw-map (kbd "<escape>") nil)
+;;
+;;     ;; 2. Assign a new key to exit insert state and return to normal state
+;;     ;; C-\ is used here as an example, but you can change it to any preferred key
+;;     (evil-define-key 'insert term-raw-map (kbd "C-\\") #'evil-normal-state))
+;;
+;;   (with-eval-after-load 'evil-collection-term
+;;     ;; 3. Ensure evil-collection also releases the ESC key
+;;     (evil-collection-define-key 'insert 'term-raw-map (kbd "ESC") nil)
+;;     (evil-collection-define-key 'insert 'term-raw-map (kbd "<escape>") nil)
+;;     (evil-collection-define-key 'insert 'term-raw-map (kbd "C-\\") #'evil-normal-state)))
+
 ;; (defun my-term-send-m-h ()
 ;;   "Send M-h to the terminal."
 ;;   (interactive)
@@ -2971,9 +2987,9 @@ In `prog-mode', this configures flyspell to check only comments and strings."
   (when (fboundp 'electric-indent-local-mode)
     (electric-indent-local-mode -1))
 
-  (evil-local-set-key 'insert (kbd "<escape>") 'my-ansi-term-send-escape)
-  (evil-local-set-key 'insert (kbd "ESC") 'my-ansi-term-send-escape)
-  (evil-local-set-key 'insert (kbd "C-[") 'my-ansi-term-send-escape)
+  ;; (evil-local-set-key 'insert (kbd "<escape>") 'my-ansi-term-send-escape)
+  ;; (evil-local-set-key 'insert (kbd "ESC") 'my-ansi-term-send-escape)
+  ;; (evil-local-set-key 'insert (kbd "C-[") 'my-ansi-term-send-escape)
 
   ;; Bind C-c to return to normal mode, since Escape is now consumed by the terminal
   (evil-local-set-key 'insert (kbd "C-c ESC") 'evil-normal-state)

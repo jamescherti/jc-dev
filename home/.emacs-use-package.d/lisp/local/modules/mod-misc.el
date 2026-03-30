@@ -3417,6 +3417,9 @@ environment for accurate linting."
                                "*ansi-term*"
                                (lambda ()
                                  (ansi-term shell-pop-term-shell))))
+  ;; (setq shell-pop-shell-type '("eat" "*eat*"
+  ;;                              (lambda nil
+  ;;                                (eat shell-pop-term-shell))))
 
   ;; Disable the built-in window restoration
   (setq shell-pop-restore-window-configuration nil)
@@ -3439,8 +3442,10 @@ environment for accurate linting."
 (defun my-shell-pop-to-insert-state ()
   "Ensure the terminal is in char-mode and Evil is in insert state."
   ;; If using term/ansi-term, this lets keys pass to the shell
-  (when (derived-mode-p 'term-mode)
-    (term-char-mode))
+  ;; (when (and (fboundp 'term-char-mode)
+  ;;            (derived-mode-p 'term-mode))
+  ;;   (term-char-mode))
+
   ;; Force Evil into insert state
   (when (fboundp 'evil-insert-state)
     (evil-insert-state)))
