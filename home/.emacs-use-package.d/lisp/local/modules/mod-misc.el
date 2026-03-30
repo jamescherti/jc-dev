@@ -3973,6 +3973,34 @@ The result is displayed in a pretty-printed temporary buffer."
   ;; (require 'battery-angel)
   (require 'point-manager))
 
+;;; term kill
+
+;; Automatically close the buffer when the terminal session ends
+;; TODO lightemacs
+(defun my-term-close-on-exit (process _event)
+  "Close the buffer when PROCESS finishes with EVENT."
+  (when (memq (process-status process) '(exit signal))
+    (kill-buffer (process-buffer process))))
+(defun my-term-exec-hook ()
+  "Attach the sentinel to the terminal process."
+  (let ((proc (get-buffer-process (current-buffer))))
+    (when proc
+      (set-process-sentinel proc #'my-term-close-on-exit))))
+(add-hook 'term-exec-hook #'my-term-exec-hook)
+
+;;; term keys
+
+(with-eval-after-load 'term
+  (define-key term-raw-map (kbd "M-x") nil)  ; unbind M-x
+  (define-key term-raw-map (kbd "C-s") 'term-send-raw)) ;; unbind isearch
+
+;;; term preferences
+
+(setq explicit-shell-file-name "bash")
+(add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+(setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
+(setq term-buffer-maximum-size 10000)
+
 ;;; xterm color
 
 ;; Set the environment variable so Bash knows it can send 256 colors

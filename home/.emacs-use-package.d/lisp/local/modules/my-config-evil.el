@@ -2560,119 +2560,47 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 ;;; term
 
-(setq explicit-shell-file-name "bash")
-(add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
-(setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
-(setq term-buffer-maximum-size 10000)
+;; (with-eval-after-load 'term
+;;   ;; Unbind Escape in Insert state so it passes directly to the shell process
+;;   ;; (evil-collection-define-key 'insert 'term-raw-map
+;;   ;;   (kbd "<escape>") nil
+;;   ;;   (kbd "ESC") nil)
+;;
+;;   ;; Bind M-j and M-k to Evil window navigation in the terminal
+;;   (evil-define-key '(insert emacs) term-raw-map
+;;     (kbd "C-c C-c") 'term-send-raw
+;;     (kbd "M-j") 'term-send-raw-meta
+;;     (kbd "M-k") 'term-send-raw-meta
+;;     (kbd "S-C-v") 'term-paste))
 
 ;; allow moving around the buffer in emacs >= 26.1 in evil's normal mode
 ;; (setq term-char-mode-point-at-process-mark nil)
 
-(defun my-term-setup ()
-  "Configuration for term and `ansi-term' buffers."
-  (let ((inhibit-message t))
-    (toggle-truncate-lines 1))
-  (display-line-numbers-mode 0)
-
-  (setq-local nobreak-char-display nil)
-  (setq-local line-spacing 0)
-
-  ;; Disable `hscroll-margin' in shell buffers to prevent visual jumping when
-  ;; the cursor approaches the left or right edges of the window.
-  (setq-local hscroll-margin 0)
-
-  ;; Setting scroll-margin to 0 prevents visual glitching and cursor jumping
-  ;; when using a terminal emulator inside Emacs.
-  (setq-local scroll-margin 0)
-
-  (setq-local scroll-conservatively most-positive-fixnum)
-  (setq-local fast-but-imprecise-scrolling t)
-
-  (setq-local mode-line-format nil)
-
-  (when (fboundp 'yas-minor-mode)
-    (yas-minor-mode -1))
-
-  (when (fboundp 'yas-minor-mode)
-    (yas-minor-mode -1))
-
-  (when (fboundp 'evil-snipe-local-mode)
-    (evil-snipe-local-mode -1))
-
-  (when (fboundp 'electric-pair-local-mode)
-    (electric-pair-mode -1))
-
-  (when (fboundp 'electric-indent-local-mode)
-    (electric-indent-local-mode -1))
-
-  (evil-local-set-key 'insert (kbd "<escape>") 'my-ansi-term-send-escape)
-  (evil-local-set-key 'insert (kbd "ESC") 'my-ansi-term-send-escape)
-  (evil-local-set-key 'insert (kbd "C-[") 'my-ansi-term-send-escape)
-
-  ;; Bind C-c to return to normal mode, since Escape is now consumed by the terminal
-  (evil-local-set-key 'insert (kbd "C-c ESC") 'evil-normal-state)
-  (evil-local-set-key 'insert (kbd "C-c <escape>") 'evil-normal-state)
-
-  ;; C-s and C-r for terminal history search
-  ;; Applied to both insert and normal states so it always works
-  ;; (evil-local-set-key 'insert (kbd "C-s") 'my-ansi-term-send-ctrl-s)
-  ;; (evil-local-set-key 'normal (kbd "C-s") 'my-ansi-term-send-ctrl-s)
-  ;; (evil-local-set-key 'insert (kbd "C-r") 'my-ansi-term-send-ctrl-r)
-  ;; (evil-local-set-key 'normal (kbd "C-r") 'my-ansi-term-send-ctrl-r)
-
-  ;; (setq-local transient-mark-mode nil)
-  ;; (auto-fill-mode -1)
-
-  ;; ;; Disable UI elements that interfere with terminal rendering
-  ;; (display-line-numbers-mode -1)
-  ;; (hl-line-mode -1)
-  ;;
-  ;; ;; Bind paste to work correctly in raw mode
-  ;; ;; (define-key term-raw-map (kbd "C-y") 'term-paste)
-  ;;
-  ;; ;; Toggle easily between line mode and char (raw) mode
-  ;; (define-key term-raw-map (kbd "C-c C-j") 'term-line-mode)
-  ;; (define-key term-mode-map (kbd "C-c C-k") 'term-char-mode)
-  )
-
-(add-hook 'term-mode-hook #'my-term-setup t)
-
-;; Automatically close the buffer when the terminal session ends
-;; TODO lightemacs
-(defun my-term-close-on-exit (process _event)
-  "Close the buffer when PROCESS finishes with EVENT."
-  (when (memq (process-status process) '(exit signal))
-    (kill-buffer (process-buffer process))))
-(defun my-term-exec-hook ()
-  "Attach the sentinel to the terminal process."
-  (let ((proc (get-buffer-process (current-buffer))))
-    (when proc
-      (set-process-sentinel proc #'my-term-close-on-exit))))
-(add-hook 'term-exec-hook #'my-term-exec-hook)
-
 ;; Change the default escape prefix to C-x
 ;; This allows C-c to be sent directly to the underlying shell
-(add-hook 'term-mode-hook (lambda ()
-                            (when (fboundp 'term-set-escape-char)
-                              (term-set-escape-char ?\C-x))))
+;; (add-hook 'term-mode-hook (lambda ()
+;;                             (when (fboundp 'term-set-escape-char)
+;;                               (term-set-escape-char ?\C-x))))
 
 ;; Restore Ctrl-c Ctrl-c to close programs
-;; (unless my-term-evil
+;; (with-eval-after-load 'term
 ;;   (evil-set-initial-state 'term-mode 'emacs))
 
-(with-eval-after-load 'term
-  (define-key term-raw-map (kbd "M-x") nil)  ; unbind M-x
-  ;; TODO
-  ;; (evil-define-key 'insert term-raw-map (kbd "C-s")
-  ;;   '(lambda() (interactive)
-  ;;      (term-send-raw)))
-  (define-key term-raw-map (kbd "C-s") 'term-send-raw)) ;; unbind isearch
 
-(defun my-ansi-term-send-escape ()
-  "Send an escape character directly to the ansi-term process."
-  (interactive)
-  (let ((proc (get-buffer-process (current-buffer))))
-    (when proc (process-send-string proc "\e"))))
+;; TODO
+;; (evil-define-key 'insert term-raw-map (kbd "C-s")
+;;   '(lambda() (interactive)
+;;      (term-send-raw)))
+
+;; (with-eval-after-load 'term
+;;   ;; Bind directly to term-raw-map instead of using evil-define-key.
+;;   ;; This ensures they work natively when the terminal is in char mode.
+;;   (define-key term-raw-map (kbd "C-c C-c") 'term-send-raw)
+;;   (define-key term-raw-map (kbd "M-j") 'term-send-raw-meta)
+;;   (define-key term-raw-map (kbd "M-k") 'term-send-raw-meta)
+;;   (define-key term-raw-map (kbd "M-h") 'term-send-raw-meta) ; Added M-h
+;;   (define-key term-raw-map (kbd "M-l") 'term-send-raw-meta) ; Added M-l for completeness
+;;   (define-key term-raw-map (kbd "S-C-v") 'term-paste))
 
 ;; (defun my-force-ansi-term-escape ()
 ;;   "Force Escape to be sent to the terminal process in Evil insert state."
@@ -2732,19 +2660,6 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 ;;         (kbd "M-H") 'my-ansi-term-send-meta-shift-h
 ;;         (kbd "M-S-l") 'my-ansi-term-send-meta-shift-l
 ;;         (kbd "M-L") 'my-ansi-term-send-meta-shift-l))))
-
-(with-eval-after-load 'term
-  ;; Unbind Escape in Insert state so it passes directly to the shell process
-  ;; (evil-collection-define-key 'insert 'term-raw-map
-  ;;   (kbd "<escape>") nil
-  ;;   (kbd "ESC") nil)
-
-  ;; Bind M-j and M-k to Evil window navigation in the terminal
-  (evil-define-key '(insert emacs) term-raw-map
-    (kbd "C-c C-c") 'term-send-raw
-    (kbd "M-j") 'term-send-raw-meta
-    (kbd "M-k") 'term-send-raw-meta
-    (kbd "S-C-v") 'term-paste))
 
 ;; (with-eval-after-load 'term
 ;;   (defun my-evil-term-send-colon ()
@@ -2839,6 +2754,83 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 ;;   ;; :custom
 ;;   ;; (compilation-environment '("TERM=xterm-256color"))
 ;;   )
+
+;;; term setup
+
+(defun my-ansi-term-send-escape ()
+  "Send an escape character directly to the ansi-term process."
+  (interactive)
+  (let ((proc (get-buffer-process (current-buffer))))
+    (when proc (process-send-string proc "\e"))))
+
+(defun my-term-setup ()
+  "Configuration for term and `ansi-term' buffers."
+  (let ((inhibit-message t))
+    (toggle-truncate-lines 1))
+  (display-line-numbers-mode 0)
+
+  (setq-local nobreak-char-display nil)
+  (setq-local line-spacing 0)
+
+  ;; Disable `hscroll-margin' in shell buffers to prevent visual jumping when
+  ;; the cursor approaches the left or right edges of the window.
+  (setq-local hscroll-margin 0)
+
+  ;; Setting scroll-margin to 0 prevents visual glitching and cursor jumping
+  ;; when using a terminal emulator inside Emacs.
+  (setq-local scroll-margin 0)
+
+  (setq-local scroll-conservatively most-positive-fixnum)
+  (setq-local fast-but-imprecise-scrolling t)
+
+  (setq-local mode-line-format nil)
+
+  (when (fboundp 'yas-minor-mode)
+    (yas-minor-mode -1))
+
+  (when (fboundp 'yas-minor-mode)
+    (yas-minor-mode -1))
+
+  (when (fboundp 'evil-snipe-local-mode)
+    (evil-snipe-local-mode -1))
+
+  (when (fboundp 'electric-pair-local-mode)
+    (electric-pair-mode -1))
+
+  (when (fboundp 'electric-indent-local-mode)
+    (electric-indent-local-mode -1))
+
+  (evil-local-set-key 'insert (kbd "<escape>") 'my-ansi-term-send-escape)
+  (evil-local-set-key 'insert (kbd "ESC") 'my-ansi-term-send-escape)
+  (evil-local-set-key 'insert (kbd "C-[") 'my-ansi-term-send-escape)
+
+  ;; Bind C-c to return to normal mode, since Escape is now consumed by the terminal
+  (evil-local-set-key 'insert (kbd "C-c ESC") 'evil-normal-state)
+  (evil-local-set-key 'insert (kbd "C-c <escape>") 'evil-normal-state)
+
+  ;; C-s and C-r for terminal history search
+  ;; Applied to both insert and normal states so it always works
+  ;; (evil-local-set-key 'insert (kbd "C-s") 'my-ansi-term-send-ctrl-s)
+  ;; (evil-local-set-key 'normal (kbd "C-s") 'my-ansi-term-send-ctrl-s)
+  ;; (evil-local-set-key 'insert (kbd "C-r") 'my-ansi-term-send-ctrl-r)
+  ;; (evil-local-set-key 'normal (kbd "C-r") 'my-ansi-term-send-ctrl-r)
+
+  ;; (setq-local transient-mark-mode nil)
+  ;; (auto-fill-mode -1)
+
+  ;; ;; Disable UI elements that interfere with terminal rendering
+  ;; (display-line-numbers-mode -1)
+  ;; (hl-line-mode -1)
+  ;;
+  ;; ;; Bind paste to work correctly in raw mode
+  ;; ;; (define-key term-raw-map (kbd "C-y") 'term-paste)
+  ;;
+  ;; ;; Toggle easily between line mode and char (raw) mode
+  ;; (define-key term-raw-map (kbd "C-c C-j") 'term-line-mode)
+  ;; (define-key term-mode-map (kbd "C-c C-k") 'term-char-mode)
+  )
+
+(add-hook 'term-mode-hook #'my-term-setup t)
 
 ;;; org
 
