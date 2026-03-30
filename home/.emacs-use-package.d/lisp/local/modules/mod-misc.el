@@ -3365,15 +3365,16 @@ environment for accurate linting."
 
 ;;; flyspell-lazy
 
-(lightemacs-use-package flyspell-lazy
-  :commands flyspell-lazy-mode
-  :hook ((lightemacs-after-init . (lambda()
-                                    (save-window-excursion
-                                      (save-excursion
-                                        (flyspell-lazy-mode))))))
-  :init
-  (setq flyspell-lazy-idle-seconds 1
-        flyspell-lazy-window-idle-seconds 3))
+;; Buggy. It erases region.
+;; (lightemacs-use-package flyspell-lazy
+;;   :commands flyspell-lazy-mode
+;;   :hook ((lightemacs-after-init . (lambda()
+;;                                     (save-window-excursion
+;;                                       (save-excursion
+;;                                         (flyspell-lazy-mode))))))
+;;   :init
+;;   (setq flyspell-lazy-idle-seconds 1
+;;         flyspell-lazy-window-idle-seconds 3))
 
 ;;; git-timemachine
 
