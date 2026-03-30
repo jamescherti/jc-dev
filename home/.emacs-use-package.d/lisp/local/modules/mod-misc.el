@@ -3411,8 +3411,10 @@ environment for accurate linting."
   ;; (setq shell-pop-last-shell-buffer-index 0)
   ;; (setq shell-pop-shell-type '("eshell" "*eshell*" (lambda nil (eshell))))
   ;; (setq shell-pop-universal-key "C-`")
-  ;; (setq shell-pop-shell-type '("vterm" "*vterm*"
-  ;;                              (lambda nil (vterm shell-pop-term-shell))))
+  ;; (setq shell-pop-shell-type '("vterm"
+  ;;                              "*vterm*"
+  ;;                              (lambda nil
+  ;;                                (vterm shell-pop-term-shell))))
   (setq shell-pop-shell-type '("ansi-term"
                                "*ansi-term*"
                                (lambda ()
@@ -3422,7 +3424,7 @@ environment for accurate linting."
   ;;                                (eat shell-pop-term-shell))))
 
   ;; Disable the built-in window restoration
-  (setq shell-pop-restore-window-configuration nil)
+  (setq shell-pop-restore-window-configuration t)
 
   ;; Execute winner-undo via the provided hook
   ;; TODO fix this
@@ -3995,10 +3997,17 @@ The result is displayed in a pretty-printed temporary buffer."
 
 ;;; term preferences
 
+(setq term-term-name "ansi")
 (setq explicit-shell-file-name "bash")
 (add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+
+;; TODO adapt this one
 (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
-(setq term-buffer-maximum-size 10000)
+;; (setq term-buffer-maximum-size 10000)
+;; (setq term-term-name "xterm-256color")
+
+;; (with-eval-after-load 'term
+;;   (define-key term-raw-map (kbd "C-y") 'term-paste))
 
 ;;; xterm color
 
