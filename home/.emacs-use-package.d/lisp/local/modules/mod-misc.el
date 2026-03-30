@@ -3424,7 +3424,9 @@ environment for accurate linting."
   (setq shell-pop-restore-window-configuration nil)
 
   ;; Execute winner-undo via the provided hook
-  (add-hook 'shell-pop-out-hook 'winner-undo))
+  ;; TODO fix this
+  ;; (add-hook 'shell-pop-out-hook 'winner-undo)
+  )
 
 ;; shell-pop: Change the default directory
 (defun my-around-shell-pop (fn &rest args)
