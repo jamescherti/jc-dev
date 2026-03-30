@@ -24,8 +24,6 @@
 
 ;;; Code:
 
-;; put it back. problem with vterm TODO
-
 ;;; Require
 
 (require 'my-defun)
