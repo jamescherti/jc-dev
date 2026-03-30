@@ -1185,6 +1185,8 @@ on text following the cursor."
   ;; (kbd "M-RET") 'toggle-term-tmux
   ;; (kbd "M-<enter>") 'toggle-term-tmux
   ;; (kbd "M-<return>") 'toggle-term-tmux
+  (kbd "M-x") 'execute-extended-command
+
   (kbd "M-RET") 'shell-pop
   (kbd "M-<enter>") 'shell-pop
   (kbd "M-<return>") 'shell-pop
@@ -2592,15 +2594,31 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 ;;   '(lambda() (interactive)
 ;;      (term-send-raw)))
 
+
+
+;; (with-eval-after-load 'term
+;;   ;; Keep the native Emacs binding for term-char-mode
+;;   (define-key term-raw-map (kbd "M-h") #'term-send-raw-meta)
+;;
+;;   ;; Tell Evil to map the key correctly when term-mode is active
+;;   (evil-define-key 'insert term-raw-map (kbd "M-h") #'term-send-raw-meta)
+;;   ;; (evil-define-key 'insert term-mode-map (kbd "M-l") #'term-send-raw-meta)
+;;   )
+
+
 ;; (with-eval-after-load 'term
 ;;   ;; Bind directly to term-raw-map instead of using evil-define-key.
 ;;   ;; This ensures they work natively when the terminal is in char mode.
-;;   (define-key term-raw-map (kbd "C-c C-c") 'term-send-raw)
-;;   (define-key term-raw-map (kbd "M-j") 'term-send-raw-meta)
-;;   (define-key term-raw-map (kbd "M-k") 'term-send-raw-meta)
-;;   (define-key term-raw-map (kbd "M-h") 'term-send-raw-meta) ; Added M-h
-;;   (define-key term-raw-map (kbd "M-l") 'term-send-raw-meta) ; Added M-l for completeness
-;;   (define-key term-raw-map (kbd "S-C-v") 'term-paste))
+;;   ;; (define-key term-raw-map (kbd "C-c C-c") 'term-send-raw)
+;;   ;; (define-key term-raw-map (kbd "M-j") 'term-send-raw-meta)
+;;   ;; (define-key term-raw-map (kbd "M-k") 'term-send-raw-meta)
+;;   ;; (define-key term-raw-map (kbd "M-h") 'term-send-raw-meta) ; Added M-h
+;;   ;; (define-key term-raw-map (kbd "M-l") 'term-send-raw-meta) ; Added M-l for completeness
+;;   ;;
+;;   ;; (evil-define-key 'insert term-raw-map (kbd "M-h") 'term-send-raw-meta)
+;;   ;; (evil-define-key 'motion term-raw-map (kbd "M-h") 'term-send-raw-meta)
+;;   ;; (define-key term-raw-map (kbd "S-C-v") 'term-paste)
+;;   )
 
 ;; (defun my-force-ansi-term-escape ()
 ;;   "Force Escape to be sent to the terminal process in Evil insert state."
@@ -2755,13 +2773,166 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 ;;   ;; (compilation-environment '("TERM=xterm-256color"))
 ;;   )
 
+
+;; (defun my-ansi-term-send-m-h ()
+;;   "Send M-h directly to the ansi-term process."
+;;   (interactive)
+;;   (let ((proc (get-buffer-process (current-buffer))))
+;;     (when proc (process-send-string proc "\eh"))))
+;;
+;; (with-eval-after-load 'term
+;;   ;; Bind for standard Emacs state
+;;   (define-key term-raw-map (kbd "M-h") #'my-ansi-term-send-m-h))
+;;
+;; (with-eval-after-load 'evil
+;;   ;; Bind specifically for Evil's insert state in the terminal
+;;   (evil-define-key 'insert term-raw-map (kbd "M-h") #'my-ansi-term-send-m-h))
+
+;; (with-eval-after-load 'term
+;;   ;; (define-key term-raw-map (kbd "M-x") nil)  ; unbind M-x
+;;
+;;   (define-key term-raw-map (kbd "C-s") 'term-send-raw)
+;;   (evil-define-key 'insert term-raw-map (kbd "C-s") nil)
+;;   ) ;; unbind isearch
+;;
+;; (with-eval-after-load 'term
+;;   ;; 1. Define the keys in the native term-raw-map
+;;   (define-key term-raw-map [?\M-h] #'term-send-raw-meta)
+;;   (define-key term-raw-map [?\M-j] #'term-send-raw-meta)
+;;   (define-key term-raw-map [?\M-k] #'term-send-raw-meta)
+;;   (define-key term-raw-map [?\M-l] #'term-send-raw-meta))
+;;
+;; (with-eval-after-load 'evil
+;;   ;; 2. Explicitly define the keys in Evil's insert state map for term-raw-map.
+;;   ;; We use vector notation [?\M-h] to prevent the "ESC prefix" error.
+;;   (evil-define-key 'insert term-raw-map
+;;     [?\M-h] #'term-send-raw-meta
+;;     [?\M-j] #'term-send-raw-meta
+;;     [?\M-k] #'term-send-raw-meta
+;;     [?\M-l] #'term-send-raw-meta))
+;;
+;; (with-eval-after-load 'term
+;;   ;; 1. Define the keys in the native term-raw-map
+;;   (define-key term-mode-map [?\M-h] #'term-send-raw-meta)
+;;   (define-key term-mode-map [?\M-j] #'term-send-raw-meta)
+;;   (define-key term-mode-map [?\M-k] #'term-send-raw-meta)
+;;   (define-key term-mode-map [?\M-l] #'term-send-raw-meta))
+;;
+;; (with-eval-after-load 'evil
+;;   ;; 2. Explicitly define the keys in Evil's insert state map for term-raw-map.
+;;   ;; We use vector notation [?\M-h] to prevent the "ESC prefix" error.
+;;   (evil-define-key 'insert term-mode-map
+;;     [?\M-h] #'term-send-raw-meta
+;;     [?\M-j] #'term-send-raw-meta
+;;     [?\M-k] #'term-send-raw-meta
+;;     [?\M-l] #'term-send-raw-meta))
+
+;; 2. Define your meta function
+;; (defun term-send-raw-meta ()
+;;   "Send the last pressed key as a meta escape sequence to the terminal."
+;;   (interactive)
+;;   (term-send-raw-string (concat "\e" (string (event-basic-type last-input-event)))))
+
+;; 3. Use evil-collection-define-key to bind the keys
+;; (with-eval-after-load 'evil-collection-term
+;;   (evil-collection-define-key 'insert 'term-raw-map
+;;     [?\M-h] #'term-send-raw-meta
+;;     ;; [?\M-j] #'term-send-raw-meta
+;;     ;; [?\M-k] #'term-send-raw-meta
+;;     [?\M-l] #'term-send-raw-meta))
+
+;; 2. Bind the keys in the native term-raw-map
+;; (with-eval-after-load 'term
+;;   (define-key term-raw-map [?\M-h] #'term-send-raw-meta)
+;;   ;; (define-key term-raw-map [?\M-j] #'term-send-raw-meta)
+;;   ;; (define-key term-raw-map [?\M-k] #'term-send-raw-meta)
+;;   (define-key term-raw-map [?\M-l] #'term-send-raw-meta))
+
+
 ;;; term setup
 
-(defun my-ansi-term-send-escape ()
-  "Send an escape character directly to the ansi-term process."
-  (interactive)
-  (let ((proc (get-buffer-process (current-buffer))))
-    (when proc (process-send-string proc "\e"))))
+;; (defun my-term-send-m-h ()
+;;   "Send M-h to the terminal."
+;;   (interactive)
+;;   (term-send-raw-string "\eh"))
+;;
+;; (defun my-term-send-m-j ()
+;;   "Send M-j to the terminal."
+;;   (interactive)
+;;   (term-send-raw-string "\ej"))
+;;
+;; (defun my-term-send-m-k ()
+;;   "Send M-k to the terminal."
+;;   (interactive)
+;;   (term-send-raw-string "\ek"))
+;;
+;; (defun my-term-send-m-l ()
+;;   "Send M-l to the terminal."
+;;   (interactive)
+;;   (term-send-raw-string "\el"))
+;;
+;; (with-eval-after-load 'term
+;;   (define-key term-raw-map [?\M-h] #'my-term-send-m-h)
+;;   (define-key term-raw-map [?\M-j] #'my-term-send-m-j)
+;;   (define-key term-raw-map [?\M-k] #'my-term-send-m-k)
+;;   (define-key term-raw-map [?\M-l] #'my-term-send-m-l))
+;;
+;; (with-eval-after-load 'evil
+;;   (evil-define-key '(insert emacs) term-raw-map
+;;     [?\M-h] #'my-term-send-m-h
+;;     [?\M-j] #'my-term-send-m-j
+;;     [?\M-k] #'my-term-send-m-k
+;;     [?\M-l] #'my-term-send-m-l))
+
+;; (defun my-ansi-term-send-m-h ()
+;;   "Send M-h directly to the ansi-term process."
+;;   (interactive)
+;;   (let ((proc (get-buffer-process (current-buffer))))
+;;     (when proc (process-send-string proc "\eh"))))
+;;
+;; (defun my-force-ansi-term-evil-bindings ()
+;;   "Force Evil insert state bindings for ansi-term buffers."
+;;   ;; Apply directly to the local Evil map using vector notation
+;;   (evil-local-set-key 'insert [?\M-h] #'my-ansi-term-send-m-h))
+;;
+;; ;; Attach this to term-mode-hook so it runs every time a new terminal opens
+;; (add-hook 'term-mode-hook #'my-force-ansi-term-evil-bindings)
+
+;; ;; 2. Define your meta function
+;; (defun term-send-raw-meta ()
+;;   "Send the last pressed key as a meta escape sequence to the terminal."
+;;   (interactive)
+;;   (term-send-raw-string (concat "\e" (string (event-basic-type last-input-event)))))
+;;
+;; (with-eval-after-load 'term
+;;   ;; 1. Define the keys in the native term-raw-map
+;;   (define-key term-raw-map [?\M-h] #'term-send-raw-meta)
+;;   (define-key term-raw-map [?\M-j] #'term-send-raw-meta)
+;;   (define-key term-raw-map [?\M-k] #'term-send-raw-meta)
+;;   (define-key term-raw-map [?\M-l] #'term-send-raw-meta))
+;;
+;; (with-eval-after-load 'evil
+;;   ;; 2. Explicitly define the keys in Evil's insert state map for term-raw-map.
+;;   ;; We use vector notation [?\M-h] to prevent the "ESC prefix" error.
+;;   (evil-define-key 'insert term-raw-map
+;;     [?\M-h] #'term-send-raw-meta
+;;     [?\M-j] #'term-send-raw-meta
+;;     [?\M-k] #'term-send-raw-meta
+;;     [?\M-l] #'term-send-raw-meta))
+;;
+;; ;; 3. Use evil-collection-define-key to bind the keys
+;; (with-eval-after-load 'evil-collection-term
+;;   (evil-collection-define-key 'insert 'term-raw-map
+;;     [?\M-h] #'term-send-raw-meta
+;;     [?\M-j] #'term-send-raw-meta
+;;     [?\M-k] #'term-send-raw-meta
+;;     [?\M-l] #'term-send-raw-meta))
+;;
+;; (defun my-ansi-term-send-escape ()
+;;   "Send an escape character directly to the ansi-term process."
+;;   (interactive)
+;;   (let ((proc (get-buffer-process (current-buffer))))
+;;     (when proc (process-send-string proc "\e"))))
 
 (defun my-term-setup ()
   "Configuration for term and `ansi-term' buffers."

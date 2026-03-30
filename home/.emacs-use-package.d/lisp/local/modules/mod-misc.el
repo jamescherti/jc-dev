@@ -3988,12 +3988,6 @@ The result is displayed in a pretty-printed temporary buffer."
       (set-process-sentinel proc #'my-term-close-on-exit))))
 (add-hook 'term-exec-hook #'my-term-exec-hook)
 
-;;; term keys
-
-(with-eval-after-load 'term
-  (define-key term-raw-map (kbd "M-x") nil)  ; unbind M-x
-  (define-key term-raw-map (kbd "C-s") 'term-send-raw)) ;; unbind isearch
-
 ;;; term preferences
 
 (setq explicit-shell-file-name "bash")

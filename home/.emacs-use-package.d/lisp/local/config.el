@@ -855,7 +855,8 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
                       "\\*Backtrace\\*"
                       "\\*\\(Help\\|eldoc\\)\\*"
                       "\\*[Hh]elp:"
-                      "\\*edit-indirect "
+                      ;; markdown-mode. I want to edit in a separate window
+                      ;; "\\*edit-indirect "
                       "\\*Proced\\*"
                       "\\*Embark Export"))
       (push `(,regexp (display-buffer-same-window)) display-buffer-alist))))
