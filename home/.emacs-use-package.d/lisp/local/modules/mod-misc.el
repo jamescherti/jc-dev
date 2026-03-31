@@ -4065,6 +4065,8 @@ The result is displayed in a pretty-printed temporary buffer."
 ;; ADVICE:
 ;; -------
 ;; The `ncurses-term' (Debian) package is useful for this purpose.
+;; On Arch Linux, the equivalent package is simply ncurses.
+;;
 ;; It provides:
 ;;
 ;; /usr/share/terminfo/x/xterm-direct
@@ -4107,12 +4109,18 @@ The result is displayed in a pretty-printed temporary buffer."
 ;; engine inside GUI Emacs still needs subprocesses to send layout and
 ;; box-drawing sequences that it understands. If you change this, you will still
 ;; get the garbage characters in curses applications.
+;; This guarantees that programs continue to send the specific structural layout
+;; and cursor control sequences that the ansi-term engine understands. This
+;; prevents display corruption in curses-based tools.
 ;;
 ;; (setenv "COLORTERM" "truecolor"): This remains the perfect solution for
 ;; colors. Modern CLI tools running inside your GUI ansi-term will see this
 ;; environment variable and output 24-bit color ANSI sequences. Because you are
 ;; using the GUI, Emacs will natively parse and render those colors beautifully
 ;; without any terminal constraints.
+;; This forces modern command-line tools to emit raw 24-bit RGB ANSI escape
+;; sequences. Emacs version 28 and newer natively parses and renders these
+;; sequences inside terminal buffers.
 ;; ============================================================================
 (setenv "COLORTERM" "truecolor")
 (setq term-term-name "eterm-color")
