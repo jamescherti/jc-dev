@@ -3424,6 +3424,7 @@ environment for accurate linting."
 ;;                       (t '("terminal" "*terminal*"
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
+
 (lightemacs-use-package shell-pop
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
