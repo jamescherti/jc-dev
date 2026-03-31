@@ -4029,7 +4029,14 @@ The result is displayed in a pretty-printed temporary buffer."
 
 ;;; term preferences
 
-(setq term-term-name "ansi")
+;; (setq term-term-name "ansi")
+;; (setenv "COLORTERM" "24bit")
+;; (setq term-term-name "xterm-256color")
+;; (setenv "COLORTERM" "truecolor")
+;; (setq term-term-name "xterm-direct")
+;; (setq term-term-name "eterm-256color")
+;; (setq term-term-name "xterm-emacs")
+(setq term-term-name "eterm-color")
 (setq explicit-shell-file-name "bash")
 (add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
 
