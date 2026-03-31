@@ -38,26 +38,27 @@
 
 ;;; Delete unused packages
 
-(require 'package)
-(dolist (item '(olivetti
-                xclip
-                stillness-mode
-                golden-ratio
-                tabgo
-                ws-butler
-                quickrun
-                xterm-color
-                ztree
-                vundo
-                flyspell-lazy
-                vterm
-                ace-window))
-  (when (package-installed-p item)
-    (message "DELETE PACKAGE: %s" item)
-    ;; Retrieve the package-desc object for the installed package
-    (let ((pkg-desc (cadr (assq item package-alist))))
-      (when pkg-desc
-        (package-delete pkg-desc)))))
+(when (eq lightemacs-package-manager 'builtin-package)
+  (require 'package)
+  (dolist (item '(olivetti
+                  xclip
+                  stillness-mode
+                  golden-ratio
+                  tabgo
+                  ws-butler
+                  quickrun
+                  xterm-color
+                  ztree
+                  vundo
+                  flyspell-lazy
+                  vterm
+                  ace-window))
+    (when (package-installed-p item)
+      (message "DELETE PACKAGE: %s" item)
+      ;; Retrieve the package-desc object for the installed package
+      (let ((pkg-desc (cadr (assq item package-alist))))
+        (when pkg-desc
+          (package-delete pkg-desc))))))
 
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
