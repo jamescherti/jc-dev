@@ -435,6 +435,19 @@ By default, closing the last window in a tab does not close the tab."
   (define-key evil-normal-state-map (kbd "C-w c")   #'mod-buffer-terminator-close-window)
   (define-key evil-normal-state-map (kbd "C-w C-c") #'mod-buffer-terminator-close-window))
 
+;; Adding this remapping ensures that the source buffer is not accidentally
+;; abandoned. By default, closing a window or killing a buffer in Emacs may
+;; leave the underlying org-src process in a "stale" state, where the
+;; temporary buffer exists but is no longer visible, or worse, changes are
+;; lost because the sync back to the parent file never triggered.
+(with-eval-after-load 'org-src
+  (define-key org-src-mode-map [remap mod-buffer-terminator-close-window]
+              'org-edit-src-exit))
+
+(with-eval-after-load 'edit-indirect
+  (define-key edit-indirect-mode-map [remap mod-buffer-terminator-close-window]
+              'edit-indirect-commit))
+
 (provide 'mod-buffer-terminator)
 
 ;; Local variables:

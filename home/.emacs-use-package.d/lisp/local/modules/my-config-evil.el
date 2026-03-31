@@ -73,8 +73,8 @@
   (interactive)
   (let ((buffer-name (buffer-name))
         (inhibit-read-only t))
-    (when (yes-or-no-p "Are you sure you want to erase the buffer?")
-      (erase-buffer))
+    ;; when (yes-or-no-p "Are you sure you want to erase the buffer?")
+    (erase-buffer)
 
     (cond
      ((string-prefix-p "*Ollama" buffer-name)
@@ -2562,9 +2562,7 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 ;;; term setup
 
-;; (with-eval-after-load 'evil
-;;   (evil-define-key 'insert term-raw-map (kbd "C-r +") #'term-paste)
-;;   (evil-define-key 'insert term-raw-map (kbd "S-<insert>") #'term-paste))
+(evil-define-key 'insert term-raw-map (kbd "C-v") 'term-paste)
 
 (with-eval-after-load 'term
   ;; Allows C-s to reach the terminal (e.g., for shell history search) instead
@@ -2574,20 +2572,19 @@ In `prog-mode', this configures flyspell to check only comments and strings."
   (evil-define-key 'insert term-raw-map (kbd "C-s") nil)
   ) ;; unbind isearch
 
-(with-eval-after-load 'evil
-  ;; Forwards Alt/Meta navigation keys to the terminal process. Using vector
-  ;; notation prevents Emacs from interpreting Meta as an ESC prefix, which
-  ;; avoids "ESC ESC" delay/clashes.
-  (evil-define-key 'insert term-raw-map
-    (kbd "M-H") 'term-send-raw-meta
-    (kbd "M-J") 'term-send-raw-meta
-    (kbd "M-K") 'term-send-raw-meta
-    (kbd "M-L") 'term-send-raw-meta
+;; Forwards Alt/Meta navigation keys to the terminal process. Using vector
+;; notation prevents Emacs from interpreting Meta as an ESC prefix, which
+;; avoids "ESC ESC" delay/clashes.
+(evil-define-key 'insert term-raw-map
+  (kbd "M-H") 'term-send-raw-meta
+  (kbd "M-J") 'term-send-raw-meta
+  (kbd "M-K") 'term-send-raw-meta
+  (kbd "M-L") 'term-send-raw-meta
 
-    (kbd "M-h") 'term-send-raw-meta
-    (kbd "M-j") 'term-send-raw-meta
-    (kbd "M-k") 'term-send-raw-meta
-    (kbd "M-l") 'term-send-raw-meta))
+  (kbd "M-h") 'term-send-raw-meta
+  (kbd "M-j") 'term-send-raw-meta
+  (kbd "M-k") 'term-send-raw-meta
+  (kbd "M-l") 'term-send-raw-meta)
 
 (defun my-ansi-term-send-escape ()
   "Send a literal ASCII escape character to the terminal.
@@ -2608,11 +2605,10 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 ;; Forces Evil to pass Escape to the terminal in both Insert and Normal states.
 ;; This allows you to use Vim-inside-Emacs without Evil-inside-Emacs
 ;; intercepting the key first.
-(with-eval-after-load 'evil
-  ;; Fixes: (wrong-type-argument characterp escape) when term-send-raw-meta is
-  ;; used as a function instead of my-ansi-term-send-escape
-  (evil-define-key '(insert normal) term-raw-map (kbd "<escape>")
-    'my-ansi-term-send-escape))
+;; Fixes: (wrong-type-argument characterp escape) when term-send-raw-meta is
+;; used as a function instead of my-ansi-term-send-escape
+(evil-define-key '(insert normal) term-raw-map (kbd "<escape>")
+  'my-ansi-term-send-escape)
 
 (defun my-term-setup ()
   "Configuration for term and `ansi-term' buffers."

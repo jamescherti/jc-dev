@@ -940,12 +940,10 @@ WIDTH is the tab width."
   (setq ispell-local-dictionary-alist
         '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)))
 
-  ;; Configures Aspell's suggestion mode to "ultra", which provides more
-  ;; aggressive and detailed suggestions for misspelled words. The language
-  ;; is set to "en_US" for US English, which can be replaced with your desired
-  ;; language code (e.g., "en_GB" for British English, "de_DE" for German).
-  (setq ispell-extra-args '("--sug-mode=ultra"
-                            "--lang=en_US"))
+  ;; Non-nil means suppress messages in ispell-word.
+  (setq ispell-quietly t)
+  (setq flyspell-issue-welcome-flag nil)
+  (setq flyspell-issue-message-flag nil)
 
   ;; If non-nil, add correction to abbreviation table.
   (setq flyspell-abbrev-p nil)
@@ -962,6 +960,15 @@ WIDTH is the tab width."
 
   (setq ispell-program-name "aspell")
   (setq ispell-local-dictionary "en_US")
+
+  ;; Configures Aspell's suggestion mode to "ultra", which provides more
+  ;; aggressive and detailed suggestions for misspelled words. The language
+  ;; is set to "en_US" for US English, which can be replaced with your desired
+  ;; language code (e.g., "en_GB" for British English, "de_DE" for German).
+  (setq ispell-extra-args '("--sug-mode=ultra"
+                            "--lang=en_US"))
+
+  (setq ispell-dictionary "en_US")
 
   (with-eval-after-load 'which-key
     (when (bound-and-true-p which-key-buffer-name)
@@ -2789,9 +2796,9 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 
 ;;; server
 
+;; (custom-set-variables '(package-selected-packages nil))
+
 (setq server-client-instructions nil)
-(unless (daemonp)
-  (add-hook 'lightemacs-after-init-hook #'server-start))
 
 ;;; quiet
 

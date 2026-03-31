@@ -695,6 +695,8 @@
 
                            le-easysession
 
+                           le-server
+
                            mod-misc
 
                            ;; My modules
