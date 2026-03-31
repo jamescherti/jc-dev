@@ -2618,6 +2618,14 @@ and ensures TUI apps like Vim receive an immediate exit signal."
   (let ((inhibit-message t))
     (toggle-truncate-lines 1))
 
+  ;; Emacs attempts to calculate bidirectional (bidi) text display for every
+  ;; buffer by default, supporting right-to-left languages like Arabic and
+  ;; Hebrew. This calculation is exceptionally CPU intensive in buffers that
+  ;; update rapidly. Forcing the terminal to strictly evaluate text from left to
+  ;; right is the single biggest performance improvement you can make.
+  ;; (setq-default bidi-paragraph-direction 'left-to-right)
+  ;; (setq-default bidi-inhibit-bpa t)
+
   (display-line-numbers-mode 0)
 
   (let ((inhibit-message t))
@@ -2632,6 +2640,8 @@ and ensures TUI apps like Vim receive an immediate exit signal."
   ;; Prevents the buffer from 'jumping' or scrolling prematurely, which can
   ;; break the visual alignment of TUI interfaces like htop or Vim.
   (setq-local scroll-margin 0)
+
+  (setq-local scroll-step 1)
 
   ;; Ensures smooth, immediate scrolling when new output arrives
   ;; without recentering the cursor point.
