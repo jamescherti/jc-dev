@@ -42,6 +42,8 @@
   (require 'package)
   (dolist (item '(olivetti
                   xclip
+                  tempel
+                  tempel-collection
                   stillness-mode
                   golden-ratio
                   tabgo
@@ -52,13 +54,25 @@
                   vundo
                   flyspell-lazy
                   vterm
+                  eat
+                  magit
+                  magit-section
                   ace-window))
-    (when (package-installed-p item)
-      (message "DELETE PACKAGE: %s" item)
-      ;; Retrieve the package-desc object for the installed package
-      (let ((pkg-desc (cadr (assq item package-alist))))
-        (when pkg-desc
-          (package-delete pkg-desc))))))
+    (let ((desc (cadr (assq item package-alist))))
+      (if (not desc)
+          (when init-file-debug
+            (message "Package %s not found in alist (already deleted?)" item))
+        (condition-case err
+            (progn
+              (package-delete desc)
+              (message "Successfully deleted: %s" item))
+          (error
+           ;; This captures the actual error message from Emacs
+           (message "Failed to delete %s: %s: %s"
+                    item
+                    (error-message-string err)
+                    desc)))))))
+
 
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
