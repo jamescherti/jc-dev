@@ -2643,6 +2643,15 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 
   (setq-local scroll-step 1)
 
+  ;; Increase process read chunk size to 4MB (Default is 4096 bytes)
+  ;; This requires Emacs 27 or newer.
+  ;; (setq-local read-process-output-max (* 50 1024 1024))
+
+  (setq-local echo-keystrokes 0)
+
+  (when (fboundp 'hl-line-mode)
+    (hl-line-mode -1))
+
   ;; Ensures smooth, immediate scrolling when new output arrives
   ;; without recentering the cursor point.
   (setq-local scroll-conservatively most-positive-fixnum)
@@ -2650,6 +2659,8 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 
   ;; Maximizes screen real estate by hiding the mode-line.
   (setq-local mode-line-format nil)
+
+  (setq-local redisplay-skip-fontification-on-input t)
 
   ;; Disables helper modes that cause logic conflicts or 'ghost' characters
   ;; when typing inside a raw terminal subprocess.
