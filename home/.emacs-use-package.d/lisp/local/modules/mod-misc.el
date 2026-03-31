@@ -4032,16 +4032,116 @@ The result is displayed in a pretty-printed temporary buffer."
 ;; (setq term-term-name "ansi")
 ;; (setenv "COLORTERM" "24bit")
 ;; (setq term-term-name "xterm-256color")
-(setenv "COLORTERM" "truecolor")
 ;; (setq term-term-name "xterm-direct")
 ;; (setq term-term-name "eterm-256color")
 ;; (setq term-term-name "xterm-emacs")
+
+;; ============================================================================
+;; Terminal Color and Emulation Configuration
+;; ============================================================================
+;; This is the optimal configuration for ansi-term because it separates
+;; color output capabilities from structural terminal rendering rules.
+;;
+;; 1. (setenv "COLORTERM" "truecolor")
+;;    Modern command-line tools check this environment variable to determine
+;;    color support. By explicitly setting it to "truecolor", you force external
+;;    programs to output raw 24-bit RGB ANSI escape sequences, entirely bypassing
+;;    the color limitations of the active terminfo profile. Emacs can natively
+;;    parse and render these 24-bit codes.
+;;
+;; 2. (setq term-term-name "eterm-color")
+;;    While COLORTERM handles the colors, the TERM variable dictates how
+;;    applications draw UI elements, move the cursor, and render boxes. The
+;;    ansi-term engine is hardcoded to understand the "eterm-color" control
+;;    sequences. If you change this to "xterm-256color", applications like
+;;    pinentry-curses will send xterm-specific Alternate Character Set (ACS)
+;;    sequences. Because ansi-term cannot interpret xterm ACS sequences, it
+;;    outputs garbage characters.
+;;
+;; Conclusion: This combination allows modern tools to push full 24-bit colors
+;; while forcing curses applications to use the specific layout sequences that
+;; the Emacs terminal engine was built to understand.
+;;
+;; ADVICE:
+;; -------
+;; The `ncurses-term' (Debian) package is useful for this purpose.
+;; It provides:
+;;
+;; /usr/share/terminfo/x/xterm-direct
+;; /usr/share/terminfo/x/xterm-direct256
+;; /usr/share/terminfo/x/xterm+direct
+;;
+;; This xterm-direct file is exactly what Emacs 27.1 and newer versions rely on.
+;; When you launch Emacs with TERM=xterm-direct, Emacs queries that specific
+;; file, detects the RGB capability flag, and natively activates 24-bit direct
+;; color mode without needing the custom xterm-emacs profile.
+;;
+;; Additionally, if you check the "e" directory in your list, you will find:
+;;
+;; /usr/share/terminfo/e/eterm-color
+;;
+;; This is the exact profile that Emacs's ansi-term requires to render its
+;; layout and curses applications properly. While Debian usually includes
+;; eterm-color in the base installation, having the full ncurses-term package
+;; guarantees it is available and up to date.
+;;
+;; Therefore, installing ncurses-term provides the official system-level
+;; definitions needed for true color. However, my previous recommendation
+;; remains the same: simply exporting COLORTERM=truecolor in your shell profile
+;; is a much better approach than changing your TERM variable to xterm-direct.
+;; Changing your TERM to xterm-direct globally will often break color rendering
+;; in other terminal multiplexers or applications that strictly expect standard
+;; 256-color definitions.
+;;
+;; Emacs GUI
+;; ---------
+;; When you open M-x ansi-term inside GUI Emacs, you are starting an isolated
+;; terminal emulator environment. The shell running inside that buffer faces the
+;; exact same limitations as before: it relies on the TERM variable to
+;; understand what the emulator can handle.
+;;
+;; Because of this, the Elisp configuration we established earlier is still
+;; highly useful and applicable.
+;;
+;; (setq term-term-name "eterm-color"): This remains necessary. The ansi-term
+;; engine inside GUI Emacs still needs subprocesses to send layout and
+;; box-drawing sequences that it understands. If you change this, you will still
+;; get the garbage characters in curses applications.
+;;
+;; (setenv "COLORTERM" "truecolor"): This remains the perfect solution for
+;; colors. Modern CLI tools running inside your GUI ansi-term will see this
+;; environment variable and output 24-bit color ANSI sequences. Because you are
+;; using the GUI, Emacs will natively parse and render those colors beautifully
+;; without any terminal constraints.
+;; ============================================================================
+(setenv "COLORTERM" "truecolor")
 (setq term-term-name "eterm-color")
+
 (setq explicit-shell-file-name "bash")
-(add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+(setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
 
 ;; TODO adapt this one
-(setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
+
+;; Commands like ls --color=auto output raw ANSI color escape sequences (such as
+;; \033[31m for red text). The function ansi-color-for-comint-mode-on intercepts
+;; these raw codes and translates them into native Emacs text properties so they
+;; display as colored text. If you do not enable this, your buffer will be
+;; filled with unreadable bracketed codes instead of colors.
+;;
+;; Required for M-x shell: The standard shell-mode is based on comint-mode
+;; (Command Interpreter). It is essentially a basic text buffer that sends and
+;; receives text. It does not know how to parse terminal colors by default, so
+;; it relies entirely on this hook to display them properly.
+;;
+;; Unnecessary for M-x ansi-term: Since ansi-term is a dedicated terminal
+;; emulator, its internal engine handles ANSI color parsing automatically. The
+;; hook will not affect ansi-term buffers.
+;;
+;; If you occasionally use M-x shell alongside ansi-term, keeping this line in
+;; your configuration is recommended to ensure your basic shell buffers remain
+;; readable.
+(add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
+
 ;; (setq term-buffer-maximum-size 10000)
 ;; (setq term-term-name "xterm-256color")
 
