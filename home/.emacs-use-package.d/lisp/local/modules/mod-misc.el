@@ -4142,7 +4142,7 @@ The result is displayed in a pretty-printed temporary buffer."
 ;;
 ;; Unnecessary for M-x ansi-term: Since ansi-term is a dedicated terminal
 ;; emulator, its internal engine handles ANSI color parsing automatically. The
-;; hook will not affect ansi-term buffers.
+;; hook will not affect `ansi-term' buffers.
 ;;
 ;; If you occasionally use M-x shell alongside ansi-term, keeping this line in
 ;; your configuration is recommended to ensure your basic shell buffers remain
