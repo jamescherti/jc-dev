@@ -3363,31 +3363,18 @@ environment for accurate linting."
 (add-hook 'lightemacs-emacs-startup-hook
           #'lightemacs-flymake-initialize-elisp-path 99)
 
-;;; flyspell-lazy
-
-;; Buggy. It erases region.
-;; (lightemacs-use-package flyspell-lazy
-;;   :commands flyspell-lazy-mode
-;;   :hook ((lightemacs-after-init . (lambda()
-;;                                     (save-window-excursion
-;;                                       (save-excursion
-;;                                         (flyspell-lazy-mode))))))
-;;   :init
-;;   (setq flyspell-lazy-idle-seconds 1
-;;         flyspell-lazy-window-idle-seconds 3))
-
 ;;; git-timemachine
 
-(lightemacs-use-package git-timemachine
-  :commands git-timemachine
-  :bind (:map vc-prefix-map
-              ("t" . git-timemachine)))
+;; (lightemacs-use-package git-timemachine
+;;   :commands git-timemachine
+;;   :bind (:map vc-prefix-map
+;;               ("t" . git-timemachine)))
 
 ;;; stillness-mode
 
-(lightemacs-use-package stillness-mode
-  :commands stillness-mode
-  :hook (lightemacs-after-init . stillness-mode))
+;; (lightemacs-use-package stillness-mode
+;;   :commands stillness-mode
+;;   :hook (lightemacs-after-init . stillness-mode))
 
 ;;; shell-pop
 
@@ -3531,11 +3518,9 @@ environment for accurate linting."
     ;;   (web-mode-css-indent-offset 2)
     ;;   (web-mode-code-indent-offset 2))
 
-    (use-package sgml-mode
-      :ensure nil
-      :commands (sgml-mode
-                 sgml-electric-tag-pair-mode)
-      :hook ((html-mode mhtml-mode) . sgml-electric-tag-pair-mode))))
+    ;; Add the hook for both html-mode and mhtml-mode
+    (add-hook 'html-mode-hook 'sgml-electric-tag-pair-mode)
+    (add-hook 'mhtml-mode-hook 'sgml-electric-tag-pair-mode)))
 
 ;;; jinja2-mode and csv-mode
 
