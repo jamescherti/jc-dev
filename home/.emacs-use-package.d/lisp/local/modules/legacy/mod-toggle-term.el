@@ -301,7 +301,7 @@ user to press a key before finishing execution."
     ;; (define-key evil-normal-state-map (kbd "<leader>et")
     ;;             #'toggle-term-tmux-default-bash)
 
-    (define-key evil-normal-state-map (kbd "<leader>et")
+    (define-key evil-normal-state-map (kbd "<leader>e t")
                 'shell-pop)
 
     ))

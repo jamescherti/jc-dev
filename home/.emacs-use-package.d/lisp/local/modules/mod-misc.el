@@ -40,38 +40,44 @@
 
 (when (eq lightemacs-package-manager 'builtin-package)
   (require 'package)
-  (dolist (item '(olivetti
-                  xclip
-                  tempel
-                  tempel-collection
-                  stillness-mode
-                  golden-ratio
-                  tabgo
-                  ws-butler
-                  quickrun
-                  xterm-color
-                  ztree
-                  vundo
-                  flyspell-lazy
-                  vterm
-                  eat
-                  magit
-                  magit-section
-                  ace-window))
-    (let ((desc (cadr (assq item package-alist))))
-      (if (not desc)
-          (when init-file-debug
-            (message "Package %s not found in alist (already deleted?)" item))
-        (condition-case err
-            (progn
-              (package-delete desc)
-              (message "Successfully deleted: %s" item))
-          (error
-           ;; This captures the actual error message from Emacs
-           (message "Failed to delete %s: %s: %s"
-                    item
-                    (error-message-string err)
-                    desc)))))))
+  (when (fboundp 'package-delete)
+    (dolist (item '(olivetti
+                    ;; TODO ?
+                    ;; posframe
+                    ;; vertico-posframe
+                    treesit-fold
+                    popup
+                    xclip
+                    tempel
+                    tempel-collection
+                    stillness-mode
+                    golden-ratio
+                    tabgo
+                    ws-butler
+                    quickrun
+                    xterm-color
+                    ztree
+                    vundo
+                    flyspell-lazy
+                    vterm
+                    eat
+                    magit
+                    magit-section
+                    ace-window))
+      (let ((desc (cadr (assq item package-alist))))
+        (if (not desc)
+            (when init-file-debug
+              (message "Package %s not found in alist (already deleted?)" item))
+          (condition-case err
+              (progn
+                (package-delete desc)
+                (message "Successfully deleted: %s" item))
+            (error
+             ;; This captures the actual error message from Emacs
+             (message "Failed to delete %s: %s: %s"
+                      item
+                      (error-message-string err)
+                      desc))))))))
 
 
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
@@ -4216,6 +4222,32 @@ explicitly trigger file loading only when desired."
         (insert "\n"))
       (goto-char (point-min))
       (special-mode))))
+
+;;; vertico postframe
+
+;; Too slow
+;; (unless IS-MAC
+;;   (use-package vertico-posframe
+;;     :after vertico
+;;     :commands vertico-posframe-mode
+;;     :custom
+;;     (vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-right-corner)
+;;     :init
+;;     (add-hook 'vertico-mode-hook #'vertico-posframe-mode)
+;;
+;;     (setq vertico-posframe-parameters
+;;           '((left-fringe . 8)
+;;             (right-fringe . 8)))
+;;
+;;     (setq vertico-posframe-height 11
+;;           vertico-posframe-width 100)
+;;
+;;     ;; vertico-posframe-parameters '((left-fringe . 20)
+;;     ;;                               (right-fringe . 20))
+;;     ;; vertico-posframe-border-width 2
+;;     ;; vertico-posframe-min-height 2
+;;     ;; (vertico-posframe-mode 1)
+;;     ))
 
 ;;; Provide
 
