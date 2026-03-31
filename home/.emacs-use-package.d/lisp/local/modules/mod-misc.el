@@ -4032,7 +4032,7 @@ The result is displayed in a pretty-printed temporary buffer."
 ;; (setq term-term-name "ansi")
 ;; (setenv "COLORTERM" "24bit")
 ;; (setq term-term-name "xterm-256color")
-;; (setenv "COLORTERM" "truecolor")
+(setenv "COLORTERM" "truecolor")
 ;; (setq term-term-name "xterm-direct")
 ;; (setq term-term-name "eterm-256color")
 ;; (setq term-term-name "xterm-emacs")
