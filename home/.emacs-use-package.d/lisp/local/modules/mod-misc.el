@@ -4029,13 +4029,6 @@ The result is displayed in a pretty-printed temporary buffer."
 
 ;;; term preferences
 
-;; (setq term-term-name "ansi")
-;; (setenv "COLORTERM" "24bit")
-;; (setq term-term-name "xterm-256color")
-;; (setq term-term-name "xterm-direct")
-;; (setq term-term-name "eterm-256color")
-;; (setq term-term-name "xterm-emacs")
-
 ;; ============================================================================
 ;; Terminal Color and Emulation Configuration
 ;; ============================================================================
@@ -4151,29 +4144,6 @@ The result is displayed in a pretty-printed temporary buffer."
 (add-hook 'shell-mode-hook #'ansi-color-for-comint-mode-on)
 
 ;; (setq term-buffer-maximum-size 10000)
-;; (setq term-term-name "xterm-256color")
-
-;; (with-eval-after-load 'term
-;;   (define-key term-raw-map (kbd "C-y") 'term-paste))
-
-;;; xterm color
-
-;; Set the environment variable so Bash knows it can send 256 colors
-;; (setenv "TERM" "xterm-256color")
-
-;; (with-eval-after-load 'shell
-;;   ;; Remove the default ansi-color filter
-;;   (setq comint-output-filter-functions
-;;         (remove 'ansi-color-process-output comint-output-filter-functions))
-;;
-;;   (defun my-shell-xterm-color-setup ()
-;;     "Configure xterm-color for M-x shell."
-;;     ;; Disable the built-in comint color handling
-;;     (setq-local ansi-color-for-comint-mode nil)
-;;     ;; Apply the xterm-color filter to process standard output
-;;     (add-hook 'comint-preoutput-filter-functions #'xterm-color-filter nil t))
-;;
-;;   (add-hook 'shell-mode-hook #'my-shell-xterm-color-setup))
 
 ;;; straight
 
