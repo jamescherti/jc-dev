@@ -606,7 +606,12 @@
 
                            ;; le-magit
 
-                           le-xclip
+                           ;; xclip (Emacs handles the clipboard natively with
+                           ;; your (setq select-enable-clipboard t) setting; you
+                           ;; don't need this unless you are running in a very
+                           ;; specific terminal-only environment without
+                           ;; X11/Wayland forwarding)
+                           ;; le-xclip
 
                            le-flymake
                            le-package-lint-flymake

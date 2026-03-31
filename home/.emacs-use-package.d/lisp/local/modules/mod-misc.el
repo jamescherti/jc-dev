@@ -36,6 +36,29 @@
 
 (setq global-auto-revert-non-file-buffers nil)
 
+;;; Delete unused packages
+
+(require 'package)
+(dolist (item '(olivetti
+                xclip
+                stillness-mode
+                golden-ratio
+                tabgo
+                ws-butler
+                quickrun
+                xterm-color
+                ztree
+                vundo
+                flyspell-lazy
+                vterm
+                ace-window))
+  (when (package-installed-p item)
+    (message "DELETE PACKAGE: %s" item)
+    ;; Retrieve the package-desc object for the installed package
+    (let ((pkg-desc (cadr (assq item package-alist))))
+      (when pkg-desc
+        (package-delete pkg-desc)))))
+
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
 ;; integer (like 3 or 5), Emacs will force the screen to scroll before you reach
@@ -3066,15 +3089,15 @@ This function is intended for use as :around advice."
 
 ;;; Focus
 
-(lightemacs-use-package focus
-  :commands (focus-mode
-             focus-change-thing
-             focus-pin
-             focus-unpin
-             focus-next-thing
-             focus-prev-thing
-             focus-read-only-mode
-             focus-turn-off-read-only-mode))
+;; (lightemacs-use-package focus
+;;   :commands (focus-mode
+;;              focus-change-thing
+;;              focus-pin
+;;              focus-unpin
+;;              focus-next-thing
+;;              focus-prev-thing
+;;              focus-read-only-mode
+;;              focus-turn-off-read-only-mode))
 
 ;;; flymake ansible lint
 
@@ -3331,9 +3354,9 @@ This function is intended for use as :around advice."
 
 ;;; Rainbow
 
-(lightemacs-use-package rainbow-mode
-  :commands rainbow-mode
-  :no-require t)
+;; (lightemacs-use-package rainbow-mode
+;;   :commands rainbow-mode
+;;   :no-require t)
 
 ;;; easysession scratch
 

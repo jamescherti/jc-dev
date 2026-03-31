@@ -2147,12 +2147,12 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;;; Packages
 
-(lightemacs-use-package tabgo
-  :commands tabgo
-  :bind (("M-z" . tabgo)
-         ("M-t" . tabgo)))
-
-(evil-define-key 'normal 'global (kbd "gt") #'tabgo)
+;; (lightemacs-use-package tabgo
+;;   :commands tabgo
+;;   :bind (("M-z" . tabgo)
+;;          ("M-t" . tabgo)))
+;;
+;; (evil-define-key 'normal 'global (kbd "gt") #'tabgo)
 
 ;; TODO: Contribute to evil-match it to add tree-sitter
 ;; (lightemacs-use-package evil-matchit

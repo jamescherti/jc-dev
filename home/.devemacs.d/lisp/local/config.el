@@ -112,15 +112,15 @@
 
 (setq native-comp-jit-compilation nil)
 
-(setq lightemacs-modules '(;; le-compile-angel
+(setq lightemacs-modules '(le-flavor-micro
                            le-pathaction
 
-                           le-autorevert
+                           le-compile-angel
+                           ;; le-autorevert
 
                            le-markdown-mode
                            le-org
 
-                           le-flavor-micro
                            le-group-evil
                            le-persist-text-scale
 
@@ -140,7 +140,8 @@
 
                            ;; le-evil-visualstar
                            ;; le-git-modes
-                           le-xclip))
+                           ;; le-xclip
+                           ))
 
 (setq lightemacs-theme-name 'tomorrow-night-deepblue)
 (setq lightemacs-theme-package 'tomorrow-night-deepblue-theme)
