@@ -3304,58 +3304,14 @@ This function is intended for use as :around advice."
 (lightemacs-use-package buffer-guardian
   :ensure nil
   :commands buffer-guardian-mode
-  ;; :vc (:url "https://github.com/jamescherti/buffer-guardian.el"
-  ;;           :rev :newest)
 
   :hook
   (lightemacs-emacs-startup . buffer-guardian-mode)
 
   :init
   (setq buffer-guardian-verbose nil)
-
-  ;; (setq buffer-guardian-save-on-focus-change t)
-  ;; (setq buffer-guardian-save-on-minibuffer t)
   (setq buffer-guardian-save-all-buffers-interval (* 60 30))
-  (setq buffer-guardian-save-all-buffers-idle 30)
-
-  ;; :config
-  ;; (setq buffer-guardian-functions-auto-save-current-buffer
-  ;;       '(
-  ;; windmove-up
-  ;; windmove-down
-  ;; windmove-left
-  ;; windmove-right
-  ;;         tab-previous
-  ;;         tab-next
-  ;;         tab-close
-  ;;         tab-new
-  ;;
-  ;;         tab-previous
-  ;;         tab-next
-  ;;
-  ;;         next-buffer
-  ;;         previous-buffer
-  ;;
-  ;;         save-buffers-kill-emacs
-  ;;         save-buffers-kill-terminal
-  ;;
-  ;;         switch-to-buffer
-  ;;         pop-to-buffer
-  ;;         other-window
-  ;;         delete-window
-  ;;
-  ;;         other-frame
-  ;;         delete-frame
-  ;;         make-frame
-  ;;
-  ;;         kill-this-buffer))
-  ;;
-  ;; (push 'my-tab-previous buffer-guardian-functions-auto-save-current-buffer)
-  ;; (push 'my-tab-next buffer-guardian-functions-auto-save-current-buffer)
-
-  ;; (with-eval-after-load 'tabgo
-  ;;   (push 'tabgo buffer-guardian-functions-auto-save-current-buffer))
-  )
+  (setq buffer-guardian-save-all-buffers-idle 30))
 
 ;; Simpler alternative to bg
 (progn
@@ -3375,7 +3331,7 @@ This function is intended for use as :around advice."
   ;; Save some buffers
   (setq save-some-buffers-default-predicate
         (lambda ()
-          (and buffer-file-name
+          (and (buffer-file-name (buffer-base-buffer))
                (file-exists-p buffer-file-name)))))
 
 ;;; Rainbow
