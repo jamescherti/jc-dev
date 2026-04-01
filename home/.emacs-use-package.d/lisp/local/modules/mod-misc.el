@@ -45,13 +45,13 @@
                     posframe
                     rainbow-mode
                     with-editor
+                    lsp-mode
                     git-timemachine
                     focus
                     spinner
                     shut-up
                     llama
                     lv
-                    cond-let
                     jenkinsfile-mode
                     basic-mode
                     highlight-numbers

@@ -1535,6 +1535,7 @@ search direction (default: \='forward)."
 ;; TODO lightemacs?
 (defun my-setup-vterm ()
   "Better evil integration with `vterm'."
+  (my-disable-fringe-truncation-arrow)
 
   ;; https://www.reddit.com/r/emacs/comments/xyo2fo/orgmode_vterm_tmux/
   ;; With the first line, you can use a binding like `M-SPC ESC` (`M-SPC`
