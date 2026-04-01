@@ -102,8 +102,6 @@
 ;; provides better visual continuity when reading large files.
 ;; TODO check again
 
-;; (add-hook 'lightemacs-after-init-hook #'window-divider-mode)
-
 ;;
 ;; Number of lines of continuity when scrolling by screenfuls.
 ;; (setq next-screen-context-lines 0)
