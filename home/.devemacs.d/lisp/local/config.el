@@ -140,7 +140,7 @@
 
                            ;; le-evil-visualstar
                            ;; le-git-modes
-                           ;; le-xclip
+                           le-xclip
                            ))
 
 (setq lightemacs-theme-name 'tomorrow-night-deepblue)
