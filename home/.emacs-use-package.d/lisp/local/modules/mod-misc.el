@@ -3462,7 +3462,8 @@ environment for accurate linting."
   ;;                                (eat shell-pop-term-shell))))
 
   ;; Disable the built-in window restoration
-  (setq shell-pop-restore-window-configuration t)
+  ;; It seems to do wrong decisions when buffer terminator kills the terminal
+  (setq shell-pop-restore-window-configuration nil)
 
   ;; Execute winner-undo via the provided hook
   ;; TODO fix this
