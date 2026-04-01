@@ -181,8 +181,8 @@
 (defun mod-buffer-terminator-sane ()
   "Buffer terminator crazy."
   (interactive)
-  (setopt buffer-terminator-inactivity-timeout 200)
-  (setopt buffer-terminator-interval 100))
+  (setopt buffer-terminator-inactivity-timeout 300)
+  (setopt buffer-terminator-interval 200))
 
 (mod-buffer-terminator-sane)
 
