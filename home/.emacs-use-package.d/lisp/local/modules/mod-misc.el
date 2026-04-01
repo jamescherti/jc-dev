@@ -3315,8 +3315,8 @@ This function is intended for use as :around advice."
 
   ;; (setq buffer-guardian-save-on-focus-change t)
   ;; (setq buffer-guardian-save-on-minibuffer t)
-  ;; (setq buffer-guardian-save-all-buffers-interval (* 60 5))
-  ;; (setq buffer-guardian-save-all-buffers-idle 25)
+  (setq buffer-guardian-save-all-buffers-interval (* 60 30))
+  (setq buffer-guardian-save-all-buffers-idle 30)
 
   ;; :config
   ;; (setq buffer-guardian-functions-auto-save-current-buffer
