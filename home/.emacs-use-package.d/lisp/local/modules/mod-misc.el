@@ -44,6 +44,7 @@
     (dolist (item '(olivetti
                     posframe
                     rainbow-mode
+                    with-editor
                     git-timemachine
                     focus
                     spinner
@@ -53,11 +54,13 @@
                     cond-let
                     jenkinsfile-mode
                     basic-mode
+                    highlight-numbers
                     ;; TODO remove on mac
                     exec-path-from-shell
                     groovy-mode
                     php-mode
                     erefactor
+                    parent-mode
                     popup
                     xclip
                     tempel
