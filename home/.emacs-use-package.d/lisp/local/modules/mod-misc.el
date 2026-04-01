@@ -42,12 +42,20 @@
   (require 'package)
   (when (fboundp 'package-delete)
     (dolist (item '(olivetti
-                    ;; TODO ?
                     posframe
                     rainbow-mode
                     git-timemachine
                     focus
                     spinner
+                    shut-up
+                    llama
+                    lv
+                    cond-let
+                    jenkinsfile-mode
+                    basic-mode
+                    ;; TODO remove on mac
+                    exec-path-from-shell
+                    groovy-mode
                     php-mode
                     erefactor
                     popup
@@ -3474,26 +3482,27 @@ environment for accurate linting."
 
 ;;; exec file form shell
 
-(lightemacs-use-package exec-path-from-shell
-  :if (and (or (display-graphic-p) (daemonp))
-           (eq system-type 'darwin)) ; macOS only
-  :demand t
-  :functions exec-path-from-shell-initialize
-  :init
-  (setq exec-path-from-shell-variables
-        '("PATH" "MANPATH"
-          "TMPDIR"
-          "SSH_AUTH_SOCK" "SSH_AGENT_PID"
-          "GPG_AGENT_INFO"
-          ;; "FZF_DEFAULT_COMMAND" "FZF_DEFAULT_OPTS" ; fzf
-          ;; "VIRTUAL_ENV" ; Python
-          ;; "GOPATH" "GOROOT" "GOBIN" ; Go
-          ;; "CARGO_HOME" "RUSTUP_HOME" ; Rust
-          ;; "NVM_DIR" "NODE_PATH" ; Node/JS
-          "LANG" "LC_CTYPE"))
-  :config
-  ;; Initialize
-  (exec-path-from-shell-initialize))
+;; TODO enable on mac
+;; (lightemacs-use-package exec-path-from-shell
+;;   :if (and (or (display-graphic-p) (daemonp))
+;;            (eq system-type 'darwin)) ; macOS only
+;;   :demand t
+;;   :functions exec-path-from-shell-initialize
+;;   :init
+;;   (setq exec-path-from-shell-variables
+;;         '("PATH" "MANPATH"
+;;           "TMPDIR"
+;;           "SSH_AUTH_SOCK" "SSH_AGENT_PID"
+;;           "GPG_AGENT_INFO"
+;;           ;; "FZF_DEFAULT_COMMAND" "FZF_DEFAULT_OPTS" ; fzf
+;;           ;; "VIRTUAL_ENV" ; Python
+;;           ;; "GOPATH" "GOROOT" "GOBIN" ; Go
+;;           ;; "CARGO_HOME" "RUSTUP_HOME" ; Rust
+;;           ;; "NVM_DIR" "NODE_PATH" ; Node/JS
+;;           "LANG" "LC_CTYPE"))
+;;   :config
+;;   ;; Initialize
+;;   (exec-path-from-shell-initialize))
 
 ;;; html
 
@@ -3700,33 +3709,33 @@ at the same level."
 
 
 ;;; Jenkinsfile
-(lightemacs-use-package jenkinsfile-mode
-  :commands jenkinsfile-mode
-  :mode
-  (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
-   ("/Jenkinsfile\\'" . jenkinsfile-mode))
-  :init
-  ;; (add-to-list 'auto-mode-alist '("/Jenkinsfile.*\\'" . jenkinsfile-mode))
-  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile[^/]*\\'" . jenkinsfile-mode))
-  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile\\'" . jenkinsfile-mode))
-  )
+;; (lightemacs-use-package jenkinsfile-mode
+;;   :commands jenkinsfile-mode
+;;   :mode
+;;   (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
+;;    ("/Jenkinsfile\\'" . jenkinsfile-mode))
+;;   :init
+;;   ;; (add-to-list 'auto-mode-alist '("/Jenkinsfile.*\\'" . jenkinsfile-mode))
+;;   ;; (add-to-list 'auto-mode-alist '("Jenkinsfile[^/]*\\'" . jenkinsfile-mode))
+;;   ;; (add-to-list 'auto-mode-alist '("Jenkinsfile\\'" . jenkinsfile-mode))
+;;   )
 
 ;;; BASIC
-(lightemacs-use-package basic-mode
-  :commands (cp437-dos
-             basic-qb45-mode)
-  :init
-  ;; (setq default-buffer-file-coding-system 'cp437-dos)
-
-  ;; Djgpp and rhide
-  (add-to-list 'file-coding-system-alist '("\\.C\\'" . cp437-dos))
-  (add-to-list 'file-coding-system-alist '("\\.H\\'" . cp437-dos))
-
-  (add-to-list 'file-coding-system-alist '("\\.[bB][aA][sS]\\'" . cp437-dos))
-
-  ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
-  ;; code." t)
-  (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
+;; (lightemacs-use-package basic-mode
+;;   :commands (cp437-dos
+;;              basic-qb45-mode)
+;;   :init
+;;   ;; (setq default-buffer-file-coding-system 'cp437-dos)
+;;
+;;   ;; Djgpp and rhide
+;;   (add-to-list 'file-coding-system-alist '("\\.C\\'" . cp437-dos))
+;;   (add-to-list 'file-coding-system-alist '("\\.H\\'" . cp437-dos))
+;;
+;;   (add-to-list 'file-coding-system-alist '("\\.[bB][aA][sS]\\'" . cp437-dos))
+;;
+;;   ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
+;;   ;; code." t)
+;;   (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
 
 ;;; ansible-doc
 
