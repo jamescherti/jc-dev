@@ -2457,7 +2457,10 @@ If COUNT is given, move COUNT - 1 lines downward first."
   (define-key evil-normal-state-map (kbd "<leader>gt") #'mod-better-vc-git-toplevel)
   (define-key evil-normal-state-map (kbd "<leader>vt") #'mod-better-vc-git-toplevel)
   (define-key evil-normal-state-map (kbd "<leader>vd") #'mod-better-vc-diff)
-  (define-key evil-normal-state-map (kbd "<leader>vb") #'vc-print-branch-log))
+
+  ;; TODO: Not available in emacs 31
+  ;; (define-key evil-normal-state-map (kbd "<leader>vb") #'vc-print-branch-log)
+  )
 
 ;;; Scroll the window down
 

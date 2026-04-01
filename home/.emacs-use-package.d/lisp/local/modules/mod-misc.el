@@ -43,9 +43,13 @@
   (when (fboundp 'package-delete)
     (dolist (item '(olivetti
                     ;; TODO ?
-                    ;; posframe
-                    ;; vertico-posframe
-                    treesit-fold
+                    posframe
+                    rainbow-mode
+                    git-timemachine
+                    focus
+                    spinner
+                    php-mode
+                    erefactor
                     popup
                     xclip
                     tempel
