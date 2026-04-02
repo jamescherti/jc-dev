@@ -225,7 +225,7 @@ any new ones."
         (undo-fu-session               . "melpa")
 
         ;; To fix the window-start bug
-        (apheleia                      . "melpa")
+        (apheleia                      . "melpa-stable")
 
         ;; 3 months ago
         ;; (gptel                         . "melpa")

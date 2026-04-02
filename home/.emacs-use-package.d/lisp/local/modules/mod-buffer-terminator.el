@@ -141,7 +141,7 @@
 
 (setq buffer-terminator-rules-alist
       `(
-        (call-function . mod-buffer-terminator-predicate)
+        ;; (call-function . mod-buffer-terminator-predicate)
 
         ;; Keep active buffers.
         ;; (This can be customized with `buffer-terminator-inactivity-timeout'
