@@ -1551,19 +1551,20 @@ search direction (default: \='forward)."
 
   (setq-local line-number-mode nil)
   (setq-local column-number-mode nil)
-  (setq-local cursor-type 'bar)
+
+  ;; (setq-local cursor-type 'bar)
   (setq mode-line-format nil)
 
   (when-let* ((proc (get-buffer-process (current-buffer))))
     (set-process-query-on-exit-flag proc nil)))
 
-(add-to-list 'evil-emacs-state-modes 'vterm-mode)
+;; (add-to-list 'evil-emacs-state-modes 'vterm-mode)
 
 (add-hook 'vterm-mode-hook 'my-setup-vterm)
 
 (setq vterm-clear-scrollback-when-clearing t)
+(setq vterm-max-scrollback 1500)
 
-(setq vterm-max-scrollback 100)
 ;; (setq vterm-set-bold-hightbright t)
 ;; (setq vterm-disable-bold t)
 ;; (setq vterm-copy-exclude-prompt t)
@@ -2567,7 +2568,7 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 ;;; term setup
 
-(evil-define-key 'insert term-raw-map (kbd "C-v") 'term-paste)
+(evil-define-key 'insert term-raw-map (kbd "C-V") 'term-paste)
 
 (with-eval-after-load 'term
   ;; Allows C-s to reach the terminal (e.g., for shell history search) instead

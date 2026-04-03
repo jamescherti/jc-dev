@@ -3408,81 +3408,54 @@ environment for accurate linting."
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
 (lightemacs-use-package shell-pop
+  :vc (:url "https://github.com/jamescherti/shell-pop-el"
+            :rev :newest)
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
+  :custom
+  (shell-pop-shell-type '("vterm" "*vterm*" (lambda () (vterm))))
   :init
   (setq shell-pop-window-position "bottom")
   (setq shell-pop-full-span nil)
   (setq shell-pop-autocd-to-working-dir t)
   (setq shell-pop-term-shell "/bin/bash")
   (setq shell-pop-window-size 80)
-  (setq shell-pop-shell-type '("ansi-term"
-                               "*ansi-term*"
-                               (lambda ()
-                                 (ansi-term shell-pop-term-shell))))
+  ;; (setq shell-pop-shell-type '("ansi-term"
+  ;;                              "*ansi-term*"
+  ;;                              (lambda ()
+  ;;                                (ansi-term shell-pop-term-shell))))
 
   ;; This protects you from the pop-out bug
   (setq shell-pop-restore-window-configuration nil)
 
   :preface
-  (defun my-shell-pop-set-exit-action-patch ()
-    "Replacement for `shell-pop--set-exit-action` that safely handles asynchronous exits."
-    (message "hello world")
-    (if (string= shell-pop-internal-mode "eshell")
-        (add-hook 'eshell-exit-hook 'shell-pop--kill-and-delete-window nil t)
-      (let ((process (get-buffer-process (current-buffer))))
-        (when process
-          (set-process-sentinel
-           process
-           (lambda (proc change)
-             (when (string-match-p "\\(?:finished\\|exited\\)" change)
-               (run-hooks 'shell-pop-process-exit-hook)
+  (defvar my-shell-pop-saved-window-config nil
+    "Stores the absolute window state prior to shell-pop-up.")
 
-               ;; 1. Identify the exact buffer and window belonging to this process
-               (let* ((proc-buf (process-buffer proc))
-                      (proc-win (when (buffer-live-p proc-buf)
-                                  (get-buffer-window proc-buf))))
+  (defun my-shell-pop-save-layout (&rest _args)
+    "Capture the exact layout before shell-pop opens."
+    (setq my-shell-pop-saved-window-config (current-window-configuration)))
 
-                 ;; 2. Explicitly kill ONLY the shell buffer
-                 (when (and shell-pop-cleanup-buffer-at-process-exit
-                            (buffer-live-p proc-buf))
-                   (kill-buffer proc-buf))
+  (defun my-shell-pop-restore-layout (orig-fun &rest args)
+    "Restore the layout without relying on linear winner history.
+  Only restores if the original working window is still alive."
+    (if (and my-shell-pop-saved-window-config
+             shell-pop-last-window
+             shell-pop-last-buffer
+             (window-live-p shell-pop-last-window)
+             (eq (window-buffer shell-pop-last-window) shell-pop-last-buffer))
+        (progn
+          (run-hooks 'shell-pop-out-hook)
+          (bury-buffer)
+          (set-window-configuration my-shell-pop-saved-window-config)
+          (setq my-shell-pop-saved-window-config nil))
+      ;; Clean up the saved config and fall back to native behavior
+      ;; if the original window was destroyed.
+      (setq my-shell-pop-saved-window-config nil)
+      (apply orig-fun args)))
 
-                 ;; 3. Explicitly manipulate ONLY the shell's window
-                 (when (window-live-p proc-win)
-                   ;; The set-window-buffer block is a mandatory Emacs safety net
-                   ;; to prevent errors in case the shell window happens to be the
-                   ;; last window open on your screen when the process exits.
-                   (if (one-window-p)
-                       ;; Safely replace the buffer in the shell's specific window
-                       (set-window-buffer proc-win
-                                          (let ((target-buf (get-buffer shell-pop-last-buffer)))
-                                            (if target-buf
-                                                target-buf
-                                              (get-scratch-buffer-create))))
-                     ;; Safely delete only the shell's specific window
-                     (delete-window proc-win)))))))))))
-
-  ;; ====================================================================
-  ;; PATCH 1: Store Buffer Objects instead of Strings
-  ;; ====================================================================
-  ;; This prevents the Uniquify race condition. By storing the actual
-  ;; memory reference to the buffer, shell-pop will correctly track it
-  ;; even if uniquify changes its name property dynamically.
-  (defun my-shell-pop-up-patch (orig-fun index)
-    "Advice to force shell-pop to store the buffer object instead of a string."
-    (funcall orig-fun index)
-    (with-current-buffer (window-buffer shell-pop-last-window)
-      (setq shell-pop-last-buffer (current-buffer))))
-
-  :config
-  ;; ====================================================================
-  ;; PATCH 1: Store Buffer Objects instead of Strings
-  ;; ====================================================================
-  (advice-add 'shell-pop-up :around #'my-shell-pop-up-patch)
-
-  ;; Override the original function with our patched version
-  (advice-add 'shell-pop--set-exit-action :override #'my-shell-pop-set-exit-action-patch))
+  (advice-add 'shell-pop-up :before #'my-shell-pop-save-layout)
+  (advice-add 'shell-pop-out :around #'my-shell-pop-restore-layout))
 
 ;; shell-pop: Change the default directory
 (defun my-around-shell-pop (fn &rest args)
