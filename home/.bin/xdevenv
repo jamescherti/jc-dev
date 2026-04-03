@@ -564,7 +564,7 @@ main() {
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
           --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",gnome-terminal --hide-menubar --title=tmux -e '$TMUX_CMD',gnome-terminal,"
+          ",gnome-terminal --hide-menubar --title=tmux -e '$TMUX_CMD',org.gnome.Terminal,"
       elif type -P terminator; then
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
