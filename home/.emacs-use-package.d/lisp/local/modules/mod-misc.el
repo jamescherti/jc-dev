@@ -3427,6 +3427,7 @@ environment for accurate linting."
   :preface
   (defun my-shell-pop-set-exit-action-patch ()
     "Replacement for `shell-pop--set-exit-action` that safely handles asynchronous exits."
+    (message "hello world")
     (if (string= shell-pop-internal-mode "eshell")
         (add-hook 'eshell-exit-hook 'shell-pop--kill-and-delete-window nil t)
       (let ((process (get-buffer-process (current-buffer))))
@@ -3449,20 +3450,37 @@ environment for accurate linting."
 
                  ;; 3. Explicitly manipulate ONLY the shell's window
                  (when (window-live-p proc-win)
-                   ;; The set-window-buffer block is just a mandatory Emacs
-                   ;; safety net to prevent errors in case the shell window
-                   ;; happens to be the last window open on your screen when the
-                   ;; process exits.
+                   ;; The set-window-buffer block is a mandatory Emacs safety net
+                   ;; to prevent errors in case the shell window happens to be the
+                   ;; last window open on your screen when the process exits.
                    (if (one-window-p)
                        ;; Safely replace the buffer in the shell's specific window
                        (set-window-buffer proc-win
-                                          (if (buffer-live-p shell-pop-last-buffer)
-                                              (get-buffer shell-pop-last-buffer)
-                                            (get-buffer-create "*scratch*")))
+                                          (let ((target-buf (get-buffer shell-pop-last-buffer)))
+                                            (if target-buf
+                                                target-buf
+                                              (get-scratch-buffer-create))))
                      ;; Safely delete only the shell's specific window
                      (delete-window proc-win)))))))))))
 
+  ;; ====================================================================
+  ;; PATCH 1: Store Buffer Objects instead of Strings
+  ;; ====================================================================
+  ;; This prevents the Uniquify race condition. By storing the actual
+  ;; memory reference to the buffer, shell-pop will correctly track it
+  ;; even if uniquify changes its name property dynamically.
+  (defun my-shell-pop-up-patch (orig-fun index)
+    "Advice to force shell-pop to store the buffer object instead of a string."
+    (funcall orig-fun index)
+    (with-current-buffer (window-buffer shell-pop-last-window)
+      (setq shell-pop-last-buffer (current-buffer))))
+
   :config
+  ;; ====================================================================
+  ;; PATCH 1: Store Buffer Objects instead of Strings
+  ;; ====================================================================
+  (advice-add 'shell-pop-up :around #'my-shell-pop-up-patch)
+
   ;; Override the original function with our patched version
   (advice-add 'shell-pop--set-exit-action :override #'my-shell-pop-set-exit-action-patch))
 
