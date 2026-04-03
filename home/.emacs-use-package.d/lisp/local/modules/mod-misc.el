@@ -3407,40 +3407,64 @@ environment for accurate linting."
 ;;                       (t '("terminal" "*terminal*"
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
-
 (lightemacs-use-package shell-pop
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
   :init
   (setq shell-pop-window-position "bottom")
-  ;; (setq shell-pop-window-position "full")
   (setq shell-pop-full-span nil)
   (setq shell-pop-autocd-to-working-dir t)
   (setq shell-pop-term-shell "/bin/bash")
   (setq shell-pop-window-size 80)
-  ;; (setq shell-pop-last-shell-buffer-index 0)
-  ;; (setq shell-pop-shell-type '("eshell" "*eshell*" (lambda nil (eshell))))
-  ;; (setq shell-pop-universal-key "C-`")
-  ;; (setq shell-pop-shell-type '("vterm"
-  ;;                              "*vterm*"
-  ;;                              (lambda nil
-  ;;                                (vterm shell-pop-term-shell))))
   (setq shell-pop-shell-type '("ansi-term"
                                "*ansi-term*"
                                (lambda ()
                                  (ansi-term shell-pop-term-shell))))
-  ;; (setq shell-pop-shell-type '("eat" "*eat*"
-  ;;                              (lambda nil
-  ;;                                (eat shell-pop-term-shell))))
 
-  ;; Disable the built-in window restoration
-  ;; It seems to do wrong decisions when buffer terminator kills the terminal
+  ;; This protects you from the pop-out bug
   (setq shell-pop-restore-window-configuration nil)
 
-  ;; Execute winner-undo via the provided hook
-  ;; TODO fix this
-  ;; (add-hook 'shell-pop-out-hook 'winner-undo)
-  )
+  :preface
+  (defun my-shell-pop-set-exit-action-patch ()
+    "Replacement for `shell-pop--set-exit-action` that safely handles asynchronous exits."
+    (if (string= shell-pop-internal-mode "eshell")
+        (add-hook 'eshell-exit-hook 'shell-pop--kill-and-delete-window nil t)
+      (let ((process (get-buffer-process (current-buffer))))
+        (when process
+          (set-process-sentinel
+           process
+           (lambda (proc change)
+             (when (string-match-p "\\(?:finished\\|exited\\)" change)
+               (run-hooks 'shell-pop-process-exit-hook)
+
+               ;; 1. Identify the exact buffer and window belonging to this process
+               (let* ((proc-buf (process-buffer proc))
+                      (proc-win (when (buffer-live-p proc-buf)
+                                  (get-buffer-window proc-buf))))
+
+                 ;; 2. Explicitly kill ONLY the shell buffer
+                 (when (and shell-pop-cleanup-buffer-at-process-exit
+                            (buffer-live-p proc-buf))
+                   (kill-buffer proc-buf))
+
+                 ;; 3. Explicitly manipulate ONLY the shell's window
+                 (when (window-live-p proc-win)
+                   ;; The set-window-buffer block is just a mandatory Emacs
+                   ;; safety net to prevent errors in case the shell window
+                   ;; happens to be the last window open on your screen when the
+                   ;; process exits.
+                   (if (one-window-p)
+                       ;; Safely replace the buffer in the shell's specific window
+                       (set-window-buffer proc-win
+                                          (if (buffer-live-p shell-pop-last-buffer)
+                                              (get-buffer shell-pop-last-buffer)
+                                            (get-buffer-create "*scratch*")))
+                     ;; Safely delete only the shell's specific window
+                     (delete-window proc-win)))))))))))
+
+  :config
+  ;; Override the original function with our patched version
+  (advice-add 'shell-pop--set-exit-action :override #'my-shell-pop-set-exit-action-patch))
 
 ;; shell-pop: Change the default directory
 (defun my-around-shell-pop (fn &rest args)
