@@ -1538,7 +1538,7 @@ search direction (default: \='forward)."
   (my-disable-fringe-truncation-arrow)
 
   ;; https://www.reddit.com/r/emacs/comments/xyo2fo/orgmode_vterm_tmux/
-  ;; With the first line, you can use a binding like `M-SPC ESC` (`M-SPC`
+  ;; With the first line, you can use a binding like M-SPC ESC (M-SPC
   ;; being the default alt-leader key) to switch the vterm buffer to evil
   ;; normal state. Most of the time I don't use it, and simply interact with
   ;; the vterm the same exact way I do with any other terminal.
@@ -1552,11 +1552,7 @@ search direction (default: \='forward)."
   (setq-local line-number-mode nil)
   (setq-local column-number-mode nil)
 
-  ;; (setq-local cursor-type 'bar)
-  (setq mode-line-format nil)
-
-  (when-let* ((proc (get-buffer-process (current-buffer))))
-    (set-process-query-on-exit-flag proc nil)))
+  (setq-local cursor-type 'bar))
 
 ;; (add-to-list 'evil-emacs-state-modes 'vterm-mode)
 
@@ -1584,13 +1580,39 @@ search direction (default: \='forward)."
   (when (fboundp 'vterm-send-key)
     (vterm-send-key (kbd "L") t t)))
 
+(defun my-vterm-insert-at-prompt ()
+  "Move the Emacs point to the terminal cursor and enter Evil insert state."
+  (interactive)
+  (vterm-reset-cursor-point)
+  (evil-insert-state))
+
+;; Evil state mappings for smooth transitions
+(with-eval-after-load 'vterm
+  ;; Map common insert keys to jump to the prompt first
+  (evil-define-key 'normal vterm-mode-map "i" 'my-vterm-insert-at-prompt)
+  (evil-define-key 'normal vterm-mode-map "a" 'my-vterm-insert-at-prompt)
+  (evil-define-key 'normal vterm-mode-map "I" 'my-vterm-insert-at-prompt)
+  (evil-define-key 'normal vterm-mode-map "A" 'my-vterm-insert-at-prompt)
+
+  ;; Map 'p' in normal mode to paste into vterm
+  ;; (evil-define-key 'normal vterm-mode-map "p" 'vterm-yank)
+  ;; Return to insert mode easily
+  ;; (evil-define-key 'normal vterm-mode-map "i" 'evil-insert-state)
+  ;; (evil-define-key 'normal vterm-mode-map "a" 'evil-insert-state)
+  ;; Ensure C-g works to return to normal mode from insert mode
+  ;; Escape to normal state using C-c <escape> or C-c [
+  (evil-define-key 'insert vterm-mode-map (kbd "C-c <escape>") 'evil-normal-state)
+  (evil-define-key 'insert vterm-mode-map (kbd "C-c [") 'evil-normal-state)
+
+  (evil-define-key 'insert vterm-mode-map (kbd "C-g") 'evil-normal-state))
+
+
 ;;; mode line
 
 (setq line-number-mode t)
 (setq column-number-mode t)
 (setq mode-line-position-column-line-format '("%l:%C"))
 (setq mode-line-percent-position nil)
-
 
 ;;; flymake fixes
 
