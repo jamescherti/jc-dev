@@ -38,62 +38,63 @@
 
 ;;; Delete unused packages
 
-(when (eq lightemacs-package-manager 'builtin-package)
-  (require 'package)
-  (when (fboundp 'package-delete)
-    (dolist (item '(olivetti
-                    posframe
-                    rainbow-mode
-                    with-editor
-                    lsp-mode
-                    git-timemachine
-                    focus
-                    spinner
-                    shut-up
-                    llama
-                    lv
-                    jenkinsfile-mode
-                    basic-mode
-                    highlight-numbers
-                    ;; TODO remove on mac
-                    exec-path-from-shell
-                    groovy-mode
-                    php-mode
-                    erefactor
-                    parent-mode
-                    popup
-                    xclip
-                    tempel
-                    tempel-collection
-                    stillness-mode
-                    golden-ratio
-                    tabgo
-                    ws-butler
-                    quickrun
-                    xterm-color
-                    ztree
-                    vundo
-                    flyspell-lazy
-                    vterm
-                    eat
-                    magit
-                    magit-section
-                    ace-window))
-      (let ((desc (cadr (assq item package-alist))))
-        (if (not desc)
-            (when init-file-debug
-              (message "Package %s not found in alist (already deleted?)" item))
-          (condition-case err
-              (progn
-                (package-delete desc)
-                (message "Successfully deleted: %s" item))
-            (error
-             ;; This captures the actual error message from Emacs
-             (message "Failed to delete %s: %s: %s"
-                      item
-                      (error-message-string err)
-                      desc))))))))
-
+(defun my-delete-unused-packages ()
+  "Delete unused packages."
+  (when (eq lightemacs-package-manager 'builtin-package)
+    (require 'package)
+    (when (fboundp 'package-delete)
+      (dolist (item '(olivetti
+                      posframe
+                      rainbow-mode
+                      with-editor
+                      lsp-mode
+                      git-timemachine
+                      focus
+                      spinner
+                      shut-up
+                      llama
+                      lv
+                      jenkinsfile-mode
+                      basic-mode
+                      highlight-numbers
+                      ;; TODO remove on mac
+                      exec-path-from-shell
+                      groovy-mode
+                      php-mode
+                      erefactor
+                      parent-mode
+                      popup
+                      xclip
+                      tempel
+                      tempel-collection
+                      stillness-mode
+                      golden-ratio
+                      tabgo
+                      ws-butler
+                      quickrun
+                      xterm-color
+                      ztree
+                      vundo
+                      flyspell-lazy
+                      vterm
+                      eat
+                      magit
+                      magit-section
+                      ace-window))
+        (let ((desc (cadr (assq item package-alist))))
+          (if (not desc)
+              (when init-file-debug
+                (message "Package %s not found in alist (already deleted?)" item))
+            (condition-case err
+                (progn
+                  (package-delete desc)
+                  (message "Successfully deleted: %s" item))
+              (error
+               ;; This captures the actual error message from Emacs
+               (message "Failed to delete %s: %s: %s"
+                        item
+                        (error-message-string err)
+                        desc)))))))))
 
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
@@ -145,7 +146,7 @@
 
 ;;; Target hooks
 
-;; (setq lightemacs-buffer-terminator-target-hooks '())
+(setq lightemacs-buffer-terminator-target-hooks '())
 
 (setq lightemacs-aggressive-indent-target-hooks '(emacs-lisp-mode-hook))
 

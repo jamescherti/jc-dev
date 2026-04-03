@@ -139,37 +139,37 @@
          ;;  nil)
          ))))))
 
-(setq buffer-terminator-rules-alist
-      `(
-        ;; (call-function . mod-buffer-terminator-predicate)
-
-        ;; Keep active buffers.
-        ;; (This can be customized with `buffer-terminator-inactivity-timeout'
-        ;; and `buffer-terminator-interval'.)
-        (keep-buffer-property . active)
-
-        ;; Keep process buffers.
-        ;; (Process buffers are buffers where an active process is running.)
-        (keep-buffer-property . process)
-
-        ;; (kill-buffer-name . ("*Warnings*"
-        ;;                      "*Compile-Log*"
-        ;;                      "*Backtrace*"
-        ;;                      "*Help*"))
-
-        ;; Retain special buffers (DO NOT REMOVE).
-        ;; DO NOT REMOVE (keep-buffer-property . special) unless you know of what
-        ;; you are doing.
-        ;; (keep-buffer-property . special)
-
-        (keep-buffer-name . ,mod-buffer-terminator-always-keep)
-
-        (keep-buffer-name-regexp . ,mod-buffer-terminator-keep-buffer-regexp)
-
-        (keep-buffer-property . visible)
-
-        ;; Kill
-        (return . :kill)))
+;; (setq buffer-terminator-rules-alist
+;;       `(
+;;         ;; (call-function . mod-buffer-terminator-predicate)
+;;
+;;         ;; Keep active buffers.
+;;         ;; (This can be customized with `buffer-terminator-inactivity-timeout'
+;;         ;; and `buffer-terminator-interval'.)
+;;         (keep-buffer-property . active)
+;;
+;;         ;; Keep process buffers.
+;;         ;; (Process buffers are buffers where an active process is running.)
+;;         (keep-buffer-property . process)
+;;
+;;         ;; (kill-buffer-name . ("*Warnings*"
+;;         ;;                      "*Compile-Log*"
+;;         ;;                      "*Backtrace*"
+;;         ;;                      "*Help*"))
+;;
+;;         ;; Retain special buffers (DO NOT REMOVE).
+;;         ;; DO NOT REMOVE (keep-buffer-property . special) unless you know of what
+;;         ;; you are doing.
+;;         ;; (keep-buffer-property . special)
+;;
+;;         (keep-buffer-name . ,mod-buffer-terminator-always-keep)
+;;
+;;         (keep-buffer-name-regexp . ,mod-buffer-terminator-keep-buffer-regexp)
+;;
+;;         (keep-buffer-property . visible)
+;;
+;;         ;; Kill
+;;         (return . :kill)))
 
 (defun mod-buffer-terminator-crazy ()
   "Buffer terminator crazy."

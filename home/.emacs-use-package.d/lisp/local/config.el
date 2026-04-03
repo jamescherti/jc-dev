@@ -592,6 +592,8 @@
                            le-vim-tab-bar
                            ;; le-evil-commentary  ; I am using my own
 
+                           ;; Temporary: Comment out to test interaction
+                           ;; with easysession
                            le-buffer-terminator
                            le-kirigami
                            le-inhibit-mouse
