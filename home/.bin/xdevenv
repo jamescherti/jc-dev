@@ -559,12 +559,17 @@ main() {
     PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin
     VIRTUAL_ENV=""
     TERMINAL_CMD=()
-    if has_run_or_raise && is_gnome && is_wayland; then
-      if type -P terminator; then
+    if is_gnome && is_wayland && has_run_or_raise; then
+      if type -P gnome-terminal; then
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
           --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",terminator $TERMINATOR_OPTS_STR --title=tmux --execute $TMUX_CMD,terminator,"
+          ",gnome-terminal --hide-menubar --title=tmux -e '$TMUX_CMD',gnome-terminal,"
+      elif type -P terminator; then
+        gdbus call --session --dest org.gnome.Shell \
+          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+          ",terminator $TERMINATOR_OPTS_STR --title=tmux --execute '$TMUX_CMD',terminator,"
       fi
     else
       if type -P terminator; then
@@ -574,11 +579,8 @@ main() {
           terminator "${TERMINATOR_OPTS[@]}"
           --title=tmux --execute "${TMUX_CMD_LIST[@]}")
       elif type -P gnome-terminal >/dev/null 2>&1; then
-        # GNOME_TERMINAL_OPTS=(--maximize --hide-menubar)
-        GNOME_TERMINAL_OPTS=(--hide-menubar)
-        # GNOME_TERMINAL_OPTS=(--full-screen)
         local win_name="gnome-terminal-server.Gnome-terminal"
-        # show_window_maximized_devilspie "$win_name" gnome-terminal "${GNOME_TERMINAL_OPTS[@]}" --title=tmux -e 'sh -c "tmux -2 attach || TERM=xterm-256color tmux -2"'
+        # show_window_maximized_devilspie "$win_name" gnome-terminal --hide-menubar --title=tmux -e 'sh -c "tmux -2 attach || TERM=xterm-256color tmux -2"'
         TERMINAL_CMD=(show_window_maximized_devilspie gnome-terminal "$win_name" gnome-terminal "${GNOME_TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
       elif type -P konsole &>/dev/null; then
         TERMINAL_OPTS=(--hide-tabbar --hide-menubar)
