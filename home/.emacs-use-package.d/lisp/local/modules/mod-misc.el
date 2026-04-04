@@ -4244,16 +4244,19 @@ This prevents non-file buffers, such as popup shells or help windows, from
 taking over the tab name. It keeps the tab-bar focused on the actual files you
 are editing by falling back to the last visited file buffer."
   (let ((current-buf (window-buffer (minibuffer-selected-window))))
-    (if (buffer-file-name current-buf)
-        (buffer-name current-buf)
-      (let ((prev-buf-entry (seq-find (lambda (entry)
-                                        (let ((buf (car entry)))
-                                          (and (buffer-live-p buf)
-                                               (buffer-file-name buf))))
-                                      (window-prev-buffers))))
-        (if prev-buf-entry
-            (buffer-name (car prev-buf-entry))
-          (buffer-name current-buf))))))
+    (cond ((one-window-p)
+           (buffer-name current-buf))
+          ((buffer-file-name current-buf)
+           (buffer-name current-buf))
+          (t
+           (let ((prev-buf-entry (seq-find (lambda (entry)
+                                             (let ((buf (car entry)))
+                                               (and (buffer-live-p buf)
+                                                    (buffer-file-name buf))))
+                                           (window-prev-buffers))))
+             (if prev-buf-entry
+                 (buffer-name (car prev-buf-entry))
+               (buffer-name current-buf)))))))
 
 (setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
 

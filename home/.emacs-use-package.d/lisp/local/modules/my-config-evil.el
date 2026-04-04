@@ -1552,7 +1552,13 @@ search direction (default: \='forward)."
   (setq-local line-number-mode nil)
   (setq-local column-number-mode nil)
 
+  ;; Define cursor shapes and colors for Evil states
+  (setq-local evil-normal-state-cursor 'box
+              evil-visual-state-cursor 'box
+              evil-insert-state-cursor 'bar)
+
   (setq-local cursor-type 'bar))
+
 
 ;; (add-to-list 'evil-emacs-state-modes 'vterm-mode)
 
@@ -1566,8 +1572,13 @@ search direction (default: \='forward)."
 ;; (setq vterm-copy-exclude-prompt t)
 ;; "C-x" "C-c" "C-g"
 (setq vterm-keymap-exceptions '("M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
+(setq vterm-disable-inverse-video t)
+
 (setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
 
+;; Disables inverse video rendering in vterm.
+;; This fixes the issue where the underlying shell visually highlights
+;; pasted text with a white background due to bracketed paste mode.
 (defun my-vterm--send-Alt-Shift-H ()
   "Send Alt Shift H to vterm."
   (interactive)
@@ -1583,8 +1594,23 @@ search direction (default: \='forward)."
 (defun my-vterm-insert-at-prompt ()
   "Move the Emacs point to the terminal cursor and enter Evil insert state."
   (interactive)
-  (vterm-reset-cursor-point)
-  (evil-insert-state))
+  (when (fboundp 'vterm-reset-cursor-point)
+    (vterm-reset-cursor-point)
+    (evil-insert-state)))
+
+(defun my-vterm-direct-paste ()
+  "Send the clipboard contents directly to the vterm process."
+  (interactive)
+  ;; (when (fboundp 'vterm-yank)
+  ;;   (let ((inhibit-message t))
+  ;;     (vterm-yank)
+  ;;     (deactivate-mark)))
+
+  (when (fboundp 'vterm-send-string)
+    (let* ((text (current-kill 0 t))
+           (clean-text (substring-no-properties text)))
+      (vterm-send-string clean-text)))
+  )
 
 ;; Evil state mappings for smooth transitions
 (with-eval-after-load 'vterm
@@ -1594,11 +1620,13 @@ search direction (default: \='forward)."
   (evil-define-key 'normal vterm-mode-map "I" 'my-vterm-insert-at-prompt)
   (evil-define-key 'normal vterm-mode-map "A" 'my-vterm-insert-at-prompt)
 
-  ;; Map 'p' in normal mode to paste into vterm
-  ;; (evil-define-key 'normal vterm-mode-map "p" 'vterm-yank)
+  ;; Bind C-y to paste in vterm insert mode
+  (evil-define-key 'insert vterm-mode-map (kbd "C-y") 'my-vterm-direct-paste)
+
+  ;; Alternatively, bind C-S-v to paste in vterm insert mode
+  (evil-define-key 'insert vterm-mode-map (kbd "C-S-v") 'my-vterm-direct-paste)
+
   ;; Return to insert mode easily
-  ;; (evil-define-key 'normal vterm-mode-map "i" 'evil-insert-state)
-  ;; (evil-define-key 'normal vterm-mode-map "a" 'evil-insert-state)
   ;; Ensure C-g works to return to normal mode from insert mode
   ;; Escape to normal state using C-c <escape> or C-c [
   (evil-define-key 'insert vterm-mode-map (kbd "C-c <escape>") 'evil-normal-state)
