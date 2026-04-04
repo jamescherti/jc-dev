@@ -1422,8 +1422,8 @@ WIDTH is the tab width."
   (setq abbrev-file-name (expand-file-name "abbrev_defs" my-shared-user-emacs-directory))
 
   (setq easysession-debug t)
-  (setq easysession-refresh-tab-bar nil)
-  (setq buffer-terminator-refresh-tab-bar t)
+  (setq easysession-refresh-tab-bar t)
+  (setq buffer-terminator-track-tab-bar-buffers t)
 
   (setq easysession-directory
         (expand-file-name "easysession" my-shared-user-emacs-directory))
@@ -3417,7 +3417,7 @@ environment for accurate linting."
   :init
   (setq shell-pop-window-position "bottom")
   (setq shell-pop-full-span nil)
-  (setq shell-pop-autocd-to-working-dir t)
+  (setq shell-pop-autocd-to-working-dir nil)
   (setq shell-pop-term-shell "/bin/bash")
   (setq shell-pop-window-size 80)
   ;; (setq shell-pop-shell-type '("ansi-term"
@@ -4235,6 +4235,27 @@ explicitly trigger file loading only when desired."
 ;;     ;; vertico-posframe-min-height 2
 ;;     ;; (vertico-posframe-mode 1)
 ;;     ))
+
+;;; tab-bar: only display file visiting buffers
+
+(defun custom-tab-bar-tab-name ()
+  "Return the name of the current or previous file-visiting buffer.
+This prevents non-file buffers, such as popup shells or help windows, from
+taking over the tab name. It keeps the tab-bar focused on the actual files you
+are editing by falling back to the last visited file buffer."
+  (let ((current-buf (window-buffer (minibuffer-selected-window))))
+    (if (buffer-file-name current-buf)
+        (buffer-name current-buf)
+      (let ((prev-buf-entry (seq-find (lambda (entry)
+                                        (let ((buf (car entry)))
+                                          (and (buffer-live-p buf)
+                                               (buffer-file-name buf))))
+                                      (window-prev-buffers))))
+        (if prev-buf-entry
+            (buffer-name (car prev-buf-entry))
+          (buffer-name current-buf))))))
+
+(setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
 
 ;;; Provide
 
