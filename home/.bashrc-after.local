@@ -207,6 +207,7 @@ _git_find_repos_wrapper() {
 
 alias gm='_gm_wrapper'
 alias ga='_ga_wrapper'
+alias gls='git ls'
 alias rgit='_bg_git_find_repos_wrapper'
 alias batchfetch='so esa ssh-add-exec batchfetch'
 alias release='so esa ssh-add-exec release'
