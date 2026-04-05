@@ -73,8 +73,8 @@
   (interactive)
   (let ((buffer-name (buffer-name))
         (inhibit-read-only t))
-    (when (yes-or-no-p "Are you sure you want to erase the buffer?")
-      (erase-buffer))
+    ;; when (yes-or-no-p "Are you sure you want to erase the buffer?")
+    (erase-buffer)
 
     (cond
      ((string-prefix-p "*Ollama" buffer-name)

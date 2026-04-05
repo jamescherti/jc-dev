@@ -72,6 +72,11 @@
 (setq site-run-file nil)
 (setq inhibit-default-init t)
 
+;; TODO remove from devemacs and my emacs and add this to lightemacs
+(with-eval-after-load 'cus-edit
+  ;; Prevent Emacs from writing custom settings to any file
+  (advice-add 'custom-save-all :override #'ignore))
+
 ;;; Ido
 
 ;; (setq ido-everywhere t

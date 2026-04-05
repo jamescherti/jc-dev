@@ -67,6 +67,11 @@
   ;; (setq straight-disable-autoloads t)
   )
 
+;; TODO remove from devemacs and my emacs and add this to lightemacs
+(with-eval-after-load 'cus-edit
+  ;; Prevent Emacs from writing custom settings to any file
+  (advice-add 'custom-save-all :override #'ignore))
+
 ;;; byte-compile
 
 (defvar my-elc-cache--emacs-lisp-directory
