@@ -4238,25 +4238,31 @@ explicitly trigger file loading only when desired."
 
 ;;; tab-bar: only display file visiting buffers
 
+(defun custom-tab-valid-buffer-p (buf)
+  "Return non-nil if BUF is visiting a file or is a `dired' buffer."
+  (or (buffer-file-name (or (buffer-base-buffer buf) buf))
+      (with-current-buffer buf
+        (derived-mode-p 'dired-mode))))
+
 (defun custom-tab-bar-tab-name ()
-  "Return the name of the current or previous file-visiting buffer.
+  "Return the name of the current or visible file-visiting buffer.
 This prevents non-file buffers, such as popup shells or help windows, from
 taking over the tab name. It keeps the tab-bar focused on the actual files you
-are editing by falling back to the last visited file buffer."
+are editing by falling back to another visible file buffer."
   (let ((current-buf (window-buffer (minibuffer-selected-window))))
-    (cond ((one-window-p)
-           (buffer-name current-buf))
-          ((buffer-file-name current-buf)
-           (buffer-name current-buf))
-          (t
-           (let ((prev-buf-entry (seq-find (lambda (entry)
-                                             (let ((buf (car entry)))
-                                               (and (buffer-live-p buf)
-                                                    (buffer-file-name buf))))
-                                           (window-prev-buffers))))
-             (if prev-buf-entry
-                 (buffer-name (car prev-buf-entry))
-               (buffer-name current-buf)))))))
+    (cond
+     ((or (one-window-p)
+          (custom-tab-valid-buffer-p current-buf))
+      (buffer-name current-buf))
+
+     (t
+      (catch 'found
+        (dolist (win (window-list))
+          (let ((buf (window-buffer win)))
+            (when (custom-tab-valid-buffer-p buf)
+              (throw 'found (buffer-name buf)))))
+        ;; Fallback if no visible valid buffer is found
+        (buffer-name current-buf))))))
 
 (setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
 
