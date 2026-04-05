@@ -44,7 +44,9 @@ export PYTHON_EGG_CACHE="$HOME/.cache/python_cache_egg"
 export PIP_DOWNLOAD_CACHE="$HOME/.cache/pip_download_cache"
 # mkdir -p "$PIP_DOWNLOAD_CACHE" >/dev/null 2>&1
 
-export STARDICT_DATA_DIR=/opt/local/sdcv_dict
+if ! [ -d ~/.sdcv_dict/ ]; then
+  export STARDICT_DATA_DIR=/opt/local/sdcv_dict
+fi
 
 export LIBVIRT_DEFAULT_URI=qemu:///system
 
