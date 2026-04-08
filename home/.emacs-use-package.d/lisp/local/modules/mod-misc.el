@@ -1188,6 +1188,9 @@ WIDTH is the tab width."
                  ;;   command-execute(dired-next-subdir)
                  "Last directory"
 
+                 ;; easysession
+                 treesit-query-error
+
                  "Bad diff region number"))
     (push err debug-ignored-errors))
 
