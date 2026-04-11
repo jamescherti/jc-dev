@@ -97,9 +97,11 @@
   (evil-ex-nohighlight)
 
   ;; Update font lock to clear new highlights after functions are evaluated
-  (when (and (bound-and-true-p font-lock-mode)
-             (fboundp 'font-lock-update))
-    (font-lock-update)))
+  (let ((inhitibt-message t))
+    (when (and (bound-and-true-p font-lock-mode)
+               (fboundp 'font-lock-update))
+      (ignore-errors
+        (font-lock-update)))))
 
 (defun evilbuffer-clear-highlights ()
   "Clear."
