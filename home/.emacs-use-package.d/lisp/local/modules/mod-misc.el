@@ -3421,9 +3421,17 @@ environment for accurate linting."
   :commands shell-pop
   :bind (("<f2>" . shell-pop))
   :custom
-  (shell-pop-shell-type '("vterm" "*vterm*" (lambda () (vterm))))
+  (shell-pop-shell-type '("vterm"
+                          "*vterm*"
+                          (lambda ()
+                            (let ((tmux-buffer (vterm)))
+                              (with-current-buffer tmux-buffer
+                                (vterm-send-string "exec tmux-session emacs")
+                                (vterm-send-string "\n")
+                                (vterm-send-return))))))
   :init
-  (setq shell-pop-window-position "bottom")
+  ;; (setq shell-pop-window-position "bottom")
+  (setq shell-pop-window-position "full")
   (setq shell-pop-full-span nil)
   (setq shell-pop-autocd-to-working-dir nil)
   (setq shell-pop-term-shell "/bin/bash")
