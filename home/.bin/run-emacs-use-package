@@ -40,8 +40,8 @@ if ! [[ -f "$RUN_EMACS_BIN" ]]; then
   #   if ! [[ -f "$RUN_EMACS_BIN" ]]; then
   #     RUN_EMACS_BIN=emacs
   #   fi
-  echo "Error: Not found: $RUN_EMACS_BIN" >&2
-  exit 1
+  # echo "Error: Not found: $RUN_EMACS_BIN" >&2
+  # exit 1
 fi
 
 EMACS_D="$HOME/.emacs-use-package.d/"
