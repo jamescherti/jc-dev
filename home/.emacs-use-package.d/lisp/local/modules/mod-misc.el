@@ -3430,8 +3430,8 @@ environment for accurate linting."
                                 (vterm-send-string "\n")
                                 (vterm-send-return))))))
   :init
-  ;; (setq shell-pop-window-position "bottom")
-  (setq shell-pop-window-position "full")
+  (setq shell-pop-window-position "bottom")
+  ;; (setq shell-pop-window-position "full")
   (setq shell-pop-full-span nil)
   (setq shell-pop-autocd-to-working-dir nil)
   (setq shell-pop-term-shell "/bin/bash")
