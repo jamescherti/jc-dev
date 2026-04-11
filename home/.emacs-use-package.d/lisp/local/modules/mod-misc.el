@@ -3490,9 +3490,16 @@ environment for accurate linting."
   ;;            (derived-mode-p 'term-mode))
   ;;   (term-char-mode))
 
+  (my-save-all-buffers)
+
   ;; Force Evil into insert state
   (when (fboundp 'evil-insert-state)
-    (evil-insert-state)))
+    (evil-insert-state))
+
+  ;; Fix issue that causes the cursor to move to the top-left of the screen
+  (when (and (derived-mode-p 'vterm-mode)
+             (fboundp 'vterm-reset-cursor-point))
+    (vterm-reset-cursor-point)))
 
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-to-insert-state)
 
