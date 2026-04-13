@@ -150,6 +150,8 @@
 
 (setq lightemacs-aggressive-indent-target-hooks '(emacs-lisp-mode-hook))
 
+(setq lightemacs-stripspace-target-hooks '(prog-mode-hook))
+
 (setq lightemacs-apheleia-target-hooks '(python-mode-hook
                                          python-ts-mode-hook
 
@@ -3000,6 +3002,11 @@ This function is intended for use as :around advice."
 
 (with-eval-after-load 'le-aggressive-indent
   (advice-add 'aggressive-indent-mode :around
+              #'my-prevent-execution-only-when-code-checker-allowed))
+
+(with-eval-after-load 'le-stripspace
+  ;; TODO activate ws-butler instead!
+  (advice-add 'stripspace-local-mode :around
               #'my-prevent-execution-only-when-code-checker-allowed))
 
 (with-eval-after-load 'le-apheleia
