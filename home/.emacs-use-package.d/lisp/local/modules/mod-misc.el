@@ -3005,7 +3005,8 @@ This function is intended for use as :around advice."
               #'my-prevent-execution-only-when-code-checker-allowed))
 
 (with-eval-after-load 'le-stripspace
-  ;; TODO activate ws-butler instead!
+  ;; TODO activate ws-butler when code checker is not allowed
+  ;; activate stripspace when it is allowed
   (advice-add 'stripspace-local-mode :around
               #'my-prevent-execution-only-when-code-checker-allowed))
 
