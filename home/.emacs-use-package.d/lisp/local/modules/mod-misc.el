@@ -1828,14 +1828,16 @@ ORIG-FN and ARGS is the functions and its arguments."
 (defun my-package-lint-ignore (orig-fun desc)
   "Bypass the \"emacs\" name check for files in a specific directory.
 ORIG-FUN is the advised function.  DESC is the package description struct."
-  (let ((target-dir (expand-file-name "~/src/emacs/lightemacs")))
-    (if (and (buffer-file-name (buffer-base-buffer))
-             (buffer-file-name (buffer-base-buffer))
-             (file-in-directory-p buffer-file-name target-dir))
-        ;; Condition met: return nil to skip the original function
-        nil
-      ;; Condition not met: execute the original function
-      (funcall orig-fun desc))))
+  (let ((target-dir (expand-file-name "~/src/emacs/lightemacs"))
+        (file-name (buffer-file-name (buffer-base-buffer))))
+    (when filen-name
+      (if (and (buffer-file-name (buffer-base-buffer))
+               (buffer-file-name (buffer-base-buffer))
+               (file-in-directory-p file-name target-dir))
+          ;; Condition met: return nil to skip the original function
+          nil
+        ;; Condition not met: execute the original function
+        (funcall orig-fun desc)))))
 
 (with-eval-after-load 'package-lint
   ;; Apply the :around advice to the specific package-lint function
@@ -2606,27 +2608,27 @@ ARGS - the arguments passed to the original function"
                     ((= gc-cons-threshold most-positive-fixnum) "∞")
                     (t (format "%sM" (/ gc-cons-threshold 1000000))))))
 
-(setq-default mode-line-format
-              '("%e"
-                mode-line-front-space
-                mode-line-modified
-                "  |  "
-                mode-line-buffer-identification
-                "  |  "
-                (vc-mode vc-mode)
-                (:eval
-                 (if (fboundp 'my-project-name)
-                     (let ((project-name (my-project-name)))
-                       (format "  |  Project:%s" (my-project-name)))
-                   "")
-                 )
-                "  |  "
-                mode-line-position
-                "  |  "
-                (:eval (my-gc-cons-threshold-mode-line))
-                ;; mode-line-modes
-                ;; Slow eval
-                (:eval (mode-line-right))))
+;; (setq-default mode-line-format
+;;               '("%e"
+;;                 mode-line-front-space
+;;                 mode-line-modified
+;;                 "  |  "
+;;                 mode-line-buffer-identification
+;;                 "  |  "
+;;                 (vc-mode vc-mode)
+;;                 (:eval
+;;                  (if (fboundp 'my-project-name)
+;;                      (let ((project-name (my-project-name)))
+;;                        (format "  |  Project:%s" (my-project-name)))
+;;                    "")
+;;                  )
+;;                 "  |  "
+;;                 mode-line-position
+;;                 "  |  "
+;;                 (:eval (my-gc-cons-threshold-mode-line))
+;;                 ;; mode-line-modes
+;;                 ;; Slow eval
+;;                 (:eval (mode-line-right))))
 
 ;;; auto insert if new file
 
