@@ -326,7 +326,7 @@ WIDTH is the tab width."
       (setq-local evil-auto-indent nil)
 
       ;; (setq-local indent-line-function nil)
-      (setq-local search-invisible nil)
+      ;; (setq-local search-invisible nil)
 
       ;; Fixes a bug of jumping in org mode when scrolling many lines in my
       ;; file
