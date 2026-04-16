@@ -151,7 +151,6 @@ OBJECT can be nil (current window), a window, or a frame."
 ;;     :type 'boolean
 ;;     :group 'kirigami)
 
-
 ;;; kirigami settings
 
 ;; (setq pulse-delay 0.04)
