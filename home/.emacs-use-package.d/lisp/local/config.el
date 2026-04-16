@@ -600,7 +600,7 @@
                            ;; Temporary: Comment out to test interaction
                            ;; with easysession
                            le-buffer-terminator
-                           ;; le-kirigami
+                           le-kirigami
                            le-inhibit-mouse
 
                            le-csv-mode

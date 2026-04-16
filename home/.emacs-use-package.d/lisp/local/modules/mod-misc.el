@@ -4028,7 +4028,7 @@ The result is displayed in a pretty-printed temporary buffer."
 
   ;; (require 'mod-toggle-term)
   ;; TODO put it back
-  ;; (require 'mod-kirigami)
+  (require 'mod-kirigami)
   (require 'mod-project)
   (require 'mod-buffer-terminator)
   (require 'buffer-guardian)

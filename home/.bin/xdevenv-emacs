@@ -35,6 +35,12 @@ set -e
 set -u
 
 EMACS_BIN="$HOME/.bin/run-emacs-use-package"
+
+# OSFAMILY=$(~/.local/bin/osid)
+# if [[ $OSFAMILY = arch ]]; then
+#     EMACS_BIN="$HOME/.bin/run-emacs-master"
+# fi
+
 # # EMACS_BIN="$HOME/.bin/run-emacs-30"
 # EMACS_BIN="$HOME/.bin/run-emacs-master"
 # EMACS_BIN="$HOME/.bin/run-emacs-straight"
