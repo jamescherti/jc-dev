@@ -170,20 +170,12 @@
 ;;             )
 ;;           t)
 
-(with-eval-after-load 'evil-collection
-  (add-hook 'evil-collection-setup-hook
-            (lambda (mode &rest _rest)
-              (when (eq mode 'diff-mode)
-                (evil-define-key 'motion diff-mode-map "d" nil)
-                (evil-define-key 'motion diff-mode-map "D" nil)))))
-
-;; (with-eval-after-load 'diff-mode
-;;   (evil-define-key 'motion diff-mode-map "D" nil)
-;;   (evil-define-key 'motion diff-mode-map "d" nil))
-;;
-;; (with-eval-after-load 'evil-collection-diff-mode
-;;   (evil-define-key 'motion diff-mode-map "D" nil)
-;;   (evil-define-key 'motion diff-mode-map "d" nil))
+;; (with-eval-after-load 'evil-collection
+;;   (add-hook 'evil-collection-setup-hook
+;;             (lambda (mode &rest _rest)
+;;               (when (eq mode 'diff-mode)
+;;                 (evil-define-key 'motion diff-mode-map "d" nil)
+;;                 (evil-define-key 'motion diff-mode-map "D" nil)))))
 
 
 ;; (defun lightemacs-user-early-init ()
