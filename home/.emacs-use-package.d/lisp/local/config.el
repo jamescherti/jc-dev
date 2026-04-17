@@ -49,9 +49,6 @@
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."
-  ;;; evil collection
-  ;; (setq evil-collection-diff-mode-want-g-bindings nil)
-
   (setq native-comp-async-report-warnings-errors t)
 
   ;; Ignore X resources
