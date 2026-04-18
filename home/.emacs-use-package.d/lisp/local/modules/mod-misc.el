@@ -3484,8 +3484,12 @@ environment for accurate linting."
 ;; shell-pop: Change the default directory
 (defun my-around-shell-pop (fn &rest args)
   "FN is the advised function. ARGS are the function arguments."
-  (with-temp-file "~/.bash_lastdir"
-    (insert (expand-file-name default-directory)))
+  (with-temp-buffer
+    (insert (expand-file-name default-directory))
+    (let ((coding-system-for-write 'utf-8-emacs)
+          (write-region-annotate-functions nil)
+          (write-region-post-annotation-function nil))
+      (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent)))
   (apply fn args))
 (with-eval-after-load 'shell-pop
   (advice-add 'shell-pop :around #'my-around-shell-pop))
