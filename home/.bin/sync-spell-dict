@@ -28,7 +28,11 @@
 
 set -euf
 
-UNIFIED_SPELL_FILE="$HOME/.sync-spell-dict"
+UNIFIED_SPELL_FILE="$HOME/src/home-settings/work_cfg/home/.sync-spell-dict"
+if ! [[ -f $UNIFIED_SPELL_FILE ]]; then
+  UNIFIED_SPELL_FILE="$HOME/.sync-spell-dict"
+fi
+
 ASPELL_FILE="$HOME/.aspell.en.pws"
 VIM_SPELL_FILE="$HOME/.vim-spell.en.utf8.add"
 
