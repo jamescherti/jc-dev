@@ -731,6 +731,14 @@ WIDTH is the tab width."
   ;; layout but may make long headings with tags harder to read.
   (setq org-hide-block-startup t)
 
+  ;; canonical fixes issues such as
+  ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2025-08/msg01128.html
+  (setq org-fold-show-context-detail
+        '((agenda . local)
+          (bookmark-jump . lineage)
+          (isearch . canonical)
+          (default . canonical)))
+
   (setq project-switch-commands #'project-dired)
   (setq project-vc-extra-root-markers '(".projectile"
                                         ".dir-locals.el"
@@ -4032,7 +4040,9 @@ The result is displayed in a pretty-printed temporary buffer."
 
   ;; (require 'mod-toggle-term)
   ;; TODO put it back
-  (require 'mod-kirigami)
+
+  (when (< emacs-major-version 31)
+    (require 'mod-kirigami))
   (require 'mod-project)
   (require 'mod-buffer-terminator)
   (require 'buffer-guardian)
@@ -4301,6 +4311,21 @@ are editing by falling back to another visible file buffer."
         (buffer-name current-buf))))))
 
 (setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
+
+;;; fold things when opening them
+
+(defun my-outline-minor-fold-all ()
+  "Close all folds."
+  (let ((buffer-name (buffer-name)))
+    (unless (string-prefix-p "*vc-" buffer-name)
+      (ignore-errors
+        (cond
+         ((fboundp 'outline-hide-sublevels)
+          (outline-hide-sublevels 1))
+         ((fboundp 'hide-sublevels)
+          (hide-sublevels 1)))))))
+
+(add-hook 'outline-minor-mode-hook #'my-outline-minor-fold-all)
 
 ;;; Provide
 

@@ -26,10 +26,28 @@
 
 ;;; Code:
 
-(eval-and-compile (require 'lightemacs-use-package))
+(eval-and-compile
+  (require 'lightemacs-module)
+  (require 'lightemacs-use-package))
 
 ;; Important for kirigami jump to load
-(require 'kirigami)
+;; Copied/pasted from le-kirigami
+(lightemacs-use-package kirigami
+  :commands (kirigami-open-fold
+             kirigami-open-fold-rec
+             kirigami-close-fold
+             kirigami-toggle-fold
+             kirigami-open-folds
+             kirigami-close-folds-except-current
+             kirigami-close-folds)
+  :init
+  (lightemacs-module-bind kirigami
+    (global-set-key (kbd "C-c z o") 'kirigami-open-fold)
+    (global-set-key (kbd "C-c z c") 'kirigami-close-fold)
+    (global-set-key (kbd "C-c z m") 'kirigami-close-folds)
+    (global-set-key (kbd "C-c z r") 'kirigami-open-folds)
+    (global-set-key (kbd "C-c z O") 'kirigami-open-fold-rec)
+    (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold)))
 
 ;; (defun my-setup-outline-minor-mode-kirigami ()
 ;;   "Close all folds."

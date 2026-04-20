@@ -27,9 +27,11 @@
 #
 
 OSFAMILY=$(osid)
-export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+# export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-fix-outline-reveal2/bin/emacs"
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-  RUN_EMACS_BIN=emacs
+  echo "Error" >&2
+  exit 1
 fi
 
 EMACS_D="$HOME/.emacs-master.d/"
