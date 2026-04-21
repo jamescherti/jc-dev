@@ -2627,7 +2627,10 @@ ARGS - the arguments passed to the original function"
                 (:eval
                  (if (fboundp 'my-project-name)
                      (let ((project-name (my-project-name)))
-                       (format "  |  Project:%s" (my-project-name)))
+                       (if project-name
+                           (format "  |  Project:%s" project-name)
+                         (format "  |  Dir:%s"
+                                 (abbreviate-file-name (buffer-cwd)))))
                    "")
                  )
                 "  |  "

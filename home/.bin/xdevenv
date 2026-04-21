@@ -26,8 +26,6 @@
 # SOFTWARE.
 #
 
-XDG_SESSION_TYPE="$XDG_SESSION_TYPE"
-
 set -e
 set -u
 
@@ -471,10 +469,16 @@ main() {
       fi
     elif type -P nautilus &>/dev/null; then
       if has_run_or_raise && is_gnome && is_wayland; then
+        OSID=$(~/.local/bin/osid)
+        if [[ $OSID = arch ]]; then
+          NAUTILUS_DESKTOP_NAME=org.gnome.Nautilus
+        else
+          NAUTILUS_DESKTOP_NAME=nautilus
+        fi
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
           --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",nautilus,nautilus,"
+          ",nautilus,$NAUTILUS_DESKTOP_NAME,"
       else
         show_window nautilus thunar.Thunar thunar
       fi
@@ -561,6 +565,12 @@ main() {
     TERMINAL_CMD=()
     if is_gnome && is_wayland && has_run_or_raise; then
       if type -P gnome-terminal; then
+        # OSID=$(~/.local/bin/osid)
+        # if [[ $OSID = arch ]]; then
+        #   NAUTILUS_DESKTOP_NAME=org.gnome.Terminal
+        # else
+        #   NAUTILUS_DESKTOP_NAME=gnome-terminal
+        # fi
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
           --method org.gnome.Shell.Extensions.RunOrRaise.Call \
@@ -649,13 +659,21 @@ main() {
     ;;
 
   xocrshot)
-    ~/.local/bin/xocrshot >~/toto 2>&1
+    bg_run ~/.local/bin/xocrshot
     ;;
 
   emacs)
-    ~/.bin/xdevenv-emacs &
-    disown
-    exit
+    bg_run ~/.bin/xdevenv-emacs
+    ;;
+
+  editor)
+    bg_run ~/.bin/xdevenv-emacs
+    # load_bashrc
+    # # echo "--cycle -i --multi --exact --bind alt-j:down,alt-k:up"
+    # # exec "$0" vim
+    # "$0" emacs &
+    # disown
+    # exit
     ;;
 
   vim)
@@ -684,15 +702,6 @@ main() {
     fi
     ;;
 
-  editor)
-    load_bashrc
-    # echo "--cycle -i --multi --exact --bind alt-j:down,alt-k:up"
-    # exec "$0" vim
-    "$0" emacs &
-    disown
-    exit
-    ;;
-
   gdm-change-user)
     gdbus call \
       --system \
@@ -700,7 +709,6 @@ main() {
       --dest org.gnome.DisplayManager \
       --method org.gnome.DisplayManager.LocalDisplayFactory.CreateTransientDisplay \
       >/dev/null
-    # fi
     ;;
 
   pavucontrol)
