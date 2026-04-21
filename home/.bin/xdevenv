@@ -474,7 +474,7 @@ main() {
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
           --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",gtk-launch org.gnome.Nautilus,nautilus,"
+          ",nautilus,nautilus,"
       else
         show_window nautilus thunar.Thunar thunar
       fi
