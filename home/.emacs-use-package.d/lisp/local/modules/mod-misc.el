@@ -420,10 +420,6 @@ WIDTH is the tab width."
     ;; (global-set-key (kbd "M-<enter>") 'toggle-term-tmux)
     ;; (global-set-key (kbd "M-<return>") 'toggle-term-tmux)
 
-    (global-set-key (kbd "M-RET") 'shell-pop)
-    (global-set-key (kbd "M-<enter>") 'shell-pop)
-    (global-set-key (kbd "M-<return>") 'shell-pop)
-
     (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
     (global-set-key (kbd "M-i") 'my-next-interesting-buffer)
     ;; (global-set-key (kbd "M-=") 'global-text-scale-adjust)
@@ -3424,6 +3420,191 @@ environment for accurate linting."
 ;;   :commands stillness-mode
 ;;   :hook (lightemacs-after-init . stillness-mode))
 
+;;; popper
+
+;; shell-pop-default-directory "~/src"
+;; shell-pop-shell-type (cond
+;;                       ((eq system-type 'gnu/linux)
+;;                        '("vterm" "*vterm*" #'vterm))
+;;                       (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
+;;                       (t '("terminal" "*terminal*"
+;;                            (lambda () (term shell-pop-term-shell)))))
+
+;; (lightemacs-use-package popper
+;;   :ensure t
+;;   :commands (popper-toggle-latest popper-cycle my-popper-vterm-toggle)
+;;   :bind (("<f2>" . my-popper-vterm-toggle)
+;;          ("C-`"   . popper-toggle-latest)
+;;          ("M-`"   . popper-cycle)
+;;          ("C-M-`" . popper-toggle-type))
+;;   :custom
+;;   (popper-reference-buffers
+;;    '("\\*vterm\\*"
+;;      vterm-mode
+;;      help-mode
+;;      compilation-mode))
+;;   (popper-window-height 80)
+;;   :config
+;;   ;; (setq shell-pop-window-position "full")
+;;   ;; (setq shell-pop-shell-type '("ansi-term"
+;;   ;;                              "*ansi-term*"
+;;   ;;                              (lambda ()
+;;   ;;                                (ansi-term shell-pop-term-shell))))
+;;
+;;   ;; This protects you from the pop-out bug
+;;   ;; Clean up the saved config and fall back to native behavior
+;;   ;; if the original window was destroyed.
+;;
+;;   (popper-mode +1)
+;;   (popper-echo-mode +1))
+
+
+;; (lightemacs-use-package popper
+;;   :commands (popper-mode
+;;              popper-echo-mode
+;;              popper-cycle
+;;              popper-toggle
+;;              popper-toggle-type
+;;              popper-cycle-backwards
+;;              popper-kill-latest-popup)
+;;
+;;   :hook
+;;   ((after-init . popper-mode)
+;;    (after-init . popper-echo-mode))
+;;
+;;   :bind (("C-;"   . popper-toggle)
+;;          ;; ("M-;"   . popper-cycle)  ;; conflict with comment-dwim
+;;          ("C-M-;" . popper-toggle-type))
+;;
+;;   :custom
+;;   (popper-reference-buffers
+;;    '("\\*vterm\\*"
+;;      vterm-mode
+;;      ;; help-mode
+;;      ;; compilation-mode
+;;      ))
+;;   (popper-window-height 80)
+;;
+;;   ;; (setq popper-window-height 20)
+;;   (popper-display-control t)
+;;
+;;   :config
+;;
+;;   ;; group by project.el project root, with fall back to default-directory
+;;   ;; (setq popper-group-function #'popper-group-by-directory)
+;;
+;;   ;; Match eshell, shell, term and/or vterm buffers
+;;   ;; (setq popper-reference-buffers
+;;   ;;       '("\\*Messages\\*"
+;;   ;;         "Output\\*$"
+;;   ;;         "\\*Async Shell Command\\*"
+;;   ;;         help-mode
+;;   ;;         compilation-mode))
+;;
+;;   ;; (setq popper-mode-line "")
+;;   (setq popper-reference-buffers
+;;         '("\\*Messages\\*$"
+;;           "Output\\*$" "\\*Pp Eval Output\\*$"
+;;           "^\\*eldoc.*\\*$"
+;;           "\\*Compile-Log\\*$"
+;;           "\\*Completions\\*$"
+;;           "\\*Warnings\\*$"
+;;           "\\*Async Shell Command\\*$"
+;;           "\\*Apropos\\*$"
+;;           "\\*Backtrace\\*$"
+;;           "\\*Calendar\\*$"
+;;           "\\*Fd\\*$" "\\*Find\\*$" "\\*Finder\\*$"
+;;           "\\*Kill Ring\\*$"
+;;           "\\*Embark \\(Collect\\|Live\\):.*\\*$"
+;;
+;;           bookmark-bmenu-mode
+;;           comint-mode
+;;           compilation-mode
+;;           help-mode helpful-mode
+;;           tabulated-list-mode
+;;           Buffer-menu-mode
+;;
+;;           flymake-diagnostics-buffer-mode
+;;           flycheck-error-list-mode flycheck-verify-mode
+;;
+;;           gnus-article-mode devdocs-mode
+;;           grep-mode occur-mode rg-mode deadgrep-mode ag-mode pt-mode
+;;           youdao-dictionary-mode osx-dictionary-mode fanyi-mode
+;;           "^\\*gt-result\\*$" "^\\*gt-log\\*$"
+;;
+;;           "^\\*Process List\\*$" process-menu-mode
+;;           list-environment-mode cargo-process-mode
+;;
+;;           "^\\*.*eat.*\\*.*$"
+;;           "^\\*.*eshell.*\\*.*$"
+;;           "^\\*.*shell.*\\*.*$"
+;;           "^\\*.*terminal.*\\*.*$"
+;;           "^\\*.*vterm[inal]*.*\\*.*$"
+;;
+;;           "\\*DAP Templates\\*$" dap-server-log-mode
+;;           "\\*ELP Profiling Restuls\\*" profiler-report-mode
+;;           "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
+;;           "\\*[Wo]*Man.*\\*$"
+;;           "\\*ert\\*$" overseer-buffer-mode
+;;           "\\*gud-debug\\*$"
+;;           "\\*lsp-help\\*$" "\\*lsp session\\*$"
+;;           "\\*quickrun\\*$"
+;;           "\\*tldr\\*$"
+;;           "\\*vc-.*\\**"
+;;           "\\*diff-hl\\**"
+;;           "^\\*macro expansion\\**"
+;;
+;;           "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
+;;           "\\*Gofmt Errors\\*$" "\\*Go Test\\*$" godoc-mode
+;;           "\\*docker-.+\\*"
+;;           "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
+;;           "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
+;;           rustic-cargo-outdated-mode rustic-cargo-run-mode
+;;           rustic-cargo-test-mode))
+;;   )
+
+
+;; shell-pop: Change the default directory
+(defun my-popper-vterm-toggle ()
+  "Launch or toggle vterm popup and save the default directory."
+  (interactive)
+  (if (string= (buffer-name) "*vterm*")
+      (popper-toggle-latest)
+    (with-temp-buffer
+      (insert (expand-file-name default-directory))
+      (let ((coding-system-for-write 'utf-8-emacs)
+            (write-region-annotate-functions nil)
+            (write-region-post-annotation-function nil))
+        (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent)))
+    (if (get-buffer "*vterm*")
+        (pop-to-buffer "*vterm*")
+      (let ((tmux-buffer (vterm)))
+        (with-current-buffer tmux-buffer
+          (vterm-send-string "exec tmux-session emacs")
+          (vterm-send-string "\n")
+          (vterm-send-return))))))
+
+;; Ensure switching to insert mode
+(defun my-popper-vterm-to-insert-state ()
+  "Ensure the terminal is in char-mode and Evil is in insert state."
+  ;; If using term/ansi-term, this lets keys pass to the shell
+  ;; (when (and (fboundp 'term-char-mode)
+  ;;            (derived-mode-p 'term-mode))
+  ;;   (term-char-mode))
+
+  (my-save-all-buffers)
+
+  ;; Force Evil into insert state
+  (when (fboundp 'evil-insert-state)
+    (evil-insert-state))
+
+  ;; Fix issue that causes the cursor to move to the top-left of the screen
+  (when (and (derived-mode-p 'vterm-mode)
+             (fboundp 'vterm-reset-cursor-point))
+    (vterm-reset-cursor-point)))
+
+(add-hook 'popper-open-popup-hook #'my-popper-vterm-to-insert-state)
+
 ;;; shell-pop
 
 ;; shell-pop-default-directory "~/src"
@@ -3438,7 +3619,7 @@ environment for accurate linting."
   :vc (:url "https://github.com/jamescherti/shell-pop-el"
             :rev :newest)
   :commands shell-pop
-  :bind (("<f2>" . shell-pop))
+  ;; :bind (("<f2>" . shell-pop))
   :custom
   (shell-pop-shell-type '("vterm"
                           "*vterm*"
@@ -3525,6 +3706,65 @@ environment for accurate linting."
     (vterm-reset-cursor-point)))
 
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-to-insert-state)
+
+;;; vterm-toggle
+
+;; (lightemacs-use-package vterm-toggle
+;;   :commands vterm-toggle
+;;   :bind (("<f2>" . vterm-toggle))
+;;   :init
+;;   (add-to-list 'display-buffer-alist
+;;                '("^\\*vterm"
+;;                  (display-buffer-reuse-window display-buffer-at-bottom)
+;;                  (window-height . 80)))
+;;   ;; :config
+;;   ;; ;; vterm-toggle: Change the default directory
+;;   ;; (defun my-around-vterm-toggle (fn &rest args)
+;;   ;;   "FN is the advised function. ARGS are the function arguments."
+;;   ;;   (with-temp-buffer
+;;   ;;     (insert (expand-file-name default-directory))
+;;   ;;     (let ((coding-system-for-write 'utf-8-emacs)
+;;   ;;           (write-region-annotate-functions nil)
+;;   ;;           (write-region-post-annotation-function nil))
+;;   ;;       (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent)))
+;;   ;;   (apply fn args))
+;;   ;; (advice-add 'vterm-toggle :around #'my-around-vterm-toggle)
+;;   ;;
+;;   ;; ;; Inject tmux session on creation
+;;   ;; (defun my-vterm-toggle-tmux-setup (orig-fun &rest args)
+;;   ;;   "Inject tmux command when a new vterm buffer is created."
+;;   ;;   (let* ((buffer-name (or (car args) vterm-buffer-name))
+;;   ;;          (buffer-exists (get-buffer buffer-name))
+;;   ;;          (buf (apply orig-fun args)))
+;;   ;;     (unless buffer-exists
+;;   ;;       (with-current-buffer buf
+;;   ;;         (vterm-send-string "exec tmux-session emacs")
+;;   ;;         (vterm-send-string "\n")
+;;   ;;         (vterm-send-return)))
+;;   ;;     buf))
+;;   ;; (advice-add 'vterm-toggle--new :around #'my-vterm-toggle-tmux-setup)
+;;   ;;
+;;   ;; ;; Ensure switching to insert mode
+;;   ;; (defun my-vterm-toggle-to-insert-state ()
+;;   ;;   "Ensure the terminal is in char-mode and Evil is in insert state."
+;;   ;;   ;; If using term/ansi-term, this lets keys pass to the shell
+;;   ;;   ;; (when (and (fboundp 'term-char-mode)
+;;   ;;   ;;            (derived-mode-p 'term-mode))
+;;   ;;   ;;   (term-char-mode))
+;;   ;;
+;;   ;;   (my-save-all-buffers)
+;;   ;;
+;;   ;;   ;; Force Evil into insert state
+;;   ;;   (when (fboundp 'evil-insert-state)
+;;   ;;     (evil-insert-state))
+;;   ;;
+;;   ;;   ;; Fix issue that causes the cursor to move to the top-left of the screen
+;;   ;;   (when (and (derived-mode-p 'vterm-mode)
+;;   ;;              (fboundp 'vterm-reset-cursor-point))
+;;   ;;     (vterm-reset-cursor-point)))
+;;   ;;
+;;   ;; (add-hook 'vterm-toggle-show-hook #'my-vterm-toggle-to-insert-state)
+;;   )
 
 ;;; Vimrc mode
 

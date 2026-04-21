@@ -1183,6 +1183,14 @@ on text following the cursor."
    (evil-get-auxiliary-keymap my-intercept-mode-map state t t)
    state))
 
+(unless noninteractive
+  (global-set-key (kbd "M-RET") 'shell-pop)
+  (global-set-key (kbd "M-<enter>") 'shell-pop)
+  ;; (global-set-key (kbd "M-<return>") 'shell-pop)
+  ;; (global-set-key (kbd "M-RET") 'vterm-toggle)
+  ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
+  )
+
 (evil-define-key '(normal insert visual) my-intercept-mode-map
   ;; (kbd "M-RET") 'toggle-term-tmux
   ;; (kbd "M-<enter>") 'toggle-term-tmux
@@ -1191,6 +1199,8 @@ on text following the cursor."
 
   (kbd "M-RET") 'shell-pop
   (kbd "M-<enter>") 'shell-pop
+  ;; (kbd "M-RET") 'vterm-toggle
+  ;; (kbd "M-<enter>") 'vterm-toggle
   (kbd "M-<return>") 'shell-pop
   (kbd "M-o") 'my-previous-interesting-buffer
   (kbd "M-i") 'my-next-interesting-buffer
