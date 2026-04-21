@@ -187,7 +187,7 @@ bg_run() {
 
 # set -o xtrace
 is_wayland() {
-  if [[ $XDG_SESSION_TYPE = wayland ]]; then
+  if [[ "${XDG_SESSION_TYPE:-}" = wayland ]]; then
     return 0
   fi
 
@@ -323,15 +323,249 @@ enable_gnome_tracker() {
   fi
 }
 
-main() {
-  USER=$(id -un)
-  HOME=$(eval echo "~$USER")
+xdevenv-terminal() {
+  # exec "$0" emacs-terminal
+  # TERMINATOR_OPTIONS_STR="--borderless"
+  TERMINATOR_OPTS=(--borderless)
+  TERMINATOR_OPTS_STR=--borderless
+
+  TMUX_CMD="$HOME/.local/bin/tmux-session xdevenv"
+  TMUX_CMD_LIST=("$HOME/.local/bin/tmux-session" xdevenv)
+  # TMUX_CMD="bash -c 'tmux-session xdevenv'"
+  # TMUX_CMD_LIST=(bash -c 'tmux-session xdevenv')
+  # TMUX_CMD="bash -c 'tmux -2 attach-session -t xdevenv || tmux -2 new -s xdevenv'"
+  # TMUX_CMD_LIST=(bash -c 'tmux -2 attach-session -t xdevenv || tmux -2 new -s xdevenv')
+  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin
+  # VIRTUAL_ENV=""
+  TERMINAL_CMD=()
+  if is_gnome && is_wayland && has_run_or_raise; then
+    if type -P gnome-terminal; then
+      # OSID=$(~/.local/bin/osid)
+      # if [[ $OSID = arch ]]; then
+      #   NAUTILUS_DESKTOP_NAME=org.gnome.Terminal
+      # else
+      #   NAUTILUS_DESKTOP_NAME=gnome-terminal
+      # fi
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",gnome-terminal --hide-menubar --title=tmux -e '$TMUX_CMD',org.gnome.Terminal,"
+    elif type -P terminator; then
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",terminator $TERMINATOR_OPTS_STR --title=tmux --execute '$TMUX_CMD',terminator,"
+    fi
+  else
+    if type -P terminator; then
+      # TERMINAL_OPTS=(--maximize --borderless)
+      local win_name="terminator.Terminator"
+      TERMINAL_CMD=(show_window_maximized_devilspie terminator "$win_name"
+        terminator "${TERMINATOR_OPTS[@]}"
+        --title=tmux --execute "${TMUX_CMD_LIST[@]}")
+    elif type -P gnome-terminal >/dev/null 2>&1; then
+      local win_name="gnome-terminal-server.Gnome-terminal"
+      # show_window_maximized_devilspie "$win_name" gnome-terminal --hide-menubar --title=tmux -e 'sh -c "tmux -2 attach || TERM=xterm-256color tmux -2"'
+      TERMINAL_CMD=(show_window_maximized_devilspie gnome-terminal "$win_name" gnome-terminal "${GNOME_TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
+    elif type -P konsole &>/dev/null; then
+      TERMINAL_OPTS=(--hide-tabbar --hide-menubar)
+      local win_name="konsole.konsole"
+      TERMINAL_CMD=(
+        show_window_maximized_devilspie konsole "$win_name"
+        konsole "${TERMINAL_OPTS[@]}" -e "${TMUX_CMD_LIST[@]}"
+      )
+    elif type -P tilix; then
+      TERMINAL_OPTS=(--window-style=borderless)
+      local win_name="tilix.Tilix"
+      TERMINAL_CMD=(show_window_maximized_devilspie tilix "$win_name" tilix "${TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
+    elif type -P xfce4-terminal >/dev/null 2>&1; then
+      XFCE_TERMINAL_OPTS=(--hide-menubar --hide-scrollbar) # --hide-borders
+      # XFCE_TERMINAL_OPTS+=(--maximize)
+      # XFCE_TERMINAL_OPTS+=(--fullscreen)
+      local win_name="xfce4-terminal.Xfce4-terminal"
+      TERMINAL_CMD=(show_window_maximized_devilspie xfce4-terminal "$win_name" xfce4-terminal "${XFCE_TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
+    fi
+
+    ERRNO=0
+    if [[ "${#TERMINAL_CMD[@]}" -gt 0 ]]; then
+      "${TERMINAL_CMD[@]}" || ERRNO="$?"
+    fi
+  fi
+}
+
+xdevenv-keepassxc() {
+  bg_run "$0" keepassxc --minimized
+}
+
+xdevenv-light() {
+  if is_gnome; then
+    gsettings set org.gnome.settings-daemon.plugins.color \
+      night-light-enabled false
+  fi
+
+  if is_xfce && type -P redshift >/dev/null 2>&1; then
+    set +e
+    pkill redfish
+    redshift -x
+    # if type -P xgamma &>/dev/null; then
+    #   xgamma -gamma 0.7
+    # fi
+    set -e
+  fi
+}
+
+xdevenv-night() {
+  if is_gnome; then
+    gsettings set org.gnome.settings-daemon.plugins.color \
+      night-light-enabled true
+  fi
+
+  if ! is_gnome && type -P redshift >/dev/null 2>&1; then
+    set +e
+    pkill redfish
+    redshift -x
+    redshift -o
+    set -e
+  fi
+}
+
+xdevenv-startup-apps() {
+  set +e
+
+  if is_xfce \
+    && type -P xmodmap &>/dev/null \
+    && type -P setxkbmap &>/dev/null; then
+    # setxkbmap -option
+    setxkbmap -option caps:hyper
+    xmodmap -e "keysym Hyper_L = Mode_switch"
+    xmodmap -e "keysym h = h H Left"
+    xmodmap -e "keysym j = j J Down"
+    xmodmap -e "keysym k = k K Up"
+    xmodmap -e "keysym l = l L Right"
+    xmodmap -e "keysym f = f F Next"
+    xmodmap -e "keysym b = b B Prior"
+  fi
+
+  # enable_gnome_tracker
+
+  # Init
+  lsmod | grep -q "nvidia" && type -P nvidia-settings &>/dev/null \
+    && nvidia-settings --load-config-only
+
+  if is_xfce; then
+    # if is_xfce && type -P picom &>/dev/null; then
+    #   bg_run "$0" picom
+    # fi
+
+    if type -P xfconf-query &>/dev/null; then
+      xfconf-query --create -c 'xfce4-power-manager' \
+        -p '/xfce4-power-manager/presentation-mode' \
+        --type 'bool' --set 'false'
+    fi
+
+    if type -P redshift &>/dev/null; then
+      redshift -x
+      redshift -o
+    fi
+  fi
+
+  if type -P keepassxc &>/dev/null; then
+    xdevenv-keepassxc
+  fi
+
+  xdevenv-terminal
+  # bg_run "$0" web-browser
+  # bg_run "$0" editor
+
+  set -e
+}
+
+xdevenv-web-browsers() {
+  export MOZ_USE_XINPUT2="0" # Disable it
+
+  if type -P firefox &>/dev/null; then
+    # Does MOZ_X11_EGL option cause issues?
+    # export MOZ_X11_EGL=1
+    if has_run_or_raise && is_gnome && is_wayland; then
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",gtk-launch firefox.desktop,firefox"
+    else
+      show_window_maximized firefox Navigator.firefox firejail firefox
+    fi
+  # elif type -P midori &>/dev/null; then
+  #   show_window midori midori.Midori firejail midori
+  elif type -P apt-get &>/dev/null; then
+    show_window_maximized chromium chromium.Chromium firejail chromium \
+      --profile=chromium \
+      --enable-features=VaapiVideoDecoder \
+      --start-maximized --password-store=basic
+  fi
+
+  # run-renice-all
+}
+
+xdevenv-file-explorer() {
+  if type -P thunar &>/dev/null; then
+    if has_run_or_raise && is_gnome && is_wayland; then
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",gtk-launch thunar,thunar,"
+    else
+      show_window thunar thunar.Thunar thunar
+    fi
+  elif type -P nautilus &>/dev/null; then
+    if has_run_or_raise && is_gnome && is_wayland; then
+      OSID=$(~/.local/bin/osid)
+      if [[ $OSID = arch ]]; then
+        NAUTILUS_DESKTOP_NAME=org.gnome.Nautilus
+      else
+        NAUTILUS_DESKTOP_NAME=nautilus
+      fi
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",nautilus,$NAUTILUS_DESKTOP_NAME,"
+    else
+      show_window nautilus thunar.Thunar thunar
+    fi
+  elif type -P dolphin &>/dev/null; then
+    show_window dolphin dolphin.dolphin dolphin "$HOME"
+  elif type -P pcmanfm &>/dev/null; then
+    show_window pcmanfm pcmanfm.Pcmanfm pcmanfm "$HOME"
+  fi
+}
+
+xdevenv-mail-client() {
+  if type -P thunderbird; then
+    if has_run_or_raise && is_gnome && is_wayland; then
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",gtk-launch org.mozilla.Thunderbird,thunderbird,"
+    else
+      show_window thunderbird Thunderbird firejail thunderbird
+    fi
+  fi
+}
+
+xdevenv-screenshot() {
+  if type -P flameshot; then
+    bg_run flameshot gui
+  elif type -P xfce4-screenshooter; then
+    bg_run xfce4-screenshooter --region
+  fi
+}
+
+init() {
+  # USER=$(id -un)
+  # HOME=$(eval echo "~$USER")
 
   [[ -z ${XDEVENV_ALWAYS_MAXIMIZE+x} ]] && XDEVENV_ALWAYS_MAXIMIZE=0
-  [[ -z ${XDG_SESSION_TYPE+x} ]] && XDG_SESSION_TYPE=""
-  [[ -z ${DESKTOP_SESSION+x} ]] && DESKTOP_SESSION=""
 
-  if [[ $XDG_SESSION_TYPE = wayland ]]; then
+  if is_wayland; then
     export QT_QPA_PLATFORM=wayland
   fi
 
@@ -347,79 +581,18 @@ main() {
     echo "Usage: $0 <name>" >&2
     exit 1
   fi
+}
+
+main() {
+  init "$@"
 
   case "$1" in
   startup-apps)
-    set +e
-
-    if is_xfce \
-      && type -P xmodmap &>/dev/null \
-      && type -P setxkbmap &>/dev/null; then
-      # setxkbmap -option
-      setxkbmap -option caps:hyper
-      xmodmap -e "keysym Hyper_L = Mode_switch"
-      xmodmap -e "keysym h = h H Left"
-      xmodmap -e "keysym j = j J Down"
-      xmodmap -e "keysym k = k K Up"
-      xmodmap -e "keysym l = l L Right"
-      xmodmap -e "keysym f = f F Next"
-      xmodmap -e "keysym b = b B Prior"
-    fi
-
-    # enable_gnome_tracker
-
-    # Init
-    lsmod | grep -q "nvidia" && type -P nvidia-settings &>/dev/null \
-      && nvidia-settings --load-config-only
-
-    BUCKLE_OPTS=()
-
-    if is_xfce && type -P picom &>/dev/null; then
-      bg_run "$0" picom
-    fi
-
-    if is_xfce && type -P xfconf-query &>/dev/null; then
-      xfconf-query --create -c 'xfce4-power-manager' \
-        -p '/xfce4-power-manager/presentation-mode' \
-        --type 'bool' --set 'false'
-    fi
-
-    if is_xfce && type -P redshift &>/dev/null; then
-      redshift -x
-      redshift -o
-    fi
-
-    bg_run "$0" keepassxc --minimized
-    # bg_run "$0" web-browser
-    # bg_run "$0" editor
-    bg_run "$0" terminal
+    xdevenv-startup-apps
     ;;
 
   web-browser)
-    export MOZ_USE_XINPUT2="0" # Disable it
-
-    if type -P firefox &>/dev/null; then
-      # Does MOZ_X11_EGL option cause issues?
-      # export MOZ_X11_EGL=1
-      if has_run_or_raise && is_gnome && is_wayland; then
-        gdbus call --session --dest org.gnome.Shell \
-          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",gtk-launch firefox.desktop,firefox"
-      else
-        show_window_maximized firefox Navigator.firefox firejail firefox
-      fi
-    # elif type -P midori &>/dev/null; then
-    #   show_window midori midori.Midori firejail midori
-    elif type -P apt-get &>/dev/null; then
-      show_window_maximized chromium chromium.Chromium firejail chromium \
-        --profile=chromium \
-        --enable-features=VaapiVideoDecoder \
-        --start-maximized --password-store=basic
-    fi
-
-    # run-renice-all
-
+    xdevenv-web-browsers
     ;;
 
   enable-gnome-tracker)
@@ -430,232 +603,28 @@ main() {
     disable_gnome_tracker
     ;;
 
-  web-browser-profiles)
-    # show_window firefox Firefox.firefox firejail firefox -P
-    bg_run firejail firefox -P
-    # run-renice-all
-    ;;
-
-  chromium)
-    # If running this inside a function or script
-    if flatpak info com.google.Chrome >/dev/null 2>&1; then
-      flatpak run com.google.Chrome \
-        --enable-features=VaapiVideoDecoder \
-        --start-maximized \
-        --password-store=basic \
-        "$@"
-    else
-      echo "Error: com.google.Chrome Flatpak is not installed." >&2
-    fi
-
-    # local name
-    # for name in chromium chromium-bin; do
-    #   firejail --profile=chromium "$name" \
-    #     --enable-features=VaapiVideoDecoder \
-    #     --start-maximized --password-store=basic
-    #   break
-    # done
-    ;;
-
   file-explorer)
-    if type -P thunar &>/dev/null; then
-      if has_run_or_raise && is_gnome && is_wayland; then
-        gdbus call --session --dest org.gnome.Shell \
-          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",gtk-launch thunar,thunar,"
-      else
-        show_window thunar thunar.Thunar thunar
-      fi
-    elif type -P nautilus &>/dev/null; then
-      if has_run_or_raise && is_gnome && is_wayland; then
-        OSID=$(~/.local/bin/osid)
-        if [[ $OSID = arch ]]; then
-          NAUTILUS_DESKTOP_NAME=org.gnome.Nautilus
-        else
-          NAUTILUS_DESKTOP_NAME=nautilus
-        fi
-        gdbus call --session --dest org.gnome.Shell \
-          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",nautilus,$NAUTILUS_DESKTOP_NAME,"
-      else
-        show_window nautilus thunar.Thunar thunar
-      fi
-    elif type -P dolphin &>/dev/null; then
-      show_window dolphin dolphin.dolphin dolphin "$HOME"
-    elif type -P pcmanfm &>/dev/null; then
-      show_window pcmanfm pcmanfm.Pcmanfm pcmanfm "$HOME"
-    fi
+    xdevenv-file-explorer
     ;;
 
   mail-client)
-    if type -P thunderbird; then
-      if has_run_or_raise && is_gnome && is_wayland; then
-        gdbus call --session --dest org.gnome.Shell \
-          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",gtk-launch org.mozilla.Thunderbird,thunderbird,"
-      else
-        show_window thunderbird Thunderbird firejail thunderbird
-      fi
-    fi
-    ;;
-
-  pwd-manager)
-    if type -P keepassxc; then
-      if [[ $XDG_SESSION_TYPE = wayland ]]; then
-        keepassxc
-      else
-        show_window keepassxc keepassxc.KeePassXC keepassxc
-      fi
-    fi
+    xdevenv-mail-client
     ;;
 
   screenshot)
-    if type -P flameshot; then
-      bg_run flameshot gui
-    elif type -P xfce4-screenshooter; then
-      bg_run xfce4-screenshooter --region
-    fi
-    ;;
-
-  mpv)
-    show_window mpv "gl.mpv" mpv --player-operation-mode=pseudo-gui
-    ;;
-
-  emacs-terminal)
-    if pgrep -x emacs &>/dev/null; then
-      "$0" emacs
-      emacsclient --no-wait -e '(best-tmux-run)'
-      exit 0
-    fi
-    ;;
-
-  picom)
-    if type -P xfconf-query &>/dev/null; then
-      USE_COMPOSING=(xfconf-query -c 'xfwm4' -p '/general/use_compositing'
-        --type 'bool')
-
-      if [[ $USE_COMPOSING = true ]]; then
-        xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' \
-          --type 'bool' --set 'false'
-        sleep 1
-      fi
-    fi
-
-    cd
-    bg_run picom
+    xdevenv-screenshot
     ;;
 
   terminal)
-    # exec "$0" emacs-terminal
-    TERMINATOR_OPTIONS_STR="--borderless"
-    TERMINATOR_OPTS=(--borderless)
-    TERMINATOR_OPTS_STR=--borderless
-
-    TMUX_CMD="$HOME/.local/bin/tmux-session xdevenv"
-    TMUX_CMD_LIST=("$HOME/.local/bin/tmux-session" xdevenv)
-    # TMUX_CMD="bash -c 'tmux-session xdevenv'"
-    # TMUX_CMD_LIST=(bash -c 'tmux-session xdevenv')
-    # TMUX_CMD="bash -c 'tmux -2 attach-session -t xdevenv || tmux -2 new -s xdevenv'"
-    # TMUX_CMD_LIST=(bash -c 'tmux -2 attach-session -t xdevenv || tmux -2 new -s xdevenv')
-    PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin
-    VIRTUAL_ENV=""
-    TERMINAL_CMD=()
-    if is_gnome && is_wayland && has_run_or_raise; then
-      if type -P gnome-terminal; then
-        # OSID=$(~/.local/bin/osid)
-        # if [[ $OSID = arch ]]; then
-        #   NAUTILUS_DESKTOP_NAME=org.gnome.Terminal
-        # else
-        #   NAUTILUS_DESKTOP_NAME=gnome-terminal
-        # fi
-        gdbus call --session --dest org.gnome.Shell \
-          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",gnome-terminal --hide-menubar --title=tmux -e '$TMUX_CMD',org.gnome.Terminal,"
-      elif type -P terminator; then
-        gdbus call --session --dest org.gnome.Shell \
-          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",terminator $TERMINATOR_OPTS_STR --title=tmux --execute '$TMUX_CMD',terminator,"
-      fi
-    else
-      if type -P terminator; then
-        # TERMINAL_OPTS=(--maximize --borderless)
-        local win_name="terminator.Terminator"
-        TERMINAL_CMD=(show_window_maximized_devilspie terminator "$win_name"
-          terminator "${TERMINATOR_OPTS[@]}"
-          --title=tmux --execute "${TMUX_CMD_LIST[@]}")
-      elif type -P gnome-terminal >/dev/null 2>&1; then
-        local win_name="gnome-terminal-server.Gnome-terminal"
-        # show_window_maximized_devilspie "$win_name" gnome-terminal --hide-menubar --title=tmux -e 'sh -c "tmux -2 attach || TERM=xterm-256color tmux -2"'
-        TERMINAL_CMD=(show_window_maximized_devilspie gnome-terminal "$win_name" gnome-terminal "${GNOME_TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
-      elif type -P konsole &>/dev/null; then
-        TERMINAL_OPTS=(--hide-tabbar --hide-menubar)
-        local win_name="konsole.konsole"
-        TERMINAL_CMD=(
-          show_window_maximized_devilspie konsole "$win_name"
-          konsole "${TERMINAL_OPTS[@]}" -e "${TMUX_CMD_LIST[@]}"
-        )
-      elif type -P tilix; then
-        TERMINAL_OPTS=(--window-style=borderless)
-        local win_name="tilix.Tilix"
-        TERMINAL_CMD=(show_window_maximized_devilspie tilix "$win_name" tilix "${TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
-      elif type -P xfce4-terminal >/dev/null 2>&1; then
-        XFCE_TERMINAL_OPTS=(--hide-menubar --hide-scrollbar) # --hide-borders
-        # XFCE_TERMINAL_OPTS+=(--maximize)
-        # XFCE_TERMINAL_OPTS+=(--fullscreen)
-        local win_name="xfce4-terminal.Xfce4-terminal"
-        TERMINAL_CMD=(show_window_maximized_devilspie xfce4-terminal "$win_name" xfce4-terminal "${XFCE_TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
-      fi
-
-      ERRNO=0
-      if [[ "${#TERMINAL_CMD[@]}" -gt 0 ]]; then
-        "${TERMINAL_CMD[@]}" || ERRNO="$?"
-      fi
-    fi
-    ;;
-
-  draw)
-    show_window_maximized soffice libreoffice.libreoffice-draw libreoffice --draw
-    ;;
-
-  pdf)
-    show_window_maximized evince evince.Evince evince
+    xdevenv-terminal
     ;;
 
   night)
-    if is_gnome; then
-      gsettings set org.gnome.settings-daemon.plugins.color \
-        night-light-enabled true
-    fi
-
-    if ! is_gnome && type -P redshift >/dev/null 2>&1; then
-      set +e
-      pkill redfish
-      redshift -x
-      redshift -o
-      set -e
-    fi
+    xdevenv-night
     ;;
 
   light)
-    if is_gnome; then
-      gsettings set org.gnome.settings-daemon.plugins.color \
-        night-light-enabled false
-    fi
-
-    if is_xfce && type -P redshift >/dev/null 2>&1; then
-      set +e
-      pkill redfish
-      redshift -x
-      # if type -P xgamma &>/dev/null; then
-      #   xgamma -gamma 0.7
-      # fi
-      set -e
-    fi
+    xdevenv-light
     ;;
 
   xocrshot)
@@ -668,38 +637,6 @@ main() {
 
   editor)
     bg_run ~/.bin/xdevenv-emacs
-    # load_bashrc
-    # # echo "--cycle -i --multi --exact --bind alt-j:down,alt-k:up"
-    # # exec "$0" vim
-    # "$0" emacs &
-    # disown
-    # exit
-    ;;
-
-  vim)
-    # 1. If you are using GTK3 and Vim appears to be slow, try setting the environment
-    # variable $GDK_RENDERING to "image".
-    # :help gtk3-slow
-    local vim_env=''
-    if is_xfce; then
-      vim_env="$vim_env GDK_RENDERING=image"
-    fi
-
-    #
-    # 2. -u ~/.vimrc makes vim ignore /etc/vim/
-    local vim_cmd=(bash -i -c "VIM_PERSISTENT_SESSION_ENABLED=1${vim_env} gvim -u ~/.vimrc --servername GMAIN")
-
-    load_bashrc
-    # export VIM_PERSISTENT_SESSION_ENABLED=1
-    # export GDK_RENDERING=image
-    # local vim_cmd=(gvim -u ~/.vimrc --servername GMAIN)
-
-    local win_name="gvim.Gvim"
-    if ! show_window_maximized_devilspie gvim "$win_name" "${vim_cmd[@]}"; then
-      # First time
-      true
-      # remove_title_bar "$win_name"
-    fi
     ;;
 
   gdm-change-user)
@@ -711,66 +648,164 @@ main() {
       >/dev/null
     ;;
 
-  pavucontrol)
-    show_window pavucontrol "pavucontrol.Pavucontrol" "pavucontrol"
-    ;;
+  # pwd-manager)
+  #   if type -P keepassxc; then
+  #     if is_wayland; then
+  #       keepassxc
+  #     else
+  #       show_window keepassxc keepassxc.KeePassXC keepassxc
+  #     fi
+  #   fi
+  #   ;;
 
-  terminal-tmux-run)
-    echo "[TASK] terminal"
-    "$XDEVENV_BIN" terminal || true
+  # chromium)
+  #   # If running this inside a function or script
+  #   if flatpak info com.google.Chrome >/dev/null 2>&1; then
+  #     flatpak run com.google.Chrome \
+  #       --enable-features=VaapiVideoDecoder \
+  #       --start-maximized \
+  #       --password-store=basic \
+  #       "$@"
+  #   else
+  #     echo "Error: com.google.Chrome Flatpak is not installed." >&2
+  #   fi
+  #
+  #   # local name
+  #   # for name in chromium chromium-bin; do
+  #   #   firejail --profile=chromium "$name" \
+  #   #     --enable-features=VaapiVideoDecoder \
+  #   #     --start-maximized --password-store=basic
+  #   #   break
+  #   # done
+  #   ;;
 
-    local i
-    for ((i = 0; i < 15; i++)); do
-      len_tmux_sessions=$(tmux list-sessions | wc -l) || break
-      if [[ $len_tmux_sessions -gt 0 ]]; then
-        break
-      fi
-      sleep 0.25
-    done
+  # web-browser-profiles)
+  #   # show_window firefox Firefox.firefox firejail firefox -P
+  #   bg_run firejail firefox -P
+  #   # run-renice-all
+  #   ;;
 
-    shift
-    echo "[TASK] tmux-run" "$@"
-    ERRNO=0
-    tmux-run "$@" || ERRNO="$?"
-    exit "$ERRNO"
-    ;;
+  # mpv)
+  #   show_window mpv "gl.mpv" mpv --player-operation-mode=pseudo-gui
+  #   ;;
 
-  suspend)
-    local process
-    for process in emerge pacman wget curl aria2c apt-get git scp rsync borg; do
-      if pgrep -x "$process" &>/dev/null; then
-        notify "You cannot suspend because of '$process'"
-        exit 1
-      fi
-    done
-    systemctl suspend
-    ;;
+  # emacs-terminal)
+  #   if pgrep -x emacs &>/dev/null; then
+  #     "$0" emacs
+  #     emacsclient --no-wait -e '(best-tmux-run)'
+  #     exit 0
+  #   fi
+  #   ;;
 
-  xfce4-toggle-composing)
-    local status
-    status=$(xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' --type 'bool')
-    if [[ $status = false ]]; then
-      status='true'
-      notify "ENABLE Compositor"
-    else
-      status='false'
-      notify "DISABLE Compositor"
-    fi
+  # picom)
+  #   if type -P xfconf-query &>/dev/null; then
+  #     USE_COMPOSING=(xfconf-query -c 'xfwm4' -p '/general/use_compositing'
+  #       --type 'bool')
+  #
+  #     if [[ $USE_COMPOSING = true ]]; then
+  #       xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' \
+  #         --type 'bool' --set 'false'
+  #       sleep 1
+  #     fi
+  #   fi
+  #
+  #   cd
+  #   bg_run picom
+  #   ;;
 
-    xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' --type 'bool' --set "$status"
-    ;;
+  # draw)
+  #   show_window_maximized soffice libreoffice.libreoffice-draw libreoffice --draw
+  #   ;;
+  #
+  # pdf)
+  #   show_window_maximized evince evince.Evince evince
+  #   ;;
+  # vim)
+  #   # 1. If you are using GTK3 and Vim appears to be slow, try setting the environment
+  #   # variable $GDK_RENDERING to "image".
+  #   # :help gtk3-slow
+  #   local vim_env=''
+  #   if is_xfce; then
+  #     vim_env="$vim_env GDK_RENDERING=image"
+  #   fi
+  #
+  #   #
+  #   # 2. -u ~/.vimrc makes vim ignore /etc/vim/
+  #   local vim_cmd=(bash -i -c "VIM_PERSISTENT_SESSION_ENABLED=1${vim_env} gvim -u ~/.vimrc --servername GMAIN")
+  #
+  #   load_bashrc
+  #   # export VIM_PERSISTENT_SESSION_ENABLED=1
+  #   # export GDK_RENDERING=image
+  #   # local vim_cmd=(gvim -u ~/.vimrc --servername GMAIN)
+  #
+  #   local win_name="gvim.Gvim"
+  #   if ! show_window_maximized_devilspie gvim "$win_name" "${vim_cmd[@]}"; then
+  #     # First time
+  #     true
+  #     # remove_title_bar "$win_name"
+  #   fi
+  #   ;;
 
-  volume-up)
-    pulseaudio_raise_volume
-    ;;
+  # pavucontrol)
+  #   show_window pavucontrol "pavucontrol.Pavucontrol" "pavucontrol"
+  #   ;;
 
-  volume-down)
-    pulseaudio_lower_volume
-    ;;
+  # terminal-tmux-run)
+  #   echo "[TASK] terminal"
+  #   "$XDEVENV_BIN" terminal || true
+  #
+  #   local i
+  #   for ((i = 0; i < 15; i++)); do
+  #     len_tmux_sessions=$(tmux list-sessions | wc -l) || break
+  #     if [[ $len_tmux_sessions -gt 0 ]]; then
+  #       break
+  #     fi
+  #     sleep 0.25
+  #   done
+  #
+  #   shift
+  #   echo "[TASK] tmux-run" "$@"
+  #   ERRNO=0
+  #   tmux-run "$@" || ERRNO="$?"
+  #   exit "$ERRNO"
+  #   ;;
 
-  volume-mute)
-    pulseaudio_mute
-    ;;
+  # suspend)
+  #   local process
+  #   for process in emerge pacman wget curl aria2c apt-get git scp rsync borg; do
+  #     if pgrep -x "$process" &>/dev/null; then
+  #       notify "You cannot suspend because of '$process'"
+  #       exit 1
+  #     fi
+  #   done
+  #   systemctl suspend
+  #   ;;
+
+  # xfce4-toggle-composing)
+  #   local status
+  #   status=$(xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' --type 'bool')
+  #   if [[ $status = false ]]; then
+  #     status='true'
+  #     notify "ENABLE Compositor"
+  #   else
+  #     status='false'
+  #     notify "DISABLE Compositor"
+  #   fi
+  #
+  #   xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' --type 'bool' --set "$status"
+  #   ;;
+
+  # volume-up)
+  #   pulseaudio_raise_volume
+  #   ;;
+  #
+  # volume-down)
+  #   pulseaudio_lower_volume
+  #   ;;
+  #
+  # volume-mute)
+  #   pulseaudio_mute
+  #   ;;
   *)
     echo "Error: '$1' is not supported." >&2
     exit 1
