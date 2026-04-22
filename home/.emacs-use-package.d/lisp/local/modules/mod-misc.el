@@ -1392,7 +1392,6 @@ WIDTH is the tab width."
   ;; testing
   (setq transient-detect-key-conflicts t)
 
-
   (setq remote-file-name-inhibit-auto-save t
         remote-file-name-inhibit-auto-save-visited t
         ;; yank-pop-change-selection t
