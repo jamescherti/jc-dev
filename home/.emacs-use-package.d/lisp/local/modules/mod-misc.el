@@ -701,7 +701,10 @@ WIDTH is the tab width."
   (setq org-hide-emphasis-markers t)
 
   ;; No extra indentation for source blocks. It keeps code aligned with text.
-  (setq org-edit-src-content-indentation 0)
+  (with-no-warnings
+    ;; Obsolete
+    (setq org-edit-src-content-indentation 0))
+  (setq org-src-content-indentation 0)
 
   ;; Fast todo selection without popup; efficient for experts but hides guidance
   ;; for beginners.
@@ -1354,14 +1357,23 @@ WIDTH is the tab width."
 
   ;; When I copy paste from an org buffer into the minibuffer, it somehow
   ;; inherits the colors
-  (setq yank-excluded-properties t)
+  ;; (setq yank-excluded-properties t)
+
+  ;; Strip 'fontified' and other text properties when pasting so jit-lock
+  ;; rescans the text, allowing org-indent-mode to apply the correct visual
+  ;; indentation.
+  ;; (setq yank-excluded-properties
+  ;;       '(category field follow-link fontified font-lock-face help-echo
+  ;;                  intangible invisible keymap local-map mouse-face read-only
+  ;;                  yank-handler))
+
+  ;; ;; Define custom handler functions to process the 'font-lock-face' and
+  ;; ;; 'category' text properties when pasting text.
+  ;; (setq yank-handled-properties
+  ;;       '((font-lock-face . yank-handle-font-lock-face-property)
+  ;;         (category . yank-handle-category-property)))
 
   ;; Shows all options when running apropos. For more info,
-  ;; (use-package calendar
-  ;;   :ensure nil
-  ;;   :commands calendar
-  ;;   :custom
-  ;;   )
   (setq calendar-week-start-day 1)
 
   (setq echo-keystrokes 0)  ;; Do not show keystrokes in the mini buffer
@@ -3479,35 +3491,6 @@ environment for accurate linting."
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
 ;; (lightemacs-use-package popper
-;;   :ensure t
-;;   :commands (popper-toggle-latest popper-cycle my-popper-vterm-toggle)
-;;   :bind (("<f2>" . my-popper-vterm-toggle)
-;;          ("C-`"   . popper-toggle-latest)
-;;          ("M-`"   . popper-cycle)
-;;          ("C-M-`" . popper-toggle-type))
-;;   :custom
-;;   (popper-reference-buffers
-;;    '("\\*vterm\\*"
-;;      vterm-mode
-;;      help-mode
-;;      compilation-mode))
-;;   (popper-window-height 80)
-;;   :config
-;;   ;; (setq shell-pop-window-position "full")
-;;   ;; (setq shell-pop-shell-type '("ansi-term"
-;;   ;;                              "*ansi-term*"
-;;   ;;                              (lambda ()
-;;   ;;                                (ansi-term shell-pop-term-shell))))
-;;
-;;   ;; This protects you from the pop-out bug
-;;   ;; Clean up the saved config and fall back to native behavior
-;;   ;; if the original window was destroyed.
-;;
-;;   (popper-mode +1)
-;;   (popper-echo-mode +1))
-
-
-;; (lightemacs-use-package popper
 ;;   :commands (popper-mode
 ;;              popper-echo-mode
 ;;              popper-cycle
@@ -3610,48 +3593,6 @@ environment for accurate linting."
 ;;           rustic-cargo-outdated-mode rustic-cargo-run-mode
 ;;           rustic-cargo-test-mode))
 ;;   )
-
-
-;; shell-pop: Change the default directory
-(defun my-popper-vterm-toggle ()
-  "Launch or toggle vterm popup and save the default directory."
-  (interactive)
-  (if (string= (buffer-name) "*vterm*")
-      (popper-toggle-latest)
-    (with-temp-buffer
-      (insert (expand-file-name default-directory))
-      (let ((coding-system-for-write 'utf-8-emacs)
-            (write-region-annotate-functions nil)
-            (write-region-post-annotation-function nil))
-        (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent)))
-    (if (get-buffer "*vterm*")
-        (pop-to-buffer "*vterm*")
-      (let ((tmux-buffer (vterm)))
-        (with-current-buffer tmux-buffer
-          (vterm-send-string "exec tmux-session emacs")
-          (vterm-send-string "\n")
-          (vterm-send-return))))))
-
-;; Ensure switching to insert mode
-(defun my-popper-vterm-to-insert-state ()
-  "Ensure the terminal is in char-mode and Evil is in insert state."
-  ;; If using term/ansi-term, this lets keys pass to the shell
-  ;; (when (and (fboundp 'term-char-mode)
-  ;;            (derived-mode-p 'term-mode))
-  ;;   (term-char-mode))
-
-  (my-save-all-buffers)
-
-  ;; Force Evil into insert state
-  (when (fboundp 'evil-insert-state)
-    (evil-insert-state))
-
-  ;; Fix issue that causes the cursor to move to the top-left of the screen
-  (when (and (derived-mode-p 'vterm-mode)
-             (fboundp 'vterm-reset-cursor-point))
-    (vterm-reset-cursor-point)))
-
-(add-hook 'popper-open-popup-hook #'my-popper-vterm-to-insert-state)
 
 ;;; shell-pop
 
