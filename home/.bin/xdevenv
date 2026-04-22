@@ -394,7 +394,13 @@ xdevenv-terminal() {
 }
 
 xdevenv-keepassxc() {
-  bg_run "$0" keepassxc --minimized
+  if type -P keepassxc; then
+    if is_wayland; then
+      keepassxc
+    else
+      show_window keepassxc keepassxc.KeePassXC keepassxc
+    fi
+  fi
 }
 
 xdevenv-light() {
@@ -470,7 +476,7 @@ xdevenv-startup-apps() {
   fi
 
   if type -P keepassxc &>/dev/null; then
-    xdevenv-keepassxc
+    bg_run "$0" keepassxc --minimized
   fi
 
   xdevenv-terminal
@@ -648,15 +654,9 @@ main() {
       >/dev/null
     ;;
 
-  # pwd-manager)
-  #   if type -P keepassxc; then
-  #     if is_wayland; then
-  #       keepassxc
-  #     else
-  #       show_window keepassxc keepassxc.KeePassXC keepassxc
-  #     fi
-  #   fi
-  #   ;;
+  pwd-manager)
+    xdevenv-keepassxc
+    ;;
 
   # chromium)
   #   # If running this inside a function or script
