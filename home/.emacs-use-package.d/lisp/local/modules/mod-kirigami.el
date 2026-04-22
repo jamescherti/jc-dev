@@ -91,7 +91,7 @@
 ;;                       (list (selected-window)))))
 ;;       (kirigami--outline-ensure-window-start-heading-visible window))))
 
-;; Good implementation but risky according to gemini when immediately is t
+;; Good implementation but risky when immediately is t
 (defvar kirigami--outline-fix-window-start-immediately nil)
 
 ;; TODO store windows is a list and run-with-timer should act on them
@@ -159,15 +159,6 @@ OBJECT can be nil (current window), a window, or a frame."
 ;; (with-eval-after-load 'evil
 ;;   (require 'kirigami-evil)
 ;;   (kirigami-evil-mode))
-
-;;   (defcustom kirigami-unfold-on-jump nil
-;;     "Reveal folded content whenever point moves into a hidden section.
-;; Integrates Kirigami with native and third-party jump mechanisms so navigation
-;; does not land inside concealed text. Adds hooks and advices for components such
-;; as `xref', `imenu', `consult', `save-place', `flymake', `evil' jumps,
-;; `bookmarks', `grep', and `org-agenda'."
-;;     :type 'boolean
-;;     :group 'kirigami)
 
 ;;; kirigami settings
 
