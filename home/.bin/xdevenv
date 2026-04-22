@@ -481,7 +481,7 @@ xdevenv-startup-apps() {
 }
 
 xdevenv-web-browsers() {
-  export MOZ_USE_XINPUT2="0" # Disable it
+  # export MOZ_USE_XINPUT2="0" # Disable it
 
   if type -P firefox &>/dev/null; then
     # Does MOZ_X11_EGL option cause issues?

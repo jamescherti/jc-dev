@@ -346,6 +346,62 @@ WIDTH is the tab width."
   (setq org-agenda-start-on-weekday 1)  ; Monday
   (setq org-clock-report-include-clocking-task t)
 
+  (setq org-fold-show-context-detail
+        '(;; 'local' reveals the current heading but keeps children folded.
+          ;; Useful to focus strictly on the agenda item without visual clutter.
+          ;; (agenda . local)
+
+          ;; This fixes:
+          ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2025-08/msg01128.html
+          ;; TODO patch org?
+          ;;
+          ;; 'canonical' reveals the current headline, its direct ancestors, and
+          ;; its immediate children. This is ideal for searching. It gives you
+          ;; enough structural context to know exactly where you are in the
+          ;; document hierarchy without unfolding the entire tree.
+          (isearch . canonical)
+
+          ;; when exposing a bookmark location 'canonical' is highly useful for
+          ;; bookmarks that point to project roots or major category headers,
+          ;; allowing you to see the immediate contents upon jumping.
+          (bookmark-jump . canonical)
+
+          ;; when using the command org-occur (C-c / /)
+          ;; 'canonical' is useful here because it shows the immediate children
+          ;; of the matched headings, providing a broader overview of the
+          ;; matched section in your sparse tree rather than just an isolated
+          ;; line.
+          (occur-tree . canonical)
+
+          ;; When using the command org-goto (C-c C-j)
+          ;; 'canonical' is useful here if you frequently jump to parent
+          ;; headings and immediately need to see their sub-headings to navigate
+          ;; further.
+          ;; (org-goto . canonical)
+
+          ;; when constructing a sparse tree based on tags matches 'canonical'
+          ;; is useful if your tags are applied to high-level categories and you
+          ;; want the sparse tree to automatically reveal the specific items
+          ;; underneath them.
+          ;; (tags-tree . canonical)
+
+          ;; when exposing search matches associated with a link 'canonical' is
+          ;; useful if your internal links frequently point to index or parent
+          ;; nodes and you want to see the associated subcategories immediately
+          ;; upon arrival.
+          ;; (link-search . canonical)
+
+          ;; when exposing the jump goal of a mark 'canonical' helps re-orient
+          ;; you by showing the immediate children of the location you just
+          ;; popped back to via the mark ring.
+          (mark-goto . canonical)
+
+          ;; The fallback for any context not explicitly defined above.
+          ;; 'ancestors' keeps the buffer as tidy as possible by only unfolding
+          ;; the direct path from the top level down to your target, leaving all
+          ;; other sibling and child trees completely folded.
+          (default . canonical)))
+
   (setq sgml-basic-offset 2)  ;; HTML
   (setq css-indent-offset 2)
   (setq javascript-indent-level 2)
@@ -726,14 +782,6 @@ WIDTH is the tab width."
   ;; Set tag column to 0 (tags appear immediately after heading); simplifies
   ;; layout but may make long headings with tags harder to read.
   (setq org-hide-block-startup t)
-
-  ;; canonical fixes issues such as
-  ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2025-08/msg01128.html
-  (setq org-fold-show-context-detail
-        '((agenda . local)
-          (bookmark-jump . lineage)
-          (isearch . canonical)
-          (default . canonical)))
 
   (setq project-switch-commands #'project-dired)
   (setq project-vc-extra-root-markers '(".projectile"
