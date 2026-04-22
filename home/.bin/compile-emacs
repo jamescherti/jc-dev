@@ -82,7 +82,25 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 #        whole-program optimizations, including cross-module inlining, dead code
 #        elimination, and constant propagation.
 export CFLAGS="-O2 -pipe -march=native -mtune=native -fomit-frame-pointer"
-export CXXFLAGS="$CFLAGS"
+
+# if [[ $ID = arch ]]; then
+#   TARGET_BRANCH="emacs-30"
+#   TARGET_TAG="emacs-30.2"
+#   CURRENT_BRANCH=$(git branch --show-current)
+#   CURRENT_TAG=$(git describe --tags --exact-match 2>/dev/null)
+#   if [ "$CURRENT_BRANCH" = "$TARGET_BRANCH" ] \
+#     || [ "$CURRENT_TAG" = "$TARGET_TAG" ]; then
+#     # -Wno-deprecated-declarations: Emacs 30.2 uses
+#     # 'gdk_pixbuf_new_from_xpm_data', which is deprecated in newer GTK3/GDK
+#     # versions. This is an upstream Emacs decision for backward compatibility
+#     # and not a functional defect in this build.
+#     CFLAGS="-Wno-deprecated-declarations $CFLAGS"
+#
+#     # Append CFLAGS to ignore implicit function declaration errors specifically
+#     # to bypass the treesit_load_language build failure.
+#     CFLAGS="$CFLAGS -Wno-implicit-function-declaration"
+#   fi
+# fi
 
 if [[ $ID = DISABLEDarch ]]; then
   # Arch Linux
@@ -130,7 +148,6 @@ fi
 export LDFLAGS="$LDFLAGS -Wl,-O2 -Wl,--sort-common \
   -Wl,--as-needed -Wl,-z,pack-relative-relocs"
 
-
 if [[ $ID == "debian" ]] && [[ $VERSION_ID = "13" ]]; then
   export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
   export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
@@ -170,7 +187,7 @@ CONFIGURE_ARGS=(
   --with-gnutls
 
   # I already handle it with -flto
-  # --enable-link-time-optimization
+  --enable-link-time-optimization
 
   --disable-build-details
 
@@ -223,8 +240,8 @@ CONFIGURE_ARGS=(
   # reduces the overhead of file I/O operations and reduces the number of linked
   # system libraries. If you are on a standard personal Linux setup, these are
   # rarely needed inside Emacs.
-  --disable-acl
-  --disable-xattr
+  --enable-acl
+  --enable-xattr
 
   # configure: WARNING: This configuration installs a 'movemail' program that
   # does not retrieve POP3 email. By default, Emacs 25 and earlier installed a
@@ -274,6 +291,9 @@ CONFIGURE_ARGS=(
   --without-gpm
   --with-zlib
 
+  # You will not be able to embed native WebKit browser sessions inside Emacs
+  # buffers. You will miss out on the ability to render complex HTML natively or
+  # use packages that rely on embedded web views.
   --without-xwidgets
 
   # --with-xdbe
@@ -287,16 +307,26 @@ CONFIGURE_ARGS=(
   --with-toolkit-scroll-bars
   --with-pgtk
 
+  # Pixel Precision Scrolling (Disabled because it is an X11 feature)
+  --without-xinput2
+
+  # Explicitly disabling X guarantees a pure Wayland binary with no legacy X11
+  # baggage.
+  --without-x
+
   --without-ns
   --without-xaw3d
 
   --with-cairo # Uses cairo and pango (instead of xft)
 
-  # --with-cairo-xcb is the preferred option for modern systems due to its
+  # is the preferred option for modern systems due to its
   # performance benefits and alignment with current X11 development trends.
   # However, --with-cairo remains a solid choice, especially if compatibility
   # with a wide range of systems is a priority.
   #
+  # Cairo XCB stands for X C bindings. X11, not Wayland.
+  # --without-cairo-xcb
+
   # Fewer developers test Emacs with --with-cairo-xcb than with default
   # --with-cairo + Xlib.
   #
@@ -311,24 +341,20 @@ CONFIGURE_ARGS=(
   # --XFT, which is now replaced.
   --without-xft # Replaced with harfbuzz
 
+  # This library provides complex text layout shaping for scripts like Arabic,
+  # Indic, or Thai. For an English-only workflow, this type of complex
+  # multilingual shaping is never triggered.
   --without-m17n-flt # I am using English only
+
+  # We do not need the legacy libotf library to handles OpenType font features.
+
+  # By compiling with --with-harfbuzz, we are instructing Emacs to use a modern
+  # text shaping engine to handle all of those exact OpenType features natively.
+  # HarfBuzz performs the exact job that libotf used to do.
   --without-libotf
 
   --with-file-notification=inotify
 
-  # Reduced Binary Size: The portable dumper generates a "dumped" file
-  # containing the preloaded Emacs Lisp code, which increases the size of the
-  # Emacs binary. Disabling it avoids creating this extra file.
-  #
-  # Simpler Build Process: Without the portable dumper, Emacs doesn't require
-  # pdumper.c-specific logic, which simplifies the build process and avoids
-  # some potential portability or compatibility issues on less common
-  # platforms.
-  #
-  # Without a dump file, Emacs dynamically loads all its initial configuration
-  # and packages during startup. This may make debugging and customization of
-  # the initialization process easier because everything is loaded on-demand
-  # rather than being baked into the dumped image.
   --with-pdumper
 
   # Yes, --with-wide-int can make certain integer operations faster in Emacs
@@ -362,7 +388,12 @@ CONFIGURE_ARGS=(
   # with images or high-quality graphics in Emacs (e.g., in Org-mode, dired
   # with image previews, or using image-based formats), you may want to keep
   # this enabled.
-  --without-lcms2
+  #
+  # I enabled support for many image formats (JPEG, PNG, WebP). Without
+  # LCMS2, Emacs cannot apply ICC color profiles. If you view images in Emacs,
+  # they might display with slightly inaccurate colors compared to your
+  # dedicated image viewers.
+  --with-lcms2
 
   # Consider enabling SQLite if you use packages that rely on databases (e.g.,
   # Org-mode, Magit, Projectile).
@@ -380,9 +411,6 @@ CONFIGURE_ARGS=(
   # Native JSON parsing via Jansson greatly increases performance for json-heavy tasks (like LSP).
   --with-json
 
-  # Pixel Precision Scrolling
-  --with-xinput2
-
   --without-compress-install
   # --with-compress-install
 
@@ -396,11 +424,14 @@ CONFIGURE_ARGS=(
 
   --without-kerberos
   --without-kerberos5
-  --without-sound
+
+  # Audible bell, and any packages that attempt to play audio notifications
+  # (such as Pomodoro timers or chat clients)
+  --with-sound
 
   # Not important unless using GNOME: These options disable GConf and
   # Settings, which are used for configuration in GNOME-based environments.
-  --without-gconf
+  --with-gconf
 
   # Useful for .service files: Type=notify
   # --with-libsystemd
@@ -417,7 +448,7 @@ CONFIGURE_ARGS=(
   # terminal-only Emacs (headless server) or if you want to avoid installing
   # glib dependencies. If you disable this on a desktop, Emacs will ignore your
   # system font configuration.
-  --without-gsettings
+  --with-gsettings
 
   # What it does: This links against libselinux to handle file contexts
   # (security labels) when creating or copying files.
@@ -550,6 +581,8 @@ main() {
 
   # Avoid too many: *.~1~ files
   [[ -d .git/hooks ]] && rm -fr .git/hooks/*
+
+  export CXXFLAGS="$CFLAGS"
 
   git clean -fxd
   git reset --hard HEAD
