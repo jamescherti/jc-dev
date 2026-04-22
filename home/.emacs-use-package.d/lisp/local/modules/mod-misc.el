@@ -3934,16 +3934,20 @@ at the same level."
 
         ;; Only execute if the current heading is an active TODO state
         (when (member (org-get-todo-state) org-not-done-keywords)
-          (let ((moving t))
+          (let ((moving t)
+                (last-point -1))
             (while moving
-              (let ((is-next-done
-                     (save-excursion
-                       (if (org-forward-heading-same-level 1)
-                           (member (org-get-todo-state) org-done-keywords)
-                         'no-next))))
-                (if (or (eq is-next-done 'no-next) is-next-done)
-                    (setq moving nil)
-                  (org-move-subtree-down 1)))))))
+              (if (= (point) last-point)
+                  (setq moving nil) ;; Break loop if movement failed silently
+                (setq last-point (point))
+                (let ((is-next-done
+                       (save-excursion
+                         (if (org-forward-heading-same-level 1)
+                             (member (org-get-todo-state) org-done-keywords)
+                           'no-next))))
+                  (if (or (eq is-next-done 'no-next) is-next-done)
+                      (setq moving nil)
+                    (org-move-subtree-down 1))))))))
     (error "Org functions are not defined")))
 
 (defun my-org-todo-and-toggle ()
