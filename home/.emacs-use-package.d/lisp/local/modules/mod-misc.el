@@ -534,7 +534,35 @@ WIDTH is the tab width."
 
   (setq hs-hide-comments-when-hiding-all nil)
   (setq hs-isearch-open t)  ;; Open both comments and code
+
+  ;; Code folding
+  (add-hook 'emacs-lisp-mode-hook #'outline-minor-mode)
+  (add-hook 'conf-mode-hook 'outline-minor-mode)
+  (add-hook 'grep-mode-hook 'outline-minor-mode)
+  (add-hook 'markdown-mode-hook 'outline-minor-mode)
+
+  (add-hook 'c-mode-hook #'hs-minor-mode)
+  (add-hook 'c++-mode-hook #'hs-minor-mode)
+  (add-hook 'java-mode-hook #'hs-minor-mode)
+  (add-hook 'sh-mode-hook #'hs-minor-mode)
+  (add-hook 'js-mode-hook #'hs-minor-mode)
+  (add-hook 'typescript-mode-hook #'hs-minor-mode)
+  (add-hook 'rust-mode-hook #'hs-minor-mode)
+  (add-hook 'go-mode-hook #'hs-minor-mode)
   (add-hook 'lua-mode-hook #'hs-minor-mode)
+
+  (add-hook 'sh-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'yaml-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'python-mode-hook 'outline-indent-minor-mode)
+
+  (add-hook 'bash-ts-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'yaml-ts-mode-hook 'outline-indent-minor-mode)
+  (add-hook 'python-ts-mode-hook 'outline-indent-minor-mode)
+
+  (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
+  (add-hook 'js-ts-mode-hook 'hs-minor-mode)
+
+  ;; (add-hook 'lisp-interaction-mode-hook #'outline-minor-mode)
 
   ;; This fixes the skipping when scrolling long org documents
   ;; NOTE: MANAGED BY MINIMAL-EMACS
@@ -828,21 +856,6 @@ WIDTH is the tab width."
                   " --null --line-buffered --color=never --max-columns=1000"
                   " --path-separator / --smart-case --no-heading"
                   " --with-filename --line-number --search-zip")))
-
-  (add-hook 'sh-mode-hook 'outline-indent-minor-mode)
-  (add-hook 'bash-ts-mode-hook 'outline-indent-minor-mode)
-  (add-hook 'yaml-mode-hook 'outline-indent-minor-mode)
-  (add-hook 'yaml-ts-mode-hook 'outline-indent-minor-mode)
-  (add-hook 'python-mode-hook 'outline-indent-minor-mode)
-  (add-hook 'python-ts-mode-hook 'outline-indent-minor-mode)
-
-  (add-hook 'conf-mode-hook 'outline-minor-mode)
-  (add-hook 'js-mode-hook 'outline-minor-mode)
-  (add-hook 'js-ts-mode-hook 'outline-minor-mode)
-  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
-  (add-hook 'grep-mode-hook 'outline-minor-mode)
-  (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
-  (add-hook 'markdown-mode-hook 'outline-minor-mode)
 
   (with-eval-after-load 'savehist
     (setq savehist-autosave-interval 650)
