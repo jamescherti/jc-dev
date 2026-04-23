@@ -604,7 +604,7 @@
 
                            le-csv-mode
 
-                           ;; le-treesit-fold
+                           le-treesit-fold
 
                            ;; le-diminish
 
