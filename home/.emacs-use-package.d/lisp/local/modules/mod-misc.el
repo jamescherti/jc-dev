@@ -4615,16 +4615,11 @@ are editing by falling back to another visible file buffer."
 
 (defun my-outline-minor-fold-all ()
   "Close all folds."
-  (let ((buffer-name (buffer-name)))
-    (unless (string-prefix-p "*vc-" buffer-name)
-      (ignore-errors
-        (cond
-         ((fboundp 'outline-hide-sublevels)
-          (outline-hide-sublevels 1))
-         ((fboundp 'hide-sublevels)
-          (hide-sublevels 1)))))))
+  (require 'kirigami nil t)
+  (when (fboundp 'kirigami-close-folds)
+    (kirigami-close-folds)))
 
-(add-hook 'outline-minor-mode-hook #'my-outline-minor-fold-all)
+(add-hook 'outline-minor-mode-hook #'my-outline-minor-fold-all -50)
 
 ;;; Provide
 
