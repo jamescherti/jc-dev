@@ -4614,18 +4614,26 @@ are editing by falling back to another visible file buffer."
 ;;; fold things when opening them
 
 ;; TODO kirigami close fold except this one
-(defun my-outline-minor-fold-all ()
+(defun my-kirigami-auto-open ()
   "Close all folds."
-  (require 'kirigami nil t)
-  (unwind-protect
-      (when (fboundp 'kirigami-close-folds)
-        (kirigami-close-folds))
-    t
-    ;; (when (fboundp 'kirigami-open-fold)
-    ;;   (kirigami-open-fold))
-    ))
+  (unless (bound-and-true-p easysession-load-in-progress)
+    (save-excursion
+      (ignore-errors
+        (require 'kirigami nil t)
+        (when (fboundp 'kirigami-open-fold)
+          (kirigami-open-fold))))))
 
-(add-hook 'outline-minor-mode-hook #'my-outline-minor-fold-all 90)
+(defun my-kirigami-auto-close-all ()
+  "Close all folds."
+  (unless (bound-and-true-p easysession-load-in-progress)
+    (save-excursion
+      (ignore-errors
+        (require 'kirigami nil t)
+        (when (fboundp 'kirigami-close-folds)
+          (kirigami-close-folds))))))
+
+(add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 90)
+(add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 90)
 
 ;;; Provide
 
