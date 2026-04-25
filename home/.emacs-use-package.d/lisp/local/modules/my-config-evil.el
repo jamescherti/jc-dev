@@ -669,7 +669,9 @@ When FORCE-ALL is non-nil, use all functions."
 
 (defun string-get-indentation (str)
   "Get the indentation of STR (leading spaces and tabs)."
-  (replace-regexp-in-string "^\\([ \t]*\\).*$" "\\1" str))
+  (if (string-match "^[ \t]+" str)
+      (match-string 0 str)
+    ""))
 
 (defun evil-clipboard--string-unindent (input-str)
   "Unindent INPUT-STR by removing the minimal common indentation from all lines."
@@ -682,28 +684,22 @@ When FORCE-ALL is non-nil, use all functions."
              (length-indent (length indent)))
         (when (and
                ;; The line must not be empty
-               (not (string= (string-trim-left line) ""))
+               (not (string-empty-p (string-trim-left line)))
                ;; And the indent should be lower than the one that has been found
                ;; previously
                (or (not min-indent)
                    (< length-indent min-indent)))
           (setq min-indent length-indent))))
 
-    (unless min-indent
-      (setq min-indent 0))
+    (setq min-indent (or min-indent 0))
 
     ;; Remove the minimum indentation from all lines
-    (let ((result ""))
-      (dolist (line lines)
-        (setq result
-              (concat result
-                      (if (string= result "") "" "\n")
-                      ;; (substring line min-indent)
-                      (if (>= (length line) min-indent)
-                          (substring line min-indent)
-                        line)
-                      )))
-      result)))
+    (mapconcat (lambda (line)
+                 (if (>= (length line) min-indent)
+                     (substring line min-indent)
+                   line))
+               lines
+               "\n")))
 
 (defun evilclipboard-paste-with-current-indentation ()
   "Paste text from the clipboard with the current line's indentation."
@@ -745,12 +741,11 @@ When FORCE-ALL is non-nil, use all functions."
     (evil-set-register ?a text-to-paste)
     (if (use-region-p)
         (evil-visual-paste 1 ?a)
-      (progn
-        (evil-paste-before 1 ?a)
-        (when evil-move-cursor-back
-          (forward-char 1))
-        (when original-register-contents
-          (evil-set-register ?a original-register-contents))))))
+      (evil-paste-before 1 ?a)
+      (when evil-move-cursor-back
+        (forward-char 1))
+      (when original-register-contents
+        (evil-set-register ?a original-register-contents)))))
 
 (defun evilclipboard-paste-with-current-indentation-restore-point ()
   "Paste text from the clipboard with the current line's indentation.
