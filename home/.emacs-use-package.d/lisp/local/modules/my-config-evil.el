@@ -731,12 +731,14 @@ When FORCE-ALL is non-nil, use all functions."
                  ""))
          (text-to-paste (string-trim-left
                          (replace-regexp-in-string "^" new-indentation text))))
-    (evil-set-register ?a text-to-paste)
-    (if (use-region-p)
-        (evil-visual-paste 1 ?a)
-      (evil-paste-before 1 ?a)
-      (when evil-move-cursor-back
-        (forward-char 1))
+    (unwind-protect
+        (progn
+          (evil-set-register ?a text-to-paste)
+          (if (use-region-p)
+              (evil-visual-paste 1 ?a)
+            (evil-paste-before 1 ?a)
+            (when evil-move-cursor-back
+              (forward-char 1))))
       (when original-register-contents
         (evil-set-register ?a original-register-contents)))))
 
