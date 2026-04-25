@@ -2180,7 +2180,25 @@ the window is resized). This function fixes these issues."
 
   (setq persist-text-scale-buffer-category-function 'my-persist-text-scale-function))
 
-;;; text scale ediff
+;;; ediff: Synchronize text scale when ediff starts
+
+(defun my-ediff-sync-text-scale ()
+  "Synchronize the text scale zoom of all ediff buffers to match Buffer A."
+  (let ((zoom-level (with-current-buffer ediff-buffer-A
+                      (if (bound-and-true-p text-scale-mode)
+                          text-scale-mode-amount
+                        0))))
+    (when (buffer-live-p ediff-buffer-B)
+      (with-current-buffer ediff-buffer-B
+        (text-scale-set zoom-level)))
+    (when (and (boundp 'ediff-buffer-C)
+               (buffer-live-p ediff-buffer-C))
+      (with-current-buffer ediff-buffer-C
+        (text-scale-set zoom-level)))))
+
+(add-hook 'ediff-startup-hook #'my-ediff-sync-text-scale)
+
+;;; ediff: Synchronize text scale when the user changes it
 
 (defun pkg-diff--ediff-control-panel-window ()
   "Return the window displaying the *Ediff Control Panel* buffer, if any."
@@ -2234,8 +2252,6 @@ session ends."
     (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
 
 (add-hook 'ediff-prepare-buffer-hook #'pkg-diff--setup-ediff-auto-text-scale)
-
-
 
 ;;; tree sitter
 

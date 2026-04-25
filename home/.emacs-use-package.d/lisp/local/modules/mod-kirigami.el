@@ -62,18 +62,23 @@
 
 ;;; Useful function: my-reveal-kirigami-fold-after-undo-advice
 
+(defun my-reveal-kirigami-fold (&rest _args)
+  "Open folds using `kirigami-open-fold' after an undo operation."
+  (interactive)
+  (ignore-errors
+    (kirigami-open-fold)))
+
 (defun my-reveal-kirigami-fold-after-undo-advice (&rest _args)
   "Open folds using `kirigami-open-fold' after an undo operation."
   (interactive)
   (when (invisible-p (point))
-    (ignore-errors
-      (kirigami-open-fold))))
+    (my-reveal-kirigami-fold)))
 
 ;;; Press SPC
 
 (with-eval-after-load 'evil
   (when (bound-and-true-p evil-normal-state-map)
-    (define-key evil-normal-state-map (kbd "SPC") 'my-reveal-kirigami-fold-after-undo-advice)))
+    (define-key evil-normal-state-map (kbd "SPC") 'my-reveal-kirigami-fold)))
 
 ;;; DISABLED: Adjust window to ensure heading is visible
 
