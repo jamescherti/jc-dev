@@ -220,6 +220,7 @@ any new ones."
         (easysession                   . "melpa")
         (flymake-ansible-lint          . "melpa")
         (flymake-bashate               . "melpa")
+        (diff-hl                       . "melpa")
 
         (visual-fill-column            . "melpa")
 
@@ -1848,6 +1849,7 @@ Returns:
 ;; Use absolute numbers; 'relative and 'visual are significantly slower
 ;; t=absolute
 ;; (setq-default display-line-numbers-type t)
+;; (setq-default display-line-numbers-type 'visual)
 (setq-default display-line-numbers-type 'visual)
 (setq display-line-numbers-grow-only t)  ; t is slow. Use nil.
 (setq display-line-numbers-current-absolute nil)  ;; t=line num / nil=0
