@@ -4649,8 +4649,10 @@ are editing by falling back to another visible file buffer."
         git-gutter:ask-p nil
         git-gutter:diff-option "-w"
         git-gutter:handled-backends '(git)
+        git-gutter:disabled-modes '(image-mode fundamental-mode)
         git-gutter:hide-gutter t
         git-gutter:modified-sign "="
+        ;; git-gutter:visual-line t        ; Better for wrapped lines
         git-gutter:update-interval 0
         git-gutter:verbosity 0)
 
