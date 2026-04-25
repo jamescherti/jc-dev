@@ -667,29 +667,21 @@ When FORCE-ALL is non-nil, use all functions."
 
 ;;; Paste with current indentation
 
-(defun string-get-indentation (str)
-  "Get the indentation of STR (leading spaces and tabs)."
-  (if (string-match "^[ \t]+" str)
-      (match-string 0 str)
-    ""))
-
 (defun evil-clipboard--string-unindent (input-str)
-  "Unindent INPUT-STR by removing the minimal common indentation from all lines."
+  "Unindent INPUT-STR by removing the minimal common indentation."
   (let ((lines (split-string input-str "\n"))
         (min-indent nil))
 
     ;; Find the minimum indentation
     (dolist (line lines)
-      (let* ((indent (string-get-indentation line))
-             (length-indent (length indent)))
-        (when (and
-               ;; The line must not be empty
-               (not (string-empty-p (string-trim-left line)))
-               ;; And the indent should be lower than the one that has been found
-               ;; previously
-               (or (not min-indent)
-                   (< length-indent min-indent)))
-          (setq min-indent length-indent))))
+      ;; The line must not be empty
+      (unless (string-match-p "^[ \t]*$" line)
+        (string-match "^[ \t]*" line)
+        ;; And the indent should be lower than the one that has been found
+        ;; previously
+        (setq min-indent (if min-indent
+                             (min min-indent (match-end 0))
+                           (match-end 0)))))
 
     (setq min-indent (or min-indent 0))
 
@@ -705,6 +697,7 @@ When FORCE-ALL is non-nil, use all functions."
   "Paste text from the clipboard with the current line's indentation."
   (interactive)
   (let* ((original-register-contents (evil-get-register ?a t))
+         (lbp (line-beginning-position))
          ;; Account for org-indent-mode virtual overlays
          ;; 'line-prefix: This is a special display property in Emacs. If
          ;; applied to a line, Emacs visually prepends the value (which is
@@ -726,8 +719,8 @@ When FORCE-ALL is non-nil, use all functions."
          ;; string used by Org mode so its width can be measured and added to
          ;; the physical column count. This allows your script to calculate the
          ;; true visual indentation before pasting.
-         (prefix (or (get-text-property (line-beginning-position) 'line-prefix)
-                     (get-text-property (line-beginning-position) 'wrap-prefix)))
+         (prefix (or (get-text-property lbp 'line-prefix)
+                     (get-text-property lbp 'wrap-prefix)))
          (virtual-indent (if (stringp prefix) (string-width prefix) 0))
          (new-indentation (make-string (+ (current-column) virtual-indent) ?\s))
          (kill-ring-content (ignore-errors (current-kill 0)))
