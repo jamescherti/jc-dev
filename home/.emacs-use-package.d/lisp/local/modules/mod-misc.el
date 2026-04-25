@@ -220,7 +220,8 @@ any new ones."
         (easysession                   . "melpa")
         (flymake-ansible-lint          . "melpa")
         (flymake-bashate               . "melpa")
-        (diff-hl                       . "melpa")
+
+        (git-gutter                    . "melpa")
 
         (visual-fill-column            . "melpa")
 
@@ -4650,7 +4651,7 @@ are editing by falling back to another visible file buffer."
         git-gutter:handled-backends '(git)
         git-gutter:hide-gutter t
         git-gutter:modified-sign "="
-        git-gutter:update-interval 2
+        git-gutter:update-interval 0
         git-gutter:verbosity 0)
 
   :config
@@ -4659,6 +4660,9 @@ are editing by falling back to another visible file buffer."
   (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
+
+;; (lightemacs-use-package git-gutter-fringe
+;;   :after git-gutter)
 
 ;;; Provide
 
