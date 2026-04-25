@@ -709,12 +709,35 @@ When FORCE-ALL is non-nil, use all functions."
   "Paste text from the clipboard with the current line's indentation."
   (interactive)
   (let* ((original-register-contents (evil-get-register ?a t))
-         (new-indentation (make-string (current-column) ?\s))
+         ;; Account for org-indent-mode virtual overlays
+         ;; 'line-prefix: This is a special display property in Emacs. If
+         ;; applied to a line, Emacs visually prepends the value (which is
+         ;; usually a string of spaces) to the beginning of the line on your
+         ;; screen.
+         ;;
+         ;; 'wrap-prefix: Similar to 'line-prefix, but it specifically applies
+         ;; to visual continuation lines when a long line wraps to the next row
+         ;; on your screen.
+         ;;
+         ;; When you enable org-indent-mode, Org does not insert actual space
+         ;; characters into your file to indent the text under headings.
+         ;; Instead, it dynamically applies the 'line-prefix and 'wrap-prefix
+         ;; text properties to visually push the text to the right.
+         ;;
+         ;; Because these prefixes are purely visual overlays and not part of
+         ;; the physical buffer text, standard functions like (current-column)
+         ;; ignore them entirely. The snippet above fetches the actual prefix
+         ;; string used by Org mode so its width can be measured and added to
+         ;; the physical column count. This allows your script to calculate the
+         ;; true visual indentation before pasting.
+         (prefix (or (get-text-property (line-beginning-position) 'line-prefix)
+                     (get-text-property (line-beginning-position) 'wrap-prefix)))
+         (virtual-indent (if (stringp prefix) (string-width prefix) 0))
+         (new-indentation (make-string (+ (current-column) virtual-indent) ?\s))
          (kill-ring-content (ignore-errors (current-kill 0)))
          (text (if kill-ring-content
                    (evil-clipboard--string-unindent (string-trim-right
-                                                     (substring-no-properties
-                                                      kill-ring-content)
+                                                     (substring-no-properties kill-ring-content)
                                                      "\n"))
                  ""))
          (text-to-paste (string-trim-left
@@ -740,7 +763,6 @@ This function also restores window start and point when pasting multiple lines."
       (lightemacs-save-window-start
         (save-mark-and-excursion
           (evilclipboard-paste-with-current-indentation))))))
-
 ;; (define-key evil-insert-state-map (kbd "C-a p") 'evilclipboard-paste-with-current-indentation-restore-point)
 ;; (define-key evil-insert-state-map (kbd "C-a C-p") 'evilclipboard-paste-with-current-indentation-restore-point)
 
