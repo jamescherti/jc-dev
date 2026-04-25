@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+;;; Use-package
+
 (eval-and-compile
   (require 'lightemacs-module)
   (require 'lightemacs-use-package))
@@ -49,28 +51,31 @@
     (global-set-key (kbd "C-c z O") 'kirigami-open-fold-rec)
     (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold)))
 
-;; (defun my-setup-outline-minor-mode-kirigami ()
-;;   "Close all folds."
-;;   (let ((buffer-name (buffer-name)))
-;;     ;; Buffers such as *vc-diff*
-;;     (unless (string-prefix-p "*vc-" buffer-name)
-;;       (ignore-errors
-;;         (unwind-protect
-;;             (kirigami-close-folds)
-;;           (kirigami-open-fold))))))
-;;
-;; (add-hook 'outline-minor-mode-hook #'my-setup-outline-minor-mode-kirigami)
+(require 'kirigami-jump)
+(when (fboundp 'kirigami-jump-mode)
+  (kirigami-jump-mode))
 
-(defun mod-kirigami--spc ()
+(with-eval-after-load 'evil
+  (require 'kirigami-evil)
+  (when (fboundp 'kirigami-evil-mode)
+    (kirigami-evil-mode)))
+
+;;; Useful function: my-reveal-kirigami-fold-after-undo-advice
+
+(defun my-reveal-kirigami-fold-after-undo-advice (&rest _args)
+  "Open folds using `kirigami-open-fold' after an undo operation."
   (interactive)
-  (condition-case nil
-      (kirigami-open-fold)
-    (error
-     nil)))
+  (when (invisible-p (point))
+    (ignore-errors
+      (kirigami-open-fold))))
+
+;;; Press SPC
 
 (with-eval-after-load 'evil
   (when (bound-and-true-p evil-normal-state-map)
-    (define-key evil-normal-state-map (kbd "SPC") 'mod-kirigami--spc)))
+    (define-key evil-normal-state-map (kbd "SPC") 'my-reveal-kirigami-fold-after-undo-advice)))
+
+;;; DISABLED: Adjust window to ensure heading is visible
 
 ;; TODO Find a way to add this fix to kirigami??
 ;; Adjust the window to ensure the current heading remains visible. This fixes
@@ -90,6 +95,8 @@
 ;;                      ((not object)
 ;;                       (list (selected-window)))))
 ;;       (kirigami--outline-ensure-window-start-heading-visible window))))
+
+;;; Outline: Ensure window-start is visible
 
 ;; Good implementation but risky when immediately is t
 (defvar kirigami--outline-fix-window-start-immediately nil)
@@ -131,35 +138,6 @@ OBJECT can be nil (current window), a window, or a frame."
 (add-hook 'window-buffer-change-functions
           #'mod-kirigami--outline-ensure-visible)
 
-;; Useless when loading because window-start does not change
-;; (defun kirigami--outline-enable-immediate-fix ()
-;;   "Enable the immediate window start fix for the current buffer."
-;;   ;; Add locally so it only runs on relevant buffers
-;;   (when (or (derived-mode-p 'outline-mode)
-;;             (bound-and-true-p outline-minor-mode))
-;;     (add-hook 'window-scroll-functions
-;;               #'(lambda(window _display-start &rest _args)
-;;                   (let ((kirigami--outline-fix-window-start-immediately t))
-;;                     (mod-kirigami--outline-ensure-visible window)))
-;;               nil  ; depth
-;;               t))) ; local
-;; (add-hook 'outline-minor-mode-hook #'kirigami--outline-enable-immediate-fix)
-;; (add-hook 'outline-mode-hook #'kirigami--outline-enable-immediate-fix)
-
-(require 'kirigami-jump)
-(when (fboundp 'kirigami-jump-mode)
-  (kirigami-jump-mode))
-
-
-(with-eval-after-load 'evil
-  (require 'kirigami-evil)
-  (when (fboundp 'kirigami-evil-mode)
-    (kirigami-evil-mode)))
-
-;; (with-eval-after-load 'evil
-;;   (require 'kirigami-evil)
-;;   (kirigami-evil-mode))
-
 ;;; kirigami settings
 
 ;; (setq pulse-delay 0.04)
@@ -195,6 +173,89 @@ OBJECT can be nil (current window), a window, or a frame."
 ;;
 ;; (add-hook 'kirigami-post-action-functions #'mod-kirigami-pulse)
 
+;;; Undo
+
+;; Built-in
+(dolist (cmd '(undo
+               undo-only
+               undo-redo))
+  (when (fboundp cmd)
+    (advice-add cmd :after #'my-reveal-kirigami-fold-after-undo-advice)))
+
+;; (with-eval-after-load 'undo-fu
+;;   (dolist (cmd '(undo-fu-only-undo
+;;                  undo-fu-only-redo))
+;;     (when (fboundp cmd)
+;;       (advice-add cmd :after #'my-reveal-kirigami-fold-after-undo-advice))))
+
+;; (with-eval-after-load 'undo-tree
+;;   (dolist (cmd '(undo-tree-undo
+;;                  undo-tree-redo))
+;;     (when (fboundp cmd)
+;;       (advice-add cmd :after #'my-reveal-kirigami-fold-after-undo-advice))))
+
+;; (with-eval-after-load 'vundo
+;;   (dolist (cmd '(vundo-backward
+;;                  vundo-forward))
+;;     (when (fboundp cmd)
+;;       (advice-add cmd :after #'my-reveal-kirigami-fold-after-undo-advice))))
+
+;; (defun reveal-kirigami-fold-after-undo ()
+;;   "Open folds using `kirigami-open-fold' after an undo operation."
+;;   (message "THIS COMMAND: %s" this-command)
+;;   (when (memq this-command '(undo
+;;                              undo-only
+;;                              undo-redo
+;;                              undo-fu-only-undo
+;;                              undo-fu-only-redo
+;;                              ;; undo-tree-undo
+;;                              ;; undo-tree-redo
+;;                              ;; vundo-backward
+;;                              ;; vundo-forward
+;;                              ))
+;;     (when (and (invisible-p (point))
+;;                (fboundp 'kirigami-open-fold))
+;;       (ignore-errors
+;;         (kirigami-open-fold)))))
+;;
+;; (add-hook 'post-command-hook #'reveal-kirigami-fold-after-undo)
+
+;;; DISABLED: pulse
+
+;; Useless when loading because window-start does not change
+;; (defun kirigami--outline-enable-immediate-fix ()
+;;   "Enable the immediate window start fix for the current buffer."
+;;   ;; Add locally so it only runs on relevant buffers
+;;   (when (or (derived-mode-p 'outline-mode)
+;;             (bound-and-true-p outline-minor-mode))
+;;     (add-hook 'window-scroll-functions
+;;               #'(lambda(window _display-start &rest _args)
+;;                   (let ((kirigami--outline-fix-window-start-immediately t))
+;;                     (mod-kirigami--outline-ensure-visible window)))
+;;               nil  ; depth
+;;               t))) ; local
+;; (add-hook 'outline-minor-mode-hook #'kirigami--outline-enable-immediate-fix)
+;; (add-hook 'outline-mode-hook #'kirigami--outline-enable-immediate-fix)
+
+;; (with-eval-after-load 'evil
+;;   (require 'kirigami-evil)
+;;   (kirigami-evil-mode))
+
+;;; DISABLED: outline
+
+;; (defun my-setup-outline-minor-mode-kirigami ()
+;;   "Close all folds."
+;;   (let ((buffer-name (buffer-name)))
+;;     ;; Buffers such as *vc-diff*
+;;     (unless (string-prefix-p "*vc-" buffer-name)
+;;       (ignore-errors
+;;         (unwind-protect
+;;             (kirigami-close-folds)
+;;           (kirigami-open-fold))))))
+;;
+;; (add-hook 'outline-minor-mode-hook #'my-setup-outline-minor-mode-kirigami)
+
+;;; Provide
 
 (provide 'mod-kirigami)
 
