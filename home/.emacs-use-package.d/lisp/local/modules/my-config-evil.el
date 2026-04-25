@@ -713,7 +713,8 @@ When FORCE-ALL is non-nil, use all functions."
          (kill-ring-content (ignore-errors (current-kill 0)))
          (text (if kill-ring-content
                    (evil-clipboard--string-unindent (string-trim-right
-                                                     (substring-no-properties kill-ring-content)
+                                                     (substring-no-properties
+                                                      kill-ring-content)
                                                      "\n"))
                  ""))
          (text-to-paste (string-trim-left
