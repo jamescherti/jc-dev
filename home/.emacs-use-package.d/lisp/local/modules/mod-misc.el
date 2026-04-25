@@ -4649,18 +4649,16 @@ are editing by falling back to another visible file buffer."
         git-gutter:diff-option "-w"
         git-gutter:handled-backends '(git)
         git-gutter:hide-gutter t
-        git-gutter:hide-gutter t
-        git-gutter:modified-sign " "
+        git-gutter:modified-sign "="
         git-gutter:update-interval 2
         git-gutter:verbosity 0)
 
   :config
-  (global-set-key (kbd "C-x n") 'git-gutter2-next-hunk)
-  (global-set-key (kbd "C-x p") 'git-gutter2-previous-hunk)
-  (global-set-key (kbd "C-x v c") 'git-gutter2-clear-gutter)
-  (global-set-key (kbd "C-x v p") 'git-gutter2-popup-hunk)
-  (global-set-key (kbd "C-x v r") 'git-gutter2-revert-hunk)
-  (global-set-key (kbd "C-x v u") 'git-gutter2-update))
+  (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
+  (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
+  (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
+  (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
+  (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
 
 ;;; Provide
 
