@@ -2199,7 +2199,6 @@ the window is resized). This function fixes these issues."
 ;; (add-hook 'ediff-startup-hook #'my-ediff-sync-text-scale)
 
 ;;; ediff: Synchronize text scale when the user changes it
-
 (defun pkg-diff--ediff-control-panel-window ()
   "Return the window displaying the *Ediff Control Panel* buffer, if any."
   (seq-find (lambda (win)
@@ -2225,7 +2224,6 @@ the window is resized). This function fixes these issues."
 This installs `pkg-diff--ediff-auto-text-scale` on `text-scale-mode-hook` in
 each Ediff buffer when the session starts, and cleans up automatically when the
 session ends."
-  (message "[EDIFF] ADD TO: %s" (current-buffer))
   (with-no-warnings
     (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
 
@@ -2243,22 +2241,29 @@ session ends."
               (when (and (buffer-live-p buf)
                          (not (eq buf original-buf)))
                 (with-current-buffer buf
-                  ;; Add the hook again because for some reason, it is never
-                  ;; added to the second buffer (TODO)
-                  (pkg-diff--setup-ediff-auto-text-scale)
-
                   ;; Prevent infinite loops
                   (let ((text-scale-mode-hook
-                         (delq 'pkg-diff--ediff-auto-text-scale
-                               text-scale-mode-hook)))
+                         (remove 'pkg-diff--ediff-auto-text-scale
+                                 text-scale-mode-hook)))
                     (ignore text-scale-mode-hook)
                     (text-scale-set original-buf-text-scale-amount))))))
         ;; Remove
-        ;; (message "[EDIFF] REMOVE %s" (current-buffer))
-        ;; (with-no-warnings
-        ;;   (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))
-        t))))
+        (with-no-warnings
+          (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))))))
 
+(defun pkg-diff--ediff-teardown-auto-text-scale ()
+  "Remove text scale synchronization hooks when an Ediff session ends.
+This function executes within the Ediff Control Buffer."
+  (let ((bufs (delq nil (list (and (boundp 'ediff-buffer-A) ediff-buffer-A)
+                              (and (boundp 'ediff-buffer-B) ediff-buffer-B)
+                              (and (boundp 'ediff-buffer-C) ediff-buffer-C)))))
+    (dolist (buf bufs)
+      (when (buffer-live-p buf)
+        (with-current-buffer buf
+          (with-no-warnings
+            (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t)))))))
+
+(add-hook 'ediff-quit-hook #'pkg-diff--ediff-teardown-auto-text-scale)
 (add-hook 'ediff-prepare-buffer-hook #'pkg-diff--setup-ediff-auto-text-scale)
 
 ;;; tree sitter
