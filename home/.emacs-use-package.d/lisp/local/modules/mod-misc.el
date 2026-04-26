@@ -2185,7 +2185,8 @@ the window is resized). This function fixes these issues."
 
 (defun pkg-diff--ediff-sync-zoom-startup ()
   "Synchronize text scale in all Ediff buffers based on Buffer A."
-  (when (and (boundp 'ediff-buffer-A) (buffer-live-p ediff-buffer-A))
+  (when (and (boundp 'ediff-buffer-A)
+             (buffer-live-p ediff-buffer-A))
     (let ((zoom-level (with-current-buffer ediff-buffer-A
                         (if (boundp 'text-scale-mode-amount)
                             text-scale-mode-amount
@@ -2262,6 +2263,7 @@ This function executes within the Ediff Control Buffer."
       (when (buffer-live-p buf)
         (with-current-buffer buf
           (with-no-warnings
+            ;; TODO make something to restore initial text scale
             (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t)))))))
 
 (add-hook 'ediff-quit-hook #'pkg-diff--ediff-teardown-auto-text-scale)
