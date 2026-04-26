@@ -2182,21 +2182,21 @@ the window is resized). This function fixes these issues."
 
 ;;; ediff: Synchronize text scale when ediff starts
 
-(defun my-ediff-sync-text-scale ()
-  "Synchronize the text scale zoom of all ediff buffers to match Buffer A."
-  (let ((zoom-level (with-current-buffer ediff-buffer-A
-                      (if (bound-and-true-p text-scale-mode)
-                          text-scale-mode-amount
-                        0))))
-    (when (buffer-live-p ediff-buffer-B)
-      (with-current-buffer ediff-buffer-B
-        (text-scale-set zoom-level)))
-    (when (and (boundp 'ediff-buffer-C)
-               (buffer-live-p ediff-buffer-C))
-      (with-current-buffer ediff-buffer-C
-        (text-scale-set zoom-level)))))
-
-(add-hook 'ediff-startup-hook #'my-ediff-sync-text-scale)
+;; (defun my-ediff-sync-text-scale ()
+;;   "Synchronize the text scale zoom of all ediff buffers to match Buffer A."
+;;   (let ((zoom-level (with-current-buffer ediff-buffer-A
+;;                       (if (bound-and-true-p text-scale-mode)
+;;                           text-scale-mode-amount
+;;                         0))))
+;;     (when (buffer-live-p ediff-buffer-B)
+;;       (with-current-buffer ediff-buffer-B
+;;         (text-scale-set zoom-level)))
+;;     (when (and (boundp 'ediff-buffer-C)
+;;                (buffer-live-p ediff-buffer-C))
+;;       (with-current-buffer ediff-buffer-C
+;;         (text-scale-set zoom-level)))))
+;;
+;; (add-hook 'ediff-startup-hook #'my-ediff-sync-text-scale)
 
 ;;; ediff: Synchronize text scale when the user changes it
 
@@ -2213,43 +2213,49 @@ the window is resized). This function fixes these issues."
 (defun pkg-diff--ediff-buffers ()
   "Return list of live ediff buffers A, B, and C, if bound."
   (when-let* ((window (pkg-diff--ediff-control-panel-window)))
-    (with-selected-window window
-      (delq nil
-            (list (and (bound-and-true-p ediff-buffer-A) ediff-buffer-A)
-                  (and (bound-and-true-p ediff-buffer-B) ediff-buffer-B)
-                  (and (bound-and-true-p ediff-buffer-C) ediff-buffer-C))))))
-
-(defun pkg-diff--ediff-auto-text-scale (&rest _)
-  "Synchronize text scale across all Ediff buffers based on Ediff buffer A."
-  (when (and (boundp 'text-scale-mode-hook)
-             (bound-and-true-p text-scale-mode-amount))
-    (let ((window (pkg-diff--ediff-control-panel-window)))
-      (if (not window)
-          (with-no-warnings
-            (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))
-        (let ((original-buf (current-buffer))
-              (original-buf-text-scale-amount text-scale-mode-amount))
-          (with-selected-window window
-            (when (and (bound-and-true-p ediff-buffer-A)
-                       (buffer-live-p ediff-buffer-A))
-              (with-current-buffer ediff-buffer-A
-                (dolist (buf (pkg-diff--ediff-buffers))
-                  (when (and (buffer-live-p buf)
-                             (not (eq buf original-buf)))
-                    (with-current-buffer buf
-                      (with-no-warnings
-                        (let ((text-scale-mode-hook
-                               (delq 'pkg-diff--ediff-auto-text-scale
-                                     text-scale-mode-hook)))
-                          (text-scale-set original-buf-text-scale-amount))))))))))))))
+    (when (window-live-p window)
+      (with-selected-window window
+        (delq nil
+              (list (and (bound-and-true-p ediff-buffer-A) ediff-buffer-A)
+                    (and (bound-and-true-p ediff-buffer-B) ediff-buffer-B)
+                    (and (bound-and-true-p ediff-buffer-C) ediff-buffer-C)))))))
 
 (defun pkg-diff--setup-ediff-auto-text-scale ()
   "Add a buffer-local hook to keep text scale synchronized during Ediff sessions.
 This installs `pkg-diff--ediff-auto-text-scale` on `text-scale-mode-hook` in
 each Ediff buffer when the session starts, and cleans up automatically when the
 session ends."
+  (message "ADD TO: %s" (current-buffer))
   (with-no-warnings
     (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
+
+(defun pkg-diff--ediff-auto-text-scale (&rest _)
+  "Synchronize text scale across all Ediff buffers based on Ediff buffer A."
+  (when (and (boundp 'text-scale-mode-hook)
+             (bound-and-true-p text-scale-mode-amount))
+    (let ((original-buf (current-buffer))
+          (original-buf-text-scale-amount text-scale-mode-amount)
+          (window (pkg-diff--ediff-control-panel-window)))
+      (if (window-live-p window)
+          ;; Sync
+          (with-selected-window window
+            (dolist (buf (pkg-diff--ediff-buffers))
+              (when (and (buffer-live-p buf)
+                         (not (eq buf original-buf)))
+                (with-current-buffer buf
+                  ;; Add the hook again because for some reason, it is never
+                  ;; added to the second buffer (TODO)
+                  (pkg-diff--setup-ediff-auto-text-scale)
+
+                  ;; Prevent infinite loops
+                  (let ((text-scale-mode-hook
+                         (delq 'pkg-diff--ediff-auto-text-scale
+                               text-scale-mode-hook)))
+                    (ignore text-scale-mode-hook)
+                    (text-scale-set original-buf-text-scale-amount))))))
+        ;; Remove
+        (with-no-warnings
+          (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))))))
 
 (add-hook 'ediff-prepare-buffer-hook #'pkg-diff--setup-ediff-auto-text-scale)
 
