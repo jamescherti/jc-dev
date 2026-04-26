@@ -2180,25 +2180,26 @@ the window is resized). This function fixes these issues."
 
   (setq persist-text-scale-buffer-category-function 'my-persist-text-scale-function))
 
-;;; ediff: Synchronize text scale when ediff starts
+;;; ediff: Sync text scale when ediff starts
+;; TODO patch?
 
-;; (defun my-ediff-sync-text-scale ()
-;;   "Synchronize the text scale zoom of all ediff buffers to match Buffer A."
-;;   (let ((zoom-level (with-current-buffer ediff-buffer-A
-;;                       (if (bound-and-true-p text-scale-mode)
-;;                           text-scale-mode-amount
-;;                         0))))
-;;     (when (buffer-live-p ediff-buffer-B)
-;;       (with-current-buffer ediff-buffer-B
-;;         (text-scale-set zoom-level)))
-;;     (when (and (boundp 'ediff-buffer-C)
-;;                (buffer-live-p ediff-buffer-C))
-;;       (with-current-buffer ediff-buffer-C
-;;         (text-scale-set zoom-level)))))
-;;
-;; (add-hook 'ediff-startup-hook #'my-ediff-sync-text-scale)
+(defun pkg-diff--ediff-sync-zoom-startup ()
+  "Synchronize text scale in all Ediff buffers based on Buffer A."
+  (when (and (boundp 'ediff-buffer-A) (buffer-live-p ediff-buffer-A))
+    (let ((zoom-level (with-current-buffer ediff-buffer-A
+                        (if (boundp 'text-scale-mode-amount)
+                            text-scale-mode-amount
+                          0))))
+      (dolist (buf (list (and (boundp 'ediff-buffer-B) ediff-buffer-B)
+                         (and (boundp 'ediff-buffer-C) ediff-buffer-C)))
+        (when (buffer-live-p buf)
+          (with-current-buffer buf
+            (text-scale-set zoom-level)))))))
+
+(add-hook 'ediff-startup-hook #'pkg-diff--ediff-sync-zoom-startup)
 
 ;;; ediff: Synchronize text scale when the user changes it
+;; TODO patch?
 (defun pkg-diff--ediff-control-panel-window ()
   "Return the window displaying the *Ediff Control Panel* buffer, if any."
   (seq-find (lambda (win)
@@ -2224,9 +2225,6 @@ the window is resized). This function fixes these issues."
 This installs `pkg-diff--ediff-auto-text-scale` on `text-scale-mode-hook` in
 each Ediff buffer when the session starts, and cleans up automatically when the
 session ends."
-  ;; FORCE RESET: Ensure the buffer starts at the default zoom level
-  (text-scale-set 0)
-
   (with-no-warnings
     (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
 
