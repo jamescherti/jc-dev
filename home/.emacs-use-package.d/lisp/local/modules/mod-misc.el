@@ -2225,7 +2225,7 @@ the window is resized). This function fixes these issues."
 This installs `pkg-diff--ediff-auto-text-scale` on `text-scale-mode-hook` in
 each Ediff buffer when the session starts, and cleans up automatically when the
 session ends."
-  (message "ADD TO: %s" (current-buffer))
+  (message "[EDIFF] ADD TO: %s" (current-buffer))
   (with-no-warnings
     (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
 
@@ -2254,8 +2254,10 @@ session ends."
                     (ignore text-scale-mode-hook)
                     (text-scale-set original-buf-text-scale-amount))))))
         ;; Remove
-        (with-no-warnings
-          (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))))))
+        ;; (message "[EDIFF] REMOVE %s" (current-buffer))
+        ;; (with-no-warnings
+        ;;   (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))
+        t))))
 
 (add-hook 'ediff-prepare-buffer-hook #'pkg-diff--setup-ediff-auto-text-scale)
 
