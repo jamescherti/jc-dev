@@ -2224,6 +2224,9 @@ the window is resized). This function fixes these issues."
 This installs `pkg-diff--ediff-auto-text-scale` on `text-scale-mode-hook` in
 each Ediff buffer when the session starts, and cleans up automatically when the
 session ends."
+  ;; FORCE RESET: Ensure the buffer starts at the default zoom level
+  (text-scale-set 0)
+
   (with-no-warnings
     (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
 
