@@ -565,26 +565,80 @@ WIDTH is the tab width."
     (setq recentf-exclude
           (append recentf-exclude
                   (list
-                   "^/\\(?:su\\|sudo\\)?:"
                    "^~/\\.emacs"
                    "^~/\\.src"
                    "^~/src/forks/"
                    "^~/\\.[a-z]*-?emacs"
                    "^/opt/local/"
+
                    "\\.tar$" "\\.tbz2$" "\\.tbz$" "\\.tgz$" "\\.bz2$" "\\.bz$"
                    "\\.gz$" "\\.gzip$" "\\.xz$" "\\.zpaq$" "\\.lz$" "\\.lrz$"
                    "\\.lzo$" "\\.lzma$" "\\.shar$" "\\.kgb$" "\\.zip$" "\\.Z$"
                    "\\.7z$" "\\.rar$"
 
-                   ;; TODO lighemacs?
-                   "COMMIT_EDITMSG\\'"
-
                    "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
 
-                   ;; TODO add lightemacs dir
+                   ;; Exclude OS temporary directories
+                   "^/tmp/"
+                   "^/var/tmp/"
 
-                   "-autoloads\\.el$"
-                   "autoload\\.el$"))))
+                   ;; Include
+                   "^/usr/include/"
+                   "/TAGS\\'"
+                   ;; "/GTAGS\\'"
+                   ;; "/GRAGS\\'"
+                   ;; "/GPATH$\\'"
+
+                   "/elpa/.*\\'"
+                   "/tramp.*\\'"
+                   "/ssh\\(x\\)?:"
+                   "/su\\(do\\)?:"
+
+                   "/\\.git/.*\\'"
+                   "/\\.hg/.*\\'"
+                   "/\\.svn/.*\\'"
+
+                   ;; "/\\.loaddefs\\.elc?\\'"
+                   ;; "-autoloads\\.el$"
+                   ;; "autoload\\.el$"
+
+                   ;; "/\\.cache/"
+                   ;; "/\\.git/"
+                   ;; "/\\.svn/"
+
+                   ;; "emacs/src/"
+                   ;; "/usr/share/emacs/"
+                   ;; "/usr/local/share/emacs/"
+
+                   ;; Exclude all remote files (prevents TRAMP hangs)
+                   ;; #'file-remote-p
+
+                   ;; binary
+                   ;; "\\.mkv$"
+                   ;; "\\.mp[34]$"
+                   ;; "\\.avi$"
+                   ;; "\\.wav$"
+                   ;; "\\.docx?$"
+                   ;; "\\.xlsx?$"
+                   ;; sub-titles
+                   ;; "\\.sub$"
+                   ;; "\\.srt$"
+                   ;; "\\.ass$"
+
+                   ;; "/eln-cache/"
+
+                   ;; TODO add lightemacs dir
+                   ;; ".cask"
+                   ;; "/G?TAGS$"
+                   ;; "\\.?cache"
+                   ;; "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
+                   ;; "\\.revive$"
+                   ;; "^/ssh:"
+                   ;; "/persp-confs/"
+                   ;; "bookmarks"
+                   ;; "url"
+                   ;; tramp-file-name-regexp
+                   ))))
 
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
