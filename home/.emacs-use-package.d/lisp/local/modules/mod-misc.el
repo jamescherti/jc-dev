@@ -3115,6 +3115,12 @@ visibility when navigation commands are executed."
 
 ;; TODO use a loop to add to hooks and advice functions
 (with-eval-after-load 'flymake
+  (with-eval-after-load 'git-gutter
+    (advice-add 'git-gutter:previous-hunk :around
+                #'lightemacs-default-settings--advice-recenter-maybe)
+    (advice-add 'git-gutter:next-hunk :around
+                #'lightemacs-default-settings--advice-recenter-maybe))
+
   (advice-add 'flymake-goto-next-error :around
               #'lightemacs-default-settings--advice-recenter-maybe)
   (advice-add 'flymake-goto-prev-error :around

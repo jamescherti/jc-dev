@@ -153,7 +153,7 @@ def git_py_find_repo(root: Path) -> set[Path]:
     :rtype: set[Path]
     """
     return {
-        git_dir.parent.resolve()
+        git_dir.absolute().parent
         for git_dir in root.rglob(".git")
         if git_dir.is_dir()
     }
@@ -259,27 +259,43 @@ def process_repo(repo_path: Path, exec_bg_cmd: Optional[list[str]],
     return RepoContext(path=repo_path, bg_result=bg_result)
 
 
-def discover_repos(directory: Path, max_workers: int) -> set[Path]:
+def discover_repos(directory: Path,
+                   max_workers: int,
+                   exclude_dirs: list[str]) -> set[Path]:
     """
-    Discover Git repositories starting from the given directory.
+    Discover Git repositories starting from 'directory' and apply exclusions.
 
     :param directory: The root directory for search.
     :type directory: Path
     :param max_workers: Maximum number of threads/workers.
     :type max_workers: int
+    :param exclude_dirs: Directories to exclude.
+    :type exclude_dirs: list[str]
     :return: A set of repository root paths.
     :rtype: set[Path]
     """
-    # 1. Check if the directory itself is inside a repo
+    repos: set[Path] = set()
+
+    # Discover all repositories
     toplevel: Optional[Path] = git_toplevel(directory)
     if toplevel:
-        return {toplevel}
+        repos = {toplevel}
+    elif shutil.which("fd"):
+        repos = git_fd_find_repo(directory, max_workers)
+    else:
+        repos = git_py_find_repo(directory)
 
-    # 2. Search subdirectories
-    if shutil.which("fd"):
-        return git_fd_find_repo(directory, max_workers)
+    # Filter out excluded directories
+    if not exclude_dirs:
+        return repos
 
-    return git_py_find_repo(directory)
+    list_ex_paths: list[Path] = [Path(ex_dir).resolve()
+                                 for ex_dir in exclude_dirs]
+    return {
+        repo for repo in repos
+        if not any(repo.resolve().is_relative_to(ex_path)
+                   for ex_path in list_ex_paths)
+    }
 
 
 def execute_parallel_tasks(
@@ -338,6 +354,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("."),
         help="Root directory to search (defaults to current directory)"
+    )
+    parser.add_argument(
+        "--exclude-dir",
+        action="append",
+        default=[],
+        help="Exclude a specific directory and all of its subdirectories"
     )
     parser.add_argument(
         "-b", "--bg",
@@ -420,9 +442,10 @@ def main() -> None:
             file=sys.stderr)
         sys.exit(127)
 
-    # 1. Discover Repositories
-    repos: set[Path] = discover_repos(
-        args.directory.resolve(), args.max_workers)
+    # Discover Repositories
+    repos: set[Path] = discover_repos(args.directory.absolute(),
+                                      args.max_workers,
+                                      args.exclude_dir)
 
     # setup background command list if needed
     exec_bg_cmd: Optional[list[str]] = None
@@ -433,7 +456,7 @@ def main() -> None:
     if args.if_exec:
         if_exec_cmd = shlex.split(args.if_exec)
 
-    # 2. Parallel Processing (Filter + Background Exec)
+    # Parallel Processing (Filter + Background Exec)
     processed_repos: list[RepoContext] = execute_parallel_tasks(
         repos,
         exec_bg_cmd,
@@ -443,7 +466,7 @@ def main() -> None:
 
     execution_errors: list[tuple[Path, CommandResult]] = []
 
-    # 3. Main Loop: Display results and run sequential commands
+    # Main Loop: Display results and run sequential commands
     for context in processed_repos:
         repo_path: Path = context.path
 
@@ -494,7 +517,7 @@ def main() -> None:
         if not args.exec_cmd:
             print(repo_path)
 
-    # 4. Final Error Summary
+    # Final Error Summary
     sys.exit(print_error_summary(execution_errors))
 
 
