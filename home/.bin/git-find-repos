@@ -55,13 +55,9 @@ class CommandResult:
     Data class to store the result of a subprocess command execution.
 
     :param command: The command that was executed.
-    :type command: list[str]
     :param returncode: The exit status of the command.
-    :type returncode: int
     :param stdout: Standard output content.
-    :type stdout: str
     :param stderr: Standard error content.
-    :type stderr: str
     """
     command: list[str]
     returncode: int
@@ -75,9 +71,7 @@ class RepoContext:
     A processed Git repository and its execution states.
 
     :param path: The absolute path to the repository root.
-    :type path: Path
     :param bg_result: The result of the background execution, if any.
-    :type bg_result: Optional[CommandResult]
     """
     path: Path
     bg_result: Optional[CommandResult] = None
@@ -88,10 +82,8 @@ def git_toplevel(repo_path: Path) -> Optional[Path]:
     Return the absolute path to the top-level directory of a Git repository.
 
     :param repo_path: Path inside the Git repository.
-    :type repo_path: Path
     :return: Path to the repository's top-level directory, or None if not a
              Git repo.
-    :rtype: Optional[Path]
     """
     try:
         proc: subprocess.CompletedProcess[str] = subprocess.run(
@@ -110,11 +102,8 @@ def git_fd_find_repo(path: Path, max_workers: int) -> set[Path]:
     Find all Git repositories in 'path' using fd.
 
     :param path: The root directory to search for Git repositories.
-    :type path: Path
     :param max_workers: Maximum number of threads for fd.
-    :type max_workers: int
     :return: set of paths to Git repositories.
-    :rtype: set[Path]
     """
     path_str: str = str(path)
     try:
@@ -148,9 +137,7 @@ def git_py_find_repo(root: Path) -> set[Path]:
     Recursively find all Git repositories under the root path using Python.
 
     :param root: Directory to search under.
-    :type root: Path
     :return: set of paths to Git repositories.
-    :rtype: set[Path]
     """
     return {
         git_dir.absolute().parent
@@ -165,13 +152,9 @@ def run_command_get_output(repo_path: Path, cmd_list: list[str],
     Execute a shell command within a specific directory.
 
     :param repo_path: The directory in which to execute the command.
-    :type repo_path: Path
     :param cmd_list: The command list to execute.
-    :type cmd_list: list[str]
     :param capture: Whether to capture stdout/stderr.
-    :type capture: bool
     :return: The result of the command execution.
-    :rtype: CommandResult
     """
     if not cmd_list:
         return CommandResult(command=[], returncode=0)
@@ -203,11 +186,8 @@ def format_bg_output(repo_path: Path, result: CommandResult) -> str:
     Format the output of a background command for display.
 
     :param repo_path: The repository path.
-    :type repo_path: Path
     :param result: The execution result.
-    :type result: CommandResult
     :return: Formatted string ready for printing.
-    :rtype: str
     """
     header: str = f"{colorama.Fore.YELLOW}[EXEC-BG] {repo_path}"
     cmd_str: str = " ".join(result.command)
@@ -232,13 +212,9 @@ def process_repo(repo_path: Path, exec_bg_cmd: Optional[list[str]],
     Process a single repository: check conditions and run background commands.
 
     :param repo_path: The repository path.
-    :type repo_path: Path
     :param exec_bg_cmd: Command list to execute in background/parallel.
-    :type exec_bg_cmd: Optional[list[str]]
     :param if_exec_cmd: Command list to check before processing (filter).
-    :type if_exec_cmd: Optional[list[str]]
     :return: RepoContext if processed successfully, None if filtered out.
-    :rtype: Optional[RepoContext]
     """
     # Filter: if-exec
     if if_exec_cmd:
@@ -266,13 +242,9 @@ def discover_repos(directory: Path,
     Discover Git repositories starting from 'directory' and apply exclusions.
 
     :param directory: The root directory for search.
-    :type directory: Path
     :param max_workers: Maximum number of threads/workers.
-    :type max_workers: int
     :param exclude_dirs: Directories to exclude.
-    :type exclude_dirs: list[str]
     :return: A set of repository root paths.
-    :rtype: set[Path]
     """
     repos: set[Path] = set()
 
@@ -308,15 +280,10 @@ def execute_parallel_tasks(
     Run discovery and background execution in parallel.
 
     :param repos: set of repositories to process.
-    :type repos: set[Path]
     :param exec_bg: Command list for background execution.
-    :type exec_bg: Optional[list[str]]
     :param if_exec: Command list for conditional filtering.
-    :type if_exec: Optional[list[str]]
     :param max_workers: Maximum number of threads for execution.
-    :type max_workers: int
     :return: list of processed repository contexts.
-    :rtype: list[RepoContext]
     """
     results: list[RepoContext] = []
 
@@ -343,7 +310,6 @@ def parse_args() -> argparse.Namespace:
     Parse command-line arguments.
 
     :return: Parsed arguments.
-    :rtype: argparse.Namespace
     """
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="Find git repos and execute commands.",
@@ -397,9 +363,7 @@ def print_error_summary(errors: list[tuple[Path, CommandResult]]) -> int:
     Print a summary of execution errors.
 
     :param errors: list of tuples containing path and result.
-    :type errors: list[tuple[Path, CommandResult]]
     :return: The final exit code (1 if errors exist, else 0).
-    :rtype: int
     """
     if not errors:
         return 0
