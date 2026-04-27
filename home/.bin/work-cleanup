@@ -36,7 +36,7 @@ TOTAL_CLEANUPS=0
 
 ATEXIT_DONE=0
 atexit() {
-  trap - EXIT INT TERM
+  trap - EXIT INT TERM HUP QUIT
   local errno="$?"
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     if [[ $TOTAL_CLEANUPS -eq 0 ]]; then
@@ -47,7 +47,7 @@ atexit() {
   exit "$errno"
 }
 
-trap 'atexit' INT TERM EXIT
+trap 'atexit' EXIT INT TERM HUP QUIT
 
 cleanup_files() {
   local path="$1"

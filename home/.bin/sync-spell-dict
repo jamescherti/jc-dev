@@ -62,7 +62,7 @@ set -o errtrace
 TMP_FILE=$(mktemp)
 ATEXIT_DONE=0
 atexit() {
-  trap - EXIT INT TERM
+  trap - EXIT INT TERM HUP QUIT
   local errno="$?"
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     if [[ -f "$TMP_FILE" ]]; then
@@ -72,7 +72,7 @@ atexit() {
   fi
   exit "$errno"
 }
-trap 'atexit' INT TERM EXIT
+trap 'atexit' EXIT INT TERM HUP QUIT
 
 #-------------------------------------------------------------------------------
 # Generate unified spell file
