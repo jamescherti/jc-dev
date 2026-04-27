@@ -1441,7 +1441,7 @@ If the parentheses are balanced, the function returns t."
 
 (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)
-(add-hook 'gfm-mode-hook #'my-setup-markdown-mode)
+;; (add-hook 'gfm-mode-hook #'my-setup-markdown-mode)
 
 ;;; Code that replaces evil visualstar
 
@@ -1722,11 +1722,8 @@ ignored and logged as a warning. All other errors are re-raised."
   "Setup the markdown-toc package."
   (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t))
 
-(when (fboundp 'my-setup-markdown-toc)
-  (add-hook 'gfm-mode-hook #'my-setup-markdown-toc)
-  (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-toc)
-  (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
-
+(add-hook 'markdown-ts-mode-hook #'my-setup-markdown-toc)
+(add-hook 'markdown-mode-hook #'my-setup-markdown-toc)
 
 ;;; Silence C-f
 
