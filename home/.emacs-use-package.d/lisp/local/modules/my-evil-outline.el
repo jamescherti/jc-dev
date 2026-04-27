@@ -126,18 +126,5 @@ heading."
 (add-hook 'outline-indent-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
 (add-hook 'outline-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
 
-;;; Fix TODO Emacs patch
-
-;; (defun outline-indent--advice-backtrack-whitespace (&rest _args)
-;;   "Backtrack over whitespace-only lines to prevent them from being folded.
-;; This advice ensures that empty lines between headings or at the end of
-;; the buffer remain visible when a fold is applied."
-;;   (if (eobp)
-;;       ;; We stopped at a nonempty line (the next heading).
-;;       (outline--end-of-previous)))
-;;
-;; (advice-add 'outline-end-of-subtree :after
-;;             #'outline-indent--advice-backtrack-whitespace)
-
 (provide 'my-evil-outline)
 ;;; my-evil-outline.el ends here
