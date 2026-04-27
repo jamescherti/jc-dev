@@ -604,7 +604,7 @@
 
                            le-csv-mode
 
-                           le-treesit-fold
+                           le-group-code-folding
 
                            ;; le-diminish
 
@@ -668,9 +668,6 @@
                            le-markdown-mode
                            le-markdown-toc
                            le-edit-indirect
-
-                           le-outline
-                           le-outline-indent
 
                            le-yasnippet
                            ;; le-yasnippet-snippets

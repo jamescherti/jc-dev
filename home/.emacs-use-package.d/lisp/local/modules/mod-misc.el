@@ -34,6 +34,8 @@
 
 ;;; testing
 
+(setq-default search-invisible nil)
+
 (setq global-auto-revert-non-file-buffers nil)
 
 ;;; Delete unused packages
@@ -537,43 +539,9 @@ WIDTH is the tab width."
   (setq hs-isearch-open t)  ;; Open both comments and code
 
   ;; Code folding
-  (add-hook 'emacs-lisp-mode-hook #'outline-minor-mode)
-  (add-hook 'conf-mode-hook 'outline-minor-mode)
-  ;; (add-hook 'grep-mode-hook 'outline-minor-mode)
-  (add-hook 'markdown-mode-hook 'outline-minor-mode)
-
   ;; Note: html-mode usually relies on specialized packages like sgml-mode or web-mode folding
 
-  (progn
-    ;; Systems and General Purpose
-    (add-hook 'c-mode-hook #'hs-minor-mode)
-    (add-hook 'c++-mode-hook #'hs-minor-mode)
-    (add-hook 'java-mode-hook #'hs-minor-mode)
-    (add-hook 'rust-mode-hook #'hs-minor-mode)
-    (add-hook 'go-mode-hook #'hs-minor-mode)
-    (add-hook 'ruby-mode-hook #'hs-minor-mode)
-
-    ;; Web and Frontend
-    (add-hook 'js-mode-hook #'hs-minor-mode)
-    (add-hook 'typescript-mode-hook #'hs-minor-mode)
-    (add-hook 'css-mode-hook #'hs-minor-mode)
-
-    ;; Scripting, Data, and Infrastructure
-    (add-hook 'sh-mode-hook #'hs-minor-mode) ; for bash/shell scripts
-    (add-hook 'json-mode-hook #'hs-minor-mode)
-    (add-hook 'lua-mode-hook #'hs-minor-mode))
-
   ;; (add-hook 'web-mode-hook 'hs-minor-mode)
-
-  ;; (add-hook 'sh-mode-hook 'outline-indent-minor-mode)
-  (progn
-    (add-hook 'yaml-mode-hook 'outline-indent-minor-mode)
-    (add-hook 'python-mode-hook 'outline-indent-minor-mode)
-
-    ;; TODO right choice?
-    ;; (add-hook 'bash-ts-mode-hook 'outline-indent-minor-mode)
-    (add-hook 'yaml-ts-mode-hook 'outline-indent-minor-mode)
-    (add-hook 'python-ts-mode-hook 'outline-indent-minor-mode))
 
   (progn
     (add-hook 'markdown-ts-mode-hook 'outline-minor-mode))
@@ -581,38 +549,6 @@ WIDTH is the tab width."
   ;; (add-hook 'js-ts-mode-hook 'hs-minor-mode)
 
   ;; TODO lightemacs treesit-fold?
-  (progn
-    ;; Systems and General Purpose
-    (add-hook 'c-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'c++-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'java-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'rust-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'go-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'ruby-ts-mode-hook 'treesit-fold-mode)
-
-    ;; Web and Frontend
-    (add-hook 'js-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'typescript-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'tsx-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'css-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'html-ts-mode-hook 'treesit-fold-mode)
-
-    ;; Scripting and Infrastructure
-    (add-hook 'bash-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'cmake-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'dockerfile-ts-mode-hook 'treesit-fold-mode)
-
-    ;; Data and Configuration
-    (add-hook 'json-ts-mode-hook 'treesit-fold-mode)
-    (add-hook 'toml-ts-mode-hook 'treesit-fold-mode)
-
-    ;; Third-party
-    ;; (add-hook 'kotlin-ts-mode-hook #'treesit-fold-mode)
-    ;; (add-hook 'swift-ts-mode-hook #'treesit-fold-mode)
-    ;; (add-hook 'elixir-ts-mode-hook #'treesit-fold-mode)
-    ;; (add-hook 'zig-ts-mode-hook #'treesit-fold-mode))
-    )
-
   ;; (add-hook 'lisp-interaction-mode-hook #'outline-minor-mode)
 
   ;; This fixes the skipping when scrolling long org documents
@@ -1220,8 +1156,6 @@ WIDTH is the tab width."
 
   ;; Set this to nil if you want to do it on demand, with my `agitate' package
   ;; (setq diff-refine nil)
-
-  (add-hook 'diff-mode-hook #'outline-minor-mode)
 
   (setq vertico-count 13)
   (with-eval-after-load 'consult
