@@ -32,6 +32,28 @@
 (require 'seq)
 (require 'my-defun)
 
+;;; TODO lightemacs? Fix annoyance: package upgrade :vc splits
+
+;; Prevent version control async commands (like "git pull --stat") from popping
+;; up new windows when upgrading Emacs packages. This works by temporarily
+;; setting the internal vc-dispatcher variable 'vc--inhibit-async-window' to t
+;; strictly during the execution of package upgrade commands.
+(defun my-inhibit-vc-async-window-around-advice (orig-fun &rest args)
+  "Inhibit VC async windows during package upgrades.
+ORIG-FUN is the original upgrade function, and ARGS are its arguments."
+  (let ((vc--inhibit-async-window t))
+    (ignore vc--inhibit-async-window)
+    (apply orig-fun args)))
+
+;; Apply the advice to the built-in package and package-vc upgrade commands.
+(with-eval-after-load 'package
+  (advice-add 'package-upgrade :around #'my-inhibit-vc-async-window-around-advice)
+  (advice-add 'package-upgrade-all :around #'my-inhibit-vc-async-window-around-advice))
+
+(with-eval-after-load 'package-vc
+  (advice-add 'package-vc-upgrade :around #'my-inhibit-vc-async-window-around-advice)
+  (advice-add 'package-vc-upgrade-all :around #'my-inhibit-vc-async-window-around-advice))
+
 ;;; testing
 
 (setq-default search-invisible nil)
