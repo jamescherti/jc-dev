@@ -4705,6 +4705,19 @@ are editing by falling back to another visible file buffer."
 ;; (lightemacs-use-package git-gutter-fringe
 ;;   :after git-gutter)
 
+;;; le-undo-fu
+
+(with-eval-after-load 'le-undo-fu-session
+  (setq undo-fu-session-incompatible-files
+        '(;; ".*\\.age$"
+          ;; "/\\.authinfo\\'"
+          ;; "/\\.netrc\\'"
+          "/SQUASH_MSG\\'"
+          "/TAG_EDITMSG\\'"
+          "/PULLREQ_EDITMSG\\'"
+          "^/tmp/"
+          "^/var/tmp/")))
+
 ;;; Provide
 
 (provide 'mod-misc)
