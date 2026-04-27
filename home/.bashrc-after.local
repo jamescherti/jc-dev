@@ -50,7 +50,9 @@ else
 fi
 
 # Reset the SSH agent
+# shellcheck disable=SC2034
 SSH_AGENT_PID=""
+# shellcheck disable=SC2034
 SSH_AUTH_SOCK=""
 
 #-----------------------------------------> INTERACTIVE
@@ -81,6 +83,47 @@ handle_ctrl_d() {
 
 # Bind Ctrl+D (\C-d) to the custom shell function
 bind -x '"\C-d": handle_ctrl_d'
+
+#-------------------------------------------------------------------------------
+# Handle TMOUT
+#-------------------------------------------------------------------------------
+# Save the initial TMOUT value so we can restore it when needed. We only do this
+# once at startup to avoid overwriting it.
+if [[ -z "$DEFAULT_TMOUT" && -n "$TMOUT" ]]; then
+  export DEFAULT_TMOUT="$TMOUT"
+fi
+
+_jc_manage_tmux_tmout() {
+  # If the TMUX environment variable is missing, we are outside a session.
+  # Restore the default TMOUT and exit the function.
+  if [[ -z "$TMUX" ]]; then
+    if [[ -n "$DEFAULT_TMOUT" ]]; then
+      export TMOUT="$DEFAULT_TMOUT"
+    fi
+
+    return
+  fi
+
+  # We are inside tmux. Query the number of windows in the current session.
+  local window_count
+  window_count=$(tmux display-message -p '#{session_windows}' 2>/dev/null)
+
+  # If there is exactly 1 window, unset TMOUT so the session does not quit.
+  if [[ "$window_count" -eq 1 ]]; then
+    unset TMOUT
+  else
+    # If there are multiple windows, re-enable the default TMOUT.
+    if [[ -n "$DEFAULT_TMOUT" ]]; then
+      export TMOUT="$DEFAULT_TMOUT"
+    fi
+  fi
+}
+
+# Append the function to PROMPT_COMMAND so it runs before each prompt.
+# We check to ensure we do not add it multiple times if ~/.bashrc is re-sourced.
+if [[ "$PROMPT_COMMAND" != *"_jc_manage_tmux_tmout"* ]]; then
+  PROMPT_COMMAND="_jc_manage_tmux_tmout${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+fi
 
 # Init bashrc improved {{{
 
@@ -321,8 +364,10 @@ alias yamllint="yamllint -c ~/.yamllint_global.yml"
 _git_checkout() {
   __git_has_doubledash && return
 
-  local dwim_opt="$(__git_checkout_default_dwim_mode)"
+  local dwim_opt
+  dwim_opt="$(__git_checkout_default_dwim_mode)"
 
+  # shellcheck disable=SC2154
   case "$prev" in
   -b | -B | --orphan)
     # Complete local branches (and DWIM branch
@@ -330,12 +375,13 @@ _git_checkout() {
     # specifying a new branch name. This is for
     # convenience, assuming new branches are
     # possibly based on pre-existing branch names.
-    __git_complete_refs $dwim_opt --mode="heads"
+    __git_complete_refs "$dwim_opt" --mode="heads"
     return
     ;;
   *) ;;
   esac
 
+  # shellcheck disable=SC2154
   case "$cur" in
   --conflict=*)
     __gitcomp "diff3 merge zdiff3" "" "${cur##--conflict=}"
