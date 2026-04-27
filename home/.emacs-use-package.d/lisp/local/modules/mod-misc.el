@@ -4712,9 +4712,9 @@ are editing by falling back to another visible file buffer."
         '(;; ".*\\.age$"
           ;; "/\\.authinfo\\'"
           ;; "/\\.netrc\\'"
-          "/SQUASH_MSG\\'"
-          "/TAG_EDITMSG\\'"
-          "/PULLREQ_EDITMSG\\'"
+          ;; "/SQUASH_MSG\\'"
+          ;; "/TAG_EDITMSG\\'"
+          ;; "/PULLREQ_EDITMSG\\'"
           "^/tmp/"
           "^/var/tmp/")))
 
