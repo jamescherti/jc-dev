@@ -568,35 +568,52 @@ WIDTH is the tab width."
                    "^~/\\.emacs"
                    "^~/\\.src"
                    "^~/src/forks/"
-                   "^~/\\.[a-z]*-?emacs"
+                   "^~/\\.[a-z-]*-?emacs.d/"
                    "^/opt/local/"
 
-                   "\\.tar$" "\\.tbz2$" "\\.tbz$" "\\.tgz$" "\\.bz2$" "\\.bz$"
-                   "\\.gz$" "\\.gzip$" "\\.xz$" "\\.zpaq$" "\\.lz$" "\\.lrz$"
-                   "\\.lzo$" "\\.lzma$" "\\.shar$" "\\.kgb$" "\\.zip$" "\\.Z$"
-                   "\\.7z$" "\\.rar$"
+                   ;; Archives and Compressed Files
+                   "\\.tar$" "\\.gz$" "\\.zip$" "\\.7z$" "\\.rar$" "\\.xz$" "\\.bz2?$"
+                   ;; "\\.tbz2?$" "\\.tgz$" "\\.gzip$"
+                   ;; "\\.zpaq$" "\\.lz$" "\\.lrz$" "\\.lzo$" "\\.lzma$"
+                   ;; "\\.shar$" "\\.kgb$" "\\.Z$" "\\.zst$"
+                   ;; "\\.tzst$" "\\.lz4$" "\\.br$" "\\.cpio$" "\\.cab$" "\\.arj$"
+                   ;; "\\.lzh$" "\\.lha$"
 
-                   "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
+                   ;; Packages, Images, and Ecosystem Archives
+                   ;; "\\.deb$" "\\.rpm$" "\\.apk$" "\\.dmg$" "\\.iso$"
+                   ;; "\\.jar$" "\\.war$" "\\.ear$" "\\.whl$"
+
+                   ;; Images and Media
+                   "\\.\\(?:gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
+                   ;; "\\.mkv$" "\\.mp[34]$" "\\.avi$" "\\.wav$"
 
                    ;; Exclude OS temporary directories
                    "^/tmp/"
                    "^/var/tmp/"
 
-                   ;; Include
-                   "^/usr/include/"
-                   "/TAGS\\'"
-                   ;; "/GTAGS\\'"
-                   ;; "/GRAGS\\'"
-                   ;; "/GPATH$\\'"
-
                    "/elpa/.*\\'"
                    "/tramp.*\\'"
                    "/ssh\\(x\\)?:"
-                   "/su\\(do\\)?:"
 
+                   ;; Exclude local bypass and root
+                   ;; "^/\\(?:su\\|sudo\\)?:"
+
+                   ;; Version Control (keeps out COMMIT_EDITMSG, MERGE_MSG,
+                   ;; etc.)
                    "/\\.git/.*\\'"
-                   "/\\.hg/.*\\'"
-                   "/\\.svn/.*\\'"
+                   ;; "/\\.hg/.*\\'"
+                   ;; "/\\.svn/.*\\'"
+
+                   ;; Emacs cache files
+                   ;; "/recentf\\'"   ; Don't track recentf itself
+                   ;; "/bookmarks\\'" ; Don't track bookmarks
+
+                   ;; Include
+                   ;; "^/usr/include/"
+                   ;; "/TAGS\\'"
+                   ;; "/GTAGS\\'"
+                   ;; "/GRAGS\\'"
+                   ;; "/GPATH$\\'"
 
                    ;; "/\\.loaddefs\\.elc?\\'"
                    ;; "-autoloads\\.el$"
@@ -614,10 +631,6 @@ WIDTH is the tab width."
                    ;; #'file-remote-p
 
                    ;; binary
-                   ;; "\\.mkv$"
-                   ;; "\\.mp[34]$"
-                   ;; "\\.avi$"
-                   ;; "\\.wav$"
                    ;; "\\.docx?$"
                    ;; "\\.xlsx?$"
                    ;; sub-titles
@@ -635,7 +648,7 @@ WIDTH is the tab width."
                    ;; "\\.revive$"
                    ;; "^/ssh:"
                    ;; "/persp-confs/"
-                   ;; "bookmarks"
+                   ;; Emacs state/cache files (Fixing the TODO)
                    ;; "url"
                    ;; tramp-file-name-regexp
                    ))))
