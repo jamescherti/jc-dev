@@ -3534,6 +3534,9 @@ This function is intended for use as :around advice."
   (lightemacs-emacs-startup . buffer-guardian-mode)
 
   :init
+  ;; TODO buffer-guardian
+  ;; (setq buffer-guardian-save-trigger-functions '())
+
   (setq buffer-guardian-verbose nil)
   (setq buffer-guardian-save-all-buffers-interval (* 60 30))
   (setq buffer-guardian-save-all-buffers-idle 30))
