@@ -400,6 +400,76 @@ config_gpg() {
   fi
 }
 
+config-fonts() {
+  local fonts_dir=(
+    "$HOME/.local/share/fonts"
+    "/usr/local/share/fonts"
+  )
+
+  local microsoft_fonts_found=0
+  local fc_cache_update=0
+  local source_conf
+  local conf_file
+  local conf_dir="${HOME}/.config/fontconfig/conf.d"
+
+  local local_ms_fonts_conf_file="${conf_dir}/50-ms-fonts.conf"
+
+  mkdir -p "${conf_dir}"
+
+  # Check if Microsoft fonts exist in the specified directories
+  if ! [[ -f "$local_ms_fonts_conf_file" ]]; then
+    local dir
+    local match
+    for dir in "${fonts_dir[@]}"; do
+      if [ -d "$dir" ]; then
+        # Look for arial.ttf (case-insensitive) to confirm presence
+        match=$(find "$dir" -maxdepth 3 -iname "arial.ttf" -print -quit)
+        if [ -n "$match" ]; then
+          echo "[FONTS] Microsoft fonts detected in: $dir"
+          microsoft_fonts_found=1
+          break
+        fi
+      fi
+    done
+  else
+    microsoft_fonts_found=1
+  fi
+
+  if [ "$microsoft_fonts_found" -ne 0 ]; then
+    source_conf="data/settings/fontconfig/50-ms-fonts.conf"
+    conf_file="$local_ms_fonts_conf_file"
+    if [[ -f "$source_conf" ]] \
+      && { [[ ! -f "$conf_file" ]] \
+        || [[ "$source_conf" -nt "$conf_file" ]]; }; then
+      if cp "$source_conf" "${conf_file}"; then
+        echo "[FONTS] Fontconfig file created or updated at: ${conf_file}"
+        fc_cache_update=1
+      fi
+    fi
+  fi
+
+  source_conf="data/settings/fontconfig/40-custom.conf"
+  conf_file="${conf_dir}/40-custom.conf"
+  if [[ -f "$source_conf" ]] \
+    && { [[ ! -f "$conf_file" ]] \
+      || [[ "$source_conf" -nt "$conf_file" ]]; }; then
+    if cp "$source_conf" "${conf_file}"; then
+      echo "[FONTS] Fontconfig file created or updated at: ${conf_file}"
+      fc_cache_update=1
+    fi
+  fi
+
+  # Update the font cache to apply the changes immediately
+  if type -P fc-cache &>/dev/null; then
+    if [[ $fc_cache_update -ne 0 ]]; then
+      echo "[FONTS] Refreshing font cache..."
+      fc-cache -f -v
+    else
+      echo "[FONTS] There is no need to update fc-cache"
+    fi
+  fi
+}
+
 main() {
   init
   confirm
@@ -454,6 +524,8 @@ main() {
   fi
 
   config-mimetypes
+
+  config-fonts
 
   echo
   echo Success.
