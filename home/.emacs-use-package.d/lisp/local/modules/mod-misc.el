@@ -69,6 +69,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (when (fboundp 'package-delete)
       (dolist (item '(olivetti
                       posframe
+                      popper
                       rainbow-mode
                       with-editor
                       lsp-mode
