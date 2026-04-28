@@ -3742,9 +3742,16 @@ environment for accurate linting."
   (shell-pop-shell-type '("vterm"
                           "*vterm*"
                           (lambda ()
-                            (let ((tmux-buffer (vterm)))
+                            (let ((tmux-buffer (vterm))
+                                  (project-name (let ((name (my-project-name)))
+                                                  (if name
+                                                      "misc"
+                                                    name))))
                               (with-current-buffer tmux-buffer
-                                (vterm-send-string "exec tmux-session emacs")
+                                (vterm-send-string
+                                 (format
+                                  "exec tmux-session emacs-%s"
+                                  (shell-quote-argument project-name)))
                                 (vterm-send-string "\n")
                                 (vterm-send-return))))))
   :init
@@ -3763,33 +3770,35 @@ environment for accurate linting."
   (setq shell-pop-restore-window-configuration nil)
 
   :preface
-  (defvar my-shell-pop-saved-window-config nil
-    "Stores the absolute window state prior to shell-pop-up.")
+  ;; `shell-pop' layout
+  (progn
+    (defvar my-shell-pop-saved-window-config nil
+      "Stores the absolute window state prior to shell-pop-up.")
 
-  (defun my-shell-pop-save-layout (&rest _args)
-    "Capture the exact layout before shell-pop opens."
-    (setq my-shell-pop-saved-window-config (current-window-configuration)))
+    (defun my-shell-pop-save-layout (&rest _args)
+      "Capture the exact layout before shell-pop opens."
+      (setq my-shell-pop-saved-window-config (current-window-configuration)))
 
-  (defun my-shell-pop-restore-layout (orig-fun &rest args)
-    "Restore the layout without relying on linear winner history.
+    (defun my-shell-pop-restore-layout (orig-fun &rest args)
+      "Restore the layout without relying on linear winner history.
   Only restores if the original working window is still alive."
-    (if (and my-shell-pop-saved-window-config
-             shell-pop-last-window
-             shell-pop-last-buffer
-             (window-live-p shell-pop-last-window)
-             (eq (window-buffer shell-pop-last-window) shell-pop-last-buffer))
-        (progn
-          (run-hooks 'shell-pop-out-hook)
-          (bury-buffer)
-          (set-window-configuration my-shell-pop-saved-window-config)
-          (setq my-shell-pop-saved-window-config nil))
-      ;; Clean up the saved config and fall back to native behavior
-      ;; if the original window was destroyed.
-      (setq my-shell-pop-saved-window-config nil)
-      (apply orig-fun args)))
+      (if (and my-shell-pop-saved-window-config
+               shell-pop-last-window
+               shell-pop-last-buffer
+               (window-live-p shell-pop-last-window)
+               (eq (window-buffer shell-pop-last-window) shell-pop-last-buffer))
+          (progn
+            (run-hooks 'shell-pop-out-hook)
+            (bury-buffer)
+            (set-window-configuration my-shell-pop-saved-window-config)
+            (setq my-shell-pop-saved-window-config nil))
+        ;; Clean up the saved config and fall back to native behavior
+        ;; if the original window was destroyed.
+        (setq my-shell-pop-saved-window-config nil)
+        (apply orig-fun args)))
 
-  (advice-add 'shell-pop-up :before #'my-shell-pop-save-layout)
-  (advice-add 'shell-pop-out :around #'my-shell-pop-restore-layout))
+    (advice-add 'shell-pop-up :before #'my-shell-pop-save-layout)
+    (advice-add 'shell-pop-out :around #'my-shell-pop-restore-layout)))
 
 ;; shell-pop: Change the default directory
 (defun my-around-shell-pop (fn &rest args)
