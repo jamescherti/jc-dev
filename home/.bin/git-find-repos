@@ -25,6 +25,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+# Optional dependencies:
+#   - colorama
+#   - setproctitle
 """
 Module for discovering and managing Git repositories.
 
@@ -46,7 +49,16 @@ from multiprocessing import cpu_count
 from pathlib import Path
 from typing import Optional
 
-import colorama
+try:
+    from colorama import Fore, init as colorama_init
+    HAS_COLORAMA: bool = True
+except ImportError:
+    HAS_COLORAMA = False
+
+    class Fore:  # type: ignore
+        YELLOW: str = ""
+        RED: str = ""
+        RESET: str = ""
 
 
 @dataclass
@@ -189,9 +201,9 @@ def format_bg_output(repo_path: Path, result: CommandResult) -> str:
     :param result: The execution result.
     :return: Formatted string ready for printing.
     """
-    header: str = f"{colorama.Fore.YELLOW}[EXEC-BG] {repo_path}"
+    header: str = f"{Fore.YELLOW}[EXEC-BG] {repo_path}"
     cmd_str: str = " ".join(result.command)
-    header += f": {cmd_str}{colorama.Fore.RESET}\n"
+    header += f": {cmd_str}{Fore.RESET}\n"
 
     raw_output: str = result.stdout + result.stderr
     if not raw_output and result.returncode == 0:
@@ -369,7 +381,7 @@ def print_error_summary(errors: list[tuple[Path, CommandResult]]) -> int:
         return 0
 
     print()
-    print(f"{colorama.Fore.RED}Errors:{colorama.Fore.RESET}")
+    print(f"{Fore.RED}Errors:{Fore.RESET}")
 
     final_errno: int = 0
     for repo_path, result in errors:
@@ -382,8 +394,8 @@ def print_error_summary(errors: list[tuple[Path, CommandResult]]) -> int:
                 msg = f"errno {result.returncode}"
 
             print(
-                f"{colorama.Fore.RED}  - {repo_path}: {msg}: "
-                f"{cmd_display}{colorama.Fore.RESET}"
+                f"{Fore.RED}  - {repo_path}: {msg}: "
+                f"{cmd_display}{Fore.RESET}"
             )
 
     return final_errno
@@ -393,7 +405,18 @@ def main() -> None:
     """
     The main entry point for the command-line interface.
     """
-    colorama.init()
+    # Optional: setproctitle
+    try:
+        # pylint: disable=import-outside-toplevel
+        from setproctitle import setproctitle
+        setproctitle(Path(sys.argv[0]).name)  # type: ignore
+    except ImportError:
+        # Optional dependency 'setproctitle' is not installed.
+        pass
+
+    if HAS_COLORAMA:
+        colorama_init()
+
     # Disable git prompting
     os.environ["GIT_TERMINAL_PROMPT"] = "0"
 
@@ -447,9 +470,9 @@ def main() -> None:
         # Handle Foreground Execution
         if args.exec_cmd and not args.bg:
             print(
-                f"{colorama.Fore.YELLOW}[EXEC] {repo_path}: "
+                f"{Fore.YELLOW}[EXEC] {repo_path}: "
                 f"{subprocess.list2cmdline(args.exec_cmd)}"
-                f"{colorama.Fore.RESET}"
+                f"{Fore.RESET}"
             )
 
             # Run interactively/sequentially (capture=False allows interaction)
