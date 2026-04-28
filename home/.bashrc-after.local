@@ -492,6 +492,9 @@ if [[ $OSFAMILY != "" ]]; then
   fi
 fi
 
+# TODO jc-dotfiles?
+alias pf="git push --force"
+
 alias cip="so cip"
 # alias gd='command git ydiff'
 # alias gdr="git diff"
