@@ -3742,18 +3742,26 @@ environment for accurate linting."
   (shell-pop-shell-type '("vterm"
                           "*vterm*"
                           (lambda ()
-                            (let ((tmux-buffer (vterm))
-                                  (project-name (let ((name (my-project-name)))
-                                                  (if name
-                                                      "misc"
-                                                    name))))
+                            (let ((tmux-buffer (vterm)))
                               (with-current-buffer tmux-buffer
                                 (vterm-send-string
-                                 (format
-                                  "exec tmux-session emacs-%s"
-                                  (shell-quote-argument project-name)))
+                                 "exec tmux-session emacs")
                                 (vterm-send-string "\n")
-                                (vterm-send-return))))))
+                                (vterm-send-return)))
+
+                            ;; (let ((tmux-buffer (vterm))
+                            ;;       (project-name (let ((name (my-project-name)))
+                            ;;                       (if name
+                            ;;                           "misc"
+                            ;;                         name))))
+                            ;;   (with-current-buffer tmux-buffer
+                            ;;     (vterm-send-string
+                            ;;      (format
+                            ;;       "exec tmux-session emacs-%s"
+                            ;;       (shell-quote-argument project-name)))
+                            ;;     (vterm-send-string "\n")
+                            ;;     (vterm-send-return)))
+                            )))
   :init
   (setq shell-pop-window-position "bottom")
   ;; (setq shell-pop-window-position "full")
