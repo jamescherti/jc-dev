@@ -56,6 +56,13 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(setq package-review-policy t
+      package-review-diff-command '("git" "--no-pager" "diff"
+                                    "--no-ext-diff"
+                                    "--no-index"
+                                    "--color=never"
+                                    "--diff-filter=d"))
+
 (setq-default search-invisible nil)
 
 (setq global-auto-revert-non-file-buffers nil)
@@ -3439,8 +3446,15 @@ This function is intended for use as :around advice."
 
 ;;; Disabled packages
 
-;; (lightemacs-use-package ws-butler
-;;   :commands ws-butler-mode)
+(lightemacs-use-package ws-butler
+  :commands ws-butler-mode
+  :init
+  (defun my-setup-ws-butler ()
+    "Setup `lsp-mode'."
+    (when (and (fboundp 'ws-butler-mode)
+               (not (my-code-checker-allowed-p)))
+      (ws-butler-mode)))
+  (add-hook 'find-file-hook #'my-setup-ws-butler))
 
 ;; (lightemacs-use-package quickrun
 ;;   :commands (quickrun
