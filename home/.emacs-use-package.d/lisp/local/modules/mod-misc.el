@@ -3320,12 +3320,12 @@ This function is intended for use as :around advice."
       ;; Yaml/Ansible
       (flyspell-prog-mode)
     ;; Other (e.g., Markdown)
-    (let ((file-name (buffer-file-name (buffer-base-buffer))))
+    (let ((file-name (downcase (buffer-file-name (buffer-base-buffer)))))
       (when (and file-name
-                 (string-suffix-p "/readme.md"
-                                  (downcase file-name))
-                 (string-suffix-p "/changelog.md"
-                                  (downcase file-name)))
+                 (or (string-suffix-p "/readme.md"
+                                      file-name)
+                     (string-suffix-p "/changelog.md"
+                                      file-name)))
         ;; (run-with-idle-timer 1 nil #'flyspell-mode 1)
         (flyspell-mode 1)))))
 
