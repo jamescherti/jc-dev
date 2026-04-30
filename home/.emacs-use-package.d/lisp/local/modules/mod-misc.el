@@ -4778,6 +4778,58 @@ are editing by falling back to another visible file buffer."
           "^/tmp/"
           "^/var/tmp/")))
 
+;;; Customize code folding
+
+(setq lightemacs-outline-minor-target-hooks '(yaml-mode-hook
+                                              yaml-ts-mode-hook
+                                              bash-ts-mode-hook
+                                              sh-mode-hook
+                                              python-mode-hook
+                                              python-ts-mode-hook
+                                              haskell-mode-hook))
+
+(setq lightemacs-treesit-fold-target-hooks '(c-ts-mode-hook
+                                             c++-ts-mode-hook
+                                             java-ts-mode-hook
+                                             rust-ts-mode-hook
+                                             go-ts-mode-hook
+                                             ruby-ts-mode-hook
+                                             js-ts-mode-hook
+                                             typescript-ts-mode-hook
+                                             tsx-ts-mode-hook
+                                             css-ts-mode-hook
+                                             html-ts-mode-hook
+                                             cmake-ts-mode-hook
+                                             dockerfile-ts-mode-hook
+                                             json-ts-mode-hook
+                                             toml-ts-mode-hook
+                                             markdown-ts-mode-hook
+
+                                             ;; Third-party packages
+                                             kotlin-ts-mode-hook
+                                             swift-ts-mode-hook
+                                             elixir-ts-mode-hook
+                                             zig-ts-mode-hook))
+
+(setq lightemacs-hs-minor-target-hooks '(;; Systems and General Purpose
+                                         c-mode-hook
+                                         c++-mode-hook
+                                         java-mode-hook
+                                         rust-mode-hook
+                                         go-mode-hook
+                                         ruby-mode-hook
+
+                                         ;; Web and frontend
+                                         js-mode-hook
+                                         typescript-mode-hook
+                                         css-mode-hook
+
+                                         ;; Scripting, Data, and Infrastructure
+                                         json-mode-hook
+                                         lua-mode-hook
+                                         nxml-mode-hook
+                                         html-mode-hook))
+
 ;;; Provide
 
 (provide 'mod-misc)
