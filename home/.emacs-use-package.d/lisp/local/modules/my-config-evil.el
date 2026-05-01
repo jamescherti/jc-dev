@@ -719,28 +719,37 @@ When FORCE-ALL is non-nil, use all functions."
          ;; string used by Org mode so its width can be measured and added to
          ;; the physical column count. This allows your script to calculate the
          ;; true visual indentation before pasting.
-         (prefix (or (get-text-property lbp 'line-prefix)
-                     (get-text-property lbp 'wrap-prefix)))
-         (virtual-indent (if (stringp prefix) (string-width prefix) 0))
+         (prefix
+          ;; TODO remove
+          ;; Doesn't work
+          nil
+          ;; (or (get-text-property lbp 'line-prefix)
+          ;;     (get-text-property lbp 'wrap-prefix))
+          )
+         (virtual-indent (if (stringp prefix)
+                             (string-width prefix)
+                           0))
          (new-indentation (make-string (+ (current-column) virtual-indent) ?\s))
          (kill-ring-content (ignore-errors (current-kill 0)))
-         (text (if kill-ring-content
-                   (evil-clipboard--string-unindent (string-trim-right
-                                                     (substring-no-properties kill-ring-content)
-                                                     "\n"))
-                 ""))
-         (text-to-paste (string-trim-left
-                         (replace-regexp-in-string "^" new-indentation text))))
-    (unwind-protect
-        (progn
-          (evil-set-register ?a text-to-paste)
-          (if (use-region-p)
-              (evil-visual-paste 1 ?a)
-            (evil-paste-before 1 ?a)
-            (when evil-move-cursor-back
-              (forward-char 1))))
-      (when original-register-contents
-        (evil-set-register ?a original-register-contents)))))
+         (text (when kill-ring-content
+                 (evil-clipboard--string-unindent (string-trim-right
+                                                   (substring-no-properties
+                                                    kill-ring-content)
+                                                   "\n"))))
+         (text-to-paste (when text
+                          (string-trim-left
+                           (replace-regexp-in-string "^" new-indentation text)))))
+    (when text-to-paste
+      (unwind-protect
+          (progn
+            (evil-set-register ?a text-to-paste)
+            (if (use-region-p)
+                (evil-visual-paste 1 ?a)
+              (evil-paste-before 1 ?a)
+              (when evil-move-cursor-back
+                (forward-char 1))))
+        (when original-register-contents
+          (evil-set-register ?a original-register-contents))))))
 
 (defun evilclipboard-paste-with-current-indentation-restore-point ()
   "Paste text from the clipboard with the current line's indentation.
@@ -753,6 +762,7 @@ This function also restores window start and point when pasting multiple lines."
       (lightemacs-save-window-start
         (save-mark-and-excursion
           (evilclipboard-paste-with-current-indentation))))))
+
 ;; (define-key evil-insert-state-map (kbd "C-a p") 'evilclipboard-paste-with-current-indentation-restore-point)
 ;; (define-key evil-insert-state-map (kbd "C-a C-p") 'evilclipboard-paste-with-current-indentation-restore-point)
 
