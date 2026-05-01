@@ -2356,11 +2356,10 @@ If COUNT is given, move COUNT - 1 lines downward first."
              quick-sdcv-search-input)
 
   :init
-  (setq quick-sdcv-ellipsis " ")
+  (setq quick-sdcv-ellipsis lightemacs-ellipsis)
+  (setq quick-sdcv-dictionary-prefix-symbol "►")
   (setq quick-sdcv-unique-buffers t)
-  ;; (quick-sdcv-only-data-dir nil)
-  ;; (quick-sdcv-exact-search t)
-
+  (setq quick-sdcv-fold-on-search t)
   (add-to-list 'display-buffer-alist '("\\*sdcv"
                                        (display-buffer-same-window)))
 
