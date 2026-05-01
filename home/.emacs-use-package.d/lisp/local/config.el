@@ -839,6 +839,39 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 (defun my-config-display-buffer-alist ()
   "Config display buffer alist using push for performance."
   (unless noninteractive
+    ;; (add-to-list 'display-buffer-alist
+    ;;              '((or . ((derived-mode . occur-mode)
+    ;;                       (derived-mode . Buffer-menu-mode)
+    ;;                       (derived-mode . grep-mode)
+    ;;                       (derived-mode . log-view-mode)
+    ;;                       (derived-mode . help-mode)))
+    ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
+    ;;                (body-function . select-window)))
+    ;;
+    ;; (add-to-list 'display-buffer-alist
+    ;;              '("\\`\\*\\(Org \\(Select\\|Note\\)\\|Agenda Commands\\)\\*\\'"
+    ;;                (display-buffer-in-side-window)
+    ;;                (dedicated . t)
+    ;;                (side . bottom)
+    ;;                (slot . 0)
+    ;;                (window-parameters . ((mode-line-format . none)))))
+    ;;
+    ;; (add-to-list 'display-buffer-alist
+    ;;              '((derived-mode . calendar-mode)
+    ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
+    ;;                (mode . (calendar-mode bookmark-edit-annotation-mode ert-results-mode))
+    ;;                (inhibit-switch-frame . t)
+    ;;                (dedicated . t)
+    ;;                (window-height . fit-window-to-buffer)))
+    ;;
+    ;; (add-to-list 'display-buffer-alist
+    ;;              '((derived-mode . reb-mode) ; M-x re-builder
+    ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
+    ;;                (inhibit-switch-frame . t)
+    ;;                (window-height . 4) ; note this is literal lines, not relative
+    ;;                (dedicated . t)
+    ;;                (preserve-size . (t . t))))
+
     (dolist (entry
              '(("\\*pathaction:" (display-buffer-at-bottom) (window-height . 0.33))
                ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
