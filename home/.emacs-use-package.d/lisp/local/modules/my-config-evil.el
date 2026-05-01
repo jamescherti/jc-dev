@@ -2440,7 +2440,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
 ;;; use-package bufferwizard
 
 (lightemacs-use-package bufferwizard
-  :ensure nil
+  ;; :ensure nil
   :vc (:url "https://github.com/jamescherti/bufferwizard.el"
             :rev :newest)
   ;; :straight (bufferwizard
@@ -2451,9 +2451,13 @@ If COUNT is given, move COUNT - 1 lines downward first."
              bufferwizard-unhighlight
              bufferwizard-toggle-highlight-at-point
              bufferwizard-switch-to-base-buffer
-             bufferwizard-replace-symbol-at-point)
+             bufferwizard-replace-symbol-at-point
+             bufferwizard-hl-todo-mode
+             bufferwizard-hl-todo-local-mode)
 
   :init
+  (add-hook-text-editing-modes #'bufferwizard-hl-todo-local-mode)
+
   ;; Indirect buffer
   (evil-define-key 'normal 'global (kbd "<leader>ec") #'bufferwizard-clone-and-switch-to-indirect-buffer)
   (evil-define-key 'normal 'global (kbd "<leader>eC") #'bufferwizard-switch-to-base-buffer)
