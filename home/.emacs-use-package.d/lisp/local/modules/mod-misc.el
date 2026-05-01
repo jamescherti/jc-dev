@@ -32,9 +32,99 @@
 (require 'seq)
 (require 'my-defun)
 
-;;; TODO lightemacs? Fix annoyance: package upgrade :vc splits
+;;; TODO minimal-emacs.d or lightemacs? Fix annoyance: package upgrade :vc splits
 
+;; Restricts the find-library completion list to actual Emacs Lisp libraries
+;; instead of including other file types like C source files. This provides a
+;; cleaner and faster completion list when you only want to inspect Elisp source
+;; code.
+;;
+;; Hidden core files: Some of the foundational code in Emacs is written in C
+;; rather than Emacs Lisp. If you are deeply debugging the Emacs editor itself
+;; and actually want to read the C source files using find-library, this setting
+;; will hide them from your completion list.
 (setq find-library-include-other-files nil)
+
+;; Automatically resizes all windows proportionally when splitting or deleting a
+;; window. This prevents new windows from taking all the space from the current
+;; window, maintaining a balanced layout across your frame.
+;; TODO
+(setq window-combination-resize t)
+
+;; Comment: This setting integrates the operating system clipboard more securely
+;; with the Emacs kill ring, functioning as a safeguard for your copied data.
+;;
+;; Benefit:
+;; - Prevents accidental data loss. If you copy text from an external
+;; application and then execute a kill command inside Emacs before pasting, the
+;; external clipboard content is automatically preserved in the kill ring first.
+;; You can safely retrieve it later using `yank-pop`.
+;;
+;; Drawback:
+;; - Clutters the kill ring history. If you frequently copy items in your
+;; operating system for use in other external applications, Emacs will pull
+;; those items into the kill ring upon your next kill command, creating
+;; unnecessary entries that you did not intend to use in Emacs.
+;;
+;; Evil: For an Evil mode user, "executing a kill" translates to performing a
+;; delete or change operation that places text into a Vim register.
+;; Specific actions that execute a kill for an Evil user include: d, c, x, s...
+;; Emacs will check the system clipboard right before you execute a command like
+;; dw or dd. If there is new text on your system clipboard that you copied from
+;; a web browser, Emacs saves that web browser text into the kill ring history
+;; first, and then it processes your dd command. This ensures your external
+;; clipboard data is preserved and remains accessible via the yank-pop command
+;; or Evil registers.
+;; (setq save-interprogram-paste-before-kill t)
+
+;; Disable displaying a bookmark icon on the fringe. Removing this icon reduces
+;; visual clutter in the margins, especially if you use bookmarks frequently and
+;; prefer a minimalist interface.
+(setq bookmark-fringe-mark nil)
+
+;; Asks for confirmation before creating missing parent directories during file
+;; copy or rename operations. This protects against creating unintended
+;; directories due to typos while remaining convenient.
+;; (setq dired-create-destination-dirs 'ask)
+
+;; Automatically creates destination directories without asking if the
+;; destination path ends with a trailing slash. This is highly efficient because
+;; the trailing slash indicates clear intent to create a directory.
+;; (setq dired-create-destination-dirs-on-trailing-dirsep t) ; Emacs 29
+
+;; Reuses a single buffer for Dired navigation instead of opening a new buffer
+;; for every directory. This keeps your buffer list clean and prevents Dired
+;; buffer proliferation.
+(setq dired-kill-when-opening-new-dired-buffer t)
+
+;; Allows wdired to automatically create missing parent directories when you
+;; rename files to paths that do not exist yet. This makes bulk project
+;; restructuring incredibly fast.
+;; (setq wdired-create-parent-directories t)
+
+;; Automatically updates Dired buffers when the underlying directory changes on
+;; the disk. This ensures your Dired view is always accurate without requiring
+;; manual refreshes.
+;; (setq dired-auto-revert-buffer #'dired-directory-changed-p)
+
+;; Automatically kills the buffers of files that you delete or rename within
+;; Dired. This prevents you from accidentally interacting with stale buffers
+;; that no longer correspond to the filesystem.
+;; (setq dired-clean-up-buffers-too t)
+
+;; t is bad for accessibility HTML email in dark themes. Disabling custom colors
+;; in HTML rendering ensures the text uses your active theme's colors,
+;; preventing unreadable situations like dark text on a dark background.
+(setq shr-use-colors nil)
+
+;; Use `variable-pitch-mode' instead. Disabling custom fonts ensures HTML
+;; documents do not override your preferred Emacs typography, maintaining a
+;; consistent reading experience.
+(setq shr-use-fonts nil)
+
+(setq isearch-lazy-count t)
+;; (setq lazy-count-prefix-format "(%s/%s) ")
+;; (setq lazy-count-suffix-format nil)
 
 ;; Prevent version control async commands (like "git pull --stat") from popping
 ;; up new windows when upgrading Emacs packages. This works by temporarily

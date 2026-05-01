@@ -709,6 +709,13 @@ When FORCE-ALL is non-nil, use all functions."
          ;; unwind-protect block.
          (original-register-contents (evil-get-register ?a t))
 
+         ;; Check if the current line is entirely empty or just whitespace up
+         ;; to the cursor. Do not apply this logic if replacing a visual region.
+         (is-empty-line (and (not (use-region-p))
+                             (string-match-p "^[ \t]*$"
+                                             (buffer-substring-no-properties
+                                              (line-beginning-position) (point)))))
+
          ;; Create the literal whitespace string that will be prepended to
          ;; the pasted lines. It relies exclusively on the physical cursor
          ;; position (current-column) to set the exact visual depth required.
@@ -730,17 +737,21 @@ When FORCE-ALL is non-nil, use all functions."
                                                    "\n"))))
 
          ;; Construct the final string that will be inserted into the buffer.
-         ;; It replaces newline characters with a newline followed by the new
-         ;; indentation string, ensuring all subsequent lines are properly
-         ;; aligned with the current cursor column. The first line remains
-         ;; unmodified to align smoothly at the cursor.
+         ;; If pasting on an empty line, treat the first line like all others
+         ;; by prepending new-indentation. Otherwise, only apply it to newlines
+         ;; to align subsequent lines smoothly with the cursor.
          (text-to-paste (when text
+                          ;; TODO fix when the first line has spaces
                           (replace-regexp-in-string "\n"
                                                     (concat "\n" new-indentation)
                                                     text))))
     (when text-to-paste
       (unwind-protect
           (progn
+            ;; Clear the visual indentation on empty lines to prevent
+            ;; double-indenting the first line before pasting.
+            ;; (when is-empty-line
+            ;;   (delete-region (line-beginning-position) (point)))
             (evil-set-register ?a text-to-paste)
             (if (use-region-p)
                 (evil-visual-paste 1 ?a)
