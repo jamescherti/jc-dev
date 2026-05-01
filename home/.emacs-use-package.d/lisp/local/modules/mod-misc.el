@@ -34,6 +34,8 @@
 
 ;;; TODO lightemacs? Fix annoyance: package upgrade :vc splits
 
+(setq find-library-include-other-files nil)
+
 ;; Prevent version control async commands (like "git pull --stat") from popping
 ;; up new windows when upgrading Emacs packages. This works by temporarily
 ;; setting the internal vc-dispatcher variable 'vc--inhibit-async-window' to t
