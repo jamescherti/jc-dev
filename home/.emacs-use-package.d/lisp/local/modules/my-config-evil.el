@@ -669,7 +669,14 @@ When FORCE-ALL is non-nil, use all functions."
 
 (defun evil-clipboard--string-unindent (input-str)
   "Unindent INPUT-STR by removing the minimal common indentation."
-  (let ((lines (split-string input-str "\n"))
+  (let (;; To split the input string into individual lines for processing.
+        ;; It allows iterating over each line to measure its leading whitespace
+        ;; independently.
+        (lines (split-string input-str "\n"))
+
+        ;; To track the smallest amount of leading whitespace found across all
+        ;; lines. It starts as nil so the first
+        ;; non-empty line encountered can establish the initial baseline value.
         (min-indent nil))
 
     ;; Find the minimum indentation
@@ -696,8 +703,17 @@ When FORCE-ALL is non-nil, use all functions."
 (defun evilclipboard-paste-with-current-indentation ()
   "Paste text from the clipboard with the current line's indentation."
   (interactive)
-  (let* ((original-register-contents (evil-get-register ?a t))
+  (let* (;; To preserve the user's existing data in register 'a'.
+         ;; The function temporarily overwrites register 'a' to perform the
+         ;; paste, so backing it up ensures the data can be restored in the
+         ;; unwind-protect block.
+         (original-register-contents (evil-get-register ?a t))
+
+         ;; To store the buffer position of the start of the current line. It
+         ;; provides the exact anchor point needed to look up text properties
+         ;; applied to the current line.
          (lbp (line-beginning-position))
+
          ;; Account for org-indent-mode virtual overlays
          ;; 'line-prefix: This is a special display property in Emacs. If
          ;; applied to a line, Emacs visually prepends the value (which is
@@ -719,6 +735,11 @@ When FORCE-ALL is non-nil, use all functions."
          ;; string used by Org mode so its width can be measured and added to
          ;; the physical column count. This allows your script to calculate the
          ;; true visual indentation before pasting.
+         ;;
+         ;; To capture any visual indentation overlays, such as those used by
+         ;; org-mode. It is currently hardcoded to nil because capturing and
+         ;; converting physical spaces from org-mode virtual prefixes causes
+         ;; incorrect double indentation.
          (prefix
           ;; TODO remove
           ;; Doesn't work
@@ -726,19 +747,45 @@ When FORCE-ALL is non-nil, use all functions."
           ;; (or (get-text-property lbp 'line-prefix)
           ;;     (get-text-property lbp 'wrap-prefix))
           )
+
+         ;; Determine the numerical width of the visual prefix.
+         ;; It safely checks if the prefix is a string before calculating its
+         ;; width, defaulting to 0 to avoid type errors if no prefix exists.
+         ;; TODO remove
          (virtual-indent (if (stringp prefix)
                              (string-width prefix)
                            0))
+
+         ;; Create the literal whitespace string that will be prepended to
+         ;; the pasted lines. It combines the actual cursor position
+         ;; (current-column) with the virtual indent to match the exact visual
+         ;; depth required.
          (new-indentation (make-string (+ (current-column) virtual-indent) ?\s))
+
+         ;; Fetch the text the user wants to paste from the clipboard. Using
+         ;; ignore-errors prevents the function from crashing if the kill ring
+         ;; happens to be completely empty.
          (kill-ring-content (ignore-errors (current-kill 0)))
+
+         ;; Prepare the raw clipboard text by stripping its original
+         ;; formatting. It removes text properties, trims trailing newlines, and
+         ;; unindents the string so it is neutral and ready for the new
+         ;; indentation block.
          (text (when kill-ring-content
                  (evil-clipboard--string-unindent (string-trim-right
                                                    (substring-no-properties
                                                     kill-ring-content)
                                                    "\n"))))
+
+         ;; Construct the final string that will be inserted into the buffer.
+         ;; It replaces the beginning of lines with the new indentation string,
+         ;; and then trims the first line so the pasted block starts smoothly at
+         ;; the current cursor column.
          (text-to-paste (when text
-                          (string-trim-left
-                           (replace-regexp-in-string "^" new-indentation text)))))
+                          text
+                          (replace-regexp-in-string "\n"
+                                                    (concat "\n" new-indentation)
+                                                    text))))
     (when text-to-paste
       (unwind-protect
           (progn
@@ -762,6 +809,11 @@ This function also restores window start and point when pasting multiple lines."
       (lightemacs-save-window-start
         (save-mark-and-excursion
           (evilclipboard-paste-with-current-indentation))))))
+
+;; (define-key evil-insert-state-map (kbd "C-a p") 'evilclipboard-paste-with-current-indentation-restore-point)
+;; (define-key evil-insert-state-map (kbd "C-a C-p") 'evilclipboard-paste-with-current-indentation-restore-point)
+
+(evil-define-key 'insert 'global (kbd "C-v") 'evilclipboard-paste-with-current-indentation-restore-point)
 
 ;; (define-key evil-insert-state-map (kbd "C-a p") 'evilclipboard-paste-with-current-indentation-restore-point)
 ;; (define-key evil-insert-state-map (kbd "C-a C-p") 'evilclipboard-paste-with-current-indentation-restore-point)
