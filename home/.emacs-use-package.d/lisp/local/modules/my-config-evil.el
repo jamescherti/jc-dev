@@ -2469,6 +2469,11 @@ If COUNT is given, move COUNT - 1 lines downward first."
   (evil-define-key 'normal 'global (kbd "<leader>eh") #'bufferwizard-toggle-highlight-at-point)
   (evil-define-key 'normal 'global (kbd "<leader>eH") #'bufferwizard-unhighlight))
 
+(when (fboundp 'bufferwizard-hl-todo-local-mode)
+  (add-hook-text-editing-modes #'bufferwizard-hl-todo-local-mode)
+  (with-eval-after-load 'consult
+    (add-hook 'consult-preview-allowed-hooks #'bufferwizard-hl-todo-local-mode)))
+
 (defun pkg-bufferwizard-smart-rename ()
   "Smartly decide how to rename the symbol at point."
   (interactive)

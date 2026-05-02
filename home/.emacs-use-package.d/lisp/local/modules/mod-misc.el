@@ -148,12 +148,12 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-(setq package-review-policy t
-      package-review-diff-command '("git" "--no-pager" "diff"
-                                    "--no-ext-diff"
-                                    "--no-index"
-                                    "--color=never"
-                                    "--diff-filter=d"))
+;; (setq package-review-policy t
+;;       package-review-diff-command '("git" "--no-pager" "diff"
+;;                                     "--no-ext-diff"
+;;                                     "--no-index"
+;;                                     "--color=never"
+;;                                     "--diff-filter=d"))
 
 (setq-default search-invisible nil)
 
@@ -2713,10 +2713,6 @@ This function executes within the Ediff Control Buffer."
 (add-hook-text-editing-modes #'my-disable-fringe-truncation-arrow)
 (with-eval-after-load 'consult
   (add-hook 'consult-preview-allowed-hooks #'my-disable-fringe-truncation-arrow))
-
-(add-hook-text-editing-modes #'highlight-codetags-local-mode)
-(with-eval-after-load 'consult
-  (add-hook 'consult-preview-allowed-hooks #'highlight-codetags-local-mode))
 
 ;; Enable smerge
 (defun my-enable-smerge-maybe ()
