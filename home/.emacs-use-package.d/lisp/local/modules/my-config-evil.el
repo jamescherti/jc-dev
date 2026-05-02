@@ -1794,13 +1794,16 @@ of the line or the buffer; just return nil."
       (symbol-name prop))))
 
 ;; TODO should this be part of Emacs ? PATCH
+;; Doesn't work when an org mode line contain: *line content*
 (defun evilcursor--after-vertical-movement ()
   "Run this after a vertical movement."
-  (when (invisible-p (line-beginning-position))
-    (vertical-motion 0)
-    ;; TODO Which is faster: end-of-line or goto-char?
-    ;; (goto-char (line-end-position))
-    (end-of-line)))
+  ;; (when (invisible-p (line-beginning-position))
+  ;;   (vertical-motion 0)
+  ;;   ;; TODO Which is faster: end-of-line or goto-char?
+  ;;   ;; (goto-char (line-end-position))
+  ;;   (end-of-line))
+
+  t)
 
 (evil-define-motion evilcursor-next-visual-line (count)
   "Move the cursor COUNT screen lines down."
