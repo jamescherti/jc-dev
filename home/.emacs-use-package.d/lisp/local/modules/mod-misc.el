@@ -148,12 +148,17 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; (setq package-review-policy t
-;;       package-review-diff-command '("git" "--no-pager" "diff"
-;;                                     "--no-ext-diff"
-;;                                     "--no-index"
-;;                                     "--color=never"
-;;                                     "--diff-filter=d"))
+;; TODO: package-upgrade
+(defun my-enable-package-review-policy ()
+  "Enable package review policy."
+  (setq package-review-policy t
+        package-review-diff-command '("git" "--no-pager" "diff"
+                                      "--no-ext-diff"
+                                      "--no-index"
+                                      "--color=never"
+                                      "--diff-filter=d")))
+
+(add-hook 'after-init-hook #'my-enable-package-review-policy)
 
 (setq-default search-invisible nil)
 
@@ -533,7 +538,7 @@ WIDTH is the tab width."
   (setq javascript-indent-level 2)
   (setq html-indent-offset 2)
   (setq sgml-basic-offset 2)
-  (setq lua-indent-level 3)
+  (setq lua-indent-level 2)
   (setq yaml-indent-offset 2)
 
   ;; python
@@ -1011,8 +1016,6 @@ WIDTH is the tab width."
   ;; (setq bufferfile-delete-switch-to 'previous-buffer)
   (setq bufferfile-delete-switch-to 'parent-directory)
 
-  (setq markdown-gfm-use-electric-backquote nil)
-  (setq markdown-heading-scaling t)
   (unless noninteractive
     (with-eval-after-load 'markdown-mode
       (define-key markdown-mode-map (kbd "TAB") #'ignore)))
@@ -1508,7 +1511,7 @@ WIDTH is the tab width."
   (setq suggest-key-bindings nil)
 
   ;; (setq tooltip-resize-echo-area t)
-  (setq-default line-spacing 0.05)
+  ;; (setq-default line-spacing 0.05)
   (setq enhanced-evil-paredit-handle-paste t)
   (setq confirm-kill-emacs 'y-or-n-p)
   (setq remote-file-name-inhibit-locks t)
@@ -1730,6 +1733,7 @@ Returns:
 
 ;; Org + vertico preview error: Debugger entered--Lisp error: (error "rx ‘**’
 ;; range error")
+
 ;;; Other settings
 
 ;; Control ^ = Control
@@ -2559,7 +2563,7 @@ This function executes within the Ediff Control Buffer."
           "Major mode for editing Ansible files.")
 
         (defun my-setup-ansible-mode ()
-          ;; (set-syntax-table (copy-syntax-table))
+          (set-syntax-table (copy-syntax-table))
 
           ;; For pip_pkg==1.0.0
           (modify-syntax-entry ?= ".")
@@ -2666,6 +2670,12 @@ This function executes within the Ediff Control Buffer."
 (add-hook 'lightemacs-after-init-hook #'my-config-tree-sitter)
 
 ;;; ansible
+
+
+;;; ansible-doc
+
+(lightemacs-use-package ansible-doc
+  :commands ansible-doc)
 
 (add-to-list 'display-buffer-alist '("\\*ansible-doc"
                                      (display-buffer-same-window)))
@@ -2831,6 +2841,9 @@ ARGS - the arguments passed to the original function"
 
 (with-eval-after-load 'log-view
   (advice-add 'log-view-diff :around #'my-log-view-diff-stay))
+
+(add-to-list 'auto-mode-alist
+             '("/COMMIT_EDITMSG\\'" . diff-mode))
 
 ;;; Modeline
 (add-hook 'lightemacs-after-init-hook #'display-time-mode)
@@ -4260,11 +4273,6 @@ at the same level."
 ;;   ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
 ;;   ;; code." t)
 ;;   (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
-
-;;; ansible-doc
-
-(lightemacs-use-package ansible-doc
-  :commands ansible-doc)
 
 ;;; Lua
 

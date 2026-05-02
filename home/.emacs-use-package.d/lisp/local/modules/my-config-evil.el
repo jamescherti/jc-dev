@@ -1402,9 +1402,40 @@ If the parentheses are balanced, the function returns t."
 ;;; markdown mode
 
 (with-eval-after-load 'markdown-mode
+  ;; (define-key markdown-mode-map (kbd "TAB") #'ignore)
+
   ;; (evil-define-key 'normal markdown-mode-map (kbd "TAB") #'ignore)
   ;; (evil-define-key 'normal markdown-mode-map (kbd "<tab>") #'ignore)
   (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block))
+
+(setq markdown-gfm-use-electric-backquote nil)
+(setq markdown-heading-scaling t)
+
+;; (with-eval-after-load 'markdown-mode
+;;   (evil-define-key 'normal markdown-mode (kbd "RET") nil)
+;;   (evil-define-key 'normal markdown-mode (kbd "{") indentnav-backward-to-empty-line)
+;;   (evil-define-key 'normal markdown-mode (kbd "}") indentnav-forward-to-empty-line))
+
+(with-eval-after-load 'markdown-mode
+  (evil-collection-define-key 'normal 'markdown-mode-map
+    "{" 'indentnav-backward-to-empty-line
+    "}" 'indentnav-forward-to-empty-line
+    ;; RET can sometimes check and uncheck boxes. This is not
+    ;; something I want.
+    "RET" nil
+    [tab] nil
+    [S-tab] nil
+    ;; `evil-markdown' doesn't bind but spacemacs does.
+    (kbd "RET") 'markdown-do))
+
+;; Already merged to upstream
+;; (with-eval-after-load 'markdown-mode
+;;   ;; Modify the shared syntax table globally for all markdown buffers
+;;   (modify-syntax-entry ?' "." markdown-mode-syntax-table)
+;;   (modify-syntax-entry ?* "." markdown-mode-syntax-table)
+;;   (modify-syntax-entry ?> "." markdown-mode-syntax-table)
+;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
+;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
 
 (defun my-setup-markdown-mode ()
   "Setup markdown modes."
@@ -1423,41 +1454,7 @@ If the parentheses are balanced, the function returns t."
   ;; (visual-line-mode 1)
 
   (let ((inhibit-message t))
-    (toggle-truncate-lines 0))
-
-  ;; (setq-local evil-auto-indent nil)
-
-  ;; (evil-define-key 'normal 'local (kbd "TAB") 'ignore)
-  ;; (evil-define-key 'normal 'local (kbd "<tab>") 'ignore)
-
-  ;; DONE already added to markdown-mode (TODO not released yet)
-  ;; Make / a punctuation (for, for example, strings like group/package) I
-  ;; sometimes have `var' in Yaml files
-  ;; (set-syntax-table (copy-syntax-table))
-  (modify-syntax-entry ?' ".")
-  (modify-syntax-entry ?* ".") ; Things like *word* (italic)
-  (modify-syntax-entry ?> ".")
-  (modify-syntax-entry ?< ".")
-  ;; (modify-syntax-entry ?- ".")  ;; Annoying for editing elisp README.md
-  (modify-syntax-entry ?_ ".")
-
-  ;; RET can sometimes check and uncheck boxes. This is not something I want.
-  ;; NOTE: THIS IS WRONG. DO NOT ACTIVATE.
-  ;; (evil-define-key 'normal 'local (kbd "RET") 'ignore)
-
-  ;; TODO reenable?
-  ;; (when (fboundp 'indentnav-backward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "{") 'indentnav-backward-to-empty-line))
-  ;; (when (fboundp 'indentnav-forward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "}") 'indentnav-forward-to-empty-line))
-
-  ;; (when (fboundp 'indentnav-backward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "{") 'evil-backward-paragraph))
-  ;;
-  ;; (when (fboundp 'indentnav-forward-to-empty-line)
-  ;;   (evil-define-key 'normal 'local (kbd "}") 'evil-forward-paragraph))
-
-  )
+    (toggle-truncate-lines 0)))
 
 (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)
@@ -2354,32 +2351,28 @@ If COUNT is given, move COUNT - 1 lines downward first."
 (add-hook 'quick-sdcv-mode-hook 'my-setup-quick-sdcv)
 (add-hook 'quick-sdcv-mode-hook 'goto-address-mode)
 
-(lightemacs-use-package quick-sdcv
-  :commands (quick-sdcv-search-at-point
-             quick-sdcv-search-input)
+(add-to-list 'display-buffer-alist '("\\*sdcv"
+                                     (display-buffer-same-window)))
 
-  :init
-  (setq quick-sdcv-ellipsis lightemacs-ellipsis)
-  (setq quick-sdcv-dictionary-prefix-symbol "►")
-  (setq quick-sdcv-unique-buffers t)
-  (setq quick-sdcv-fold-on-search t)
-  (add-to-list 'display-buffer-alist '("\\*sdcv"
-                                       (display-buffer-same-window)))
 
-  ;; Dictionary lookup
-  ;; (add-hook 'quick-sdcv-mode-hook 'my-evil-quick-sdcv-search-at-point)
-  ;; (add-hook 'markdown-mode-hook 'my-evil-quick-sdcv-search-at-point)
-  ;; (add-hook 'org-mode-hook 'my-evil-quick-sdcv-search-at-point)
-  ;; (add-hook 'txt-file-mode-hook 'my-evil-quick-sdcv-search-at-point)
-  (dolist (mode-hook '(markdown-mode-hook
-                       org-mode-hook
-                       txt-file-mode-hook))
-    (add-hook mode-hook
-              (lambda ()
-                (setq-local evil-lookup-func 'quick-sdcv-search-at-point))))
+(setq quick-sdcv-fold-on-search t)
 
-  (with-eval-after-load 'evil
-    (define-key evil-normal-state-map (kbd "<leader>ed") 'quick-sdcv-search-input)))
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "<leader>ed") 'quick-sdcv-search-input))
+
+;; (setq quick-sdcv-dictionary-prefix-symbol "►")
+
+;; Dictionary lookup
+;; (add-hook 'quick-sdcv-mode-hook 'my-evil-quick-sdcv-search-at-point)
+;; (add-hook 'markdown-mode-hook 'my-evil-quick-sdcv-search-at-point)
+;; (add-hook 'org-mode-hook 'my-evil-quick-sdcv-search-at-point)
+;; (add-hook 'txt-file-mode-hook 'my-evil-quick-sdcv-search-at-point)
+(dolist (mode-hook '(markdown-mode-hook
+                     org-mode-hook
+                     txt-file-mode-hook))
+  (add-hook mode-hook
+            (lambda ()
+              (setq-local evil-lookup-func 'quick-sdcv-search-at-point))))
 
 ;;; quick-fasd
 
@@ -2852,6 +2845,20 @@ unless a wrapper hook is active."
 
 (with-eval-after-load 'outline
   (require 'my-evil-outline))
+
+;;; highlight search after paste
+
+;; TODO: Send patch to evil?
+(defun my-evil-refresh-search-highlight (&rest _)
+  "Refresh Evil search overlays after pasting text."
+  (when (and (eq evil-search-module 'evil-search)
+             (evil-ex-hl-active-p 'evil-ex-search)
+             (boundp 'evil-ex-search-pattern)
+             evil-ex-search-pattern)
+    (evil-ex-search-activate-highlight evil-ex-search-pattern)))
+
+(advice-add 'evil-paste-after :after #'my-evil-refresh-search-highlight)
+(advice-add 'evil-paste-before :after #'my-evil-refresh-search-highlight)
 
 ;;; Provide
 

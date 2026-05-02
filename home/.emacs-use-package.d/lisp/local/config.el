@@ -604,6 +604,8 @@
 
                            le-csv-mode
 
+                           le-quick-sdcv
+
                            le-group-code-folding
 
                            ;; le-diminish
@@ -679,7 +681,11 @@
                            le-avy
                            ;; le-ace-window
                            le-bufferfile
-                           le-diff-hl
+
+                           ;; TODO This adds support for indirect buffers:
+                           ;;      https://github.com/dgutov/diff-hl/pull/276
+                           ;; le-diff-hl
+                           tmp-diff-hl
 
                            le-dtrt-indent
 
