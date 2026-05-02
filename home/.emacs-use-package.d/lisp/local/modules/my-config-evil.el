@@ -1,4 +1,4 @@
-;;; my-config-evil.el --- Config evil -*- lexical-binding: t -*-
+;;; mod-misc.el --- mod-misc -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -2849,16 +2849,85 @@ unless a wrapper hook is active."
 ;;; highlight search after paste
 
 ;; TODO: Send patch to evil?
+;; (defun my-evil-refresh-search-highlight (&rest _)
+;;   "Refresh Evil search overlays after pasting text."
+;;   (when (and (eq evil-search-module 'evil-search)
+;;              (evil-ex-hl-active-p 'evil-ex-search)
+;;              (boundp 'evil-ex-search-pattern)
+;;              evil-ex-search-pattern)
+;;     (evil-ex-search-activate-highlight evil-ex-search-pattern)))
+;;
+;; (advice-add 'evil-paste-after :after #'my-evil-refresh-search-highlight)
+;; (advice-add 'evil-paste-before :after #'my-evil-refresh-search-highlight)
+
 (defun my-evil-refresh-search-highlight (&rest _)
-  "Refresh Evil search overlays after pasting text."
+  "Refresh Evil search overlays after buffer changes.
+Accepts any arguments so it can be used as advice or a hook."
   (when (and (eq evil-search-module 'evil-search)
              (evil-ex-hl-active-p 'evil-ex-search)
              (boundp 'evil-ex-search-pattern)
              evil-ex-search-pattern)
     (evil-ex-search-activate-highlight evil-ex-search-pattern)))
 
+;; Evil paste commands
 (advice-add 'evil-paste-after :after #'my-evil-refresh-search-highlight)
 (advice-add 'evil-paste-before :after #'my-evil-refresh-search-highlight)
+(advice-add 'evil-visual-paste :after #'my-evil-refresh-search-highlight)
+
+;; Evil undo and redo commands
+(advice-add 'evil-undo :after #'my-evil-refresh-search-highlight)
+(advice-add 'evil-redo :after #'my-evil-refresh-search-highlight)
+
+;; Evil mode text transformations and macros
+(advice-add 'evil-join :after #'my-evil-refresh-search-highlight)
+(advice-add 'evil-replace :after #'my-evil-refresh-search-highlight)
+(advice-add 'evil-ex-substitute :after #'my-evil-refresh-search-highlight)
+(advice-add 'evil-execute-macro :after #'my-evil-refresh-search-highlight)
+
+;; Standard Emacs paste and undo commands
+;; (advice-add 'yank :after #'my-evil-refresh-search-highlight)
+;; (advice-add 'yank-pop :after #'my-evil-refresh-search-highlight)
+;; (advice-add 'undo :after #'my-evil-refresh-search-highlight)
+
+;; Undo-tree commands (if installed)
+;; (with-eval-after-load 'undo-tree
+;;   (advice-add 'undo-tree-undo :after #'my-evil-refresh-search-highlight)
+;;   (advice-add 'undo-tree-redo :after #'my-evil-refresh-search-highlight))
+
+;; Undo-fu commands (if installed)
+;; (with-eval-after-load 'undo-fu
+;;   (advice-add 'undo-fu-only-undo :after #'my-evil-refresh-search-highlight)
+;;   (advice-add 'undo-fu-only-redo :after #'my-evil-refresh-search-highlight))
+
+;; Org-mode structural movements and visibility
+(with-eval-after-load 'org
+  (advice-add 'org-metaleft :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-metaright :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-shiftmetaleft :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-shiftmetaright :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-sort :after #'my-evil-refresh-search-highlight)
+
+  ;; Org-mode table manipulation
+  (advice-add 'org-table-move-row-down :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-table-move-row-up :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-table-move-column-left :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-table-move-column-right :after #'my-evil-refresh-search-highlight)
+
+  (advice-add 'org-metaup :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-metadown :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-move-subtree-up :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-move-subtree-down :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-move-item-up :after #'my-evil-refresh-search-highlight)
+  (advice-add 'org-move-item-down :after #'my-evil-refresh-search-highlight)
+  ;; It is also highly recommended to refresh after toggling visibility
+  ;; (advice-add 'org-cycle :after #'my-evil-refresh-search-highlight)
+  ;; (advice-add 'org-shifttab :after #'my-evil-refresh-search-highlight)
+  )
+
+;; Outline-mode and outline-minor-mode structural movements
+(with-eval-after-load 'outline
+  (advice-add 'outline-move-subtree-up :after #'my-evil-refresh-search-highlight)
+  (advice-add 'outline-move-subtree-down :after #'my-evil-refresh-search-highlight))
 
 ;;; Provide
 
