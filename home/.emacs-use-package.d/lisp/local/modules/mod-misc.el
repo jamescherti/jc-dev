@@ -5012,6 +5012,19 @@ are editing by falling back to another visible file buffer."
           "^/tmp/"
           "^/var/tmp/")))
 
+;;; Filetype: PHP and HTML
+
+(if (and nil (my-treesit-language-available-p 'php))
+    (progn
+      (push '(php-mode . php-ts-mode) major-mode-remap-alist)
+      (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]\\'" . php-ts-mode))
+      (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]3\\'" . php-ts-mode)))
+  (lightemacs-use-package php-mode
+    :commands php-mode
+    :mode
+    ("\\.php3\\'" . php-mode)
+    ("\\.php\\'" . php-mode)))
+
 ;;; Provide
 
 (provide 'mod-misc)
