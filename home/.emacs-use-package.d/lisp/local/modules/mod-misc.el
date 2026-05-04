@@ -4305,10 +4305,10 @@ at the same level."
         (let ((current-state (org-get-todo-state)))
           (if (or (not current-state) (string= current-state "DONE"))
               (org-todo "TODO")
-            (my-org-move-todo-before-first-done)
-            (org-todo "DONE")))
+            (org-todo "DONE")
+            (when (string= (org-get-todo-state) "DONE")
+              (my-org-move-todo-before-first-done))))
         (org-hide-entry))
-
       (move-to-column column))))
 
 ;; TODO lightemacs?

@@ -602,7 +602,7 @@
                            le-buffer-terminator
                            le-inhibit-mouse
 
-                           le-csv-mode
+                           ;; le-csv-mode
 
                            le-quick-sdcv
 
