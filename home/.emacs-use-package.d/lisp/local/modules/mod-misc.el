@@ -4240,9 +4240,9 @@ environment for accurate linting."
 
 ;;; jinja2-mode and csv-mode
 
-(lightemacs-use-package jinja2-mode
-  :commands jinja2-mode
-  :mode ("\\.j2\\'" . jinja2-mode))
+;; (lightemacs-use-package jinja2-mode
+;;   :commands jinja2-mode
+;;   :mode ("\\.j2\\'" . jinja2-mode))
 
 ;;; org
 
