@@ -4126,7 +4126,9 @@ environment for accurate linting."
                            ;; (sleep-for 0.1)
                            (vterm-send-string
                             (format "exec tmux-session emacs-%s"
-                                    (shell-quote-argument ,proj-name)))
+                                    (replace-regexp-in-string
+                                     "[^a-z0-9]+" "-"
+                                     (shell-quote-argument ,proj-name))))
                            (vterm-send-return)))))))))
 
 (with-eval-after-load 'shell-pop
