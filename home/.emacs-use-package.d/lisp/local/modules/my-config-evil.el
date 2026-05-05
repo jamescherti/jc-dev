@@ -1796,13 +1796,16 @@ of the line or the buffer; just return nil."
   "Run this after a vertical movement."
   (when (save-excursion
           (vertical-motion 0)
-          (cond ((and (bound-and-true-p outline-minor-mode)  ; folded?
+          (cond ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
+                          (derived-mode-p 'outline-mode))
                       (fboundp 'outline-invisible-p))
                  (outline-invisible-p (line-end-position)))
 
-                ((and (derived-mode-p 'org-mode)
-                      (fboundp 'org-invisible-p))
-                 (org-invisible-p (line-end-position)))
+                ((derived-mode-p 'org-mode)
+                 (if (fboundp 'org-fold-folded-p)
+                     (org-fold-folded-p (line-end-position))
+                   (when (fboundp 'org-invisible-p)
+                     (org-invisible-p (line-end-position)))))
 
                 (t
                  (invisible-p (line-end-position)))))
