@@ -1216,9 +1216,26 @@ on text following the cursor."
    (evil-get-auxiliary-keymap my-intercept-mode-map state t t)
    state))
 
+(defun my-shell-pop ()
+  "Close the minibuffer if active, then launch shell-pop."
+  (interactive)
+  (let ((inhibit-redisplay t))
+    (if (active-minibuffer-window)
+        (progn
+          ;; Schedule shell-pop to run immediately after the abort finishes
+          (run-at-time 0 nil (lambda ()
+                               (when (fboundp 'shell-pop)
+                                 ;; Clear the echo area to remove "Quit"
+                                 (message nil)
+                                 (call-interactively 'shell-pop))))
+          (abort-recursive-edit))
+      ;; If no minibuffer is active, just run shell-pop normally
+      (when (fboundp 'shell-pop)
+        (call-interactively 'shell-pop)))))
+
 (unless noninteractive
-  (global-set-key (kbd "M-RET") 'shell-pop)
-  (global-set-key (kbd "M-<enter>") 'shell-pop)
+  (global-set-key (kbd "M-RET") 'my-shell-pop)
+  (global-set-key (kbd "M-<enter>") 'my-shell-pop)
   ;; (global-set-key (kbd "M-<return>") 'shell-pop)
   ;; (global-set-key (kbd "M-RET") 'vterm-toggle)
   ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
@@ -1230,11 +1247,11 @@ on text following the cursor."
   ;; (kbd "M-<return>") 'toggle-term-tmux
   (kbd "M-x") 'execute-extended-command
 
-  (kbd "M-RET") 'shell-pop
-  (kbd "M-<enter>") 'shell-pop
+  (kbd "M-RET") 'my-shell-pop
+  (kbd "M-<enter>") 'my-shell-pop
   ;; (kbd "M-RET") 'vterm-toggle
   ;; (kbd "M-<enter>") 'vterm-toggle
-  (kbd "M-<return>") 'shell-pop
+  (kbd "M-<return>") 'my-shell-pop
   (kbd "M-o") 'my-previous-interesting-buffer
   (kbd "M-i") 'my-next-interesting-buffer
   ;; (kbd "M-=") 'global-text-scale-adjust
@@ -1794,21 +1811,23 @@ of the line or the buffer; just return nil."
 ;; Doesn't work when an org mode line contain: *line content*
 (defun evilcursor--after-vertical-movement ()
   "Run this after a vertical movement."
-  (when (save-excursion
-          (vertical-motion 0)
-          (cond ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
-                          (derived-mode-p 'outline-mode))
-                      (fboundp 'outline-invisible-p))
-                 (outline-invisible-p (line-end-position)))
+  (when (and
+         (invisible-p (point))
+         ;; (vertical-motion 0)
+         (cond
+          ;; ((derived-mode-p 'org-mode)
+          ;;  (if (fboundp 'org-fold-folded-p)
+          ;;      (org-fold-folded-p (line-end-position))
+          ;;    (when (fboundp 'org-invisible-p)
+          ;;      (org-invisible-p (line-end-position)))))
 
-                ((derived-mode-p 'org-mode)
-                 (if (fboundp 'org-fold-folded-p)
-                     (org-fold-folded-p (line-end-position))
-                   (when (fboundp 'org-invisible-p)
-                     (org-invisible-p (line-end-position)))))
+          ;; ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
+          ;;           (derived-mode-p 'outline-mode))
+          ;;       (fboundp 'outline-invisible-p))
+          ;;  (outline-invisible-p (line-end-position)))
 
-                (t
-                 (invisible-p (line-end-position)))))
+          (t
+           (invisible-p (line-end-position)))))
     (vertical-motion 0)
     (goto-char (line-end-position))))
 

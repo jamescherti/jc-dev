@@ -4108,6 +4108,30 @@ environment for accurate linting."
 
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-to-insert-state)
 
+;;; shell-pop: shell pop per project
+
+(defun my-shell-pop-set-global-type (&rest _args)
+  "Set `shell-pop-shell-type' as a global variable for the current project."
+  (when (fboundp 'my-project-name)
+    (let* ((proj-name (or (my-project-name) "misc"))
+           (buf-name (format "*vterm:%s*" proj-name)))
+      ;; Use setq to globally update the variable right before shell-pop runs
+      (setopt shell-pop-shell-type
+              (list "vterm"
+                    buf-name
+                    `(lambda ()
+                       (let ((tmux-buffer (vterm ,buf-name)))
+                         (with-current-buffer tmux-buffer
+                           ;; (sleep-for 0.1)
+                           (vterm-send-string
+                            (format "exec tmux-session emacs-%s"
+                                    (shell-quote-argument ,proj-name)))
+                           (vterm-send-return)))))))))
+
+(with-eval-after-load 'shell-pop
+  ;; Apply the new global setting advice
+  (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
+
 ;;; vterm-toggle
 
 ;; (lightemacs-use-package vterm-toggle
