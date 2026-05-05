@@ -3587,7 +3587,10 @@ This function is intended for use as :around advice."
                        (string-suffix-p "/changelog.md"
                                         file-name-downcase))))
         ;; (run-with-idle-timer 1 nil #'flyspell-mode 1)
-        (flyspell-mode 1)))))
+        (if (or (derived-mode-p 'yaml-mode)
+                (derived-mode-p 'yaml-ts-mode))
+            (flyspell-prog-mode)
+          (flyspell-mode 1))))))
 
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 (add-hook 'text-mode-hook 'my-setup-flyspell-text-mode)
