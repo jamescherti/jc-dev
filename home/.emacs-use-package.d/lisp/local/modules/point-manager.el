@@ -114,8 +114,8 @@ COMMAND is the previous command."
         (backward-char 1))
 
       (if point-manager-ignore-invisible
-          (beginning-of-visual-line)
-        (beginning-of-line))
+          (vertical-motion 0)
+        (goto-char (line-beginning-position)))
 
       (point-manager--move-to-column point-manager--previous-column))
 
