@@ -1828,7 +1828,8 @@ of the line or the buffer; just return nil."
 (defun evilcursor--after-vertical-movement ()
   "Run this after a vertical movement."
   ;; Prevent the command loop from moving the cursor after we place it
-  (setq disable-point-adjustment t)
+  ;; Useless
+  ;; (setq disable-point-adjustment t)
 
   (when (and
          ;; Landed on an invisible line

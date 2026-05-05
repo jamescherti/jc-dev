@@ -1006,13 +1006,15 @@ WIDTH is the tab width."
 
   ;; Set tag column to 0 (tags appear immediately after heading); simplifies
   ;; layout but may make long headings with tags harder to read.
-  (setq org-hide-block-startup t)
+  ;;
+  ;; Setting this to t will fold  stuff
+  (setq org-hide-block-startup nil)
 
   (setq project-switch-commands #'project-dired)
-  (setq project-vc-extra-root-markers '(".projectile"
-                                        ".dir-locals.el"
-                                        "requirements.txt"
-                                        "autogen.sh"
+  (setq project-vc-extra-root-markers '(;; ".projectile"
+                                        ;; ".dir-locals.el"
+                                        ;; "requirements.txt"
+                                        ;; "autogen.sh"
                                         ".project"))
 
 
