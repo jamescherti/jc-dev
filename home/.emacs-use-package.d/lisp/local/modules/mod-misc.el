@@ -646,19 +646,21 @@ WIDTH is the tab width."
   (add-to-list 'yas-snippet-dirs
                (expand-file-name "yasnippet/snippets-auto" "~/.emacs-data/etc"))
 
-  (defun my-yas-next-field-or-corfu ()
-    "Insert the selected Corfu candidate or move to the next Yasnippet field."
-    (interactive)
-    (if (and (bound-and-true-p corfu-mode)
-             (fboundp 'corfu-insert)
-             (>= corfu--index 0))
-        (corfu-insert)
-      (when (fboundp 'yas-next-field)
-        (yas-next-field))))
+  ;; TODO fix when enter is pressed, yas it does not behave as well
+  ;; as without this
+  ;; (defun my-yas-next-field-or-corfu ()
+  ;;   "Insert the selected Corfu candidate or move to the next Yasnippet field."
+  ;;   (interactive)
+  ;;   (if (and (bound-and-true-p corfu-mode)
+  ;;            (fboundp 'corfu-insert)
+  ;;            (>= corfu--index 0))
+  ;;       (corfu-insert)
+  ;;     (when (fboundp 'yas-next-field)
+  ;;       (yas-next-field))))
 
   (with-eval-after-load 'yasnippet
-    (define-key yas-keymap (kbd "RET") 'my-yas-next-field-or-corfu)
-    (define-key yas-keymap (kbd "<return>") 'my-yas-next-field-or-corfu)
+    ;; (define-key yas-keymap (kbd "RET") 'my-yas-next-field-or-corfu)
+    ;; (define-key yas-keymap (kbd "<return>") 'my-yas-next-field-or-corfu)
 
     ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
     (unless noninteractive
