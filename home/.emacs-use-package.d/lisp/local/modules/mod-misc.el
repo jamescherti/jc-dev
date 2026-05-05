@@ -4275,22 +4275,23 @@ at the same level."
         (unless (org-at-heading-p)
           (org-back-to-heading t))
 
-        ;; Only execute if the current heading is an active TODO state
-        (when (member (org-get-todo-state) org-not-done-keywords)
-          (let ((moving t)
-                (last-point -1))
-            (while moving
-              (if (= (point) last-point)
-                  (setq moving nil) ;; Break loop if movement failed silently
-                (setq last-point (point))
-                (let ((is-next-done
-                       (save-excursion
-                         (if (org-forward-heading-same-level 1)
-                             (member (org-get-todo-state) org-done-keywords)
-                           'no-next))))
-                  (if (or (eq is-next-done 'no-next) is-next-done)
-                      (setq moving nil)
-                    (org-move-subtree-down 1))))))))
+        (let ((moving t)
+              (last-point -1))
+          (while moving
+            (if (= (point) last-point)
+                (setq moving nil) ;; Break loop if movement failed silently
+              (setq last-point (point))
+              (let ((is-next-done
+                     (save-excursion
+                       (if (org-forward-heading-same-level 1)
+                           (let ((state (org-get-todo-state)))
+                             (member
+                              (if state (substring-no-properties state) "")
+                              org-done-keywords))
+                         'no-next))))
+                (if (or (eq is-next-done 'no-next) is-next-done)
+                    (setq moving nil)
+                  (org-move-subtree-down 1)))))))
     (error "Org functions are not defined")))
 
 (defun my-org-todo-and-toggle ()
@@ -4298,18 +4299,27 @@ at the same level."
   (interactive)
   (when (and (fboundp 'org-todo)
              (fboundp 'org-hide-entry)
-             (fboundp 'org-get-todo-state))
+             (fboundp 'org-get-todo-state)
+             (fboundp 'org-back-to-heading)
+             (fboundp 'org-at-heading-p))
     (let ((column (current-column)))
-      (save-excursion
-        (beginning-of-visual-line)
-        (let ((current-state (org-get-todo-state)))
-          (if (or (not current-state) (string= current-state "DONE"))
-              (org-todo "TODO")
-            (org-todo "DONE")
-            (when (string= (org-get-todo-state) "DONE")
-              (my-org-move-todo-before-first-done))))
-        (org-hide-entry))
-      (move-to-column column))))
+      (unwind-protect
+          (save-excursion
+            (org-back-to-heading)
+            (when (org-at-heading-p)
+              (let ((current-state (substring-no-properties
+                                    (let ((state (org-get-todo-state)))
+                                      (if state state "")))))
+                (if (string= current-state "DONE")
+                    (org-todo "TODO")
+                  (org-todo "DONE")
+                  (when (string= (substring-no-properties
+                                  (let ((state (org-get-todo-state)))
+                                    (if state state "")))
+                                 "DONE")
+                    (my-org-move-todo-before-first-done)))))
+            (org-hide-entry))
+        (move-to-column column)))))
 
 ;; TODO lightemacs?
 (defun my-org-capture-switch-insert ()
