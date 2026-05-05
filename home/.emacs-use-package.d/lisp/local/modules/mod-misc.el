@@ -349,6 +349,10 @@ any new ones."
         (easysession                   . "melpa")
         (flymake-ansible-lint          . "melpa")
         (flymake-bashate               . "melpa")
+        (buffer-guardian               . "melpa")
+
+        ;; Latest
+        (vterm                         . "melpa")
 
         (git-gutter                    . "melpa")
 
