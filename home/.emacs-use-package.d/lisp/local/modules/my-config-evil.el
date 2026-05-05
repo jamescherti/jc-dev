@@ -1807,27 +1807,36 @@ of the line or the buffer; just return nil."
                        'category)))
       (symbol-name prop))))
 
+(defun evilcursor--outline-invisible-p (pos)
+  (cond
+   ((derived-mode-p 'org-mode)
+    (if (fboundp 'org-fold-folded-p)
+        (org-fold-folded-p pos)
+      (when (fboundp 'org-invisible-p)
+        (org-invisible-p pos))))
+
+   ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
+             (derived-mode-p 'outline-mode))
+         (fboundp 'outline-invisible-p))
+    (outline-invisible-p pos))
+
+   (t
+    (invisible-p pos))))
+
 ;; TODO should this be part of Emacs ? PATCH
 ;; Doesn't work when an org mode line contain: *line content*
 (defun evilcursor--after-vertical-movement ()
   "Run this after a vertical movement."
+  ;; Prevent the command loop from moving the cursor after we place it
+  (setq disable-point-adjustment t)
+
   (when (and
-         (invisible-p (point))
-         ;; (vertical-motion 0)
-         (cond
-          ;; ((derived-mode-p 'org-mode)
-          ;;  (if (fboundp 'org-fold-folded-p)
-          ;;      (org-fold-folded-p (line-end-position))
-          ;;    (when (fboundp 'org-invisible-p)
-          ;;      (org-invisible-p (line-end-position)))))
-
-          ;; ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
-          ;;           (derived-mode-p 'outline-mode))
-          ;;       (fboundp 'outline-invisible-p))
-          ;;  (outline-invisible-p (line-end-position)))
-
-          (t
-           (invisible-p (line-end-position)))))
+         ;; Landed on an invisible line
+         (evilcursor--outline-invisible-p
+          (if (eolp)
+              ;; Without this, invisible-p is nil when eolp
+              (- (point) 1)
+            (point))))
     (vertical-motion 0)
     (goto-char (line-end-position))))
 
