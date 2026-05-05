@@ -4431,7 +4431,7 @@ at the same level."
 (defun my-org-capture-move-cursor-end-line ()
   "Move cursor to end line."
   (when (eq major-mode 'org-mode)
-    (end-of-line)))
+    (goto-char (line-end-position))))
 
 (when (fboundp 'my-org-capture-move-cursor-end-line)
   (add-hook 'org-capture-before-finalize-hook

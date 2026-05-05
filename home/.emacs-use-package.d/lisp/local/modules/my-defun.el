@@ -377,7 +377,7 @@ end"))
          (with-current-buffer window-buffer
            (when (string= (buffer-name window-buffer) "*Messages*")
              (goto-char (point-max))
-             (beginning-of-line)
+             (goto-char (line-beginning-position))
              (set-window-point window (point-max)))))))
    ;; Exclude the minibuffer
    nil

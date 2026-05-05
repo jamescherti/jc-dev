@@ -161,7 +161,7 @@
   (let* ((beg (if (use-region-p)
                   (save-excursion
                     (goto-char (region-beginning))
-                    (beginning-of-line)
+                    (goto-char (line-beginning-position))
                     (point))
                 (line-beginning-position)))
          (end (if (use-region-p)
@@ -213,7 +213,7 @@
           (goto-char beg)
           (dotimes (i count)
             (when (= (1+ i) count)
-              (beginning-of-line))
+              (goto-char (line-beginning-position)))
             (join-line 1)))))
 
     (goto-char original-point)))
@@ -1801,7 +1801,7 @@ of the line or the buffer; just return nil."
 (defun evilcursor--get-category-at-point ()
   "Get the category at point."
   (save-excursion
-    (beginning-of-line)
+    (goto-char (line-beginning-position))
     (when-let* ((prop (get-text-property
                        (point)
                        'category)))
