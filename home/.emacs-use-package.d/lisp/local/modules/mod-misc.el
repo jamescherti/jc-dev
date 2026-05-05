@@ -4115,7 +4115,6 @@ environment for accurate linting."
   (when (fboundp 'my-project-name)
     (let* ((proj-name (or (my-project-name) "misc"))
            (buf-name (format "*vterm:%s*" proj-name)))
-      ;; Use setq to globally update the variable right before shell-pop runs
       (setopt shell-pop-shell-type
               (list "vterm"
                     buf-name
