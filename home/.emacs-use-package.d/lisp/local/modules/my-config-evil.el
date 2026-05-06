@@ -2663,7 +2663,16 @@ In `prog-mode', this configures flyspell to check only comments and strings."
   "FN is the advised function. ARGS are the function arguments."
   (cl-letf (((symbol-function #'evil-ex-echo)
              (lambda (&rest _args) nil)))
-    (apply fn args)))
+    ;; Fixes:
+    ;; - Debugger entered--Lisp error: (wrong-type-argument window-live-p nil)
+    ;; - #<subr select-window>(nil norecord)
+    ;; - apply(#<subr select-window> (nil norecord))
+    ;; - select-window(nil norecord)
+    ;; - #<subr evil-ex-search-update-pattern>()
+    ;; - my-around-evil-ex-search-update-pattern-no-echo(#<subr
+    ;;   evil-ex-search-update-pattern>)
+    (when (minibuffer-selected-window)
+      (apply fn args))))
 
 (with-eval-after-load 'evil-search
   (when (fboundp 'my-around-evil-ex-search-update-pattern-no-echo)

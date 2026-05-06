@@ -4052,7 +4052,7 @@ environment for accurate linting."
   ;;                                (ansi-term shell-pop-term-shell))))
 
   ;; This protects you from the pop-out bug
-  (setq shell-pop-restore-window-configuration nil)
+  (setq shell-pop-restore-window-configuration t)
 
   :preface
   ;; `shell-pop' layout
