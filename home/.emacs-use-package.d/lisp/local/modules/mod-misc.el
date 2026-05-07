@@ -4019,7 +4019,8 @@ environment for accurate linting."
   (shell-pop-shell-type '("vterm"
                           "*vterm*"
                           (lambda ()
-                            (let* ((vterm-shell shell-pop-term-shell))
+                            (let* ((vterm-shell shell-pop-term-shell)
+                                   (inhibit-redisplay t))
                               (when (fboundp 'vterm)
                                 (vterm))))))
   :init
