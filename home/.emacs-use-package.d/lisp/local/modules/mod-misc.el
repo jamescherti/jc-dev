@@ -157,6 +157,13 @@
 ;; a window-local one.
 ;; (setq switch-to-buffer-preserve-window-point t)
 
+;; Setting this to nil prevents Emacs from "snapping" the viewport to fit the
+;; entire line when point moves to a partially visible line.
+;; Pros: Enables true smooth/pixel scrolling; prevents jarring UI jumps
+;;       when navigating past large images or long wrapped blocks of text.
+;; Cons: The cursor can technically be on a line that is only half-visible
+;;       at the very top or bottom edge of the window.
+;; TODO minimal emacs?
 (setq make-cursor-line-fully-visible t)
 
 ;; t: This setting is the most common and means that the screen position is
