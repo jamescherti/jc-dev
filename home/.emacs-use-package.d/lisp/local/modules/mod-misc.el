@@ -122,9 +122,76 @@
 ;; consistent reading experience.
 (setq shr-use-fonts nil)
 
-(setq isearch-lazy-count t)
+(setq isearch-lazy-count nil)
+
+;; Disable the highlighting of all visible matches during an incremental search
+;; to improve focus on the current match and mitigate performance degradation
+(setq isearch-lazy-highlight t)
+
 ;; (setq lazy-count-prefix-format "(%s/%s) ")
 ;; (setq lazy-count-suffix-format nil)
+
+;; TODO: add to minimal-emacs.d?
+(setq dired-create-destination-dirs-on-trailing-dirsep t)
+
+;; (setq dired-hide-details-hide-symlink-targets nil)
+
+(setq dired-hide-details-hide-absolute-location t)            ; EMACS-31
+
+(setq dired-do-revert-buffer t)
+
+(setq resize-mini-windows t)
+
+;; (setq switch-to-buffer-obey-display-actions t)
+
+;; Preserve point when switching to a buffer that is already displayed in
+;; another window. This enables operating on the same buffer from multiple
+;; windows, each maintaining its own point.
+;;
+;; Benefits:
+;; - Allows concurrent viewing/editing of different parts of the same buffer in
+;; multiple windows.
+;; - Prevents cursor jumps when switching between windows showing the same
+;; buffer.
+;; - Enhances usability in workflows involving window splits (e.g., side-by-side
+;; editing or diffing).
+;;
+;; Drawbacks:
+;; - Can interfere with bookmark behavior, as bookmarks may not restore point
+;; consistently across windows.
+;; - May cause confusion if one expects a global point for a buffer rather than
+;; a window-local one.
+;; (setq switch-to-buffer-preserve-window-point t)
+
+(setq make-cursor-line-fully-visible t)
+
+;; t: This setting is the most common and means that the screen position is
+;; preserved while scrolling. The cursor will stay in place relative to the
+;; visible part of the buffer, and it won’t jump to the top or bottom of the
+;; screen.
+;;
+;; 'always: This is a more aggressive setting, ensuring the point is preserved
+;; no matter what, including in edge cases. This can be especially useful if
+;; you’re using smooth scrolling or if the Emacs window is resized.
+;;
+;; nil: Disables preserving the screen position, meaning the cursor might move
+;; when scrolling.
+;; (setq scroll-preserve-screen-position nil)
+;; If you choose always, it will change the cursor position
+;; (setq scroll-preserve-screen-position 'always)
+;; (setq scroll-preserve-screen-position t)
+
+;; TODO also useful for org
+(setq imenu-max-items 30)
+
+;; (setq isearch-allow-motion t)
+;;  isearch-allow-scroll t
+;; (setq lazy-highlight-initial-delay 0.5)
+
+;; (ls-lisp-use-insert-directory-program nil)
+;; (ls-lisp-use-insert-directory-program t)      ;; use external ls
+
+;; (setq fit-window-to-buffer-horizontally t)
 
 ;; Prevent version control async commands (like "git pull --stat") from popping
 ;; up new windows when upgrading Emacs packages. This works by temporarily
@@ -147,6 +214,74 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (advice-add 'package-vc-upgrade-all :around #'my-inhibit-vc-async-window-around-advice))
 
 ;;; testing
+
+;; Auto-scroll to bottom only when you type, not when output arrives
+(setq-default comint-scroll-to-bottom-on-input t)
+;; (setq-default comint-scroll-to-bottom-on-output nil)
+
+;; Prevent duplicates in your shell history
+(setq comint-input-ignoredups t)
+
+;; (setq duplicate-line-final-position -1 ; both are Emacs 29
+;;       duplicate-region-final-position -1)
+
+;; The 'fill-nobreak-invisible' variable is used to control how text wrapping
+;; works when using the M-q, 'M-x fill-paragraph', or gq in Evil mode. When set
+;; to t, it ensures that words are not broken across lines and any invisible
+;; characters are respected, which can be beneficial for maintaining the
+;; structure of code or other formatted texts in a way that avoids altering
+;; their intended layout or meaning due to line breaks.
+(setq fill-nobreak-invisible t)
+
+;; NOTE disabled recently
+(setq message-log-max 16384)
+;; (setq global-mark-ring-max 512)
+;; (setq kill-ring-max 1024)
+
+;; If this variable is t, splitting a window tries to get the space
+;; proportionally from all windows in the same combination.  This also
+;; allows splitting a window that is otherwise too small or of fixed size.
+;; Resizing and deleting a window proportionally resize all windows in the
+;; same combination.
+;;
+;; Emacs can balance window sizes automatically, but you can turn this behavior
+;; off by setting even-window-sizes to nil: This prevents Emacs from resizing
+;; existing windows to match the size of a new split window.
+;; (setq even-window-sizes nil)
+;; (setq even-window-sizes 'height-only)
+
+;; Kills the entire line plus the newline character
+;; kills the entire line plus the newline
+;; (setq kill-whole-line t)
+
+;; 'hungry' deletes all consecutive whitespace characters at once
+;; Alternatives is: 'all (remove all consecutive whitespace characters, even newlines).
+;; (setq backward-delete-char-untabify-method 'hungry)
+
+;; Prevent prompting for identifier when running xref-find-* commands, including
+;; xref-find-references, which enables faster navigation to all usages of the
+;; symbol at point without manual input
+;;
+;; Default: (not xref-find-definitions xref-find-definitions-other-window
+;; xref-find-definitions-other-frame)
+(setq xref-prompt-for-identifier
+      '(not xref-find-definitions
+            xref-find-definitions-other-window
+            xref-find-definitions-other-frame
+            ;; This adds the following
+            ;; This setting skips the redundant prompt asking you to confirm the
+            ;; identifier under the cursor, making code navigation immediate.
+            xref-find-references))
+
+;; Ignore case in file and buffer completions
+;; (setq completion-ignore-case t)
+;; (setq read-file-name-completion-ignore-case t)
+;; (setq read-buffer-completion-ignore-case t)
+
+;; Decrease verbosity and use faster connection methods
+;; (setq tramp-verbose 2)
+;; (setq tramp-use-connection-share t)
+;; (setq tramp-use-scp-direct-remote-copying t)
 
 ;; TODO: package-upgrade
 (defun my-enable-package-review-policy ()
@@ -1108,6 +1243,8 @@ WIDTH is the tab width."
   ;; (setq flymake-no-changes-timeout (when (> (num-processors) 8) 0.8))
   (setq flymake-no-changes-timeout 0.8)
   (setq flymake-start-on-save-buffer t)  ;; Do not enable or it will enable it on save
+
+  ;; Suppress the display of Flymake error counters when there are no errors.
   (setq flymake-suppress-zero-counters t)
 
   (with-no-warnings
@@ -1155,16 +1292,6 @@ WIDTH is the tab width."
       (add-hook 'eat-mode-hook 'evil-collection-enable-eat-toggle-send-escape)))
 
   (setq show-paren-mode nil)
-
-  (setq icomplete-separator "\n")
-  (setq icomplete-delay-completions-threshold 0)
-  (setq icomplete-compute-delay 0)
-  (setq icomplete-prospects-height 10)
-  (setq icomplete-hide-common-prefix nil)
-  (setq icomplete-with-completion-tables t)
-  (setq icomplete-show-matches-on-no-input t)
-  (setq icomplete-max-delay-chars 0)
-  (setq icomplete-tidy-shadowed-file-names t)
 
   (add-hook 'emacs-lisp-mode-hook
             #'(lambda()
@@ -1564,7 +1691,7 @@ WIDTH is the tab width."
   (setq transient-detect-key-conflicts t)
 
   (setq remote-file-name-inhibit-auto-save t
-        remote-file-name-inhibit-auto-save-visited t
+        remote-file-name-inhibit-auto-save-visited t  ; Speed up tramp
         ;; yank-pop-change-selection t
         ;; kill-whole-line t
         ;; list-matching-lines-jump-to-current-line t
@@ -1594,6 +1721,18 @@ WIDTH is the tab width."
         ;; help-enable-variable-value-editing t
         )
 
+
+  (setq icomplete-separator "\n")
+  (setq icomplete-delay-completions-threshold 0)
+  (setq icomplete-compute-delay 0)
+  (setq icomplete-prospects-height 10)
+  (setq icomplete-hide-common-prefix nil)
+  (setq icomplete-with-completion-tables t)
+  (setq icomplete-show-matches-on-no-input t)
+  (setq icomplete-max-delay-chars 0)
+  (setq icomplete-tidy-shadowed-file-names t)
+  (setq icomplete-scroll t)
+  (setq icomplete-in-buffer t)
   (setq completion-auto-select nil  ; Alternative: 'second-tab
         completions-detailed t
         completions-format 'vertical
@@ -3820,7 +3959,6 @@ This function is intended for use as :around advice."
 
 ;; Simpler alternative to bg
 (progn
-  (setq remote-file-name-inhibit-auto-save-visited t)
   (setq auto-save-visited-interval 30)
   ;; (auto-save-visited-mode 1)
 
