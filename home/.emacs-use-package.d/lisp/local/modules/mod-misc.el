@@ -234,9 +234,39 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq fill-nobreak-invisible t)
 
 ;; NOTE disabled recently
+;;
+;; Emacs packages are very verbose. Language servers, version control
+;; operations, and background linters (like Flymake) constantly print to the
+;; *Messages* buffer.
+;;
+;; The Real Benefit: If you run Emacs as a daemon or keep it open for days, the
+;; default 1000-line limit is overwritten quickly. If you experience a sudden UI
+;; freeze or a package fails silently, a limit of 16384 ensures the error trace
+;; from three hours ago is still there for you to read. It turns your log into a
+;; reliable diagnostic tool instead of a fleeting ticker.
 (setq message-log-max 16384)
-;; (setq global-mark-ring-max 512)
-;; (setq kill-ring-max 1024)
+
+;; Emacs drops a mark in the global ring every time you jump across files, such
+;; as when using xref-find-definitions to trace Python or Elisp functions.
+;;
+;; The Real Benefit: If you are exploring a large codebase and following a call
+;; stack through a dozen files, the default limit of 16 means your earliest
+;; marks are erased. A limit of 512 turns your global mark ring into an infinite
+;; "back button" for your entire project. You can pop the mark continuously to
+;; retrace your steps and return to your exact starting point, regardless of how
+;; many files you visited.
+(setq global-mark-ring-max 512)
+
+;; In Emacs, almost every deletion command (such as killing a word, killing a
+;; line, or deleting a sentence) saves the text to the clipboard history.
+;;
+;; The Real Benefit: If you copy a block of code to paste elsewhere, but then
+;; delete 70 individual lines to clean up a buffer, the default limit of 60 will
+;; push your copied code out of memory before you can paste it. A limit of 1024
+;; prevents this data loss. It allows you to use completion frameworks to search
+;; for text you cut hours ago, treating your clipboard as a safe, long-term
+;; scratchpad rather than a fragile queue.
+(setq kill-ring-max 1024)
 
 ;; If this variable is t, splitting a window tries to get the space
 ;; proportionally from all windows in the same combination.  This also
