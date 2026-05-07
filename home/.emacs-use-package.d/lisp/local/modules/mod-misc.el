@@ -127,13 +127,12 @@
 ;; (setq lazy-count-suffix-format nil)
 
 ;; TODO: add to minimal-emacs.d?
-(setq dired-create-destination-dirs-on-trailing-dirsep t)
+;; Doesn't work
+;; (setq dired-create-destination-dirs-on-trailing-dirsep t)
 
-;; (setq dired-hide-details-hide-symlink-targets nil)
+(setq dired-hide-details-hide-symlink-targets nil)
 
-(setq dired-hide-details-hide-absolute-location t)            ; EMACS-31
-
-(setq dired-do-revert-buffer t)
+(setq dired-create-destination-dirs 'ask)
 
 (setq resize-mini-windows t)
 
@@ -176,7 +175,7 @@
 ;; (setq scroll-preserve-screen-position 'always)
 ;; (setq scroll-preserve-screen-position t)
 
-;; TODO also useful for org
+;; also useful for org
 (setq imenu-max-items 30)
 
 ;; (setq isearch-allow-motion t)
