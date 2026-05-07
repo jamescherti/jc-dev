@@ -514,6 +514,11 @@ CWD is the current working directory."
 (defvar my-tmp-files-dir (expand-file-name "~")
   "Temporary ediff.")
 
+(with-eval-after-load 'le-compile-angel
+  (with-eval-after-load 'compile-angel
+    (when (fboundp 'le-compile-angel-exclude)
+      (le-compile-angel-exclude my-tmp-files-dir))))
+
 (defvar my-tmp-file-name "tmp-file"
   "The name of the temporary file.")
 
