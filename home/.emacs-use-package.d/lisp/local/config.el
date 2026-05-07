@@ -1016,6 +1016,12 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
                                          nxml-mode-hook
                                          html-mode-hook))
 
+;;; evil
+
+;; Fixes bug: https://github.com/emacs-evil/evil-collection/issues/905
+(setq evil-collection-repl-submit-state 'insert)
+;; (setq evil-collection-repl-submit-state 'normal)
+
 ;;; Provide
 
 (provide 'config)
