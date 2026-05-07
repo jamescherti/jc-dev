@@ -102,11 +102,6 @@
 ;; restructuring incredibly fast.
 ;; (setq wdired-create-parent-directories t)
 
-;; Automatically updates Dired buffers when the underlying directory changes on
-;; the disk. This ensures your Dired view is always accurate without requiring
-;; manual refreshes.
-;; (setq dired-auto-revert-buffer #'dired-directory-changed-p)
-
 ;; Automatically kills the buffers of files that you delete or rename within
 ;; Dired. This prevents you from accidentally interacting with stale buffers
 ;; that no longer correspond to the filesystem.
@@ -326,8 +321,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (add-hook 'after-init-hook #'my-enable-package-review-policy)
 
 (setq-default search-invisible nil)
-
-(setq global-auto-revert-non-file-buffers nil)
 
 ;;; Delete unused packages
 
