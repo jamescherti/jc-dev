@@ -4040,10 +4040,10 @@ environment for accurate linting."
                             ;;     (vterm-send-return)))
                             )))
   :init
-  (setq shell-pop-window-position "bottom")
   ;; (setq shell-pop-window-position "full")
+  (setq shell-pop-window-position "bottom")
   (setq shell-pop-full-span nil)
-  (setq shell-pop-autocd-to-working-dir nil)
+  (setq shell-pop-autocd-to-working-dir t)
   (setq shell-pop-term-shell "/bin/bash")
   (setq shell-pop-window-size 80)
   ;; (setq shell-pop-shell-type '("ansi-term"
@@ -4051,39 +4051,44 @@ environment for accurate linting."
   ;;                              (lambda ()
   ;;                                (ansi-term shell-pop-term-shell))))
 
+  ;; (setq shell-pop-shell-type
+  ;;       '("eshell"
+  ;;         ("eshell" "*eshell*" (lambda () (eshell)))))
+
   ;; This protects you from the pop-out bug
   (setq shell-pop-restore-window-configuration t)
 
-  :preface
+  ;; :preface
   ;; `shell-pop' layout
-  (progn
-    (defvar my-shell-pop-saved-window-config nil
-      "Stores the absolute window state prior to shell-pop-up.")
-
-    (defun my-shell-pop-save-layout (&rest _args)
-      "Capture the exact layout before shell-pop opens."
-      (setq my-shell-pop-saved-window-config (current-window-configuration)))
-
-    (defun my-shell-pop-restore-layout (orig-fun &rest args)
-      "Restore the layout without relying on linear winner history.
-  Only restores if the original working window is still alive."
-      (if (and my-shell-pop-saved-window-config
-               shell-pop-last-window
-               shell-pop-last-buffer
-               (window-live-p shell-pop-last-window)
-               (eq (window-buffer shell-pop-last-window) shell-pop-last-buffer))
-          (progn
-            (run-hooks 'shell-pop-out-hook)
-            (bury-buffer)
-            (set-window-configuration my-shell-pop-saved-window-config)
-            (setq my-shell-pop-saved-window-config nil))
-        ;; Clean up the saved config and fall back to native behavior
-        ;; if the original window was destroyed.
-        (setq my-shell-pop-saved-window-config nil)
-        (apply orig-fun args)))
-
-    (advice-add 'shell-pop-up :before #'my-shell-pop-save-layout)
-    (advice-add 'shell-pop-out :around #'my-shell-pop-restore-layout)))
+  ;; (progn
+  ;;   (defvar my-shell-pop-saved-window-config nil
+  ;;     "Stores the absolute window state prior to shell-pop-up.")
+  ;;
+  ;;   (defun my-shell-pop-save-layout (&rest _args)
+  ;;     "Capture the exact layout before shell-pop opens."
+  ;;     (setq my-shell-pop-saved-window-config (current-window-configuration)))
+  ;;
+  ;;   (defun my-shell-pop-restore-layout (orig-fun &rest args)
+  ;;     "Restore the layout without relying on linear winner history.
+  ;; Only restores if the original working window is still alive."
+  ;;     (if (and my-shell-pop-saved-window-config
+  ;;              shell-pop-last-window
+  ;;              shell-pop-last-buffer
+  ;;              (window-live-p shell-pop-last-window)
+  ;;              (eq (window-buffer shell-pop-last-window) shell-pop-last-buffer))
+  ;;         (progn
+  ;;           (run-hooks 'shell-pop-out-hook)
+  ;;           (bury-buffer)
+  ;;           (set-window-configuration my-shell-pop-saved-window-config)
+  ;;           (setq my-shell-pop-saved-window-config nil))
+  ;;       ;; Clean up the saved config and fall back to native behavior
+  ;;       ;; if the original window was destroyed.
+  ;;       (setq my-shell-pop-saved-window-config nil)
+  ;;       (apply orig-fun args)))
+  ;;
+  ;;   (advice-add 'shell-pop-up :before #'my-shell-pop-save-layout)
+  ;;   (advice-add 'shell-pop-out :around #'my-shell-pop-restore-layout))
+  )
 
 ;; shell-pop: Change the default directory
 (defun my-around-shell-pop (fn &rest args)
@@ -4140,9 +4145,9 @@ environment for accurate linting."
                                      (shell-quote-argument ,proj-name))))
                            (vterm-send-return)))))))))
 
-(with-eval-after-load 'shell-pop
-  ;; Apply the new global setting advice
-  (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
+;; (with-eval-after-load 'shell-pop
+;;   ;; Apply the new global setting advice
+;;   (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
 
 ;;; vterm-toggle
 
