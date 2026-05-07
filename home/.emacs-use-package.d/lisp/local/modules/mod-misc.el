@@ -4019,33 +4019,18 @@ environment for accurate linting."
   (shell-pop-shell-type '("vterm"
                           "*vterm*"
                           (lambda ()
-                            (let ((tmux-buffer (vterm)))
-                              (with-current-buffer tmux-buffer
-                                (vterm-send-string
-                                 "exec tmux-session emacs")
-                                (vterm-send-string "\n")
-                                (vterm-send-return)))
-
-                            ;; (let ((tmux-buffer (vterm))
-                            ;;       (project-name (let ((name (my-project-name)))
-                            ;;                       (if name
-                            ;;                           "misc"
-                            ;;                         name))))
-                            ;;   (with-current-buffer tmux-buffer
-                            ;;     (vterm-send-string
-                            ;;      (format
-                            ;;       "exec tmux-session emacs-%s"
-                            ;;       (shell-quote-argument project-name)))
-                            ;;     (vterm-send-string "\n")
-                            ;;     (vterm-send-return)))
-                            )))
+                            (let* ((vterm-shell shell-pop-term-shell))
+                              (when (fboundp 'vterm)
+                                (vterm))))))
   :init
   ;; (setq shell-pop-window-position "full")
   (setq shell-pop-window-position "bottom")
   (setq shell-pop-full-span nil)
   (setq shell-pop-autocd-to-working-dir nil)
-  (setq shell-pop-term-shell "/usr/bin/env bash")
+  (setq shell-pop-term-shell "tmux-session emacs")
   (setq shell-pop-window-size 80)
+  (setq shell-pop-restore-window-configuration nil)
+
   ;; (setq shell-pop-shell-type '("ansi-term"
   ;;                              "*ansi-term*"
   ;;                              (lambda ()
@@ -4054,9 +4039,6 @@ environment for accurate linting."
   ;; (setq shell-pop-shell-type
   ;;       '("eshell"
   ;;         ("eshell" "*eshell*" (lambda () (eshell)))))
-
-  ;; This protects you from the pop-out bug
-  (setq shell-pop-restore-window-configuration t)
 
   ;; :preface
   ;; `shell-pop' layout
@@ -4104,14 +4086,14 @@ environment for accurate linting."
   (advice-add 'shell-pop :around #'my-around-shell-pop))
 
 ;; Ensure switching to insert mode
-(defun my-shell-pop-to-insert-state ()
+(defun my-shell-pop-evil-insert-state ()
   "Ensure the terminal is in char-mode and Evil is in insert state."
   ;; If using term/ansi-term, this lets keys pass to the shell
   ;; (when (and (fboundp 'term-char-mode)
   ;;            (derived-mode-p 'term-mode))
   ;;   (term-char-mode))
 
-  (my-save-all-buffers)
+  ;; (my-save-all-buffers)
 
   ;; Force Evil into insert state
   (when (fboundp 'evil-insert-state)
@@ -4122,7 +4104,7 @@ environment for accurate linting."
              (fboundp 'vterm-reset-cursor-point))
     (vterm-reset-cursor-point)))
 
-(add-hook 'shell-pop-in-after-hook #'my-shell-pop-to-insert-state)
+(add-hook 'shell-pop-in-after-hook #'my-shell-pop-evil-insert-state)
 
 ;;; shell-pop: shell pop per project
 
