@@ -4043,8 +4043,8 @@ environment for accurate linting."
   ;; (setq shell-pop-window-position "full")
   (setq shell-pop-window-position "bottom")
   (setq shell-pop-full-span nil)
-  (setq shell-pop-autocd-to-working-dir t)
-  (setq shell-pop-term-shell "/bin/bash")
+  (setq shell-pop-autocd-to-working-dir nil)
+  (setq shell-pop-term-shell "/usr/bin/env bash")
   (setq shell-pop-window-size 80)
   ;; (setq shell-pop-shell-type '("ansi-term"
   ;;                              "*ansi-term*"
