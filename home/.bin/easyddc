@@ -25,9 +25,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-
-set -x
-
 # monitor-ctl: A wrapper for ddcutil to manage external displays.
 
 VCP_BRIGHTNESS="10"
@@ -55,7 +52,9 @@ set_vcp() {
   local buses=$(get_buses)
 
   for bus in $buses; do
-    ddcutil --bus "$bus" setvcp "$vcp" "$value"
+    # --noverify bypasses the DDCRC_VERIFY check
+    # --sleep-multiplier 2 can help if communication is unstable
+    ddcutil --bus "$bus" setvcp "$vcp" "$value" --noverify
   done
 }
 
