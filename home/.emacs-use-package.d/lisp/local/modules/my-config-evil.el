@@ -589,9 +589,6 @@ This enhancement prevents the cursor from moving."
   (evil-define-key 'insert vterm-mode-map (kbd "M-H") 'my-vterm--send-Alt-Shift-H)
   (evil-define-key 'insert vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L)
 
-  ;; Useful for nano
-  ;;(define-key vterm-mode-map (kbd "C-c") 'vterm--self-insert)
-  ;;(define-key vterm-mode-map (kbd "C-g") 'vterm--self-insert)
   (define-key vterm-mode-map (kbd "C-x") 'vterm--self-insert)
 
   (define-key vterm-mode-map (kbd "C-c C-c") 'vterm--self-insert)
@@ -600,6 +597,27 @@ This enhancement prevents the cursor from moving."
   (define-key vterm-mode-map (kbd "M-k") 'vterm--self-insert)
   (evil-define-key 'insert vterm-mode-map (kbd "M-j") 'vterm--self-insert)
   (evil-define-key 'insert vterm-mode-map (kbd "M-k") 'vterm--self-insert)
+
+  ;; Tell vterm to pass C-g directly to the underlying shell
+
+  ;; This is an "Emacs vs. Terminal" clash. It happens because Emacs and
+  ;; the shell (like bash or zsh) have completely different ideas about what
+  ;; C-g is supposed to do.
+  ;;
+  ;; In Emacs, C-g is the universal "cancel/abort" shortcut (keyboard-quit). To
+  ;; play nicely with Emacs, vterm intercepts C-g by default so you can still
+  ;; use it to cancel Emacs commands.
+  ;;
+  ;; Because vterm intercepts it, the C-g keypress is never actually sent to
+  ;; your shell.
+  ;;
+  ;; If you press C-g to try and cancel a terminal command, the shell doesn't
+  ;; receive anything. Worse, if your shell is in a mode that is actively
+  ;; waiting for a C-g to cancel out of a specific state (like a C-r reverse
+  ;; history search), it stays permanently stuck in that state. Your keystrokes
+  ;; start doing weird things because the shell is still searching, making it
+  ;; look like the terminal is completely frozen or broken.
+  ;; (define-key vterm-mode-map (kbd "C-g") 'vterm--self-insert)
 
   (define-key vterm-mode-map (kbd "M-H") 'my-vterm--send-Alt-Shift-H)
   (define-key vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L))
@@ -1217,7 +1235,7 @@ on text following the cursor."
    state))
 
 (defun my-shell-pop ()
-  "Close the minibuffer if active, then launch shell-pop."
+  "Close the minibuffer if active, then launch `shell-pop'."
   (interactive)
   (let ((inhibit-redisplay t))
     (if (active-minibuffer-window)
@@ -1632,7 +1650,8 @@ search direction (default: \='forward)."
 ;; "C-x" "C-c" "C-g"
 
 ;; C-w to change the window in vim
-(setq vterm-keymap-exceptions '("C-w" "C-g" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
+
+(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
 (setq vterm-disable-inverse-video t)
 
 (setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
@@ -1691,9 +1710,7 @@ search direction (default: \='forward)."
   ;; Ensure C-g works to return to normal mode from insert mode
   ;; Escape to normal state using C-c <escape> or C-c [
   (evil-define-key 'insert vterm-mode-map (kbd "C-c <escape>") 'evil-normal-state)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-c [") 'evil-normal-state)
-
-  (evil-define-key 'insert vterm-mode-map (kbd "C-g") 'evil-normal-state))
+  (evil-define-key 'insert vterm-mode-map (kbd "C-c [") 'evil-normal-state))
 
 
 ;;; mode line
@@ -1808,6 +1825,7 @@ of the line or the buffer; just return nil."
       (symbol-name prop))))
 
 (defun evilcursor--outline-invisible-p (pos)
+  "Return non-nil when POS is invisible."
   (cond
    ((derived-mode-p 'org-mode)
     (if (fboundp 'org-fold-folded-p)
