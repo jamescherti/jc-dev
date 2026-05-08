@@ -30,6 +30,7 @@
 # List monitors:
 # ddcutil detect | grep -E "I2C bus:|Model:|Serial number:"
 #
+# ddcutil capabilities | grep -A 10 "Feature: 14"
 
 VCP_BRIGHTNESS="10"
 VCP_CONTRAST="12"
@@ -37,7 +38,6 @@ VCP_COLOR_PRESET="14"
 VCP_INPUT="60"
 TARGET_MONITOR=""
 
-set -x
 if [[ -f ~/.easyddc ]]; then
   # shellcheck disable=SC1090
   source ~/.easyddc
@@ -65,19 +65,12 @@ execute_ddcutil() {
   local vcp=$2
   local value=$3
 
-  if [ -n "$TARGET_MONITOR" ]; then
-    # Determine if TARGET_MONITOR is a bus number (numeric) or a string (SN/Model)
-    if [[ "$TARGET_MONITOR" =~ ^[0-9]+$ ]]; then
-      ddcutil --bus "$TARGET_MONITOR" "$action" "$vcp" "$value" --noverify
-    else
-      # Try targeting by serial number or model name
-      ddcutil --sn "$TARGET_MONITOR" "$action" "$vcp" "$value" --noverify \
-        2>/dev/null \
-        || ddcutil --model "$TARGET_MONITOR" "$action" "$vcp" "$value" \
-          --noverify
-    fi
+  # If you know your monitor is always on bus 4, hardcode it or pass it as -m 4
+  if [[ "$TARGET_MONITOR" =~ ^[0-9]+$ ]]; then
+    # Direct bus access is the fastest possible command
+    ddcutil --bus "$TARGET_MONITOR" "$action" "$vcp" "$value" --noverify
   else
-    # Default: Loop through all buses
+    # Only if no bus is provided, we perform the slow search
     local buses
     buses=$(get_buses)
     for bus in $buses; do
