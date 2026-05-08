@@ -36,6 +36,7 @@ VCP_BRIGHTNESS="10"
 VCP_CONTRAST="12"
 VCP_COLOR_PRESET="14"
 VCP_INPUT="60"
+VCP_SHARPNESS="87"
 TARGET_MONITOR=""
 
 if [[ -f ~/.easyddc ]]; then
@@ -49,6 +50,7 @@ show_help() {
   echo "  -m ID       Specify monitor (e.g., bus number, serial, or model)"
   echo "  -b VALUE    Set brightness (0-100)"
   echo "  -c VALUE    Set contrast (0-100)"
+  echo "  -s VALUE    Set sharpness (usually 0-100, varies by model)"
   echo "  -p VALUE    Set color preset"
   echo "  -i VALUE    Set input source"
   echo "  -g VCP      Get current value for a VCP code"
@@ -64,13 +66,22 @@ execute_ddcutil() {
   local action=$1
   local vcp=$2
   local value=$3
+  local bus_to_use=""
 
-  # If you know your monitor is always on bus 4, hardcode it or pass it as -m 4
+  # Check if ID is a raw bus number
   if [[ "$TARGET_MONITOR" =~ ^[0-9]+$ ]]; then
-    # Direct bus access is the fastest possible command
-    ddcutil --bus "$TARGET_MONITOR" "$action" "$vcp" "$value" --noverify
+    bus_to_use="$TARGET_MONITOR"
+  # Check if ID exists as a variable in ~/.easyddc (e.g., MONITOR_office)
   else
-    # Only if no bus is provided, we perform the slow search
+    local var_name="MONITOR_${TARGET_MONITOR}"
+    if [[ -n "${!var_name}" ]]; then
+      bus_to_use="${!var_name}"
+    fi
+  fi
+
+  if [[ -n "$bus_to_use" ]]; then
+    ddcutil --bus "$bus_to_use" "$action" "$vcp" "$value" --noverify
+  else
     local buses
     buses=$(get_buses)
     for bus in $buses; do
@@ -79,11 +90,12 @@ execute_ddcutil() {
   fi
 }
 
-while getopts "m:b:c:p:i:g:h" opt; do
+while getopts "m:b:c:s:p:i:g:h" opt; do
   case "$opt" in
   m) TARGET_MONITOR="$OPTARG" ;;
   b) execute_ddcutil "setvcp" "$VCP_BRIGHTNESS" "$OPTARG" ;;
   c) execute_ddcutil "setvcp" "$VCP_CONTRAST" "$OPTARG" ;;
+  s) execute_ddcutil "setvcp" "$VCP_SHARPNESS" "$OPTARG" ;;
   p) execute_ddcutil "setvcp" "$VCP_COLOR_PRESET" "$OPTARG" ;;
   i) execute_ddcutil "setvcp" "$VCP_INPUT" "$OPTARG" ;;
   g) execute_ddcutil "getvcp" "$OPTARG" ;;
