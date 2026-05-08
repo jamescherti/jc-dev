@@ -4209,7 +4209,7 @@ environment for accurate linting."
   (setq shell-pop-autocd-to-working-dir nil)
   (setq shell-pop-term-shell "tmux-session emacs")
   (setq shell-pop-window-size 80)
-  (setq shell-pop-restore-window-configuration nil)
+  (setq shell-pop-restore-window-configuration t)
 
   ;; (setq shell-pop-shell-type '("ansi-term"
   ;;                              "*ansi-term*"
