@@ -25,55 +25,75 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# monitor-ctl: A wrapper for ddcutil to manage external displays.
+# easyddc: A wrapper for ddcutil to manage external displays.
+#
+# List monitors:
+# ddcutil detect | grep -E "I2C bus:|Model:|Serial number:"
+#
 
 VCP_BRIGHTNESS="10"
 VCP_CONTRAST="12"
+VCP_COLOR_PRESET="14"
 VCP_INPUT="60"
+TARGET_MONITOR=""
+
+set -x
+if [[ -f ~/.easyddc ]]; then
+  # shellcheck disable=SC1090
+  source ~/.easyddc
+fi
 
 show_help() {
   echo "Usage: monitor-ctl [options]"
   echo "Options:"
+  echo "  -m ID       Specify monitor (e.g., bus number, serial, or model)"
   echo "  -b VALUE    Set brightness (0-100)"
   echo "  -c VALUE    Set contrast (0-100)"
-  echo "  -i VALUE    Set input source (e.g., 11 for HDMI-1, 0f for DP-1)"
+  echo "  -p VALUE    Set color preset"
+  echo "  -i VALUE    Set input source"
   echo "  -g VCP      Get current value for a VCP code"
   echo "  -h          Show this help menu"
 }
 
-# Detect active I2C buses
+# Detect active I2C buses if no specific monitor is targeted
 get_buses() {
   ddcutil detect | grep "I2C bus:" | awk -F'-' '{print $NF}'
 }
 
-set_vcp() {
-  local vcp=$1
-  local value=$2
-  local buses=$(get_buses)
+execute_ddcutil() {
+  local action=$1
+  local vcp=$2
+  local value=$3
 
-  for bus in $buses; do
-    # --noverify bypasses the DDCRC_VERIFY check
-    # --sleep-multiplier 2 can help if communication is unstable
-    ddcutil --bus "$bus" setvcp "$vcp" "$value" --noverify
-  done
+  if [ -n "$TARGET_MONITOR" ]; then
+    # Determine if TARGET_MONITOR is a bus number (numeric) or a string (SN/Model)
+    if [[ "$TARGET_MONITOR" =~ ^[0-9]+$ ]]; then
+      ddcutil --bus "$TARGET_MONITOR" "$action" "$vcp" "$value" --noverify
+    else
+      # Try targeting by serial number or model name
+      ddcutil --sn "$TARGET_MONITOR" "$action" "$vcp" "$value" --noverify \
+        2>/dev/null \
+        || ddcutil --model "$TARGET_MONITOR" "$action" "$vcp" "$value" \
+          --noverify
+    fi
+  else
+    # Default: Loop through all buses
+    local buses
+    buses=$(get_buses)
+    for bus in $buses; do
+      ddcutil --bus "$bus" "$action" "$vcp" "$value" --noverify
+    done
+  fi
 }
 
-get_vcp() {
-  local vcp=$1
-  local buses=$(get_buses)
-
-  for bus in $buses; do
-    echo "Bus $bus:"
-    ddcutil --bus "$bus" getvcp "$vcp"
-  done
-}
-
-while getopts "b:c:i:g:h" opt; do
+while getopts "m:b:c:p:i:g:h" opt; do
   case "$opt" in
-  b) set_vcp "$VCP_BRIGHTNESS" "$OPTARG" ;;
-  c) set_vcp "$VCP_CONTRAST" "$OPTARG" ;;
-  i) set_vcp "$VCP_INPUT" "$OPTARG" ;;
-  g) get_vcp "$OPTARG" ;;
+  m) TARGET_MONITOR="$OPTARG" ;;
+  b) execute_ddcutil "setvcp" "$VCP_BRIGHTNESS" "$OPTARG" ;;
+  c) execute_ddcutil "setvcp" "$VCP_CONTRAST" "$OPTARG" ;;
+  p) execute_ddcutil "setvcp" "$VCP_COLOR_PRESET" "$OPTARG" ;;
+  i) execute_ddcutil "setvcp" "$VCP_INPUT" "$OPTARG" ;;
+  g) execute_ddcutil "getvcp" "$OPTARG" ;;
   h)
     show_help
     exit 0
