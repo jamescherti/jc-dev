@@ -649,10 +649,11 @@ When IMENU-ONLY is nil it only uses imenu."
           (evil-goto-definition))))))
 
 (defun eviljump-goto-definition (&optional force-all)
-  "Find definition and scroll line to top.
+  "Find definition and recenter the window.
 When FORCE-ALL is non-nil, use all functions."
   (interactive)
-  (lightemacs-recenter-if-out-of-view
+  (let ((old-buffer (current-buffer))
+        (old-point (point)))
     (cond
      ((and (fboundp 'eglot-managed-p)
            (eglot-managed-p))
@@ -669,7 +670,15 @@ When FORCE-ALL is non-nil, use all functions."
       (eviljump-goto-definition-try-imenu-first t))
 
      (t
-      (eviljump-goto-definition-try-imenu-first nil)))))
+      (eviljump-goto-definition-try-imenu-first nil)))
+
+    (when (or (not (eq old-buffer (current-buffer)))
+              (/= old-point (point)))
+      ;; Dynamically recenter the point to a position roughly 25% from the top
+      ;; of the window. Using (window-body-height) instead of a hardcoded line
+      ;; number ensures consistent visual placement across different screen
+      ;; sizes, font scales, and window split configurations.
+      (recenter (/ (window-body-height) 4)))))
 
 (defun eviljump-goto-definition-force ()
   "Go to definition."
