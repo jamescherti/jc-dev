@@ -3569,14 +3569,26 @@ visibility when navigation commands are executed."
       (apply fn args)
     (lightemacs-default-settings--recenter-maybe)))
 
-;; TODO use a loop to add to hooks and advice functions
-(with-eval-after-load 'flymake
-  (with-eval-after-load 'git-gutter
-    (advice-add 'git-gutter:previous-hunk :around
-                #'lightemacs-default-settings--advice-recenter-maybe)
-    (advice-add 'git-gutter:next-hunk :around
-                #'lightemacs-default-settings--advice-recenter-maybe))
+(with-eval-after-load 'diff-hl
+  (advice-add 'diff-hl-next-hunk :around
+              #'lightemacs-default-settings--advice-recenter-maybe)
+  (advice-add 'diff-hl-next-hunk :around
+              #'lightemacs-default-settings--advice-recenter-maybe))
 
+(with-eval-after-load 'git-gutter
+  (advice-add 'git-gutter:previous-hunk :around
+              #'lightemacs-default-settings--advice-recenter-maybe)
+  (advice-add 'git-gutter:next-hunk :around
+              #'lightemacs-default-settings--advice-recenter-maybe))
+
+;; TODO use a loop to add to hooks and advice functions
+(with-eval-after-load 'git-gutter
+  (advice-add 'git-gutter:previous-hunk :around
+              #'lightemacs-default-settings--advice-recenter-maybe)
+  (advice-add 'git-gutter:next-hunk :around
+              #'lightemacs-default-settings--advice-recenter-maybe))
+
+(with-eval-after-load 'flymake
   (advice-add 'flymake-goto-next-error :around
               #'lightemacs-default-settings--advice-recenter-maybe)
   (advice-add 'flymake-goto-prev-error :around
@@ -4181,14 +4193,14 @@ environment for accurate linting."
   :vc (:url "https://github.com/jamescherti/shell-pop-el"
             :rev :newest)
   :commands shell-pop
-  ;; :bind (("<f2>" . shell-pop))
+  :bind (("C-c t" . shell-pop))
   :custom
-  (shell-pop-shell-type '("vterm"
-                          "*vterm*"
+  ;; The key sequence used to toggle the shell window.
+  (shell-pop-universal-key "C-c t")
+  (shell-pop-shell-type '("vterm" "*vterm*"
                           (lambda ()
-                            (let* ((vterm-shell shell-pop-term-shell)
-                                   (inhibit-redisplay t))
-                              (when (fboundp 'vterm)
+                            (when (fboundp 'vterm)
+                              (let* ((vterm-shell shell-pop-term-shell))
                                 (vterm))))))
   :init
   ;; (setq shell-pop-window-position "full")

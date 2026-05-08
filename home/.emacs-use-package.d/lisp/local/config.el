@@ -1022,6 +1022,10 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 (setq evil-collection-repl-submit-state 'insert)
 ;; (setq evil-collection-repl-submit-state 'normal)
 
+;;; pathaction
+
+(setq pathaction-term-function 'pathaction-vterm)
+
 ;;; Provide
 
 (provide 'config)

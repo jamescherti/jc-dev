@@ -1632,7 +1632,7 @@ search direction (default: \='forward)."
 ;; "C-x" "C-c" "C-g"
 
 ;; C-w to change the window in vim
-(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
+(setq vterm-keymap-exceptions '("C-w" "C-g" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
 (setq vterm-disable-inverse-video t)
 
 (setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
