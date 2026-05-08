@@ -102,6 +102,27 @@ export CFLAGS="-O2 -pipe -march=native -mtune=native -fomit-frame-pointer"
 #   fi
 # fi
 
+# -Wl,-O2 - Instructs the linker to optimize layout of the binary. Helps reduce
+# cache misses slightly.
+#
+# -Wl,--sort-common – Orders common symbols to improve memory locality. Small
+# effect, generally safe.
+#
+# -Wl,--as-needed – Only links libraries that are actually used. Reduces the
+# size of the executable and startup overhead. Useful for Emacs because it links
+# many libraries.
+#
+# -Wl,-z,pack-relative-relocs – Reduces the size of relocations for
+# position-independent executables. Slightly reduces memory usage and can
+# improve startup speed.
+export LDFLAGS="-Wl,-O2 -Wl,--sort-common \
+  -Wl,--as-needed -Wl,-z,pack-relative-relocs"
+
+if [[ $ID == "debian" ]] && [[ $VERSION_ID = "13" ]]; then
+  export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
+  export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
+fi
+
 if [[ $ID = DISABLEDarch ]]; then
   # Arch Linux
   export CC=clang
@@ -129,28 +150,7 @@ else
   #
   # -flto=auto              # Full link-time optimization; reduces binary size and can improve runtime performance
   export CFLAGS="$CFLAGS -flto=auto"
-  export LDFLAGS="-flto=auto"
-fi
-
-# -Wl,-O2 - Instructs the linker to optimize layout of the binary. Helps reduce
-# cache misses slightly.
-#
-# -Wl,--sort-common – Orders common symbols to improve memory locality. Small
-# effect, generally safe.
-#
-# -Wl,--as-needed – Only links libraries that are actually used. Reduces the
-# size of the executable and startup overhead. Useful for Emacs because it links
-# many libraries.
-#
-# -Wl,-z,pack-relative-relocs – Reduces the size of relocations for
-# position-independent executables. Slightly reduces memory usage and can
-# improve startup speed.
-export LDFLAGS="$LDFLAGS -Wl,-O2 -Wl,--sort-common \
-  -Wl,--as-needed -Wl,-z,pack-relative-relocs"
-
-if [[ $ID == "debian" ]] && [[ $VERSION_ID = "13" ]]; then
-  export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
-  export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
+  export LDFLAGS="$LDFLAGS -flto=auto"
 fi
 
 # The `--with-mps=yes` configure flag instructs Emacs to use the **Memory Pool
@@ -240,29 +240,26 @@ CONFIGURE_ARGS=(
   # reduces the overhead of file I/O operations and reduces the number of linked
   # system libraries. If you are on a standard personal Linux setup, these are
   # rarely needed inside Emacs.
-  --enable-acl
-  --enable-xattr
-
-  # configure: WARNING: This configuration installs a 'movemail' program that
-  # does not retrieve POP3 email. By default, Emacs 25 and earlier installed a
-  # 'movemail' program that retrieved POP3 email via only insecure channels, a
-  # practice that is no longer recommended but that you can continue to
-  # support by using './configure --with-pop'. configure: You might want to
-  # use './configure --with-mailutils'.
-  --without-mailutils
-  --without-pop
-
-  # --without-hesiod disables support for Hesiod, a relatively obscure name
-  # service protocol that maps names to data using DNS. In Emacs, Hesiod
-  # support is used for resolving user information (such as user names and
-  # home directories) via a network-based lookup instead of relying solely on
-  # local system files like /etc/passwd.
-  --without-hesiod
+  --disable-acl
+  --disable-xattr
 
   # On Linux, --without-included-regex is typically faster than
   # --with-included-regex, assuming your system's C library (e.g., glibc)
   # provides a high-performance and standards-compliant regex implementation.
-  --without-included-regex
+  #
+  # Emacs does not use standard POSIX regular expressions. It uses a highly
+  # specialized, heavily modified internal regex engine (regex-emacs.c).
+  # Standard system regex libraries (like the one built into Linux's glibc)
+  # simply do not understand Emacs-specific features, such as:
+  #
+  # The --without-included-regex flag comes from gnulib (a library of shared C
+  # code used by the Emacs build system). If you pass this flag, Emacs will
+  # still use its internal engine for all of your Lisp code and buffer searches.
+  # At best, the flag is silently ignored by the core editor. At worst, it
+  # forces minor background C utilities to use your operating system's regex
+  # library, which might be slower or contain bugs that the GNU developers
+  # already patched in the included version.
+  --with-included-regex
 
   # The make process will be significantly longer (often 30 to 60 minutes
   # depending on your CPU). It systematically iterates through every single .el
@@ -288,8 +285,9 @@ CONFIGURE_ARGS=(
 
   --with-tree-sitter
   --with-xml2
-  --without-gpm
   --with-zlib
+
+  --without-gpm
 
   # You will not be able to embed native WebKit browser sessions inside Emacs
   # buffers. You will miss out on the ability to render complex HTML natively or
@@ -299,7 +297,7 @@ CONFIGURE_ARGS=(
   # --with-xdbe
   # --with-x-toolkit=lucid
 
-  # --with-xdbe
+  --without-xdbe
   # --with-x-toolkit=gtk3
   # --without-toolkit-scroll-bars
   # --without-pgtk
@@ -375,13 +373,13 @@ CONFIGURE_ARGS=(
 
   --without-imagemagick
 
-  --with-gif
-  --with-jpeg
-  --with-png
-  --with-rsvg
-  --with-tiff
-  --with-xpm
-  --with-webp
+  --without-gif
+  --without-jpeg
+  --without-png
+  --without-rsvg
+  --without-tiff
+  --without-xpm
+  --without-webp
 
   # The LCMS2 library enables color management for image processing in Emacs,
   # allowing for accurate color rendering of images and fonts. If you work
@@ -393,7 +391,7 @@ CONFIGURE_ARGS=(
   # LCMS2, Emacs cannot apply ICC color profiles. If you view images in Emacs,
   # they might display with slightly inaccurate colors compared to your
   # dedicated image viewers.
-  --with-lcms2
+  --without-lcms2
 
   # Consider enabling SQLite if you use packages that rely on databases (e.g.,
   # Org-mode, Magit, Projectile).
@@ -406,9 +404,10 @@ CONFIGURE_ARGS=(
   # Other packages that use it: Magit, Projectile, Company.
   #
   # (That should speed up things like Org Roam or Magit Forge)
-  --with-sqlite3
+  --without-sqlite3
 
-  # Native JSON parsing via Jansson greatly increases performance for json-heavy tasks (like LSP).
+  # Native JSON parsing via Jansson greatly increases performance for json-heavy
+  # tasks (like LSP).
   --with-json
 
   --without-compress-install
@@ -418,23 +417,41 @@ CONFIGURE_ARGS=(
   # desktop environments for communication between applications. Disabling
   # DBus will remove certain integration features, such as notifications or
   # communication with other applications.
-  --with-dbus
+  --without-dbus
 
+  # You should absolutely not add --without-libgmp. Adding that flag will
+  # actually destroy your Emacs performance.
   --with-libgmp
 
+  # These flags disable support for ancient mail retrieval methods, directory
+  # services, and local mail spool manipulation. Because modern Emacs mail
+  # setups rely on external synchronization, removing these ensures the build
+  # script does not waste time searching for legacy network libraries and keeps
+  # the binary entirely free of dead mail code
   --without-kerberos
   --without-kerberos5
+  --without-hesiod
+  --without-mail-unlink
+
+  # configure: WARNING: This configuration installs a 'movemail' program that
+  # does not retrieve POP3 email. By default, Emacs 25 and earlier installed a
+  # 'movemail' program that retrieved POP3 email via only insecure channels, a
+  # practice that is no longer recommended but that you can continue to
+  # support by using './configure --with-pop'. configure: You might want to
+  # use './configure --with-mailutils'.
+  --without-mailutils
+  --without-pop
 
   # Audible bell, and any packages that attempt to play audio notifications
   # (such as Pomodoro timers or chat clients)
-  --with-sound
+  --without-sound
 
   # Not important unless using GNOME: These options disable GConf and
   # Settings, which are used for configuration in GNOME-based environments.
-  --with-gconf
+  --without-gconf
 
   # Useful for .service files: Type=notify
-  # --with-libsystemd
+  --without-libsystemd
 
   # GSettings
   #
@@ -448,7 +465,7 @@ CONFIGURE_ARGS=(
   # terminal-only Emacs (headless server) or if you want to avoid installing
   # glib dependencies. If you disable this on a desktop, Emacs will ignore your
   # system font configuration.
-  --with-gsettings
+  --without-gsettings
 
   # What it does: This links against libselinux to handle file contexts
   # (security labels) when creating or copying files.
@@ -473,6 +490,12 @@ CONFIGURE_ARGS=(
   # Chinese, Japanese, or Korean. Disabling XIM can affect text input in those
   # languages. Why disable? If you don't need multi-language input support
   # (for languages that require XIM), it's safe to disable it.
+  #
+  # Wayland: You should almost certainly use --without-xim. The PGTK build is
+  # designed to use the native GTK input method context, which works directly
+  # with Wayland. XIM is an X11-specific protocol; keeping it enabled in a pure
+  # Wayland build adds unnecessary overhead and legacy code paths that can lead
+  # to crashes or "stuck" keys.
   --without-xim
 
   # Disable (--disable-largefile): Only if you do not work with files larger
