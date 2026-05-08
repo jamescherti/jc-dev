@@ -36,7 +36,7 @@ VCP_BRIGHTNESS="10"
 VCP_CONTRAST="12"
 VCP_COLOR_PRESET="14"
 VCP_INPUT="60"
-VCP_SHARPNESS="87"
+VCP_SHARPNESS="87" # Change this if discovery finds a different code
 TARGET_MONITOR=""
 
 if [[ -f ~/.easyddc ]]; then
@@ -50,7 +50,7 @@ show_help() {
   echo "  -m ID       Specify monitor (e.g., bus number, serial, or model)"
   echo "  -b VALUE    Set brightness (0-100)"
   echo "  -c VALUE    Set contrast (0-100)"
-  echo "  -s VALUE    Set sharpness (usually 0-100, varies by model)"
+  echo "  -s VALUE    Set sharpness (0-100)"
   echo "  -p VALUE    Set color preset"
   echo "  -i VALUE    Set input source"
   echo "  -g VCP      Get current value for a VCP code"
