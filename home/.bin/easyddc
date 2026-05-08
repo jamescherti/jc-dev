@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -x
+
+# monitor-ctl: A wrapper for ddcutil to manage external displays.
+
+VCP_BRIGHTNESS="10"
+VCP_CONTRAST="12"
+VCP_INPUT="60"
+
+show_help() {
+  echo "Usage: monitor-ctl [options]"
+  echo "Options:"
+  echo "  -b VALUE    Set brightness (0-100)"
+  echo "  -c VALUE    Set contrast (0-100)"
+  echo "  -i VALUE    Set input source (e.g., 11 for HDMI-1, 0f for DP-1)"
+  echo "  -g VCP      Get current value for a VCP code"
+  echo "  -h          Show this help menu"
+}
+
+# Detect active I2C buses
+get_buses() {
+  ddcutil detect | grep "I2C bus:" | awk -F'-' '{print $NF}'
+}
+
+set_vcp() {
+  local vcp=$1
+  local value=$2
+  local buses=$(get_buses)
+
+  for bus in $buses; do
+    ddcutil --bus "$bus" setvcp "$vcp" "$value"
+  done
+}
+
+get_vcp() {
+  local vcp=$1
+  local buses=$(get_buses)
+
+  for bus in $buses; do
+    echo "Bus $bus:"
+    ddcutil --bus "$bus" getvcp "$vcp"
+  done
+}
+
+while getopts "b:c:i:g:h" opt; do
+  case "$opt" in
+  b) set_vcp "$VCP_BRIGHTNESS" "$OPTARG" ;;
+  c) set_vcp "$VCP_CONTRAST" "$OPTARG" ;;
+  i) set_vcp "$VCP_INPUT" "$OPTARG" ;;
+  g) get_vcp "$OPTARG" ;;
+  h)
+    show_help
+    exit 0
+    ;;
+  *)
+    show_help
+    exit 1
+    ;;
+  esac
+done
+
+if [ $# -eq 0 ]; then
+  show_help
+fi
