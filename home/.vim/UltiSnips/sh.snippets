@@ -1,0 +1,597 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+priority 50
+
+snippet size
+"\${#${1:name}[@]}"
+endsnippet
+
+snippet getopt
+show_usage() {
+  {
+	echo "Usage: $0 [-h] [--${1:longopt} $3]" >&2
+	echo
+	echo "-h, --help    Show this help message and exit"
+	echo "--$1 f      Show only files (default)"
+	echo "--$1 d      Show only directories"
+  } >&2
+}
+
+${2:LONGOPT}_FLAG=f
+${4:ARG1}=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  -h | --help)
+	show_usage
+	exit 1
+	;;
+  --$1)
+	shift
+	case "$1" in
+	${3:f|d})
+	  $2_FLAG="$1"
+	  ;;
+	*)
+	  echo "Invalid --$1" >&2
+	  exit 1
+	  ;;
+	esac
+	;;
+  *)
+	$4="\$1"
+	;;
+  esac
+
+  shift
+done
+
+if [[ \$$4 = "" ]]; then
+  show_usage
+  exit 1
+fi
+endsnippet
+
+snippet getopt2
+show_usage() {
+	{
+		echo "Usage: \$0 [-h]" >&2
+		echo
+		echo "-h    Show this help message and exit"
+	} >&2
+}
+
+while getopts ":h${1:}" opt; do
+	case ${opt} in
+	h)
+		show_usage
+		exit 1
+		;;
+	\?)
+		echo "Invalid option: -$OPTARG" >&2
+		exit 1
+		;;
+	:)
+		echo "Invalid option: -$OPTARG requires an argument" >&2
+		exit 1
+		;;
+	esac
+done
+shift $((OPTIND - 1))
+endsnippet
+
+snippet underline "underline"
+echo "${1:string}" | sed -n 'p;s/./-/gp'  # Underline
+endsnippet
+
+snippet stdin "stdin"
+while IFS='' read -r line; do
+	${1:true}
+done
+endsnippet
+
+snippet add "add"
+${1:var}=$(($1+1))
+endsnippet
+
+snippet day "day"
+local day=$(date '+%d' | sed 's/^0*//')
+if [[ "$day" ${1:-ge} ${1:1} ]]; then
+	${1:true}
+fi
+endsnippet
+
+snippet strict "strict"
+set -euf -o pipefail
+endsnippet
+
+snippet rtrim "rtrim"
+sed -e 's/\([0-9\s. ]\+\)$//g'
+endsnippet
+
+snippet rsync "rsync"
+rsync -ar --delete --info=progress2 --human-readable --sparse --hard-links --acls --xattrs ${1:src/} ${2:dest/}
+endsnippet
+
+snippet len "len" w
+"\$\{#${1:var}[@]\}${2:}"
+endsnippet
+
+snippet inc2 "inc" w
+let ${1:var}=($1+1)
+endsnippet
+
+snippet inc
+${1:var}=$(($1+${2:1}))
+endsnippet
+
+snippet user "user" w
+$(id -un)
+endsnippet
+
+snippet path
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+endsnippet
+
+snippet mit
+#
+# Copyright (c) ${1:Name} ${2:Year}
+# URL: ${3:URL}
+#
+# Distributed under terms of the MIT license.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+endsnippet
+
+snippet enter
+echo "Press enter..."
+read -r enter
+endsnippet
+
+snippet mountpoint
+mountpoint "${1:/path/to/mountpoint}" || exit 1
+endsnippet
+
+snippet bash
+rsync -arv --human-readable --info=progress2 "${1:/first/path/}" "${2:/second/path}"
+endsnippet
+
+snippet bash
+if [ -z "$BASH_VERSION" ] ; then
+	echo "Please use bash to execute the script '$0'." >&2
+	exit 1
+fi
+endsnippet
+
+snippet abspath "abspath" w
+realpath "${1:/path/to/file}"
+endsnippet
+
+snippet useradd
+useradd  ${5:--system }--create-home --home-dir ${1:/home/}${2:USER} --comment "${3:COMMENT}" --shell ${4:/bin/bash} $2
+endsnippet
+
+snippet mkdir
+install -d --mode=${1:755} ${3:/path/to/dir}
+endsnippet
+
+snippet mkdir2
+install -d --owner=${3:root} --group=${2:root} --mode=0${1:755} ${3:/path/to/dir}
+endsnippet
+
+snippet copy
+install --owner=${3:root} --group=${2:root} --mode=0${1:755} ${3:/path/to/file} ${4:/path/to/file_or_dir}
+endsnippet
+
+snippet cp
+install --owner=${3:root} --group=${2:root} --mode=0${1:755} ${3:/path/to/file} ${4:/path/to/file_or_dir}
+endsnippet
+
+snippet nvar
+[[ -z ${${1:VAR_NAME}+x} ]] && $1=${2:VALUE}
+endsnippet
+
+snippet which
+type -P ${1:cmd} &>/dev/null
+endsnippet
+
+snippet home "home" w
+USER=$(id -un)
+HOME=$(eval echo "~$USER")
+endsnippet
+
+snippet nice
+nice -n 19 chrt -i 0 ionice -c3 ${1:}
+endsnippet
+
+snippet readarray
+while IFS= read -r ${1:item}; do
+  ${3:true}
+done < <(${2:command})
+endsnippet
+
+snippet readarray2
+readarray -t ${1:array} < <(${2:command})
+endsnippet
+
+snippet readarray2
+readarray -t ${1:array} < <(${2:command})
+if [[ $\{#$1[@]\} -gt 0 ]]; then
+	# the 'if' above will avoid 'set -u' to trigger the error: ${$1[@]} is undefined
+	${3:true}
+fi
+endsnippet
+
+# "$\{${3:}${1:array}[${2:@}]\}"${4:}
+snippet it "bash item" w
+"$\{${1:array}[@]\}"${2:}
+endsnippet
+
+snippet it2 "bash item" w
+"$\{${3:}${1:array}[${2:@}]\}"${4:}
+endsnippet
+
+snippet ex
+exit ${1:1}
+endsnippet
+
+snippet usage
+if [[ $# -eq 0 ]]; then
+	echo "Usage: \$0${1:}" >&2
+	exit 1
+fi
+endsnippet
+
+snippet expect
+expect >/dev/null <<EOF
+set timeout=5
+spawn ${1:COMMAND}
+expect "${2:STRING_EXPECTED}"
+send "${3:STRING_TO_SEND}\r"
+expect eof
+EOF
+endsnippet
+
+snippet internet
+if ! ping -q -c 1 -W 1 -w 1 "${1:1.1.1.1}" &>/dev/null; then
+	echo "Error: the script needs Internet." >&2
+	exit 1
+fi
+endsnippet
+
+snippet if
+if ${1:}; then
+	${2:}
+fi
+endsnippet
+
+snippet ifb
+if [[ ${1:} ]]; then
+	${2:true}
+fi
+endsnippet
+
+snippet ifnb
+if ! [[ ${1:} ]]; then
+	${2:}
+fi
+endsnippet
+
+snippet and "and operator" w
+&& [[ ${1:} ]]
+endsnippet
+
+snippet lower "lower" w
+| tr '[:upper:]' '[:lower:]'
+endsnippet
+
+snippet lower "upper" w
+| tr '[:lower:]' '[:upper:]'
+endsnippet
+
+snippet or "or operator" w
+|| [[ ${1:} ]]
+endsnippet
+
+snippet fun
+${1:function_name}() {
+	${2:}
+}
+endsnippet
+
+snippet arg
+local ${1:var}="\$1"
+endsnippet
+
+snippet docker_running
+docker_is_running() {
+	local errno=0
+
+	local output
+	output=$(docker inspect -f '{{.State.Running}}' "$DOCKER_RUN_IMAGE_NAME") || errno=$?
+
+	local result=1
+	if [[ $errno -eq 0 ]] && [[ $output = 'true' ]]; then
+	  result=0
+	fi
+
+	return "$result"
+}
+endsnippet
+
+snippet docker_exists
+docker_image_exists() {
+	local errno=1
+	docker inspect --type image "$1" &>/dev/null || errno=0
+	return "$errno"
+}
+endsnippet
+
+snippet ke "bash key" w
+endsnippet
+
+snippet trim
+trim()
+{
+	local trimmed="$1"
+	trimmed="${trimmed## }"
+	trimmed="${trimmed%% }"
+	echo "$trimmed"
+}
+endsnippet
+
+snippet var
+${1:VAR}=$\$1:-\}
+endsnippet
+
+snippet re "regex" w
+${${1:VAR}/${2:STRING}/${3:REPLACEMENT}}
+endsnippet
+
+snippet main
+main() {
+	${1:}
+}
+
+main "$@"
+endsnippet
+
+snippet input
+read -r -p "${1:text}: " ${2:variable}
+endsnippet
+
+snippet pass
+read -s -r -p "${1:password}: " ${2:variable}
+endsnippet
+
+snippet confirm
+read -r -p "${1:Proceed}? [y,n] " ${2:ANSWER}
+if [[ "$$2" != "y" ]]; then
+	echo "Interrupted." >&2
+	exit 1
+fi
+endsnippet
+
+snippet dsource "Source directory" w
+"$(dirname "${BASH_SOURCE[0]}")"
+endsnippet
+
+snippet source "Bash source" w
+${BASH_SOURCE[0]}
+endsnippet
+
+snippet sdir
+SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+cd "$SCRIPT_DIR"
+endsnippet
+
+snippet find
+find ${1:.} -maxdepth 1 -type f -name '${2:*}'
+endsnippet
+
+snippet dis
+# shellcheck disable=SC${1:1091}
+endsnippet
+
+snippet while
+while ${1:true}; do
+	${2:true}
+done
+endsnippet
+
+snippet fori
+local ${2:i}
+for (( $2 = 0; $2 < ${1:}; $2++ )); do
+	${3:true}
+done
+endsnippet
+
+snippet for
+for ${1:v} in ${2:variables}; do
+	${3:true}
+done
+endsnippet
+
+snippet case
+case ${1:word} in
+	${2:pattern})
+		${3};;
+	*)
+		${4}
+		;;
+esac
+endsnippet
+
+snippet trace2
+# shellcheck disable=SC2317
+bash_traceback() {
+  local lasterr="$?"
+  local code="-1"
+  local bash_command=${BASH_COMMAND}
+  echo "Error in ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+	"('$bash_command' exited with status $lasterr)" >&2
+  if [ ${#FUNCNAME[@]} -gt 2 ]; then
+	# Print out the stack trace described by $function_stack
+	echo "Traceback of ${BASH_SOURCE[1]} (most recent call last):" >&2
+	for ((i = 0; i < ${#FUNCNAME[@]} - 1; i++)); do
+	  local funcname="${FUNCNAME[$i]}"
+	  [ "$i" -eq "0" ] && funcname=$bash_command
+	  echo -e "  ${BASH_SOURCE[$i + 1]}:${BASH_LINENO[$i]}\\t$funcname" >&2
+	done
+  fi
+  echo "Exiting with status ${code}" >&2
+  exit "${code}"
+}
+
+trap "bash_traceback" "ERR"
+set -o errtrace
+endsnippet
+
+snippet trace
+# shellcheck disable=SC2317
+error_handler() {
+	local errno="$?"
+	echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+		"(${BASH_COMMAND} exited with status $errno)" >&2
+	exit "${errno}"
+}
+
+trap "error_handler" ERR
+set -o errtrace
+endsnippet
+
+snippet f
+${1:name}() {
+	${2:}
+}
+endsnippet
+
+snippet v
+${${1:name}}
+endsnippet
+
+snippet err
+echo "${1:}" >&2
+endsnippet
+
+snippet n
+&>/dev/null
+endsnippet
+
+snippet #!
+#!/usr/bin/env bash
+endsnippet
+
+snippet root
+if [ "$(id -u)" -ne "0" ]; then
+	echo "Error: you need root privileges to run this script." >&2
+	exit 1
+fi
+endsnippet
+
+snippet atexit
+# shellcheck disable=SC2329
+ATEXIT_DONE=0
+atexit() {
+	trap - EXIT INT TERM
+	local errno="$?"
+	if [[ "$ATEXIT_DONE" -eq 0 ]]; then
+		${1:}
+		ATEXIT_DONE=1
+	fi
+	exit "$errno"
+}
+
+trap 'atexit' INT TERM EXIT
+endsnippet
+
+snippet unique
+LOCKFILE="${1:/var/run}/${2:scriptname}.lock"
+
+atexit() {
+	local errno="$?"
+	rm -f "$LOCKFILE" || true
+	exit "$errno"
+}
+
+trap 'atexit' INT TERM EXIT
+
+if ! ( set -o noclobber; echo "locked" > "$LOCKFILE") 2> /dev/null; then
+	echo "Lock failed: the program \$0 is already running (the file $LOCKFILE exists)." >&2
+	exit 1
+fi
+endsnippet
+
+snippet fix_array
+fix_array() {
+	# if an array is null: the array = an empty array
+	local array
+	array="$1"
+	eval "${array}=\"\${${array}[@]+\"\${${array}[@]}\"}\""
+}
+endsnippet
+
+snippet sh_if
+if [ ${1:condition} ]; then
+	${2:#statements}
+fi
+endsnippet
+
+snippet sh_elif
+elif [ ${1:condition} ]; then
+	${2:#statements}
+endsnippet
+
+snippet sh_while
+while [ ${1:condition} ]; do
+	${2:#statements}
+done
+endsnippet
+
+snippet sh_until
+until [ ${1:condition} ]; do
+	${2:#statements}
+done
+endsnippet

@@ -1,0 +1,617 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+priority 50
+
+snippet cl-letf
+(cl-letf (((symbol-function '${1:orig-function})
+			   (lambda (${2:&rest _})
+				 ${3:nil})))
+	  ${4:nil})
+endsnippet
+
+snippet b
+(boundp '${1:var-name})
+endsnippet
+
+snippet fb
+(fboundp '${1:function-name})
+endsnippet
+
+snippet visible
+(let ((buffers (delete-dups
+				(cl-loop for frame in (if all-frames (visible-frame-list)
+										(list (selected-frame)))
+						 if (window-list frame)
+						 nconc (mapcar #'window-buffer it)))))
+  (if buffer-list
+	  (cl-loop for buf in buffers
+			   unless (memq buf buffer-list)
+			   collect buffers)
+	buffers))
+endsnippet
+
+snippet regionr
+(defun ${1:region-replace} ()
+  "${2:Replace text in a region}."
+  (interactive)
+  (let ((beg end))
+	(if (use-region-p)
+		(setq beg (region-beginning)
+			  end (region-end))
+	  (setq beg (point-min)
+			end (point-max)))
+
+	(let* ((original-text (buffer-substring-no-properties beg end))
+		   (cleaned-text (with-temp-buffer
+						   ;; Insert the original text into our temporary
+						   ;; workspace.
+						   (insert original-text)
+
+						   (goto-char (point-min))
+						   (while (re-search-forward "${3:[ABC]}" nil t)
+							 (replace-match "${4:D}" nil nil))
+						   (buffer-string))))
+	  (save-excursion
+		(delete-region beg end)
+		(goto-char beg)
+		(insert cleaned-text)))))
+endsnippet
+
+snippet regiong
+(if (use-region-p)
+	(buffer-substring-no-properties (region-beginning) (region-end))
+  (buffer-substring-no-properties (point-min) (point-max)))
+endsnippet
+
+snippet regionc
+(defun ${1:region-replace-with-command} ()
+  "${2:Replace using a command.}"
+  (interactive)
+  (let (beg end)
+	(if (use-region-p)
+		(setq beg (region-beginning)
+			  end (region-end))
+	  (setq beg (point-min)
+			end (point-max)))
+
+	(let* ((original-text (buffer-substring-no-properties beg end))
+		   (cleaned-text
+			(with-temp-buffer
+			  ;; Insert the original text into our temporary workspace.
+			  (insert original-text)
+
+			  ;; Run the pandoc command on the contents of the temp buffer
+			  (call-process-region (point-min) (point-max)
+								   ${3:"pandoc"} t t nil ${4:"-f" "markdown" "-t" "plain" "--wrap=none"})
+
+			  ;; Return the final, cleaned-up text from the temp buffer.
+			  (string-trim-right (buffer-string) "\n"))))
+
+	  ;; Replace the original text with the cleaned text.
+	  (save-excursion
+		(delete-region beg end)
+		(goto-char beg)
+		(insert cleaned-text)))))
+endsnippet
+
+snippet cat
+(catch '${1:done}
+  (dolist (${2:item} ${3:list})
+	(throw '$1 t)))
+endsnippet
+
+snippet cc
+(condition-case nil
+	(progn ${1:})
+  (error
+   ${2:nil}))
+endsnippet
+
+snippet throw
+(throw '${1:done} t)
+endsnippet
+
+snippet ww
+(walk-windows
+   (lambda (window)
+	 (let ((window-buffer (window-buffer window)))
+	   (let ((window-buffer (window-buffer window)))
+		 (when window-buffer
+		   (with-selected-window window-buffer
+			 ${1:t})))))
+   ;; Exclude the minibuffer
+   nil
+   ;; Apply to all frames
+   t)
+endsnippet
+
+snippet al
+(autoload '${1:function-name} "${2:module}" nil ${3:t})
+endsnippet
+
+snippet nowarn
+(with-suppressed-warnings ((${1:obsolete} ${2:tab-bar-new-button-show}))
+	  (setq $2 ${3:nil}))
+endsnippet
+
+snippet dh
+(defcustom ${1:name}-hook nil
+  "Hooks to run when ${2:}.
+Each element should be a function to be called with no arguments."
+  :type 'hook
+  :group '${3:GROUPNAME})
+endsnippet
+
+snippet ln
+
+endsnippet
+
+snippet gsk
+(global-set-key (kbd "${1:C-c l}") '${1:func})
+endsnippet
+
+snippet dk
+(define-key ${1:the-mode-map} (kbd "${1:C-c l}") '${1:func})
+endsnippet
+
+snippet sentinel
+(setq ${1:buffer-process} (get-buffer-process (get-buffer ${2:"buffer-name"})))
+(set-process-sentinel $1
+					  (lambda (_process event)
+						(when (string-prefix-p "finished" event)
+						  ${3:t})))
+endsnippet
+
+
+snippet line2
+(thing-at-point 'line t)
+endsnippet
+
+snippet line
+(buffer-substring-no-properties (line-beginning-position)
+								(line-end-position))
+endsnippet
+
+snippet write
+(with-temp-buffer
+  (insert ${1:"string"})
+  (let ((coding-system-for-write 'utf-8-emacs)
+		(write-region-annotate-functions nil)
+		(write-region-post-annotation-function nil))
+	(write-region (point-min) (point-max) ${2:"filename"} nil 'silent)))
+endsnippet
+
+snippet read
+(let ((coding-system-for-read 'utf-8-emacs)
+	  (file-coding-system-alist nil))
+  (with-temp-buffer
+	(insert-file-contents ${1:"filename"})
+	(buffer-string)))
+endsnippet
+
+snippet ewc
+(eval-when-compile
+  ${1:t})
+endsnippet
+
+snippet cs
+(cl-some (lambda (regex)
+		   ${1:condition})
+		 ${2:list})
+endsnippet
+
+snippet quiet
+(let ((original-message (symbol-function 'message)))
+		(cl-letf (((symbol-function #'message)
+				   #'(lambda (format-string &rest messages-args)
+					   (let ((combined-args (cons format-string
+												  messages-args)))
+						 (unless (string-prefix-p "${1:Exception}" format-string)
+						   ;; Display message
+						   (apply original-message combined-args))))))
+		  ${2:original_code}))
+endsnippet
+
+snippet mode
+(defgroup ${1:name} nil
+	"${2:DESCRIPTION}."
+	:group '$1
+	:prefix "$1-")
+
+(defvar $1-mode-map
+  (let ((map (make-sparse-keymap)))
+	map)
+  "Keymap for `$1-mode'.")
+
+(define-minor-mode $1-mode
+	"Toggle `$1-mode'.
+This mode ${2:}."
+	:global ${3:t}
+	:lighter " ${4:}"
+	:keymap $1-mode-map
+	:group '$1
+	(if $1-mode
+			(progn
+				;; Mode enabled
+				${5:})
+		;; Mode disabled
+		{6:}))
+endsnippet
+
+snippet minor
+(defgroup ${1:name} nil
+	"Customization options for `$1-mode'."
+	:group '$1
+	:prefix "$1-")
+
+;;;###autoload
+(define-minor-mode $1-mode
+	"${2:DESCRIPTION}."
+	:global t
+	:lighter " $1"
+	:group '$1
+	(if $1-mode
+			${3:t}
+		${4:t}))
+endsnippet
+
+snippet clf
+(defun ${1:cl-letf-function} (original-func &rest args)
+  "${2:Do something} when calling ORIGINAL-FUNC with ARGS."
+  (cl-letf (((symbol-function '${3:overwritten-func})
+			 #'(lambda (format-string &rest args)
+				 (apply $3 format-string args))))
+	(apply original-func args)))
+(advice-add 'byte-compile-file :around #'$1)
+endsnippet
+
+snippet lv
+(defvar ${1:highlight-symbol} nil)
+(make-variable-buffer-local '$1)
+endsnippet
+
+snippet macro
+(defmacro ${1:name} (&rest body)
+	"${2:Docstring}."
+	(declare (indent 0) (debug t))
+	`(unwind-protect
+			(progn ,@body)
+		${3:t}))
+endsnippet
+
+snippet ov
+(define-obsolete-variable-alias
+	'${1:old-var}
+	'${2:new-var}
+	"${3:1.0.0}"
+	"Obsolete. Use `$2' instead.")
+endsnippet
+
+snippet of
+(define-obsolete-function-alias
+  '${1:obsolete-function}
+  '${2:new-function}
+  "${3:x.x.x}")
+endsnippet
+
+snippet deprecated
+(defvar ${1:old-var} '${2:new-var}
+	"Alias for \`$2'. This variable is deprecated; use \`$2' instead.")
+
+(make-obsolete '$1
+	'$2
+	"${3:2024-10-18}")
+endsnippet
+
+snippet around
+(with-temp-buffer
+	(insert "${1:Content}")
+	(write-file ${2:"filename"}))
+endsnippet
+
+snippet around
+(defun my-around-$1 (fn &rest args)
+	"${2:}FN is the advised function. ARGS are the function arguments."
+	${3:}(apply fn args))
+
+(advice-add '${1:} :around #'my-around-$1)
+endsnippet
+
+snippet advice
+(advice-add '${1:func-name} :before #'${2:advice-func-name})
+endsnippet
+
+snippet radvice
+(advice-remove '${1:func-name} #'${2:advice-func-name})
+endsnippet
+
+snippet dc
+(defcustom ${1:name} ${2:nil}
+	"${3:desc}."
+	:type '${4:string|boolean|number}
+	:group '${5:group})
+endsnippet
+
+snippet elisp
+:bind (("M-A" . marginalia-cycle)
+:map minibuffer-local-map
+	   ("M-A" . marginalia-cycle))
+endsnippet
+
+snippet ah
+(add-hook '${1:hookname}-hook #'${2:})
+endsnippet
+
+snippet copy
+(setq ${1:alist} (copy-tree $1))
+endsnippet
+
+snippet setf
+(setf (alist-get '${1:key} ${2:alist}) ${3:value})
+endsnippet
+
+snippet alistpush
+(push '(foreground-color . :never) frameset-filter-alist)
+endsnippet
+
+snippet touch
+(make-empty-file ${1:"file"})
+endsnippet
+
+snippet run
+(call-process ${1:shell-file-name} nil nil nil ${2:"--arg" "arg2"})
+endsnippet
+
+snippet shell
+shell-file-name
+endsnippet
+
+snippet doah
+(dolist (hook '({1:emacs-lisp-mode-hook ielm-mode-hook lisp-interaction-mode-hook}))
+	(add-hook hook #'${2:setup-company-mode}))
+endsnippet
+
+snippet gg
+(goto-char (point-min))
+endsnippet
+
+snippet match
+(string-match-p "[^ \t]" line)
+endsnippet
+
+snippet line2
+(thing-at-point 'line)
+endsnippet
+
+snippet dk
+(define-key ${1:org-mode-map} (kbd "${2:C-c e}") #'${3:function})
+endsnippet
+
+snippet edk
+(evil-define-key '${1:normal} '${2:global} (kbd "<leader>${3:d}") #'${4:function})
+endsnippet
+
+snippet timer
+(run-with-timer ${1:start_after_seconds} (* ${2:repeat_minutes} 60) '${3:function})
+endsnippet
+
+snippet dict
+(defvar ${1:var-name} (make-hash-table :test 'equal)
+	"${3:Description.}")
+endsnippet
+
+snippet dictget
+(gethash ${1:"key"} ${2:dict})
+endsnippet
+
+snippet dictset
+(puthash ${1:"key"} ${2:"value"} ${3:hash-table})
+endsnippet
+
+snippet var
+(defvar ${1:var-name} ${2:default-value}
+	"${3:Description.}")
+endsnippet
+
+snippet s
+(setq ${1:var-name} ${2:value})
+endsnippet
+
+snippet dv
+(defvar ${1:var-name} ${2:default-value})
+endsnippet
+
+snippet dv2
+(defvar ${1:var-name} ${2:default-value}
+	"${3:Description.}")
+endsnippet
+
+snippet list
+(setq flymake-yamllint-arguments (list "string1" (anyfunc)))
+endsnippet
+
+snippet up
+(use-package ${1:package-name}
+	:ensure nil
+	:defer t${2:})
+endsnippet
+
+snippet upn
+(use-package ${1:package-name}
+	:ensure nil)
+endsnippet
+
+snippet buffers
+(dolist (buffer (buffer-list))
+	(with-current-buffer buffer
+	${1:})))
+endsnippet
+
+snippet filename
+(file-name-nondirectory ${1:file})
+endsnippet
+
+snippet dirname
+(file-name-directory ${1:file})
+endsnippet
+
+snippet command
+(call-process ${1:"/path/to/command"} nil nil nil ${2:"arg1" "arg2"})
+endsnippet
+
+snippet shell
+(shell-command ${1:shell-command})
+endsnippet
+
+snippet mkdir
+(make-directory $1 t)
+endsnippet
+
+snippet windows
+(dolist (window (window-list))
+	(with-selected-window window
+		(when (string= "*NAME*" (buffer-name))
+			(CALL-THIS))))
+endsnippet
+
+snippet which
+(when (executable-find "${1:cmd}")
+	${2:}
+)
+endsnippet
+
+snippet case
+(cl-case ${1:var}
+	(${2:"vterm"} ${3:(cmd)})
+	(t ${4:(message "Unknown string")}))
+endsnippet
+
+snippet startswith
+(string-prefix-p "${1:string}" ${2:var})
+endsnippet
+
+snippet endswith
+(string-suffix-p "${1:string}" ${2:var})
+endsnippet
+
+snippet foreach
+(dolist (${1:item} ${2:list})
+	${3:})
+endsnippet
+
+snippet foreach
+(dolist (${1:item} ${2:list})
+	${3:})
+endsnippet
+
+snippet eal
+(with-eval-after-load '${1:package-name}
+	${2:})
+endsnippet
+
+snippet l
+(lambda() ${1:})
+endsnippet
+
+snippet idef
+(defun ${1:name} (${2:})
+	"${3:Docstring}"
+	(interactive)
+	${4:})
+endsnippet
+
+snippet def
+(defun ${1:name} (${2:})
+	"${3:Docstring}."
+	${4:})
+endsnippet
+
+snippet o
+(or ${1:} ${2:})
+endsnippet
+
+snippet or
+(or ${1:} ${2:})
+endsnippet
+
+snippet a
+(and ${1:} ${2:})
+endsnippet
+
+snippet and
+(and ${1:} ${2:})
+endsnippet
+
+snippet let
+(let ((${1:var} ${2:value})${3:})
+	${4:})
+endsnippet
+
+snippet quote
+(shell-quote-argument ${1:var})${2:}
+endsnippet
+
+snippet eq
+(eq ${1:var} ${2:value})
+endsnippet
+
+snippet w
+(when ${1:}
+	${2:})
+endsnippet
+
+snippet u
+(unless ${1:}
+	${2:})
+endsnippet
+
+snippet if
+(if ${1:} ${2:})
+endsnippet
+
+snippet basename
+(file-name-nondirectory ${1:path})
+endsnippet
+
+snippet abspath
+(expand-file-name ${1:default-directory})
+endsnippet
+
+snippet file
+(buffer-file-name)
+endsnippet
+
+snippet isfile
+(file-regular-p ${1:var})
+endsnippet
+
+snippet p
+(progn
+	${1:})
+endsnippet

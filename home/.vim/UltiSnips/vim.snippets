@@ -1,0 +1,504 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+priority 50
+
+snippet chars "chars"
+for l:char in split(l:string, '\zs')
+endfor
+endsnippet
+
+snippet has_cmd
+" The 'patch-8.2.1978' adds the '<cmd>' feature
+if has('patch-8.2.1978')
+	${1:}
+endif
+endsnippet
+
+snippet arg "arg"
+let ${1:l:var} = (len(a:000) > ${2:0}) ? a:000[$2] : ${3:'default'}
+endsnippet
+
+snippet filter "filter"
+filter(${1:l:list_or_func}, {_, item -> (${1:item.subitem}) })
+endsnippet
+
+snippet fmap "map"
+map(${1:l:dict}, '${2:v:val}')
+endsnippet
+
+snippet fmap2 "map2"
+map(${1:l:dict}, {_, dict -> dict.${1:item}})
+endsnippet
+
+snippet map "map"
+
+endsnippet
+
+snippet nnoremap2
+nnoremap ${1:,hj} ${2::call func_name()}<CR>
+endsnippet
+
+snippet mapc2
+nnoremap ${1:<silent>} ${2:<C-t>} :${3:}<CR>
+inoremap $1 $2 <Esc>:$3<CR>
+endsnippet
+
+
+snippet int "int" w
+eval(${1:var})
+endsnippet
+
+snippet escape "escape"
+escape(${1:var}, '|\ "')
+endsnippet
+
+snippet match "match"
+matchstr(string, pattern)
+endsnippet
+
+snippet e "e"
+exists(${1:})
+endsnippet
+
+snippet sub "sub"
+substitute(a:arg, '\(.\)', '\\1', 'g')
+endsnippet
+
+snippet sub2 "s / substitute"
+" vint: next-line -ProhibitCommandWithUnintendedSideEffect -ProhibitCommandRelyOnUser
+keeppatterns ${3:silent! }%substitute/\v${1:}/${2:}/g
+endsnippet
+
+snippet tab "tab"
+setlocal tabstop=${1:2} softtabstop=$1 shiftwidth=$1
+endsnippet
+
+snippet pos "pos"
+let l:pos = getpos('.')
+call setpos('.', l:pos)
+endsnippet
+
+snippet exe "ex"
+execute ${1:''}
+endsnippet
+
+snippet timer "timer"
+call timer_start(${1:30} * 1000, {-> execute('${1::let &stl=&stl}')}, {'repeat': ${1:-1}})
+endsnippet
+
+snippet path_sep "path_sep"
+let l:${1:path_sep} = (!exists('+shellslash') || &shellslash) ? '/' : '\\'
+endsnippet
+
+snippet python_path "python_path"
+" Add the script path to $PYTHONPATH
+let s:git_repo = expand('<sfile>:p:h')
+let b:ale_shell = printf('/usr/bin/env PYTHONPATH=%s /bin/sh', s:git_repo)
+let b:jedi_added_sys_path = [s:git_repo]
+endsnippet
+
+snippet system "system"
+let ${1:l:output} = system('${2:true}${3: args}')
+if v:shell_error !=# 0
+	echomsg 'Error: $2: ' . $1
+	${4:return}
+endif
+endsnippet
+
+snippet systemlist "systemlist"
+let ${1:l:output} = systemlist('${2:true}${3: args}')
+if v:shell_error !=# 0
+	echomsg 'Error: $2: ' . join($1, "\n")
+	${4:return}
+endif
+endsnippet
+
+snippet confirm "confirm"
+let l:answer = input('Proceed? [y,n]')
+if l:answer !=# 'y'
+	return
+endif
+endsnippet
+
+snippet dis "dis"
+" vint: next-line -${1:ProhibitUsingUndeclaredVariable}
+endsnippet
+
+snippet nofile "nofile"
+setlocal modifiable
+silent normal! ggdG
+silent normal! 1Gdd
+${1:" Modify here}
+silent normal! gg0
+setlocal nomodifiable
+setlocal nomodified
+setlocal noswapfile
+setlocal nowrap
+setlocal nonumber
+setlocal nofoldenable
+setlocal buftype=nofile
+setlocal bufhidden=delete
+${2:" setlocal nobuflisted}
+setlocal foldcolumn=0
+if exists('&relativenumber')
+	setlocal norelativenumber
+endif
+if exists('&signcolumn')
+	setlocal signcolumn=no
+endif
+endsnippet
+
+snippet file "%" w
+expand('%')
+endsnippet
+
+snippet getvisual "getvisual"
+function! GetVisualSelection()
+	let [line_start, column_start] = getpos("'<")[1:2]
+	let [line_end, column_end] = getpos("'>")[1:2]
+	let lines = getline(line_start, line_end)
+	if len(lines) == 0
+		return ''
+	endif
+	let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
+	let lines[0] = lines[0][column_start - 1:]
+	return join(lines, "\n")
+endfunction
+endsnippet
+
+snippet private "private"
+setlocal nobackup
+setlocal noswapfile
+setlocal noundofile
+setlocal viminfo=
+endsnippet
+
+snippet in "in"
+index(${1:l:list}, ${2:l:item}) >= 0
+endsnippet
+
+snippet empty "empty"
+if line('$') ==# 1 && getline(1) ==# ''
+	${1:}
+endif
+endsnippet
+
+snippet cwd "cwd"
+getcwd()${1:}
+endsnippet
+
+snippet type "type"
+type(${1:}) == type(${2:})
+endsnippet
+
+snippet remove "remove"
+call remove(${1:list}, ${2:index}${3:})
+endsnippet
+
+snippet getl "getl"
+get(${1:list}, '${2:key}', '${3:default}')[0]
+endsnippet
+
+snippet get "get"
+let $2${1:var_name} = get(${2:g:}, '$1', ${3:'default'})
+endsnippet
+
+snippet append
+call add(${1:list}, ${2:'value'})
+endsnippet
+
+snippet ! "!" w
+!=#
+endsnippet
+
+snippet = "=" w
+==#
+endsnippet
+
+snippet lower "lower" w
+tolower(${1:string})
+endsnippet
+
+snippet upper "upper" w
+toupper(${1:string})
+endsnippet
+
+snippet rm
+call delete(${1:l:filename})
+endsnippet
+
+snippet tmp
+let ${1:l:tempfile} = tempname()
+endsnippet
+
+snippet try
+try
+	${1:}
+catch
+	${2:echoerr string(v:exception)}
+finally
+	${3:}
+endtry
+endsnippet
+
+snippet read "read" w
+let ${1:l:lines} = join(readfile(${2:l:fname}), "\n")
+endsnippet
+
+snippet write
+call writefile(${1:['line1', 'line2']}, ${2:'filename'})
+endsnippet
+
+snippet writea
+call writefile(${1:['line1', 'line2']}, ${2:'filename'}, ${3:'a'})
+endsnippet
+
+snippet cmd
+command! -bar ${4:-bang }-nargs=${3:1} ${1:FunctionName} call ${2:func_name}(${5:<f-args>}${6:, <bang>0})
+endsnippet
+
+snippet cmdf "cmdf"
+command! -bar ${5:-bang }-nargs=${3:1} -complete=${6:file} ${1:FunctionName} call ${2:func_name}(<f-args>${4:, <bang>0})
+endsnippet
+
+snippet pgrep "pgrep" w
+executable('pgrep') && len(systemlist('pgrep "^gvim$|^vim$"')) > 0
+endsnippet
+
+snippet err
+echoerr '${1:}'
+endsnippet
+
+snippet win "win" w
+has('win32') && !has('win32unix')
+endsnippet
+
+snippet unix "unix" w
+has('unix')
+endsnippet
+
+snippet gui "gui" w
+has('gui_running')
+endsnippet
+
+snippet augroup
+augroup ${1:name}
+	autocmd!
+	${2:}
+augroup END
+endsnippet
+
+snippet home "home" w
+expand('~')
+endsnippet
+
+snippet startswith "startswith" w
+${1:var}[0:len(${2:prefix})-1] ==# $2
+endsnippet
+
+snippet which "which" w
+executable('${1:prog_name}')
+endsnippet
+
+snippet which2 "which" w
+exepath('${1:prog_name}')
+endsnippet
+
+snippet xok "xok" w
+executable('${1:prog_name}')
+endsnippet
+
+snippet complete
+function! ${5:AutoComplete}${1:FromList}(arglead, cmdline, cursorpos)
+	let l:autocomplete_list = []
+	if ! exists('$2')
+		return l:autocomplete_list
+	endif
+
+	if a:cmdline == ""
+		return g:_autocomplete_session
+	endif
+
+	for l:item in ${6:g:_autocomplete_}${2:list}
+		if a:cmdline == l:item[0:len(a:cmdline) -1]
+			call add(l:autocomplete_list, l:item)
+		endif
+	endfor
+
+	return l:autocomplete_list
+endfunction
+
+let ${3:l:answer} = trim(input(${4:'Question: '}, '', 'customlist,$5$1'))
+endsnippet
+
+snippet complete "complete"
+function! s:${1:command_completion}(arglead, cmdline, cursorpos) abort
+	let l:list = ${2:funcname}()
+
+	if a:arglead ==# ''
+		return l:list
+	endif
+
+	let l:result = []
+	for l:item in l:list
+		if l:item[0:len(a:arglead)-1] ==# a:arglead
+			call add(l:result, l:item)
+		endif
+	endfor
+	return l:result
+endfunction
+
+command! -nargs=* -range -complete=customlist,s:$1 ${2:CommandName}
+endsnippet
+
+snippet input
+let ${1:l:var} = trim(input('${2:Question: }'))
+endsnippet
+
+snippet ls
+for path in sort(split(globpath(${1:l:var}, '${2:*}'), '\n'))
+	echo fnamemodify(path, ':t:r')
+endfor
+endsnippet
+
+snippet strip "strip" w
+trim(${1:l:var})
+endsnippet
+
+snippet exists "abspath" w
+filereadable(${1:l:var})
+endsnippet
+
+# just file name (no path and no extension)
+snippet fileroot "filename" w
+fnamemodify(${1:l:var}, ':p:h:t')
+endsnippet
+
+snippet abspath "abspath" w
+fnamemodify(${1:l:var}, ':p')
+endsnippet
+
+snippet edit
+execute 'silent! edit ' . fnameescape(${1:l:var})
+endsnippet
+
+snippet source
+execute 'silent! source ' . fnameescape(${1:l:var})
+endsnippet
+
+snippet basename "basename" w
+fnamemodify(${1:path}, ':p:t')
+endsnippet
+
+snippet dirname "dirname" w
+fnamemodify(${1:path}, ':h')
+endsnippet
+
+snippet mkdir
+call mkdir(${1:'/path/to/dir'}, 'p', 0700)
+endsnippet
+
+snippet writeopt
+call writefile(['set ${1:option}=' . escape(&$1, ' ')], ${2:'/path/to/file'}, ${3:'a'})
+endsnippet
+
+snippet header
+" Name:        ${1:Name}
+" Description: ${2:Description}.
+" Version:     ${3:1.0}
+" Maintainer:  `!v g:username`
+" Updates:     `!v g:template_url`
+" Last Change: `date +'%Y %b %d'`
+" Licence:     Copyright (c) `date +'%Y'` `!v g:username`
+"              Distributed under terms of the MIT license.  Permission is
+"              hereby granted, free of charge, to any person obtaining a copy
+"              of this software and associated documentation files (the
+"              "Software"), to deal in the Software without restriction,
+"              including without limitation the rights to use, copy, modify,
+"              merge, publish, distribute, sublicense, and/or sell copies of
+"              the Software, and to permit persons to whom the Software is
+"              furnished to do so, subject to the following conditions: The
+"              above copyright notice and this permission notice shall be
+"              included in all copies or substantial portions of the Software.
+"              THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+"              EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+"              OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+"              NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+"              HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+"              WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+"              FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+"              OTHER DEALINGS IN THE SOFTWARE.
+"
+
+if exists('g:loaded_${4:pluginname}') || &compatible
+	finish
+endif
+let g:loaded_$4 = 1
+
+${5:}
+endsnippet
+
+snippet check "check"
+if exists('g:loaded_${1:pluginname}${2:_plugin}') || &compatible
+	finish
+endif
+let g:loaded_$1$2 = 1
+
+${3:}
+endsnippet
+
+snippet script_dir
+let ${1:var} = expand('<sfile>:p:h:h')
+endsnippet
+
+snippet nohelp
+if &buftype ==# 'help'
+	return
+endif
+endsnippet
+
+snippet f
+function! ${1:FunctionName}(${2:}) abort
+	${3:}
+endfunction
+endsnippet
+
+snippet fori
+let ${1:i} = ${4:0}
+while $1 < ${2:10}
+	${5:}
+	let $1 ${3:+}= 1
+endwhile
+endsnippet
+
+snippet while
+while ${1:}
+	${2:}
+endwhile
+endsnippet

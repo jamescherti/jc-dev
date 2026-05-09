@@ -1,0 +1,1256 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+priority 50
+
+snippet fstdin
+try:
+    import platform  # pylint: disable=import-outside-toplevel
+    if os.name == "nt":
+        import msvcrt  # pylint: disable=import-outside-toplevel
+
+        # Check if there's input in the buffer
+        while msvcrt.kbhit():
+            # Read and discard one character at a time
+            msvcrt.getch()
+    elif os.name == "posix" or platform.system() in ["Linux", "Darwin"]:
+        # For Unix-like systems, check if there's any pending input in
+        # stdin without blocking
+        import select  # pylint: disable=import-outside-toplevel
+
+        # Check if there is any pending input in stdin without blocking
+        # If input is available, flush the stdin buffer
+        stdin, _, _ = select.select([sys.stdin], [], [], 0)
+        if stdin:
+            if sys.stdin.isatty():
+                # pylint: disable=import-outside-toplevel
+                from termios import TCIFLUSH, tcflush
+
+                # Flush the input buffer
+                tcflush(sys.stdin.fileno(), TCIFLUSH)
+            else:
+                # Read and discard input (in chunks)
+                sys.stdin.read(1024)
+except ImportError:
+    pass
+endsnippet
+
+snippet gpl
+# ${1:This software} is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# $1 is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# $1. If not, see <http://www.gnu.org/licenses/>.
+endsnippet
+
+snippet "indent"
+textwrap.indent(${1:string}, prefix=${2:    })
+endsnippet
+
+snippet indent
+textwrap.indent(${1:string}, prefix=${2:    })
+endsnippet
+
+snippet pop
+(setq ${1:list-var-name} (delete '${2:item} $1))
+endsnippet
+
+snippet push
+(push '${1:item} ${2:list-var})
+endsnippet
+
+snippet ipath "ipathlib"
+from pathlib import Path
+endsnippet
+
+snippet hasattr "hasattr"
+hasattr(${1:self}, '${2:attr_name}')
+endsnippet
+
+snippet doc "doc"
+"""${1:}"""
+endsnippet
+
+snippet ip "ip of a host"
+try:
+	_, _, ip_addresses = socket.gethostbyname_ex(${1:host})
+except socket.gaierror:
+	${1:ip_addresses = []}
+endsnippet
+
+snippet python_path "python_path"
+let s:python_path = '${1:/path/to/file}'
+let b:ale_shell = printf('PYTHON_PATH=%s /bin/sh', s:python_path)
+let b:jedi_environment_path = s:python_path
+endsnippet
+
+snippet warnings
+import warnings
+warnings.filterwarnings("ignore")
+endsnippet
+
+snippet warning "warning"
+warnings.filterwarnings("ignore", message="divide by zero encountered in divide")
+endsnippet
+
+snippet l
+lambda ${1:vars}: ${2:action}
+endsnippet
+
+snippet setproctitle
+import setproctitle
+import subprocess
+from pathlib import Path
+setproctitle.setproctitle(
+	subprocess.list2cmdline([Path(sys.argv[0]).name] + sys.argv[1:])
+)
+endsnippet
+
+snippet json
+with open(${1:path}, ${2:"r"}${4:, encoding="utf-8"}) as fhandler:
+	${3:data} = json.load(fhandler)
+endsnippet
+
+snippet jsond
+with open(${1:path}, ${2:"w"}${4:, encoding="utf-8"}) as fhandler:
+	fhandler.write(json.dumps(${3:data}, indent=2))
+endsnippet
+
+snippet execl
+os.execl(bin_path, *([bin_path] + args))
+endsnippet
+
+snippet exec "exec" w
+os.access(${1:filename}, os.X_OK)
+endsnippet
+
+snippet colorama
+import colorama
+colorama.init()
+endsnippet
+
+snippet tty
+if not sys.stdin.isatty():
+	print("Error: stdin is not a tty.", file=sys.stderr)
+	sys.exit(1)
+endsnippet
+
+snippet nocover "nocover" w
+# pragma: no cover
+endsnippet
+
+snippet importlib
+import importlib.util
+spec = importlib.util.spec_from_file_location("module.name", "/path/to/file.py")
+foo = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(foo)
+foo.MyClass()
+endsnippet
+
+snippet coverage
+import coverage
+cov = coverage.Coverage()
+cov.start()
+${1:}
+cov.stop()
+cov.save()
+
+if cov.report() < 90.0:
+	print()
+	print("WARNING: the code coverage is low.", file=sys.stderr)
+	print()
+endsnippet
+
+snippet doctest
+doctest_result = doctest.testmod()
+print("[DOCTEST]", doctest_result, file=sys.stderr)
+if doctest_result.failed:
+	print("Error: a doc test has failed.", doctest_result,
+	       file=sys.stderr)
+	sys.exit(1)
+endsnippet
+
+snippet ps
+current_user = getpass.getuser()
+for pid in psutil.pids():
+	try:
+		proc = psutil.Process(pid)
+		if proc.username() != current_user:
+			continue
+
+		if proc.name() == ${1:"proc_name"}:
+			${2:pass}
+	except psutil.Error:
+		pass
+endsnippet
+
+snippet psfile
+def is_file_open(fpath):
+	for proc in psutil.process_iter():
+		try:
+			for item in proc.open_files():
+				if fpath == item.path:
+					return True
+		except psutil.Error:
+			pass
+
+	return False
+endsnippet
+
+snippet diskp
+for diskpart in psutil.disk_partitions(all=False):
+	print(diskpart)
+endsnippet
+
+snippet check_output
+def _run(self, *args):
+	"""Run netctl."""
+	os_env = os.environ.copy()
+	os_env["LC_ALL"] = "C"
+	cmd = ["netctl"] + list(args)
+	output = subprocess.check_output(cmd, env=os_env, timeout=30)
+	return output.decode("utf-8").splitlines()
+endsnippet
+
+snippet run
+run = subprocess.run(
+	cmd,
+	stdin=subprocess.PIPE,
+	stdout=subprocess.PIPE,
+	stderr=subprocess.PIPE,
+	shell=False,
+	universal_newlines=True,
+	check=False,
+)
+print(run.returncode, run.stdout, run.stderr)
+endsnippet
+
+snippet warn
+import warnings
+warnings.filterwarnings("ignore")
+endsnippet
+
+snippet mypy
+from typing import List
+endsnippet
+
+snippet repr
+def __repr__(self) -> str:
+	"""Object representation in string format."""
+	result = ""
+	return result
+endsnippet
+
+snippet iter
+def __iter__(self):
+	yield from self.$1
+endsnippet
+
+snippet mit
+#
+# Copyright (c) ${1:First Lastname}
+#
+# Distributed under terms of the MIT license.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+endsnippet
+
+snippet p "print" w
+print(${1:})
+endsnippet
+
+snippet basef
+try:
+    path = sys.argv[1]
+except IndexError:
+    print(f"Usage: {sys.argv[0]} <file>", file=sys.stderr)
+    sys.exit(1)
+
+if not os.path.exists(path):
+    print(f"Error: the file '{path}' does not exist.", file=sys.stderr)
+    sys.exit(1)
+endsnippet
+
+snippet confirm
+while True:
+	try:
+		answer = input("Execute? [y,n] ")
+	except KeyboardInterrupt:
+		print()
+		sys.exit(1)
+
+	if answer not in ["y", "n"]:
+		continue
+
+	if answer == "y":
+		break
+	else:
+		sys.exit(1)
+endsnippet
+
+snippet av "arg var" w
+${1:var}=$1
+endsnippet
+
+snippet pddup
+${1:data}.drop_duplicates(inplace=True})
+endsnippet
+
+snippet pd
+import pandas as pd
+import numpy as np
+endsnippet
+
+snippet pdinit
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+# pd.set_option('display.max_colwidth', None)
+# pd.set_option("display.precision", 2)
+endsnippet
+
+snippet pdappend
+${1:data} = pd.concat([$1, ${2:data2}], ignore_index=False)
+endsnippet
+
+snippet pdcsv
+${1:data} = pd.read_csv(${2:csv_path}, keep_default_na=False,
+                        na_values=[""], encoding="ISO-8859-1")
+endsnippet
+
+snippet pdtocsv
+${1:data}.to_csv(${2:path}, index=False)
+endsnippet
+
+snippet pdtoexcel
+${1:data}.to_excel(${2:path}, index=False)
+endsnippet
+
+# $1["$2"] = $1["$2"].astype('datetime64[ns]')  # Timezone naive
+snippet pddatetime
+${1:data}["${2:col}"] = pd.to_datetime($1["$2"], utc=True, format="mixed")
+endsnippet
+
+# $1["$2"] = $1["$2"].astype('datetime64[ns]')  # Timezone naive
+snippet pddate
+${1:data}["${2:col}"] = pd.to_datetime($1["$2"], utc=True).dt.date
+endsnippet
+
+snippet pdnum
+${1:data}[${2:"col"}] = pd.to_numeric($1[$2])
+endsnippet
+
+snippet pdapply
+${1:data}["${2:Category}"] = $1.apply(${3:lambda row: ""}, axis=1)
+endsnippet
+
+snippet pdsort
+${1:data} = $1.sort_values(by=[${2:"Column"}])
+endsnippet
+
+snippet pdreset
+${3:}${1:data}.reset_index(drop=True${2:, inplace=True})
+endsnippet
+
+snippet pddropc
+${1:data}.drop(columns=["${2:column}"${3:}], inplace=True)
+endsnippet
+
+snippet pddrop
+${1:data}.drop($1[
+	($1["${2:ColName}"] ${3:>=} ${4:var})
+].index, inplace=True)
+endsnippet
+
+snippet delta
+datetime.utcnow() - timedelta(${2:days}=${1:7})
+endsnippet
+
+snippet args "args" w
+*args, **kwargs
+endsnippet
+
+snippet st
+@staticmethod
+endsnippet
+
+snippet raise
+err_str = "${1:}"
+raise ${2:ValueError}${3:(err_str)}
+endsnippet
+
+snippet ke "Create a key" w
+"${1:}": ${2:}, ${3:}
+endsnippet
+
+snippet it "Create an item" w
+${1:item}["${2:key}"]
+endsnippet
+
+snippet ins "isinstance" w
+isinstance(${1:var}, ${2:type})
+endsnippet
+
+snippet join "Join list" w
+"${1: }".join(${2:var})
+endsnippet
+
+snippet main
+def $2():
+	"""${1:The command-line interface.}"""
+	${1:pass}
+
+
+if __name__ == "__main__":
+	${2:main}()
+endsnippet
+
+snippet schema
+from schema import Schema, Or, Optional, SchemaError
+
+self.schema = Schema({
+	Optional('${2:dict}'): {
+		Optional(${3:str_key}): schema.Or(
+			schema.Optional(str),
+			schema.Optional(list),
+			schema.Optional(dict),
+			schema.Optional(int),
+			schema.Optional(float)
+		)
+	},
+	Optional("${4:str_key}"): str
+})
+
+try:
+	self.schema.validate(${1:data_dict})
+except SchemaError as err:
+	pass
+endsnippet
+
+snippet range
+for ${1:_} in range(${2:2}):
+	${3:pass}
+endsnippet
+
+snippet err
+print(${2:f}"Error: ${1:}", file=sys.stderr${3:})
+sys.exit(1)
+endsnippet
+
+snippet print
+print(${2:f}"Error: ${1:}."${3:})
+endsnippet
+
+snippet final
+try:
+	${1:pass}
+finally:
+	${2:pass}
+endsnippet
+
+snippet tmp
+tmp_path = None
+try:
+	_, tmp_path = tempfile.mkstemp(prefix="${1:prefix}", suffix="${2:.ext}")
+finally:
+	if tmp_path:
+		os.remove(tmp_path)
+endsnippet
+
+snippet tmpdir
+from tempfile import TemporaryDirectory
+with TemporaryDirectory() as tmpdir:
+	${1:pass}
+endsnippet
+
+snippet tmpdir2
+tmpdir = None
+try:
+	tmpdir = tempfile.mkdtemp(prefix="${1:prefix}")
+	${2:pass}
+finally:
+	if tmpdir:
+		shutil.rmtree(tmpdir)
+endsnippet
+
+snippet tmp2
+import os
+import tempfile
+tmpfile = tempfile.NamedTemporaryFile(prefix="${1:prefix}",
+                                      suffix="${2:suffix}",
+                                      delete=False)
+tmpfile_name = tmpfile.name
+try:
+	${1:pass}
+finally:
+	tmpfile.close()
+endsnippet
+
+snippet utime
+file_st = os.stat(filename)
+os.utime(cachefile, (file_st[stat.ST_ATIME], file_st[stat.ST_MTIME]))
+endsnippet
+
+snippet pexpect
+import sys
+import struct
+import fcntl
+import termios
+import signal
+import pexpect
+
+cmd = ['bash']
+child = pexpect.spawn(command=cmd[0], args=cmd[1:],
+                      timeout=60, cwd='/', echo=False)
+
+child.expect(".*password")
+child.sendline(password)
+
+# pylint: disable=unused-argument
+def sigwinch_passthrough(sig, data):
+	"""Pass the window size to the parent."""
+	aup = struct.unpack('hhhh',
+	                    fcntl.ioctl(sys.stdout.fileno(),
+	                                termios.TIOCGWINSZ,
+	                                struct.pack("HHHH", 0, 0, 0, 0)))
+
+sigwinch_passthrough(None, None)  # resize
+orig_sigwinch = signal.getsignal(signal.SIGWINCH)
+signal.signal(signal.SIGWINCH, sigwinch_passthrough)
+child.interact()
+signal.signal(signal.SIGWINCH, orig_sigwinch)
+endsnippet
+
+snippet super
+super().${1:__init__}(${2:*args, **kwargs})
+endsnippet
+
+snippet except
+class ${1:Name}${2:Error}(Exception):
+	"""Exception raised by $1()."""
+
+endsnippet
+
+snippet cla
+class ${1:ClassName}:
+	def __init__(self${3:}):
+		${4:pass}
+endsnippet
+
+# snippet cla
+# class $1Error(Exception):
+# 	"""Exception raised by $1()."""
+#
+#
+# class ${1:ClassName}:
+# 	"""${2:Description}."""
+#
+# 	def __init__(self${3:, *args, **kwargs}):
+# 		${4:pass}
+# endsnippet
+
+snippet sdir
+os.chdir(sys.path[0])
+endsnippet
+
+snippet scriptdir
+os.chdir(sys.path[0])
+endsnippet
+
+snippet xok "access to file is ok" w
+os.access(${1:path}, os.X_OK)
+endsnippet
+
+snippet logger
+self._logger = logging.getLogger(${1:self.__class__.__name__})
+endsnippet
+
+snippet info
+self._logger.info("$1"${2:})
+endsnippet
+
+snippet jinja
+import jinja2
+j2_template = jinja2.Template(${1:string}, undefined=jinja2.StrictUndefined)
+$1 = j2_template.render(var=value)
+endsnippet
+
+snippet input
+${1:variable} = input("${2:Question?}${3: }")  # nosec: B322
+endsnippet
+
+snippet stdin
+import select
+import fileinput
+if select.select([sys.stdin], [], [], 0.0)[0]:
+	for line in fileinput.input():
+		pass
+endsnippet
+
+snippet check_call
+try:
+	cmd = [${1:}]
+	print("[RUN] " + " ".join(cmd))
+	subprocess.check_call(cmd)
+except subprocess.CalledProcessError as err:
+	sys.stderr.write("Error: {}\n".format(str(err)))
+	sys.exit(1)
+endsnippet
+
+snippet linux
+import platform
+assert platform.system() == "Linux", \
+	"Linux is the only supported operating system "
+endsnippet
+
+snippet pdb
+import pdb
+pdb.set_trace()
+endsnippet
+
+snippet yaml
+with open(${1:path}, "${2:r}", encoding="utf-8") as ${3:fhandler}:
+	${4:yaml_dict} = yaml.load($3, Loader=yaml.FullLoader)
+endsnippet
+
+snippet yamld
+def yaml_dump_indent_lists(data: Any, **kwargs):
+    """Same as yaml.dump() but with a better indentation for lists."""
+    class YamlDumper(yaml.Dumper):
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow, False)
+
+    return yaml.dump(data,
+                     Dumper=YamlDumper,
+                     default_flow_style=False,
+                     indent=2)
+endsnippet
+
+snippet read
+with open(${1:path}, ${2:"r"}${4:, encoding="utf-8"}) as fhandler:
+	for line in fhandler.readlines():
+		line = line.rstrip()
+		${3:}
+endsnippet
+
+snippet write
+with open(${1:path}, ${2:"w"}${4:, encoding="utf-8"}) as fhandler:
+	fhandler.write(${3:content})
+endsnippet
+
+snippet def
+def ${1:name}(${2:self}${3:}):
+	${3:pass}
+endsnippet
+
+snippet defs
+def ${1:name}(${2:self}):
+	${3:pass}
+endsnippet
+
+snippet defc
+def ${1:name}(${4:self}${2:}) -> ${3:str}:
+	${5:pass}
+endsnippet
+
+snippet unixtime
+datetime.fromtimestamp(${1:int_value}).strftime('%Y-%m-%d %H:%M:%S'))
+endsnippet
+
+snippet timeit
+import timeit
+time_start = timeit.default_timer()
+time_total = int(timeit.default_timer() - time_start)
+logging.info("Duration: %d seconds", time_total)
+endsnippet
+
+snippet gc
+import signal
+import gc
+
+def garbage_collector(signum, frame):
+	"""Garbage collection."""
+	gc.collect()
+	logging.debug("Garbage collection done.")
+	if signum == signal.SIGINT:
+		sys.exit(1)
+	else:
+		sys.exit(0)
+
+signal.signal(signal.SIGINT, garbage_collector)
+signal.signal(signal.SIGTERM, garbage_collector)
+endsnippet
+
+snippet dismypy "dismypy" w
+# type: ignore
+endsnippet
+
+snippet dis
+# pylint: disable=${1:}
+endsnippet
+
+snippet f "fstring" w
+f"${1:}"
+endsnippet
+
+snippet ex
+sys.exit(${1:1})
+endsnippet
+
+snippet imock "imock"
+from unittest import mock
+endsnippet
+
+snippet upatcho
+with patch.object(${1:sys}, ${2:"argv"}, ${3:list_argv}):
+	${3:pass}
+endsnippet
+
+snippet upatch
+with mock.patch('${1:builtins.input}', return_value=${2:'n'}):
+	${3:pass}
+endsnippet
+
+snippet umagicmock
+${1:class_instance}.${2:method} = MagicMock(name="$2", return_value=${3:True})
+endsnippet
+
+snippet umock2
+${1:class_instance}.${2:method} = Mock(return_value=${3:True})
+endsnippet
+
+snippet utest
+def test_${1:name}(${2:self}):
+	"""Test $1()."""
+	${4:pass}
+endsnippet
+
+snippet utestc
+def test_${1:name}(${2:self}):
+	"""Test the class $1()."""
+	${4:pass}
+endsnippet
+
+snippet uraises
+with self.assertRaises(${1:Exception}):
+	${2:method}(${3:})
+endsnippet
+
+snippet traises "traises"
+with pytest.raises(${1:Exception}):
+	${2:method}(${3:})
+endsnippet
+
+snippet unittest
+import unittest
+from unittest.mock import Mock
+
+class Test${1:ClassName}(unittest.TestCase):
+	"""Test the class $1()."""
+
+	def test_${3:name}(self):
+		"""Test $1.$3."""
+		${4:pass}
+
+tests = unittest.TestLoader().loadTestsFromTestCase(Test$1)
+ret = unittest.TextTestRunner(verbosity=5).run(tests).wasSuccessful()
+errno = 0 if ret else 1
+sys.exit(errno)
+endsnippet
+
+snippet which
+import shutil
+if not shutil.which(${1:"command"}):
+	print("Error: the command '{}' was not found.".format($1),
+		  file=sys.stderr)
+	sys.exit(1)
+endsnippet
+
+snippet walk
+list_files = [os.path.join(folder, sub_file)
+              for folder, _, sub_files in os.walk(${1:"."})
+              for sub_file in sub_files]
+endsnippet
+
+snippet walk2
+list_files = []
+for folder, _, sub_files in os.walk(${1:"."}):
+	for sub_file in sub_files:
+		sub_path = os.path.join(folder, sub_file)
+		list_files.append(sub_file)${2:}
+endsnippet
+
+snippet traceback
+import traceback
+trace_format_exc = traceback.format_exc()
+endsnippet
+
+snippet	try
+try:
+	pass
+except ${1:Exception}:
+	raise
+endsnippet
+
+snippet user
+pwd.getpwuid(os.getuid()).pw_name
+endsnippet
+
+snippet home
+home = pwd.getpwuid(os.getuid()).pw_dir
+endsnippet
+
+snippet shell
+home = pwd.getpwuid(os.getuid()).pw_shell
+endsnippet
+
+snippet root
+if os.getuid() != 0:
+	print("Error: you cannot perform this operation unless you are root.",
+	      file=sys.stderr)
+	sys.exit(1)
+endsnippet
+
+snippet d
+"""${1:Docstring}."""
+endsnippet
+
+snippet pycallgraph
+from pycallgraph import PyCallGraph
+from pycallgraph.output import GraphvizOutput
+from pycallgraph import GlobbingFilter as GFilter
+from pycallgraph import Config
+cfg = Config()
+cfg.trace_filter = GFilter(exclude=["pycallgraph.*"])
+#cfg.max_depth = 3
+graphviz = GraphvizOutput(output_file="graph.png")
+with PyCallGraph(output=graphviz, config=cfg):
+	pass
+endsnippet
+
+snippet embed
+# ==== EMBED ========================================================
+from IPython.terminal.embed import InteractiveShellEmbed
+ipshell = InteractiveShellEmbed(config=None, banner1="", exit_msg="")
+ipshell.confirm_exit = False
+ipshell.mainloop()
+exit()
+# ==== EMBED ========================================================
+endsnippet
+
+snippet embed2
+import code
+variables = globals().copy()
+variables.update(locals())
+shell = code.InteractiveConsole(variables)
+shell.interact()
+endsnippet
+
+snippet thread
+import threading
+import time
+
+def $1(stop_event: threading.Event):
+	while not stop_event.is_set():
+		time.sleep(0.5)
+
+stop_event = threading.Event()
+thread = threading.Thread(target=${1:method_name}, args=(stop_event,))
+thread.start()
+try:
+	while True:
+		time.sleep(1)
+except (KeyboardInterrupt, SystemExit):
+	sys.exit(1)
+finally:
+	stop_event.set()
+	thread.join()
+endsnippet
+
+snippet threadp
+from concurrent.futures import ThreadPoolExecutor, as_completed
+with ThreadPoolExecutor() as executor:
+	futures = []
+	for ${1:item} in ${2:iterator}:
+		future = executor.submit(${3:method}${4:, arg1})
+		futures.append(future)
+
+	for future in as_completed(futures):
+		${5:print(future.result())}
+endsnippet
+
+snippet mailtrace
+import traceback
+try:
+	${1:main()}
+except Exception:
+	SCRIPT_PATH = os.path.abspath(sys.argv[0])
+	sendmail(SCRIPT_PATH + " has crashed:\n" + traceback.format_exc(),
+			 "Traceback " + SCRIPT_PATH)
+	raise
+endsnippet
+
+snippet sendmail
+from smtplib import SMTP
+from email.mime.text import MIMEText
+
+
+def sendmail(email_from: str,
+             recipients: list,
+             subject: str,
+             message: str,
+             smtp_server: str = "localhost"):
+	"""Send an email from 'email_from' to 'recipients'."""
+	for recipient in recipients:
+		msg = MIMEText(message)
+		msg["Subject"] = subject
+		msg["From"] = email_from
+		msg["To"] = recipient
+		smtp = SMTP(smtp_server)
+		smtp.sendmail(email_from, recipient, msg.as_string())
+		smtp.quit()
+endsnippet
+
+snippet loggingfile
+import logging
+logging.basicConfig(level=${1:INFO},
+                    handlers=[logging.StreamHandler(sys.stdout),
+                    logging.FileHandler(log_file)],
+                    format="%(asctime)s %(name)s: %(message)s")
+endsnippet
+
+snippet logging
+import logging
+logging.basicConfig(level=logging.${1:INFO}, stream=sys.stdout,
+					format="%(asctime)s %(name)s: %(message)s")
+endsnippet
+
+snippet wrapper
+class ${1:ClassName}:
+	def __init__(self):
+		self._${2:object} = ${3:WrapperClass}
+
+	def __getattr__(self, name):
+		"""Get an attribute."""
+		return self._$2[name]
+
+	@property
+	def __dict__(self):
+		"""The internal variables."""
+		return self._$2
+
+	def __iter__(self):
+		"""Iteration."""
+		return iter(self._$2)
+
+	def __repr__(self):
+		"""Return the string representation of the class."""
+		return repr(self._$2)
+endsnippet
+
+snippet decor
+def ${1:decorator}(orig_func):
+	"""${3:A decorator}"""
+	def _func(*args, **kwargs):
+		"""A nested function for other functions"""
+		print("before")
+		orig_func(*args, **kwargs)
+		print("after")
+		return True
+
+	return _func
+
+@$1
+def ${2:func}():
+	"""Docstring"""
+	pass
+endsnippet
+
+snippet makedirs
+os.makedirs(${1:path}, exist_ok=True)
+endsnippet
+
+snippet Popen
+import subprocess
+cmd = ["${1:ls}"]
+proc = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+(stdout, stderr) = proc.communicate()
+if proc.returncode != 0:
+    raise subprocess.CalledProcessError(returncode=proc.returncode,
+	                                    cmd=cmd,
+	                                    output=stdout,
+							            stderr=stderr)
+stdout = stdout.decode()
+stderr = stderr.decode()
+endsnippet
+
+snippet cvar
+${2:var} = cparser.get("${3:section}", "$2")
+endsnippet
+
+snippet config
+import configparser
+try:
+	cparser = configparser.ConfigParser()
+	cparser.read(${1:config_file})
+	${2:var} = cparser.get("${3:section}", "$2")
+except (configparser.NoOptionError, configparser.NoSectionError) as err:
+	pass
+endsnippet
+
+snippet lfor
+[${1:var} for ${1} in ${2:list}]
+endsnippet
+
+snippet if
+if ${1:True}:
+	${2:pass}
+endsnippet
+
+snippet for
+for ${1:_} in ${2:[]}:
+	${3:pass}
+endsnippet
+
+snippet while
+while ${1:True}:
+	${2:pass}
+endsnippet
+
+snippet stderr
+sys.stderr.write("${1:}\n".format(${2:}))
+endsnippet
+
+snippet future
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import unicode_literals
+endsnippet
+
+snippet fm
+"${1:}".format(${2:})
+endsnippet
+
+snippet schedule
+schedule.every(1).minutes.do(job)
+schedule.every().hour.do(job)
+schedule.every().day.at("10:30").do(job)
+schedule.every().monday.do(job)
+schedule.every().wednesday.at("13:15").do(job)
+endsnippet
+
+snippet user_agent
+import requests
+user_agent = "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:60.0) " \
+	"Gecko/20100101 Firefox/72.0"
+try:
+	request = requests.get(url, allow_redirects=True,
+                               headers={"User-Agent": user_agent})
+	request.raise_for_status()
+
+	content = request.content.decode("utf-8", "ignore")
+except requests.exceptions.RequestException as err:
+	raise
+endsnippet
+
+snippet requests_get
+import requests
+params = {"VAR": "VALUE", "VAR2": "VALUE"}
+auth = requests.auth.HTTPBasicAuth("VARIABLE", "PASSWORD")
+req = requests.get("https://url.com/dir",
+				   params=params,
+				   verify="ssl.pem",
+				   auth=auth)
+endsnippet
+
+snippet md5
+import hashlib
+def md5sum(filename):
+	"""Return the MD5 sum of a file."""
+	md5 = hashlib.md5()
+	with open(filename, "rb") as fhandler:
+		for chunk in iter(lambda: fhandler.read(8192), b""):
+			md5.update(chunk)
+	return md5.hexdigest()
+endsnippet
+
+snippet daemon
+import daemon
+context = daemon.DaemonContext(stdout=fhandler)
+context.open()
+endsnippet
+
+snippet argstr "argstr"
+parser.add_argument(
+	"-${1:f}",
+	"--${2:foo}",
+	default="",
+	required=${3:False},
+	help="${4:}",
+)
+endsnippet
+
+snippet argbool "argbool"
+parser.add_argument(
+	"-${1:f}",
+	"--${2:foo}",
+	default=${3:False},
+	action="store_true",
+	required=${3:False},
+	help="${4:}",
+)
+endsnippet
+
+snippet arglist
+parser.add_argument(
+	"-${1:f}",
+	"--${2:foo}",
+	default=[],
+	action="append",
+	required=${3:False},
+	help="${4:}",
+)
+endsnippet
+
+snippet argparse
+import argparse
+def parse_args():
+	"""Parse command-line arguments."""
+	usage = "%(prog)s [--option] [args]"
+	parser = argparse.ArgumentParser(description=__doc__.splitlines()[0],
+	                                 usage=usage)
+	parser.add_argument("args", metavar="N", type=str, nargs="+",
+	                    help="${1:}")
+	return parser.parse_args()
+endsnippet
+
+snippet argexclusive "argexclusive"
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-${1:o}", "--${2:horizontal}", action="store_true",
+                    help="${3:Help}")
+group.add_argument("-${4:O}", "--${5:vertical}", action="store_true",
+                    help="${6:Help}")
+endsnippet
+
+snippet readline "readline"
+import readline
+from typing import Any, List, Union
+
+
+class ReadlineCompleter:
+    """A readline completer."""
+
+    def __init__(self, options: List[str]):
+        """Store the options = ['word1', 'word2']."""
+        readline.set_completer_delims('')
+        self.options = options
+        self.matches: List[str] = []
+
+    def complete(self, _, state):
+        """Complete a readline sentence."""
+        if state == 0:
+            origline = readline.get_line_buffer()
+            begin = readline.get_begidx()
+            end = readline.get_endidx()
+            being_completed = origline[begin:end]
+            words = origline.split()
+
+            if not words:
+                self.matches = self.options[:]
+            else:
+                try:
+                    if begin == 0:
+                        matches = self.options[:]  # First word
+                    else:
+                        first = words[0]  # Later word
+                        matches = self.options[first]
+
+                    if being_completed:
+                        # Match options with portion of input
+                        # being completed
+                        self.matches = [w for w in matches
+                                        if w.startswith(being_completed)]
+                    else:
+                        # Matching empty string so use all candidates
+                        self.matches = matches
+                except (KeyError, IndexError):
+                    self.matches = []
+
+        try:
+            return self.matches[state]
+        except IndexError:
+            return None
+
+
+def input_completion(prompt: Any,
+                     list_options: Union[None, List[str]] = None):
+    """Read a string from standard input and complete against 'list_options'.
+
+    The trailing newline is stripped. The prompt string is printed to
+    standard output without a trailing newline before reading input.
+
+    If the user hits EOF (*nix: Ctrl-D, Windows: Ctrl-Z+Return), raise
+    EOFError. On *nix systems, readline is used if available.
+
+    """
+    readline.parse_and_bind('tab: complete')
+    if list_options is None:
+        list_options = []
+
+    save_completer = readline.get_completer()
+    try:
+        readline.set_completer(
+            ReadlineCompleter(list_options).complete
+        )
+        return input(prompt)
+    finally:
+        readline.set_completer(save_completer)
+endsnippet

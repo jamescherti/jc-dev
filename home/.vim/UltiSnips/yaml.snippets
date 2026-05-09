@@ -1,0 +1,991 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+priority 50
+
+snippet home
+{{ lookup('env', 'HOME') }}
+endsnippet
+
+snippet pause "pause"
+- name: Pause
+  pause:
+    seconds: ${1:1}
+endsnippet
+
+snippet mask "mask"
+- name: Restart $1
+  ansible.builtin.systemd:
+    name: ${1:service_name}
+    masked: true
+endsnippet
+
+snippet comment "comment"
+- name: Comment lines in $1
+  ansible.builtin.replace:
+    path: ${1:/path/to/file}
+    regexp: '^(\s*${2:string}.*)$'
+    replace: '#\1'
+endsnippet
+
+snippet cfgdir
+- name: "Directory {{ ${1:cfgdir} }}"
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    mode: "0755"
+  loop:
+    - "{{ $1 }}"
+
+- name: Delete old configuration file
+  changed_when: false
+  ansible.builtin.command:
+    argv:
+      - "find"
+      - "{{ $1 }}"
+      - "-maxdepth"
+      - "1"
+      - "-name"
+      - "${1:*_cfg.yaml}"
+      - "-print"
+      - "-delete"
+endsnippet
+
+snippet rclocal
+- name: File /etc/rc.local
+  ansible.builtin.copy:
+    dest: /etc/rc.local
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/usr/bin/env bash
+      # /etc/rc.local
+      ${1:}
+
+- name: File /etc/systemd/system/rc-local.service
+  register: rc_local
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/rc-local.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Runs /etc/rc.local
+      [Unit]
+      Description=/etc/rc.local compatibility
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/rc.local
+      # disable timeout logic
+      TimeoutSec=0
+      #StandardOutput=tty
+      RemainAfterExit=yes
+      SysVStartPriority=99
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: systemd daemon-reload
+  systemd:
+    daemon_reload: true
+  when: rc_local.changed
+
+- name: Service rc-local enabled
+  service:
+    name: rc-local
+    enabled: true
+endsnippet
+
+snippet a2ensite
+- name: Run: a2ensite
+  ansible.builtin.command:
+    argv:
+      - "a2ensite"
+      - "{{ item }}"
+  args:
+    creates: "/etc/apache2/sites-enabled/{{ item }}"
+  loop:
+    - ${1:site.conf}
+endsnippet
+
+snippet a2enmod
+ansible.builtin.apache2_module:
+  name: "{{ item }}"
+loop:
+  - ${1:module}
+endsnippet
+
+snippet if
+{% if ${1:true} -%}
+${2:}
+{% endif %}
+endsnippet
+
+snippet for
+{% for ${1:item} in ${2:list} -%}
+${3:}
+{% endfor %}
+endsnippet
+
+snippet var
+{{ ${1:var} }}
+endsnippet
+
+snippet normalize
+- name: Normalize the permissions of $1
+  ansible.builtin.command:
+    argv: "{{ item.cmd }}"
+  loop:
+    - cmd:
+        - "find"
+        - "${1:/path/to/dir}"
+        - "-type"
+        - "d"
+        - "-exec"
+        - "chmod"
+        - "755"
+        - "{}"
+        - ";"
+    - cmd:
+        - "find"
+        - "$1"
+        - "-type"
+        - "f"
+        - "-exec"
+        - "chmod"
+        - "644"
+        - "{}"
+        - ";"
+endsnippet
+
+snippet unzip
+- name: Extract the archive $1
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: ${1:/path/to/zip}
+    dest: ${2:/path/to/dir}
+    owner: ${3:root}
+    group: $3
+    mode: "${4:0755}"
+    creates: ${5:/path/to/dir}
+endsnippet
+
+snippet default
+{{ ${1:var} | default('${2:default}') }}
+endsnippet
+
+snippet env
+{{ ansible_env.${1:HOME} }}
+endsnippet
+
+snippet files
+"{{ role_path }}/files/${2:filename}"
+endsnippet
+
+snippet template
+"{{ role_path }}/templates/${2:filename}"
+endsnippet
+
+snippet osystemd
+- name: Directory /etc/systemd/system/${1:NAME}.${2:service}.d
+  ansible.builtin.file:
+    state: directory
+    path: /etc/systemd/system/$1.$2.d
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: File /etc/systemd/system/$1.$2.d/override.conf
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/$1.$2.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [${3:}]
+      ${4:}
+endsnippet
+
+snippet pathaction
+actions:
+  main:
+    - fnmatch: *.sh
+      ansible.builtin.command: bash %
+endsnippet
+
+snippet home "home" w
+{{ lookup('env','HOME') }}
+endsnippet
+
+snippet os
+- name: Check the operating system
+  ansible.builtin.fail:
+    msg: Operating system not supported. You need: $1 $2
+  when: ansible_facts.distribution != "${1:Ubuntu}" and ansible_facts.distribution_release != "${2:xenial}"
+endsnippet
+
+snippet virt
+when: ansible_virtualization_type == "kvm" and ansible_virtualization_role ${1:==} "guest"
+endsnippet
+
+snippet def
+- name: Check if the variable $1 is defined
+  ansible.builtin.fail:
+    msg: "The variable '$1' is not defined."
+  when: ${1:variable} == undefined
+endsnippet
+
+snippet touch
+- name: Touch $1
+  ansible.builtin.command: touch ${1:/path/to/file}
+  args:
+    creates: $1
+endsnippet
+
+snippet stouch
+- name: Touch $1
+  ansible.builtin.shell: touch ${1:/path/to/file}
+  args:
+    executable: ${2:/bin/sh}
+    creates: $1
+endsnippet
+
+snippet hosts
+- hosts: ${1:host}
+  tasks:
+    ${2:}
+endsnippet
+
+snippet hostsb
+- hosts: ${1:host}
+  become: true
+  become_user: root
+  become_method: sudo
+  become_flags: -i
+  tasks:
+    ${3:}
+endsnippet
+
+snippet ifhost
+ansible_fqdn | search('${1:\.home\.org}$')
+endsnippet
+
+snippet assert
+- name: ${3:Assertions}
+  ansible.builtin.assert:
+    that:
+      - '${1:var = "value"}'
+    msg: "${2:message}"
+endsnippet
+
+snippet version
+- ansible.builtin.assert:
+    that:
+      - ansible_version.major >= ${1:2}
+      - ansible_version.minor >= ${2:4}
+    msg: "You need Ansible version $1.$2"
+endsnippet
+
+# useful for shell/command + register
+snippet nochange
+changed_when: false
+endsnippet
+
+snippet nofail
+failed_when: false
+changed_when: false
+endsnippet
+
+snippet ignore
+ignore_errors: true
+endsnippet
+
+snippet regex
+${1:ansible_fqdn} | search('${2:\.domain\.com}')
+endsnippet
+
+snippet fqdn
+ansible_fqdn
+endsnippet
+
+snippet fact
+- name: Set fact $1
+  set_fact: ${1:var}="${2:value}"
+endsnippet
+
+# same as fact
+snippet var
+- name: Set fact $1=$2
+  ansible.builtin.set_fact: ${1:var}="${2:value}"
+endsnippet
+
+snippet fail
+- name: Fail $1
+  ansible.builtin.fail:
+    msg: "${1:Failure message}"
+endsnippet
+
+snippet import
+- name: Import Tasks from $1.$2
+  ansible.builtin.import_tasks: "${1:file}.${2:yaml}"
+  tags: $1
+endsnippet
+
+snippet tag
+tags: ${1:tag}
+endsnippet
+
+snippet debug
+- name: Debug the $1 variable
+  ansible.builtin.debug:
+    var: ${1:variable}
+endsnippet
+
+snippet stdout
+- name: Run $1$2
+  ${4:ansible.builtin.shell}: ${1:/usr/local/bin/}${2:command} ${3:args}
+  register: cmd_$2
+  failed_when: false
+  changed_when: false
+
+- debug: var=cmd_$2.stdout
+endsnippet
+
+snippet check_become
+- name: Check if the username is root
+  ansible.builtin.command: whoami
+  register: ${1:whoami}
+  failed_when: false
+  changed_when: false
+
+- ansible.builtin.fail:
+    msg: "${2:Ansible needs to become root}"
+  when: $1.stdout != "root"
+endsnippet
+
+snippet wget
+- name: Download $1
+  ansible.builtin.get_url:
+    dest: ${1:/path/to/file}
+    url: ${2:http://domain.com/file}
+    owner: ${3:root}
+    group: $3
+    mode: "${4:0644}"
+endsnippet
+
+snippet exists
+- name: Check the existence of the file $1
+  ansible.builtin.stat:
+    path: ${1:/path/to/file}
+  register: ${2:var_name}
+
+${3:}
+  when: $2.stat.exists
+endsnippet
+
+snippet bk
+- name: ${1:Description}
+  block:
+    ${2:}
+endsnippet
+
+snippet infile
+- name: Block in the file $1
+  ansible.builtin.blockinfile:
+    dest: ${1:/path/to/file}
+    owner: ${2:root}
+    group: $1
+    mode: "${3:0644}"
+    marker: "# {mark}: ANSIBLE BLOCK${4:}"
+    backup: ${5:no}
+    block: |
+      ${6:}
+endsnippet
+
+snippet systemd
+- name: Systemd service /lib/systemd/system/$1.service
+  ansible.builtin.copy:
+    dest: /lib/systemd/system/${1:name}.service
+    owner: ${2:root}
+    group: $2
+    mode: "${3:0644}"
+    content: |
+      [Unit]
+      Description=$1
+      Requires=network.target
+      After=network.service
+      [Service]
+      Type=simple
+      ExecStart=${4:/usr/local/bin/name}
+      User=${5:root}
+      Group=${6:root}
+      Restart=always
+      RestartSec=${7:15}
+      [Install]
+      WantedBy=multi-user.target
+  ${8:notify: systemctl daemon-reload}
+endsnippet
+
+snippet docker
+- name: Docker container $1
+  community.docker.docker_container:
+    name: $1
+    image: ${1:name}:${2:latest}
+    state: started
+    restart_policy: unless-stopped
+    container_default_behavior: compatibility
+    published_ports:
+      - ${3:80:80}
+    volumes:
+      - ${4:/dir/in/localhost}:${5:/dir/in/container}
+    env:
+      ${6:VARIABLE}: ${7:value}
+endsnippet
+
+snippet dir
+- name: Directory $1
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: ${3:root}
+    group: $3
+    mode: "${4:0755}"
+  loop:
+    - ${1:/path/to/dir}${2:}
+endsnippet
+
+snippet ct
+- name: File $1
+  ansible.builtin.copy:
+    dest: ${1:/path/to/file}
+    owner: ${3:root}
+    group: $3
+    mode: "${4:0644}"
+    content: |
+      ${2:}
+endsnippet
+
+snippet copy
+- name: File $1
+  ansible.builtin.copy:
+    dest: ${1:/path/to/file}
+    src: "{{ role_path }}/files/${2:filename}"
+    owner: ${3:root}
+    group: $3
+    mode: "${4:0644}"
+endsnippet
+
+snippet file
+- name: File $1
+  ansible.builtin.template:
+    dest: ${1:/path/to/server/file}
+    src: "{{ role_path }}/templates/${2:filename}"
+    owner: ${3:root}
+    group: $3
+    mode: "${4:0644}"
+endsnippet
+
+snippet apt_repo
+- name: Apt key
+  ansible.builtin.apt_key:
+    keyserver: pool.sks-keyservers.net
+    id: ${1:58118E89F3A912897C070ADBF76221572C52609D}
+    # url: https://ftp-master.debian.org/keys/archive-key-6.0.asc
+
+- name: Apt Repository $2
+  ansible.builtin.apt_repository:
+    repo: "deb ${2:https://url} ${3:\{\{ ansible_facts.distribution_release \}\}} ${4:main}"
+    update_cache: true
+endsnippet
+
+snippet apt_update
+- name: Update Apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: ${1:3600}
+  changed_when: false
+endsnippet
+
+snippet pacman_update
+- name: Pacman update cache
+  community.general.pacman: update_cache=true
+  changed_when: false
+endsnippet
+
+snippet deb
+- name: Install deb package: $1
+  ansible.builtin.apt:
+    deb: ${1:/path/to/deb}
+endsnippet
+
+snippet apt
+- name: Apt install ${2:packages}
+  when: ansible_facts.os_family == "Debian"
+  ansible.builtin.apt:
+    name:
+      - ${1:package_name}
+endsnippet
+
+snippet yum
+- name: Yum install ${3:packages}
+  ansible.builtin.yum: name={{ item }} state=${2:present}
+  with_items:
+    - ${1:package_name}
+endsnippet
+
+snippet dnf
+- name: Dnf Install ${3:packages}
+  ansible.builtin.dnf: name={{ item }} state=${2:present}
+  with_items:
+    - ${1:package_name}
+  when: ansible_facts.distribution == "Fedora"
+endsnippet
+
+snippet emerge
+- name: Emerge install $1
+  community.general.portage:
+    state: present
+    package: ${1:package_name}
+endsnippet
+
+snippet pacman
+- name: Pacman install $1${2:}
+  when: ansible_facts.os_family == "Archlinux"
+  community.general.pacman:
+    name:
+      - ${1:package_name}
+endsnippet
+
+snippet empty
+- name: Empty the file $1
+  ansible.builtin.copy: path=${1:/path/to/file} content=""
+endsnippet
+
+snippet service
+- name: Enable/start the service $1
+  ansible.builtin.systemd:
+    name: ${1:service_name}
+    state: ${2:started}
+    enabled: ${3:true}
+endsnippet
+
+snippet daemonreload
+- name: Systemd daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: ${1:REG}.changed
+endsnippet
+
+snippet restart
+- name: restart $1
+  ansible.builtin.systemd:
+    name: ${1:service_name}
+    state: ${2:restarted}
+endsnippet
+
+snippet flush
+- meta: flush_handlers
+endsnippet
+
+snippet cshell
+- name: Run $1
+  ansible.builtin.shell: "${1:command}"
+  args:
+    executable: ${2:/bin/sh}
+    creates: ${4:/path/to/file}
+endsnippet
+
+snippet shell
+- name: Run $1
+  ansible.builtin.shell: "${1:command}"
+  args:
+    executable: ${2:/bin/sh}
+endsnippet
+
+snippet ccommand
+- name: Run $1
+  ansible.builtin.command:
+    argv:
+      - "${1:command}"
+      - "${2:arg}"
+  args:
+    creates: ${4:/path/to/file}
+endsnippet
+
+snippet command
+- name: Run $1
+  ansible.builtin.command:
+    argv:
+      - "${1:command}"
+      - "${2:arg}"
+endsnippet
+
+snippet crond
+- name: Cron.d file /etc/cron.d/${1:01}-${2:script_name}
+  ansible.builtin.copy:
+    dest: /etc/cron.d/$1-$2
+    owner: root
+    group: root
+    mode: 0640
+    content: |
+      SHELL=/bin/bash
+      PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      MAILTO=root
+      ${3:01} ${4:*} * * * root ${5:script}
+endsnippet
+
+snippet cronvar
+- name: Cron variables
+  community.general.cronvar:
+    name: "{{ item[0] }}"
+    value: "{{ item[1] }}"
+  loop:
+    - ["${1:PATH}", "${2:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin}"]
+endsnippet
+
+snippet cron
+- name: Cron $1
+  ansible.builtin.cron:
+    name: "${1:cron name}"
+    job: "${2:command} >/dev/null"
+    minute: "${3:0}"
+    hour: "${4:0}"
+endsnippet
+
+snippet udev
+- name: Udev rule /etc/udev/rules.d/$1.rules
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/${1:90-filename}.rules
+    src: ${2:files/}${3:$2}.rules
+    owner: ${4:root}
+    group: $4
+    mode: "${5:0644}"
+  register: ${6:variable}
+
+- name: Udevadm control --reload-rules
+  shell: udevadm control --reload-rules
+  args:
+    executable: ${7:/bin/bash}
+  when: $6.changed
+endsnippet
+
+snippet sysctl
+- name: Sysctl file $3 $1=$2
+  ansible.posix.sysctl:
+    name: "{{ item[0] }}"
+    value: "{{ item[1] }}"
+    sysctl_file: "${3:/etc/sysctl.d/}${4:40-name.conf}"
+    reload: true
+  loop:
+    - ["${1:variable}", "${2:value}"]
+endsnippet
+
+snippet notdocker
+ansible_virtualization_type != "docker"
+endsnippet
+
+snippet arch
+ansible_facts.os_family == "Archlinux"
+endsnippet
+
+snippet gentoo
+ansible_facts.os_family == "Gentoo"
+endsnippet
+
+snippet ubuntu
+ansible_facts.distribution == "Ubuntu"
+endsnippet
+
+snippet debianos
+ansible_facts.distribution == "Debian"
+endsnippet
+
+snippet debian
+ansible_facts.os_family == "Debian"
+endsnippet
+
+snippet redhat
+ansible_facts.os_family == "RedHat"
+endsnippet
+
+snippet dist
+when: ansible_facts.distribution == "${1:Ubuntu}"
+endsnippet
+
+snippet osfamily
+ansible_facts.os_family == "${1:Debian}"
+endsnippet
+
+snippet link
+- name: Link $1
+  ansible.builtin.file:
+    state: link
+    dest: ${1:/path/to/symlink}
+    src: ${2:/file/to/link/to}
+    owner: ${3:root}
+    group: $3
+endsnippet
+
+snippet group
+- name: System group $1
+  ansible.builtin.group:
+    name: ${1:groupname}
+    gid: '${2:700}'
+endsnippet
+
+snippet suser
+- name: System group $1
+  ansible.builtin.group:
+    name: $1
+    system: true
+
+- name: System user $1
+  ansible.builtin.user:
+    name: ${1:username}
+    system: true
+    group: $1
+    home: ${3:/home}/$1
+    shell: ${4:/bin/false}
+    createhome: ${5:true}
+
+- name: Directory $3/$1
+  ansible.builtin.file:
+    state: directory
+    path: $3/$1
+    owner: $1
+    group: $1
+    mode: "${6:0700}"
+endsnippet
+
+snippet user
+- name: System group $1
+  ansible.builtin.group:
+    name: $1
+
+- name: System user $1
+  ansible.builtin.user:
+    name: ${1:username}
+    group: $1
+    home: ${3:/home}/$1
+    shell: ${4:/bin/bash}
+    createhome: ${5:true}
+
+- name: Directory $3/$1
+  ansible.builtin.file:
+    state: directory
+    path: $3/$1
+    owner: $1
+    group: $1
+    mode: "${6:0700}"
+endsnippet
+
+snippet remove
+- name: Delete $1
+  ansible.builtin.file:
+    path: ${1:/path/to/file}
+    state: absent
+endsnippet
+
+snippet hostname
+"{{ lookup('pipe', 'hostname -f') }}"
+endsnippet
+
+snippet vars
+- name: Load variables $1
+  ansible.builtin.include_vars: ${1:file.yaml}
+endsnippet
+
+snippet cfg
+- name: Variables modified in $1
+  ansible.builtin.lineinfile:
+    dest: ${1:/path/to/file}
+    # insertafter: '### optional insert after'
+    regexp: '^\s*\#*\s*{{ item[0] }}\s*='
+    line: "{{ item[0] }}={{ item[1] }}"
+    owner: root
+    group: root
+    mode: "0644"
+    create: ${4:false}
+    backup: ${5:false}
+  loop:
+    - ['${2:VAR}', '${3:"VALUE"}']
+endsnippet
+
+snippet ini
+- name: Ini file $1
+  community.general.ini_file:
+    path: ${2:/path/to/ini/file}
+    section: "{{ item[0] }}"
+    option: "{{ item[1] }}"
+    value: "{{ item[2] }}"
+    owner: ${3:root}
+    group: $3
+    mode: "${4:0644}"
+    backup: ${5:false}
+  loop:
+    - ["${5:section}", "${6:variable}", "${7:value}"]
+endsnippet
+
+snippet sync
+- name: Rsync to $1
+  ansible.posix.synchronize:
+    dest: ${1:/dest/dir}
+    src: ${2:/source/dir}
+    use_ssh_args: true
+    ssh_connection_multiplexing: true
+    delete: true
+endsnippet
+
+snippet become
+become: true
+become_user: ${1:root}
+become_method: su
+endsnippet
+
+snippet roles
+roles:
+  - {role: ${1:role_name}, ${2:var}: ${3:value}}
+endsnippet
+
+snippet role
+- {role: ${1:role_name}, ${2:var}: ${3:value}}
+endsnippet
+
+snippet irole
+- name: Import role $1
+  ansible.builtin.import_role:
+    name: ${1:role_name}
+  vars:
+    ${2:var}: ${3:value}
+endsnippet
+
+snippet incrole
+- name: Include role $1
+  ansible.builtin.include_role:
+    name: ${1:role_name}
+  vars:
+    ${2:var}: ${3:value}
+endsnippet
+
+snippet owner
+owner: ${2:root}
+group: ${3:root}
+endsnippet
+
+snippet perm
+owner: ${1:root}
+group: ${2:root}
+mode: "${3:0644}"
+endsnippet
+
+snippet tmpfs
+- name: Add tmpfs to fstab /tmp
+  ansible.posix.mount:
+    src: tmpfs
+    path: /tmp
+    fstype: tmpfs
+    opts: "size=${1:1G},rw,nosuid,noatime,nodev,mode=1777"
+    dump: "0"
+    passno: "0"
+    state: present
+endsnippet
+
+snippet bind
+- name: Fstab mount $2 $1
+  ansible.posix.mount:
+    src: ${1:/path/to/source}
+    path: ${2:/path/to/dest}
+    fstype: ${3:none}
+    opts: ${4:defaults,bind}
+    dump: "0"
+    passno: "0"
+    state: ${5:mounted}
+endsnippet
+
+snippet lvol
+- name: LVM logical volume /dev/$2/$1
+  community.general.lvol:
+    lv: ${1:lv_name}
+    vg: ${2:vol1}
+    size: "${3:1G}"
+
+- name: $4 filesystem /dev/$2/$1
+  community.general.filesystem:
+    fstype: ${4:ext4}
+    dev: /dev/$2/$1
+    resizefs: true
+
+- name: Directory: $5
+  ansible.builtin.file:
+    state: directory
+    path: ${5:/path/to/mount/point}
+    owner: ${6:root}
+    group: ${7:root}
+
+- name: Mount: /dev/$2/$1 $5
+  ansible.posix.mount:
+    path: $5
+    src: /dev/$2/$1
+    fstype: $4
+    opts: ${9:defaults}
+    state: ${10:mounted}
+    dump: "0"
+    passno: "2"
+endsnippet
+
+snippet mount
+- name: Mount Point: $2
+  ansible.posix.mount:
+    src: "{{ item[0] }}"
+    path: "{{ item[1] }}"
+    fstype: ${3:ext4}
+    opts: ${4:defaults}
+    state: ${5:mounted}
+    dump: "0"
+    passno: "${6:2}"
+  loop:
+    - ["${1:/dev/xxx}", "${2:/mnt/path/to/mount/point}"]
+endsnippet
+
+# TODO: should I add version: ?
+snippet git
+- name: Git clone $1 $2
+  ansible.builtin.git:
+    repo: ${1:git_repo_uri}
+    dest: ${2:/path/to/dir}
+    remote: ${3:origin}
+    update: ${4:true}
+    depth: ${5:1}
+  become_user: ${5:root}
+endsnippet
+
+snippet dis
+# yamllint disable rule:truthy rule:line-length
+endsnippet

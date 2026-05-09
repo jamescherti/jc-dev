@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+priority 50
+
+snippet arch
+FROM base/archlinux:latest
+endsnippet
+
+snippet ubuntu
+FROM ubuntu:${1:latest}
+endsnippet
+
+snippet deb
+FROM debian:${1:latest}
+endsnippet
+
+snippet apt
+RUN export DEBIAN_FRONTEND='noninteractive' && \
+	apt-get update -qq && \
+	DEBIAN_FRONTEND="noninteractive" apt-get -q upgrade -y -o Dpkg::Options::="--force-confnew" --no-install-recommends && \
+	DEBIAN_FRONTEND="noninteractive" apt-get -q install ${1:vim} -y -o Dpkg::Options::="--force-confnew" --no-install-recommends && \
+	apt-get -q autoremove -y && \
+	apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
+endsnippet
+
+snippet pacman
+RUN pacman -Syuq --noconfirm
+endsnippet
+
+snippet user
+RUN groupadd -g ${2:10000} ${1:username} \
+	useradd -m -u $2 -g $1 -d ${2:/var/lib/$1} -s /bin/${3:false} $1 \
+	echo "$1:${4:password}" | chpasswd
+endsnippet
+
+snippet env
+ENV ${1:VARIABLE} ${2:VALUE}
+endsnippet
+
+snippet daemon
+EXPOSE ${1:22}
+CMD ["${2:/path/to/daemon}"${3:, "--option"}]
+endsnippet

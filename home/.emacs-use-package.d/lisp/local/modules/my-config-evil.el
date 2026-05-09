@@ -2466,7 +2466,9 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;;; ultisnips-mode
 
-(lightemacs-use-package ultisnips-mode)
+(lightemacs-use-package ultisnips-mode
+  :commands ultisnips-mode
+  :mode ("\\.snippets\\'" . lua-mode))
 
 ;;; Use-package pathaction
 

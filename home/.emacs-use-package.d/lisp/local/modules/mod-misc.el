@@ -4230,6 +4230,15 @@ environment for accurate linting."
                             (when (fboundp 'vterm)
                               (let* ((vterm-shell shell-pop-term-shell))
                                 (vterm))))))
+  ;; (shell-pop-shell-type '("eat" "*eat*"
+  ;;                         (lambda ()
+  ;;                           (when (fboundp 'eat)
+  ;;                             (eat shell-pop-term-shell)))))
+  ;; (shell-pop-shell-type '("ansi-term"
+  ;;                         "*ansi-term*"
+  ;;                         (lambda ()
+  ;;                           (ansi-term shell-pop-term-shell))))
+
   :init
   ;; (setq shell-pop-window-position "full")
   (setq shell-pop-window-position "bottom")
@@ -4238,11 +4247,6 @@ environment for accurate linting."
   (setq shell-pop-term-shell "tmux-session emacs")
   (setq shell-pop-window-size 80)
   (setq shell-pop-restore-window-configuration t)
-
-  ;; (setq shell-pop-shell-type '("ansi-term"
-  ;;                              "*ansi-term*"
-  ;;                              (lambda ()
-  ;;                                (ansi-term shell-pop-term-shell))))
 
   ;; (setq shell-pop-shell-type
   ;;       '("eshell"
