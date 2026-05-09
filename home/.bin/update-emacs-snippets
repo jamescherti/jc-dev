@@ -56,6 +56,10 @@ EMACS_MODES = {
         "yasnippet-names": ["lua-mode"],
         "convert-tabs-to": " " * 3,
     },
+    "php": {
+        "yasnippet-names": ["php-mode", "php-ts-mode"],
+        # "convert-tabs-to": " " * 2,
+    },
     "python": {
         "yasnippet-names": ["python-mode", "python-ts-mode"],
         "convert-tabs-to": " " * 4,

@@ -500,10 +500,6 @@ main() {
   sync-spell-dict
 
   echo
-  echo "[INFO] Update Emacs snippets"
-  update-emacs-snippets
-
-  echo
   echo "[INFO] Update Emacs templates"
   update-emacs-templates
 
@@ -526,6 +522,10 @@ main() {
   config-mimetypes
 
   config-fonts
+
+  echo
+  echo "[INFO] Update Emacs snippets"
+  update-emacs-snippets
 
   echo
   echo Success.

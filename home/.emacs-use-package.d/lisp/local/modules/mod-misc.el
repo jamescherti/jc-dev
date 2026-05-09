@@ -3591,6 +3591,12 @@ visibility when navigation commands are executed."
       (apply fn args)
     (lightemacs-default-settings--recenter-maybe)))
 
+(with-eval-after-load 'evil-commands
+  (advice-add 'evil-goto-last-change-reverse :around
+              #'lightemacs-default-settings--advice-recenter-maybe)
+  (advice-add 'evil-goto-last-change :around
+              #'lightemacs-default-settings--advice-recenter-maybe))
+
 (with-eval-after-load 'diff-hl
   (advice-add 'diff-hl-next-hunk :around
               #'lightemacs-default-settings--advice-recenter-maybe)
