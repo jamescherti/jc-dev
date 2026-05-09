@@ -921,23 +921,7 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
     (with-current-buffer (window-buffer)
       (derived-mode-p 'compilation-mode))))
 
-(defun current-window-only-setup ()
-  "Make Emacs only use the current window."
-  (unless noninteractive
-    ;; org-mode
-    (setq org-src-window-setup 'current-window) ;; Edit source in current window
-    (setq org-agenda-window-setup 'current-window)
 
-    ;; Open links in help windows (like links to files) in the current window
-    (setq help-window-keep-selected t)
-
-    ;; Compilation buffers. Also used by wgrep buffers / Embark export.
-    ;; (push '(always-current-window---display-buffer-from-compilation-p
-    ;;         display-buffer-same-window
-    ;;         (inhibit-same-window . nil))
-    ;;       display-buffer-alist)
-
-    (current-window-only--setup-display-buffer-alist)))
 
 ;; (defun lightemacs-user-post-init ()
 ;;   "User post init."
@@ -949,8 +933,7 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
 (defun lightemacs-user-pre-modules ()
   "Pre-modules."
   (my-add-packages-to-load-path)
-  (my-config-display-buffer-alist)
-  (current-window-only-setup))
+  (my-config-display-buffer-alist))
 
 (defun lightemacs-user-post-modules ()
   "Post-modules."

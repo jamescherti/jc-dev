@@ -328,6 +328,28 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq-default search-invisible nil)
 
+;;; current window only
+
+(defun current-window-only-setup ()
+  "Make Emacs only use the current window."
+  (unless noninteractive
+    ;; org-mode
+    (setq org-src-window-setup 'current-window) ;; Edit source in current window
+    (setq org-agenda-window-setup 'current-window)
+
+    ;; Open links in help windows (like links to files) in the current window
+    (setq help-window-keep-selected t)
+
+    ;; Compilation buffers. Also used by wgrep buffers / Embark export.
+    ;; (push '(always-current-window---display-buffer-from-compilation-p
+    ;;         display-buffer-same-window
+    ;;         (inhibit-same-window . nil))
+    ;;       display-buffer-alist)
+
+    (current-window-only--setup-display-buffer-alist)))
+
+(current-window-only-setup)
+
 ;;; Delete unused packages
 
 (defun my-delete-unused-packages ()
