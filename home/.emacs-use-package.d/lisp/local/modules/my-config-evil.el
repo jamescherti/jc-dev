@@ -582,8 +582,8 @@ This enhancement prevents the cursor from moving."
              ;;       (grep-edit-save-changes)))
              )))))
 
-  (evil-define-key 'normal 'global (kbd "<leader>ee") 'embark-dwim)
-  (evil-define-key 'normal 'global (kbd "<leader>ew") 'embark-act))
+  (evil-define-key 'normal 'global (kbd "<leader>ed") 'embark-dwim)
+  (evil-define-key 'normal 'global (kbd "<leader>ea") 'embark-act))
 
 (with-eval-after-load 'vterm
   (evil-define-key 'insert vterm-mode-map (kbd "M-H") 'my-vterm--send-Alt-Shift-H)
@@ -1835,20 +1835,21 @@ of the line or the buffer; just return nil."
 
 (defun evilcursor--outline-invisible-p (pos)
   "Return non-nil when POS is invisible."
-  (cond
-   ((derived-mode-p 'org-mode)
-    (if (fboundp 'org-fold-folded-p)
-        (org-fold-folded-p pos)
-      (when (fboundp 'org-invisible-p)
-        (org-invisible-p pos))))
+  (when (>= pos 1)
+    (cond
+     ((derived-mode-p 'org-mode)
+      (if (fboundp 'org-fold-folded-p)
+          (org-fold-folded-p pos)
+        (when (fboundp 'org-invisible-p)
+          (org-invisible-p pos))))
 
-   ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
-             (derived-mode-p 'outline-mode))
-         (fboundp 'outline-invisible-p))
-    (outline-invisible-p pos))
+     ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
+               (derived-mode-p 'outline-mode))
+           (fboundp 'outline-invisible-p))
+      (outline-invisible-p pos))
 
-   (t
-    (invisible-p pos))))
+     (t
+      (invisible-p pos)))))
 
 ;; TODO should this be part of Emacs ? PATCH
 ;; Doesn't work when an org mode line contain: *line content*
@@ -1861,7 +1862,7 @@ of the line or the buffer; just return nil."
   (when (and
          ;; Landed on an invisible line
          (evilcursor--outline-invisible-p
-          (if (eolp)
+          (if (and (eolp) (not (bobp)))
               ;; Without this, invisible-p is nil when eolp
               (- (point) 1)
             (point))))
@@ -2424,7 +2425,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
 (setq quick-sdcv-fold-on-search t)
 
 (with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "<leader>ed") 'quick-sdcv-search-input))
+  (define-key evil-normal-state-map (kbd "<leader>sd") 'quick-sdcv-search-input))
 
 ;; (setq quick-sdcv-dictionary-prefix-symbol "►")
 
@@ -2490,6 +2491,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
   (my-save-all-buffers))
 
 (with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "<leader>ee") #'pathaction-main)
   (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
   (define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main))
 

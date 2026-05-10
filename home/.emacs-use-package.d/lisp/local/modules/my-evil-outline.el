@@ -46,23 +46,29 @@
 (defun my-patched-outline-move-subtree-down (&optional arg)
   "Move the current subtree down past ARG headlines of the same level."
   (interactive "p")
-  ;; TODO: PATCH3: Restore column
   (when (and (fboundp 'outline-back-to-heading)
              (fboundp 'outline-end-of-subtree)
              (fboundp 'outline-end-of-heading)
              (fboundp 'outline-hide-subtree))
+    ;; TODO: PATCH3: Restore column
     (let ((column (current-column)))
       (unwind-protect
           (progn
             (outline-back-to-heading)
             (let* ((movfunc (if (> arg 0) 'outline-get-next-sibling
                               'outline-get-last-sibling))
-                   ;; Find the end of the subtree to be moved as well as the point
-                   ;; to move it to, adding a newline if necessary, to ensure
-                   ;; these points are at bol on the line below the subtree.
+                   ;; Find the end of the subtree to be moved as well as the
+                   ;; point to move it to, adding a newline if necessary, to
+                   ;; ensure these points are at bol on the line below the
+                   ;; subtree.
                    (end-point-func (lambda ()
                                      (let ((outline-blank-line nil))
                                        (outline-end-of-subtree))
+                                     ;; PATCH 4: Include all empty spaces
+                                     (skip-chars-forward " \t\n\r")
+                                     (unless (eobp)
+                                       (beginning-of-line))
+
                                      (if (eq (char-after) ?\n) (forward-char 1)
                                        (if (and (eobp) (not (bolp))) (insert "\n")))
                                      (point)))

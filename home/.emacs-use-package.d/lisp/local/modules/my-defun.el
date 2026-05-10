@@ -156,24 +156,25 @@ If FILE-NAME is provided and non-nil, use it as the filename. Otherwise, use the
 buffer's associated file name.
 
 Returns: boolean: t if code checking is allowed, nil otherwise."
-  (if (bound-and-true-p config-buffer-enable-syntax-checkers)
-      t
-    (let* ((file-name (if file-name
-                          file-name
-                        (buffer-file-name (buffer-base-buffer))))
-           (base-name (when file-name
-                        (file-name-nondirectory file-name))))
-      (when (and file-name
-                 base-name
-                 (not (string-match-p "cookiecutter" file-name))
-                 (not (string-match-p "/forks/" file-name))
-                 (not (string-prefix-p "tmp-" base-name))
-                 (my-path-inside-p "~/src" file-name)
-                 (not (my-path-inside-p "~/src/other" file-name))
-                 (not (string-suffix-p "/PKGBUILD" file-name))
-                 (not (string-suffix-p ".ebuild" file-name)))
-        (setq-local config-buffer-enable-syntax-checkers t)
-        t))))
+  (if (not (boundp 'config-buffer-enable-syntax-checkers))
+      (let* ((file-name (if file-name
+                            file-name
+                          (buffer-file-name (buffer-base-buffer))))
+             (base-name (when file-name
+                          (file-name-nondirectory file-name))))
+        (when (and file-name
+                   base-name
+                   ;; (not (string-match-p "cookiecutter" file-name))
+                   (not (string-suffix-p ".ebuild" file-name))
+                   (not (string-suffix-p "/PKGBUILD" file-name))
+                   (my-path-inside-p "~/src" file-name)
+                   (not (my-path-inside-p "~/src/forks" file-name))
+                   (not (my-path-inside-p "~/src/other" file-name))
+                   (not (my-path-inside-p my-tmp-files-dir file-name)))
+          (setq-local config-buffer-enable-syntax-checkers t)
+          t))
+    (when (boundp 'config-buffer-enable-syntax-checkers)
+      config-buffer-enable-syntax-checkers)))
 
 (defun my-disable-fringe-truncation-arrow ()
   "Disable the truncation arrow."

@@ -2199,8 +2199,7 @@ Returns:
   (setf (alist-get 'python-mode apheleia-mode-alist) '())
   (setf (alist-get 'python-ts-mode apheleia-mode-alist) '())
   (setf (alist-get 'python-mode apheleia-mode-alist) '(isort autopep8))
-  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8))
-  )
+  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8)))
 
 ;;; Elisp
 
@@ -3691,8 +3690,52 @@ This function is intended for use as :around advice."
   :hook
   (lightemacs-after-init . lazy-loader-mode)
   :custom
-  (lazy-loader-verbose nil)
-  (lazy-loader-modules '(org term))
+  (lazy-loader-verbose t)
+  (lazy-loader-modules '(vterm
+                         shell-pop
+                         vertico
+                         marginalia
+                         orderless
+                         consult
+                         elisp-mode
+                         python
+                         markdown-mode
+                         cl-lib
+                         subr-x
+                         dash
+                         s
+                         f
+                         eglot
+                         outline
+                         outline-indent
+                         kirigami
+                         hideshow
+                         ;; org
+                         ;; org-appear
+                         ;; org-ibullets
+                         ;; org-indent
+                         ;; org-element
+                         ;; org-persist
+                         ;; org-id
+                         ;; org-refile
+                         ;; org-element-ast
+                         ;; org-macro
+                         ;; org-pcomplete
+                         ;; org-list
+                         ;; org-footnote
+                         ;; org-faces
+                         ;; org-entities
+                         ;; org-src
+                         ;; org-cycle
+                         ;; org-table
+                         ;; org-fold
+                         ;; org-fold-core
+                         ;; org-keys
+                         ;; org-loaddefs
+                         ;; org-version
+                         ;; org-compat
+                         ;; org-macs
+                         ))
   (lazy-loader-files (delq nil
                            (list (when (bound-and-true-p file-path-todo)
                                    file-path-todo))))
