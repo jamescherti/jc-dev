@@ -69,8 +69,8 @@
                                      (unless (eobp)
                                        (beginning-of-line))
 
-                                     (if (eq (char-after) ?\n) (forward-char 1)
-                                       (if (and (eobp) (not (bolp))) (insert "\n")))
+                                     (when (and (eobp) (not (bolp)))
+                                       (insert "\n"))
                                      (point)))
                    (beg (point))
                    (folded (save-match-data
