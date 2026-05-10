@@ -4245,8 +4245,9 @@ environment for accurate linting."
   (setq shell-pop-full-span nil)
   (setq shell-pop-autocd-to-working-dir nil)
   (setq shell-pop-term-shell "tmux-session emacs")
+  ;; (setq shell-pop-term-shell "/usr/bin/env bash")
   (setq shell-pop-window-size 80)
-  (setq shell-pop-restore-window-configuration t)
+  (setq shell-pop-restore-window-configuration nil)
 
   ;; (setq shell-pop-shell-type
   ;;       '("eshell"
