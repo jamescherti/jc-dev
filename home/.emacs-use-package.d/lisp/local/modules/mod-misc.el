@@ -3835,6 +3835,8 @@ This function is intended for use as :around advice."
                  (when file-name-downcase
                    (or (string-suffix-p "/readme.md"
                                         file-name-downcase)
+                       (string-suffix-p "/readme.org"
+                                        file-name-downcase)
                        (string-suffix-p "/changelog.md"
                                         file-name-downcase))))
         ;; (run-with-idle-timer 1 nil #'flyspell-mode 1)
