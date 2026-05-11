@@ -1869,16 +1869,14 @@ of the line or the buffer; just return nil."
     (vertical-motion 0)
     (goto-char (line-end-position))))
 
-(evil-define-motion evilcursor-next-visual-line (count)
+(defun evilcursor-next-visual-line (count)
   "Move the cursor COUNT screen lines down."
-  :type exclusive
   (let ((line-move-visual t))
     (evil-line-move (or count 1)))
   (evilcursor--after-vertical-movement))
 
-(evil-define-motion evilcursor-previous-visual-line (count)
+(defun evilcursor-previous-visual-line (count)
   "Move the cursor COUNT screen lines up."
-  :type exclusive
   (let ((line-move-visual t))
     (evil-line-move (- (or count 1))))
   (evilcursor--after-vertical-movement))
