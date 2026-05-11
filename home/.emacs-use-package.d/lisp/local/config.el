@@ -45,7 +45,7 @@
 ;; (when (eq lightemacs-package-manager 'builtin-package)
 ;;   (setq package-quickstart t))
 
-(setq native-comp-jit-compilation nil)
+(setq native-comp-jit-compilation t)
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."
