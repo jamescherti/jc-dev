@@ -142,7 +142,7 @@ else
   # Action: Keep for personal builds; remove for distributing binaries.
   #
   # -flto=auto              # Full link-time optimization; reduces binary size and can improve runtime performance
-  export CFLAGS="$CFLAGS -flto=auto"
+  export CFLAGS="$CFLAGS -flto=auto -fprofile-generate"
   export LDFLAGS="$LDFLAGS -flto=auto"
 fi
 
