@@ -4266,15 +4266,15 @@ environment for accurate linting."
   :vc (:url "https://github.com/jamescherti/shell-pop-el"
             :rev :newest)
   :commands shell-pop
-  :bind (("C-c t" . shell-pop))
-  :custom
+  ;; :bind (("C-c t" . shell-pop))
+  :config
   ;; The key sequence used to toggle the shell window.
-  (shell-pop-universal-key "C-c t")
-  (shell-pop-shell-type '("vterm" "*vterm*"
-                          (lambda ()
-                            (when (fboundp 'vterm)
-                              (let* ((vterm-shell shell-pop-term-shell))
-                                (vterm))))))
+  (setopt shell-pop-universal-key "C-c t")
+  (setopt shell-pop-shell-type '("vterm" "*vterm*"
+                                 (lambda ()
+                                   (when (fboundp 'vterm)
+                                     (let* ((vterm-shell shell-pop-term-shell))
+                                       (vterm))))))
   ;; (shell-pop-shell-type '("eat" "*eat*"
   ;;                         (lambda ()
   ;;                           (when (fboundp 'eat)
