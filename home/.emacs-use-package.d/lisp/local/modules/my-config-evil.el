@@ -2451,12 +2451,10 @@ If COUNT is given, move COUNT - 1 lines downward first."
          :map minibuffer-local-completion-map
          ("C-x C-d" . quick-fasd-find-path))
 
-  :custom
-  (quick-fasd-auto-add-on-buffer-change t)
-  (quick-fasd-enable-initial-prompt nil)
-  (quick-fasd-command-args '("-d"))
-
   :config
+  (setq quick-fasd-auto-add-on-buffer-change t)
+  (setq quick-fasd-enable-initial-prompt nil)
+  (setq quick-fasd-command-args '("-d"))
   (quick-fasd-mode))
 
 (with-eval-after-load 'evil
