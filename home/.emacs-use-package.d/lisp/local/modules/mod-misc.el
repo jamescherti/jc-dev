@@ -4266,7 +4266,7 @@ environment for accurate linting."
   :vc (:url "https://github.com/jamescherti/shell-pop-el"
             :rev :newest)
   :commands shell-pop
-  ;; :bind (("C-c t" . shell-pop))
+  :bind (("C-c t" . shell-pop))
   :config
   ;; The key sequence used to toggle the shell window.
   (setopt shell-pop-universal-key "C-c t")
