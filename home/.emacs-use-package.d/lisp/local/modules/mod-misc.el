@@ -4980,7 +4980,7 @@ The result is displayed in a pretty-printed temporary buffer."
   (require 'mod-project)
   (require 'mod-buffer-terminator)
   (require 'buffer-guardian)
-  (require 'mod-eglot)
+  ;; (require 'mod-eglot)
   (require 'smartindent)
   ;; (require 'battery-angel)
   (require 'point-manager))
