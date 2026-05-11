@@ -37,4 +37,5 @@ fi
 EMACS_D="$HOME/.emacs-master.d/"
 export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
 
-LD_PRELOAD=/usr/lib/libjemalloc.so exec run-emacs --init-directory ~/.emacs-master.d/ "$@"
+# LD_PRELOAD=/usr/lib/libjemalloc.so exec
+exec run-emacs --init-directory ~/.emacs-master.d/ "$@"

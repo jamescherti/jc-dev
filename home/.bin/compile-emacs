@@ -302,7 +302,7 @@ CONFIGURE_ARGS=(
   # forces minor background C utilities to use your operating system's regex
   # library, which might be slower or contain bugs that the GNU developers
   # already patched in the included version.
-  --with-included-regex
+  --without-included-regex
 
   # The make process will be significantly longer (often 30 to 60 minutes
   # depending on your CPU). It systematically iterates through every single .el
@@ -656,7 +656,7 @@ main() {
 
   ./configure "${CONFIGURE_ARGS[@]}"
 
-  make -j "$NUM_PROC"
+  make -j 64 -l "$NUM_PROC"
 
   test -f "$EMACS_INSTALL_PREFIX/bin/emacs" && rm -fr "$EMACS_INSTALL_PREFIX"
 
