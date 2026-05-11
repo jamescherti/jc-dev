@@ -146,6 +146,56 @@ else
   export LDFLAGS="$LDFLAGS -flto=auto"
 fi
 
+# The -fno-semantic-interposition flag is one of the few advanced compiler
+# options that can improve performance for large dynamically linked
+# applications without changing program behavior.
+#
+# On ELF systems, externally visible symbols are normally interposable at
+# runtime. This means a function defined inside a shared object or PIE binary
+# may be replaced by another definition provided by a different shared library.
+#
+# Because of this, GCC must conservatively assume that externally visible
+# functions can change at runtime, which inhibits optimizations such as:
+# - Function inlining
+# - Constant propagation
+# - Interprocedural analysis
+#
+# -fno-semantic-interposition tells GCC to assume that functions defined within
+# the current binary or shared object will not be overridden externally. This
+# allows the compiler to optimize internal calls more aggressively and avoid
+# some indirection overhead associated with ELF symbol interposition.
+#
+# Emacs performs a large number of internal C function calls within the Lisp
+# interpreter, redisplay engine, and buffer manipulation code. Allowing GCC to
+# optimize these internal call paths can slightly reduce CPU overhead.
+#
+# This flag became widely known after several Linux distributions adopted it
+# for CPython builds, where it produced measurable interpreter performance
+# improvements with minimal risk.
+#
+# (THIS DOESN'T MAKE SENSE IN native-comp-compiler-options. This attempts to
+# apply C-level binary linking semantics to Emacs Lisp, which operates under a
+# completely different execution model.)
+export CFLAGS="$CFLAGS -fno-semantic-interposition"
+
+# By default, external function calls in ELF binaries often go through the
+# Procedure Linkage Table (PLT). The PLT adds a small level of indirection used
+# for dynamic symbol resolution.
+#
+# -fno-plt instructs GCC to avoid PLT trampolines for external calls when
+# possible and instead load function addresses directly from the Global Offset
+# Table (GOT).
+#
+# This can slightly reduce overhead for external function calls in dynamically
+# linked applications. However, the practical performance impact on Emacs is
+# usually small because most execution time is spent inside the Emacs core and
+# Lisp interpreter rather than external shared libraries.
+#
+# (THIS DOESN'T MAKE SENSE IN native-comp-compiler-options. This attempts to
+# apply C-level binary linking semantics to Emacs Lisp, which operates under a
+# completely different execution model.)
+export CFLAGS="$CFLAGS -fno-plt"
+
 # The `--with-mps=yes` configure flag instructs Emacs to use the **Memory Pool
 # System (MPS)** for memory management instead of its default conservative
 # garbage collector. MPS is a modular, high-performance garbage collection
