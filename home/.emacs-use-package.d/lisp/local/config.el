@@ -724,7 +724,7 @@
 
                            ;; TODO fix eldoc help more than one line. I only
                            ;; want 1 line
-                           mod-lsp-mode
+                           ;; mod-lsp-mode
 
                            ;; mod-kirigami-alternative
 
