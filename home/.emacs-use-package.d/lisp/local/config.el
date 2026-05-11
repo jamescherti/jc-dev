@@ -391,31 +391,7 @@
                                      ;;
                                      ;; This is the default behavior of GCC
                                      ;; unless you explicitly p
-                                     "-fno-finite-math-only"
-
-                                     ;; Can improve performance in loops, but
-                                     ;; sometimes increases binary size.
-                                     ;;
-                                     ;; Usually unnecessary for Emacs Lisp;
-                                     ;; increases binary size for negligible
-                                     ;; benefit. Leave disabled.
-                                     ;; "-funroll-loops"
-
-                                     ;; Allows the compiler to assume standard C
-                                     ;; aliasing rules. Emacs native code
-                                     ;; adheres to these rules, enabling better
-                                     ;; load and store optimizations.
-                                     ;;
-                                     ;; Standard C aliasing rules are respected
-                                     ;; by Emacs; allows minor optimizations.
-                                     ;;
-                                     ;; This is is automatically enabled by
-                                     ;; "-O2". You can safely remove it.
-                                     ;; "-fstrict-aliasing"
-
-                                     ;; Not relevant for Emacs Lisp, more for C++ code.
-                                     ;; -fno-exceptions / -fno-rtti
-                                     ))
+                                     "-fno-finite-math-only"))
 (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
 
 ;; (message "LOADING config.el")
