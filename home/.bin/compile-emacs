@@ -74,14 +74,13 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 # -mtune=native: Tunes performance (instruction scheduling) for the host CPU
 # model.
 #
-# -fomit-frame-pointer: Frees up a general-purpose register and reduces function
-#                       prologue/epilogue overhead. Makes backtraces and
-#                       profiling more difficult—acceptable for release builds.
-#
 # -flto: Enables Link Time Optimization. Allows the compiler to perform
 #        whole-program optimizations, including cross-module inlining, dead code
 #        elimination, and constant propagation.
-export CFLAGS="-O2 -pipe -march=native -mtune=native -fomit-frame-pointer"
+#
+# The -fno-omit-frame-pointer The Emacs developers recommend using this to
+# disable omit-frame-pointer, because it can cause hard to debug bugs.
+export CFLAGS="-O3 -fno-omit-frame-pointer -pipe -march=native -mtune=native"
 
 # if [[ $ID = arch ]]; then
 #   TARGET_BRANCH="emacs-30"
@@ -115,7 +114,7 @@ export CFLAGS="-O2 -pipe -march=native -mtune=native -fomit-frame-pointer"
 # -Wl,-z,pack-relative-relocs – Reduces the size of relocations for
 # position-independent executables. Slightly reduces memory usage and can
 # improve startup speed.
-export LDFLAGS="-Wl,-O2 -Wl,--sort-common \
+export LDFLAGS="-Wl,-O3 -Wl,--sort-common \
   -Wl,--as-needed -Wl,-z,pack-relative-relocs"
 
 if [[ $ID == "debian" ]] && [[ $VERSION_ID = "13" ]]; then
@@ -141,12 +140,6 @@ else
   # Optimizes for your specific CPU.
   # Drawback: Reduces portability; binary may not run on older CPUs.
   # Action: Keep for personal builds; remove for distributing binaries.
-  #
-  # -fomit-frame-pointer    # Slightly faster code; makes debugging harder
-  #                         -fomit-frame-pointer
-  #                         Removes the frame pointer to free a register, giving slightly faster code.
-  #                         Drawback: Makes debugging crashes and profiling harder.
-  #                         Action: Keep it for release builds; remove it if you plan to debug or use profiling tools.
   #
   # -flto=auto              # Full link-time optimization; reduces binary size and can improve runtime performance
   export CFLAGS="$CFLAGS -flto=auto"

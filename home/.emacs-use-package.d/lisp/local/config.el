@@ -329,6 +329,7 @@
 ;; the native compilation driver process (a small program written in C and
 ;; Lisp). This driver prepares the command line for the compiler, applies
 ;; system-dependent settings, and runs the compilation in an isolated process.
+(setq native-comp-speed 2)
 (setq native-comp-compiler-options '(;; Enables aggressive optimization passes
                                      ;; in GCC. Native compilation of Emacs Lisp
                                      ;; benefits from improved inlining and loop
@@ -339,7 +340,7 @@
                                      ;; stable; avoid -O3 or -Ofast since they
                                      ;; can break numeric primitives in Emacs
                                      ;; Lisp code.
-                                     "-O2"
+                                     "-O3"
 
                                      ;; Disables generation of debug symbols.
                                      ;; Reduces compilation time and disk usage
@@ -375,7 +376,7 @@
                                      ;; architectures. Frees an additional
                                      ;; register and slightly reduces call
                                      ;; overhead on x86_64 systems.
-                                     "-fomit-frame-pointer"
+                                     "-fno-omit-frame-pointer"
 
                                      ;; Prevents assumptions that floating point
                                      ;; operations never produce NaN or
@@ -411,20 +412,6 @@
                                      ;; This is is automatically enabled by
                                      ;; "-O2". You can safely remove it.
                                      ;; "-fstrict-aliasing"
-
-                                     ;; Generates code optimized for the local
-                                     ;; CPU architecture. Improves instruction
-                                     ;; selection and vectorization when
-                                     ;; available.
-                                     ;; NOTE: Does not work.
-                                     ;; "-march=native"
-
-                                     ;; Tunes instruction scheduling for the
-                                     ;; local CPU. Improves runtime behavior
-                                     ;; without affecting portability of
-                                     ;; bytecode.
-                                     ;; NOTE: Does not work.
-                                     ;;"-mtune=native"
 
                                      ;; Not relevant for Emacs Lisp, more for C++ code.
                                      ;; -fno-exceptions / -fno-rtti

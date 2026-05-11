@@ -26,15 +26,38 @@
 # SOFTWARE.
 #
 
-OSFAMILY=$(osid)
-export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
-# export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-fix-outline-reveal2/bin/emacs"
-if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-  echo "Error" >&2
+set -u
+set -e
+
+cleanup-emacs-files() {
+  while IFS= read -r dir; do
+    if [[ -d "$dir" ]]; then
+      if [[ $1 != dry-run ]]; then
+        echo "[CLEANUP] Delete .elc and .eln files: $dir"
+      fi
+
+      local opts=()
+      if [[ $1 != dry-run ]]; then
+        opts=("-delete")
+      fi
+      find "$dir" \( -iname '*.elc' -o -iname '*.eln' \) "${opts[@]}"
+    fi
+  done < <(
+    if [[ -d "$HOME/src" ]]; then
+      echo "$HOME/src"
+    fi
+
+    find ~ -maxdepth 1 -name '.*emacs*.d'
+  )
+}
+
+cleanup-emacs-files dry-run
+
+echo
+read -r -p "Delete all compiled .elc and .eln files? [y,n] " ANSWER
+if [[ "$ANSWER" != "y" ]]; then
   exit 1
 fi
+echo
 
-EMACS_D="$HOME/.emacs-master.d/"
-export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
-
-LD_PRELOAD=/usr/lib/libjemalloc.so exec run-emacs --init-directory ~/.emacs-master.d/ "$@"
+cleanup-emacs-files apply

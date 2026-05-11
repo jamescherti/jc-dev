@@ -110,7 +110,7 @@ main() {
     exit 0
   else
     echo "[RUN] $(which emacs) $*"
-    exec emacs "${EMACS_ARGS_DICT[@]}" "$@"
+    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
     # exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
   fi
 }
