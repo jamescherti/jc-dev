@@ -280,7 +280,7 @@ CONFIGURE_ARGS=(
   --disable-gc-mark-trace
 
   # MPS is still experimental and not what "maximum stable performance" means.
-  # --with-mps
+  --with-mps
 
   # Remove support for Access Control Lists and Extended Attributes for slightly
   # faster/simpler file I/O.
@@ -416,7 +416,7 @@ CONFIGURE_ARGS=(
   #
   # --with-wide-int: This is the default on 64-bit systems. Manually specifying
   # it is harmless but unnecessary.
-  # --with-wide-int
+  --with-wide-int
 
   # Not relevant in Linux
   # --without-native-image-api
@@ -667,13 +667,17 @@ main() {
 
   test -f "$EMACS_INSTALL_PREFIX/bin/emacs" && rm -fr "$EMACS_INSTALL_PREFIX"
 
-  # make install-strip: This is a variant of make install, but with the added step
-  # of "stripping" the binaries. Stripping refers to removing debugging symbols
-  # and other information from the executable files, reducing their size. This is
-  # usually done for production releases to make the binaries smaller and more
-  # efficient, since debugging symbols are typically not needed in a production
-  # environment.
+  # make install-strip: This is a variant of make install, but with the added
+  # step of "stripping" the binaries. Stripping refers to removing debugging
+  # symbols and other information from the executable files, reducing their
+  # size. This is usually done for production releases to make the binaries
+  # smaller and more efficient, since debugging symbols are typically not needed
+  # in a production environment.
   make install-strip
+
+  git clean -fxd
+  git reset --hard HEAD
+  git gc --prune=now
 }
 
 main "$@"
