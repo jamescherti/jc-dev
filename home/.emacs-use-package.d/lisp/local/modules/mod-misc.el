@@ -214,6 +214,22 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (advice-add 'package-vc-upgrade :around #'my-inhibit-vc-async-window-around-advice)
   (advice-add 'package-vc-upgrade-all :around #'my-inhibit-vc-async-window-around-advice))
 
+;;; compile-angel timer (test)
+
+(defun my-disable-compile-angel-after-delay ()
+  "Disable `compile-angel-on-load-mode' 60 seconds after Emacs startup."
+  (run-at-time
+   60 nil
+   (lambda ()
+     (when (bound-and-true-p compile-angel-on-load-mode)
+       (when (fboundp 'compile-angel-on-load-mode)
+         (compile-angel-on-load-mode -1)
+         (let ((inhibit-message t))
+           (message "compile-angel-on-load-mode disabled after 60 seconds")))))))
+
+;; Activate the timer at startup
+(add-hook 'emacs-startup-hook #'my-disable-compile-angel-after-delay)
+
 ;;; testing
 
 ;; Auto-scroll to bottom only when you type, not when output arrives
