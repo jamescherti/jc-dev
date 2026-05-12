@@ -657,6 +657,7 @@ main() {
 
   export CXXFLAGS="$CFLAGS"
 
+  set -x
   git clean -fxd
   git reset --hard HEAD
   ./autogen.sh
@@ -678,6 +679,7 @@ main() {
   git clean -fxd
   git reset --hard HEAD
   git gc --prune=now
+  set +x
 }
 
 main "$@"
