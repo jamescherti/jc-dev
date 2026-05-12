@@ -24,6 +24,243 @@
 
 ;;; Code:
 
+;;; Native compilation
+
+;; `native-comp-compiler-options' specifies flags passed directly to the C
+;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
+;; produced by the native compilation process. These flags affect code
+;; generation, optimization, and debugging information.
+;;
+;; `native-comp-driver-options' specifies additional flags passed to the native
+;; compilation driver process, which may invoke the compiler and linker with
+;; certain parameters. In most cases, these flags mirror the compiler options,
+;; but they can be configured separately when the driver needs different
+;; arguments (for example, link-time options or toolchain-specific parameters).
+;;
+;; In native-compilation mode, when a .el or .elc file is compiled to native
+;; code (.eln): Emacs itself does not call gcc directly. Instead, Emacs invokes
+;; the native compilation driver process (a small program written in C and
+;; Lisp). This driver prepares the command line for the compiler, applies
+;; system-dependent settings, and runs the compilation in an isolated process.
+(setq native-comp-speed 2)
+(setq native-comp-compiler-options '(;; Enables aggressive optimization passes
+                                     ;; in GCC. Native compilation of Emacs Lisp
+                                     ;; benefits from improved inlining and loop
+                                     ;; transformations without affecting
+                                     ;; correctness.
+                                     ;;
+                                     ;; Aggressive enough for performance but
+                                     ;; stable; avoid -O3 or -Ofast since they
+                                     ;; can break numeric primitives in Emacs
+                                     ;; Lisp code.
+                                     "-O3"
+
+                                     ;; Using -g0 disables the generation of
+                                     ;; debug symbols for .eln files, which
+                                     ;; reduces their size on disk and speeds up
+                                     ;; the compilation process itself.
+                                     "-g0"
+
+                                     ;; -fno-omit-frame-pointer The Emacs
+                                     ;; developers recommend using this flag to
+                                     ;; disable omit-frame-pointer. Although
+                                     ;; enabling omit-frame-pointer frees up a
+                                     ;; general-purpose CPU register, it does
+                                     ;; not yield significant performance gains
+                                     ;; on modern architectures and can lead to
+                                     ;; bugs that are difficult to debug.
+                                     ;; According to Eli Zaretskii, an Emacs
+                                     ;; developer: “See bug#76180. This is in
+                                     ;; the context of the igc branch, where
+                                     ;; omit-frame-pointer is particularly
+                                     ;; troublesome, though it also causes
+                                     ;; problems in other situations. For
+                                     ;; further details, see etc/DEBUG in the
+                                     ;; Emacs source tree.”
+                                     ;; "-fno-omit-frame-pointer"
+                                     ;;
+                                     ;; These are .eln files, not Emacs C
+                                     ;; source.
+                                     "-fomit-frame-pointer"
+
+                                     ;; The -fno-finite-math-only flag prevents
+                                     ;; the compiler from assuming that
+                                     ;; floating-point operations never produce
+                                     ;; NaN or infinity values. This flag is
+                                     ;; mostly defensive because GCC does not
+                                     ;; enable -ffinite-math-only at -O2 or -O3
+                                     ;; by default, but it can help avoid unsafe
+                                     ;; assumptions if additional aggressive
+                                     ;; optimization flags are introduced later.
+                                     "-fno-finite-math-only"
+
+                                     ;; By default, when GCC compiles a shared
+                                     ;; library, it adheres strictly to the ELF
+                                     ;; standard, which assumes that externally
+                                     ;; visible symbols might be interposed at
+                                     ;; runtime (e.g., via LD_PRELOAD). This
+                                     ;; assumption acts as a strict barrier that
+                                     ;; inhibits optimizations such as function
+                                     ;; inlining across boundaries, constant
+                                     ;; propagation, and devirtualization.
+                                     ;;
+                                     ;; -fno-semantic-interposition tells GCC to
+                                     ;; assume that functions defined within the
+                                     ;; shared object will not be overridden
+                                     ;; externally, removing this barrier.
+                                     ;;
+                                     ;; Benefit: Small. While .eln files *are*
+                                     ;; compiled as shared objects (which is
+                                     ;; where this flag technically applies),
+                                     ;; interposition is not a major performance
+                                     ;; bottleneck in this context. Emacs Lisp
+                                     ;; compiled output is not call-heavy in the
+                                     ;; same way native C libraries are;
+                                     ;; execution time is dominated by dynamic
+                                     ;; dispatch, garbage collection checks, and
+                                     ;; calls back to C primitives. Breaking the
+                                     ;; interposition optimization barrier here
+                                     ;; is technically correct but only
+                                     ;; beneficial in very narrow cases.
+                                     ;;
+                                     ;; Drawback: None. Elisp functions compiled
+                                     ;; into a .eln file are not going to be
+                                     ;; interposed at the ELF/C linker level.
+                                     ;;
+                                     ;; -fno-semantic-interposition: This flag
+                                     ;; tells the compiler it can safely inline
+                                     ;; functions within a shared library
+                                     ;; because those symbols will not be
+                                     ;; overridden (interposed) by the host
+                                     ;; application. While theoretically
+                                     ;; beneficial for .eln shared objects,
+                                     ;; libgccjit handles internal Elisp symbol
+                                     ;; resolution strictly. The measurable
+                                     ;; performance gain here is virtually zero.
+                                     "-fno-semantic-interposition"
+
+                                     ;; -fgraphite-identity & -floop-nest-optimize
+                                     ;;
+                                     ;; - Benefit: Zero. Elisp loops (like while
+                                     ;;   or dolist) translate into C code that
+                                     ;;   is heavily interrupted by dynamic
+                                     ;;   type-checking, garbage collection
+                                     ;;   probes, and maybe_quit signals to keep
+                                     ;;   the UI responsive. Graphite is
+                                     ;;   designed for pure, predictable
+                                     ;;   mathematical loops (like matrix
+                                     ;;   calculations). It will find nothing to
+                                     ;;   optimize in Elisp loops.
+                                     ;;
+                                     ;; - Drawback: Pure wasted CPU cycles
+                                     ;;   during package compilation. libgccjit
+                                     ;;   will spend time attempting to build
+                                     ;;   polyhedral models of your Elisp loops,
+                                     ;;   fail to find optimization
+                                     ;;   opportunities, and abandon the effort.
+                                     ;; TODO
+                                     ;; "-fgraphite-identity"
+                                     ;; "-floop-nest-optimize"
+
+                                     ;; -fdevirtualize-at-ltrans: This flag is
+                                     ;; used during Link Time Optimization (LTO)
+                                     ;; to devirtualize C++ virtual function
+                                     ;; calls. Because the core of Emacs is
+                                     ;; written entirely in C and Emacs Lisp,
+                                     ;; there are no C++ classes or virtual
+                                     ;; methods to optimize. This flag doesn't
+                                     ;; do anything for your build.
+                                     ;; "-fdevirtualize-at-ltrans"
+
+                                     ;; Benefits:
+                                     ;; - Practically zero. Emacs native
+                                     ;; compilation uses libgccjit to compile
+                                     ;; Emacs Lisp into independent shared
+                                     ;; libraries (.eln files) that are loaded
+                                     ;; dynamically at runtime.
+                                     ;; - Because there is no large-scale
+                                     ;; linking of multiple object files into a
+                                     ;; single binary, whole-program
+                                     ;; optimization techniques do not apply
+                                     ;; here.
+                                     ;; Tradeoffs:
+                                     ;; - Introduces a high probability of build
+                                     ;; failures. The libgccjit environment is
+                                     ;; delicate and sensitive to injected
+                                     ;; compiler and linker flags.
+                                     ;; - Forcing linker plugins into the async
+                                     ;; native compilation threads can cause the
+                                     ;; generation of .eln files to crash or
+                                     ;; hang indefinitely.
+                                     ;; - It wastes system resources by adding
+                                     ;; unnecessary steps to the compilation of
+                                     ;; single-file shared objects.
+                                     ;; "-fuse-linker-plugin"
+                                     ))
+(setq native-comp-driver-options '())
+
+;; I did not add the following to `native-comp-driver-options':
+;;
+;; -Wl,--sort-common:
+;; ------------------
+;; This flag instructs the linker to sort "common" symbols (uninitialized global
+;; variables in C) by their alignment to reduce memory padding. The issue: The
+;; GCC intermediate representation (IR) generated by Emacs for Lisp code does
+;; not produce the kind of raw, uninitialized C global variables that benefit
+;; from this sorting. Passing this flag forces the linker to perform a sorting
+;; pass on empty or near-empty symbol tables for every single .el file you
+;; compile. It is wasted CPU time.
+;;
+;; -Wl,-z,now and -Wl,-z,relro:
+;; ----------------------------
+;; These two flags are used together to enable "Full Relocation Read-Only." This
+;; is a security hardening technique. It forces the dynamic linker to resolve
+;; all dynamically linked functions at startup (now) and then marks the Global
+;; Offset Table (GOT) as read-only (relro). This prevents attackers from
+;; exploiting buffer overflows to overwrite function pointers in the GOT. The
+;; issue: Emacs .eln files are not standalone executables; they are dynamically
+;; loaded plugins that serve as caches for compiled Lisp code.
+;;
+;; Security mismatch: You do not have buffer overflows in safe Emacs Lisp code
+;; that would allow an attacker to execute a GOT overwrite exploit against an
+;; .eln file. Hardening .eln files against memory corruption exploits is
+;; completely unnecessary.
+;;
+;; Performance penalty: Forcing -z,now means that when Emacs loads an .eln file
+;; via dlopen, the OS dynamic linker must instantly resolve every external
+;; symbol in that file before Emacs can resume execution. While Emacs resolves
+;; most of these anyway to wire up the Lisp environment, forcing this strictly
+;; at the linker level can introduce micro-stutters during .eln loading.
+;;
+;; Compilation overhead: It adds extra linking steps to the asynchronous
+;; libgccjit worker threads.
+;;
+;; ---------------------------------------------------------------------------
+;; Optimize the linker output for natively compiled Elisp (.eln files):
+(setq native-comp-driver-options '(;; -Wl,-z,pack-relative-relocs: Compresses
+                                   ;; relocation tables to reduce file size and
+                                   ;; slightly improve load times.
+                                   "-Wl,-z,pack-relative-relocs"
+                                   ;; -Wl,-O2: Applies standard linker-level
+                                   ;; optimizations (like string merging) to the
+                                   ;; generated shared object.
+                                   "-Wl,-O2"
+                                   ;; -Wl,--as-needed: Prevents the linker from
+                                   ;; recording dependencies on libraries that
+                                   ;; are not actually used by the code.
+                                   "-Wl,--as-needed"))
+
+;; (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
+
+;; Which kind of warnings and errors to report from async native compilation.
+;; (setq native-comp-async-warnings-errors-kind 'important)
+(setq native-comp-async-warnings-errors-kind 'all)
+
+;; (message "LOADING config.el")
+(load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
+
+;;; Provide
+
 (require 'seq)
 
 ;;; Debug, native comp, and initial options
@@ -216,10 +453,6 @@
 (unless noninteractive
   (setq minimal-emacs-frame-title-format "Lightemacs"))
 
-;; Which kind of warnings and errors to report from async native compilation.
-;; (setq native-comp-async-warnings-errors-kind 'important)
-(setq native-comp-async-warnings-errors-kind 'all)
-
 ;; TODO find out why early-init and init is compiled when
 ;; compile-angel-native-compile-load is t
 (setq lightemacs-load-compiled-init-files t)
@@ -312,90 +545,6 @@
 ;;   (with-no-warnings
 ;;     (setq native-comp-deferred-compilation-deny-list deny-list)
 ;;     (setq comp-deferred-compilation-deny-list deny-list)))
-
-;; `native-comp-compiler-options' specifies flags passed directly to the C
-;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
-;; produced by the native compilation process. These flags affect code
-;; generation, optimization, and debugging information.
-;;
-;; `native-comp-driver-options' specifies additional flags passed to the native
-;; compilation driver process, which may invoke the compiler and linker with
-;; certain parameters. In most cases, these flags mirror the compiler options,
-;; but they can be configured separately when the driver needs different
-;; arguments (for example, link-time options or toolchain-specific parameters).
-;;
-;; In native-compilation mode, when a .el or .elc file is compiled to native
-;; code (.eln): Emacs itself does not call gcc directly. Instead, Emacs invokes
-;; the native compilation driver process (a small program written in C and
-;; Lisp). This driver prepares the command line for the compiler, applies
-;; system-dependent settings, and runs the compilation in an isolated process.
-(setq native-comp-speed 2)
-(setq native-comp-compiler-options '(;; Enables aggressive optimization passes
-                                     ;; in GCC. Native compilation of Emacs Lisp
-                                     ;; benefits from improved inlining and loop
-                                     ;; transformations without affecting
-                                     ;; correctness.
-                                     ;;
-                                     ;; Aggressive enough for performance but
-                                     ;; stable; avoid -O3 or -Ofast since they
-                                     ;; can break numeric primitives in Emacs
-                                     ;; Lisp code.
-                                     "-O3"
-
-                                     ;; Disables generation of debug symbols.
-                                     ;; Reduces compilation time and disk usage
-                                     ;; for .eln files.
-                                     "-g0"
-
-                                     ;; This also causes instability:
-                                     ;; /usr/bin/ld: /tmp/ccps2Qse.o:
-                                     ;; plugin needed to handle lto object
-                                     ;;
-                                     ;; This is a known issue with older
-                                     ;; versions of libgccjit failing to parse
-                                     ;; the "native" expansion correctly.
-                                     ;; Hardcoding "-march=skylake" and
-                                     ;; "-mtune=skylake" is a valid workaround.
-                                     ;; However, passing these to both the
-                                     ;; compiler and the driver is unnecessary.
-                                     ;; Passing CPU architecture flags to
-                                     ;; native-comp-driver-options is sufficient
-                                     ;; for the assembler and linker phases to
-                                     ;; optimize the binary output.
-                                     ;;
-                                     ;; Commented out. If your Emacs build
-                                     ;; already enables LTO
-                                     ;; (--enable-link-time-optimization), you
-                                     ;; do not need this here. Let the main
-                                     ;; build handle LTO across modules.
-                                     ;; Otherwise, enabling it here may cause
-                                     ;; linking issues.
-                                     ;; "-flto=auto"
-
-                                     ;; Omits the frame pointer on supported
-                                     ;; architectures. Frees an additional
-                                     ;; register and slightly reduces call
-                                     ;; overhead on x86_64 systems.
-                                     "-fno-omit-frame-pointer"
-
-                                     ;; Prevents assumptions that floating point
-                                     ;; operations never produce NaN or
-                                     ;; infinity. Emacs uses IEEE-compliant
-                                     ;; behavior, and this avoids undefined
-                                     ;; behavior in numerical primitives.
-                                     ;;
-                                     ;; Emacs relies on IEEE floating-point
-                                     ;; behavior. Never enable -ffast-math or
-                                     ;; similar, as it can break native
-                                     ;; compilation semantics.
-                                     ;;
-                                     ;; This is the default behavior of GCC
-                                     ;; unless you explicitly p
-                                     "-fno-finite-math-only"))
-(setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
-
-;; (message "LOADING config.el")
-(load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
 ;;; Options
 

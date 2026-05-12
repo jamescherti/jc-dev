@@ -80,7 +80,13 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 #
 # The -fno-omit-frame-pointer The Emacs developers recommend using this to
 # disable omit-frame-pointer, because it can cause hard to debug bugs.
-export CFLAGS="-O3 -fno-omit-frame-pointer -pipe -march=native -mtune=native"
+export CFLAGS="-O3 -pipe -march=native -mtune=native"
+
+# Stable
+# export CFLAGS="$CFLAGS -fno-omit-frame-pointer "
+
+# Unstable, according to Emacs devs, but it works for me.
+export CFLAGS="$CFLAGS -fomit-frame-pointer"
 
 # if [[ $ID = arch ]]; then
 #   TARGET_BRANCH="emacs-30"
@@ -153,70 +159,290 @@ else
   export LDFLAGS="$LDFLAGS -flto=auto"
 fi
 
-# The -fno-semantic-interposition flag is one of the few advanced compiler
-# options that can improve performance for large dynamically linked
-# applications without changing program behavior.
+# The -fno-semantic-interposition flag is an advanced compiler option that
+# removes a strict ELF-standard optimization barrier, allowing for more
+# aggressive inlining and interprocedural analysis.
 #
-# On ELF systems, externally visible symbols are normally interposable at
-# runtime. This means a function defined inside a shared object or PIE binary
-# may be replaced by another definition provided by a different shared library.
-#
-# Because of this, GCC must conservatively assume that externally visible
-# functions can change at runtime, which inhibits optimizations such as:
-# - Function inlining
+# On ELF systems, externally visible symbols in shared objects are normally
+# interposable at runtime (e.g., via LD_PRELOAD). Because of this, GCC must
+# conservatively assume that these functions can change at runtime. This acts
+# as a hard barrier that inhibits optimizations such as:
+# - Function inlining across boundaries
 # - Constant propagation
-# - Interprocedural analysis
+# - Devirtualization
 #
 # -fno-semantic-interposition tells GCC to assume that functions defined within
-# the current binary or shared object will not be overridden externally. This
-# allows the compiler to optimize internal calls more aggressively and avoid
-# some indirection overhead associated with ELF symbol interposition.
+# the current binary or shared object will not be overridden externally.
 #
-# Emacs performs a large number of internal C function calls within the Lisp
-# interpreter, redisplay engine, and buffer manipulation code. Allowing GCC to
-# optimize these internal call paths can slightly reduce CPU overhead.
+# Impact on Emacs
+# ---------------
+# While this flag became widely known after it produced measurable interpreter
+# performance improvements for CPython builds, its impact on Emacs is much
+# more nuanced.
 #
-# This flag became widely known after several Linux distributions adopted it
-# for CPython builds, where it produced measurable interpreter performance
-# improvements with minimal risk.
+# * For the Emacs C Core:
+#   * Benefit: Small. Emacs is typically compiled as a main executable, not a
+#     shared library. Even when compiled as a Position Independent Executable
+#     (PIE), the compiler generally already knows that internal symbols will
+#     not be interposed. The performance gain here is usually marginal and
+#     highly dependent on compiler visibility and Link-Time Optimization (LTO).
+#   * Drawback: None. You do not need to dynamically interpose internal Emacs
+#     C functions at runtime.
 #
-# (THIS DOESN'T MAKE SENSE IN native-comp-compiler-options. This attempts to
-# apply C-level binary linking semantics to Emacs Lisp, which operates under a
-# completely different execution model.)
+# * For .eln Files (Native Compilation):
+#   * Benefit: Small. While .eln files *are* compiled as shared objects (which
+#     is where this flag technically applies most), interposition is not a
+#     major performance bottleneck in this context. Emacs Lisp compiled output
+#     is not call-heavy in the same way native C libraries are; execution time
+#     is dominated by dynamic dispatch, garbage collection checks, and calls
+#     back to C primitives. Breaking the interposition optimization barrier
+#     here is technically correct but only beneficial in very narrow cases.
+#   * Drawback: None. Elisp functions compiled into a .eln file are not
+#     going to be interposed at the ELF/C linker level.
+#
+# TIP: Remove -fno-semantic-interposition and -fno-finite-math-only: These are
+# largely redundant for the Emacs codebase. Emacs does not rely heavily on
+# floating-point math, and it is not a shared library where semantic
+# interposition rules heavily apply.
 export CFLAGS="$CFLAGS -fno-semantic-interposition"
 
-# By default, external function calls in ELF binaries often go through the
-# Procedure Linkage Table (PLT). The PLT adds a small level of indirection used
-# for dynamic symbol resolution.
+# The -fno-finite-math-only flag prevents the compiler from assuming that
+# floating-point operations never produce NaN or infinity values. This flag is
+# mostly defensive because GCC does not enable -ffinite-math-only at -O2 or -O3
+# by default, but it can help avoid unsafe assumptions if additional aggressive
+# optimization flags are introduced later.
 #
-# -fno-plt instructs GCC to avoid PLT trampolines for external calls when
-# possible and instead load function addresses directly from the Global Offset
-# Table (GOT).
+# TODO: Remove -fno-semantic-interposition and -fno-finite-math-only: These are
+# largely redundant for the Emacs codebase. Emacs does not rely heavily on
+# floating-point math, and it is not a shared library where semantic
+# interposition rules heavily apply.
+export CFLAGS="$CFLAGS -fno-finite-math-only"
+
+# Applying -fno-plt to the Emacs Executable (C Core)
+# -----------------------------------------------------
+# Benefits
+# - Execution Efficiency: Emacs relies heavily on external C libraries (libc,
+#   GTK, tree-sitter, SQLite). Bypassing the Procedure Linkage Table (PLT)
+#   saves a jump instruction on every single call to these libraries, yielding
+#   a small but measurable reduction in CPU overhead.
+# - Security Hardening: Because you are pairing this with -Wl,-z,now (bind
+#   now), the dynamic linker resolves all symbols at startup. This allows the
+#   Global Offset Table (GOT) to be marked strictly read-only, neutralizing a
+#   common vector for memory corruption exploits.
 #
-# This can slightly reduce overhead for external function calls in dynamically
-# linked applications. However, the practical performance impact on Emacs is
-# usually small because most execution time is spent inside the Emacs core and
-# Lisp interpreter rather than external shared libraries.
+# Tradeoffs
+# - Startup Overhead: Because lazy binding is disabled, the operating system
+#   dynamic linker must resolve every single external symbol before the emacs
+#   binary is allowed to execute. This shifts computation to the startup phase,
+#   adding a few milliseconds to the initial launch time.
 #
-# (THIS DOESN'T MAKE SENSE IN native-comp-compiler-options. This attempts to
-# apply C-level binary linking semantics to Emacs Lisp, which operates under a
-# completely different execution model.)
+# Applying -fno-plt to Native-Compiled .eln Files
+# ---------------------------------------------------
+# For maximum performance, the engineering recommendation is to exclude these
+# specific flags from your native compilation variables.
+#
+# While they provide a measurable benefit when compiling the static Emacs C
+# core, applying them to dynamically generated .eln files introduces a severe
+# latency penalty that degrades the interactive feel of the editor.
+#
+# Emacs loads .eln files (which are standard ELF shared objects) on demand using
+# the operating system's dlopen mechanism. This usually happens when an autoload
+# is triggered the first time you run a command from a new package.
+#
+# Without the flags (Lazy Binding): The .eln file is loaded into memory
+# instantly. The addresses for external Emacs C functions are resolved one by
+# one, only when they are actually called for the first time. The overhead is
+# spread out invisibly.
+#
+# With the flags (Bind Now): If you compile an .eln file with -fno-plt and link
+# it with -Wl,-z,now, you force the dynamic linker to resolve every single
+# external symbol inside that .eln file immediately during the dlopen call.
+#
+# For massive packages like Magit or LSP mode, resolving thousands of C
+# primitives instantly will block the main Emacs thread. This manifests as a
+# noticeable UI stutter or freeze right when you try to load the package. The
+# microscopic execution speed gained by dropping the PLT jump instruction is
+# entirely overshadowed by this severe load-time latency.
+#
+# How to Apply Them (If You Insist)
+# ---------------------------------
+# If your workflow involves loading all packages at startup (a "heavy init") and
+# you want absolute maximum runtime throughput regardless of startup or load
+# latency, you must apply both the compiler and linker flags together.
 export CFLAGS="$CFLAGS -fno-plt"
 
-# The `--with-mps=yes` configure flag instructs Emacs to use the **Memory Pool
-# System (MPS)** for memory management instead of its default conservative
-# garbage collector. MPS is a modular, high-performance garbage collection
-# library that supports precise and incremental collection, allowing Emacs to
-# manage memory more efficiently, especially in memory-intensive workloads.
-# Enabling this option requires that the MPS library and headers are installed
-# and accessible during compilation. While primarily experimental, using MPS can
-# improve performance and enable advanced memory management features, making it
-# useful for custom Emacs builds such as those using the
-# incremental garbage collection (IGC) framework.
+# I am using -fno-plt in my CFLAGS, I must pair it with "bind now" semantics
+# in the linker flags. This forces the dynamic linker to resolve all symbols at
+# startup, fully bypassing lazy
+# binding and allowing the Global Offset Table to be marked read-only.
 #
-# MPS is still experimental and not what "maximum stable performance" means.
-# TODO: try: --with-mps=yes
+# These slightly slow down startup time, but subtly speed up and smooth out
+# runtime execution.
 #
+# Wl,-z,now: By default, Linux binaries use "lazy binding". When Emacs calls an
+# external C library function (like a GTK drawing function or a tree-sitter
+# parser) for the very first time, the program execution pauses while the
+# dynamic linker resolves the memory address of that function. Adding -z,now
+# forces the dynamic linker to resolve every single external symbol immediately
+# when the binary is launched, before the program's main() function is even
+# executed. It slightly slows down the initial startup of Emacs (usually by just
+# a few milliseconds) because the operating system has to do all the symbol
+# resolution math upfront. However, it speeds up your interactive runtime
+# execution. Because all addresses are pre-calculated, you never encounter
+# micro-stutters from the dynamic linker resolving symbols on the fly while you
+# are typing or executing heavy Elisp operations.
+#
+# -Wl,-z,relro (Read-Only Relocations): What it does: This is a security
+# hardening flag. Once the dynamic linker finishes resolving all the symbols
+# (which is guaranteed to happen at startup thanks to the now flag), relro locks
+# the Global Offset Table (GOT) in memory, marking it strictly read-only. This
+# prevents specific types of memory corruption exploits where an attacker
+# overwrites the GOT to hijack function calls.
+# It has essentially zero impact on execution speed. The only minor overhead
+# occurs during the load time when the operating system changes the memory page
+# permissions to read-only.
+export LDFLAGS="$LDFLAGS -Wl,-z,now -Wl,-z,relro"
+
+# -fgraphite-identity & -floop-nest-optimize
+#
+# These two flags activate the Graphite polyhedral optimization framework.
+# They analyze loops and rewrite them to maximize CPU cache locality
+# (e.g., loop fusion, loop unrolling, and loop interchange).
+#
+# NOTE: These flags activate the GCC Graphite framework, which relies on
+# polyhedral models to optimize complex, nested loops. This is excellent for
+# heavy numerical computing or matrix mathematics. However, Emacs is essentially
+# a C-based Lisp machine and text editor. Its performance bottlenecks are
+# garbage collection, string manipulation, and Lisp evaluation. Using Graphite
+# on Emacs will drastically increase your compilation time and memory usage. It
+# often leads to compiler crashes or subtle runtime bugs without yielding faster
+# execution.
+#
+# There is no tangible benefit to applying Graphite loop optimizations when
+# compiling Emacs.
+#
+# Here is a technical breakdown of why those flags are ineffective for this
+# specific codebase:
+#
+# * Data Structures: Emacs is built on dynamic, pointer-heavy data structures.
+#   The core types are `Lisp_Object` variants (tagged pointers), linked lists
+#   (cons cells), and the gap buffer for text management. Graphite relies on
+#   static or highly predictable array bounds to perform polyhedral modeling.
+#
+# * Execution Profile: The execution time of Emacs is dominated by pointer
+#   chasing during garbage collection, symbol lookups, and deep, unpredictable
+#   call stacks from the Lisp evaluator. These are highly branch-dependent
+#   workloads.
+#
+# * Lack of Affine Loops: For Graphite to optimize a loop, the loop must have
+#   affine bounds (linear equations based on loop iterators) without complex
+#   control flow inside the loop body. The C code in Emacs does not fit this
+#   profile.
+#
+# * Compilation Overhead: Enabling `-floop-nest-optimize` forces GCC to perform
+#   expensive data dependency analysis on code blocks that will ultimately be
+#   rejected by the polyhedral model. This wastes CPU cycles and memory during
+#   the build process without generating faster machine code.
+#
+# When configuring an Emacs build, you will see much better results by focusing
+# on link-time optimizations and native compilation. Standard `-O2` or `-O3`
+# combined with `-flto` (Link Time Optimization) yields a highly responsive
+# binary. Furthermore, enabling native compilation (`--with-native-compilation`)
+# using `libgccjit` is where the most significant performance gains for Lisp
+# execution will occur.
+#
+# IMPORTANT: These flags: increase build time, increase compiler RAM usage, may
+# trigger GCC bugs, rarely improve runtime performance measurably. These are
+# essentially wasted on Emacs.
+export CFLAGS="$CFLAGS -fgraphite-identity -floop-nest-optimize"
+
+# -fdevirtualize-at-ltrans: This flag is used during Link Time Optimization
+# (LTO) to devirtualize C++ virtual function calls. Because the core of Emacs is
+# written entirely in C and Emacs Lisp, there are no C++ classes or virtual
+# methods to optimize. This flag doesn't do anything for your build.
+#
+# The Emacs core is written in C. C does not have virtual tables
+# (vtables) or class inheritance in the way C++ does.
+# The Result: The compiler will simply ignore this flag because there is no C++
+# metadata to analyze. It is dead code in your build script.
+# export CFLAGS="$CFLAGS -fdevirtualize-at-ltrans"
+
+# -fipa-pta: This enables interprocedural pointer template analysis. While
+# technically applicable to C code, it requires an enormous amount of RAM during
+# the compilation phase. The performance gains for a codebase like Emacs are
+# negligible, but the risk of the compiler running out of memory or generating
+# broken binaries due to complex pointer aliasing is high.
+#
+# -fipa-pta enables interprocedural points-to analysis, allowing GCC to perform
+# deeper pointer alias analysis across function boundaries. While technically
+# applicable to C code, this optimization significantly increases compiler RAM
+# usage and compilation time. For a codebase like Emacs, the runtime performance
+# gains are usually negligible and may not justify the additional build
+# complexity and resource consumption.
+#
+# NOTE: Enabling -fipa-pta for .eln compilation is generally not worthwhile.
+# -fipa-pta is designed for deep interprocedural pointer alias analysis across
+# large C codebases with complex pointer interactions. Native-compiled Elisp
+# does not resemble that kind of workload:
+# .eln code generated by libgccjit contains:
+# heavy dynamic dispatch,
+# runtime type checks,
+# GC barriers,
+# Lisp object tagging,
+# frequent calls back into the Emacs runtime.
+# -fipa-pta belongs more to large static C/C++ performance engineering workloads
+# than to JIT-generated Emacs Lisp native code.
+#
+# Again: huge compile-time cost, minimal likely runtime gain, particularly poor
+# fit for native-comp generated code. This belongs in HPC workloads, not Emacs.
+export CFLAGS="$CFLAGS -fipa-pta"
+
+# Analysis of the -fuse-linker-plugin export flag
+#
+# For compiling Emacs C source code
+#
+# Benefits:
+# - Enables the linker plugin during Link Time Optimization (-flto).
+# - Allows the compiler and linker to cooperate, performing optimizations across
+# different C translation units.
+# - Can yield a slightly faster Emacs binary due to aggressive inlining and dead
+# code elimination across the entire C codebase.
+#
+# Tradeoffs:
+# - Increases both memory usage and overall compilation time during the linking
+# phase.
+# - Demands a compatible linker (such as ld.gold or lld) that is properly
+# configured to work with your GCC installation.
+# - It is mostly redundant. Modern versions of GCC automatically activate the
+# linker plugin when you pass the -flto flag, so specifying it manually adds no
+# extra value.
+#
+# 2. For compiling .el files to .eln files (Native Compilation)
+#
+# Benefits:
+# - Practically zero. Emacs native compilation uses libgccjit to compile Emacs
+# Lisp into independent shared libraries (.eln files) that are loaded
+# dynamically at runtime.
+# - Because there is no large-scale linking of multiple object files into a
+# single binary, whole-program optimization techniques do not apply here.
+#
+# Tradeoffs:
+# - Introduces a high probability of build failures. The libgccjit environment
+# is delicate and sensitive to injected compiler and linker flags.
+# - Forcing linker plugins into the async native compilation threads can cause
+# the generation of .eln files to crash or hang indefinitely.
+# - It wastes system resources by adding unnecessary steps to the compilation of
+# single-file shared objects.
+#
+# IMPORTANT: redundant if using -flto=auto (already implies plugin usage)
+#
+# The Historical Habit: Explicitly declaring -fuse-linker-plugin is a legacy
+# defensive programming habit. On older or highly fragmented toolchains, if the
+# linker failed to load the plugin, GCC would silently fall back to traditional
+# linking or fail in confusing ways. Explicitly declaring the flag forced a hard
+# error if the plugin was missing, rather than allowing a silent downgrade.
+export CFLAGS="$CFLAGS -fuse-linker-plugin"
+
 # Using the Memory Pool System (MPS) in Emacs introduces several drawbacks. It
 # is largely experimental, so some Emacs packages or internal subsystems may not
 # be fully compatible, potentially causing crashes or subtle memory issues.
@@ -279,8 +505,17 @@ CONFIGURE_ARGS=(
   # https://lists.gnu.org/archive/html/emacs-devel/2024-09/msg00240.html
   --disable-gc-mark-trace
 
-  # MPS is still experimental and not what "maximum stable performance" means.
-  --with-mps
+  # The --with-mps=yes configure flag instructs Emacs to use the Memory Pool
+  # System (MPS) for memory management instead of its default conservative
+  # garbage collector. MPS is a modular, high-performance garbage collection
+  # library that supports precise and incremental collection, allowing Emacs to
+  # manage memory more efficiently, especially in memory-intensive workloads.
+  # Enabling this option requires that the MPS library and headers are installed
+  # and accessible during compilation. While primarily experimental, using MPS can
+  # improve performance and enable advanced memory management features, making it
+  # useful for custom Emacs builds such as those using the
+  # incremental garbage collection (IGC) framework.
+  # --with-mps=yes
 
   # Remove support for Access Control Lists and Extended Attributes for slightly
   # faster/simpler file I/O.
@@ -347,21 +582,34 @@ CONFIGURE_ARGS=(
   # --with-xdbe
   # --with-x-toolkit=lucid
 
-  --without-xdbe
+  # --without-xdbe
   # --with-x-toolkit=gtk3
   # --without-toolkit-scroll-bars
   # --without-pgtk
 
+  --without-x
+  --without-xdbe
   --with-toolkit-scroll-bars
   --with-pgtk
+
+  # Important if using X11 and multiple input methods: X Input Method (XIM) is
+  # an interface for input methods, which is essential for languages like
+  # Chinese, Japanese, or Korean. Disabling XIM can affect text input in those
+  # languages. Why disable? If you don't need multi-language input support
+  # (for languages that require XIM), it's safe to disable it.
+  #
+  # Wayland: You should almost certainly use --without-xim. The PGTK build is
+  # designed to use the native GTK input method context, which works directly
+  # with Wayland. XIM is an X11-specific protocol; keeping it enabled in a pure
+  # Wayland build adds unnecessary overhead and legacy code paths that can lead
+  # to crashes or "stuck" keys.
+  --without-xim
 
   # Pixel Precision Scrolling (Disabled because it is an X11 feature)
   --without-xinput2
 
   # Explicitly disabling X guarantees a pure Wayland binary with no legacy X11
   # baggage.
-  --without-x
-
   --without-ns
   --without-xaw3d
 
@@ -403,7 +651,7 @@ CONFIGURE_ARGS=(
 
   --with-file-notification=inotify
 
-  --with-pdumper
+  --with-pdumper=yes
 
   # Yes, --with-wide-int can make certain integer operations faster in Emacs
   # Lisp because it allows using a wider native integer type instead of
@@ -416,7 +664,7 @@ CONFIGURE_ARGS=(
   #
   # --with-wide-int: This is the default on 64-bit systems. Manually specifying
   # it is harmless but unnecessary.
-  --with-wide-int
+  # --with-wide-int
 
   # Not relevant in Linux
   # --without-native-image-api
@@ -494,7 +742,7 @@ CONFIGURE_ARGS=(
 
   # Audible bell, and any packages that attempt to play audio notifications
   # (such as Pomodoro timers or chat clients)
-  --without-sound
+  --with-sound=no
 
   # Not important unless using GNOME: These options disable GConf and
   # Settings, which are used for configuration in GNOME-based environments.
@@ -534,19 +782,6 @@ CONFIGURE_ARGS=(
   # rarely used outside of embedded environments (like Tizen) or highly specific
   # corporate deployments.
   --without-libsmack
-
-  # Important if using X11 and multiple input methods: X Input Method (XIM) is
-  # an interface for input methods, which is essential for languages like
-  # Chinese, Japanese, or Korean. Disabling XIM can affect text input in those
-  # languages. Why disable? If you don't need multi-language input support
-  # (for languages that require XIM), it's safe to disable it.
-  #
-  # Wayland: You should almost certainly use --without-xim. The PGTK build is
-  # designed to use the native GTK input method context, which works directly
-  # with Wayland. XIM is an X11-specific protocol; keeping it enabled in a pure
-  # Wayland build adds unnecessary overhead and legacy code paths that can lead
-  # to crashes or "stuck" keys.
-  --without-xim
 
   # Disable (--disable-largefile): Only if you do not work with files larger
   # than 2GB and want to reduce Emacs' binary size and potential overhead.
@@ -676,10 +911,11 @@ main() {
   # in a production environment.
   make install-strip
 
-  git clean -fxd
-  git reset --hard HEAD
-  git gc --prune=now
   set +x
+
+  git clean -fxd &>/dev/null || true
+  git reset --hard HEAD &>/dev/null || true
+  git gc --prune=now &>/dev/null || true
 }
 
 main "$@"

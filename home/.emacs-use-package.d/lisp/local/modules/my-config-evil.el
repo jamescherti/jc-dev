@@ -1871,14 +1871,12 @@ of the line or the buffer; just return nil."
 
 (defun evilcursor-next-visual-line (count)
   "Move the cursor COUNT screen lines down."
-  (let ((line-move-visual t))
-    (evil-line-move (or count 1)))
+  (evil-next-visual-line (or count 1))
   (evilcursor--after-vertical-movement))
 
 (defun evilcursor-previous-visual-line (count)
   "Move the cursor COUNT screen lines up."
-  (let ((line-move-visual t))
-    (evil-line-move (- (or count 1))))
+  (evil-previous-visual-line (or count 1))
   (evilcursor--after-vertical-movement))
 
 (defun evilcursor-forward-line (n)
