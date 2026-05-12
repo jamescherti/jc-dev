@@ -901,7 +901,7 @@ WIDTH is the tab width."
 
   ;; This fixes the skipping when scrolling long org documents
   ;; NOTE: MANAGED BY MINIMAL-EMACS
-  (setq scroll-conservatively most-positive-fixnum)
+  ;; (setq scroll-conservatively most-positive-fixnum)
 
   ;; TODO put them back
   ;;(setq eldoc-idle-delay 0.5)
