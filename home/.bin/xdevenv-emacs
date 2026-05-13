@@ -38,6 +38,7 @@ EMACS_BIN="$HOME/.bin/run-emacs-use-package"
 
 OSFAMILY=$(~/.local/bin/osid)
 if [[ $OSFAMILY = arch ]]; then
+    # EMACS_BIN="$HOME/.bin/run-emacs-31"
     EMACS_BIN="$HOME/.bin/run-emacs-master"
 fi
 

@@ -1009,37 +1009,6 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
             (dedicated . t))
           display-buffer-alist)))
 
-;;; Always current window
-
-(defun current-window-only--setup-display-buffer-alist ()
-  "Setup display buffer alist using push for performance."
-  (unless noninteractive
-    (dolist (regexp '("\\*Man"
-                      "\\*eat"
-                      "\\*Memory-Report\\*"
-                      "\\*helpful"
-                      "\\*Backtrace\\*"
-                      "\\*\\(Help\\|eldoc\\)\\*"
-                      "\\*[Hh]elp:"
-                      ;; markdown-mode. I want to edit in a separate window
-                      ;; "\\*edit-indirect "
-                      "\\*Proced\\*"
-                      "\\*Embark Export"))
-      (push `(,regexp (display-buffer-same-window)) display-buffer-alist))))
-
-(defun always-current-window---display-buffer-from-compilation-p (_buffer-name _action)
-  "Display buffer from compilation."
-  (unless current-prefix-arg
-    (with-current-buffer (window-buffer)
-      (derived-mode-p 'compilation-mode))))
-
-
-
-;; (defun lightemacs-user-post-init ()
-;;   "User post init."
-;;   (my-add-packages-to-load-path))
-
-
 ;;; pre/post modules
 
 (defun lightemacs-user-pre-modules ()

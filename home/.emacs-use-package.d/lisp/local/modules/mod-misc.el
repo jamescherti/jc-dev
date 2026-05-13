@@ -219,7 +219,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (defun my-disable-compile-angel-after-delay ()
   "Disable `compile-angel-on-load-mode' 60 seconds after Emacs startup."
   (run-at-time
-   60 nil
+   (* 30 60) nil
    (lambda ()
      (when (bound-and-true-p compile-angel-on-load-mode)
        (when (fboundp 'compile-angel-on-load-mode)
@@ -231,6 +231,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (add-hook 'emacs-startup-hook #'my-disable-compile-angel-after-delay)
 
 ;;; testing
+
+(setq gcmh-high-cons-threshold (* 600 1024 1024))
 
 ;; Auto-scroll to bottom only when you type, not when output arrives
 (setq-default comint-scroll-to-bottom-on-input t)
@@ -344,7 +346,33 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq-default search-invisible nil)
 
-;;; current window only
+;;; Always current window
+
+(defun current-window-only--setup-display-buffer-alist ()
+  "Setup display buffer alist using push for performance."
+  (unless noninteractive
+    (dolist (regexp '("\\*Man"
+                      "\\*eat"
+                      "\\*Memory-Report\\*"
+                      "\\*helpful"
+                      "\\*Backtrace\\*"
+                      "\\*\\(Help\\|eldoc\\)\\*"
+                      "\\*[Hh]elp:"
+                      ;; markdown-mode. I want to edit in a separate window
+                      ;; "\\*edit-indirect "
+                      "\\*Proced\\*"
+                      "\\*Embark Export"))
+      (push `(,regexp (display-buffer-same-window)) display-buffer-alist))))
+
+(defun always-current-window---display-buffer-from-compilation-p (_buffer-name _action)
+  "Display buffer from compilation."
+  (unless current-prefix-arg
+    (with-current-buffer (window-buffer)
+      (derived-mode-p 'compilation-mode))))
+
+;; (defun lightemacs-user-post-init ()
+;;   "User post init."
+;;   (my-add-packages-to-load-path))
 
 (defun current-window-only-setup ()
   "Make Emacs only use the current window."
@@ -1662,9 +1690,9 @@ WIDTH is the tab width."
 
   (setq read-process-output-max (* 32 1024 1024))
 
-  (unless (display-graphic-p)
+  (when (and (not (daemonp))
+             (not (display-graphic-p)))
     (xterm-mouse-mode 1))
-
 
   (unless noninteractive
     (windmove-default-keybindings)
