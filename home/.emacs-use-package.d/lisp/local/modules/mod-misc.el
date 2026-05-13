@@ -2237,8 +2237,18 @@ Returns:
           "-"))
   (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
 
-  (setf (alist-get 'bash-ts-mode apheleia-mode-alist) '(shfmt))
-  (setf (alist-get 'sh-mode apheleia-mode-alist) '(shfmt))
+  (setf (alist-get 'bash-ts-mode apheleia-mode-alist) nil)
+  (setf (alist-get 'sh-mode apheleia-mode-alist) nil)
+
+  (defun my-apheleia-sh-mode-setup ()
+    "Enable shfmt in `sh-mode' only if the shell is Bash."
+    ;; To prevent it, for example, from replacing `cmd` with $(cmd)
+    (if (eq sh-shell 'bash)
+        (setq-local apheleia-formatter '(shfmt))
+      (setq-local apheleia-formatter nil)))
+
+  (add-hook 'bash-ts-mode-hook 'my-apheleia-sh-mode-setup)
+  (add-hook 'sh-mode-hook 'my-apheleia-sh-mode-setup)
 
   (setf (alist-get 'python-mode apheleia-mode-alist) '())
   (setf (alist-get 'python-ts-mode apheleia-mode-alist) '())
