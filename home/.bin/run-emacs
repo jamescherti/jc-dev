@@ -78,11 +78,6 @@ is-emacs-server-running() {
 }
 
 main() {
-  if [[ $RUN_EMACS_BIN == "" ]]; then
-    echo "Error: \$RUN_EMACS_BIN is not set or empty." >&2
-    exit 1
-  fi
-
   RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
   OSFAMILY=$(~/.local/bin/osid)
   if [[ $OSFAMILY = arch ]]; then
@@ -108,6 +103,11 @@ main() {
 
   EMACS_ARGS_DICT+=("--init-directory")
   EMACS_ARGS_DICT+=("$EMACS_D")
+
+  if [[ $RUN_EMACS_BIN == "" ]]; then
+    echo "Error: \$RUN_EMACS_BIN is not set or empty." >&2
+    exit 1
+  fi
 
   # Correctly check if the binary exists in the system PATH
   if ! RUN_EMACS_BIN=$(type -P "$RUN_EMACS_BIN" 2>/dev/null); then
