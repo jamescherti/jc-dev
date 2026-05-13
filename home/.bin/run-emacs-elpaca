@@ -25,6 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+exit
 
 OSFAMILY=$(~/.local/bin/osid)
 export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"

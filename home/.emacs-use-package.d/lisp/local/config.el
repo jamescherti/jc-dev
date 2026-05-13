@@ -250,6 +250,47 @@
                                    ;; are not actually used by the code.
                                    "-Wl,--as-needed"))
 
+(defun my-get-cpu-architecture ()
+  "Return the CPU architecture detected via GCC target help output.
+The detected value is stored in `my-cpu-architecture' and returned as a
+string.
+If GCC is not available or no architecture information can be
+extracted, the function returns nil."
+  (when (executable-find "gcc")
+    (with-temp-buffer
+      (let ((exit-code (call-process "gcc" nil t nil "-march=native"
+                                     "-Q" "--help=target")))
+        (when (zerop exit-code)
+          (goto-char (point-min))
+          (when (re-search-forward
+                 "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
+            (match-string 1)))))))
+
+;; Auto detect the CPU architecture
+(when-let* ((cpu-architecture (my-get-cpu-architecture)))
+  (add-to-list 'native-comp-compiler-options
+               (format "-march=%s" cpu-architecture))
+  (add-to-list 'native-comp-compiler-options
+               (format "-mtune=%s" cpu-architecture)))
+
+;; Auto detect the CPU architecture
+;; Alternative: Just let
+;; (let ((cpu-architecture
+;;        (when (executable-find "gcc")
+;;          (with-temp-buffer
+;;            (let ((exit-code (call-process "gcc" nil t nil "-march=native"
+;;                                           "-Q" "--help=target")))
+;;              (when (zerop exit-code)
+;;                (goto-char (point-min))
+;;                (when (re-search-forward
+;;                       "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
+;;                  (match-string 1))))))))
+;;   (when cpu-architecture
+;;     (add-to-list 'native-comp-compiler-options
+;;                  (format "-march=%s" cpu-architecture))
+;;     (add-to-list 'native-comp-compiler-options
+;;                  (format "-mtune=%s" cpu-architecture))))
+
 ;; (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
 
 ;; Which kind of warnings and errors to report from async native compilation.
@@ -263,10 +304,13 @@
 
 (require 'seq)
 
-;;; Debug, native comp, and initial options
+;;; Optimization
 
-(setq minimal-emacs-inhibit-redisplay-during-startup t)
+(setq minimal-emacs-inhibit-redisplay-during-startup nil)
+(setq minimal-emacs-inhibit-message-during-startup nil)
 (setq lightemacs-easysession-load-session-on-startup t)
+
+;;; Debug, native comp, and initial options
 
 (let ((user-dir (file-truename lightemacs-user-directory)))
   (cond

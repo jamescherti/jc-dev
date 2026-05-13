@@ -32,7 +32,7 @@ EMACS_EDIT_TIMEOUT="${EMACS_EDIT_TIMEOUT:-3}"
 # EMACS_EDIT_NEW_TAB="${EMACS_EDIT_NEW_TAB:-1}"
 EMACS_EDIT_NEW_TAB=1
 EMACS_EDIT_WAIT_SECONDS=30
-EMACS_EDIT_EMACS_BIN=run-emacs-use-package
+EMACS_EDIT_EMACS_BIN=run-emacs
 
 run-emacsclient() {
   emacsclient --no-wait "--timeout=$EMACS_EDIT_TIMEOUT" "$@" 2>/dev/null \

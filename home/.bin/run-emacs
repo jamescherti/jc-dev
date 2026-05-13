@@ -26,6 +26,21 @@
 # SOFTWARE.
 #
 
+# Safely assign default values
+RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
+
+EMACS_ARGS_DICT=(
+  --no-site-file
+  --no-site-lisp
+  --no-splash
+  --no-x-resources
+  # Removed: --no-loadup
+  # The --no-loadup option in GNU Emacs prevents Emacs from loading its standard
+  # startup file loadup.el. This file normally initializes a large portion of
+  # the core environment. Using this option therefore has significant side
+  # effects.
+  --no-loadup
+)
 EMACS_EDIT_TIMEOUT="${EMACS_EDIT_TIMEOUT:-3}"
 
 # shellcheck disable=SC1090
@@ -47,32 +62,10 @@ popd &>/dev/null
 
 set -euf -o pipefail
 
-# Safely assign default values
-RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
-RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
-
 # Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
 # lsp-use-plists flag. plists provide better performance in deserialization and
 # also put less presure than hash-tables.
 export LSP_USE_PLISTS=true
-
-ORIG_CWD=$(pwd)
-EMACS_ARGS_DICT=(
-  --no-site-file
-  --no-site-lisp
-  --no-splash
-  --no-x-resources
-  --chdir "$ORIG_CWD"
-  #
-  # Removed: --no-loadup
-  #
-  # The --no-loadup option in GNU Emacs prevents Emacs from loading its standard
-  # startup file loadup.el. This file normally initializes a large portion of
-  # the core environment. Using this option therefore has significant side
-  # effects.
-  #
-  # --no-loadup
-)
 
 run-emacsclient-nowait() {
   emacsclient --no-wait "--timeout=$EMACS_EDIT_TIMEOUT" "$@" 2>/dev/null \
@@ -90,15 +83,58 @@ main() {
     exit 1
   fi
 
+  RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
+  OSFAMILY=$(~/.local/bin/osid)
+  if [[ $OSFAMILY = arch ]]; then
+    # Emacs master
+    OSFAMILY=$(osid)
+    export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+    EMACS_D="$HOME/.emacs-master.d/"
+    export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
+  else
+    # Emacs 31
+    export RUN_EMACS_BIN="/usr/bin/emacs"
+    if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+      if [[ $OSFAMILY = arch ]]; then
+        export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
+      else
+        export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-30/bin/emacs"
+      fi
+    fi
+
+    EMACS_D="$HOME/.emacs-use-package.d/"
+    export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
+  fi
+
+  EMACS_ARGS_DICT+=("--init-directory")
+  EMACS_ARGS_DICT+=("$EMACS_D")
+
   # Correctly check if the binary exists in the system PATH
   if ! RUN_EMACS_BIN=$(type -P "$RUN_EMACS_BIN" 2>/dev/null); then
     echo "Error: Command not found in PATH: '$RUN_EMACS_BIN'" >&2
     exit 1
   fi
 
+  if [[ "${XDG_SESSION_TYPE:-}" = wayland ]]; then
+    # By default, GTK applications try to guess the best backend to use. If you
+    # want to guarantee that Emacs runs natively as a Wayland client and does not
+    # fall back to XWayland, you should explicitly set the backend.
+    export GDK_BACKEND=wayland
+
+    # A common issue with the Emacs PGTK build involves input lag, freezing, or
+    # swallowed keystrokes when typing or scrolling. This is often caused by GTK's
+    # default input method module interfering with Emacs's internal event loop.
+    # Disabling the GTK input module resolves most of these issues.
+    export GTK_IM_MODULE=none
+  fi
+
   local emacs_dir
   emacs_dir=$(dirname "$RUN_EMACS_BIN")
   export PATH="$emacs_dir:$PATH"
+
+  if [[ -d "$PWD" ]]; then
+    EMACS_ARGS_DICT+=(--chdir "$PWD")
+  fi
 
   if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
     EMACS_DAEMON=$(run-emacsclient-nowait -e '(daemonp)' || :)
@@ -109,7 +145,7 @@ main() {
 
     exit 0
   else
-    echo "[RUN] $(which emacs) $*"
+    echo "[RUN]" "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
     exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
     # exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
   fi
