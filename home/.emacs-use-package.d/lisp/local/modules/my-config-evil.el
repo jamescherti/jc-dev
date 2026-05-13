@@ -34,6 +34,76 @@
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'mod-project)
 
+;;; Spell checker: Jins or Flyspell
+
+(defvar my-spell-checker 'jinx)
+
+(use-package jinx
+  :commands (jinx-correct
+             jinx-next
+             jinx-previous
+             jinx-mode)
+  :if (eq my-spell-checker 'jinx)
+  :config
+  (with-eval-after-load 'evil-maps
+    ;; Register Jinx motions as Evil jumps so you can return with C-o
+    ;; (evil-add-command-properties #'jinx-next :jump t)
+    ;; (evil-add-command-properties #'jinx-previous :jump t)
+
+    ;; Bind across both normal and visual states
+    (evil-define-key '(normal visual) jinx-mode-map
+      "z=" #'jinx-correct
+      "]s" #'jinx-next
+      "[s" #'jinx-previous
+      ;; Buffer-wide correction (emulating :spellrepall)
+      "zR" #'jinx-correct-all
+      ;; Intercept zg/zG to teach Jinx's workflow
+      ;; "zg" #'my-jinx-zg
+      ;; "zG" #'my-jinx-zg)
+    )
+
+  ;;   :preface
+  ;;   (defun my-jinx-zg ()
+  ;;     "Helper to emulate Vim's zg functionality.
+  ;; Jinx handles dictionary additions inside the correction menu.
+  ;; This opens the menu and reminds the user of the native Jinx keys."
+  ;;     (interactive)
+  ;;     (message "Jinx: Press '+' (personal) or '*' (local) to add to dictionary.")
+  ;;     (sit-for 1.5)
+  ;;     (jinx-correct)
+  ))
+
+(defun my-setup-spell-checker ()
+  "Setup `jinx-mode' or `flyspell-mode' depending on `my-spell-checker'."
+  ;; unless (or (derived-mode-p 'yaml-mode)
+  ;;            (derived-mode-p 'yaml-ts-mode)
+  ;;            (derived-mode-p 'ansible-mode))
+  (if (or (derived-mode-p 'yaml-mode)
+          (derived-mode-p 'yaml-ts-mode)
+          (derived-mode-p 'ansible-mode))
+      ;; Yaml/Ansible
+      (if (eq my-spell-checker 'jinx)
+          (when (fboundp 'jinx-mode)
+            (jinx-mode 1))
+        (flyspell-prog-mode))
+    ;; Other (e.g., Markdown)
+    (let* ((file-name (buffer-file-name (buffer-base-buffer)))
+           (file-name-downcase (when file-name
+                                 (downcase file-name))))
+      (when (and file-name-downcase
+                 (or (string-suffix-p "/readme.md" file-name-downcase)
+                     (string-suffix-p "/readme.org" file-name-downcase)
+                     (string-suffix-p "/changelog.md" file-name-downcase)))
+        ;; (run-with-idle-timer 1 nil #'jinx-mode 1)
+        (if (eq my-spell-checker 'jinx)
+            (when (fboundp 'jinx-mode)
+              (jinx-mode 1))
+          (flyspell-mode 1))))))
+
+;; Attach the hook independently so it works for Flyspell as well
+(add-hook 'prog-mode-hook #'my-setup-spell-checker)
+(add-hook 'text-mode-hook #'my-setup-spell-checker)
+
 ;;; Better evil
 
 (defun evilbuffer-switch-to-scratch ()

@@ -3859,39 +3859,6 @@ This function is intended for use as :around advice."
   (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
   (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes))
 
-;;; flyspell
-
-(defun my-setup-flyspell-text-mode ()
-  "Setup `flyspell-mode' for `text-mode-hook'."
-  ;; unless (or (derived-mode-p 'yaml-mode)
-  ;;            (derived-mode-p 'yaml-ts-mode)
-  ;;            (derived-mode-p 'ansible-mode))
-  (if (or (derived-mode-p 'yaml-mode)
-          (derived-mode-p 'yaml-ts-mode)
-          (derived-mode-p 'ansible-mode))
-      ;; Yaml/Ansible
-      (flyspell-prog-mode)
-    ;; Other (e.g., Markdown)
-    (let* ((file-name (buffer-file-name (buffer-base-buffer)))
-           (file-name-downcase (when file-name
-                                 (downcase file-name))))
-      (when (and file-name-downcase
-                 (when file-name-downcase
-                   (or (string-suffix-p "/readme.md"
-                                        file-name-downcase)
-                       (string-suffix-p "/readme.org"
-                                        file-name-downcase)
-                       (string-suffix-p "/changelog.md"
-                                        file-name-downcase))))
-        ;; (run-with-idle-timer 1 nil #'flyspell-mode 1)
-        (if (or (derived-mode-p 'yaml-mode)
-                (derived-mode-p 'yaml-ts-mode))
-            (flyspell-prog-mode)
-          (flyspell-mode 1))))))
-
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-(add-hook 'text-mode-hook 'my-setup-flyspell-text-mode)
-
 ;;; Golden-ratio
 
 ;; package cl is deprecated
@@ -4336,7 +4303,7 @@ environment for accurate linting."
   (setq shell-pop-autocd-to-working-dir nil)
   (setq shell-pop-term-shell "tmux-session emacs")
   (setq shell-pop-window-size 80)
-  (setq shell-pop-restore-window-configuration nil)
+  (setq shell-pop-restore-window-configuration t)
 
   ;; (setq shell-pop-shell-type
   ;;       '("eshell"

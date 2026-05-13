@@ -650,7 +650,7 @@ this file must exist."
     (set-window-prev-buffers nil buffer-list)
     (with-current-buffer buffer
       (goto-char point)
-      (set-window-start nil window-start))))
+      (set-window-start nil window-start t))))
 
 ;;; ex init-helpers
 
