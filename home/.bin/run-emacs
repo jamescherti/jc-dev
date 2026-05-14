@@ -125,6 +125,19 @@ main() {
     # swallowed keystrokes when typing or scrolling. This is often caused by GTK's
     # default input method module interfering with Emacs's internal event loop.
     # Disabling the GTK input module resolves most of these issues.
+    #
+    # https://github.com/emacs-mirror/emacs/blob/master/etc/PROBLEMS
+    #
+    # Emacs built with GTK lags in its response to keyboard input. This can
+    # happen when input methods are used. It happens because Emacs behaves in an
+    # unconventional way with respect to GTK input methods: it registers to
+    # receive keyboard input as unprocessed key events with metadata (as opposed
+    # to receiving them as text strings). Most GTK programs use the latter
+    # approach, so some modern input methods have bugs and misbehave when faced
+    # with the way Emacs does it.
+    #
+    # A workaround is to set GTK_IM_MODULE=none in the environment, or maybe
+    # find a different input method without these problems.
     export GTK_IM_MODULE=none
   fi
 
