@@ -168,12 +168,12 @@
 
 ;; t: This setting is the most common and means that the screen position is
 ;; preserved while scrolling. The cursor will stay in place relative to the
-;; visible part of the buffer, and it won’t jump to the top or bottom of the
+;; visible part of the buffer, and it won't jump to the top or bottom of the
 ;; screen.
 ;;
 ;; 'always: This is a more aggressive setting, ensuring the point is preserved
 ;; no matter what, including in edge cases. This can be especially useful if
-;; you’re using smooth scrolling or if the Emacs window is resized.
+;; you're using smooth scrolling or if the Emacs window is resized.
 ;;
 ;; nil: Disables preserving the screen position, meaning the cursor might move
 ;; when scrolling.
@@ -366,7 +366,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                       "\\*\\(Help\\|eldoc\\)\\*"
                       "\\*[Hh]elp:"
                       ;; markdown-mode. I want to edit in a separate window
-                      ;; "\\*edit-indirect "
+                      "\\*edit-indirect "
                       "\\*Proced\\*"
                       "\\*Embark Export"))
       (push `(,regexp (display-buffer-same-window)) display-buffer-alist))))
@@ -1106,7 +1106,7 @@ WIDTH is the tab width."
 
   ;; The function that is called by default is `vc-shrink-buffer-window',
   ;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
-  ;; This function shrinks height of WINDOW if its buffer doesn’t need so many
+  ;; This function shrinks height of WINDOW if its buffer doesn't need so many
   ;; lines. More precisely, shrink WINDOW vertically to be as small as possible,
   ;; while still showing the full contents of its buffer. WINDOW must be a live
   ;; window and defaults to the selected one.
@@ -1326,6 +1326,9 @@ WIDTH is the tab width."
   ;; (setq easysession-mode-line-misc-info t)
   ;; (setq easysession-setup-load-session nil)
 
+  ;; Change default to this
+  (setq easysession-fontify t)
+
   (setq easysession-switch-to-exclude-current t)
   (setq easysession-save-interval (* 14 60))
   (add-hook 'easysession-before-reset-hook
@@ -1404,8 +1407,8 @@ WIDTH is the tab width."
   ;; nil means case is significant.
   (setq dabbrev-case-fold-search nil)
 
-  ;; Whether dabbrev applies the abbreviations’s case pattern to the expansion.
-  ;; A value of nil means preserve the expansion’s case pattern.
+  ;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
+  ;; A value of nil means preserve the expansion's case pattern.
   (setq dabbrev-case-replace nil)
 
   (setq dabbrev-check-all-buffers nil)
@@ -1983,7 +1986,7 @@ Returns:
 
  ibuffer-show-empty-filter-groups nil
 
- ;; If non-nil, don’t ask for confirmation of "dangerous" operations.
+ ;; If non-nil, don't ask for confirmation of "dangerous" operations.
  ibuffer-expert t
 
  ;; If non-nil, summarize Ibuffer columns.
@@ -2539,33 +2542,16 @@ the window is resized). This function fixes these issues."
 ;;; ediff: settings
 
 (setq ediff-keep-variants t)
-(setq ediff-make-buffers-readonly-at-startup nil)
-(setq ediff-confirm-copy t)
+;; (setq ediff-make-buffers-readonly-at-startup nil) ; default nil
+;; (setq ediff-confirm-copy t)
 
-;; ediff-ignore-similar-regions: Ensures that when you press n to go to the next
-;; difference, Emacs doesn't stop at a line where the only change is a tab vs a
-;; space.
-;;
-;; The variable ediff-ignore-similar-regions serves a specific purpose, but it
-;; functions differently than the -w flag. While -w tells the diff engine to
-;; ignore whitespace when identifying differences, ediff-ignore-similar-regions
-;; controls what happens after the differences have already been found.
-;;
-;; When ediff-ignore-similar-regions is set to t, Emacs will skip over regions
-;; where the only differences are "insignificant."
-;;
-;; By default, "insignificant" is defined by the variable ediff-diff-options. If
-;; you have -w in your options, ediff will find the differences, realize they
-;; are just whitespace, and then—if this variable is enabled—it will
-;; automatically hide those differences or skip them when you navigate with n
-;; and p.
-(setq ediff-ignore-similar-regions t)
-
-;; -w: Ignore all whitespace.
-;; -b: Ignore changes in the amount of whitespace (treats sequences of
-;;     whitespace as equivalent).
-;; -B: Ignore changes that just insert or delete blank lines.
+;; Ediff: Ignore all whitespace differences (-w) to reduce visual noise from
+;; indentation changes or auto-formatters, keeping the focus on logic.
 (setq ediff-diff-options "-w")
+
+;; Ediff: Skip over regions where the only differences are whitespace (or other
+;; ignored options) when navigating with 'n' and 'p'.
+(setq ediff-ignore-similar-regions t)
 
 (add-hook 'ediff-startup-hook 'ediff-next-difference)
 
@@ -4722,7 +4708,7 @@ at the same level."
   ;;  ;; Face used for todo keywords that indicate DONE items.
   ;;  '(org-done ((t (:strike-through t))))
   ;;  ;; Face used to indicate that a headline is DONE. This face is only used if
-  ;;  ;; ‘org-fontify-done-headline’ is set. If applies to the part of the headline
+  ;;  ;; `org-fontify-done-headline' is set. If applies to the part of the headline
   ;;  ;; after the DONE keyword.
   ;;  '(org-headline-done ((t (:strike-through t)))))
 
@@ -5316,9 +5302,11 @@ are editing by falling back to another visible file buffer."
   (unless (bound-and-true-p easysession-load-in-progress)
     (save-excursion
       (ignore-errors
-        (require 'kirigami nil t)
-        (when (fboundp 'kirigami-close-folds)
-          (kirigami-close-folds))))))
+        (when (require 'kirigami nil t)
+          (when (and (fboundp 'kirigami-close-folds)
+                     (not (bound-and-true-p edit-indirect--overlay))
+                     (not (fboundp 'org-src-edit-buffer-p)))
+            (kirigami-close-folds)))))))
 
 (add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 90)
 (add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 90)

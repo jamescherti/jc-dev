@@ -80,7 +80,7 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 #
 # The -fno-omit-frame-pointer The Emacs developers recommend using this to
 # disable omit-frame-pointer, because it can cause hard to debug bugs.
-export CFLAGS="-O3 -pipe -march=native -mtune=native"
+export CFLAGS="-O2 -pipe -march=native -mtune=native"
 
 # Stable
 # export CFLAGS="$CFLAGS -fno-omit-frame-pointer "

@@ -53,7 +53,7 @@
                                      ;; stable; avoid -O3 or -Ofast since they
                                      ;; can break numeric primitives in Emacs
                                      ;; Lisp code.
-                                     "-O3"
+                                     "-O2"
 
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which
