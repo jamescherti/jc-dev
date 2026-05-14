@@ -172,8 +172,8 @@ if [ -n "$USER" ] && [ -n "$OSFAMILY" ]; then
 fi
 
 # AI env var hugging face
-export TRANSFORMERS_OFFLINE=1
-export HF_DATASETS_OFFLINE=1
+# export TRANSFORMERS_OFFLINE=1
+# export HF_DATASETS_OFFLINE=1
 
 export JC_DOTFILES_UNATTENDED=1
 export JC_DEV_UNATTENDED=1
