@@ -232,6 +232,13 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; Disable the optimization locally for dired to guarantee directory fontification
+;; (add-hook 'dired-mode-hook
+;;           (lambda ()
+;;             (setq-local redisplay-skip-fontification-on-input nil)))
+
+(setq font-lock-maximum-decoration t)
+
 (setq gcmh-high-cons-threshold (* 600 1024 1024))
 
 ;; Auto-scroll to bottom only when you type, not when output arrives
@@ -1151,7 +1158,6 @@ WIDTH is the tab width."
                                        "[/\\\\]node_modules")))
 
   (setq kirigami-preserve-visual-position t)
-  (setq buffer-terminator-verbose 'inhibit-message)
 
   ;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
   ;; editing emphasis.
@@ -1901,7 +1907,6 @@ WIDTH is the tab width."
 
   (setq easysession-debug t)
   (setq easysession-refresh-tab-bar t)
-  (setq buffer-terminator-track-tab-bar-buffers t)
 
   (setq easysession-directory
         (expand-file-name "easysession" my-shared-user-emacs-directory))
@@ -2536,6 +2541,31 @@ the window is resized). This function fixes these issues."
 (setq ediff-keep-variants t)
 (setq ediff-make-buffers-readonly-at-startup nil)
 (setq ediff-confirm-copy t)
+
+;; ediff-ignore-similar-regions: Ensures that when you press n to go to the next
+;; difference, Emacs doesn't stop at a line where the only change is a tab vs a
+;; space.
+;;
+;; The variable ediff-ignore-similar-regions serves a specific purpose, but it
+;; functions differently than the -w flag. While -w tells the diff engine to
+;; ignore whitespace when identifying differences, ediff-ignore-similar-regions
+;; controls what happens after the differences have already been found.
+;;
+;; When ediff-ignore-similar-regions is set to t, Emacs will skip over regions
+;; where the only differences are "insignificant."
+;;
+;; By default, "insignificant" is defined by the variable ediff-diff-options. If
+;; you have -w in your options, ediff will find the differences, realize they
+;; are just whitespace, and then—if this variable is enabled—it will
+;; automatically hide those differences or skip them when you navigate with n
+;; and p.
+(setq ediff-ignore-similar-regions t)
+
+;; -w: Ignore all whitespace.
+;; -b: Ignore changes in the amount of whitespace (treats sequences of
+;;     whitespace as equivalent).
+;; -B: Ignore changes that just insert or delete blank lines.
+(setq ediff-diff-options "-w")
 
 (add-hook 'ediff-startup-hook 'ediff-next-difference)
 

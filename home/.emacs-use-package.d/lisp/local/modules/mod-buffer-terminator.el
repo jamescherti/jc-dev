@@ -186,6 +186,8 @@
 
 (mod-buffer-terminator-sane)
 
+(setq buffer-terminator-verbose 'inhibit-message)
+
 ;; (defvar my-buffer-rename-list nil
 ;;   "List of buffer renames as cons cells (old-name . new-name).")
 ;;
@@ -423,8 +425,11 @@ By default, closing the last window in a tab does not close the tab."
 (defun mod-buffer-terminator-only-visible ()
   "Kill all the buffers that are not currently displayed in a window or tab."
   (interactive)
-  (buffer-guardian-save-all-buffers)
-  (mod-buffer-terminator-kill-non-visible-buffers))
+  (message "DO NOT USE IT!")
+
+  ;; (buffer-guardian-save-all-buffers)
+  ;; (mod-buffer-terminator-kill-non-visible-buffers)
+  )
 
 ;;; Evil
 
