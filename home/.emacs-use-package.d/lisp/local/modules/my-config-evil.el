@@ -41,6 +41,32 @@
 (use-package jinx
   :if (eq my-spell-checker 'jinx)
   :preface
+
+  (defun my-jinx-setup ()
+    "Configure Jinx to ignore specific faces in programming modes."
+    ;; Make the variable buffer-local first
+    (let ((excluded-faces
+           (cond
+            ((or (derived-mode-p 'yaml-mode)
+                 (derived-mode-p 'yaml-ts-mode))
+             '(font-lock-comment-face
+               font-lock-string-face
+               ;; font-lock-doc-face
+               ))
+            ;; ((derived-mode-p 'emacs-lisp-mode)
+            ;;  '(;; font-lock-comment-face ; TODO?
+            ;;    font-lock-string-face
+            ;;    ))
+            ((derived-mode-p 'prog-mode)
+             '(;; font-lock-comment-face
+               font-lock-string-face
+               ;; font-lock-doc-face
+               )))))
+      ;; Use setf to modify or insert the specific field for the current mode
+      (when excluded-faces
+        (make-local-variable 'jinx-exclude-faces)
+        (setf (alist-get major-mode jinx-exclude-faces) excluded-faces))))
+
   ;; (defun my-jinx-ignore-2-chars ()
   ;;   "Jinx: Ignore 2 characters."
   ;;   ;; Exclude words of 1-2 characters and common Elisp char literals
@@ -48,27 +74,6 @@
   ;;               (append jinx-exclude-regexps
   ;;                       '("\\b\\w\\{1,2\\}\\b"      ;; Any 1 or 2 char word
   ;;                         "\\?\\\\\\?[a-zA-Z]"))))
-
-  (defun my-jinx-prog-mode ()
-    "Configure Jinx to ignore specific faces in programming modes."
-    ;; Make the variable buffer-local first
-    (make-local-variable 'jinx-exclude-faces)
-
-    (let ((excluded-faces (if (or (derived-mode-p 'yaml-mode)
-                                  (derived-mode-p 'yaml-ts-mode))
-                              '(font-lock-comment-face
-                                font-lock-string-face
-                                font-lock-doc-face)
-                            '(font-lock-comment-face
-                              font-lock-doc-face))))
-
-      ;; Use setf to modify or insert the specific field for the current mode
-      (setf (alist-get major-mode jinx-exclude-faces) excluded-faces)))
-
-  :config
-  ;; Prevent jinx from correcting comments
-  (add-hook 'prog-mode-hook #'my-jinx-prog-mode)
-
   ;; Ignore 2-character strings/words in Elisp
   ;; Catches for example "]s"
   ;; (add-hook 'emacs-lisp-mode-hook #'my-jinx-ignore-2-chars)
@@ -141,11 +146,17 @@
             ;; (run-with-idle-timer 1 nil #'jinx-mode 1)
             (if (eq my-spell-checker 'jinx)
                 (when (fboundp 'jinx-mode)
+                  (require 'jinx)
+                  (when (fboundp 'my-jinx-setup)
+                    (my-jinx-setup))
                   (jinx-mode 1))
               (flyspell-mode 1))))
       ;; Prog
       (if (eq my-spell-checker 'jinx)
           (when (fboundp 'jinx-mode)
+            (require 'jinx)
+            (when (fboundp 'my-jinx-setup)
+              (my-jinx-setup))
             (jinx-mode 1))
         ;; TODO remove when?
         (when (or (derived-mode-p 'yaml-mode)
