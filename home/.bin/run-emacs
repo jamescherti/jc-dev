@@ -84,7 +84,8 @@ load_emacs_profile() {
     if [[ $OSFAMILY = arch ]]; then
       # Emacs master
       OSFAMILY=$(osid)
-      export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+      # export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+      export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
       EMACS_D="$HOME/.emacs-master.d/"
       export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
     else

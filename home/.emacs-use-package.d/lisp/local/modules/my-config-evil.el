@@ -39,7 +39,40 @@
 (defvar my-spell-checker 'jinx)
 
 (use-package jinx
-  :if (eq my-spell-checker 'jinx))
+  :if (eq my-spell-checker 'jinx)
+  :preface
+  ;; (defun my-jinx-ignore-2-chars ()
+  ;;   "Jinx: Ignore 2 characters."
+  ;;   ;; Exclude words of 1-2 characters and common Elisp char literals
+  ;;   (setq-local jinx-exclude-regexps
+  ;;               (append jinx-exclude-regexps
+  ;;                       '("\\b\\w\\{1,2\\}\\b"      ;; Any 1 or 2 char word
+  ;;                         "\\?\\\\\\?[a-zA-Z]"))))
+
+  (defun my-jinx-prog-mode ()
+    "Configure Jinx to ignore specific faces in programming modes."
+    ;; Make the variable buffer-local first
+    (make-local-variable 'jinx-exclude-faces)
+
+    (let ((excluded-faces (if (or (derived-mode-p 'yaml-mode)
+                                  (derived-mode-p 'yaml-ts-mode))
+                              '(font-lock-comment-face
+                                font-lock-string-face
+                                font-lock-doc-face)
+                            '(font-lock-comment-face
+                              font-lock-doc-face))))
+
+      ;; Use setf to modify or insert the specific field for the current mode
+      (setf (alist-get major-mode jinx-exclude-faces) excluded-faces)))
+
+  :config
+  ;; Prevent jinx from correcting comments
+  (add-hook 'prog-mode-hook #'my-jinx-prog-mode)
+
+  ;; Ignore 2-character strings/words in Elisp
+  ;; Catches for example "]s"
+  ;; (add-hook 'emacs-lisp-mode-hook #'my-jinx-ignore-2-chars)
+  )
 
 ;; Router functions to handle the active spell checker dynamically
 (defun my-spell-correct ()
@@ -94,30 +127,31 @@
 
 (defun my-setup-spell-checker ()
   "Setup `jinx-mode' or `flyspell-mode' depending on `my-spell-checker'."
-  (if (or (derived-mode-p 'markdown-mode)
-          (derived-mode-p 'org-mode))
-      ;; Other (e.g., Markdown)
-      (let* ((file-name (buffer-file-name (buffer-base-buffer)))
-             (file-name-downcase (when file-name
-                                   (downcase file-name))))
-        (when (and file-name-downcase
-                   (or (string-suffix-p "/readme.md" file-name-downcase)
-                       (string-suffix-p "/readme.org" file-name-downcase)
-                       (string-suffix-p "/changelog.md" file-name-downcase)))
-          ;; (run-with-idle-timer 1 nil #'jinx-mode 1)
-          (if (eq my-spell-checker 'jinx)
-              (when (fboundp 'jinx-mode)
-                (jinx-mode 1))
-            (flyspell-mode 1))))
-    ;; Prog
-    (if (eq my-spell-checker 'jinx)
-        (when (fboundp 'jinx-mode)
-          (jinx-mode 1))
-      ;; TODO remove when?
-      (when (or (derived-mode-p 'yaml-mode)
-                (derived-mode-p 'yaml-ts-mode)
-                (derived-mode-p 'ansible-mode))
-        (flyspell-prog-mode)))))
+  (when (not (derived-mode-p 'conf-mode))
+    (if (or (derived-mode-p 'markdown-mode)
+            (derived-mode-p 'org-mode))
+        ;; Other (e.g., Markdown)
+        (let* ((file-name (buffer-file-name (buffer-base-buffer)))
+               (file-name-downcase (when file-name
+                                     (downcase file-name))))
+          (when (and file-name-downcase
+                     (or (string-suffix-p "/readme.md" file-name-downcase)
+                         (string-suffix-p "/readme.org" file-name-downcase)
+                         (string-suffix-p "/changelog.md" file-name-downcase)))
+            ;; (run-with-idle-timer 1 nil #'jinx-mode 1)
+            (if (eq my-spell-checker 'jinx)
+                (when (fboundp 'jinx-mode)
+                  (jinx-mode 1))
+              (flyspell-mode 1))))
+      ;; Prog
+      (if (eq my-spell-checker 'jinx)
+          (when (fboundp 'jinx-mode)
+            (jinx-mode 1))
+        ;; TODO remove when?
+        (when (or (derived-mode-p 'yaml-mode)
+                  (derived-mode-p 'yaml-ts-mode)
+                  (derived-mode-p 'ansible-mode))
+          (flyspell-prog-mode))))))
 
 (add-hook 'prog-mode-hook #'my-setup-spell-checker)
 (add-hook 'text-mode-hook #'my-setup-spell-checker)
@@ -857,16 +891,14 @@ When FORCE-ALL is non-nil, use all functions."
          ;; to align subsequent lines smoothly with the cursor.
          (text-to-paste (when text
                           ;; TODO fix when the first line has spaces
+                          ;; FIXED: Prepending new-indentation directly to the first
+                          ;; line when is-empty-line is true to ensure correct offset.
                           (replace-regexp-in-string "\n"
                                                     (concat "\n" new-indentation)
                                                     text))))
     (when text-to-paste
       (unwind-protect
           (progn
-            ;; Clear the visual indentation on empty lines to prevent
-            ;; double-indenting the first line before pasting.
-            ;; (when is-empty-line
-            ;;   (delete-region (line-beginning-position) (point)))
             (evil-set-register ?a text-to-paste)
             (if (use-region-p)
                 (evil-visual-paste 1 ?a)
