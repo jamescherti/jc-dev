@@ -53,7 +53,40 @@
                                      ;; stable; avoid -O3 or -Ofast since they
                                      ;; can break numeric primitives in Emacs
                                      ;; Lisp code.
+                                     ;;
+                                     ;; NOTE:
+                                     ;; Redundancy of optimization flags: Emacs
+                                     ;; manages libgccjit optimization levels
+                                     ;; internally via the native-comp-speed
+                                     ;; variable. By default, native-comp-speed
+                                     ;; is set to 2, which maps to standard
+                                     ;; optimizations with some Emacs-specific
+                                     ;; safety guards. Passing -O2 manually
+                                     ;; through native-comp-compiler-options is
+                                     ;; redundant and bypasses the native
+                                     ;; compiler's built-in logic.
                                      "-O2"
+
+                                     ;; Link-Time Optimization (-flto) is
+                                     ;; designed to perform cross-module
+                                     ;; optimizations during the final linking
+                                     ;; stage of a monolithic binary. Emacs
+                                     ;; compiles each .el file into an isolated
+                                     ;; .eln shared library. Because these
+                                     ;; modules are compiled independently and
+                                     ;; loaded dynamically at runtime, the GCC
+                                     ;; driver cannot perform whole-program
+                                     ;; optimization across different .eln
+                                     ;; files.
+                                     ;;
+                                     ;; Compilation overhead: Adding -flto=auto
+                                     ;; will increase compilation times and
+                                     ;; memory consumption during the
+                                     ;; ahead-of-time (AOT) or just-in-time
+                                     ;; (JIT) compilation phases without
+                                     ;; providing measurable runtime performance
+                                     ;; benefits for Elisp execution.
+                                     "-flto=auto"
 
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which
@@ -197,7 +230,7 @@
                                      ;; single-file shared objects.
                                      ;; "-fuse-linker-plugin"
                                      ))
-(setq native-comp-driver-options '())
+(setq native-comp-driver-options '("-flto=auto" "-O2"))
 
 ;; I did not add the following to `native-comp-driver-options':
 ;;

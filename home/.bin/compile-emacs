@@ -26,6 +26,11 @@
 # SOFTWARE.
 #
 
+# 1 to generate and anything else to use it (PGO)
+FPROFILE_GENERATE=0
+
+cd ~/src/forks/emacs/
+
 # shellcheck disable=SC1091
 ID=unknown
 if [[ -f /etc/os-release ]]; then
@@ -868,17 +873,80 @@ main() {
     # profile inconsistencies rather than halting the build with an error.
     #
     # TODO: -fprofile-correction to CFLAGS and LDFLAGS
+    #
+    # 1. Using -flto=auto without PGO
+    # -------------------------------
+    # When you use Link-Time Optimization, you change how the compiler works.
+    # During the initial CFLAGS phase, the compiler does not generate final
+    # machine code. It generates an intermediate representation (GIMPLE).
+    # The actual translation into machine code happens during the linking phase.
+    # When the build system calls the linker, it invokes the GCC compiler driver
+    # to handle that intermediate code. If the compiler driver does not see -O2
+    # in the LDFLAGS, it assumes you want an unoptimized build for that final,
+    # massive compilation step. It defaults to -O0, negating your initial -O2 in
+    # CFLAGS.
+    # Whenever -flto is present in CFLAGS, the exact same -O optimization level
+    # must be present in LDFLAGS.
+    #
+    # 2. Not using -flto=auto at all
+    # ------------------------------
+    # No, you do not need to add the standalone -O2 to your LDFLAGS.
+    # If you execute a standard build without LTO, the compilation process is
+    # traditional. The compiler reads the C source code, applies the -O2
+    # optimizations specified in your CFLAGS, and generates fully optimized,
+    # final machine code directly into the object files (.o).
+    # By the time the build reaches the linking phase, the code optimization is
+    # entirely finished. The linker's only job is to stitch those object files
+    # together into the final Emacs executable. Passing a standalone -O2 to
+    # LDFLAGS in a non-LTO build does nothing, because the linker itself does
+    # not understand compiler optimization heuristics.
 
     # Step 1
-    # fprofile-generate: ensure -fuse-linker-plugin is used
-    export CFLAGS="$CFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE"
-    export LDFLAGS="$LDFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE"
+    if [[ $FPROFILE_GENERATE -ne 0 ]]; then
+      # fprofile-generate: ensure -fuse-linker-plugin is used
+      export CFLAGS="$CFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE"
 
-    # Then recompile with: Step 2
-    # export CFLAGS="$CFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\""
-    # export LDFLAGS="$LDFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction"
+      # TODO: Should fprofile be removed from LDFLAGS?
+      export LDFLAGS="$LDFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
+    else
+      # Then recompile with: Step 2
+      # -fprofile-correction resolves the object generation issue. However, you
+      # still missed the standalone -O2 in your LDFLAGS. The -Wl,-O2 flag only
+      # passes instructions to the linker subsystem (ld). Because you are using
+      # -flto=auto, GCC handles the link phase. It requires the standalone -O2
+      # flag to know which optimization heuristics to apply to the intermediate
+      # representation. Without it, the LTO pass defaults to -O0.
+      #
+      # The placement of -O2 at the end of the LDFLAGS string is completely valid.
+      # The compiler driver parses the arguments correctly regardless of their
+      # position relative to the -Wl linker-specific directives. You have
+      # successfully combined aggressive interprocedural analysis, profile-guided
+      # optimization, and modern security hardening.
+      #
+      # Because this build configuration is prod ready, here is the commit
+      # message:
+      #
+      # build: configure Emacs Phase 2 PGO flags with hardened LTO and linking
+      # optimizations
+      #
+      # Source: The official GNU Compiler Collection (GCC) Manual. Section:
+      # Options That Control Optimization.
+      # Details: The GCC documentation for -flto explicitly states: "To use the
+      # link-time optimizer, -flto and optimization options should be specified
+      # at compile time and during the final link. It is recommended that you
+      # compile all the files participating in the same link with the same
+      # options and also specify those options at link time."
+      # Rationale: During LTO, the linker hands the intermediate representation
+      # (GIMPLE) back to the compiler driver for the actual machine-code
+      # generation. If the compiler driver does not see an -O flag during this
+      # link invocation, it defaults to -O0.
+      # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+      export CFLAGS="$CFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction"
+
+      # TODO: Should fprofile be removed from LDFLAGS?
+      export LDFLAGS="$LDFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction -O2"
+    fi
   fi
-
 
   # Append the OS family
   if [[ $EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM -ne 0 ]]; then
@@ -900,8 +968,8 @@ main() {
   #   source /etc/makepkg.conf
   # fi
 
-  echo "[SOURCE DIR] " "$PWD"
-  echo "[CONFIGURE OPTION] " "${CONFIGURE_ARGS[@]}"
+  echo "[SOURCE DIR]" "$PWD"
+  echo "[CONFIGURE OPTION]" "${CONFIGURE_ARGS[@]}"
   echo "[CFLAGS] $CFLAGS"
   echo "[LDFLAGS] $LDFLAGS"
   echo
@@ -920,6 +988,9 @@ main() {
   set -x
   git clean -fxd
   git reset --hard HEAD
+
+  rm -fr "$FPROFILE_FILE"
+
   ./autogen.sh
 
   ./configure "${CONFIGURE_ARGS[@]}"
