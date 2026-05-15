@@ -313,10 +313,6 @@ extracted, the function returns nil."
 ;; (message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
-;;; Provide
-
-(require 'seq)
-
 ;;; Optimization
 
 (setq minimal-emacs-inhibit-redisplay-during-startup nil)
@@ -957,6 +953,7 @@ extracted, the function returns nil."
 ;;       (add-to-list 'straight-recipe-overrides
 ;;                    (list item :type 'built-in)))))
 
+(require 'seq)
 (defun my-add-packages-to-load-path ()
   "Add my packages to `load-path\=' dynamically.
 Iterates over `my-package-base-directory\=' and adds all subdirectories to
