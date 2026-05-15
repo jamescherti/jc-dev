@@ -263,29 +263,6 @@
 
                                    "-O2"))
 
-(defun my-get-cpu-architecture ()
-  "Return the CPU architecture detected via GCC target help output.
-The detected value is stored in `my-cpu-architecture' and returned as a
-string.
-If GCC is not available or no architecture information can be
-extracted, the function returns nil."
-  (when (executable-find "gcc")
-    (with-temp-buffer
-      (let ((exit-code (call-process "gcc" nil t nil "-march=native"
-                                     "-Q" "--help=target")))
-        (when (zerop exit-code)
-          (goto-char (point-min))
-          (when (re-search-forward
-                 "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
-            (match-string 1)))))))
-
-;; Auto detect the CPU architecture
-(when-let* ((cpu-architecture (my-get-cpu-architecture)))
-  (add-to-list 'native-comp-compiler-options
-               (format "-march=%s" cpu-architecture))
-  (add-to-list 'native-comp-compiler-options
-               (format "-mtune=%s" cpu-architecture)))
-
 ;; Auto detect the CPU architecture
 ;; Alternative: Just let
 ;; (let ((cpu-architecture
@@ -312,6 +289,34 @@ extracted, the function returns nil."
 
 ;; (message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
+
+;;; Auto detect architecture
+
+(defvar my-auto-detect-cpu-architecture t)
+
+(defun my-get-cpu-architecture ()
+  "Return the CPU architecture detected via GCC target help output.
+The detected value is stored in `my-cpu-architecture' and returned as a
+string.
+If GCC is not available or no architecture information can be
+extracted, the function returns nil."
+  (when (executable-find "gcc")
+    (with-temp-buffer
+      (let ((exit-code (call-process "gcc" nil t nil "-march=native"
+                                     "-Q" "--help=target")))
+        (when (zerop exit-code)
+          (goto-char (point-min))
+          (when (re-search-forward
+                 "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
+            (match-string 1)))))))
+
+;; Auto detect the CPU architecture
+(when my-auto-detect-cpu-architecture
+  (when-let* ((cpu-architecture (my-get-cpu-architecture)))
+    (add-to-list 'native-comp-compiler-options
+                 (format "-march=%s" cpu-architecture))
+    (add-to-list 'native-comp-compiler-options
+                 (format "-mtune=%s" cpu-architecture))))
 
 ;;; Optimization
 
@@ -953,13 +958,12 @@ extracted, the function returns nil."
 ;;       (add-to-list 'straight-recipe-overrides
 ;;                    (list item :type 'built-in)))))
 
-(require 'seq)
 (defun my-add-packages-to-load-path ()
-  "Add my packages to `load-path\=' dynamically.
-Iterates over `my-package-base-directory\=' and adds all subdirectories to
-`load-path\=', skipping any directories listed in
-`my-excluded-package-directories\='. Caches the result in
-`my--package-load-path-cache\=' to avoid redundant scanning."
+  "Add my packages to `load-path' dynamically.
+Iterates over `my-package-base-directory' and adds all subdirectories to
+`load-path', skipping any directories listed in
+`my-excluded-package-directories'. Caches the result in
+`my--package-load-path-cache' to avoid redundant scanning."
   ;; (let ((default-directory (expand-file-name "~/src/forks/evil-collection/")))
   ;;   (add-to-list 'load-path default-directory)
   ;;   (push default-directory load-path)
@@ -981,7 +985,7 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
                     nil)))
           (discovered-paths nil))
       (when items
-        (seq-doseq (dir items)
+        (dolist (dir items)
           (let ((dir-name (file-name-nondirectory dir)))
             (when (and (file-directory-p dir)
                        (not (member dir-name my-excluded-package-directories)))
@@ -1002,7 +1006,7 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
     (when (file-exists-p local-path)
       (push "~/src/fork/shell-pop-el" load-path)))
 
-  (seq-doseq (path my--package-load-path-cache)
+  (dolist (path my--package-load-path-cache)
     ;; (push path load-path)
     (push path load-path)))
 
