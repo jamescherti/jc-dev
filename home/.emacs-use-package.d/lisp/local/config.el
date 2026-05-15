@@ -230,7 +230,6 @@
                                      ;; single-file shared objects.
                                      ;; "-fuse-linker-plugin"
                                      ))
-(setq native-comp-driver-options '("-flto=auto" "-O2"))
 
 ;; I did not add the following to `native-comp-driver-options':
 ;;
@@ -281,7 +280,17 @@
                                    ;; -Wl,--as-needed: Prevents the linker from
                                    ;; recording dependencies on libraries that
                                    ;; are not actually used by the code.
-                                   "-Wl,--as-needed"))
+                                   "-Wl,--as-needed"
+
+                                   ;; TODO The Compile-Time Drag: -flto=auto
+                                   ;; remains the bottleneck. Because Link-Time
+                                   ;; Optimization cannot perform cross-module
+                                   ;; optimization on dynamically loaded .eln
+                                   ;; files, you are paying a noticeable penalty
+                                   ;; in background compilation time and CPU
+                                   ;; usage for zero runtime execution benefit.
+                                   "-flto=auto"
+                                   "-O2"))
 
 (defun my-get-cpu-architecture ()
   "Return the CPU architecture detected via GCC target help output.
