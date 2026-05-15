@@ -94,7 +94,7 @@ export CFLAGS="$CFLAGS -fomit-frame-pointer"
 #   CURRENT_BRANCH=$(git branch --show-current)
 #   CURRENT_TAG=$(git describe --tags --exact-match 2>/dev/null)
 #   if [ "$CURRENT_BRANCH" = "$TARGET_BRANCH" ] \
-#     || [ "$CURRENT_TAG" = "$TARGET_TAG" ]; then
+  #     || [ "$CURRENT_TAG" = "$TARGET_TAG" ]; then
 #     # -Wno-deprecated-declarations: Emacs 30.2 uses
 #     # 'gdk_pixbuf_new_from_xpm_data', which is deprecated in newer GTK3/GDK
 #     # versions. This is an upstream Emacs decision for backward compatibility
@@ -133,30 +133,6 @@ export LDFLAGS="-Wl,-O2 -Wl,--sort-common \
 if [[ $ID == "debian" ]] && [[ $VERSION_ID = "13" ]]; then
   export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
   export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
-fi
-
-if [[ $ID = DISABLEDarch ]]; then
-  # Arch Linux
-  export CC=clang
-  export CXX=clang++
-  export AR=llvm-ar
-  export NM=llvm-nm
-  export LD=ld.lld
-  export RANLIB=ranlib
-  export CFLAGS="$CFLAGS -flto=full"
-  export LDFLAGS="-flto=full"
-else
-  # -O2                    # Safe, good optimization level; avoids some aggressive optimizations of -O3
-  # -pipe                  # Speeds up compilation by using pipes instead of temporary files
-  # -march=native          # Uses CPU-specific instructions; improves performance on your machine but reduces portability
-  # -mtune=native          # Tunes instruction scheduling for your CPU
-  # Optimizes for your specific CPU.
-  # Drawback: Reduces portability; binary may not run on older CPUs.
-  # Action: Keep for personal builds; remove for distributing binaries.
-  #
-  # -flto=auto              # Full link-time optimization; reduces binary size and can improve runtime performance
-  export CFLAGS="$CFLAGS -flto=auto"
-  export LDFLAGS="$LDFLAGS -flto=auto"
 fi
 
 # The -fno-semantic-interposition flag is an advanced compiler option that
@@ -354,7 +330,7 @@ export LDFLAGS="$LDFLAGS -Wl,-z,now -Wl,-z,relro"
 # IMPORTANT: These flags: increase build time, increase compiler RAM usage, may
 # trigger GCC bugs, rarely improve runtime performance measurably. These are
 # essentially wasted on Emacs.
-export CFLAGS="$CFLAGS -fgraphite-identity -floop-nest-optimize"
+# export CFLAGS="$CFLAGS -fgraphite-identity -floop-nest-optimize"
 
 # -fdevirtualize-at-ltrans: This flag is used during Link Time Optimization
 # (LTO) to devirtualize C++ virtual function calls. Because the core of Emacs is
@@ -442,6 +418,7 @@ export CFLAGS="$CFLAGS -fipa-pta"
 # linking or fail in confusing ways. Explicitly declaring the flag forced a hard
 # error if the plugin was missing, rather than allowing a silent downgrade.
 export CFLAGS="$CFLAGS -fuse-linker-plugin"
+export LDFLAGS="$LDFLAGS -fuse-linker-plugin"
 
 # Using the Memory Pool System (MPS) in Emacs introduces several drawbacks. It
 # is largely experimental, so some Emacs packages or internal subsystems may not
@@ -822,18 +799,18 @@ detect_git_branch() {
 operating_system() {
   case "$OSTYPE" in
   darwin*)
-    echo macos
-    ;;
+  echo macos
+  ;;
   *)
-    if [[ -f /etc/os-release ]]; then
-      # shellcheck disable=SC1091
-      source /etc/os-release
-      test "$ID" = "archlinux" && ID=arch
-      echo "$ID"
-    else
-      exit 1
-    fi
-    ;;
+  if [[ -f /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    source /etc/os-release
+    test "$ID" = "archlinux" && ID=arch
+    echo "$ID"
+  else
+    exit 1
+  fi
+  ;;
   esac
 }
 
@@ -849,10 +826,59 @@ main() {
   trap "error_handler" ERR
   set -o errtrace
 
-  if ! git remote -v | grep '/emacs '; then
-    echo "This is not an Emacs repository." >&2
-    exit 1
+  # if ! git remote -v | grep '/emacs '; then
+  #   echo "This is not an Emacs repository." >&2
+  #   exit 1
+  # fi
+
+  detect_git_branch
+
+  if [[ $ID = DISABLEDarch ]]; then
+    # Arch Linux
+    export CC=clang
+    export CXX=clang++
+    export AR=llvm-ar
+    export NM=llvm-nm
+    export LD=ld.lld
+    export RANLIB=ranlib
+    export CFLAGS="$CFLAGS -flto=full"
+    export LDFLAGS="-flto=full"
+  else
+    # -O2                    # Safe, good optimization level; avoids some aggressive optimizations of -O3
+    # -pipe                  # Speeds up compilation by using pipes instead of temporary files
+    # -march=native          # Uses CPU-specific instructions; improves performance on your machine but reduces portability
+    # -mtune=native          # Tunes instruction scheduling for your CPU
+    # Optimizes for your specific CPU.
+    # Drawback: Reduces portability; binary may not run on older CPUs.
+    # Action: Keep for personal builds; remove for distributing binaries.
+    #
+    # -flto=auto              # Full link-time optimization; reduces binary size and can improve runtime performance
+    # export CFLAGS="$CFLAGS -flto=auto"
+    # export LDFLAGS="$LDFLAGS -flto=auto"
+
+    FPROFILE_DIR="$HOME/.flto/emacs"
+    FPROFILE_FILE="$FPROFILE_DIR$EMACS_BRANCH"
+    mkdir -p "$FPROFILE_DIR"
+
+    # Notice the addition of -fprofile-correction. This is highly recommended
+    # when compiling Emacs with PGO. Emacs handles async processes and threads
+    # (if compiled with --with-threads), which can occasionally cause
+    # multithreaded profile data counters to become slightly inconsistent. The
+    # -fprofile-correction flag tells GCC to silently correct these minor
+    # profile inconsistencies rather than halting the build with an error.
+    #
+    # TODO: -fprofile-correction to CFLAGS and LDFLAGS
+
+    # Step 1
+    # fprofile-generate: ensure -fuse-linker-plugin is used
+    export CFLAGS="$CFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE"
+    export LDFLAGS="$LDFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE"
+
+    # Then recompile with: Step 2
+    # export CFLAGS="$CFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\""
+    # export LDFLAGS="$LDFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction"
   fi
+
 
   # Append the OS family
   if [[ $EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM -ne 0 ]]; then
@@ -862,7 +888,6 @@ main() {
   EMACS_INSTALL_PREFIX="${EMACS_INSTALL_PREFIX}/${SOFTWARE_NAME}"
 
   if [[ $EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH -ne 0 ]]; then
-    detect_git_branch
     EMACS_INSTALL_PREFIX="$EMACS_INSTALL_PREFIX$EMACS_BRANCH"
     CONFIGURE_ARGS+=("--prefix=${EMACS_INSTALL_PREFIX}")
   fi
@@ -911,11 +936,11 @@ main() {
   # in a production environment.
   make install-strip
 
-  set +x
+  # set +x
 
-  git clean -fxd &>/dev/null || true
-  git reset --hard HEAD &>/dev/null || true
-  git gc --prune=now &>/dev/null || true
+  # git clean -fxd &>/dev/null || true
+  # git reset --hard HEAD &>/dev/null || true
+  # git gc --prune=now &>/dev/null || true
 }
 
 main "$@"
