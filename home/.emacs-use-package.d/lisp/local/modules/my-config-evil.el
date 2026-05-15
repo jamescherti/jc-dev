@@ -58,7 +58,7 @@
             ;;    font-lock-string-face
             ;;    ))
             ((derived-mode-p 'prog-mode)
-             '(;; font-lock-comment-face
+             '(font-lock-comment-face
                font-lock-string-face
                ;; font-lock-doc-face
                )))))

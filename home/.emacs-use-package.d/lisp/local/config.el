@@ -67,27 +67,6 @@
                                      ;; compiler's built-in logic.
                                      "-O2"
 
-                                     ;; Link-Time Optimization (-flto) is
-                                     ;; designed to perform cross-module
-                                     ;; optimizations during the final linking
-                                     ;; stage of a monolithic binary. Emacs
-                                     ;; compiles each .el file into an isolated
-                                     ;; .eln shared library. Because these
-                                     ;; modules are compiled independently and
-                                     ;; loaded dynamically at runtime, the GCC
-                                     ;; driver cannot perform whole-program
-                                     ;; optimization across different .eln
-                                     ;; files.
-                                     ;;
-                                     ;; Compilation overhead: Adding -flto=auto
-                                     ;; will increase compilation times and
-                                     ;; memory consumption during the
-                                     ;; ahead-of-time (AOT) or just-in-time
-                                     ;; (JIT) compilation phases without
-                                     ;; providing measurable runtime performance
-                                     ;; benefits for Elisp execution.
-                                     "-flto=auto"
-
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which
                                      ;; reduces their size on disk and speeds up
@@ -282,14 +261,6 @@
                                    ;; are not actually used by the code.
                                    "-Wl,--as-needed"
 
-                                   ;; TODO The Compile-Time Drag: -flto=auto
-                                   ;; remains the bottleneck. Because Link-Time
-                                   ;; Optimization cannot perform cross-module
-                                   ;; optimization on dynamically loaded .eln
-                                   ;; files, you are paying a noticeable penalty
-                                   ;; in background compilation time and CPU
-                                   ;; usage for zero runtime execution benefit.
-                                   "-flto=auto"
                                    "-O2"))
 
 (defun my-get-cpu-architecture ()
@@ -1115,7 +1086,9 @@ Iterates over `my-package-base-directory\=' and adds all subdirectories to
                                                      haskell-mode-hook
                                                      ;; My preference
                                                      sh-mode-hook
-                                                     bash-ts-mode-hook))
+                                                     bash-ts-mode-hook
+                                                     php-mode
+                                                     php-ts-mode))
 
 (setq lightemacs-outline-minor-target-hooks '(emacs-lisp-mode-hook
                                               lisp-mode-hook

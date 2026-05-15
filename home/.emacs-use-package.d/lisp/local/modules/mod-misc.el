@@ -27,6 +27,7 @@
 ;;; Require
 
 (require 'my-defun)
+(require 'cl-lib)
 (eval-and-compile
   (require 'lightemacs-use-package))
 (require 'seq)
@@ -4573,6 +4574,20 @@ environment for accurate linting."
   :mode ("\\.j2\\'" . jinja2-mode))
 
 ;;; org
+
+(defun my-hide-rng-what-schema-message (orig-fun &rest args)
+  "Hide `rng-what-schema' message.
+ORIG-FUN is the function and ARGS are its arguments."
+  (cl-letf* ((old-msg (symbol-function 'message))
+             ((symbol-function 'message)
+              (lambda (format-string &rest msg-args)
+                (unless (and (stringp format-string)
+                             (string-match-p "Using .*schema" format-string))
+                  (apply old-msg format-string msg-args)))))
+    (apply orig-fun args)))
+
+(with-eval-after-load 'rng-loc
+  (advice-add 'rng-what-schema :around #'my-hide-rng-what-schema-message))
 
 ;; Must be evaluated before Org is loaded
 (with-eval-after-load 'org
