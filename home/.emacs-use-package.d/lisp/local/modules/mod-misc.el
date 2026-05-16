@@ -2955,19 +2955,46 @@ and suppresses all interactive confirmation prompts during teardown."
   t
   )
 
+;; Highlight sh-mode and bash-ts-mode $variables
+
+(progn
+  (defun sh-script-match-variables (limit)
+    "Search forward for shell variables up to LIMIT, skipping comments and single quotes."
+    (catch 'found
+      (while (re-search-forward
+              "\\$\\({#?\\)?\\([[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)"
+              limit t)
+        (let ((state (syntax-ppss)))
+          ;; (nth 4 state) is non-nil if we are inside a comment
+          ;; (nth 3 state) is the string delimiter character (e.g., ?\')
+          (unless (or (nth 4 state)
+                      (eq (nth 3 state) ?\'))
+            (throw 'found t))))
+      nil))
+
+  ;; This one works, but it also highlights the variable that are in comments
+  (defvar sh-script-extra-font-lock-keywords
+    '((sh-script-match-variables
+       (2 font-lock-variable-name-face prepend))))
+
+  (defun sh-script-extra-font-lock-activate ()
+    "Activate additional font-locking for variables in double-quoted strings."
+    (font-lock-add-keywords nil sh-script-extra-font-lock-keywords))
+
+  (add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
+  (add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate))
 
 ;; Highlight $variables
 ;; This one works, but it also highlights the variable that are in comments
-(defvar sh-script-extra-font-lock-keywords
-  '(("\\$\\({#?\\)?\\([[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)"
-     (2 font-lock-variable-name-face prepend))))
-
-(defun sh-script-extra-font-lock-activate ()
-  "Activate additional font-locking for variables in double-quoted strings."
-  (font-lock-add-keywords nil sh-script-extra-font-lock-keywords))
-
-(add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
-(add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate)
+;; NOTE DEPRECATED
+;; (defvar sh-script-extra-font-lock-keywords
+;;   '(("\\$\\({#?\\)?\\([[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)"
+;;      (2 font-lock-variable-name-face prepend))))
+;; (defun sh-script-extra-font-lock-activate ()
+;;   "Activate additional font-locking for variables in double-quoted strings."
+;;   (font-lock-add-keywords nil sh-script-extra-font-lock-keywords))
+;; (add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
+;; (add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate)
 
 ;; When auto-mode-alist is bypassed, use a hook function
 (defun ansible-detect-and-enable-mode ()
