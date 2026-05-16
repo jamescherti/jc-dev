@@ -5409,6 +5409,19 @@ are editing by falling back to another visible file buffer."
     ("\\.php3\\'" . php-mode)
     ("\\.php\\'" . php-mode)))
 
+;;; savefold
+
+(lightemacs-use-package savefold
+  :init
+  (setq savefold-backends '(outline org hideshow treesit-fold markdown))
+
+  ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
+  (setq savefold-directory
+        (expand-file-name "savefold" my-shared-user-emacs-directory))
+
+  :config
+  (savefold-mode 1))
+
 ;;; Provide
 
 (provide 'mod-misc)
