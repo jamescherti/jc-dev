@@ -81,6 +81,18 @@ atexit() {
 trap 'atexit' EXIT INT TERM HUP QUIT
 
 #-------------------------------------------------------------------------------
+# Get Mozilla dictionaries paths
+#-------------------------------------------------------------------------------
+get_mozilla_dicts_paths() {
+  local search_dir
+  for search_dir in "$@"; do
+    if [[ -d "$search_dir" ]]; then
+      find "$search_dir" -maxdepth 2 -name persdict.dat
+    fi
+  done
+}
+
+#-------------------------------------------------------------------------------
 # Generate unified spell file
 #-------------------------------------------------------------------------------
 gen_unified_spell_file() {
@@ -111,34 +123,28 @@ gen_unified_spell_file() {
   fi
 
   # FIREFOX
-  local local_dicts
-  local local_path
-  for local_path in "$HOME/.mozilla/firefox" \
-    "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox"; do
-    if [[ -d "$local_path" ]]; then
-      readarray -t local_dicts < \
-        <(find "$local_path" -maxdepth 2 -name persdict.dat)
-      for item in "${local_dicts[@]}"; do
-        cat "$item" >>"$TMP_FILE"
-        LIST_FIREFOX_DICTS+=("$item")
-      done
-      FIREFOX=1
-    fi
-  done
+  readarray -t LIST_FIREFOX_DICTS < \
+    <(get_mozilla_dicts_paths "$HOME/.mozilla/firefox" \
+    "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox")
+
+  if [[ ${#LIST_FIREFOX_DICTS[@]} -gt 0 ]]; then
+    FIREFOX=1
+    for item in "${LIST_FIREFOX_DICTS[@]}"; do
+      cat "$item" >>"$TMP_FILE"
+    done
+  fi
 
   # THUNDERBIRD
-  for local_path in "$HOME/.thunderbird" \
-    "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird"; do
-    if [[ -d "$local_path" ]]; then
-      readarray -t local_dicts < \
-        <(find "$local_path" -maxdepth 2 -name persdict.dat)
-      for item in "${local_dicts[@]}"; do
-        cat "$item" >>"$TMP_FILE"
-        LIST_THUNDERBIRD_DICTS+=("$item")
-      done
-      THUNDERBIRD=1
-    fi
-  done
+  readarray -t LIST_THUNDERBIRD_DICTS < \
+    <(get_mozilla_dicts_paths "$HOME/.thunderbird" \
+    "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird")
+
+  if [[ ${#LIST_THUNDERBIRD_DICTS[@]} -gt 0 ]]; then
+    THUNDERBIRD=1
+    for item in "${LIST_THUNDERBIRD_DICTS[@]}"; do
+      cat "$item" >>"$TMP_FILE"
+    done
+  fi
 
   # Unified spell file (Source of truth)
   cat "$TMP_FILE" | grep -v '^$' | grep -E '^[[:alpha:]]+$' \
@@ -240,32 +246,24 @@ main() {
     remove_exact_line "$VIM_SPELL_FILE" "$2"
     remove_exact_line "$ENCHANT_FILE" "$2"
 
-    local local_path
     local file
-    local local_dicts
 
     # Firefox
-    for local_path in "$HOME/.mozilla/firefox" \
-      "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox"; do
-      if [[ -d "$local_path" ]]; then
-        readarray -t local_dicts < \
-          <(find "$local_path" -maxdepth 2 -name persdict.dat)
-        for file in "${local_dicts[@]}"; do
-          remove_exact_line "$file" "$2"
-        done
-      fi
+    readarray -t LIST_FIREFOX_DICTS < \
+      <(get_mozilla_dicts_paths "$HOME/.mozilla/firefox" \
+      "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox")
+
+    for file in "${LIST_FIREFOX_DICTS[@]}"; do
+      remove_exact_line "$file" "$2"
     done
 
     # Thunderbird
-    for local_path in "$HOME/.thunderbird" \
-      "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird"; do
-      if [[ -d "$local_path" ]]; then
-        readarray -t local_dicts < \
-          <(find "$local_path" -maxdepth 2 -name persdict.dat)
-        for file in "${local_dicts[@]}"; do
-          remove_exact_line "$file" "$2"
-        done
-      fi
+    readarray -t LIST_THUNDERBIRD_DICTS < \
+      <(get_mozilla_dicts_paths "$HOME/.thunderbird" \
+      "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird")
+
+    for file in "${LIST_THUNDERBIRD_DICTS[@]}"; do
+      remove_exact_line "$file" "$2"
     done
   fi
 }
