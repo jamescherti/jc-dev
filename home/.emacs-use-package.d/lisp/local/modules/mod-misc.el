@@ -937,7 +937,8 @@ WIDTH is the tab width."
 
   ;; This fixes the skipping when scrolling long org documents
   ;; NOTE: MANAGED BY MINIMAL-EMACS
-  (setq scroll-conservatively most-positive-fixnum)
+  ;; (setq scroll-conservatively most-positive-fixnum)
+  (setq scroll-conservatively 20)
 
   ;; TODO put them back
   ;;(setq eldoc-idle-delay 0.5)
@@ -4403,7 +4404,8 @@ environment for accurate linting."
     (let ((coding-system-for-write 'utf-8-emacs)
           (write-region-annotate-functions nil)
           (write-region-post-annotation-function nil))
-      (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent)))
+      (let ((inhibit-quit t))
+        (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent))))
   (apply fn args))
 (with-eval-after-load 'shell-pop
   (advice-add 'shell-pop :around #'my-around-shell-pop))

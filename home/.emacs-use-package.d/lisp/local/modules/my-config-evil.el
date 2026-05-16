@@ -3052,6 +3052,32 @@ Accepts any arguments so it can be used as advice or a hook."
   (advice-add 'outline-move-subtree-up :after #'my-evil-refresh-search-highlight)
   (advice-add 'outline-move-subtree-down :after #'my-evil-refresh-search-highlight))
 
+;;; copy the whole buffer
+
+;; (defun my-copy-whole-buffer ()
+;;   "Copy the entire buffer to the kill-ring without moving the cursor."
+;;   (interactive)
+;;   (save-excursion
+;;     (kill-new (buffer-substring-no-properties (point-min) (point-max))))
+;;   (message "Buffer copied to kill-ring"))
+
+(defun my-copy-whole-buffer-evil ()
+  "Copy the entire buffer without moving the cursor and sync with Evil registers."
+  (interactive)
+  (save-excursion
+    (let ((text (buffer-substring-no-properties (point-min) (point-max))))
+      ;; Copy to the standard Emacs kill-ring / system clipboard
+      (kill-new text)
+      ;; Force sync with Evil's yank register (0) and default register (")
+      (when (fboundp 'evil-set-register)
+        (evil-set-register ?\" text)
+        (evil-set-register ?0 text))))
+  (message "Buffer copied for Evil paste."))
+
+;; Example binding to C-c b c
+;; (global-set-key (kbd "C-c b c") 'my-copy-whole-buffer-evil)
+(evil-define-key 'normal 'global (kbd "<leader>cb") #'my-copy-whole-buffer)
+
 ;;; Provide
 
 (provide 'my-config-evil)
