@@ -2961,9 +2961,9 @@ and suppresses all interactive confirmation prompts during teardown."
   (defun sh-script-match-variables (limit)
     "Search forward for shell variables up to LIMIT, skipping comments and single quotes."
     (catch 'found
-      (while (re-search-forward
-              "\\$\\({#?\\)?\\([[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)"
-              limit t)
+      ;; The regex now matches ${anything_except_newline_and_closing_brace}
+      ;; or standard unbracketed variables like $var, $1, $#
+      (while (re-search-forward "\\$\\({[^}\n]+}\\|[[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)" limit t)
         (let ((state (syntax-ppss)))
           ;; (nth 4 state) is non-nil if we are inside a comment
           ;; (nth 3 state) is the string delimiter character (e.g., ?\')
@@ -2975,7 +2975,7 @@ and suppresses all interactive confirmation prompts during teardown."
   ;; This one works, but it also highlights the variable that are in comments
   (defvar sh-script-extra-font-lock-keywords
     '((sh-script-match-variables
-       (2 font-lock-variable-name-face prepend))))
+       (0 font-lock-variable-name-face prepend))))
 
   (defun sh-script-extra-font-lock-activate ()
     "Activate additional font-locking for variables in double-quoted strings."
@@ -2984,9 +2984,9 @@ and suppresses all interactive confirmation prompts during teardown."
   (add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
   (add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate))
 
+;; NOTE: DEPRECATED
 ;; Highlight $variables
 ;; This one works, but it also highlights the variable that are in comments
-;; NOTE DEPRECATED
 ;; (defvar sh-script-extra-font-lock-keywords
 ;;   '(("\\$\\({#?\\)?\\([[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)"
 ;;      (2 font-lock-variable-name-face prepend))))
