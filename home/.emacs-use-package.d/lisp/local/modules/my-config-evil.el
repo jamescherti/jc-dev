@@ -825,117 +825,6 @@ When FORCE-ALL is non-nil, use all functions."
 ;; (evil-define-key 'normal 'global (kbd "gD") 'eviljump-goto-definition-force)
 
 
-;;; Paste with current indentation
-
-(defun evil-clipboard--string-unindent (input-str)
-  "Unindent INPUT-STR by removing the minimal common indentation."
-  (let (;; To split the input string into individual lines for processing.
-        ;; It allows iterating over each line to measure its leading whitespace
-        ;; independently.
-        (lines (split-string input-str "\n"))
-
-        ;; To track the smallest amount of leading whitespace found across all
-        ;; lines. It starts as nil so the first non-empty line encountered can
-        ;; establish the initial baseline value.
-        (min-indent nil))
-
-    ;; Find the minimum indentation
-    (dolist (line lines)
-      ;; The line must not be empty
-      (unless (string-match-p "^[ \t]*$" line)
-        (string-match "^[ \t]*" line)
-        ;; And the indent should be lower than the one that has been found
-        ;; previously
-        (setq min-indent (if min-indent
-                             (min min-indent (match-end 0))
-                           (match-end 0)))))
-
-    (setq min-indent (or min-indent 0))
-
-    ;; Remove the minimum indentation from all lines
-    (mapconcat (lambda (line)
-                 (if (>= (length line) min-indent)
-                     (substring line min-indent)
-                   line))
-               lines
-               "\n")))
-
-(defun evilclipboard-paste-with-current-indentation ()
-  "Paste text from the clipboard with the current line's indentation."
-  (interactive)
-  (let* (;; To preserve the user's existing data in register 'a'.
-         ;; The function temporarily overwrites register 'a' to perform the
-         ;; paste, so backing it up ensures the data can be restored in the
-         ;; unwind-protect block.
-         (original-register-contents (evil-get-register ?a t))
-
-         ;; Check if the current line is entirely empty or just whitespace up
-         ;; to the cursor. Do not apply this logic if replacing a visual region.
-         (is-empty-line (and (not (use-region-p))
-                             (string-match-p "^[ \t]*$"
-                                             (buffer-substring-no-properties
-                                              (line-beginning-position) (point)))))
-
-         ;; Create the literal whitespace string that will be prepended to
-         ;; the pasted lines. It relies exclusively on the physical cursor
-         ;; position (current-column) to set the exact visual depth required.
-         (new-indentation (make-string (current-column) ?\s))
-
-         ;; Fetch the text the user wants to paste from the clipboard. Using
-         ;; ignore-errors prevents the function from crashing if the kill ring
-         ;; happens to be completely empty.
-         (kill-ring-content (ignore-errors (current-kill 0)))
-
-         ;; Prepare the raw clipboard text by stripping its original
-         ;; formatting. It removes text properties, trims trailing newlines, and
-         ;; unindents the string so it is neutral and ready for the new
-         ;; indentation block.
-         (text (when kill-ring-content
-                 (evil-clipboard--string-unindent (string-trim-right
-                                                   (substring-no-properties
-                                                    kill-ring-content)
-                                                   "\n"))))
-
-         ;; Construct the final string that will be inserted into the buffer.
-         ;; If pasting on an empty line, treat the first line like all others
-         ;; by prepending new-indentation. Otherwise, only apply it to newlines
-         ;; to align subsequent lines smoothly with the cursor.
-         (text-to-paste (when text
-                          ;; TODO fix when the first line has spaces
-                          ;; FIXED: Prepending new-indentation directly to the first
-                          ;; line when is-empty-line is true to ensure correct offset.
-                          (replace-regexp-in-string "\n"
-                                                    (concat "\n" new-indentation)
-                                                    text))))
-    (when text-to-paste
-      (unwind-protect
-          (progn
-            (evil-set-register ?a text-to-paste)
-            (if (use-region-p)
-                (evil-visual-paste 1 ?a)
-              (evil-paste-before 1 ?a)
-              (when evil-move-cursor-back
-                (forward-char 1))))
-        (when original-register-contents
-          (evil-set-register ?a original-register-contents))))))
-
-(defun evilclipboard-paste-with-current-indentation-restore-point ()
-  "Paste text from the clipboard with the current line's indentation.
-This function also restores window start and point when pasting multiple lines."
-  (interactive)
-  (if (minibufferp)
-      (let ((evil-move-cursor-back nil))
-        (evil-paste-before 1))
-    (lightemacs-save-window-hscroll
-      (lightemacs-save-window-start
-        (save-mark-and-excursion
-          (evilclipboard-paste-with-current-indentation))))))
-
-;; (define-key evil-insert-state-map (kbd "C-a p") 'evilclipboard-paste-with-current-indentation-restore-point)
-;; (define-key evil-insert-state-map (kbd "C-a C-p") 'evilclipboard-paste-with-current-indentation-restore-point)
-
-(evil-define-key 'insert 'global (kbd "C-v") 'evilclipboard-paste-with-current-indentation-restore-point)
-
 ;;; Copy with without indentation
 
 (defun evilclipboard-evil-yank-region-unindented ()
@@ -2654,6 +2543,29 @@ If COUNT is given, move COUNT - 1 lines downward first."
              bufferwizard-hl-todo-local-mode)
 
   :init
+  ;;; Paste with current indentation
+  (global-set-key (kbd "C-v") 'bufferwizard-paste-indented)
+  (evil-define-key 'insert 'global (kbd "C-v") #'bufferwizard-paste-indented)
+
+  ;; (defun evil-clipboard-paste-adapter (text)
+  ;;   "Insert TEXT using Evil's paste mechanics.
+  ;; Temporarily uses register 'a' to perform `evil-paste-before`, restoring
+  ;; the register's original contents afterward."
+  ;;   (let ((original-register-contents (evil-get-register ?a t)))
+  ;;     (unwind-protect
+  ;;         (progn
+  ;;           (evil-set-register ?a text)
+  ;;           ;; The core function already deletes the active region,
+  ;;           ;; so we only need to call `evil-paste-before`.
+  ;;           (evil-paste-before 1 ?a)
+  ;;           (when (bound-and-true-p evil-move-cursor-back)
+  ;;             (forward-char 1)))
+  ;;       (when original-register-contents
+  ;;         (evil-set-register ?a original-register-contents)))))
+  ;;
+  ;; ;; Assign the adapter to the global paste variable
+  ;; (setq clipboard-paste-function #'evil-clipboard-paste-adapter)
+
   (add-hook-text-editing-modes #'bufferwizard-hl-todo-local-mode)
 
   ;; Indirect buffer
