@@ -756,237 +756,76 @@ TO-STRING."
 
 (defun indentnav--keep-searching-until-empty (_initial-indentation)
   "Return t when the current line is empty."
-  (not (string= (string-trim-left (buffer-substring-no-properties (line-beginning-position)
-                                                                  (line-end-position)))
-                "")))
+  (looking-at-p "^\\s-*$"))
 
 (defun indentnav--keep-searching-until-indent-lower (initial-indentation)
-  "Return t when the indentation is >= than INITIAL-INDENTATION.
-It also returns t when it is empty."
-  (or (string= (string-trim-left (buffer-substring-no-properties
-                                  (line-beginning-position)
-                                  (line-end-position)))
-               "")
+  "Return t when the indentation is >= INITIAL-INDENTATION, or the line is empty."
+  (or (looking-at-p "^\\s-*$")
       (>= (current-indentation) initial-indentation)))
 
-(defun indentnav--find-line (direction func-keep-searching)
-  "Get the line number of the previous/next line with lower indentation.
-
-If DIRECTION is positive, move forward; if negative, move backward.
-
-The FUNC-KEEP-SEARCHING function considers lines with lower indentation,
-skipping empty lines. Returns the line number of the identified line."
-  (when (>= direction 0) (setq direction 1))
-  (when (< direction 0) (setq direction -1))
+(defun indentnav--find-pos (direction func-keep-searching)
+  "Get the buffer position of the previous/next line with lower indentation.
+DIRECTION is 1 for forward, -1 for backward.
+FUNC-KEEP-SEARCHING is a predicate function called with the initial indentation.
+Returns the buffer position (point) instead of line number for performance."
+  (setq direction (if (>= direction 0) 1 -1))
   (save-excursion
-    (let* ((initial-indentation (current-indentation)))
+    (let ((initial-indentation (current-indentation)))
       (while (and (not (if (> direction 0) (eobp) (bobp)))
                   (zerop (forward-line direction))
                   (funcall func-keep-searching initial-indentation))))
-    (line-number-at-pos)))
-
-(defun indentnav--goto-line (line &optional buffer relative)
-  "Go to LINE, counting from line 1 at beginning of buffer.
-
-If optional argument BUFFER is non-nil, switch to that buffer and
-move to line LINE there.
-
-If optional argument RELATIVE is non-nil, counting starts at the beginning
-of the accessible portion of the (potentially narrowed) buffer.
-
-If the variable `widen-automatically' is non-nil, cancel narrowing and
-leave all lines accessible.  If `widen-automatically' is nil, just move
-point to the edge of visible portion and don't change the buffer bounds.
-
-Prior to moving point, this function sets the mark (without
-activating it), unless Transient Mark mode is enabled and the
-mark is already active.
-
-This function is usually the wrong thing to use in a Lisp program.
-What you probably want instead is something like:
-  (goto-char (point-min))
-  (forward-line (1- N))
-If at all possible, an even better solution is to use char counts
-rather than line counts."
-  ;; Switch to the desired buffer, one way or another.
-  (if buffer
-      (let ((window (get-buffer-window buffer)))
-        (if window (select-window window)
-          (switch-to-buffer-other-window buffer))))
-  ;; Leave mark at previous position
-  (or (region-active-p) (push-mark))
-  ;; Move to the specified line number in that buffer.
-  (let ((pos (save-restriction
-               (unless relative (widen))
-               (goto-char (point-min))
-               (if (eq selective-display t)
-                   (re-search-forward "[\n\C-m]" nil 'end (1- line))
-                 (forward-line (1- line)))
-               (point))))
-    (when (and (not relative)
-               (buffer-narrowed-p)
-               widen-automatically
-               ;; Position is outside narrowed part of buffer
-               (or (> (point-min) pos) (> pos (point-max))))
-      (widen))
-    (goto-char pos)))
+    (point)))
 
 (defun indentnav--move (direction func-keep-searching)
-  "Move to the previous/next line with lower indentation.
-If DIRECTION is positive, move forward; if negative, move backward.
-The FUNC-KEEP-SEARCHING function considers lines with lower indentation,
-skipping empty lines. Returns the line number of the identified line."
+  "Move to the previous/next line matching FUNC-KEEP-SEARCHING criteria.
+DIRECTION > 0 moves forward; < 0 moves backward."
   (let ((saved-column (current-column))
-        (line-number (indentnav--find-line direction func-keep-searching)))
-    (when line-number
-      (indentnav--goto-line line-number)
+        (target-pos (indentnav--find-pos direction func-keep-searching)))
+    (when target-pos
+      (goto-char target-pos)
       (move-to-column saved-column))))
 
 ;;;###autoload
 (defun indentnav-backward-to-lower-indentation ()
   "Move backward to the lower indentation."
   (interactive)
-  (indentnav--move -1 'indentnav--keep-searching-until-indent-lower))
+  (indentnav--move -1 #'indentnav--keep-searching-until-indent-lower))
 
 ;;;###autoload
 (defun indentnav-forward-to-lower-indentation ()
   "Move forward to the lower indentation."
   (interactive)
-  (indentnav--move 1 'indentnav--keep-searching-until-indent-lower))
-
-;;;###autoload
-;;(defun indentnav-select-same-indentation ()
-;;  "Select the same indentation."
-;;  (interactive)
-;;  (indentnav-select-current 'indentnav--keep-searching-until-indent-lower))
+  (indentnav--move 1 #'indentnav--keep-searching-until-indent-lower))
 
 ;;;###autoload
 (defun indentnav-backward-to-empty-line ()
   "Move backward to empty line."
   (interactive)
-  (indentnav--move -1 'indentnav--keep-searching-until-empty))
+  (indentnav--move -1 #'indentnav--keep-searching-until-empty))
 
 ;;;###autoload
 (defun indentnav-forward-to-empty-line ()
   "Move forward to empty line."
   (interactive)
-  (indentnav--move 1 'indentnav--keep-searching-until-empty))
-
-;;; Byte compile
-
-;; (defun byte-compile-if-outdated (file-or-symbol &optional no-error)
-;;   "Byte-compile FILE-OR-SYMBOL into a .elc if it is missing or outdated.
-;;
-;; If the corresponding .elc file does not exist or is older than FILE-OR-SYMBOL,
-;; this function attempts to compile FILE-OR-SYMBOL. Compilation warnings and
-;; errors are suppressed, and verbose messages are displayed if
-;; `lightemacs-verbose` is non-nil.
-;;
-;; NO-ERROR, if non-nil, suppresses raising an error when FILE-OR-SYMBOL cannot be
-;; found. Returns t if the file is up to date or successfully compiled, nil or the
-;; error object otherwise."
-;;   (let ((el-file (if (symbolp file-or-symbol)
-;;                      (locate-library (symbol-name file-or-symbol))
-;;                    file-or-symbol)))
-;;     (cond
-;;      ((and (stringp el-file)
-;;            (or (string-suffix-p ".eln" el-file)
-;;                (string-suffix-p ".elc" el-file)))
-;;       (lightemacs-verbose-message
-;;         "[lightemacs] IGNORE: Byte-compile: Already compiled: %s"
-;;         el-file))
-;;
-;;      ((not (file-exists-p el-file))
-;;       (unless no-error
-;;         (error "[lightemacs] Byte-compile: Cannot detect the .elc path for: %s"
-;;                el-file)))
-;;
-;;      (t
-;;       (let* ((elc-file (funcall
-;;                         (if (bound-and-true-p byte-compile-dest-file-function)
-;;                             byte-compile-dest-file-function
-;;                           #'byte-compile-dest-file)
-;;                         el-file)))
-;;         (cond
-;;          ((not elc-file)
-;;           (message "WARNING: Byte-compile: Cannot detect the .elc path for: %s"
-;;                    el-file))
-;;
-;;          ((and (file-exists-p elc-file)
-;;                (not (file-newer-than-file-p el-file elc-file)))
-;;           ;; Up to date
-;;           t)
-;;
-;;          ((and lightemacs-verbose
-;;                (not (file-writable-p elc-file)))
-;;           (lightemacs-verbose-message
-;;             (concat "IGNORE: Byte-compile: Destination .elc is read-only: %S. "
-;;                     "Ensure you have write permissions to allow recompilation.")
-;;             elc-file))
-;;
-;;          (t
-;;           (let* ((noninteractive t)
-;;                  (byte-compile-warnings nil)
-;;                  (cond-error nil)
-;;                  (success (condition-case err
-;;                               (progn
-;;                                 (lightemacs-verbose-message
-;;                                   "Byte-compile: %S" el-file)
-;;                                 (byte-compile-file el-file))
-;;                             (error
-;;                              ;; Return error
-;;                              (setq cond-error err)))))
-;;             (when (or (not success)
-;;                       cond-error)
-;;               (let ((delete-by-moving-to-trash nil))
-;;                 (lightemacs-verbose-message "Delete .elc file: %S" elc-file)
-;;                 (ignore-errors
-;;                   (delete-file elc-file))))
-;;
-;;             (when (or cond-error
-;;                       (not success))
-;;               (lightemacs-verbose-message
-;;                 "Error: Byte-compile: %S (Result: %s)"
-;;                 el-file (cond (cond-error
-;;                                (format "Error: %s"
-;;                                        cond-error))
-;;                               ((eq success t)
-;;                                "success")
-;;                               ((not success)
-;;                                "error")
-;;                               (t
-;;                                success))))))))))))
+  (indentnav--move 1 #'indentnav--keep-searching-until-empty))
 
 ;;; Add to load-path recursively
 
 (defun directory-contains-extension-p (dir extension)
-  "Check if DIR any file with EXTENSION."
+  "Return non-nil if at least one file with EXTENSION exists in DIR.
+Delegates regex matching to the C level for significantly better performance."
   (catch 'found
-    (dolist (name (directory-files dir nil nil t))
-      (when (and (string-suffix-p extension name))
+    (dolist (file (directory-files dir nil (concat (regexp-quote extension) "\\'") t))
+      (when (file-regular-p (expand-file-name file dir))
         (throw 'found t)))
     nil))
 
-;; (defun directory-contains-extension-p (dir extension)
-;;   "Return non-nil if at least one EXTENSION file exists in DIR."
-;;   (let ((regex (concat (regexp-quote extension) "\\'")))
-;;     (catch 'found
-;;       (dolist (file (directory-files dir nil regex t 1))
-;;         (when (file-regular-p (expand-file-name file dir))
-;;           (throw 'found t)))
-;;       nil)))
-
 (defun optimized-normal-top-level-add-subdirs-to-load-path ()
-  "Recursively add all subdirectories of `default-directory' to `load-path'.
-More precisely, this uses only the subdirectories whose names
-start with letters or digits; it excludes any subdirectory named `RCS'
-or `CVS', and any subdirectory that contains a file named `.nosearch'."
+  "Recursively add all subdirectories of `default-directory' to `load-path'."
   (let (dirs
         attrs
-        (file-name-handler-alist nil)  ;; JC: OPTIMIZATION
+        (file-name-handler-alist nil) ;; JC: OPTIMIZATION
         (pending (list default-directory)))
-    ;; This loop does a breadth-first tree walk on DIR's subtree,
-    ;; putting each subdir into DIRS as its contents are examined.
     (while pending
       (push (pop pending) dirs)
       (let* ((this-dir (car dirs))
@@ -994,37 +833,28 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
              (default-directory this-dir)
              (canonicalized (if (fboundp 'w32-untranslated-canonical-name)
                                 (w32-untranslated-canonical-name this-dir))))
-        ;; The Windows version doesn't report meaningful inode numbers, so
-        ;; use the canonicalized absolute file name of the directory instead.
         (setq attrs (or canonicalized
-                        (file-attribute-file-identifier
-                         (file-attributes this-dir))))
+                        (file-attribute-file-identifier (file-attributes this-dir))))
         (unless (member attrs normal-top-level-add-subdirs-inode-list)
           (push attrs normal-top-level-add-subdirs-inode-list)
           (dolist (file contents)
-            (and ;; (string-match "\\`[[:alnum:]]" file) ;; JC: remove this
-             ;; (not (string= file ""))  ;; JC: replaced it with this
-             (not (string= file "."))  ;; JC: replaced it with this
-             (not (string= file ".."))  ;; JC: replaced it with this
-             ;; The lower-case variants of RCS and CVS are for DOS/Windows.
-             ;; JC: OPTIMIZATION: added .git
-             ;; (not (member file '("RCS" "CVS" "rcs" "cvs" ".git")))
-             (not (member file '(".git" ".github")))
-             (not (string-match-p "test" file))
-             (file-directory-p file)
-             ;; TODO: fix
-             ;; (directory-contains-extension-p file ".el")  ;; JC: optimization
-             (let ((expanded (expand-file-name file)))
-               (or (file-exists-p (expand-file-name ".nosearch" expanded))
-                   (setq pending (nconc pending (list expanded))))))))))
+            (and (not (string= file "."))
+                 (not (string= file ".."))
+                 (not (member file '(".git" ".github" ".svn" ".hg")))
+                 ;; Safer directory matching (avoids matching "latest")
+                 (not (string-match-p "\\`test" file))
+                 (file-directory-p file)
+                 (let ((expanded (expand-file-name file)))
+                   (or (file-exists-p (expand-file-name ".nosearch" expanded))
+                       (setq pending (nconc pending (list expanded))))))))))
 
-    ;; JC: Only add dirs that contain .el files
+    ;; Only add dirs that contain .el files
     (normal-top-level-add-to-load-path
      (seq-filter (lambda (d) (directory-contains-extension-p d ".el"))
-                 (cdr (nreverse dirs))))
+                 (cdr (nreverse dirs))))))
 
-    ;; (normal-top-level-add-to-load-path (cdr (nreverse dirs)))
-    ))
+
+;;; Buffer Management
 
 (defun my-save-buffers-kill-emacs ()
   "Handle quitting Emacs with daemon-aware frame management."
@@ -1035,33 +865,31 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
     (save-buffers-kill-emacs)))
 
 (defun my-interesting-buffer-p ()
-  "Return t if this buffer is considered a file/directory."
-  (let ((buffer-name (buffer-name))
-        (file-name (buffer-file-name (buffer-base-buffer))))
-    (when (or (string-prefix-p "*Ollama" buffer-name)
-              (string-prefix-p "*sdcv:" buffer-name)
-              (not (or (string-prefix-p "*" buffer-name)
-                       (string-prefix-p " " buffer-name)
-                       (and file-name
-                            (string-suffix-p "/todo.org" file-name)))))
-      t)))
+  "Return t if this buffer is considered a file/directory or otherwise interesting."
+  (let ((b-name (buffer-name))
+        (f-name (buffer-file-name (buffer-base-buffer))))
+    (or (string-prefix-p "*Ollama" b-name)
+        (string-prefix-p "*sdcv:" b-name)
+        (and (not (string-prefix-p "*" b-name))
+             (not (string-prefix-p " " b-name)))
+        (and f-name (string-suffix-p "/todo.org" f-name)))))
 
 (defun my-smart-previous-interesting-buffer ()
   "Switch to the previous buffer that is a file, Dired, or vterm."
   (interactive)
-  (let ((current-buffer (current-buffer)))
+  (let ((start-buffer (current-buffer)))
     (previous-buffer)
     (while (and (not (my-interesting-buffer-p))
-                (not (eq (current-buffer) current-buffer)))
+                (not (eq (current-buffer) start-buffer)))
       (previous-buffer))))
 
 (defun my-smart-next-interesting-buffer ()
   "Switch to the next buffer that is a file, Dired, or vterm."
   (interactive)
-  (let ((current-buffer (current-buffer)))
+  (let ((start-buffer (current-buffer)))
     (next-buffer)
     (while (and (not (my-interesting-buffer-p))
-                (not (eq (current-buffer) current-buffer)))
+                (not (eq (current-buffer) start-buffer)))
       (next-buffer))))
 
 ;;; Provide
