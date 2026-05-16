@@ -1118,6 +1118,7 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
                                          rust-mode-hook
                                          go-mode-hook
                                          ruby-mode-hook
+                                         perl-mode-hook
 
                                          ;; Web and frontend
                                          js-mode-hook
