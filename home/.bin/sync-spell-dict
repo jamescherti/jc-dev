@@ -35,7 +35,7 @@ fi
 
 ASPELL_FILE="$HOME/.aspell.en.pws"
 VIM_SPELL_FILE="$HOME/.vim-spell.en.utf8.add"
-ENCHANT_DIR="$HOME/.config/enchant/"
+ENCHANT_DIR="$HOME/.config/enchant"
 ENCHANT_FILE="$ENCHANT_DIR/en_US.dic"
 
 # Internal variables
@@ -127,7 +127,6 @@ gen_unified_spell_file() {
   done
 
   # THUNDERBIRD
-  local local_path
   for local_path in "$HOME/.thunderbird" \
     "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird"; do
     if [[ -d "$local_path" ]]; then
@@ -246,20 +245,28 @@ main() {
     local local_dicts
 
     # Firefox
-    local file
-    for file in "${LIST_FIREFOX_DICTS[@]}"; do
-      remove_exact_line "$file" "$2"
+    for local_path in "$HOME/.mozilla/firefox" \
+      "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox"; do
+      if [[ -d "$local_path" ]]; then
+        readarray -t local_dicts < \
+          <(find "$local_path" -maxdepth 2 -name persdict.dat)
+        for file in "${local_dicts[@]}"; do
+          remove_exact_line "$file" "$2"
+        done
+      fi
     done
 
     # Thunderbird
-    # TODO make it like LIST_FIREFOX_DICTS
-    if [[ -d ~/.thunderbird ]]; then
-      readarray -t LIST_THUNDERBIRD_DICTS < \
-        <(find ~/.thunderbird -maxdepth 2 -name persdict.dat)
-      for file in "${LIST_THUNDERBIRD_DICTS[@]}"; do
-        remove_exact_line "$file" "$2"
-      done
-    fi
+    for local_path in "$HOME/.thunderbird" \
+      "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird"; do
+      if [[ -d "$local_path" ]]; then
+        readarray -t local_dicts < \
+          <(find "$local_path" -maxdepth 2 -name persdict.dat)
+        for file in "${local_dicts[@]}"; do
+          remove_exact_line "$file" "$2"
+        done
+      fi
+    done
   fi
 }
 
