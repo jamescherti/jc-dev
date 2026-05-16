@@ -5329,32 +5329,6 @@ are editing by falling back to another visible file buffer."
 
 (setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
 
-;;; fold things when opening them
-
-;; TODO kirigami close fold except this one
-(defun my-kirigami-auto-open ()
-  "Close all folds."
-  (unless (bound-and-true-p easysession-load-in-progress)
-    (save-excursion
-      (ignore-errors
-        (require 'kirigami nil t)
-        (when (fboundp 'kirigami-open-fold)
-          (kirigami-open-fold))))))
-
-(defun my-kirigami-auto-close-all ()
-  "Close all folds."
-  (unless (bound-and-true-p easysession-load-in-progress)
-    (save-excursion
-      (ignore-errors
-        (when (require 'kirigami nil t)
-          (when (and (fboundp 'kirigami-close-folds)
-                     (not (bound-and-true-p edit-indirect--overlay))
-                     (not (fboundp 'org-src-edit-buffer-p)))
-            (kirigami-close-folds)))))))
-
-(add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 90)
-(add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 90)
-
 ;;; git gutter
 
 (lightemacs-use-package git-gutter
@@ -5413,14 +5387,45 @@ are editing by falling back to another visible file buffer."
 
 (lightemacs-use-package savefold
   :init
-  (setq savefold-backends '(outline org hideshow treesit-fold markdown))
+  ;; Removed org (buggy)
+  (setq savefold-backends '(outline hideshow treesit-fold markdown))
 
   ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
   (setq savefold-directory
         (expand-file-name "savefold" my-shared-user-emacs-directory))
 
+  (setq org-startup-folded 'showeverything)
+
   :config
   (savefold-mode 1))
+
+;;; outline persist fold
+
+;;; fold things when opening them
+
+;; TODO kirigami close fold except this one
+(defun my-kirigami-auto-open ()
+  "Close all folds."
+  (unless (bound-and-true-p easysession-load-in-progress)
+    (save-excursion
+      (ignore-errors
+        (require 'kirigami nil t)
+        (when (fboundp 'kirigami-open-fold)
+          (kirigami-open-fold))))))
+
+(defun my-kirigami-auto-close-all ()
+  "Close all folds."
+  (unless (bound-and-true-p easysession-load-in-progress)
+    (save-excursion
+      (ignore-errors
+        (when (require 'kirigami nil t)
+          (when (and (fboundp 'kirigami-close-folds)
+                     (not (bound-and-true-p edit-indirect--overlay))
+                     (not (fboundp 'org-src-edit-buffer-p)))
+            (kirigami-close-folds)))))))
+
+;; (add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 99)
+;; (add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 99)
 
 ;;; Provide
 
