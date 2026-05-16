@@ -35,12 +35,18 @@ fi
 
 ASPELL_FILE="$HOME/.aspell.en.pws"
 VIM_SPELL_FILE="$HOME/.vim-spell.en.utf8.add"
+ENCHANT_DIR="$HOME/.config/enchant/"
+ENCHANT_FILE="$ENCHANT_DIR/en_US.dic"
 
 # Internal variables
 FIREFOX=0
 THUNDERBIRD=0
 VIM=0
 ASPELL=0
+ENCHANT=0
+
+declare -a LIST_FIREFOX_DICTS=()
+declare -a LIST_THUNDERBIRD_DICTS=()
 
 #-------------------------------------------------------------------------------
 # Error handler
@@ -77,7 +83,7 @@ trap 'atexit' EXIT INT TERM HUP QUIT
 #-------------------------------------------------------------------------------
 # Generate unified spell file
 #-------------------------------------------------------------------------------
-gen-unified-spell-file() {
+gen_unified_spell_file() {
   local item
 
   cp "$UNIFIED_SPELL_FILE" "$TMP_FILE"
@@ -98,6 +104,12 @@ gen-unified-spell-file() {
     VIM=1
   fi
 
+  # ENCHANT (EMACS JINX)
+  if [[ -f "$ENCHANT_FILE" ]]; then
+    cat "$ENCHANT_FILE" >>"$TMP_FILE"
+    ENCHANT=1
+  fi
+
   # FIREFOX
   local local_dicts
   local local_path
@@ -116,7 +128,7 @@ gen-unified-spell-file() {
 
   # THUNDERBIRD
   local local_path
-  for local_path in "$HOME/.mozilla/firefox" \
+  for local_path in "$HOME/.thunderbird" \
     "$HOME/.var/app/org.mozilla.Thunderbird/.thunderbird"; do
     if [[ -d "$local_path" ]]; then
       readarray -t local_dicts < \
@@ -137,7 +149,7 @@ gen-unified-spell-file() {
 #-------------------------------------------------------------------------------
 # Generate software spell dictionary
 #-------------------------------------------------------------------------------
-gen-dict-from-unified-spell-file() {
+gen_dict_from_unified_spell_file() {
   local item
 
   # ASPELL
@@ -158,6 +170,10 @@ gen-dict-from-unified-spell-file() {
   if [[ $VIM -ne 0 ]]; then
     cat "$UNIFIED_SPELL_FILE" >"$VIM_SPELL_FILE"
   fi
+
+  # ENCHANT (EMACS JINX)
+  mkdir -p "$ENCHANT_DIR"
+  cat "$UNIFIED_SPELL_FILE" >"$ENCHANT_FILE"
 
   # FIREFOX
   if [[ $FIREFOX -ne 0 ]]; then
@@ -192,8 +208,8 @@ main() {
     # Delete the legacy one
     rm -f ~/.spell-unified
 
-    gen-unified-spell-file
-    gen-dict-from-unified-spell-file
+    gen_unified_spell_file
+    gen_dict_from_unified_spell_file
 
     if [[ $ASPELL -ne 0 ]]; then
       wc -l "$ASPELL_FILE"
@@ -202,6 +218,8 @@ main() {
     if [[ $VIM -ne 0 ]]; then
       wc -l "$VIM_SPELL_FILE"
     fi
+
+    wc -l "$ENCHANT_FILE"
 
     if [[ $FIREFOX -ne 0 ]]; then
       for item in "${LIST_FIREFOX_DICTS[@]}"; do
@@ -221,8 +239,11 @@ main() {
     remove_exact_line "$ASPELL_FILE" "$2"
     remove_exact_line "$UNIFIED_SPELL_FILE" "$2"
     remove_exact_line "$VIM_SPELL_FILE" "$2"
-    readarray -t LIST_FIREFOX_DICTS < \
-      <(find ~/.mozilla/firefox -maxdepth 2 -name persdict.dat)
+    remove_exact_line "$ENCHANT_FILE" "$2"
+
+    local local_path
+    local file
+    local local_dicts
 
     # Firefox
     local file
