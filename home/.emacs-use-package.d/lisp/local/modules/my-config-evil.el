@@ -1899,7 +1899,6 @@ of the line or the buffer; just return nil."
 
 (defun evilcursor-previous-visual-line (count)
   "Move the cursor COUNT screen lines up."
-  (message "TMP %s %s" temporary-goal-column (type-of temporary-goal-column))
   (let ((line-move-visual t))
     (when (and (numberp temporary-goal-column)
                (< temporary-goal-column 0))
