@@ -5003,7 +5003,7 @@ The result is displayed in a pretty-printed temporary buffer."
 ;;; so long
 
 ;; (setq so-long-threshold 10000)
-(add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
+;; (add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
 
 ;;; auto save
 
