@@ -1078,8 +1078,9 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
                                                      ;; My preference
                                                      sh-mode-hook
                                                      bash-ts-mode-hook
-                                                     php-mode
-                                                     php-ts-mode))
+                                                     php-mode-hook
+                                                     php-ts-mode-hook
+                                                     txt-file-mode-hook))
 
 (setq lightemacs-outline-minor-target-hooks '(emacs-lisp-mode-hook
                                               lisp-mode-hook

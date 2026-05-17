@@ -132,7 +132,8 @@
 
 (defun my-setup-spell-checker ()
   "Setup `jinx-mode' or `flyspell-mode' depending on `my-spell-checker'."
-  (when (not (derived-mode-p 'conf-mode))
+  (when (and (not (derived-mode-p 'conf-mode))
+             (not (derived-mode-p 'txt-file-mode)))
     (if (or (derived-mode-p 'markdown-mode)
             (derived-mode-p 'org-mode))
         ;; Other (e.g., Markdown)
