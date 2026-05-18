@@ -630,9 +630,6 @@ extracted, the function returns nil."
     (add-to-list 'default-frame-alist no-border)
     (add-to-list 'initial-frame-alist no-border)))
 
-;; (unless (display-graphic-p)
-;;   (add-to-list 'default-frame-alist '(inhibit-double-buffering . t)))
-
 ;; On some window managers (fvwm 2.2.5 and KDE 2.1), Emacs can pause because Xt
 ;; waits for a `ConfigureNotify` event that the WM does not send, timing out
 ;; after about 5 seconds.

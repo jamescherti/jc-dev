@@ -754,6 +754,8 @@ TO-STRING."
 
 ;;; indentnav
 
+(defvar bufferwizard-indent-ignore-invisible t)
+
 (defun bufferwizard--indent-keep-searching-until-empty (_initial-indentation)
   "Return t when the current line is NOT empty."
   (not (looking-at-p "^\\s-*$")))
@@ -773,7 +775,8 @@ Returns the buffer position (point) instead of line number for performance."
     (let ((initial-indentation (current-indentation)))
       (while (and (not (if (> direction 0) (eobp) (bobp)))
                   (zerop (forward-line direction))
-                  (or (invisible-p (point))
+                  (or (and bufferwizard-indent-ignore-invisible
+                           (invisible-p (point)))
                       (funcall func-keep-searching initial-indentation))))
       (point))))
 
@@ -801,14 +804,14 @@ DIRECTION > 0 moves forward; < 0 moves backward."
    1 #'bufferwizard--indent-keep-searching-until-indent-lower))
 
 ;;;###autoload
-(defun bufferwizard-indent-backward-to-empty-line ()
+(defun bufferwizard-nav-backward-to-empty-line ()
   "Move backward to empty line."
   (interactive)
   (bufferwizard--indent-move
    -1 #'bufferwizard--indent-keep-searching-until-empty))
 
 ;;;###autoload
-(defun bufferwizard-indent-forward-to-empty-line ()
+(defun bufferwizard-nav-forward-to-empty-line ()
   "Move forward to empty line."
   (interactive)
   (bufferwizard--indent-move
