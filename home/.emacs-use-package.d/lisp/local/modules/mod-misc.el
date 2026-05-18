@@ -44,6 +44,7 @@
 ;; rather than Emacs Lisp. If you are deeply debugging the Emacs editor itself
 ;; and actually want to read the C source files using find-library, this setting
 ;; will hide them from your completion list.
+;; TODO minimal-emacs.d
 (setq find-library-include-other-files nil)
 
 ;; Automatically resizes all windows proportionally when splitting or deleting a
@@ -164,8 +165,19 @@
 ;;       when navigating past large images or long wrapped blocks of text.
 ;; Cons: The cursor can technically be on a line that is only half-visible
 ;;       at the very top or bottom edge of the window.
+;; Recently disabled. Causes issues?
+;; (setq make-cursor-line-fully-visible t)
+
+;; The Problem: If you scroll down a file and land on a line that is only 90%
+;; visible at the bottom of the window, vanilla Emacs will violently "snap" the
+;; entire screen to force that line into full view. This destroys smooth
+;; scrolling.
+;; Why it has no tradeoff: Note: Your snippet had this set to t, which is the
+;; vanilla default. Changing it to nil is universally preferred by users who
+;; want modern, predictable scrolling behavior, especially when dealing with
+;; large images in Org-mode or long wrapped paragraphs.
 ;; TODO minimal emacs?
-(setq make-cursor-line-fully-visible t)
+(setq make-cursor-line-fully-visible nil)
 
 ;; t: This setting is the most common and means that the screen position is
 ;; preserved while scrolling. The cursor will stay in place relative to the
@@ -233,7 +245,17 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; Disable the optimization locally for dired to guarantee directory fontification
+;; TODO minimal-emacs.d
+;; setq native-comp-async-on-battery-power nil) is an excellent default, for
+;; users running Emacs on laptops. Background native compilation (via gccemacs)
+;; is a highly CPU-intensive task. When packages are installed or updated,
+;; spawning multiple asynchronous compiler processes on battery power can cause
+;; rapid battery drain and thermal throttling. Suspending this behavior until
+;; the machine is connected to AC power is a sensible optimization.
+(setq native-comp-async-on-battery-power nil)
+
+;; Disable the optimization locally for dired to guarantee directory
+;; fontification
 ;; (add-hook 'dired-mode-hook
 ;;           (lambda ()
 ;;             (setq-local redisplay-skip-fontification-on-input nil)))
@@ -251,14 +273,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; (setq duplicate-line-final-position -1 ; both are Emacs 29
 ;;       duplicate-region-final-position -1)
-
-;; The 'fill-nobreak-invisible' variable is used to control how text wrapping
-;; works when using the M-q, 'M-x fill-paragraph', or gq in Evil mode. When set
-;; to t, it ensures that words are not broken across lines and any invisible
-;; characters are respected, which can be beneficial for maintaining the
-;; structure of code or other formatted texts in a way that avoids altering
-;; their intended layout or meaning due to line breaks.
-(setq fill-nobreak-invisible t)
 
 ;; NOTE disabled recently
 ;;
@@ -321,6 +335,16 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;
 ;; Default: (not xref-find-definitions xref-find-definitions-other-window
 ;; xref-find-definitions-other-frame)
+;;
+;; The Problem: When you place your cursor over a function and press M-?
+;; (xref-find-references), vanilla Emacs stops and prompts you in the
+;; minibuffer: Find references for: [Function Name]. You have to press RET to
+;; confirm, adding an unnecessary keystroke to a highly repetitive action.
+;;
+;; Why it has no tradeoff: It makes code navigation immediate. If you ever need
+;; to search for a symbol that is not under your cursor, you can simply call the
+;; command with a prefix argument (C-u M-?), and Emacs will prompt you normally.
+;; TODO: minimal-emacs.d
 (setq xref-prompt-for-identifier
       '(not xref-find-definitions
             xref-find-definitions-other-window
@@ -477,7 +501,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; removed
 ;; (setq tramp-completion-reread-directory-timeout 50)
-;; (setq remote-file-name-inhibit-cache 50)
 
 ;; Removed it from m.e
 ;; (setq next-screen-context-lines 0): Setting this to 0 can make it
@@ -1435,8 +1458,6 @@ WIDTH is the tab width."
         (cons (cons epa-file-name-regexp #'epa-file-handler)
               file-name-handler-alist))
 
-  (setq large-file-warning-threshold (* 100 1024 1024))  ; 100 Mb
-
   ;; Add ( and ) to modes such as yaml-ts-mode
   (defvar original-electric-pair-pairs '((40 . 41)   ;; ( and ) for yaml-ts-mode
                                          (123 . 125) ;; { and } for elisp
@@ -1553,6 +1574,16 @@ WIDTH is the tab width."
 
   ;; Use reliable file-based syntax highlighting when available and hunk-based
   ;; syntax highlighting otherwise as a fallback.
+  ;;
+  ;; The Problem: When you look at a diff in Emacs, added lines are strictly
+  ;; green and removed lines are strictly red. You lose all of the programming
+  ;; language's native syntax highlighting, making the code harder to read.
+  ;;
+  ;; Why it has no tradeoff: Emacs will apply the correct major mode syntax
+  ;; highlighting (like Python or Elisp keywords) inside the diff hunk itself,
+  ;; blending the diff colors with your code colors perfectly.
+  ;;
+  ;; TODO add to minimal-emacs.d
   (setq diff-font-lock-syntax 'hunk-also)
 
   ;; (setq diff-advance-after-apply-hunk t)
@@ -1728,7 +1759,6 @@ WIDTH is the tab width."
   ;; (setq-default line-spacing 0.05)
   (setq enhanced-evil-paredit-handle-paste t)
   (setq confirm-kill-emacs 'y-or-n-p)
-  (setq remote-file-name-inhibit-locks t)
   (setq history-delete-duplicates t)
   (setq comint-buffer-maximum-size 10000)
   (setq shell-kill-buffer-on-exit t)
@@ -1796,8 +1826,12 @@ WIDTH is the tab width."
   ;; testing
   (setq transient-detect-key-conflicts t)
 
+  ;; TODO minimal-emacs
+  ;; tramp-copy-size-limit (* 2 1024 1024) ; 1mb
+  ;; tramp-use-scp-direct-remote-copying t
+  ;; tramp-completion-reread-directory-timeout 60
+
   (setq remote-file-name-inhibit-auto-save t
-        remote-file-name-inhibit-auto-save-visited t  ; Speed up tramp
         ;; yank-pop-change-selection t
         ;; kill-whole-line t
         ;; list-matching-lines-jump-to-current-line t
