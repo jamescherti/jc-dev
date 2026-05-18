@@ -34,36 +34,6 @@
   (interactive)
   (message "%s" (frame-parameter nil 'font)))
 
-(defun buffer-guardian-save-buffer ()
-  "Save the current buffer.
-
-If the buffer is visiting a file and has a base buffer, save that base buffer.
-
-Before saving, check if the visited file has been modified outside of Emacs. If
-so, prompt the user for confirmation and revert the buffer if confirmed. Then
-save the buffer without prompting or displaying messages."
-  (interactive)
-  (when (fboundp 'buffer-guardian-save-buffer-maybe)
-    (let ((buffer (or (buffer-base-buffer) (current-buffer)))
-          (file-name (buffer-file-name (buffer-base-buffer)))
-          (buffer-guardian-inhibit-saving-nonexistent-files nil))
-      (ignore buffer-guardian-inhibit-saving-nonexistent-files)
-      (when buffer
-        (cond
-         (file-name
-          (with-current-buffer buffer
-            ;; Was the file modified outside of Emacs? Revert buffer
-            (unless (verify-visited-file-modtime (current-buffer))
-              (when (yes-or-no-p (format "Discard edits and reread from '%s'?"
-                                         file-name))
-                (revert-buffer :ignore-auto :noconfirm)))
-
-            ;; Save buffer
-            (buffer-guardian-save-buffer-maybe)))
-
-         (t
-          (buffer-guardian-save-buffer-maybe)))))))
-
 (defun my-save-all-buffers ()
   "Save all buffers."
   (cond
@@ -72,52 +42,6 @@ save the buffer without prompting or displaying messages."
 
    (t
     (save-some-buffers t))))
-
-;; TODO move this to buffer-guardian. I fixed version of the previous func
-(defun my-save-buffer ()
-  "Save the current buffer."
-  ;; The buffer guardian version checks if the file on disk has been modified
-  ;; and prompts the user to reload it
-  (interactive)
-  (cond
-   ((bound-and-true-p gptel-mode)
-    nil)
-
-   ((string= (buffer-name) "*scratch*")
-    nil)
-
-   ;; Special buffer
-   ((and
-     (let ((buffer-name (buffer-name)))
-       (when buffer-name
-         (and (or (string-prefix-p " " buffer-name)
-                  (and (string-prefix-p "*" buffer-name)
-                       (string-suffix-p "*" buffer-name))
-                  (derived-mode-p 'special-mode)
-                  (minibufferp (current-buffer)))
-              (not (buffer-file-name (buffer-base-buffer))))))
-
-     (not (and buffer-guardian-handle-org-src
-               (fboundp 'org-src-edit-buffer-p)
-               (funcall 'org-src-edit-buffer-p)))
-
-     (not (and buffer-guardian-handle-edit-indirect
-               (bound-and-true-p edit-indirect--overlay))))
-    nil)
-
-   ;; Other
-   ((buffer-modified-p)
-    (let ((inhibit-message t)
-          (save-silently t))
-      (save-buffer)
-      ;; (let ((buffer (or (buffer-base-buffer) (current-buffer))))
-      ;;   (when (buffer-live-p buffer)
-      ;;     (save-buffer)))
-      )
-    ;; (if (fboundp 'buffer-guardian-save-buffer)
-    ;;     (buffer-guardian-save-buffer)
-    ;;   (save-buffer))
-    )))
 
 (defun my-project-root-dir (&optional path)
   "Search up the PATH for `project-root-markers'."
@@ -801,7 +725,7 @@ Delegates regex matching to the C level for significantly better performance."
 
 ;;; Buffer Management
 
-(defun my-save-buffers-kill-emacs ()
+(defun buffer-guardian-save-buffers-kill-emacs ()
   "Handle quitting Emacs with daemon-aware frame management."
   (interactive)
   (if (and (daemonp)

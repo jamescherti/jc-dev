@@ -224,18 +224,30 @@
 
 (defun my-clear-highlights ()
   "Clear highlight and related state in the buffer."
-  ;; Clear lazy highlights
-  (lazy-highlight-cleanup)
+  (let ((inhibit-message t)
+        (cur-buf (current-buffer))
+        (buffer (current-buffer)))
+    (when (buffer-live-p buffer)
+      (with-current-buffer buffer
+        ;; Clear lazy highlights
+        (lazy-highlight-cleanup t)
 
-  ;; Clear Evil mode highlights
-  (evil-ex-nohighlight)
+        ;; Refresh git fringe indicators (if diff-hl is used)
+        (when (and (bound-and-true-p diff-hl-mode)
+                   (fboundp 'diff-hl-update))
+          (diff-hl-update))
 
-  ;; Update font lock to clear new highlights after functions are evaluated
-  (let ((inhitibt-message t))
-    (when (and (bound-and-true-p font-lock-mode)
-               (fboundp 'font-lock-update))
-      (ignore-errors
-        (font-lock-update)))))
+        ;; Clear Evil mode highlights
+        (when (fboundp 'evil-ex-nohighlight)
+          (evil-ex-nohighlight))
+
+        ;; Update font lock to clear new highlights after functions are
+        ;; evaluated
+        (when (bound-and-true-p font-lock-mode)
+          (if (fboundp 'font-lock-flush)
+              (font-lock-flush)
+            (with-no-warnings
+              (font-lock-fontify-buffer))))))))
 
 (defun evilbuffer-clear-highlights ()
   "Clear."
@@ -494,7 +506,7 @@ ORIG-FUN is the function and ARGS the arguments."
   (advice-add 'evil-paste-before :around #'ignore-empty-ring-errors))
 
 (evil-define-key '(normal insert visual) 'global (kbd "C-s")
-  #'my-save-buffer)
+  #'buffer-guardian-save-buffer)
 
 (defun evilclipboard-select-pasted ()
   "Visually select last pasted text."
@@ -592,9 +604,9 @@ This enhancement prevents the cursor from moving."
 (add-hook 'evil-mode-hook 'my-setup-evil-mode)
 
 (when (daemonp)
-  (global-set-key (kbd "C-x C-c") 'my-save-buffers-kill-emacs))
+  (global-set-key (kbd "C-x C-c") 'buffer-guardian-save-buffers-kill-emacs))
 
-(define-key evil-normal-state-map (kbd "C-q") 'my-save-buffers-kill-emacs)
+(define-key evil-normal-state-map (kbd "C-q") 'buffer-guardian-save-buffers-kill-emacs)
 
 ;; Make goto mark use ' to restore the column
 (define-key evil-motion-state-map "`" 'evil-goto-mark-line)
@@ -1337,67 +1349,10 @@ on text following the cursor."
 ;;           (cmd (cdr binding)))
 ;;       (evil-define-key* 'normal lightemacs-keymap-override-map (kbd key) cmd))))
 
-;;; Move region
-
-(defvar bufferwizard-move-region-skip-invisible t
-  "Non-nil means moving the region will skip invisible lines.")
-
-(defun bufferwizard-move-region (n)
-  "Move the current region up or down by N lines."
-  ;; (interactive "r\np")
-  (when (use-region-p)
-    ;; (region-to-linewise-region)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (when (and (bound-and-true-p evil-local-mode)
-                 (fboundp 'evil-visual-state-p)
-                 (evil-visual-state-p)
-                 (fboundp 'evil-exit-visual-state))
-        ;; For Evil users: Exit visual state explicitly before performing the
-        ;; operation. If we do not do this, Evil will automatically restore the
-        ;; original point and mark after the command finishes, overriding any
-        ;; cursor movement or region updates made within the function.
-        (evil-exit-visual-state))
-
-      (let ((line-text (delete-and-extract-region start end)))
-        (if bufferwizard-move-region-skip-invisible
-            (forward-visible-line n)
-          (forward-line n))
-        (let ((start (point)))
-          (insert line-text)
-
-          (setq end (point))
-          (set-mark end)
-
-          (goto-char start)
-
-          ;; Ensure that the region remains active after the command finishes.
-          ;; In Emacs, the variable `deactivate-mark' controls whether the
-          ;; region is deactivated automatically at the end of a command.
-          ;; default, it is set to t by many interactive commands, which
-          ;; causes the region to be cleared after execution. Setting
-          ;; `deactivate-mark' to nil prevents this automatic deactivation.
-          ;; This is necessary even when `activate-mark' is called explicitly,
-          ;; because without setting `deactivate-mark' to nil, the region may
-          ;; appear briefly and then vanish immediately after the function
-          ;; returns, giving the false impression that the selection failed.
-          (setq deactivate-mark nil)
-          (activate-mark))))))
-
-(defun bufferwizard-move-region-up ()
-  "Move the current region up by 1 line."
-  (interactive)
-  (bufferwizard-move-region -1))
-
-(defun bufferwizard-move-region-down ()
-  "Move the current region down by 1 line."
-  (interactive)
-  (bufferwizard-move-region 1))
+;;; check parens no jump
 
 (define-key evil-visual-state-map (kbd "M-j") 'bufferwizard-move-region-down)
 (define-key evil-visual-state-map (kbd "M-k") 'bufferwizard-move-region-up)
-
-;;; check parens no jump
 
 ;; TODO: Part of smooth cursor?
 ;;-----------------------------
@@ -2624,7 +2579,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
   "Save and call `vc-diff' silently."
   (interactive)
   (let ((inhibit-message t))
-    (my-save-buffer)
+    (buffer-guardian-save-buffer)
     (vc-diff)))
 
 (defun mod-better-vc-git-toplevel ()
@@ -3083,7 +3038,7 @@ Accepts any arguments so it can be used as advice or a hook."
 
 ;; Example binding to C-c b c
 ;; (global-set-key (kbd "C-c b c") 'my-copy-whole-buffer-evil)
-(evil-define-key 'normal 'global (kbd "<leader>cb") #'my-copy-whole-buffer)
+(evil-define-key 'normal 'global (kbd "<leader>cb") #'my-copy-whole-buffer-evil)
 
 ;;; Provide
 
