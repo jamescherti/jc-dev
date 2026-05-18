@@ -996,8 +996,8 @@ DIR is the directory."
 ;;; evil org
 
 ;; TODO put this back?
-;; (when (fboundp 'indentnav-backward-to-empty-line)
-;;   (evil-define-key 'normal 'local (kbd "{") 'indentnav-backward-to-empty-line))
+;; (when (fboundp 'bufferwizard-indent-backward-to-empty-line)
+;;   (evil-define-key 'normal 'local (kbd "{") 'bufferwizard-indent-backward-to-empty-line))
 ;; (when (fboundp 'indentnav-forward-to-empty-line)
 ;;   (evil-define-key 'normal 'local (kbd "}") 'indentnav-forward-to-empty-line))
 
@@ -1478,12 +1478,12 @@ If the parentheses are balanced, the function returns t."
 
 ;; (with-eval-after-load 'markdown-mode
 ;;   (evil-define-key 'normal markdown-mode (kbd "RET") nil)
-;;   (evil-define-key 'normal markdown-mode (kbd "{") indentnav-backward-to-empty-line)
+;;   (evil-define-key 'normal markdown-mode (kbd "{") bufferwizard-indent-backward-to-empty-line)
 ;;   (evil-define-key 'normal markdown-mode (kbd "}") indentnav-forward-to-empty-line))
 
 (with-eval-after-load 'markdown-mode
   (evil-collection-define-key 'normal 'markdown-mode-map
-    "{" 'indentnav-backward-to-empty-line
+    "{" 'bufferwizard-indent-backward-to-empty-line
     "}" 'indentnav-forward-to-empty-line
     ;; RET can sometimes check and uncheck boxes. This is not
     ;; something I want.
