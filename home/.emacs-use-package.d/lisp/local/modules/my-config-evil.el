@@ -1289,10 +1289,11 @@ on text following the cursor."
   ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
   )
 
-(evil-define-key '(normal insert visual) my-intercept-mode-map
+(evil-define-key '(insert visual) my-intercept-mode-map
   "{" 'bufferwizard-point-backward-to-empty-line
-  "}" 'bufferwizard-point-forward-to-empty-line
+  "}" 'bufferwizard-point-forward-to-empty-line)
 
+(evil-define-key '(normal insert visual) my-intercept-mode-map
   ;; (kbd "M-RET") 'toggle-term-tmux
   ;; (kbd "M-<enter>") 'toggle-term-tmux
   ;; (kbd "M-<return>") 'toggle-term-tmux
@@ -1338,32 +1339,32 @@ on text following the cursor."
 
 ;;; Move region
 
-(defvar bufferwizard-move-region-skip-invisible t)
+(defvar bufferwizard-move-region-skip-invisible t
+  "Non-nil means moving the region will skip invisible lines.")
 
 (defun bufferwizard-move-region (n)
   "Move the current region up or down by N lines."
   ;; (interactive "r\np")
-  (interactive)
   (when (use-region-p)
     ;; (region-to-linewise-region)
     (let ((start (region-beginning))
           (end (region-end)))
-      ;; Exit visual state explicitly before performing the operation. If we
-      ;; do not do this, Evil will automatically restore the original point
-      ;; and mark after the command finishes, overriding any cursor movement
-      ;; or region updates made within the function.
-      (when (fboundp 'evil-exit-visual-state)
+      (when (and (bound-and-true-p evil-local-mode)
+                 (fboundp 'evil-visual-state-p)
+                 (evil-visual-state-p)
+                 (fboundp 'evil-exit-visual-state))
+        ;; For Evil users: Exit visual state explicitly before performing the
+        ;; operation. If we do not do this, Evil will automatically restore the
+        ;; original point and mark after the command finishes, overriding any
+        ;; cursor movement or region updates made within the function.
         (evil-exit-visual-state))
 
       (let ((line-text (delete-and-extract-region start end)))
         (if bufferwizard-move-region-skip-invisible
             (forward-visible-line n)
           (forward-line n))
-        (let ((start (point))
-              ;; (length-text (length line-text))
-              )
+        (let ((start (point)))
           (insert line-text)
-          ;; (backward-char)
 
           (setq end (point))
           (set-mark end)
@@ -1371,25 +1372,25 @@ on text following the cursor."
           (goto-char start)
 
           ;; Ensure that the region remains active after the command finishes.
-          ;; In Emacs, the variable `deactivate-mark` controls whether the
-          ;; region is deactivated automatically at the end of a command. By
-          ;; default, it is set to `t` by many interactive commands, which
+          ;; In Emacs, the variable `deactivate-mark' controls whether the
+          ;; region is deactivated automatically at the end of a command.
+          ;; default, it is set to t by many interactive commands, which
           ;; causes the region to be cleared after execution. Setting
-          ;; `deactivate-mark` to `nil` prevents this automatic deactivation.
-          ;; This is necessary even when `activate-mark` is called explicitly,
-          ;; because without setting `deactivate-mark` to `nil`, the region may
+          ;; `deactivate-mark' to nil prevents this automatic deactivation.
+          ;; This is necessary even when `activate-mark' is called explicitly,
+          ;; because without setting `deactivate-mark' to nil, the region may
           ;; appear briefly and then vanish immediately after the function
           ;; returns, giving the false impression that the selection failed.
           (setq deactivate-mark nil)
           (activate-mark))))))
 
-(defun bufferwizard-move-region-up (&rest _)
-  "Move the current line up by N lines."
+(defun bufferwizard-move-region-up ()
+  "Move the current region up by 1 line."
   (interactive)
   (bufferwizard-move-region -1))
 
-(defun bufferwizard-move-region-down (&rest _)
-  "Move the current line down by N lines."
+(defun bufferwizard-move-region-down ()
+  "Move the current region down by 1 line."
   (interactive)
   (bufferwizard-move-region 1))
 
