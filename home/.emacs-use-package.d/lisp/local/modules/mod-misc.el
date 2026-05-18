@@ -2324,63 +2324,33 @@ Returns:
 
 ;; elisp evil-imenu
 
-(with-eval-after-load 'emacs-lisp-mode
-  (setq lisp-imenu-generic-expression
-        (append lisp-imenu-generic-expression
-                `(("Evil Definitions"
-                   ,(rx line-start
-                        (* space)
-                        "("
-                        (or "evil-define-avy-motion"
-                            "evil-define-command"
-                            "evil-define-interactive-code"
-                            "evil-define-key"
-                            "evil-define-key*"
-                            "evil-define-keymap"
-                            "evil-define-local-var"
-                            "evil-define-minor-mode-key"
-                            "evil-define-motion"
-                            "evil-define-operator"
-                            "evil-define-state"
-                            "evil-define-text-object"
-                            "evil-define-type"
-                            "evil-define-visual-selection")
-                        (+ space)
-                        (* (any "'" "#"))
-                        (* "(")
-                        (group
-                         (+ (or word ?- ?_))))
-                   1)))))
-
-;; (defun my-elisp-imenu-evil-support ()
-;;   "Add Evil definition forms to `imenu' in Emacs Lisp buffers."
-;;   (setq-local lisp-imenu-generic-expression
-;;               (append lisp-imenu-generic-expression
-;;                       `(("Evil Definitions"
-;;                          ,(rx line-start
-;;                               (* space)
-;;                               "("
-;;                               (or "evil-define-avy-motion"
-;;                                   "evil-define-command"
-;;                                   "evil-define-interactive-code"
-;;                                   "evil-define-key"
-;;                                   "evil-define-key*"
-;;                                   "evil-define-keymap"
-;;                                   "evil-define-local-var"
-;;                                   "evil-define-minor-mode-key"
-;;                                   "evil-define-motion"
-;;                                   "evil-define-operator"
-;;                                   "evil-define-state"
-;;                                   "evil-define-text-object"
-;;                                   "evil-define-type"
-;;                                   "evil-define-visual-selection")
-;;                               (+ space)
-;;                               (* (any "'" "#"))
-;;                               (* "(")
-;;                               (group
-;;                                (+ (or word ?- ?_))))
-;;                          1)))))
-;; (add-hook 'emacs-lisp-mode-hook #'my-elisp-imenu-evil-support)
+(with-eval-after-load 'lisp-mode
+  (add-to-list 'lisp-imenu-generic-expression
+               `("Evil Definitions"
+                 ,(rx line-start
+                      (* space)
+                      "("
+                      (or "evil-define-avy-motion"
+                          "evil-define-command"
+                          "evil-define-interactive-code"
+                          "evil-define-key"
+                          "evil-define-key*"
+                          "evil-define-keymap"
+                          "evil-define-local-var"
+                          "evil-define-minor-mode-key"
+                          "evil-define-motion"
+                          "evil-define-operator"
+                          "evil-define-state"
+                          "evil-define-text-object"
+                          "evil-define-type"
+                          "evil-define-visual-selection")
+                      (+ space)
+                      (* (any "'" "#"))
+                      (* "(")
+                      (group
+                       (+ (or word (syntax symbol)))))
+                 1)
+               t))
 
 ;;; Flymake
 
@@ -5493,6 +5463,26 @@ are editing by falling back to another visible file buffer."
 
   :config
   (savefold-mode 1))
+
+(defun my-save-buffer-savefold-advice (&rest _)
+  "Advise `save-buffer' to persist folds when the buffer is unmodified.
+Standard save hooks handle persistence when the buffer is modified."
+  (when (and (bound-and-true-p savefold-mode)
+             (not (buffer-modified-p)))
+    (dolist (backend (bound-and-true-p savefold-backends))
+      (let ((save-func (intern-soft (format "savefold-%s--save-folds" backend)))
+            (pred-func (intern-soft (format "savefold-%s--bufferp" backend))))
+        (when (and save-func (fboundp save-func)
+                   pred-func (fboundp pred-func)
+                   (funcall pred-func))
+          (funcall save-func))))))
+
+;; (with-eval-after-load 'buffer-guardian
+;;   (with-eval-after-load 'savefold
+;;     (advice-add 'buffer-guardian-save-buffer :before
+;;                 #'my-save-buffer-savefold-advice)
+;;     (advice-add 'buffer-guardian-save-buffer-maybe :before
+;;                 #'my-save-buffer-savefold-advice)))
 
 ;;; outline persist fold
 
