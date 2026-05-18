@@ -2321,6 +2321,67 @@ Returns:
 
 (add-hook 'emacs-lisp-mode-hook #'better-jump--setup-imenu-elisp)
 
+
+;; elisp evil-imenu
+
+(with-eval-after-load 'emacs-lisp-mode
+  (setq lisp-imenu-generic-expression
+        (append lisp-imenu-generic-expression
+                `(("Evil Definitions"
+                   ,(rx line-start
+                        (* space)
+                        "("
+                        (or "evil-define-avy-motion"
+                            "evil-define-command"
+                            "evil-define-interactive-code"
+                            "evil-define-key"
+                            "evil-define-key*"
+                            "evil-define-keymap"
+                            "evil-define-local-var"
+                            "evil-define-minor-mode-key"
+                            "evil-define-motion"
+                            "evil-define-operator"
+                            "evil-define-state"
+                            "evil-define-text-object"
+                            "evil-define-type"
+                            "evil-define-visual-selection")
+                        (+ space)
+                        (* (any "'" "#"))
+                        (* "(")
+                        (group
+                         (+ (or word ?- ?_))))
+                   1)))))
+
+;; (defun my-elisp-imenu-evil-support ()
+;;   "Add Evil definition forms to `imenu' in Emacs Lisp buffers."
+;;   (setq-local lisp-imenu-generic-expression
+;;               (append lisp-imenu-generic-expression
+;;                       `(("Evil Definitions"
+;;                          ,(rx line-start
+;;                               (* space)
+;;                               "("
+;;                               (or "evil-define-avy-motion"
+;;                                   "evil-define-command"
+;;                                   "evil-define-interactive-code"
+;;                                   "evil-define-key"
+;;                                   "evil-define-key*"
+;;                                   "evil-define-keymap"
+;;                                   "evil-define-local-var"
+;;                                   "evil-define-minor-mode-key"
+;;                                   "evil-define-motion"
+;;                                   "evil-define-operator"
+;;                                   "evil-define-state"
+;;                                   "evil-define-text-object"
+;;                                   "evil-define-type"
+;;                                   "evil-define-visual-selection")
+;;                               (+ space)
+;;                               (* (any "'" "#"))
+;;                               (* "(")
+;;                               (group
+;;                                (+ (or word ?- ?_))))
+;;                          1)))))
+;; (add-hook 'emacs-lisp-mode-hook #'my-elisp-imenu-evil-support)
+
 ;;; Flymake
 
 (defun my-limit-package-lint-flymake-setup-a (orig-fn &rest args)

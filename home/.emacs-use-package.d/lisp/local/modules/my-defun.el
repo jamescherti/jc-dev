@@ -725,7 +725,7 @@ Delegates regex matching to the C level for significantly better performance."
 
 ;;; Buffer Management
 
-(defun buffer-guardian-save-buffers-kill-emacs ()
+(defun my-save-buffers-kill-emacs ()
   "Handle quitting Emacs with daemon-aware frame management."
   (interactive)
   (if (and (daemonp)

@@ -604,9 +604,9 @@ This enhancement prevents the cursor from moving."
 (add-hook 'evil-mode-hook 'my-setup-evil-mode)
 
 (when (daemonp)
-  (global-set-key (kbd "C-x C-c") 'buffer-guardian-save-buffers-kill-emacs))
+  (global-set-key (kbd "C-x C-c") 'my-save-buffers-kill-emacs))
 
-(define-key evil-normal-state-map (kbd "C-q") 'buffer-guardian-save-buffers-kill-emacs)
+(define-key evil-normal-state-map (kbd "C-q") 'my-save-buffers-kill-emacs)
 
 ;; Make goto mark use ' to restore the column
 (define-key evil-motion-state-map "`" 'evil-goto-mark-line)
