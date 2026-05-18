@@ -772,7 +772,7 @@ Returns the buffer position (point) instead of line number for performance."
   (save-excursion
     (let ((initial-indentation (current-indentation)))
       (while (and (not (if (> direction 0) (eobp) (bobp)))
-                  (zerop (forward-line direction))
+                  (zerop (forward-visible-line direction))
                   (funcall func-keep-searching initial-indentation))))
     (point)))
 
