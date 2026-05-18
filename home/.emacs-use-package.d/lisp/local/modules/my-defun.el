@@ -754,69 +754,6 @@ TO-STRING."
 
 ;;; indentnav
 
-(defvar bufferwizard-indent-ignore-invisible t)
-
-(defun bufferwizard--indent-keep-searching-until-empty (_initial-indentation)
-  "Return t when the current line is NOT empty."
-  (not (looking-at-p "^\\s-*$")))
-
-(defun bufferwizard--indent-keep-searching-until-indent-lower (initial-indentation)
-  "Return t when the indentation is >= INITIAL-INDENTATION, or the line is empty."
-  (or (looking-at-p "^\\s-*$")
-      (>= (current-indentation) initial-indentation)))
-
-(defun bufferwizard--indent-find-pos (direction func-keep-searching)
-  "Get the buffer position of the previous/next line with lower indentation.
-DIRECTION is 1 for forward, -1 for backward.
-FUNC-KEEP-SEARCHING is a predicate function called with the initial indentation.
-Returns the buffer position (point) instead of line number for performance."
-  (setq direction (if (>= direction 0) 1 -1))
-  (save-excursion
-    (let ((initial-indentation (current-indentation)))
-      (while (and (not (if (> direction 0) (eobp) (bobp)))
-                  (zerop (forward-line direction))
-                  (or (and bufferwizard-indent-ignore-invisible
-                           (invisible-p (point)))
-                      (funcall func-keep-searching initial-indentation))))
-      (point))))
-
-(defun bufferwizard--indent-move (direction func-keep-searching)
-  "Move to the previous/next line matching FUNC-KEEP-SEARCHING criteria.
-DIRECTION > 0 moves forward; < 0 moves backward."
-  (let ((saved-column (current-column))
-        (target-pos (bufferwizard--indent-find-pos direction func-keep-searching)))
-    (when target-pos
-      (goto-char target-pos)
-      (move-to-column saved-column))))
-
-;;;###autoload
-(defun bufferwizard-indent-backward-to-lower-indentation ()
-  "Move backward to the lower indentation."
-  (interactive)
-  (bufferwizard--indent-move
-   -1 #'bufferwizard--indent-keep-searching-until-indent-lower))
-
-;;;###autoload
-(defun bufferwizard-indent-forward-to-lower-indentation ()
-  "Move forward to the lower indentation."
-  (interactive)
-  (bufferwizard--indent-move
-   1 #'bufferwizard--indent-keep-searching-until-indent-lower))
-
-;;;###autoload
-(defun bufferwizard-nav-backward-to-empty-line ()
-  "Move backward to empty line."
-  (interactive)
-  (bufferwizard--indent-move
-   -1 #'bufferwizard--indent-keep-searching-until-empty))
-
-;;;###autoload
-(defun bufferwizard-nav-forward-to-empty-line ()
-  "Move forward to empty line."
-  (interactive)
-  (bufferwizard--indent-move
-   1 #'bufferwizard--indent-keep-searching-until-empty))
-
 ;;; Add to load-path recursively
 
 (defun directory-contains-extension-p (dir extension)

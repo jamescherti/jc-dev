@@ -996,8 +996,8 @@ DIR is the directory."
 ;;; evil org
 
 ;; TODO put this back?
-;; (when (fboundp 'bufferwizard-nav-backward-to-empty-line)
-;;   (evil-define-key 'normal 'local (kbd "{") 'bufferwizard-nav-backward-to-empty-line))
+;; (when (fboundp 'bufferwizard-point-backward-to-empty-line)
+;;   (evil-define-key 'normal 'local (kbd "{") 'bufferwizard-point-backward-to-empty-line))
 ;; (when (fboundp 'indentnav-forward-to-empty-line)
 ;;   (evil-define-key 'normal 'local (kbd "}") 'indentnav-forward-to-empty-line))
 
@@ -1290,8 +1290,8 @@ on text following the cursor."
   )
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
-  "{" 'bufferwizard-nav-backward-to-empty-line
-  "}" 'bufferwizard-nav-forward-to-empty-line
+  "{" 'bufferwizard-point-backward-to-empty-line
+  "}" 'bufferwizard-point-forward-to-empty-line
 
   ;; (kbd "M-RET") 'toggle-term-tmux
   ;; (kbd "M-<enter>") 'toggle-term-tmux
@@ -1338,9 +1338,9 @@ on text following the cursor."
 
 ;;; Move region
 
-(defvar move-region-skip-invisible t)
+(defvar bufferwizard-move-region-skip-invisible t)
 
-(defun move-region (n)
+(defun bufferwizard-move-region (n)
   "Move the current region up or down by N lines."
   ;; (interactive "r\np")
   (interactive)
@@ -1356,7 +1356,7 @@ on text following the cursor."
         (evil-exit-visual-state))
 
       (let ((line-text (delete-and-extract-region start end)))
-        (if move-region-skip-invisible
+        (if bufferwizard-move-region-skip-invisible
             (forward-visible-line n)
           (forward-line n))
         (let ((start (point))
@@ -1383,18 +1383,18 @@ on text following the cursor."
           (setq deactivate-mark nil)
           (activate-mark))))))
 
-(defun move-region-up (&rest _)
+(defun bufferwizard-move-region-up (&rest _)
   "Move the current line up by N lines."
   (interactive)
-  (move-region -1))
+  (bufferwizard-move-region -1))
 
-(defun move-region-down (&rest _)
+(defun bufferwizard-move-region-down (&rest _)
   "Move the current line down by N lines."
   (interactive)
-  (move-region 1))
+  (bufferwizard-move-region 1))
 
-(define-key evil-visual-state-map (kbd "M-j") 'move-region-down)
-(define-key evil-visual-state-map (kbd "M-k") 'move-region-up)
+(define-key evil-visual-state-map (kbd "M-j") 'bufferwizard-move-region-down)
+(define-key evil-visual-state-map (kbd "M-k") 'bufferwizard-move-region-up)
 
 ;;; check parens no jump
 
@@ -1481,14 +1481,14 @@ If the parentheses are balanced, the function returns t."
 
 ;; (with-eval-after-load 'markdown-mode
 ;;   (evil-define-key 'normal markdown-mode (kbd "RET") nil)
-;;   (evil-define-key 'normal markdown-mode (kbd "{") bufferwizard-nav-backward-to-empty-line)
+;;   (evil-define-key 'normal markdown-mode (kbd "{") bufferwizard-point-backward-to-empty-line)
 ;;   (evil-define-key 'normal markdown-mode (kbd "}") indentnav-forward-to-empty-line))
 
 (with-eval-after-load 'markdown-mode
   (evil-collection-define-key 'normal 'markdown-mode-map
     ;; Intercept
-    ;; "{" 'bufferwizard-nav-backward-to-empty-line
-    ;; "}" 'bufferwizard-nav-forward-to-empty-line
+    ;; "{" 'bufferwizard-point-backward-to-empty-line
+    ;; "}" 'bufferwizard-point-forward-to-empty-line
     ;; RET can sometimes check and uncheck boxes. This is not
     ;; something I want.
     "RET" nil
@@ -2547,6 +2547,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
              bufferwizard-hl-todo-local-mode)
 
   :init
+  (setq bufferwizard-point-ignore-invisible t)
   ;;; Paste with current indentation
   (global-set-key (kbd "C-v") 'bufferwizard-paste-indented)
   (evil-define-key 'insert 'global (kbd "C-v") #'bufferwizard-paste-indented)
