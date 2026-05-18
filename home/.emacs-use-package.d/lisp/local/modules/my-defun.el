@@ -772,9 +772,10 @@ Returns the buffer position (point) instead of line number for performance."
   (save-excursion
     (let ((initial-indentation (current-indentation)))
       (while (and (not (if (> direction 0) (eobp) (bobp)))
-                  (zerop (forward-visible-line direction))
-                  (funcall func-keep-searching initial-indentation))))
-    (point)))
+                  (zerop (forward-line direction))
+                  (or (invisible-p (point))
+                      (funcall func-keep-searching initial-indentation))))
+      (point))))
 
 (defun bufferwizard--indent-move (direction func-keep-searching)
   "Move to the previous/next line matching FUNC-KEEP-SEARCHING criteria.
