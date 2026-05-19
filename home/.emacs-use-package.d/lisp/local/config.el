@@ -988,11 +988,11 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
       (setq my--package-load-path-cache (nreverse discovered-paths))))
 
   ;; Apply the cached paths to load-path
-  (let ((local-path "~/src/fork/shell-pop-el"))
+  (let ((local-path (expand-file-name "~/src/fork/shell-pop-el")))
     (when (file-exists-p local-path)
-      (push "~/src/fork/shell-pop-el" load-path)))
+      (push local-path load-path)))
 
-  (let ((local-path "~/src/fork/diff-hl"))
+  (let ((local-path (expand-file-name "~/src/fork/diff-hl")))
     (when (file-exists-p local-path)
       (push local-path load-path)))
 
