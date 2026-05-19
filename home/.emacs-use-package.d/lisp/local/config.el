@@ -988,17 +988,63 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
       (setq my--package-load-path-cache (nreverse discovered-paths))))
 
   ;; Apply the cached paths to load-path
-  (let ((local-path "~/src/fork/diff-hl"))
-    (when (file-exists-p local-path)
-      (push local-path load-path)))
-
   (let ((local-path "~/src/fork/shell-pop-el"))
+    (when (file-exists-p local-path)
+      (push "~/src/fork/shell-pop-el" load-path)))
+
+  (let ((local-path "~/src/fork/diff-hl"))
     (when (file-exists-p local-path)
       (push local-path load-path)))
 
   (dolist (path my--package-load-path-cache)
     ;; (push path load-path)
     (push path load-path)))
+
+;; (defun my-add-packages-to-load-path ()
+;;   "Add my packages to `load-path' dynamically.
+;; Iterates over `my-package-base-directory' and adds all subdirectories to
+;; `load-path', skipping any directories listed in
+;; `my-excluded-package-directories'. Caches the result in
+;; `my--package-load-path-cache' to avoid redundant scanning."
+;;   ;; Build the cache if it is empty
+;;   (unless my--package-load-path-cache
+;;     (let ((items (condition-case nil
+;;                      (progn (directory-files my-package-base-directory
+;;                                              t
+;;                                              directory-files-no-dot-files-regexp))
+;;                    (error
+;;                     ;; TODO add debug message
+;;                     nil)))
+;;           (discovered-paths nil))
+;;       (when items
+;;         (dolist (dir items)
+;;           (let ((dir-name (file-name-nondirectory dir)))
+;;             (when (and (file-directory-p dir)
+;;                        (not (member dir-name my-excluded-package-directories)))
+;;               ;; Dynamically handle the "extensions" subdirectory if it exists
+;;               ;; TODO optimize this by providing a list?
+;;               (let ((ext-dir (expand-file-name "extensions" dir)))
+;;                 (when (file-directory-p ext-dir)
+;;                   (push ext-dir discovered-paths)))
+;;
+;;               ;; Add the base package directory
+;;               (push dir discovered-paths)))))
+;;
+;;       ;; Reverse the list to maintain the original alphabetical order
+;;       (setq my--package-load-path-cache (nreverse discovered-paths))))
+;;
+;;   ;; Apply the cached paths to load-path
+;;   (let ((local-path "~/src/fork/diff-hl"))
+;;     (when (file-exists-p local-path)
+;;       (push local-path load-path)))
+;;
+;;   (let ((local-path "~/src/fork/shell-pop-el"))
+;;     (when (file-exists-p local-path)
+;;       (push local-path load-path)))
+;;
+;;   (dolist (path my--package-load-path-cache)
+;;     ;; (push path load-path)
+;;     (push path load-path)))
 
 ;;; display buffer alist
 
