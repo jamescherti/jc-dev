@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+"Update Cask."
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+VERBOSE = True
+
+
+def main():
+    """The command-line interface."""
+
+    try:
+        git_toplevel = \
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"],
+                                    text=True).splitlines()[0]
+    except subprocess.CalledProcessError:
+        sys.exit(1)
+    else:
+        git_toplevel = Path(git_toplevel)
+        if not git_toplevel.is_dir():
+            print(f"[ERROR] The directory does not exist: {git_toplevel}",
+                  file=sys.stderr)
+            sys.exit(1)
+
+        os.chdir(git_toplevel)
+
+    if not any(git_toplevel.suffix == '.el'
+               for git_toplevel in Path('.').rglob('*.el')):
+        print("[ERROR] the following directory is not an Emacs "
+              f"project: {git_toplevel}",
+              file=sys.stderr)
+        sys.exit(1)
+
+    subprocess.check_call(["update-cookiecutter", "addon-cask"])
+
+
+if __name__ == "__main__":
+    main()

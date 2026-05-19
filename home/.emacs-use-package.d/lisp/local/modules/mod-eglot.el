@@ -152,6 +152,8 @@ ERROR is the error (if any)."
   :init
   (add-hook 'python-ts-mode-hook #'my-setup-eglot-mode)
   (add-hook 'python-mode-hook #'my-setup-eglot-mode)
+  ;; (add-hook 'php-mode-hook #'my-setup-eglot-mode)
+  ;; (add-hook 'php-ts-mode-hook #'my-setup-eglot-mode)
 
   ;; (setq eglot-prefer-plaintext nil)
 

@@ -856,6 +856,14 @@ WIDTH is the tab width."
     ;; Mac Port
     (add-to-list 'treesit-extra-load-path "/opt/local/lib"))
 
+  (with-eval-after-load 'savehist
+    ;; Prevent savehist from persisting this variable because it accumulates
+    ;; every directory path selected during treesit grammar installation,
+    ;; including temporary or incorrect paths that are not valid locations for
+    ;; tree-sitter .so files.
+    (add-to-list 'savehist-ignored-variables
+                 'treesit--install-language-grammar-out-dir-history))
+
   (with-eval-after-load 'treesit
     (setq treesit--install-language-grammar-out-dir-history
           (list (expand-file-name "tree-sitter" lightemacs-var-directory))))
