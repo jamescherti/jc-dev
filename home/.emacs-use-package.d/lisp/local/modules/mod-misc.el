@@ -852,14 +852,13 @@ WIDTH is the tab width."
   (setq smerge-diff-buffer-name "*smerge-diff*")
   (setq smerge-refine-shadow-cursor nil)
 
-  ;; TODO: lightemacs?
-  (with-eval-after-load 'treesit
-    (add-to-list 'treesit-extra-load-path
-                 (expand-file-name "tree-sitter" lightemacs-var-directory)))
-
   (unless IS-MAC
     ;; Mac Port
     (add-to-list 'treesit-extra-load-path "/opt/local/lib"))
+
+  (with-eval-after-load 'treesit
+    (setq treesit--install-language-grammar-out-dir-history
+          (list (expand-file-name "tree-sitter" lightemacs-var-directory))))
 
   (unless noninteractive
     (with-eval-after-load 'evil

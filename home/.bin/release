@@ -35,7 +35,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from devops_helpers.prompt import prompt_text
+from jc_helpers.prompt import prompt_text
 from packaging import version
 
 

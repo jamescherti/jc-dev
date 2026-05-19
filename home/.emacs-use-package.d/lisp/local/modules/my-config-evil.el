@@ -837,25 +837,6 @@ When FORCE-ALL is non-nil, use all functions."
 ;; (evil-define-key 'normal 'global (kbd "gd") 'eviljump-goto-definition)
 ;; (evil-define-key 'normal 'global (kbd "gD") 'eviljump-goto-definition-force)
 
-
-;;; Copy with without indentation
-
-(defun evilclipboard-evil-yank-region-unindented ()
-  "Copy the region, un-indented by the length of its minimum indent.
-If numeric prefix argument PAD is supplied, indent the resulting
-text by that amount."
-  (interactive)
-  (when (use-region-p)
-    (evil-yank (region-beginning) (region-end))
-    (dolist (register '(?\" ?*))
-      (let ((original-contents (evil-get-register register t)))
-        (when original-contents
-          (evil-set-register
-           register (evil-clipboard--string-unindent
-                     (substring-no-properties original-contents))))))))
-
-(evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)
-
 ;;; evilwindow: split and select
 
 (defun evilwindow-split-and-select-new-window (split-direction)
@@ -1712,30 +1693,34 @@ search direction (default: \='forward)."
 
 ;;; flymake fixes
 
-;; TODO: Should this fail silently? (Patch Emacs)
-;; (defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
-;;   "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
-;;
-;; ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
-;; ARGS are the arguments passed to ORIG-FUN.
-;;
-;; If the error message contains \"find a suitable init function\", it is
-;; ignored and logged as a warning. All other errors are re-raised."
-;;   (condition-case err
-;;       (apply orig-fun args)
-;;     ((error)
-;;      (let ((error-message (error-message-string err)))
-;;        (if (string-match-p "find a suitable init function"
-;;                            error-message)
-;;            (let ((inhibit-message t))
-;;              (message "[WARNING] Flymake: %s: %s"
-;;                       buffer-file-name
-;;                       error-message))
-;;          (signal (car err) (cdr err)))))))
-;;
-;; (with-eval-after-load 'flymake-proc
-;;   (advice-add 'flymake-proc-legacy-flymake :around
-;;               #'my-flymake-proc-legacy-safe-advice))
+(defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
+  "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
+
+ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
+ARGS are the arguments passed to ORIG-FUN.
+
+If the error message contains \"find a suitable init function\", it is
+ignored and logged as a warning. All other errors are re-raised."
+  (condition-case err
+      (apply orig-fun args)
+    ((error)
+     (let ((error-message (error-message-string err))
+           (inhibit-message t))
+       (message "[WARNING] Flymake: %s: %s"
+                buffer-file-name
+                error-message))
+     ;; (if (string-match-p "find a suitable init function"
+     ;;                     error-message)
+     ;;     (let ((inhibit-message t))
+     ;;       (message "[WARNING] Flymake: %s: %s"
+     ;;                buffer-file-name
+     ;;                error-message))
+     ;;   (signal (car err) (cdr err)))
+     )))
+
+(with-eval-after-load 'flymake-proc
+  (advice-add 'flymake-proc-legacy-flymake :around
+              #'my-flymake-proc-legacy-safe-advice))
 
 ;;; markdown toc
 
@@ -2486,6 +2471,25 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;;; use-package bufferwizard
 
+;; Copy with without indentation
+
+(defun evilclipboard-evil-yank-region-unindented ()
+  "Copy the region, un-indented by the length of its minimum indent.
+If numeric prefix argument PAD is supplied, indent the resulting
+text by that amount."
+  (interactive)
+  (when (and (use-region-p)
+             (fboundp 'bufferwizard--unindent-string))
+    (evil-yank (region-beginning) (region-end))
+    (dolist (register '(?\" ?*))
+      (let ((original-contents (evil-get-register register t)))
+        (when original-contents
+          (evil-set-register
+           register (bufferwizard--unindent-string
+                     (substring-no-properties original-contents))))))))
+
+(evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)
+
 (lightemacs-use-package bufferwizard
   ;; :ensure nil
   :vc (:url "https://github.com/jamescherti/bufferwizard.el"
@@ -2500,7 +2504,8 @@ If COUNT is given, move COUNT - 1 lines downward first."
              bufferwizard-switch-to-base-buffer
              bufferwizard-replace-symbol-at-point
              bufferwizard-hl-todo-mode
-             bufferwizard-hl-todo-local-mode)
+             bufferwizard-hl-todo-local-mode
+             bufferwizard-paste-indented)
 
   :init
   (setq bufferwizard-point-ignore-invisible t)
@@ -3034,7 +3039,7 @@ Accepts any arguments so it can be used as advice or a hook."
       (when (fboundp 'evil-set-register)
         (evil-set-register ?\" text)
         (evil-set-register ?0 text))))
-  (message "Buffer copied for Evil paste."))
+  (message "Buffer copied."))
 
 ;; Example binding to C-c b c
 ;; (global-set-key (kbd "C-c b c") 'my-copy-whole-buffer-evil)

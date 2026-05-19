@@ -396,7 +396,12 @@ xdevenv-terminal() {
 xdevenv-keepassxc() {
   if type -P keepassxc; then
     if is_wayland; then
-      keepassxc
+      if is_gnome && has_run_or_raise; then
+        gdbus call --session --dest org.gnome.Shell \
+          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+          ",gtk-launch org.keepassxc.KeePassXC.desktop,org.keepassxc.KeePassXC"
+      fi
     else
       show_window keepassxc keepassxc.KeePassXC keepassxc
     fi

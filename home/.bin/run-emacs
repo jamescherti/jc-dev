@@ -80,28 +80,26 @@ is-emacs-server-running() {
 load_emacs_profile() {
   RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
   OSFAMILY=$(~/.local/bin/osid)
-  if [[ $RUN_EMACS_BIN = "" ]]; then
-    if [[ $OSFAMILY = arch ]]; then
-      # Emacs master
-      OSFAMILY=$(osid)
-      # export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
-      export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
-      EMACS_D="$HOME/.emacs-master.d/"
-      export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
-    else
-      # Emacs 31
-      export RUN_EMACS_BIN="/usr/bin/emacs"
-      if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-        if [[ $OSFAMILY = arch ]]; then
-          export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
-        else
-          export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-30/bin/emacs"
-        fi
+  if [[ $OSFAMILY = arch ]]; then
+    # Emacs master
+    OSFAMILY=$(osid)
+    # export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+    export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+    EMACS_D="$HOME/.emacs-master.d/"
+    export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
+  else
+    # Emacs 31
+    export RUN_EMACS_BIN="/usr/bin/emacs"
+    if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+      if [[ $OSFAMILY = arch ]]; then
+        export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
+      else
+        export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-30/bin/emacs"
       fi
-
-      EMACS_D="$HOME/.emacs-use-package.d/"
-      export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
     fi
+
+    EMACS_D="$HOME/.emacs-use-package.d/"
+    export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
   fi
 }
 
