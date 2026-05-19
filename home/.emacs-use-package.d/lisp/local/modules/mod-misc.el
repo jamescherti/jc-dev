@@ -1565,12 +1565,12 @@ WIDTH is the tab width."
   ;; This seems to change ediff
   (setq diff-default-read-only t)
 
-  ;; This mimics the Magit's diff format by making the hunk header less cryptic,
-  ;; and on GUI frames also displays insertion and deletion indicators on the
-  ;; left fringe (if it's available).
-  ;;
-  ;; This is better for patches.
-  (setq diff-font-lock-prettify t)
+  ;; TODO minimal-emacs
+  (fringe-mode (frame-char-height))
+  ;; (if (fboundp 'fringe-mode) (fringe-mode '20))
+
+  ;; TODO try
+  ;; (setq-default fringes-outside-margins t)
 
   ;; Use reliable file-based syntax highlighting when available and hunk-based
   ;; syntax highlighting otherwise as a fallback.
