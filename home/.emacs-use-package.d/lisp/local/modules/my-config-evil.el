@@ -1301,7 +1301,7 @@ on text following the cursor."
   ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
   )
 
-(evil-define-key '(insert visual) my-intercept-mode-map
+(evil-define-key '(normal visual) my-intercept-mode-map
   "{" 'bufferwizard-point-backward-to-empty-line
   "}" 'bufferwizard-point-forward-to-empty-line)
 
