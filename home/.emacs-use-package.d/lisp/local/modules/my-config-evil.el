@@ -1713,29 +1713,29 @@ search direction (default: \='forward)."
 ;;; flymake fixes
 
 ;; TODO: Should this fail silently? (Patch Emacs)
-(defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
-  "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
-
-ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
-ARGS are the arguments passed to ORIG-FUN.
-
-If the error message contains \"find a suitable init function\", it is
-ignored and logged as a warning. All other errors are re-raised."
-  (condition-case err
-      (apply orig-fun args)
-    ((error)
-     (let ((error-message (error-message-string err)))
-       (if (string-match-p "find a suitable init function"
-                           error-message)
-           (let ((inhibit-message t))
-             (message "[WARNING] Flymake: %s: %s"
-                      buffer-file-name
-                      error-message))
-         (signal (car err) (cdr err)))))))
-
-(with-eval-after-load 'flymake-proc
-  (advice-add 'flymake-proc-legacy-flymake :around
-              #'my-flymake-proc-legacy-safe-advice))
+;; (defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
+;;   "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
+;;
+;; ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
+;; ARGS are the arguments passed to ORIG-FUN.
+;;
+;; If the error message contains \"find a suitable init function\", it is
+;; ignored and logged as a warning. All other errors are re-raised."
+;;   (condition-case err
+;;       (apply orig-fun args)
+;;     ((error)
+;;      (let ((error-message (error-message-string err)))
+;;        (if (string-match-p "find a suitable init function"
+;;                            error-message)
+;;            (let ((inhibit-message t))
+;;              (message "[WARNING] Flymake: %s: %s"
+;;                       buffer-file-name
+;;                       error-message))
+;;          (signal (car err) (cdr err)))))))
+;;
+;; (with-eval-after-load 'flymake-proc
+;;   (advice-add 'flymake-proc-legacy-flymake :around
+;;               #'my-flymake-proc-legacy-safe-advice))
 
 ;;; markdown toc
 

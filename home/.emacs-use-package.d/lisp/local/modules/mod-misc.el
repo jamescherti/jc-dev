@@ -4517,9 +4517,9 @@ environment for accurate linting."
                                      (shell-quote-argument ,proj-name))))
                            (vterm-send-return)))))))))
 
-;; (with-eval-after-load 'shell-pop
-;;   ;; Apply the new global setting advice
-;;   (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
+(with-eval-after-load 'shell-pop
+  ;; Apply the new global setting advice
+  (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
 
 ;;; vterm-toggle
 
