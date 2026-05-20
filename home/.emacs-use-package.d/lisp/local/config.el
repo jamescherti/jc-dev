@@ -31,7 +31,7 @@
 
 ;; Experimental
 ;; TODO make them a default
-(setq compile-angel-cache-file-truename t)
+(setq compile-angel-cache-file-truename nil)
 (setq compile-angel-cache-locate-file t)
 
 ;;; Native compilation
