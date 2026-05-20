@@ -1,0 +1,4 @@
+/bashate-*
+/src/
+/pkg/
+/*.tar.gz
