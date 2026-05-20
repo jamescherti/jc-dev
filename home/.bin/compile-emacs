@@ -896,6 +896,7 @@ main() {
 
     # Step 1
     if [[ $FPROFILE_GENERATE -ne 0 ]]; then
+      rm -fr "$FPROFILE_FILE"
       # fprofile-generate: ensure -fuse-linker-plugin is used
       export CFLAGS="$CFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE"
 
@@ -981,8 +982,6 @@ main() {
   set -x
   git clean -fxd
   git reset --hard HEAD
-
-  rm -fr "$FPROFILE_FILE"
 
   ./autogen.sh
 
