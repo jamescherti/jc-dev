@@ -1,0 +1,100 @@
+---
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
+vars:
+  debug: true
+  verbose: true
+  last: true
+
+actions:
+  - path_match:
+      - "*/update-iptables.sh"
+      - "*/update-iptables/*"
+      - "*/update-iptables"
+    tags: install
+    list_commands:
+      - "sudo sh -c 'scp tools/update-iptables/update-iptables.sh /usr/local/bin/update-iptables && /usr/local/bin/update-iptables'"
+
+  - path_match:
+      - "*/ananicy-rules/*"
+      - "*/ananicy-rules"
+    shell: true
+    tags: install
+    command: reset; echo "rsync forks/ananicy-rules/ -> /etc/ananicy.d/"; sudo sh -c "rsync --delete -v -ar forks/ananicy-rules/ /etc/ananicy.d/ && systemctl restart ananicy-cpp && echo && echo ananicy-cpp has been restarted"
+
+  - path_match:
+      - "*/lightvim/*"
+      - "*/lightvim"
+    shell: true
+    tags: install
+    list_commands:
+      - rm -f ~/.vimrc ~/.config/nvim/init.vim
+      - cp dotfiles/lightvim/lightvim.vim ~/.vimrc
+      - cp dotfiles/lightvim/lightvim.vim ~/.config/nvim/init.vim
+
+  - path_match:
+      - "*/minimal-emacs.d/*"
+      - "*/minimal-emacs.d"
+    shell: true
+    tags: install
+    list_commands:
+      - 'rsync --times -a ./emacs/minimal-emacs.d/*init.el* ~/src/emacs/lightemacs/lisp/lightemacs/init/'
+      - 'cd ~/src/emacs/lightemacs/lisp/lightemacs/init/ && pathaction -t install .'
+
+  - path_match:
+      - "*/lightemacs/*"
+      - "*/lightemacs"
+    shell: true
+    tags: install
+    command: |
+      so update-emacs-config
+
+  - path_match:
+      - "*/run-or-raise/*"
+      - "*/run-or-raise"
+    shell: true
+    tags: install
+    command: |
+      set -e
+      set -u
+      set -x
+      cd forks/run-or-raise/
+      make compile >/dev/null
+      make build >/dev/null
+      rm -fr ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
+      mkdir -p ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
+      unzip "build/run-or-raise@edvard.cz.zip" -d ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
+      gnome-extensions disable run-or-raise@edvard.cz
+      gnome-extensions enable run-or-raise@edvard.cz
+
+  - path_match:
+      - "*/bash-stdops/*"
+      - "*/bash-stdops"
+    shell: true
+    tags: install
+    command: "cd dotfiles/bash-stdops && PREFIX=~/.local ./install.sh"
+
+  - path_match: "*"
+    command:
+      - smart-install
+      - "{{ file }}"
+    tags:
+      - install

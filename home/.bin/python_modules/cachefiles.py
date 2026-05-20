@@ -5,7 +5,6 @@
 #
 # Copyright (C) 2004-2026 James Cherti
 #
-#
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
@@ -21,9 +20,9 @@
 #
 """Cache files."""
 
+import hashlib
 import os
 import time
-import hashlib
 
 
 def sha512sum(filename):
