@@ -229,19 +229,19 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; compile-angel timer (test)
 
-(defun my-disable-compile-angel-after-delay ()
-  "Disable `compile-angel-on-load-mode' 60 seconds after Emacs startup."
-  (run-at-time
-   (* 30 60) nil
-   (lambda ()
-     (when (bound-and-true-p compile-angel-on-load-mode)
-       (when (fboundp 'compile-angel-on-load-mode)
-         (compile-angel-on-load-mode -1)
-         (let ((inhibit-message t))
-           (message "compile-angel-on-load-mode disabled after 60 seconds")))))))
-
-;; Activate the timer at startup
-(add-hook 'emacs-startup-hook #'my-disable-compile-angel-after-delay)
+;; (defun my-disable-compile-angel-after-delay ()
+;;   "Disable `compile-angel-on-load-mode' 60 seconds after Emacs startup."
+;;   (run-at-time
+;;    (* 30 60) nil
+;;    (lambda ()
+;;      (when (bound-and-true-p compile-angel-on-load-mode)
+;;        (when (fboundp 'compile-angel-on-load-mode)
+;;          (compile-angel-on-load-mode -1)
+;;          (let ((inhibit-message t))
+;;            (message "compile-angel-on-load-mode disabled after 60 seconds")))))))
+;;
+;; ;; Activate the timer at startup
+;; (add-hook 'emacs-startup-hook #'my-disable-compile-angel-after-delay)
 
 ;;; testing
 
@@ -252,7 +252,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; spawning multiple asynchronous compiler processes on battery power can cause
 ;; rapid battery drain and thermal throttling. Suspending this behavior until
 ;; the machine is connected to AC power is a sensible optimization.
-(setq native-comp-async-on-battery-power nil)
+;;
+;; NOTE: Issue. This stops native compilation, even when the laptop is charging.
+;; (setq native-comp-async-on-battery-power nil)
 
 ;; Disable the optimization locally for dired to guarantee directory
 ;; fontification
@@ -1583,7 +1585,7 @@ WIDTH is the tab width."
   (setq diff-default-read-only t)
 
   ;; TODO minimal-emacs
-  (fringe-mode (frame-char-height))
+  (fringe-mode (frame-char-width))
   ;; (if (fboundp 'fringe-mode) (fringe-mode '20))
 
   ;; TODO try
@@ -3311,32 +3313,29 @@ and suppresses all interactive confirmation prompts during teardown."
 This function checks for native compilation support and ensures the operation
 only runs once per session to avoid redundant I/O."
   (interactive)
-  ;; Check if we have already run this session
-  (unless my-native-compile--prune-cache-done
-    ;; Check if native compilation is actually available
-    (when (and (fboundp 'native-comp-available-p)
-               (native-comp-available-p)
-               (fboundp 'native-compile-prune-cache))
-      ;; Set flag immediately to prevent re-entry
-      (setq my-native-compile--prune-cache-done t)
-      (message "[native-comp] Native compilation cache pruned")
-      (with-demoted-errors "Error pruning native cache: %S"
-        (native-compile-prune-cache)))))
+  (when (and (not my-native-compile--prune-cache-done)
+             (fboundp 'native-comp-available-p)
+             (native-comp-available-p)
+             (fboundp 'native-compile-prune-cache))
+    (setq my-native-compile--prune-cache-done t)
+    (message "[native-comp] Native compilation cache pruned")
+    (with-demoted-errors "Error pruning native cache: %S"
+      (native-compile-prune-cache))))
 
 ;; Only register the timer if native compilation is enabled
 (when (and my-native-compile-prune
            (fboundp 'native-comp-available-p)
            (native-comp-available-p))
-  ;; Run once after 5 minutes of idle time
   (add-hook 'kill-emacs-hook 'my-native-compile-prune-cache)
 
   ;; 5 minutes: This is the standard definition of "Away From Keyboard." If you
   ;; haven't touched Emacs for 5 minutes, you have likely stepped away (coffee,
   ;; meeting, etc.). This is the safest time to burn CPU cycles or disk I/O
   ;; without affecting user experience.
-  (add-hook 'lightemacs-after-init-hook
-            #'(lambda()
-                (run-with-idle-timer (* 5 60) nil #'my-native-compile-prune-cache))))
+  ;; (add-hook 'lightemacs-after-init-hook
+  ;;           #'(lambda()
+  ;;               (run-with-idle-timer (* 5 60) nil #'my-native-compile-prune-cache)))
+  )
 
 ;;; Prune native comp tmp files
 

@@ -99,7 +99,7 @@ export CFLAGS="$CFLAGS -fomit-frame-pointer"
 #   CURRENT_BRANCH=$(git branch --show-current)
 #   CURRENT_TAG=$(git describe --tags --exact-match 2>/dev/null)
 #   if [ "$CURRENT_BRANCH" = "$TARGET_BRANCH" ] \
-  #     || [ "$CURRENT_TAG" = "$TARGET_TAG" ]; then
+#     || [ "$CURRENT_TAG" = "$TARGET_TAG" ]; then
 #     # -Wno-deprecated-declarations: Emacs 30.2 uses
 #     # 'gdk_pixbuf_new_from_xpm_data', which is deprecated in newer GTK3/GDK
 #     # versions. This is an upstream Emacs decision for backward compatibility
@@ -804,18 +804,18 @@ detect_git_branch() {
 operating_system() {
   case "$OSTYPE" in
   darwin*)
-  echo macos
-  ;;
+    echo macos
+    ;;
   *)
-  if [[ -f /etc/os-release ]]; then
-    # shellcheck disable=SC1091
-    source /etc/os-release
-    test "$ID" = "archlinux" && ID=arch
-    echo "$ID"
-  else
-    exit 1
-  fi
-  ;;
+    if [[ -f /etc/os-release ]]; then
+      # shellcheck disable=SC1091
+      source /etc/os-release
+      test "$ID" = "archlinux" && ID=arch
+      echo "$ID"
+    else
+      exit 1
+    fi
+    ;;
   esac
 }
 

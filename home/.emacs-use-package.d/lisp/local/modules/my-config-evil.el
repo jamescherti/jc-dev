@@ -36,48 +36,48 @@
 
 ;;; Spell checker: Jinx or Flyspell
 
-(defvar my-spell-checker 'jinx)
+(defvar my-spell-checker 'ispell)
 
-(use-package jinx
-  :if (eq my-spell-checker 'jinx)
-  :preface
-
-  (defun my-jinx-setup ()
-    "Configure Jinx to ignore specific faces in programming modes."
-    ;; Make the variable buffer-local first
-    (let ((excluded-faces
-           (cond
-            ((or (derived-mode-p 'yaml-mode)
-                 (derived-mode-p 'yaml-ts-mode))
-             '(font-lock-comment-face
-               font-lock-string-face
-               ;; font-lock-doc-face
-               ))
-            ;; ((derived-mode-p 'emacs-lisp-mode)
-            ;;  '(;; font-lock-comment-face ; TODO?
-            ;;    font-lock-string-face
-            ;;    ))
-            ((derived-mode-p 'prog-mode)
-             '(font-lock-comment-face
-               font-lock-string-face
-               ;; font-lock-doc-face
-               )))))
-      ;; Use setf to modify or insert the specific field for the current mode
-      (when excluded-faces
-        (make-local-variable 'jinx-exclude-faces)
-        (setf (alist-get major-mode jinx-exclude-faces) excluded-faces))))
-
-  ;; (defun my-jinx-ignore-2-chars ()
-  ;;   "Jinx: Ignore 2 characters."
-  ;;   ;; Exclude words of 1-2 characters and common Elisp char literals
-  ;;   (setq-local jinx-exclude-regexps
-  ;;               (append jinx-exclude-regexps
-  ;;                       '("\\b\\w\\{1,2\\}\\b"      ;; Any 1 or 2 char word
-  ;;                         "\\?\\\\\\?[a-zA-Z]"))))
-  ;; Ignore 2-character strings/words in Elisp
-  ;; Catches for example "]s"
-  ;; (add-hook 'emacs-lisp-mode-hook #'my-jinx-ignore-2-chars)
-  )
+;; (use-package jinx
+;;   :if (eq my-spell-checker 'jinx)
+;;   :preface
+;;
+;;   (defun my-jinx-setup ()
+;;     "Configure Jinx to ignore specific faces in programming modes."
+;;     ;; Make the variable buffer-local first
+;;     (let ((excluded-faces
+;;            (cond
+;;             ((or (derived-mode-p 'yaml-mode)
+;;                  (derived-mode-p 'yaml-ts-mode))
+;;              '(font-lock-comment-face
+;;                font-lock-string-face
+;;                ;; font-lock-doc-face
+;;                ))
+;;             ;; ((derived-mode-p 'emacs-lisp-mode)
+;;             ;;  '(;; font-lock-comment-face ; TODO?
+;;             ;;    font-lock-string-face
+;;             ;;    ))
+;;             ((derived-mode-p 'prog-mode)
+;;              '(font-lock-comment-face
+;;                font-lock-string-face
+;;                ;; font-lock-doc-face
+;;                )))))
+;;       ;; Use setf to modify or insert the specific field for the current mode
+;;       (when excluded-faces
+;;         (make-local-variable 'jinx-exclude-faces)
+;;         (setf (alist-get major-mode jinx-exclude-faces) excluded-faces))))
+;;
+;;   ;; (defun my-jinx-ignore-2-chars ()
+;;   ;;   "Jinx: Ignore 2 characters."
+;;   ;;   ;; Exclude words of 1-2 characters and common Elisp char literals
+;;   ;;   (setq-local jinx-exclude-regexps
+;;   ;;               (append jinx-exclude-regexps
+;;   ;;                       '("\\b\\w\\{1,2\\}\\b"      ;; Any 1 or 2 char word
+;;   ;;                         "\\?\\\\\\?[a-zA-Z]"))))
+;;   ;; Ignore 2-character strings/words in Elisp
+;;   ;; Catches for example "]s"
+;;   ;; (add-hook 'emacs-lisp-mode-hook #'my-jinx-ignore-2-chars)
+;;   )
 
 ;; Router functions to handle the active spell checker dynamically
 (defun my-spell-correct ()
@@ -110,11 +110,13 @@
 (defun my-spell-add-word ()
   "Emulate Vim zg behavior for adding words."
   (interactive)
-  (if (and (eq my-spell-checker 'jinx) (bound-and-true-p jinx-mode))
+  (if (and (eq my-spell-checker 'jinx)
+           (bound-and-true-p jinx-mode))
       (progn
         (message "Jinx: Press '+' (personal) or '*' (local) inside the correction menu.")
         (sit-for 1.5)
-        (jinx-correct))
+        (when (fboundp 'jinx-correct)
+          (jinx-correct)))
     (call-interactively #'ispell-word)))
 
 (with-eval-after-load 'evil
@@ -506,7 +508,7 @@ ORIG-FUN is the function and ARGS the arguments."
   (advice-add 'evil-paste-before :around #'ignore-empty-ring-errors))
 
 (evil-define-key '(normal insert visual) 'global (kbd "C-s")
-  #'buffer-guardian-save-buffer)
+  'buffer-guardian-save-buffer)
 
 (defun evilclipboard-select-pasted ()
   "Visually select last pasted text."

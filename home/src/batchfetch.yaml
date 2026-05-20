@@ -1,0 +1,414 @@
+---
+
+options:
+  exec_before: ["sh", "-c", "set -e; git-setup"]
+  git_pull: false
+  exec_after: ["update-project-list"]
+  ignore_untracked:
+    - .rgignore
+    - other
+    - .fdignore
+    - .dir-settings.el
+    - .pathaction.yaml
+    - .quickaction.yaml
+    - local/
+    - bell/
+    - .fileaction.yaml
+    - batchfetch-local.yaml
+
+tasks:
+  # ----------------------------------------------------------------------------
+  # Linux
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/motley-overlay
+    path: linux/motley-overlay
+
+  - git: git@github.com:jamescherti/docker-oddmuse
+    path: linux/docker-oddmuse
+
+  - git: git@github.com:jamescherti/python-dpc3848v-wifi-modem
+    path: linux/python-dpc3848v-wifi-modem
+
+  - git: git@github.com:jamescherti/alpm-reboot-required
+    path: linux/alpm-reboot-required
+
+  # linux-keep-modules
+  - git: git@github.com:jamescherti/archlinux-linux-keep-modules
+    path: linux/archlinux-linux-keep-modules
+
+  - git: ssh://aur@aur.archlinux.org/linux-keep-modules
+    path: linux/aur-linux-keep-modules
+
+  # brother-ql1110nwb
+  - git: git@github.com:jamescherti/archlinux-brother-ql1110nwb
+    path: linux/archlinux-brother-ql1110nwb
+
+  - git: ssh://aur@aur.archlinux.org/brother-ql1110nwb
+    path: linux/aur-brother-ql1110nwb
+
+  # ----------------------------------------------------------------------------
+  # Misc
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/jamescherti
+    path: jamescherti
+
+  # ----------------------------------------------------------------------------
+  # Tools
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/cherrybuckle
+    # revision: master
+    path: tools/cherrybuckle
+    exec_before: ["git", "upstream", "https://github.com/zevv/bucklespring"]
+
+  - git: git@github.com:jamescherti/pdfcipher
+    path: tools/pdfcipher
+
+  - git: git@github.com:jamescherti/caffeine-aw
+    path: tools/caffeine-aw
+
+  - git: git@github.com:jamescherti/watch-xfce-xfconf
+    path: tools/watch-xfce-xfconf
+
+  - git: git@github.com:jamescherti/batchfetch
+    path: tools/batchfetch
+
+  - git: git@github.com:jamescherti/pathaction
+    path: tools/pathaction
+
+  - git: git@github.com:jamescherti/update-iptables
+    path: tools/update-iptables
+
+  # ----------------------------------------------------------------------------
+  # Git
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/git-commitflow
+    path: git/git-commitflow
+
+  - git: git@github.com:jamescherti/git-smartpull
+    path: git/git-smartpull
+
+  - git: git@github.com:jamescherti/git-smartmv
+    path: git/git-smartmv
+
+  # ----------------------------------------------------------------------------
+  # Ansible
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/ansible-role-ofbiz
+    path: ansible/ansible-role-ofbiz
+
+  - git: git@github.com:jamescherti/ansible-role-flatpak
+    path: ansible/ansible-role-flatpak
+
+  - git: git@github.com:jamescherti/ansible-role-gitolite
+    path: ansible/ansible-role-gitolite
+
+  - git: git@github.com:jamescherti/ansible-role-tuned
+    path: ansible/ansible-role-tuned
+
+  - git: git@github.com:jamescherti/ansible-role-reniced
+    path: ansible/ansible-role-reniced
+
+  - git: git@github.com:jamescherti/ansible-role-apt
+    path: ansible/ansible-role-apt
+
+  - git: git@github.com:jamescherti/ansible-role-auto-upgrade
+    path: ansible/ansible-role-auto-upgrade
+
+  # ----------------------------------------------------------------------------
+  # Dotfiles
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/jc-dev
+    path: dotfiles/jc-dev
+
+  - git: git@github.com:jamescherti/jc-gentoo-portage
+    path: dotfiles/jc-gentoo-portage
+
+  - git: git@github.com:jamescherti/bash-stdops
+    path: dotfiles/bash-stdops
+
+  - git: git@github.com:jamescherti/jc-firefox-settings
+    path: dotfiles/jc-firefox-settings
+
+  - git: git@github.com:jamescherti/jc-dotfiles
+    path: dotfiles/jc-dotfiles
+
+  - git: git@github.com:jamescherti/jc-xfce-settings
+    path: dotfiles/jc-xfce-settings
+
+  - git: git@github.com:jamescherti/jc-gnome-settings
+    path: dotfiles/jc-gnome-settings
+
+  - git: git@github.com:jamescherti/lightvim
+    path: dotfiles/lightvim
+
+  # ----------------------------------------------------------------------------
+  # Forks
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/diff-hl
+    path: forks/diff-hl
+    exec_before: ["git", "upstream", "https://github.com/dgutov/diff-hl"]
+
+  - git: git@github.com:jamescherti/ananicy-rules
+    path: forks/ananicy-rules
+    exec_before: ["git", "upstream", "https://github.com/CachyOS/ananicy-rules"]
+
+  - git: git@github.com:jamescherti/fasd
+    path: forks/fasd
+    revision: master
+    exec_before: ["git", "upstream", "https://github.com/whjvenyl/fasd"]
+
+  - git: git@github.com:jamescherti/gcmh
+    path: forks/gcmh
+    revision: master
+
+  # https://emacsredux.com/blog/2021/08/11/submitting-a-package-to-nongnu-elpa/
+  - git: git@github.com:jamescherti/run-or-raise.git
+    path: forks/run-or-raise
+    revision: main
+    exec_before: ["git", "upstream", "https://github.com/CZ-NIC/run-or-raise"]
+
+  - git: git@github.com:jamescherti/org-mode
+    path: forks/org-mode
+    revision: main
+    exec_before: ["git", "upstream", "https://git.savannah.gnu.org/git/emacs/org-mode.git"]
+
+  - git: git@github.com:jamescherti/avy
+    path: forks/avy
+    revision: master
+    exec_before: ["git", "upstream", "https://github.com/abo-abo/avy"]
+
+  - git: git@github.com:jamescherti/ansible-doc
+    path: forks/ansible-doc
+    revision: master
+    exec_before: ["git", "upstream", "https://github.com/emacsorphanage/ansible-doc"]
+
+  - git: git@github.com:jamescherti/yasnippet
+    path: forks/yasnippet
+    revision: master
+    exec_before: ["git", "upstream", "https://github.com/joaotavora/yasnippet"]
+
+  - git: git@github.com:jamescherti/emacs-elpa
+    path: forks/emacs-elpa
+    revision: main
+    exec_before: ["git", "upstream", "https://git.savannah.gnu.org/git/emacs/elpa.git"]
+
+  - git: git@github.com:jamescherti/emacs-nongnu-elpa
+    path: forks/emacs-nongnu-elpa
+    revision: main
+    exec_before: ["git", "upstream", "https://git.savannah.gnu.org/git/emacs/nongnu.git"]
+
+  - git: git@github.com:jamescherti/emacs.git
+    path: forks/emacs
+    revision: master
+    exec_before: ["git", "upstream", "https://github.com/emacs-mirror/emacs"]
+
+  - git: git@github.com:jamescherti/emacs-shfmt
+    path: forks/emacs-shfmt
+
+  - git: git@github.com:jamescherti/highlight-symbol.el
+    path: forks/highlight-symbol.el
+
+  - git: git@github.com:jamescherti/git-gutter
+    path: forks/git-gutter
+
+  - git: git@github.com:jamescherti/lua-mode
+    path: forks/lua-mode
+    exec_before: ["git", "upstream", "https://github.com/immerrr/lua-mode"]
+
+  - git: git@github.com:jamescherti/jinja2-mode
+    path: forks/jinja2-mode
+    exec_before: ["git", "upstream", "https://github.com/paradoxxxzero/jinja2-mode"]
+
+  - git: git@github.com:jamescherti/vline
+    path: forks/vline
+
+  - git: git@github.com:jamescherti/highlight-defined
+    path: forks/highlight-defined
+
+  - git: git@github.com:jamescherti/paredit
+    path: forks/paredit
+    exec_before: ["git", "upstream", "https://paredit.org/cgit/paredit"]
+
+  # - git: ssh://git@codeberg.org/jamescherti/emacs-eat.git
+  # I have change it and the developer hasn't merged my changes yet.
+  - git: git@github.com:jamescherti/emacs-eat
+    path: forks/emacs-eat
+    exec_before: ["git", "upstream", "https://codeberg.org/akib/emacs-eat"]
+
+  - git: git@github.com:jamescherti/emacs-goto-chg
+    path: forks/emacs-goto-chg
+    exec_before: ["git", "upstream", "https://github.com/emacs-evil/goto-chg"]
+
+  - git: git@codeberg.org:jamescherti/git-timemachine
+    path: forks/git-timemachine
+
+  - git: git@github.com:jamescherti/modeline-region.el
+    path: forks/modeline-region.el
+
+  - git: git@github.com:jamescherti/cherrybuckle
+    path: forks/cherrybuckle
+
+  - git: git@github.com:jamescherti/markdown-mode
+    path: forks/markdown-mode
+    exec_before: ["git", "upstream", "https://github.com/jrblevin/markdown-mode"]
+
+  - git: git@github.com:jamescherti/dtrt-indent
+    path: forks/dtrt-indent
+
+  - git: git@github.com:jamescherti/markdown-toc
+    path: forks/markdown-toc
+    exec_before: ["git", "upstream", "https://github.com/ardumont/markdown-toc"]
+
+  - git: git@github.com:jamescherti/awesome-emacs
+    path: forks/awesome-emacs
+    exec_before: ["git", "upstream", "https://github.com/emacs-tw/awesome-emacs"]
+
+  - git: git@github.com:jamescherti/highlight-sexp
+    path: forks/highlight-sexp
+    exec_before: ["git", "upstream", "https://github.com/daimrod/highlight-sexp"]
+
+  - git: git@github.com:jamescherti/evil
+    path: forks/evil
+    exec_before: ["git", "upstream", "https://github.com/emacs-evil/evil"]
+
+  - git: git@github.com:jamescherti/evil-collection
+    path: forks/evil-collection
+    exec_before: ["git", "upstream", "https://github.com/emacs-evil/evil-collection"]
+
+  - git: git@github.com:jamescherti/evil-snipe
+    path: forks/evil-snipe
+
+  - git: git@github.com:jamescherti/emacs-libvterm
+    path: forks/emacs-libvterm
+    exec_before: ["git", "upstream", "https://github.com/akermu/emacs-libvterm"]
+
+  - git: git@github.com:jamescherti/dired-hacks
+    path: forks/dired-hacks
+    exec_before: ["git", "upstream", "https://github.com/Fuco1/dired-hacks"]
+
+  - git: git@github.com:jamescherti/melpa
+    path: forks/melpa
+    exec_before: ["git", "upstream", "https://github.com/melpa/melpa"]
+
+  - git: git@github.com:jamescherti/parsedown
+    path: forks/parsedown
+    exec_before: ["git", "upstream", "https://github.com/erusev/parsedown"]
+
+  # ----------------------------------------------------------------------------
+  # Vim
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/vim-tomorrow-night-deepblue
+    path: vim/vim-tomorrow-night-deepblue
+
+  - git: git@github.com:jamescherti/vim-pathaction
+    path: vim/vim-pathaction
+
+  - git: git@github.com:jamescherti/vim-easysession
+    path: vim/vim-easysession
+
+  - git: git@github.com:jamescherti/vim-client
+    path: vim/vim-client
+
+  - git: git@github.com:jamescherti/vim-hjklmode
+    path: vim/vim-hjklmode
+
+  - git: git@github.com:jamescherti/vim-jedipydoc
+    path: vim/vim-jedipydoc
+
+  # ----------------------------------------------------------------------------
+  # Emacs projects
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/quick-fasd.el
+    path: emacs/quick-fasd.el
+
+  - git: git@github.com:jamescherti/persist-text-scale.el
+    path: emacs/persist-text-scale.el
+
+  - git: git@github.com:jamescherti/stripspace.el
+    path: emacs/stripspace.el
+
+  - git: git@github.com:jamescherti/ultisnips-mode.el
+    path: emacs/ultisnips-mode.el
+
+  - git: git@github.com:jamescherti/ultyas
+    path: emacs/ultyas
+
+  - git: git@github.com:jamescherti/pathaction.el
+    path: emacs/pathaction.el
+
+  - git: git@github.com:jamescherti/buffer-terminator.el
+    path: emacs/buffer-terminator.el
+
+  - git: git@github.com:jamescherti/enhanced-evil-paredit.el
+    path: emacs/enhanced-evil-paredit.el
+
+  - git: git@github.com:jamescherti/bufferfile.el
+    path: emacs/bufferfile.el
+
+  - git: git@github.com:jamescherti/buffer-guardian.el
+    path: emacs/buffer-guardian.el
+
+  - git: git@github.com:jamescherti/bufferwizard.el
+    path: emacs/bufferwizard.el
+
+  - git: git@github.com:jamescherti/tomorrow-night-deepblue-theme.el
+    path: emacs/tomorrow-night-deepblue-theme.el
+
+  - git: git@github.com:jamescherti/vim-tab-bar.el
+    path: emacs/vim-tab-bar.el
+
+  - git: git@github.com:jamescherti/quick-sdcv.el
+    path: emacs/quick-sdcv.el
+
+  - git: git@github.com:jamescherti/cursorcolumn.el
+    path: emacs/cursorcolumn.el
+
+  - git: git@github.com:jamescherti/pre-commit-elisp
+    path: emacs/pre-commit-elisp
+
+  - git: git@github.com:jamescherti/minimal-emacs.d
+    path: emacs/minimal-emacs.d
+
+  - git: git@github.com:jamescherti/lightemacs
+    path: emacs/lightemacs
+
+  - git: git@github.com:jamescherti/kirigami.el
+    path: emacs/kirigami.el
+
+  - git: git@github.com:jamescherti/easysession.el
+    path: emacs/easysession.el
+
+  - git: git@github.com:jamescherti/shell-pop-el
+    path: emacs/shell-pop-el
+    revision: master
+    exec_before: ["git", "upstream", "https://github.com/kyagi/shell-pop-el"]
+
+  - git: git@github.com:jamescherti/outline-yaml.el
+    path: emacs/outline-yaml.el
+
+  - git: git@github.com:jamescherti/outline-indent.el
+    path: emacs/outline-indent.el
+
+  - git: git@github.com:jamescherti/elispcomp
+    path: emacs/elispcomp
+
+  - git: git@github.com:jamescherti/dir-config.el
+    path: emacs/dir-config.el
+
+  - git: git@github.com:jamescherti/be-quiet.el
+    path: emacs/be-quiet.el
+
+  - git: git@github.com:jamescherti/flymake-bashate.el
+    path: emacs/flymake-bashate.el
+
+  - git: git@github.com:jamescherti/flymake-ansible-lint.el
+    path: emacs/flymake-ansible-lint.el
+
+  - git: git@github.com:jamescherti/org-ibullets.el
+    path: emacs/org-ibullets.el
+
+  - git: git@github.com:jamescherti/compile-angel.el
+    path: emacs/compile-angel.el
+
+  - git: git@github.com:jamescherti/inhibit-mouse.el
+    path: emacs/inhibit-mouse.el
