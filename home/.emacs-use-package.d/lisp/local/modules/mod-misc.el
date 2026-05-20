@@ -243,6 +243,12 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; ;; Activate the timer at startup
 ;; (add-hook 'emacs-startup-hook #'my-disable-compile-angel-after-delay)
 
+;;; compile-angel on save local hooks
+
+;; TODO lightemacs target hooks
+;; (with-eval-after-load 'le-compile-angel
+;;   (add-hook 'lightemacs-after-init-hook 'compile-angel-on-save-mode))
+
 ;;; testing
 
 ;; TODO minimal-emacs.d
@@ -4206,37 +4212,42 @@ This function is intended for use as :around advice."
 (lightemacs-use-package buffer-guardian
   :ensure nil
   :commands buffer-guardian-mode
-
   :hook
   (lightemacs-emacs-startup . buffer-guardian-mode)
 
   :init
-  ;; TODO buffer-guardian
-  ;; (setq buffer-guardian-save-trigger-functions '())
+  (setq buffer-guardian-override-save-some-buffers t)
+
+  ;; (defun buffer-guardian--save-some-buffers-hook (&rest _)
+  ;;   "Trigger `buffer-guardian' save logic during `save-some-buffers' safely."
+  ;;   (when (bound-and-true-p buffer-guardian-mode)
+  ;;     (buffer-guardian-save-all-buffers))
+  ;;   nil) ; Return nil so native save-some-buffers continues cleanly if needed
+  ;; (add-hook 'save-some-buffers-functions #'buffer-guardian--save-some-buffers-hook)
 
   (setq buffer-guardian-verbose nil)
   (setq buffer-guardian-save-all-buffers-interval (* 60 30))
   (setq buffer-guardian-save-all-buffers-idle 30))
 
 ;; Simpler alternative to bg
-(progn
-  (setq auto-save-visited-interval 30)
-  ;; (auto-save-visited-mode 1)
-
-  ;; Make (save-some-buffers 1) only save buffers when they exist in the disk
-
-  ;; Focus
-  ;; (defun my-save-on-focus-change ()
-  ;;   "Save all buffers when Emacs loses focus."
-  ;;   (when (not (frame-focus-state))
-  ;;     (my-save-all-buffers)))
-  ;; (add-function :after after-focus-change-function #'my-save-on-focus-change)
-
-  ;; Save some buffers
-  (setq save-some-buffers-default-predicate
-        (lambda ()
-          (and (buffer-file-name (buffer-base-buffer))
-               (file-exists-p buffer-file-name)))))
+;; (progn
+;;   (setq auto-save-visited-interval 30)
+;;   ;; (auto-save-visited-mode 1)
+;;
+;;   ;; Make (save-some-buffers 1) only save buffers when they exist in the disk
+;;
+;;   ;; Focus
+;;   ;; (defun my-save-on-focus-change ()
+;;   ;;   "Save all buffers when Emacs loses focus."
+;;   ;;   (when (not (frame-focus-state))
+;;   ;;     (my-save-all-buffers)))
+;;   ;; (add-function :after after-focus-change-function #'my-save-on-focus-change)
+;;
+;;   ;; Save some buffers
+;;   (setq save-some-buffers-default-predicate
+;;         (lambda ()
+;;           (and (buffer-file-name (buffer-base-buffer))
+;;                (file-exists-p buffer-file-name)))))
 
 ;;; Rainbow
 

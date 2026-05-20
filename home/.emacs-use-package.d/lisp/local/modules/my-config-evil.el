@@ -2672,7 +2672,8 @@ column layout, except when a point falls on the first visible line."
 (with-eval-after-load 'dired
   (require 'le-dired-filter)
 
-  (evil-define-key 'normal dired-mode-map (kbd "I") 'lightemacs-dired-filter-toggle))
+  (evil-define-key 'normal dired-mode-map (kbd "I")
+    'lightemacs-dired-filter-global-toggle))
 
 ;;; flyspell
 
