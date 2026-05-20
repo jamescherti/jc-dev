@@ -249,6 +249,54 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (with-eval-after-load 'le-compile-angel
 ;;   (add-hook 'lightemacs-after-init-hook 'compile-angel-on-save-mode))
 
+;;; compile-angel function report
+
+;; TODO add to compile angel
+(defun compile-angel--get-list-non-native-compiled-functions ()
+  "Return a list of loaded Elisp function symbols that are not natively compiled."
+  (let (result)
+    (mapatoms
+     (lambda (sym)
+       (when (and (fboundp sym)
+                  (functionp sym))
+         (let ((def (symbol-function sym)))
+           (when (and (not (eq (car-safe def) 'autoload))
+                      (not (subr-primitive-p def))
+                      (if (fboundp 'subr-native-elisp-p)
+                          (not (subr-native-elisp-p def))
+                        t))
+             (push sym result))))))
+    (sort result #'string-lessp)))
+
+;;;###autoload
+(defun compile-angel-report-functions ()
+  "Create a buffer listing all loaded Elisp functions that are not native compiled."
+  (interactive)
+  (with-current-buffer (get-buffer-create "*compile-angel:functions-report*")
+    (let ((inhibit-read-only t))
+      (read-only-mode 1)
+      (erase-buffer)
+      (insert "Non-natively compiled functions:\n")
+      (insert "--------------------------------\n\n")
+      (goto-char (point-min))
+
+      (pop-to-buffer (current-buffer))
+
+      (save-excursion
+        (goto-char (point-max))
+        (let ((count 0))
+          (dolist (func (compile-angel--get-list-non-native-compiled-functions))
+            (setq count (1+ count))
+            (insert (format "- %s\n" func)))
+
+          (if (= count 0)
+              (insert "(All loaded Elisp functions have been natively compiled.)")
+            (insert (format
+                     "\n(%s function%s %s NOT successfully natively compiled.)"
+                     count
+                     (if (< count 2) "" "s")
+                     (if (< count 2) "was" "were")))))))))
+
 ;;; testing
 
 ;; TODO minimal-emacs.d
