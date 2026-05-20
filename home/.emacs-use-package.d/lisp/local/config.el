@@ -468,8 +468,9 @@ extracted, the function returns nil."
 ;; correctly.
 ;;
 ;; Redirect the byte compiler output
-(push my-elc-cache-directory load-path)
-(setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
+;; TODO doesn't work for natively compiling my packages in src dir
+;; (push my-elc-cache-directory load-path)
+;; (setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
 
 ;;; Other settings
 
