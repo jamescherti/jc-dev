@@ -24,6 +24,16 @@
 
 ;;; Code:
 
+(profiler-start 'cpu)
+(add-hook 'emacs-startup-hook #'(lambda() (when (fboundp 'profiler-stop)
+                                            (profiler-stop)))
+          300)
+
+;; Experimental
+;; TODO make them a default
+(setq compile-angel-cache-file-truename t)
+(setq compile-angel-cache-locate-file t)
+
 ;;; Native compilation
 
 ;; `native-comp-compiler-options' specifies flags passed directly to the C
@@ -1111,6 +1121,13 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 ;;; Customize code folding
 
+(setq lightemacs-flymake-target-hooks '(python-mode
+                                        python-ts-mode
+                                        bash-ts-mode
+                                        sh-mode
+                                        yaml-ts-mode
+                                        yaml-mode))
+
 (setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook
                                                      yaml-ts-mode-hook
                                                      python-mode-hook
@@ -1182,6 +1199,46 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 ;;; pathaction
 
 (setq pathaction-term-function 'pathaction-vterm)
+
+;;; im
+
+;; If you want the lowest possible latency and do not care about system-level
+;; Compose keys, or if you are willing to map them entirely within Emacs using
+;; iso-transl, you can tell Emacs to rip out the GTK input context completely.
+;;
+;; This prevents Emacs passing keystrokes through GtkIMContext. It handles the
+;; raw Wayland/X11 event symbols directly. This gives you terminal-level input
+;; latency in a GUI frame.
+;;
+;; Disabling pgtk-use-im-context-on-new-connection bypasses GTK input method
+;; handling in PGTK Emacs and can slightly reduce keyboard input latency. This
+;; may improve perceived responsiveness, but it can disable GTK-provided
+;; compose/dead-key and IME functionality. Compose behavior can be partially
+;; restored inside Emacs using iso-transl.
+;;
+;; If you want to change it after connection, use the pgtk-use-im-context
+;; function.
+;;
+;; If you go this route but still need Compose functionality, you can map the
+;; raw <Multi_key> inside Emacs:
+;; (require 'iso-transl)
+;; (define-key global-map (kbd "<Multi_key>") iso-transl-ctl-x-8-map)
+;; Completely disable GTK input method context overhead
+;;
+;; When an external IM module is active, the event flow for typing a standard
+;; English letter looks like this:
+;; - Wayland/X11 registers the key.
+;; - GTK intercepts the key.
+;; - GTK sends a D-Bus message to the IM daemon.
+;; - The daemon evaluates if the key is part of a complex sequence.
+;; - The daemon sends a D-Bus message back to GTK saying the key is unhandled.
+;; - GTK finally passes the key to Emacs.
+;;
+;; Forcing GTK_IM_MODULE=none removes the D-Bus overhead. Setting
+;; pgtk-use-im-context-on-new-connection to nil goes a step further by skipping
+;; GTK's internal input filtering entirely, handing the raw event straight to
+;; the Emacs event loop.
+(setq pgtk-use-im-context-on-new-connection nil)
 
 ;;; Provide
 

@@ -144,6 +144,7 @@ main() {
     # A workaround is to set GTK_IM_MODULE=none in the environment, or maybe
     # find a different input method without these problems.
     export GTK_IM_MODULE=none
+    export XMODIFIERS=@im=none
     echo "[INFO] Change GDK_BACKEND to wayland and GTK_IM_MODULE to none"
   fi
 

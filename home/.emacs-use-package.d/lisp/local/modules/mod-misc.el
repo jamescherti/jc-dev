@@ -1095,7 +1095,10 @@ WIDTH is the tab width."
     (setq-local indent-tabs-mode nil)
     (setq-local tab-width 2)
     (setq-local standard-indent 2))
-  (setq initial-major-mode 'txt-file-mode)
+
+  ;; Bad idea. It loads too many modes.
+  ;; (setq initial-major-mode 'txt-file-mode)
+
   (push (cons "\\.[Tt][Xx][Tt]\\'" 'txt-file-mode) auto-mode-alist)
   (push (cons "\\.[Tt][Xx][Tt]\\.[aA][sS][cC]\\'" 'txt-file-mode) auto-mode-alist)
 
