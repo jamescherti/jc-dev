@@ -129,7 +129,7 @@ export CFLAGS="$CFLAGS -fomit-frame-pointer"
 export LDFLAGS="-Wl,-O2 -Wl,--sort-common \
   -Wl,--as-needed -Wl,-z,pack-relative-relocs"
 
-if [[ $ID == "debian" ]] && [[ $VERSION_ID = "13" ]]; then
+if [[ $ID == "debian" ]] && [[ ${VERSION_ID:-} == "13" ]]; then
   export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
   export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
 fi
@@ -884,9 +884,11 @@ run_build() {
   # Dynamic profiling and optimization assignment based on active phase
   if [[ "$phase" == "fprofile-generate" ]]; then
     rm -fr "$FPROFILE_FILE"
+    mkdir -p "$FPROFILE_FILE"
+
     if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
-      export CFLAGS="$current_cflags -fprofile-instr-generate=$FPROFILE_FILE"
-      export LDFLAGS="$current_ldflags -fprofile-instr-generate=$FPROFILE_FILE -O2"
+      export CFLAGS="$current_cflags -fprofile-generate=$FPROFILE_FILE"
+      export LDFLAGS="$current_ldflags -fprofile-generate=$FPROFILE_FILE -O2"
     else
     export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_FILE"
     export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
@@ -925,11 +927,13 @@ run_build() {
     # link invocation, it defaults to -O0.
     # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
     if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
-      export CFLAGS="$current_cflags -fprofile-instr-use=$FPROFILE_FILE"
-      export LDFLAGS="$current_ldflags -fprofile-instr-use=$FPROFILE_FILE -O2"
+      # Clang demands that we explicitly merge raw generated profile data before use
+      llvm-profdata merge -output="$FPROFILE_FILE/merged.profdata" "$FPROFILE_FILE" || true
+      export CFLAGS="$current_cflags -fprofile-use=$FPROFILE_FILE/merged.profdata"
+      export LDFLAGS="$current_ldflags -fprofile-use=$FPROFILE_FILE/merged.profdata -O2"
     else
-    export CFLAGS="$current_cflags -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction"
-    export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction -O2"
+      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_FILE -fprofile-correction"
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_FILE -fprofile-correction -O2"
     fi
   else
     # Fallback for when PGO is completely disabled but LTO is still desired
