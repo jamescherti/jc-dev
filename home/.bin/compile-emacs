@@ -32,7 +32,7 @@ set -euf
 HANDLE_FPROFILE=1
 
 # 1 to use Clang on Arch Linux
-USE_CLANG=1
+USE_CLANG=0
 
 SOFTWARE_NAME="emacs"
 NUM_PROC=$(nproc --ignore=1)
@@ -935,6 +935,28 @@ run_build() {
     # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
     if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
       # Clang demands that we explicitly merge raw generated profile data before use
+
+      # Why llvm-profdata is required
+      #
+      # There is a fundamental difference in how GCC and Clang handle the two
+      # phases of Profile-Guided Optimization (PGO):
+      #
+      # - GCC PGO: GCC handles the "merging" of data internally. When you
+      #   compile with -fprofile-use, GCC looks at the .gcda files generated in
+      #   the build directory, reads them, and performs the optimization. It
+      #   manages the index of those files automatically.
+      # - Clang/LLVM PGO: Clang creates raw profile files (.profraw). These
+      #   files are not directly readable by the compiler for the second
+      #   optimization pass. They contain a dump of counters that must be
+      #   processed, normalized, and indexed into a single binary format called
+      #   .profdata. The compiler only understands the indexed .profdata format.
+      # If you skip the merge step, one of two things will happen:
+      # - Build Failure: The compiler will fail to find the expected indexed
+      #   format.
+      # - Silent Failure (The worst case): The compiler might ignore the missing
+      #   data and build a non-optimized binary, giving you a false sense of
+      #   security that your Emacs is "optimized" when it is actually just a
+      #   standard build.
       llvm-profdata merge -output="$FPROFILE_FILE/merged.profdata" "$FPROFILE_FILE"/*.profraw
       export CFLAGS="$current_cflags -fprofile-use=$FPROFILE_FILE/merged.profdata"
       export LDFLAGS="$current_ldflags -fprofile-use=$FPROFILE_FILE/merged.profdata -O2"
