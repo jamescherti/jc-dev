@@ -41,7 +41,9 @@
              kirigami-toggle-fold
              kirigami-open-folds
              kirigami-close-folds-except-current
-             kirigami-close-folds)
+             kirigami-close-folds
+             kirigami-mode)
+  :hook (lightemacs-after-init . kirigami-mode)
   :init
   (lightemacs-module-bind kirigami
     (global-set-key (kbd "C-c z o") 'kirigami-open-fold)
