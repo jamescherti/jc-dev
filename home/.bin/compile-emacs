@@ -81,13 +81,13 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 #
 # The -fno-omit-frame-pointer The Emacs developers recommend using this to
 # disable omit-frame-pointer, because it can cause hard to debug bugs.
-export CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
+export BASE_CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
 
 # Stable
-# export CFLAGS="$CFLAGS -fno-omit-frame-pointer "
+# export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer "
 
 # Unstable, according to Emacs devs, but it works for me.
-export CFLAGS="$CFLAGS -fomit-frame-pointer"
+export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
 
 # if [[ $ID = arch ]]; then
 #   TARGET_BRANCH="emacs-30"
@@ -100,11 +100,11 @@ export CFLAGS="$CFLAGS -fomit-frame-pointer"
 #     # 'gdk_pixbuf_new_from_xpm_data', which is deprecated in newer GTK3/GDK
 #     # versions. This is an upstream Emacs decision for backward compatibility
 #     # and not a functional defect in this build.
-#     CFLAGS="-Wno-deprecated-declarations $CFLAGS"
+#     BASE_CFLAGS="-Wno-deprecated-declarations $BASE_CFLAGS"
 #
-#     # Append CFLAGS to ignore implicit function declaration errors specifically
+#     # Append BASE_CFLAGS to ignore implicit function declaration errors specifically
 #     # to bypass the treesit_load_language build failure.
-#     CFLAGS="$CFLAGS -Wno-implicit-function-declaration"
+#     BASE_CFLAGS="$BASE_CFLAGS -Wno-implicit-function-declaration"
 #   fi
 # fi
 
@@ -128,12 +128,12 @@ export CFLAGS="$CFLAGS -fomit-frame-pointer"
 # (which enables more aggressive string merging). However, -O3 is generally
 # meaningless to standard linkers and is either silently ignored or downgraded
 # to -O2.
-export LDFLAGS="-Wl,-O2 -Wl,--sort-common \
+export BASE_LDFLAGS="-Wl,-O2 -Wl,--sort-common \
   -Wl,--as-needed -Wl,-z,pack-relative-relocs"
 
 if [[ $ID == "debian" ]] && [[ ${VERSION_ID:-} == "13" ]]; then
-  export CFLAGS="$CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
-  export LDFLAGS="$LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
+  export BASE_CFLAGS="$BASE_CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
+  export BASE_LDFLAGS="$BASE_LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
 fi
 
 # The -fno-semantic-interposition flag is an advanced compiler option that
@@ -181,7 +181,7 @@ fi
 # largely redundant for the Emacs codebase. Emacs does not rely heavily on
 # floating-point math, and it is not a shared library where semantic
 # interposition rules heavily apply.
-export CFLAGS="$CFLAGS -fno-semantic-interposition"
+export BASE_CFLAGS="$BASE_CFLAGS -fno-semantic-interposition"
 
 # The -fno-finite-math-only flag prevents the compiler from assuming that
 # floating-point operations never produce NaN or infinity values. This flag is
@@ -193,7 +193,7 @@ export CFLAGS="$CFLAGS -fno-semantic-interposition"
 # largely redundant for the Emacs codebase. Emacs does not rely heavily on
 # floating-point math, and it is not a shared library where semantic
 # interposition rules heavily apply.
-export CFLAGS="$CFLAGS -fno-finite-math-only"
+export BASE_CFLAGS="$BASE_CFLAGS -fno-finite-math-only"
 
 # Applying -fno-plt to the Emacs Executable (C Core)
 # -----------------------------------------------------
@@ -246,9 +246,9 @@ export CFLAGS="$CFLAGS -fno-finite-math-only"
 # If your workflow involves loading all packages at startup (a "heavy init") and
 # you want absolute maximum runtime throughput regardless of startup or load
 # latency, you must apply both the compiler and linker flags together.
-export CFLAGS="$CFLAGS -fno-plt"
+export BASE_CFLAGS="$BASE_CFLAGS -fno-plt"
 
-# I am using -fno-plt in my CFLAGS, I must pair it with "bind now" semantics
+# I am using -fno-plt in my BASE_CFLAGS, I must pair it with "bind now" semantics
 # in the linker flags. This forces the dynamic linker to resolve all symbols at
 # startup, fully bypassing lazy
 # binding and allowing the Global Offset Table to be marked read-only.
@@ -278,7 +278,7 @@ export CFLAGS="$CFLAGS -fno-plt"
 # It has essentially zero impact on execution speed. The only minor overhead
 # occurs during the load time when the operating system changes the memory page
 # permissions to read-only.
-export LDFLAGS="$LDFLAGS -Wl,-z,now -Wl,-z,relro"
+export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
 
 # -fgraphite-identity & -floop-nest-optimize
 #
@@ -331,7 +331,7 @@ export LDFLAGS="$LDFLAGS -Wl,-z,now -Wl,-z,relro"
 # IMPORTANT: These flags: increase build time, increase compiler RAM usage, may
 # trigger GCC bugs, rarely improve runtime performance measurably. These are
 # essentially wasted on Emacs.
-# export CFLAGS="$CFLAGS -fgraphite-identity -floop-nest-optimize"
+# export BASE_CFLAGS="$BASE_CFLAGS -fgraphite-identity -floop-nest-optimize"
 
 # -fdevirtualize-at-ltrans: This flag is used during Link Time Optimization
 # (LTO) to devirtualize C++ virtual function calls. Because the core of Emacs is
@@ -342,7 +342,7 @@ export LDFLAGS="$LDFLAGS -Wl,-z,now -Wl,-z,relro"
 # (vtables) or class inheritance in the way C++ does.
 # The Result: The compiler will simply ignore this flag because there is no C++
 # metadata to analyze. It is dead code in your build script.
-# export CFLAGS="$CFLAGS -fdevirtualize-at-ltrans"
+# export BASE_CFLAGS="$BASE_CFLAGS -fdevirtualize-at-ltrans"
 
 # -fipa-pta: This enables interprocedural pointer template analysis. While
 # technically applicable to C code, it requires an enormous amount of RAM during
@@ -373,7 +373,7 @@ export LDFLAGS="$LDFLAGS -Wl,-z,now -Wl,-z,relro"
 # Again: huge compile-time cost, minimal likely runtime gain, particularly poor
 # fit for native-comp generated code. This belongs in HPC workloads, not Emacs.
 if [[ "$ID" != "arch" || "$USE_CLANG" -eq 0 ]]; then
-  export CFLAGS="$CFLAGS -fipa-pta"
+  export BASE_CFLAGS="$BASE_CFLAGS -fipa-pta"
 fi
 
 # Analysis of the -fuse-linker-plugin export flag
@@ -421,8 +421,8 @@ fi
 # linking or fail in confusing ways. Explicitly declaring the flag forced a hard
 # error if the plugin was missing, rather than allowing a silent downgrade.
 if [[ "$ID" != "arch" || "$USE_CLANG" -eq 0 ]]; then
-  export CFLAGS="$CFLAGS -fuse-linker-plugin"
-  export LDFLAGS="$LDFLAGS -fuse-linker-plugin"
+  export BASE_CFLAGS="$BASE_CFLAGS -fuse-linker-plugin"
+  export BASE_LDFLAGS="$BASE_LDFLAGS -fuse-linker-plugin"
 fi
 
 # Using the Memory Pool System (MPS) in Emacs introduces several drawbacks. It
@@ -1091,15 +1091,12 @@ main() {
 
   echo "[SOURCE DIR]" "$PWD"
   echo "[CONFIGURE OPTION]" "${CONFIGURE_ARGS[@]}"
-  echo "[CFLAGS] $CFLAGS"
-  echo "[LDFLAGS] $LDFLAGS"
+  echo "[BASE_CFLAGS] $BASE_CFLAGS"
+  echo "[BASE_LDFLAGS] $BASE_LDFLAGS"
   echo
 
   read -r -p "Compile Emacs? [y,n] " ANSWER
   [[ "$ANSWER" != "y" ]] && exit 1
-
-  export BASE_CFLAGS="$CFLAGS"
-  export BASE_LDFLAGS="$LDFLAGS"
 
   if [[ $HANDLE_FPROFILE -ne 0 ]]; then
     echo "Building with profile generation..."
