@@ -75,11 +75,11 @@ load_emacs_profile() {
   OSFAMILY=$(~/.local/bin/osid)
   if [[ $OSFAMILY = arch ]]; then
     # Emacs master
-    # export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
-    # EMACS_D="$HOME/.emacs-master.d/"
-
-    export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+    export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
     EMACS_D="$HOME/.emacs-master.d/"
+
+    # export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+    # EMACS_D="$HOME/.emacs-master.d/"
 
     # Emacs stable
     # export RUN_EMACS_BIN="/usr/bin/emacs"

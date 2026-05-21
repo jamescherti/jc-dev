@@ -953,7 +953,7 @@ run_build() {
     # This prevents the compiler from panicking over internal toolchain
     # test variations without needing to inject coverage-mismatch CFLAGS.
     # TODO enable
-    # find "$FPROFILE_DIR" -type f -name "*conftest*" -delete 2>/dev/null || true
+    find "$FPROFILE_DIR" -type f -name "*conftest*" -delete 2>/dev/null || true
 
     # Then recompile with: Step 2
     # -fprofile-correction resolves the object generation issue. However, you

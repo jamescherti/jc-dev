@@ -1,0 +1,8 @@
+---
+
+actions:
+  - path_match:
+      - "*"
+    tags: install
+    list_commands:
+      - "rsync {{ cwd | quote }} {{ \"~/.bin/\" | expanduser }}"
