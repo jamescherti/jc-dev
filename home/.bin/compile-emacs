@@ -37,7 +37,7 @@ USE_CLANG=0
 SOFTWARE_NAME="emacs"
 NUM_PROC=$(nproc --ignore=1)
 
-CC_OPTIMIZE="3"
+CC_OPTIMIZE="2"
 
 # Emacs will be installed under the following path:
 #   $EMACS_INSTALL_PREFIX/<OS>/<EMACS_VERSION>
@@ -891,9 +891,9 @@ run_build() {
     current_ldflags="$current_ldflags -flto=full"
   fi
 
-  FPROFILE_DIR="$HOME/.flto/emacs"
-  FPROFILE_FILE="$FPROFILE_DIR$EMACS_BRANCH"
-  mkdir -p "$FPROFILE_DIR"
+  FPROFILE_BASE_DIR="$HOME/.flto/emacs"
+  FPROFILE_DIR="$FPROFILE_BASE_DIR$EMACS_BRANCH"
+  mkdir -p "$FPROFILE_BASE_DIR"
 
   # Notice the addition of -fprofile-correction. This is highly recommended
   # when compiling Emacs with PGO. Emacs handles async processes and threads
@@ -933,20 +933,28 @@ run_build() {
 
   # Dynamic profiling and optimization assignment based on active phase
   if [[ "$phase" == "fprofile-generate" ]]; then
-    rm -fr "$FPROFILE_FILE"
-    mkdir -p "$FPROFILE_FILE"
+    rm -fr "$FPROFILE_DIR"
+    mkdir -p "$FPROFILE_DIR"
 
     if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
       # Clang concurrent build threads will overwrite each other's data unless
       # explicitly separated using %p (PID) and %m (Binary Signature).
-      export LLVM_PROFILE_FILE="$FPROFILE_FILE/%p-%m.profraw"
-      export CFLAGS="$current_cflags -fprofile-generate=$FPROFILE_FILE"
-      export LDFLAGS="$current_ldflags -fprofile-generate=$FPROFILE_FILE -O$CC_OPTIMIZE"
+      export LLVM_PROFILE_FILE="$FPROFILE_DIR/%p-%m.profraw"
+      export CFLAGS="$current_cflags -fprofile-generate=$FPROFILE_DIR"
+      export LDFLAGS="$current_ldflags -fprofile-generate=$FPROFILE_DIR -O$CC_OPTIMIZE"
     else
-      export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_FILE"
-      export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O$CC_OPTIMIZE"
+      export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_DIR"
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_DIR -O$CC_OPTIMIZE"
     fi
   elif [[ "$phase" == "fprofile-use" ]]; then
+    # Then recompile with: Step 2
+    #
+    # Clear out the accumulated conftest data markers from Phase 1.
+    # This prevents the compiler from panicking over internal toolchain
+    # test variations without needing to inject coverage-mismatch CFLAGS.
+    # TODO enable
+    # find "$FPROFILE_DIR" -type f -name "*conftest*" -delete 2>/dev/null || true
+
     # Then recompile with: Step 2
     # -fprofile-correction resolves the object generation issue. However, you
     # still missed the standalone -O2 in your LDFLAGS. The -Wl,-O2 flag only
@@ -1003,12 +1011,41 @@ run_build() {
       #   data and build a non-optimized binary, giving you a false sense of
       #   security that your Emacs is "optimized" when it is actually just a
       #   standard build.
-      llvm-profdata merge -output="$FPROFILE_FILE/merged.profdata" "$FPROFILE_FILE"/*.profraw
-      export CFLAGS="$current_cflags -fprofile-use=$FPROFILE_FILE/merged.profdata"
-      export LDFLAGS="$current_ldflags -fprofile-use=$FPROFILE_FILE/merged.profdata -O$CC_OPTIMIZE"
+      llvm-profdata merge -output="$FPROFILE_DIR/merged.profdata" "$FPROFILE_DIR"/*.profraw
+      export CFLAGS="$current_cflags -fprofile-use=$FPROFILE_DIR/merged.profdata -Wno-missing-profile"
+      export LDFLAGS="$current_ldflags -fprofile-use=$FPROFILE_DIR/merged.profdata -O$CC_OPTIMIZE"
     else
-      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_FILE -fprofile-correction"
-      export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_FILE -fprofile-correction -O$CC_OPTIMIZE"
+      # The -Wno-error=coverage-mismatch flag: Ensures that if any other minor
+      # mismatch occurs during the linking phase, GCC will only print a warning
+      # instead of aborting the entire compilation process.
+      #
+      # The -Wno-missing-profile flag: Prevents GCC from complaining when it
+      # inevitably can't find profile data for the freshly generated Autoconf
+      # test files.
+      #
+      # Phases
+      # ------
+      # In Phase 1 (fprofile-generate): ./configure runs. It compiles a bunch of
+      # conftest.c files. GCC diligently tracks them and creates a profile data
+      # file named conftest.gcda in your ~/.flto/ folder.
+      #
+      # In Phase 2 (fprofile-use): ./configure runs again. It writes a brand
+      # new, completely different conftest.c file to test something. When GCC
+      # tries to compile it, it automatically loads the old conftest.gcda file
+      # from Phase 1.
+      #
+      # The Crash: GCC looks at the old profile data (which might say "this
+      # program has 7 branches") and looks at the new conftest.c file (which
+      # only has 1 branch). GCC panics, throws a coverage-mismatch error, and
+      # halts. Because the compiler halted, ./configure assumes your compiler is
+      # completely broken and throws the cannot compute suffix of executables:
+      # cannot compile and link error.
+      # Solution: -fprofile-correction -Wno-missing-profile
+      # -Wno-error=coverage-mismatch
+      # removed from cflags: -fprofile-correction -Wno-missing-profile -Wno-error=coverage-mismatch
+      # removed from ldflags: -fprofile-correction
+      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_DIR"
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_DIR -O$CC_OPTIMIZE"
     fi
   else
     # Fallback for when PGO is completely disabled but LTO is still desired
@@ -1029,10 +1066,6 @@ run_build() {
   echo "[LDFLAGS] $LDFLAGS"
 
   set -x
-  git clean -fxd
-  git reset --hard HEAD
-
-  ./autogen.sh
 
   ./configure "${CONFIGURE_ARGS[@]}"
 
@@ -1096,11 +1129,18 @@ main() {
   echo
 
   read -r -p "Compile Emacs? [y,n] " ANSWER
+
+  git clean -fxd
+  git reset --hard HEAD
+  ./autogen.sh
+
   [[ "$ANSWER" != "y" ]] && exit 1
 
   if [[ $HANDLE_FPROFILE -ne 0 ]]; then
     echo "Building with profile generation..."
     run_build "fprofile-generate" 0
+    make distclean
+
     echo "Building with profile use..."
     run_build "fprofile-use" 1
   else
