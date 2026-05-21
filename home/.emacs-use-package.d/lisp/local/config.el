@@ -300,6 +300,32 @@
 ;; (message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
+(setq debug-on-error t)
+
+;;---------------------------------------->TMP
+
+(defvar my-session-temp-directory
+  (file-name-as-directory (make-temp-file "emacs-session-" t))
+  "Unique temporary directory for the current Emacs session.")
+
+;; Direct Emacs internal temporary file generation to the new directory
+(setq temporary-file-directory my-session-temp-directory)
+(setq small-temporary-file-directory my-session-temp-directory)
+
+;; Direct subprocesses (like libgccjit) to the new directory
+(setenv "TMPDIR" my-session-temp-directory)
+;; (message "TMP:%s" my-session-temp-directory)
+
+(defun my-cleanup-session-temp-directory ()
+  "Remove the unique session temporary directory and its contents."
+  (when (and my-session-temp-directory
+             (file-directory-p my-session-temp-directory))
+    (delete-directory my-session-temp-directory t)))
+
+;; Hook the cleanup function to Emacs exit
+(add-hook 'kill-emacs-hook #'my-cleanup-session-temp-directory)
+;;---------------------------------------->TMP
+
 ;;; Auto detect architecture
 
 (defvar my-auto-detect-cpu-architecture t)
@@ -492,32 +518,6 @@ extracted, the function returns nil."
 ;; Experimental
 ;; (setq compile-angel-reload-compiled-version t)
 ;; (setq compile-angel-native-compile-load t)
-
-(setq debug-on-error t)
-
-;;---------------------------------------->TMP
-
-(defvar my-session-temp-directory
-  (file-name-as-directory (make-temp-file "emacs-session-" t))
-  "Unique temporary directory for the current Emacs session.")
-
-;; Direct Emacs internal temporary file generation to the new directory
-(setq temporary-file-directory my-session-temp-directory)
-(setq small-temporary-file-directory my-session-temp-directory)
-
-;; Direct subprocesses (like libgccjit) to the new directory
-(setenv "TMPDIR" my-session-temp-directory)
-;; (message "TMP:%s" my-session-temp-directory)
-
-(defun my-cleanup-session-temp-directory ()
-  "Remove the unique session temporary directory and its contents."
-  (when (and my-session-temp-directory
-             (file-directory-p my-session-temp-directory))
-    (delete-directory my-session-temp-directory t)))
-
-;; Hook the cleanup function to Emacs exit
-(add-hook 'kill-emacs-hook #'my-cleanup-session-temp-directory)
-;;---------------------------------------->TMP
 
 (unless noninteractive
   (setq minimal-emacs-frame-title-format "Lightemacs"))

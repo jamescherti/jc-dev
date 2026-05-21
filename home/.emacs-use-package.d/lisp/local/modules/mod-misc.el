@@ -4318,7 +4318,7 @@ This function is intended for use as :around advice."
 ;; Lazy loader report for new features
 
 (defvar lazy-loader-initial-features nil
-  "A copy of the \='features\=' list captured right after Emacs initialization.")
+  "A copy of the features list captured right after Emacs initialization.")
 
 (defun lazy-loader-save-initial-features ()
   "Capture the state of loaded features post-init."
@@ -4328,7 +4328,7 @@ This function is intended for use as :around advice."
 (add-hook 'after-init-hook #'lazy-loader-save-initial-features)
 
 (defun lazy-loader-compare-features ()
-  "Compare current \='features\=' against the stored post-init version.
+  "Compare current features against the stored post-init version.
 Opens a split window showing the added and removed features."
   (interactive)
   ;; Fallback for testing in the current session if Emacs wasn't restarted
