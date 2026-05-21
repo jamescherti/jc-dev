@@ -19,8 +19,6 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-set -x
-
 # shellcheck disable=SC1091
 ID=unknown
 if [[ -f /etc/os-release ]]; then
@@ -936,6 +934,10 @@ run_build() {
 
       # TODO: Should fprofile be removed from LDFLAGS?
       export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction -O2"
+    else
+      # Fallback for when PGO is completely disabled but LTO is still desired
+      export CFLAGS="$current_cflags -flto=auto"
+      export LDFLAGS="$current_ldflags -flto=auto -O2"
     fi
   fi
 
