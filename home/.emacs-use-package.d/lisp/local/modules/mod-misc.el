@@ -33,6 +33,27 @@
 (require 'seq)
 (require 'my-defun)
 
+;;; Other modules
+
+(unless noninteractive
+  ;; Optional
+  (require 'mod-misc2 nil t)
+
+  ;; (require 'mod-toggle-term)
+  ;; TODO put it back
+
+  ;; (when (< emacs-major-version 31)
+  ;;   (require 'mod-kirigami))
+  (require 'mod-kirigami)
+
+  (require 'mod-project)
+  (require 'mod-buffer-terminator)
+  (require 'buffer-guardian)
+  (require 'mod-eglot)
+  (require 'smartindent)
+  ;; (require 'battery-angel)
+  (require 'point-manager))
+
 ;;; TODO minimal-emacs.d or lightemacs? Fix annoyance: package upgrade :vc splits
 
 ;; Restricts the find-library completion list to actual Emacs Lisp libraries
@@ -519,6 +540,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (require 'package)
     (when (fboundp 'package-delete)
       (dolist (item '(olivetti
+                      git-gutter
                       posframe
                       popper
                       rainbow-mode
@@ -3952,56 +3974,334 @@ This function is intended for use as :around advice."
   :commands lazy-loader-mode
   :hook
   (lightemacs-after-init . lazy-loader-mode)
-  :custom
-  (lazy-loader-verbose t)
-  (lazy-loader-modules '(vterm
-                         shell-pop
-                         vertico
-                         marginalia
-                         orderless
-                         consult
-                         elisp-mode
-                         python
-                         markdown-mode
-                         cl-lib
-                         subr-x
-                         dash
-                         s
-                         f
-                         eglot
-                         outline
-                         outline-indent
-                         kirigami
-                         hideshow
-                         ;; org
-                         ;; org-appear
-                         ;; org-ibullets
-                         ;; org-indent
-                         ;; org-element
-                         ;; org-persist
-                         ;; org-id
-                         ;; org-refile
-                         ;; org-element-ast
-                         ;; org-macro
-                         ;; org-pcomplete
-                         ;; org-list
-                         ;; org-footnote
-                         ;; org-faces
-                         ;; org-entities
-                         ;; org-src
-                         ;; org-cycle
-                         ;; org-table
-                         ;; org-fold
-                         ;; org-fold-core
-                         ;; org-keys
-                         ;; org-loaddefs
-                         ;; org-version
-                         ;; org-compat
-                         ;; org-macs
-                         ))
-  (lazy-loader-files (delq nil
-                           (list (when (bound-and-true-p file-path-todo)
-                                   file-path-todo))))
+  :init
+  (setq lazy-loader-verbose t)
+  (setq lazy-loader-files (delq nil
+                                (list (when (bound-and-true-p file-path-todo)
+                                        file-path-todo))))
+  (setq lazy-loader-modules '(advice
+                              aggressive-indent
+                              annalist
+                              ansi-color
+                              ansi-osc
+                              apheleia
+                              apheleia-dp
+                              apheleia-formatter-context
+                              apheleia-formatters
+                              apheleia-log
+                              apheleia-rcs
+                              apheleia-utils
+                              autorevert
+                              avl-tree
+                              bibtex
+                              bookmark
+                              buffer-terminator
+                              bufferwizard
+                              byte-opt
+                              c++-ts-mode
+                              c-ts-common
+                              c-ts-mode
+                              cal-loaddefs
+                              cal-menu
+                              calendar
+                              char-fold
+                              color
+                              comint
+                              comp
+                              comp-common
+                              comp-cstr
+                              comp-run
+                              compile
+                              compile-angel
+                              corfu
+                              corfu-prescient
+                              cursor-sensor
+                              derived
+                              diff-mode
+                              dig
+                              dired
+                              dired-loaddefs
+                              disp-table
+                              display-fill-column-indicator
+                              display-line-numbers
+                              doc-view
+                              dom
+                              dtrt-indent
+                              easy-escape
+                              edit-indirect
+                              edmacro
+                              ef-melissa-dark-theme
+                              ef-themes
+                              ehelp
+                              elec-pair
+                              enhanced-evil-paredit
+                              epa
+                              epg
+                              epg-config
+                              evil
+                              evil-collection
+                              evil-collection-bookmark
+                              evil-collection-buff-menu
+                              evil-collection-calendar
+                              evil-collection-comint
+                              evil-collection-compile
+                              evil-collection-corfu
+                              evil-collection-custom
+                              evil-collection-diff-mode
+                              evil-collection-dired
+                              evil-collection-doc-view
+                              evil-collection-eldoc
+                              evil-collection-elisp-mode
+                              evil-collection-epa
+                              evil-collection-eww
+                              evil-collection-finder
+                              evil-collection-flymake
+                              evil-collection-gnus
+                              evil-collection-help
+                              evil-collection-hideshow
+                              evil-collection-image
+                              evil-collection-imenu
+                              evil-collection-indent
+                              evil-collection-kmacro
+                              evil-collection-markdown-mode
+                              evil-collection-message
+                              evil-collection-minibuffer
+                              evil-collection-org
+                              evil-collection-outline
+                              evil-collection-package-menu
+                              evil-collection-process-menu
+                              evil-collection-python
+                              evil-collection-replace
+                              evil-collection-sh-script
+                              evil-collection-simple
+                              evil-collection-tab-bar
+                              evil-collection-tabulated-list
+                              evil-collection-term
+                              evil-collection-unimpaired
+                              evil-collection-vc-git
+                              evil-collection-vertico
+                              evil-collection-vterm
+                              evil-command-window
+                              evil-commands
+                              evil-common
+                              evil-core
+                              evil-ex
+                              evil-integration
+                              evil-jumps
+                              evil-macros
+                              evil-maps
+                              evil-matchit-evil-setup
+                              evil-repeat
+                              evil-search
+                              evil-snipe
+                              evil-states
+                              evil-surround
+                              evil-types
+                              evil-vars
+                              eww
+                              executable
+                              exif
+                              face-remap
+                              filenotify
+                              files-x
+                              find-func
+                              finder
+                              flymake
+                              format-spec
+                              gcmh
+                              gcsentinel
+                              generator
+                              gmm-utils
+                              gnus
+                              gnus-art
+                              gnus-cloud
+                              gnus-group
+                              gnus-int
+                              gnus-range
+                              gnus-spec
+                              gnus-start
+                              gnus-sum
+                              gnus-undo
+                              gnus-util
+                              gnus-win
+                              gnutls
+                              help-fns
+                              highlight-defined
+                              hl-line
+                              ibuf-macs
+                              ietf-drums
+                              image-mode
+                              imenu
+                              inhibit-mouse
+                              inline
+                              iso8601
+                              jinx
+                              jka-compr
+                              kinsoku
+                              kirigami-evil
+                              kmacro
+                              lazy-loader
+                              let-alist
+                              lisp-mnt
+                              mail-parse
+                              mail-prsvr
+                              mail-source
+                              mail-utils
+                              mailabbrev
+                              mailheader
+                              marginalia
+                              markdown-mode
+                              mb-depth
+                              message
+                              mm-bodies
+                              mm-decode
+                              mm-encode
+                              mm-url
+                              mm-util
+                              mm-uu
+                              mm-view
+                              mml
+                              mml-sec
+                              mml-smime
+                              mml2015
+                              modus-themes
+                              my-config-evil
+                              my-evil-outline
+                              nnheader
+                              nnimap
+                              nnmail
+                              nnoo
+                              nnselect
+                              ob
+                              ob-comint
+                              ob-core
+                              ob-emacs-lisp
+                              ob-eval
+                              ob-exp
+                              ob-lob
+                              ob-python
+                              ob-ref
+                              ob-shell
+                              ob-table
+                              ob-tangle
+                              oc
+                              oc-basic
+                              ol
+                              ol-bbdb
+                              ol-bibtex
+                              ol-docview
+                              ol-doi
+                              ol-eww
+                              ol-gnus
+                              ol-info
+                              ol-irc
+                              ol-mhe
+                              ol-rmail
+                              ol-w3m
+                              org
+                              org-appear
+                              org-compat
+                              org-cycle
+                              org-element
+                              org-element-ast
+                              org-entities
+                              org-faces
+                              org-fold
+                              org-fold-core
+                              org-footnote
+                              org-ibullets
+                              org-id
+                              org-indent
+                              org-keys
+                              org-link-doi
+                              org-list
+                              org-loaddefs
+                              org-macro
+                              org-macs
+                              org-pcomplete
+                              org-persist
+                              org-refile
+                              org-src
+                              org-table
+                              org-version
+                              outline-indent
+                              package-lint
+                              package-lint-flymake
+                              paredit
+                              parse-time
+                              pcase
+                              pcomplete
+                              persist-text-scale
+                              pixel-fill
+                              prescient
+                              project
+                              pulse
+                              puny
+                              python
+                              radix-tree
+                              range
+                              recentf
+                              rect
+                              reveal
+                              rfc2045
+                              rfc2047
+                              rfc2231
+                              rfc6068
+                              rfc822
+                              ring
+                              rx
+                              savehist
+                              saveplace
+                              sendmail
+                              server
+                              sh-script
+                              shell
+                              shell-pop
+                              shr
+                              smie
+                              smime
+                              stripspace
+                              sub-better-evil
+                              svg
+                              tabify
+                              term
+                              term/xterm
+                              terminal-themes
+                              terminal-themes-frame-color
+                              terminal-themes-vterm
+                              text-property-search
+                              thingatpt
+                              time
+                              time-date
+                              time-stamp
+                              track-changes
+                              tramp
+                              tramp-cache
+                              tramp-cmds
+                              tramp-compat
+                              tramp-integration
+                              tramp-loaddefs
+                              tramp-message
+                              trampver
+                              tree-widget
+                              undo-fu-session
+                              url-file
+                              url-queue
+                              utf7
+                              vc-dispatcher
+                              vc-git
+                              vertico
+                              vertico-prescient
+                              vtable
+                              vterm
+                              vterm-module
+                              warnings
+                              winner
+                              xml
+                              xterm
+                              yaml-ts-mode
+                              yank-media
+                              yasnippet))
   ;; (lazy-loader-buffers
   ;;  '(("*tmux*" .
   ;;     (lambda ()
@@ -4014,6 +4314,60 @@ This function is intended for use as :around advice."
   ;;           (vterm-send-return))
   ;;         buf)))))
   )
+
+;; Lazy loader report for new features
+
+(defvar lazy-loader-initial-features nil
+  "A copy of the 'features' list captured right after Emacs initialization.")
+
+(defun lazy-loader-save-initial-features ()
+  "Capture the state of loaded features post-init."
+  (setq lazy-loader-initial-features (copy-sequence features)))
+
+;; Automatically capture features after the init file finishes loading
+(add-hook 'after-init-hook #'lazy-loader-save-initial-features)
+
+(defun lazy-loader-compare-features ()
+  "Compare current 'features' against the stored post-init version.
+Opens a split window showing the added and removed features."
+  (interactive)
+  ;; Fallback for testing in the current session if Emacs wasn't restarted
+  (unless lazy-loader-initial-features
+    (when (y-or-n-p "Initial features not recorded. Snapshot current features as baseline? ")
+      (lazy-loader-save-initial-features)))
+
+  (if (not lazy-loader-initial-features)
+      (message "Comparison canceled.")
+    (let ((added (seq-remove (lambda (f)
+                               (seq-contains-p lazy-loader-initial-features f))
+                             features))
+          (removed (seq-remove (lambda (f)
+                                 (seq-contains-p features f))
+                               lazy-loader-initial-features))
+          (buf (get-buffer-create "*Feature Diff*")))
+      (with-current-buffer buf
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (insert "=== Emacs Feature Diff Report ===\n\n")
+          (insert (format "Initial features count: %d\n"
+                          (length lazy-loader-initial-features)))
+          (insert (format "Current features count: %d\n\n"
+                          (length features)))
+
+          (insert "--- Added Features (Loaded since init) ---\n")
+          (if added
+              (dolist (f (sort added #'string-lessp))
+                (insert (format "%s\n" f)))
+            (insert "  (None)\n"))
+
+          (insert "\n--- Removed Features (Unloaded since init) ---\n")
+          (if removed
+              (dolist (f (sort removed #'string-lessp))
+                (insert (format "%s\n" f)))
+            (insert "  (None)\n"))
+          (special-mode)))
+      ;; Pop to the buffer, which naturally splits the window
+      (pop-to-buffer buf))))
 
 ;;; Themes config
 
@@ -5216,27 +5570,6 @@ The result is displayed in a pretty-printed temporary buffer."
 ;;
 ;; (add-hook 'find-file-hook #'auto-recover-prompt-on-visit 90)
 
-;;; Other modules
-
-(unless noninteractive
-  ;; Optional
-  (require 'mod-misc2 nil t)
-
-  ;; (require 'mod-toggle-term)
-  ;; TODO put it back
-
-  ;; (when (< emacs-major-version 31)
-  ;;   (require 'mod-kirigami))
-  (require 'mod-kirigami)
-
-  (require 'mod-project)
-  (require 'mod-buffer-terminator)
-  (require 'buffer-guardian)
-  (require 'mod-eglot)
-  (require 'smartindent)
-  ;; (require 'battery-angel)
-  (require 'point-manager))
-
 ;;; term kill
 
 ;; Automatically close the buffer when the terminal session ends
@@ -5500,28 +5833,28 @@ are editing by falling back to another visible file buffer."
 
 ;;; git gutter
 
-(lightemacs-use-package git-gutter
-  :commands (git-gutter-mode)
-
-  :init
-  (setq git-gutter:added-sign "+"
-        git-gutter:deleted-sign "-"
-        git-gutter:ask-p nil
-        git-gutter:diff-option "-w"
-        git-gutter:handled-backends '(git)
-        git-gutter:disabled-modes '(image-mode fundamental-mode)
-        git-gutter:hide-gutter t
-        git-gutter:modified-sign "="
-        ;; git-gutter:visual-line t        ; Better for wrapped lines
-        git-gutter:update-interval 0
-        git-gutter:verbosity 0)
-
-  :config
-  (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
-  (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
-  (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
-  (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
-  (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
+;; (lightemacs-use-package git-gutter
+;;   :commands (git-gutter-mode)
+;;
+;;   :init
+;;   (setq git-gutter:added-sign "+"
+;;         git-gutter:deleted-sign "-"
+;;         git-gutter:ask-p nil
+;;         git-gutter:diff-option "-w"
+;;         git-gutter:handled-backends '(git)
+;;         git-gutter:disabled-modes '(image-mode fundamental-mode)
+;;         git-gutter:hide-gutter t
+;;         git-gutter:modified-sign "="
+;;         ;; git-gutter:visual-line t        ; Better for wrapped lines
+;;         git-gutter:update-interval 0
+;;         git-gutter:verbosity 0)
+;;
+;;   :config
+;;   (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
+;;   (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
+;;   (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
+;;   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
+;;   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
 
 ;; (lightemacs-use-package git-gutter-fringe
 ;;   :after git-gutter)

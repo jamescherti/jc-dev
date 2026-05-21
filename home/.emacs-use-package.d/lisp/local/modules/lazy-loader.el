@@ -78,21 +78,31 @@ called to initialize the buffer."
 (defvar lazy-loader--done nil)
 (defun lazy-loader--load ()
   "Load modules and files."
+  ;; Disable hooks and timers
+  (lazy-loader-disable-focus-hook)
+  (lazy-loader--stop-idle-timer)
+
   (unless lazy-loader--done
     (setq lazy-loader--done t)
+
     ;; Load modules
     (dolist (module lazy-loader-modules)
       (unless (featurep module)
-        (if (require module nil t)
-            (lazy-loader--verbose-message "Load module: %s" module)
-          (lazy-loader--verbose-message "Unable to load the module: %s" module))))
+        ;; TODO condition-case + verbose error message
+        (ignore-errors
+          (if (require module nil t)
+              (lazy-loader--verbose-message "Load module: %s" module)
+            (lazy-loader--verbose-message "Unable to load the module: %s" module)))))
 
     ;; Load files
     (dolist (file lazy-loader-files)
       (when (and (file-regular-p file)
                  (file-readable-p file))
-        (lazy-loader--verbose-message "Load file: %s" file)
-        (find-file-noselect file)))
+        (unwind-protect
+            ;; TODO condition-case + verbose error message
+            (ignore-errors
+              (find-file-noselect file))
+          (lazy-loader--verbose-message "Load file: %s" file))))
 
     ;; Load all buffers listed in `lazy-loader-buffers' by calling their
     ;; initializer functions.
@@ -100,11 +110,9 @@ called to initialize the buffer."
       (let ((buf-name (car entry))
             (init-func (cdr entry)))
         (unless (get-buffer buf-name)
-          (funcall init-func))))
-
-    ;; Disable hooks and timers
-    (lazy-loader-disable-focus-hook)
-    (lazy-loader--stop-idle-timer)))
+          ;; TODO condition-case + verbose error message
+          (ignore-errors
+            (funcall init-func)))))))
 
 ;;; Focus change
 
