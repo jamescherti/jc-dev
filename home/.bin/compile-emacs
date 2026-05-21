@@ -370,7 +370,9 @@ export LDFLAGS="$LDFLAGS -Wl,-z,now -Wl,-z,relro"
 #
 # Again: huge compile-time cost, minimal likely runtime gain, particularly poor
 # fit for native-comp generated code. This belongs in HPC workloads, not Emacs.
-export CFLAGS="$CFLAGS -fipa-pta"
+if [[ $USE_CLANG -eq 0 ]]; then
+  export CFLAGS="$CFLAGS -fipa-pta"
+fi
 
 # Analysis of the -fuse-linker-plugin export flag
 #
@@ -416,8 +418,10 @@ export CFLAGS="$CFLAGS -fipa-pta"
 # linker failed to load the plugin, GCC would silently fall back to traditional
 # linking or fail in confusing ways. Explicitly declaring the flag forced a hard
 # error if the plugin was missing, rather than allowing a silent downgrade.
-export CFLAGS="$CFLAGS -fuse-linker-plugin"
-export LDFLAGS="$LDFLAGS -fuse-linker-plugin"
+if [[ $USE_CLANG -eq 0 ]]; then
+  export CFLAGS="$CFLAGS -fuse-linker-plugin"
+  export LDFLAGS="$LDFLAGS -fuse-linker-plugin"
+fi
 
 # Using the Memory Pool System (MPS) in Emacs introduces several drawbacks. It
 # is largely experimental, so some Emacs packages or internal subsystems may not
@@ -887,11 +891,14 @@ run_build() {
     mkdir -p "$FPROFILE_FILE"
 
     if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+      # Clang concurrent build threads will overwrite each other's data unless
+      # explicitly separated using %p (PID) and %m (Binary Signature).
+      export LLVM_PROFILE_FILE="$FPROFILE_FILE/%p-%m.profraw"
       export CFLAGS="$current_cflags -fprofile-generate=$FPROFILE_FILE"
       export LDFLAGS="$current_ldflags -fprofile-generate=$FPROFILE_FILE -O2"
     else
-    export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_FILE"
-    export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
+      export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_FILE"
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
     fi
   elif [[ "$phase" == "fprofile-use" ]]; then
     # Then recompile with: Step 2
@@ -928,7 +935,7 @@ run_build() {
     # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
     if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
       # Clang demands that we explicitly merge raw generated profile data before use
-      llvm-profdata merge -output="$FPROFILE_FILE/merged.profdata" "$FPROFILE_FILE" || true
+      llvm-profdata merge -output="$FPROFILE_FILE/merged.profdata" "$FPROFILE_FILE"/*.profraw
       export CFLAGS="$current_cflags -fprofile-use=$FPROFILE_FILE/merged.profdata"
       export LDFLAGS="$current_ldflags -fprofile-use=$FPROFILE_FILE/merged.profdata -O2"
     else
@@ -941,8 +948,8 @@ run_build() {
       export CFLAGS="$current_cflags"
       export LDFLAGS="$current_ldflags -O2"
     else
-    export CFLAGS="$current_cflags -flto=auto"
-    export LDFLAGS="$current_ldflags -flto=auto -O2"
+      export CFLAGS="$current_cflags -flto=auto"
+      export LDFLAGS="$current_ldflags -flto=auto -O2"
     fi
   fi
 
