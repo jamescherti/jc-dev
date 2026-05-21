@@ -773,19 +773,18 @@ Delegates regex matching to the C level for significantly better performance."
 
 (defun my-update-bash-lastdir (&rest _)
   "Update Bash lastdir."
-  (let* ((directory (file-truename (buffer-cwd)))
+  (let* ((directory (buffer-cwd))
          (file "~/.bash_lastdir")
-         (file-lastdir (let ((line (string-trim
-                                    (let ((coding-system-for-read 'utf-8-emacs)
-                                          (file-coding-system-alist nil))
-                                      (with-temp-buffer
-                                        (insert-file-contents file)
-                                        (thing-at-point 'line))))))
-                         (when line
-                           (file-truename line)))))
+         (file-lastdir (when (file-exists-p file)
+                         (let ((line (let ((coding-system-for-read 'utf-8-emacs)
+                                           (file-coding-system-alist nil))
+                                       (with-temp-buffer
+                                         (insert-file-contents file)
+                                         (thing-at-point 'line)))))
+                           (when line
+                             line)))))
     (when (or (not file-lastdir)
               (not (string= directory file-lastdir)))
-      (message "Update: %S %S" directory file-lastdir)
       (with-temp-buffer
         (insert (expand-file-name default-directory))
         (let ((coding-system-for-write 'utf-8-emacs)

@@ -37,6 +37,8 @@ USE_CLANG=0
 SOFTWARE_NAME="emacs"
 NUM_PROC=$(nproc --ignore=1)
 
+CC_OPTIMIZE="3"
+
 # Emacs will be installed under the following path:
 #   $EMACS_INSTALL_PREFIX/<OS>/<EMACS_VERSION>
 # For example, on a Debian system with the current Git branch "emacs-30":
@@ -79,7 +81,7 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 #
 # The -fno-omit-frame-pointer The Emacs developers recommend using this to
 # disable omit-frame-pointer, because it can cause hard to debug bugs.
-export CFLAGS="-O2 -pipe -march=native -mtune=native"
+export CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
 
 # Stable
 # export CFLAGS="$CFLAGS -fno-omit-frame-pointer "
@@ -939,10 +941,10 @@ run_build() {
       # explicitly separated using %p (PID) and %m (Binary Signature).
       export LLVM_PROFILE_FILE="$FPROFILE_FILE/%p-%m.profraw"
       export CFLAGS="$current_cflags -fprofile-generate=$FPROFILE_FILE"
-      export LDFLAGS="$current_ldflags -fprofile-generate=$FPROFILE_FILE -O2"
+      export LDFLAGS="$current_ldflags -fprofile-generate=$FPROFILE_FILE -O$CC_OPTIMIZE"
     else
       export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_FILE"
-      export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O$CC_OPTIMIZE"
     fi
   elif [[ "$phase" == "fprofile-use" ]]; then
     # Then recompile with: Step 2
@@ -1003,19 +1005,19 @@ run_build() {
       #   standard build.
       llvm-profdata merge -output="$FPROFILE_FILE/merged.profdata" "$FPROFILE_FILE"/*.profraw
       export CFLAGS="$current_cflags -fprofile-use=$FPROFILE_FILE/merged.profdata"
-      export LDFLAGS="$current_ldflags -fprofile-use=$FPROFILE_FILE/merged.profdata -O2"
+      export LDFLAGS="$current_ldflags -fprofile-use=$FPROFILE_FILE/merged.profdata -O$CC_OPTIMIZE"
     else
       export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_FILE -fprofile-correction"
-      export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_FILE -fprofile-correction -O2"
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_FILE -fprofile-correction -O$CC_OPTIMIZE"
     fi
   else
     # Fallback for when PGO is completely disabled but LTO is still desired
     if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
       export CFLAGS="$current_cflags"
-      export LDFLAGS="$current_ldflags -O2"
+      export LDFLAGS="$current_ldflags -O$CC_OPTIMIZE"
     else
       export CFLAGS="$current_cflags -flto=auto"
-      export LDFLAGS="$current_ldflags -flto=auto -O2"
+      export LDFLAGS="$current_ldflags -flto=auto -O$CC_OPTIMIZE"
     fi
   fi
 
