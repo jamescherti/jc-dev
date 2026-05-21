@@ -354,6 +354,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(setq fast-but-imprecise-scrolling t)
+;; (setq scroll-step 1)
+
 ;; TODO minimal-emacs.d
 ;; setq native-comp-async-on-battery-power nil) is an excellent default, for
 ;; users running Emacs on laptops. Background native compilation (via gccemacs)
@@ -2363,7 +2366,11 @@ Returns:
 ;; (setq-default display-line-numbers-type t)
 ;; (setq-default display-line-numbers-type 'visual)
 (setq-default display-line-numbers-type 'visual)
-(setq display-line-numbers-grow-only t)  ; t is slow. Use nil.
+
+;; t is slow. Use nil.
+;; Scroll profiling: 7% + display-line-numbers-update-width
+(setq display-line-numbers-grow-only nil)
+
 (setq display-line-numbers-current-absolute nil)  ;; t=line num / nil=0
 
 ;;; Sync dictionary

@@ -35,7 +35,7 @@
 ;;     enhanced-evil-paredit-delete))
 
 (defvar point-manager-move-to-column-force nil)
-(defvar point-manager-ignore-invisible t)
+(defvar point-manager-ignore-invisible nil) ; t is slow
 ;; (defvar point-manager-inhibit-when-region-active t)
 (defvar point-manager-dired-min-column 2)
 
