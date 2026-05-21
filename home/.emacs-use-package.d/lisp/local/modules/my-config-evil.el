@@ -879,7 +879,8 @@ guarantees that the new window is selected, as in Vim."
   (when (and (fboundp 'kirigami-close-folds)
              (fboundp 'kirigami-open-fold))
     (let ((file-buffer (find-buffer-visiting file-path)))
-      (if file-buffer (switch-to-buffer file-buffer)
+      (if file-buffer
+          (switch-to-buffer file-buffer)
         (find-file file-path)
         (kirigami-close-folds)
         (kirigami-open-fold)

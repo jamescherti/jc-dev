@@ -340,7 +340,7 @@ BUFFERS is a buffer or a list of alive buffers."
     (unless file-name
       (setq file-name default-directory))
     (when-let* ((buffer (find-file-noselect (file-name-directory file-name))))
-      (switch-to-buffer buffer nil t)
+      (set-window-buffer nil buffer)
       (with-current-buffer buffer
         (when (fboundp 'dired-goto-file)
           (dired-goto-file file-name)

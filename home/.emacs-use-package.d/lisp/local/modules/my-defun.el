@@ -69,7 +69,7 @@ directory is not open yet, open it in the current window."
                       (find-file-noselect filename)))))
     (when (fboundp 'my-tab-bar-switch-to-buffer)
       (when (and buffer (not (my-tab-bar-switch-to-buffer buffer)))
-        (switch-to-buffer buffer)))))
+        (set-window-buffer nil buffer)))))
 
 (defun my-path-inside-p (path1 path2)
   "Check if PATH2 is inside PATH1."
@@ -180,9 +180,8 @@ LANGUAGE is the programming language."
 
         (kill-buffer buffer)
 
-        (let ((new-buffer (find-file-noselect file))
-              (switch-to-buffer-obey-display-actions nil))
-          (switch-to-buffer new-buffer)
+        (let ((new-buffer (find-file-noselect file)))
+          (set-window-buffer nil new-buffer)
           (with-current-buffer new-buffer
             (goto-char point)
             ;; TODO This does not seem to work
@@ -547,14 +546,14 @@ this file must exist."
         (let* ((preview-buf (current-buffer)))
           ;; Create a new tab and switch to the preview buffer
           (tab-bar-new-tab)
-          (switch-to-buffer preview-buf)
+          (set-window-buffer nil preview-buf)
 
           ;; Go back to the original tab
           (tab-bar-select-tab original-tab-index)
 
           ;; Restore the state of the other window
           (select-window other-window)
-          (switch-to-buffer other-window-buf)
+          (set-window-buffer nil other-window-buf)
           (goto-char other-window-point)
           (set-window-start nil other-window-view t)
 
@@ -570,7 +569,7 @@ this file must exist."
         (point (point))
         (window-start (window-start)))
     (tab-bar-new-tab)
-    (switch-to-buffer buffer)
+    (set-window-buffer nil buffer)
     (set-window-prev-buffers nil buffer-list)
     (with-current-buffer buffer
       (goto-char point)
