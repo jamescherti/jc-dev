@@ -433,6 +433,8 @@ fi
 # debugging or profiling tools may not fully support MPS, making memory issues
 # harder to diagnose.
 CONFIGURE_ARGS=(
+  # In the configure.ac file, passing this flag sets the internal with_features
+  # variable to no.
   --without-all
 
   # Enable internal assertions and type checks. Helpful during debugging or for
@@ -440,10 +442,42 @@ CONFIGURE_ARGS=(
   # --enable-checking=all
   # --enable-check-lisp-object-type
 
+  # --disable-checking: Guarantees that expensive runtime assertions (such as
+  # memory boundary checks) are stripped out entirely.
+  --disable-checking
+
+  # --disable-check-lisp-object-type: Ensures the internal Lisp_Object data type
+  # is compiled as a simple native type rather than a strict C union or struct,
+  # avoiding overhead during deep Lisp execution stacks.
+  --disable-check-lisp-object-type
+
+  # --disable-profiling: Ensures the compiler does not inject gprof instruction
+  # profiling (-pg) into the binary.
+  # TODO bug in this one: The Autoconf Quirk: In the previous step, I added
+  # --disable-profiling to the configure options. However, the Emacs
+  # configure.ac script evaluates this flag incorrectly. It checks if the
+  # variable is simply non-empty (if test x$ac_enable_profiling != x). Because
+  # --disable-profiling sets the value to no, the script evaluates xno != x as
+  # true. This accidentally activates the -pg (gprof profiling) compiler flag.
+  # --disable-profiling
+
   --with-gnutls
 
+  # Use -fanalyzer and related options only if --enable-gcc-warnings,
+  # as they slow GCC considerably.
+  # nw="$nw -fanalyzer -Wno-analyzer-double-free -Wno-analyzer-malloc-leak"
+  # The -fanalyzer framework dramatically increases compiler computational
+  # complexity, blowing up compilation time and layout tracking memory overhead.
+  # Since you are looking for production speed, remove --enable-gcc-warnings and
+  # explicitly pass:
+  --disable-gcc-warnings
+
   # I already handle it with -flto
-  --enable-link-time-optimization
+  # it adds things that I don't need like -ffat-lto-objects This flag forces the
+  # compiler to generate both LTO-compatible object code and standard machine
+  # code. It essentially doubles the disk I/O and build time during the
+  # compilation phase. Emacs is a final executable.
+  # --enable-link-time-optimization
 
   --disable-build-details
 
@@ -472,9 +506,9 @@ CONFIGURE_ARGS=(
   # rebuilt. Over time, this saves significant build time.
   #
   # NOTE: This is only useful for developers who are constantly modifying
-  # Emacs's own C source code. Since you are likely compiling a specific
+  # Emacs's own C source code. Since I am likely compiling a specific
   # branch/tag and then using it, this just adds a tiny bit of overhead to the
-  # initial make process and generates extra .d files you don't need.
+  # initial make process and generates extra .d files I don't need.
   # --enable-autodepend
 
   # Enable GC_REMEMBER_LAST_MARKED by default (it was disabled in Emacs 29)
@@ -500,10 +534,10 @@ CONFIGURE_ARGS=(
   # Remove support for Access Control Lists and Extended Attributes for slightly
   # faster/simpler file I/O.
   #
-  # If you are aiming for a lean, high-performance binary and don't use complex
+  # If I am aiming for a lean, high-performance binary and don't use complex
   # Access Control Lists or Extended Attributes on your files: This slightly
   # reduces the overhead of file I/O operations and reduces the number of linked
-  # system libraries. If you are on a standard personal Linux setup, these are
+  # system libraries. If we are on a standard personal Linux setup, these are
   # rarely needed inside Emacs.
   --disable-acl
   --disable-xattr
@@ -518,7 +552,7 @@ CONFIGURE_ARGS=(
   # simply do not understand Emacs-specific features, such as:
   #
   # The --without-included-regex flag comes from gnulib (a library of shared C
-  # code used by the Emacs build system). If you pass this flag, Emacs will
+  # code used by the Emacs build system). If I pass this flag, Emacs will
   # still use its internal engine for all of your Lisp code and buffer searches.
   # At best, the flag is silently ignored by the core editor. At worst, it
   # forces minor background C utilities to use your operating system's regex
@@ -531,15 +565,15 @@ CONFIGURE_ARGS=(
   # file bundled with the Emacs distribution and compiles it into an .eln file
   # before the installation is complete.
   #Emacs is "born" fully optimized. Every built-in feature is already running
-  # as native machine code the very first time you launch it. There is no
+  # as native machine code the very first time I launch it. There is no
   # background "churn" for the standard library.
   # --with-native-compilation=aot
 
-  # When you use this flag alone, it enables Just-In-Time (JIT) compilation
+  # When I use this flag alone, it enables Just-In-Time (JIT) compilation
   # The Emacs C source compiles quickly. Only a absolute minimum set of Lisp
   # files required to start the editor are natively compiled during the make
   # process.
-  # When you first start Emacs and begin using various packages (like dired,
+  # When I first start Emacs and begin using various packages (like dired,
   # magit, or org-mode), Emacs will notice those files are only available as
   # byte-code (.elc). It will then spawn background processes to compile them
   # into .eln files on the fly.
@@ -686,7 +720,8 @@ CONFIGURE_ARGS=(
 
   # Native JSON parsing via Jansson greatly increases performance for json-heavy
   # tasks (like LSP).
-  --with-json
+  # not compatible
+  # --with-json
 
   --without-compress-install
   # --with-compress-install
@@ -840,6 +875,15 @@ run_build() {
     export LD=ld.lld
     export RANLIB=llvm-ranlib
 
+    # Mirror configure.ac Clang LTO plugin management
+    # Locate the LLVMgold plugin dynamically via the compiler driver
+    GOLD_PLUGIN=$($CC -print-file-name=LLVMgold.so 2>/dev/null)
+    if [[ -x "$GOLD_PLUGIN" ]]; then
+      # Append the plugin name directly to ARFLAGS as required by standard ar
+      export ARFLAGS="cru --plugin $GOLD_PLUGIN"
+      export RANLIB="llvm-ranlib --plugin $GOLD_PLUGIN"
+    fi
+
     # Use Clang's specific LTO flag and avoid string pollution further down
     current_cflags="$current_cflags -flto=full"
     current_ldflags="$current_ldflags -flto=full"
@@ -989,7 +1033,11 @@ run_build() {
   ./autogen.sh
 
   ./configure "${CONFIGURE_ARGS[@]}"
-  make -j "$(nproc)" -l "$NUM_PROC"
+
+  NUM_PROC_MAX=$(nproc)
+  NUM_PROC_MAX=$((NUM_PROC_MAX * 4))
+
+  make -j "$NUM_PROC_MAX" -l "$NUM_PROC"
 
   if [[ "$do_install" -ne 0 ]]; then
     test -f "$EMACS_INSTALL_PREFIX/bin/emacs" && rm -fr "$EMACS_INSTALL_PREFIX"

@@ -408,7 +408,18 @@ Returns:
 (defun buffer-cwd ()
   "Return the directory of the current buffer."
   (interactive)
-  (or (my-dir-config--buffer-cwd) default-directory))
+  (let* ((dir (or (my-dir-config--buffer-cwd)
+                  default-directory
+                  "~"))
+         (path (expand-file-name dir)))
+    (cond
+     ((file-directory-p path)
+      (file-name-as-directory path))
+     ((file-directory-p default-directory)
+      (file-name-as-directory
+       (expand-file-name default-directory)))
+     (t
+      "/"))))
 
 
 (defun my-previous-interesting-buffer ()
@@ -759,6 +770,30 @@ Delegates regex matching to the C level for significantly better performance."
     (while (and (not (my-interesting-buffer-p))
                 (not (eq (current-buffer) start-buffer)))
       (next-buffer))))
+
+(defun my-update-bash-lastdir (&rest _)
+  "Update Bash lastdir."
+  (let* ((directory (file-truename (buffer-cwd)))
+         (file "~/.bash_lastdir")
+         (file-lastdir (let ((line (string-trim
+                                    (let ((coding-system-for-read 'utf-8-emacs)
+                                          (file-coding-system-alist nil))
+                                      (with-temp-buffer
+                                        (insert-file-contents file)
+                                        (thing-at-point 'line))))))
+                         (when line
+                           (file-truename line)))))
+    (when (or (not file-lastdir)
+              (not (string= directory file-lastdir)))
+      (message "Update: %S %S" directory file-lastdir)
+      (with-temp-buffer
+        (insert (expand-file-name default-directory))
+        (let ((coding-system-for-write 'utf-8-emacs)
+              (write-region-annotate-functions nil)
+              (write-region-post-annotation-function nil))
+          (let ((inhibit-quit t))
+            (write-region (point-min) (point-max) file
+                          nil 'silent)))))))
 
 ;;; Provide
 (provide 'my-defun)

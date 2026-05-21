@@ -4566,18 +4566,13 @@ environment for accurate linting."
   )
 
 ;; shell-pop: Change the default directory
-(defun my-around-shell-pop (fn &rest args)
-  "FN is the advised function. ARGS are the function arguments."
-  (with-temp-buffer
-    (insert (expand-file-name default-directory))
-    (let ((coding-system-for-write 'utf-8-emacs)
-          (write-region-annotate-functions nil)
-          (write-region-post-annotation-function nil))
-      (let ((inhibit-quit t))
-        (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent))))
-  (apply fn args))
-(with-eval-after-load 'shell-pop
-  (advice-add 'shell-pop :around #'my-around-shell-pop))
+;; NOTE replaced
+;; (defun my-around-shell-pop (fn &rest args)
+;;   "FN is the advised function. ARGS are the function arguments."
+;;   (my-update-bash-lastdir)
+;;   (apply fn args))
+;; (with-eval-after-load 'shell-pop
+;;   (advice-add 'shell-pop :around #'my-around-shell-pop))
 
 ;; Ensure switching to insert mode
 (defun my-shell-pop-evil-insert-state ()
@@ -4599,6 +4594,11 @@ environment for accurate linting."
     (vterm-reset-cursor-point)))
 
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-evil-insert-state)
+
+;;; Auto update lastdir
+
+;; (add-hook 'find-file-hook #'my-update-bash-lastdir)
+(add-hook 'window-buffer-change-functions #'my-update-bash-lastdir)
 
 ;;; shell-pop: shell pop per project
 
@@ -5615,6 +5615,52 @@ Standard save hooks handle persistence when the buffer is modified."
 
 ;; (add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 99)
 ;; (add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 99)
+
+;;; ghostel
+
+;; (lightemacs-use-package ghostel
+;;   :bind (("C-c g" . ghostel)
+;;          ("C-c p" . ghostel-project)
+;;          ("C-c o" . ghostel-other))
+;;   :custom
+;;   (ghostel-term "xterm-ghostty")
+;;   (ghostel-scroll-on-input t)
+;;   (ghostel-enable-url-detection t)
+;;   (ghostel-enable-file-detection t)
+;;   (ghostel-query-before-killing 'auto)
+;;   (ghostel-max-scrollback (* 5 1024 1024))
+;;   (ghostel-module-directory "~/.config/emacs/ghostel-bin/")
+;;   (ghostel-module-auto-install nil)
+;;   :config
+;;   (setq ghostel-shell-integration t)
+;;   (ghostel-sync-theme)
+;;
+;;   ;; (with-eval-after-load 'project
+;;   ;;   (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t))
+;;   ;;
+;;   ;; (use-package ghostel-compile
+;;   ;;   :bind (("C-c c" . ghostel-compile)
+;;   ;;          ("C-c r" . ghostel-recompile)))
+;;
+;;   ;; (use-package ghostel-eshell
+;;   ;;   :after eshell
+;;   ;;   :config
+;;   ;;   (add-hook 'eshell-load-hook #'ghostel-eshell-visual-command-mode))
+;;   )
+;;
+;; ;; Evil-mode integration for tracking terminal state transitions
+;; (lightemacs-use-package evil-ghostel
+;;   :after (ghostel evil)
+;;   :hook (ghostel-mode . evil-ghostel-mode)
+;;   :custom
+;;   ;; Configures the default entry state when initializing a new terminal buffer
+;;   ;; Options include 'insert, 'normal, or 'emacs
+;;   (evil-ghostel-initial-state 'insert)
+;;
+;;   ;; Dictates how the dynamic module handles the ESC key inside insert state
+;;   ;; 'auto routes ESC to the shell if an alt-screen TUI (like vim) is running,
+;;   ;; otherwise it switches the buffer frame to evil normal state.
+;;   (evil-ghostel-escape 'auto))
 
 ;;; Provide
 
