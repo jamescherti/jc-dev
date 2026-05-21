@@ -1138,7 +1138,13 @@ main() {
 
   if [[ $HANDLE_FPROFILE -ne 0 ]]; then
     echo "Building with profile generation..."
-    run_build "fprofile-generate" 0
+    run_build "fprofile-generate" 1
+
+    read -r -p "Proceed with fprofile-use? [y,n] " ANSWER
+    if [[ "$ANSWER" != "y" ]]; then
+      echo "Interrupted." >&2
+      exit 1
+    fi
     make distclean
 
     echo "Building with profile use..."

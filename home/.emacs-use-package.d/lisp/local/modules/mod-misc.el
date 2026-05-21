@@ -54,6 +54,11 @@
   ;; (require 'battery-angel)
   (require 'point-manager))
 
+(unless noninteractive
+  (with-eval-after-load 'evil
+    (with-eval-after-load 'evil-collection
+      (require 'my-config-evil))))
+
 ;;; TODO minimal-emacs.d or lightemacs? Fix annoyance: package upgrade :vc splits
 
 ;; Restricts the find-library completion list to actual Emacs Lisp libraries
@@ -981,11 +986,6 @@ WIDTH is the tab width."
   (with-eval-after-load 'treesit
     (setq treesit--install-language-grammar-out-dir-history
           (list (expand-file-name "tree-sitter" lightemacs-var-directory))))
-
-  (unless noninteractive
-    (with-eval-after-load 'evil
-      (with-eval-after-load 'evil-collection
-        (require 'my-config-evil))))
 
   (unless noninteractive
     ;; (global-set-key (kbd "M-RET") 'toggle-term-tmux)
@@ -3149,7 +3149,7 @@ and suppresses all interactive confirmation prompts during teardown."
 
 (progn
   (defun sh-script-match-variables (limit)
-    "Search forward for shell variables up to LIMIT, skipping comments and single quotes."
+    "Search forward for env vars up to LIMIT, skipping comments and quotes."
     (catch 'found
       ;; The regex now matches ${anything_except_newline_and_closing_brace}
       ;; or standard unbracketed variables like $var, $1, $#
@@ -4318,7 +4318,7 @@ This function is intended for use as :around advice."
 ;; Lazy loader report for new features
 
 (defvar lazy-loader-initial-features nil
-  "A copy of the 'features' list captured right after Emacs initialization.")
+  "A copy of the \='features\=' list captured right after Emacs initialization.")
 
 (defun lazy-loader-save-initial-features ()
   "Capture the state of loaded features post-init."
@@ -4328,7 +4328,7 @@ This function is intended for use as :around advice."
 (add-hook 'after-init-hook #'lazy-loader-save-initial-features)
 
 (defun lazy-loader-compare-features ()
-  "Compare current 'features' against the stored post-init version.
+  "Compare current \='features\=' against the stored post-init version.
 Opens a split window showing the added and removed features."
   (interactive)
   ;; Fallback for testing in the current session if Emacs wasn't restarted

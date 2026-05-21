@@ -7,6 +7,7 @@
 
 (require 'evil)
 (require 'outline)
+(require 'buffer-guardian)
 
 ;;; Outline Keybindings
 
