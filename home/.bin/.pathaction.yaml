@@ -5,4 +5,4 @@ actions:
       - "*"
     tags: install
     list_commands:
-      - "rsync {{ cwd | quote }} {{ \"~/.bin/\" | expanduser }}"
+      - "rsync -av {{ cwd | quote }}/ {{ \"~/.bin/\" | expanduser }}"

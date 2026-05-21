@@ -37,7 +37,7 @@ USE_CLANG=0
 SOFTWARE_NAME="emacs"
 NUM_PROC=$(nproc --ignore=1)
 
-CC_OPTIMIZE="2"
+CC_OPTIMIZE="3"
 
 # Emacs will be installed under the following path:
 #   $EMACS_INSTALL_PREFIX/<OS>/<EMACS_VERSION>

@@ -34,6 +34,43 @@
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'mod-project)
 
+;;; cursor color
+
+;; (setq evil-normal-state-cursor '("#DD0000" box))
+;; (setq evil-insert-state-cursor '("#DD0000" bar))
+;; (setq evil-visual-state-cursor '("#DD0000" hbar))
+;; (evil-refresh-cursor)
+
+;; cursor global
+
+;; (defvar-local my-local-cursor-cookie nil
+;;   "Stores the cookie for buffer-local cursor face remapping.")
+
+;; (defun my-set-local-cursor (color shape)
+;;   "Set the cursor COLOR and SHAPE locally in the current buffer.
+;; Handles both standard Emacs built-in behavior and Evil mode."
+;;
+;;   ;; 1. Standard Emacs shape
+;;   ;; (setq-local cursor-type shape)
+;;
+;;   ;; 2. Standard Emacs color
+;;   (when my-local-cursor-cookie
+;;     (face-remap-remove-relative my-local-cursor-cookie))
+;;   (setq my-local-cursor-cookie
+;;         (face-remap-add-relative 'cursor :background color))
+;;
+;;   ;; 3. Evil mode color and shape
+;;   (when (bound-and-true-p evil-local-mode)
+;;     (let ((cursor-spec (list color shape)))
+;;       (setq-local evil-normal-state-cursor cursor-spec)
+;;       (setq-local evil-insert-state-cursor cursor-spec)
+;;       (setq-local evil-visual-state-cursor cursor-spec)
+;;       (setq-local evil-replace-state-cursor cursor-spec)
+;;       (setq-local evil-operator-state-cursor cursor-spec)
+;;       (setq-local evil-motion-state-cursor cursor-spec)
+;;       (setq-local evil-emacs-state-cursor cursor-spec)
+;;       (evil-refresh-cursor))))
+
 ;;; Spell checker: Jinx or Flyspell
 
 (defvar my-spell-checker 'jinx)
