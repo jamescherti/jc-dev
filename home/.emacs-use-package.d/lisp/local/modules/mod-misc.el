@@ -4567,12 +4567,12 @@ environment for accurate linting."
 
 ;; shell-pop: Change the default directory
 ;; NOTE replaced
-;; (defun my-around-shell-pop (fn &rest args)
-;;   "FN is the advised function. ARGS are the function arguments."
-;;   (my-update-bash-lastdir)
-;;   (apply fn args))
-;; (with-eval-after-load 'shell-pop
-;;   (advice-add 'shell-pop :around #'my-around-shell-pop))
+(defun my-around-shell-pop (fn &rest args)
+  "FN is the advised function. ARGS are the function arguments."
+  (my-update-bash-lastdir)
+  (apply fn args))
+(with-eval-after-load 'shell-pop
+  (advice-add 'shell-pop :around #'my-around-shell-pop))
 
 ;; Ensure switching to insert mode
 (defun my-shell-pop-evil-insert-state ()
