@@ -19,10 +19,7 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-# 1 to generate and anything else to use it (PGO)
-FPROFILE_GENERATE=0
-
-cd ~/src/forks/emacs/
+set -x
 
 # shellcheck disable=SC1091
 ID=unknown
@@ -32,6 +29,9 @@ if [[ -f /etc/os-release ]]; then
 fi
 
 set -euf
+
+# 1 to automatically handle the 2-step process: generate profile, then use it
+HANDLE_FPROFILE=1
 
 SOFTWARE_NAME="emacs"
 NUM_PROC=$(nproc --ignore=1)
@@ -92,7 +92,7 @@ export CFLAGS="$CFLAGS -fomit-frame-pointer"
 #   CURRENT_BRANCH=$(git branch --show-current)
 #   CURRENT_TAG=$(git describe --tags --exact-match 2>/dev/null)
 #   if [ "$CURRENT_BRANCH" = "$TARGET_BRANCH" ] \
-#     || [ "$CURRENT_TAG" = "$TARGET_TAG" ]; then
+  #     || [ "$CURRENT_TAG" = "$TARGET_TAG" ]; then
 #     # -Wno-deprecated-declarations: Emacs 30.2 uses
 #     # 'gdk_pixbuf_new_from_xpm_data', which is deprecated in newer GTK3/GDK
 #     # versions. This is an upstream Emacs decision for backward compatibility
@@ -797,18 +797,18 @@ detect_git_branch() {
 operating_system() {
   case "$OSTYPE" in
   darwin*)
-    echo macos
-    ;;
+  echo macos
+  ;;
   *)
-    if [[ -f /etc/os-release ]]; then
-      # shellcheck disable=SC1091
-      source /etc/os-release
-      test "$ID" = "archlinux" && ID=arch
-      echo "$ID"
-    else
-      exit 1
-    fi
-    ;;
+  if [[ -f /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    source /etc/os-release
+    test "$ID" = "archlinux" && ID=arch
+    echo "$ID"
+  else
+    exit 1
+  fi
+  ;;
   esac
 }
 
@@ -820,17 +820,14 @@ error_handler() {
   exit "${errno}"
 }
 
-main() {
-  trap "error_handler" ERR
-  set -o errtrace
+run_build() {
+  local phase="$1"
+  local do_install="$2"
 
-  # if ! git remote -v | grep '/emacs '; then
-  #   echo "This is not an Emacs repository." >&2
-  #   exit 1
-  # fi
+  local current_cflags="$BASE_CFLAGS"
+  local current_ldflags="$BASE_LDFLAGS"
 
-  detect_git_branch
-
+  # TODO add variable for clang
   if [[ $ID = DISABLEDarch ]]; then
     # Arch Linux
     export CC=clang
@@ -839,7 +836,7 @@ main() {
     export NM=llvm-nm
     export LD=ld.lld
     export RANLIB=ranlib
-    export CFLAGS="$CFLAGS -flto=full"
+    export CFLAGS="$current_cflags -flto=full"
     export LDFLAGS="-flto=full"
   else
     # -O2                    # Safe, good optimization level; avoids some aggressive optimizations of -O3
@@ -895,14 +892,14 @@ main() {
     # not understand compiler optimization heuristics.
 
     # Step 1
-    if [[ $FPROFILE_GENERATE -ne 0 ]]; then
+    if [[ "$phase" == "fprofile-generate" ]]; then
       rm -fr "$FPROFILE_FILE"
       # fprofile-generate: ensure -fuse-linker-plugin is used
-      export CFLAGS="$CFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE"
+      export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_FILE"
 
       # TODO: Should fprofile be removed from LDFLAGS?
-      export LDFLAGS="$LDFLAGS -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
-    else
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
+    elif [[ "$phase" == "fprofile-use" ]]; then
       # Then recompile with: Step 2
       # -fprofile-correction resolves the object generation issue. However, you
       # still missed the standalone -O2 in your LDFLAGS. The -Wl,-O2 flag only
@@ -935,12 +932,58 @@ main() {
       # generation. If the compiler driver does not see an -O flag during this
       # link invocation, it defaults to -O0.
       # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
-      export CFLAGS="$CFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction"
+      export CFLAGS="$current_cflags -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction"
 
       # TODO: Should fprofile be removed from LDFLAGS?
-      export LDFLAGS="$LDFLAGS -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction -O2"
+      export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction -O2"
     fi
   fi
+
+  export CXXFLAGS="$CFLAGS"
+
+  echo "[SOURCE DIR]" "$PWD"
+  echo "[CONFIGURE OPTION]" "${CONFIGURE_ARGS[@]}"
+  echo "[CFLAGS] $CFLAGS"
+  echo "[LDFLAGS] $LDFLAGS"
+  echo
+
+  set -x
+  git clean -fxd
+  git reset --hard HEAD
+
+  ./autogen.sh
+
+  ./configure "${CONFIGURE_ARGS[@]}"
+
+  make -j 64 -l "$NUM_PROC"
+
+  if [[ "$do_install" -ne 0 ]]; then
+    test -f "$EMACS_INSTALL_PREFIX/bin/emacs" && rm -fr "$EMACS_INSTALL_PREFIX"
+
+    # make install-strip: This is a variant of make install, but with the added
+    # step of "stripping" the binaries. Stripping refers to removing debugging
+    # symbols and other information from the executable files, reducing their
+    # size. This is usually done for production releases to make the binaries
+    # smaller and more efficient, since debugging symbols are typically not needed
+    # in a production environment.
+    make install-strip
+  fi
+
+  set +x
+}
+
+main() {
+  trap "error_handler" ERR
+  set -o errtrace
+
+  cd ~/src/forks/emacs/
+
+  # if ! git remote -v | grep '/emacs '; then
+  #   echo "This is not an Emacs repository." >&2
+  #   exit 1
+  # fi
+
+  detect_git_branch
 
   # Append the OS family
   if [[ $EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM -ne 0 ]]; then
@@ -977,29 +1020,17 @@ main() {
   # Avoid too many: *.~1~ files
   [[ -d .git/hooks ]] && rm -fr .git/hooks/*
 
-  export CXXFLAGS="$CFLAGS"
+  export BASE_CFLAGS="$CFLAGS"
+  export BASE_LDFLAGS="$LDFLAGS"
 
-  set -x
-  git clean -fxd
-  git reset --hard HEAD
-
-  ./autogen.sh
-
-  ./configure "${CONFIGURE_ARGS[@]}"
-
-  make -j 64 -l "$NUM_PROC"
-
-  test -f "$EMACS_INSTALL_PREFIX/bin/emacs" && rm -fr "$EMACS_INSTALL_PREFIX"
-
-  # make install-strip: This is a variant of make install, but with the added
-  # step of "stripping" the binaries. Stripping refers to removing debugging
-  # symbols and other information from the executable files, reducing their
-  # size. This is usually done for production releases to make the binaries
-  # smaller and more efficient, since debugging symbols are typically not needed
-  # in a production environment.
-  make install-strip
-
-  # set +x
+  if [[ $HANDLE_FPROFILE -ne 0 ]]; then
+    echo "Building with profile generation..."
+    run_build "fprofile-generate" 0
+    echo "Building with profile use..."
+    run_build "fprofile-use" 1
+  else
+    run_build "disable-fprofile" 1
+  fi
 
   # git clean -fxd &>/dev/null || true
   # git reset --hard HEAD &>/dev/null || true
