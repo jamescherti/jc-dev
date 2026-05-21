@@ -24,10 +24,10 @@
 
 ;;; Code:
 
-(profiler-start 'cpu)
-(add-hook 'emacs-startup-hook #'(lambda() (when (fboundp 'profiler-stop)
-                                            (profiler-stop)))
-          300)
+;; (profiler-start 'cpu)
+;; (add-hook 'emacs-startup-hook #'(lambda() (when (fboundp 'profiler-stop)
+;;                                             (profiler-stop)))
+;;           300)
 
 ;; Experimental
 ;; TODO make them a default
