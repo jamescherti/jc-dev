@@ -1477,7 +1477,6 @@ WIDTH is the tab width."
 
   ;; Change default to this
   (setq easysession-fontify t)
-  (setq easysession-save-postpone-on-input t)
   (setq easysession-debug t)
 
   (setq easysession-switch-to-exclude-current t)
