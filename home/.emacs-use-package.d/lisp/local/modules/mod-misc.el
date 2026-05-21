@@ -251,6 +251,23 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; compile-angel function report
 
+;; TODO: Useless?
+;; (defun compile-angel--get-list-non-native-compiled-functions ()
+;;   "Return a list of loaded Elisp function symbols that are not natively compiled."
+;;   (let (result)
+;;     (mapatoms
+;;      (lambda (sym)
+;;        (when (and (fboundp sym)
+;;                   (functionp sym))
+;;          (let ((def (symbol-function sym)))
+;;            (when (and (not (eq (car-safe def) 'autoload))
+;;                       (not (subr-primitive-p def))
+;;                       (if (fboundp 'subr-native-elisp-p)
+;;                           (not (subr-native-elisp-p def))
+;;                         t))
+;;              (push sym result))))))
+;;     (sort result #'string-lessp)))
+
 ;; TODO add to compile angel
 (defun compile-angel--get-list-non-native-compiled-functions ()
   "Return a list of loaded Elisp function symbols that are not natively compiled."
@@ -259,9 +276,21 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
      (lambda (sym)
        (when (and (fboundp sym)
                   (functionp sym))
-         (let ((def (symbol-function sym)))
-           (when (and (not (eq (car-safe def) 'autoload))
+         (let ((sym-name (symbol-name sym))
+               (def (indirect-function sym))) ; Resolve aliases to their true definition
+           (when (and def
+                      ;; Filter out generalized variable setters
+                      (not (string-prefix-p "(setf " sym-name))
+                      ;; Filter out runtime dynamically generated function patterns
+                      (not (string-prefix-p "vterm-send-" sym-name))
+                      (not (string-prefix-p "orgtbl-hijacker-command-" sym-name))
+                      (not (string-prefix-p "recentf-open-most-recent-file-" sym-name))
+                      ;; Filter out macros and autoload stubs
+                      (not (eq (car-safe def) 'autoload))
+                      (not (eq (car-safe def) 'macro))
+                      ;; Filter out C primitives
                       (not (subr-primitive-p def))
+                      ;; Verify native compilation status status
                       (if (fboundp 'subr-native-elisp-p)
                           (not (subr-native-elisp-p def))
                         t))

@@ -2475,22 +2475,23 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;; Copy with without indentation
 
-(defun evilclipboard-evil-yank-region-unindented ()
-  "Copy the region, un-indented by the length of its minimum indent.
-If numeric prefix argument PAD is supplied, indent the resulting
-text by that amount."
-  (interactive)
-  (when (and (use-region-p)
-             (fboundp 'bufferwizard--unindent-string))
-    (evil-yank (region-beginning) (region-end))
-    (dolist (register '(?\" ?*))
-      (let ((original-contents (evil-get-register register t)))
-        (when original-contents
-          (evil-set-register
-           register (bufferwizard--unindent-string
-                     (substring-no-properties original-contents))))))))
+;; (defun evilclipboard-evil-yank-region-unindented ()
+;;   "Copy the region, un-indented by the length of its minimum indent.
+;; If numeric prefix argument PAD is supplied, indent the resulting
+;; text by that amount."
+;;   (interactive)
+;;   (when (and (use-region-p)
+;;              (fboundp 'bufferwizard--unindent-string))
+;;     (evil-yank (region-beginning) (region-end))
+;;     (dolist (register '(?\" ?*))
+;;       (let ((original-contents (evil-get-register register t)))
+;;         (when original-contents
+;;           (evil-set-register
+;;            register (bufferwizard--unindent-string
+;;                      (substring-no-properties original-contents))))))))
 
-(evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)
+;; (evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)
+(evil-define-key 'visual 'global (kbd "C") 'bufferwizard-copy-unindented)
 
 (lightemacs-use-package bufferwizard
   ;; :ensure nil
