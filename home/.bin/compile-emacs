@@ -835,8 +835,10 @@ run_build() {
     export NM=llvm-nm
     export LD=ld.lld
     export RANLIB=llvm-ranlib
+
+    # Use Clang's specific LTO flag and avoid string pollution further down
     current_cflags="$current_cflags -flto=full"
-    current_ldflags="-flto=full"
+    current_ldflags="$current_ldflags -flto=full"
   fi
 
   FPROFILE_DIR="$HOME/.flto/emacs"
@@ -879,13 +881,16 @@ run_build() {
   # LDFLAGS in a non-LTO build does nothing, because the linker itself does
   # not understand compiler optimization heuristics.
 
-  # Step 1
+  # Dynamic profiling and optimization assignment based on active phase
   if [[ "$phase" == "fprofile-generate" ]]; then
     rm -fr "$FPROFILE_FILE"
+    if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+      export CFLAGS="$current_cflags -fprofile-instr-generate=$FPROFILE_FILE"
+      export LDFLAGS="$current_ldflags -fprofile-instr-generate=$FPROFILE_FILE -O2"
+    else
     export CFLAGS="$current_cflags -flto=auto -fprofile-generate=$FPROFILE_FILE"
-
-    # TODO: Should fprofile be removed from LDFLAGS?
     export LDFLAGS="$current_ldflags -flto=auto -fprofile-generate=$FPROFILE_FILE -O2"
+    fi
   elif [[ "$phase" == "fprofile-use" ]]; then
     # Then recompile with: Step 2
     # -fprofile-correction resolves the object generation issue. However, you
@@ -919,14 +924,22 @@ run_build() {
     # generation. If the compiler driver does not see an -O flag during this
     # link invocation, it defaults to -O0.
     # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+    if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+      export CFLAGS="$current_cflags -fprofile-instr-use=$FPROFILE_FILE"
+      export LDFLAGS="$current_ldflags -fprofile-instr-use=$FPROFILE_FILE -O2"
+    else
     export CFLAGS="$current_cflags -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction"
-
-    # TODO: Should fprofile be removed from LDFLAGS?
     export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=\"$FPROFILE_FILE\" -fprofile-correction -O2"
+    fi
   else
     # Fallback for when PGO is completely disabled but LTO is still desired
+    if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+      export CFLAGS="$current_cflags"
+      export LDFLAGS="$current_ldflags -O2"
+    else
     export CFLAGS="$current_cflags -flto=auto"
     export LDFLAGS="$current_ldflags -flto=auto -O2"
+    fi
   fi
 
   export CXXFLAGS="$CFLAGS"
