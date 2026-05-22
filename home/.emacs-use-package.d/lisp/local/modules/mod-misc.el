@@ -1005,6 +1005,7 @@ WIDTH is the tab width."
     (global-set-key (kbd "C-k") 'my-tab-previous)
     (global-set-key (kbd "C-j") 'my-tab-next))
 
+  (setq lightemacs-dired-filter-global-enabled t)
   (setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
                                              dired-filter-by-git-ignored
                                              dired-filter-by-dot-files))
