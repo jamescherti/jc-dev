@@ -758,6 +758,7 @@ extracted, the function returns nil."
 ;; Enable native-compilation and byte-compilation
 
 (setq lightemacs-modules '(le-compile-angel  ;;moved it down
+                           le-flymake
                            le-pathaction
                            le-theme
                            le-default-settings
@@ -799,7 +800,6 @@ extracted, the function returns nil."
                            ;; X11/Wayland forwarding)
                            ;; le-xclip
 
-                           le-flymake
                            le-package-lint-flymake
 
                            le-apheleia
@@ -1122,13 +1122,6 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
   (my-add-packages-to-load-path))
 
 ;;; Customize code folding
-
-(setq lightemacs-flymake-target-hooks '(python-mode
-                                        python-ts-mode
-                                        bash-ts-mode
-                                        sh-mode
-                                        yaml-ts-mode
-                                        yaml-mode))
 
 (setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook
                                                      yaml-ts-mode-hook

@@ -678,9 +678,10 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
         ansible-mode-hook
         yaml-ts-mode-hook
         yaml-mode-hook
-        toml-ts-mode-hook
-        conf-toml-mode-hook
-        markdown-mode-hook))
+        ;; toml-ts-mode-hook
+        ;; conf-toml-mode-hook
+        ;; markdown-mode-hook
+        ))
 
 ;;; straight
 
