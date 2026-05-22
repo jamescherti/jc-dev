@@ -3449,7 +3449,7 @@ only runs once per session to avoid redundant I/O."
   ;; without affecting user experience.
   (add-hook 'lightemacs-after-init-hook
             #'(lambda()
-                (run-with-idle-timer (* 10 60) nil #'my-native-compile-prune-cache))))
+                (run-with-idle-timer (* 7 60) nil #'my-native-compile-prune-cache))))
 
 ;;; Prune native comp tmp files
 
