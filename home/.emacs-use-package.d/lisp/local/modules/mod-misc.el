@@ -548,6 +548,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (require 'package)
     (when (fboundp 'package-delete)
       (dolist (item '(olivetti
+                      ws-butler
                       git-gutter
                       posframe
                       popper
