@@ -4556,15 +4556,15 @@ Opens a split window showing the added and removed features."
 
 ;;; Disabled packages
 
-(lightemacs-use-package ws-butler
-  :commands ws-butler-mode
-  :init
-  (defun my-setup-ws-butler ()
-    "Setup `lsp-mode'."
-    (when (and (fboundp 'ws-butler-mode)
-               (not (my-code-checker-allowed-p)))
-      (ws-butler-mode)))
-  (add-hook 'find-file-hook #'my-setup-ws-butler))
+;; (lightemacs-use-package ws-butler
+;;   :commands ws-butler-mode
+;;   :init
+;;   (defun my-setup-ws-butler ()
+;;     "Setup `lsp-mode'."
+;;     (when (and (fboundp 'ws-butler-mode)
+;;                (not (my-code-checker-allowed-p)))
+;;       (ws-butler-mode)))
+;;   (add-hook 'find-file-hook #'my-setup-ws-butler))
 
 ;; (lightemacs-use-package quickrun
 ;;   :commands (quickrun
