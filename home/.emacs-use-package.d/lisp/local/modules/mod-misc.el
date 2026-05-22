@@ -549,6 +549,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (when (fboundp 'package-delete)
       (dolist (item '(olivetti
                       ws-butler
+                      spinner
                       git-gutter
                       posframe
                       popper
@@ -557,7 +558,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                       lsp-mode
                       git-timemachine
                       focus
-                      spinner
                       shut-up
                       llama
                       lv
@@ -602,6 +602,14 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                         item
                         (error-message-string err)
                         desc)))))))))
+
+;; 5 minutes: This is the standard definition of "Away From Keyboard." If you
+;; haven't touched Emacs for 5 minutes, you have likely stepped away (coffee,
+;; meeting, etc.). This is the safest time to burn CPU cycles or disk I/O
+;; without affecting user experience.
+(add-hook 'lightemacs-after-init-hook
+          #'(lambda()
+              (run-with-idle-timer (* 6 60) nil #'my-delete-unused-packages)))
 
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
