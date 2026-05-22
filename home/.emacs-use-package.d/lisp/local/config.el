@@ -323,7 +323,7 @@
     (delete-directory my-session-temp-directory t)))
 
 ;; Hook the cleanup function to Emacs exit
-(add-hook 'kill-emacs-hook #'my-cleanup-session-temp-directory)
+(add-hook 'kill-emacs-hook #'my-cleanup-session-temp-directory 90)
 ;;---------------------------------------->TMP
 
 ;;; Auto detect architecture

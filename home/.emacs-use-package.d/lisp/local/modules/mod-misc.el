@@ -3416,9 +3416,8 @@ and suppresses all interactive confirmation prompts during teardown."
 ;;; Prune cache
 
 ;; TODO lightemacs?
-;; TODO minimal-emacs.d?
 
-(defvar my-native-compile-prune nil
+(defvar my-native-compile-prune t
   "Prune.")
 
 (defvar my-native-compile--prune-cache-done nil
@@ -3448,10 +3447,9 @@ only runs once per session to avoid redundant I/O."
   ;; haven't touched Emacs for 5 minutes, you have likely stepped away (coffee,
   ;; meeting, etc.). This is the safest time to burn CPU cycles or disk I/O
   ;; without affecting user experience.
-  ;; (add-hook 'lightemacs-after-init-hook
-  ;;           #'(lambda()
-  ;;               (run-with-idle-timer (* 5 60) nil #'my-native-compile-prune-cache)))
-  )
+  (add-hook 'lightemacs-after-init-hook
+            #'(lambda()
+                (run-with-idle-timer (* 10 60) nil #'my-native-compile-prune-cache))))
 
 ;;; Prune native comp tmp files
 
