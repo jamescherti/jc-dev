@@ -757,6 +757,8 @@ any new ones."
         (flymake-bashate               . "melpa")
         (buffer-guardian               . "melpa")
 
+        (markdown-mode                 . "melpa")
+
         ;; Latest
         (vterm                         . "melpa")
 
@@ -1449,14 +1451,6 @@ WIDTH is the tab width."
   ;;
   ;; Setting this to t will fold  stuff
   (setq org-hide-block-startup nil)
-
-  (setq project-switch-commands #'project-dired)
-  (setq project-vc-extra-root-markers '(;; ".projectile"
-                                        ;; ".dir-locals.el"
-                                        ;; "requirements.txt"
-                                        ;; "autogen.sh"
-                                        ".project"))
-
 
   (setq savehist-autosave-interval 650)
   (setq tab-bar-history-limit 15)
@@ -4019,6 +4013,10 @@ This function is intended for use as :around advice."
   (advice-add 'stripspace-local-mode :around
               #'my-prevent-execution-only-when-code-checker-allowed))
 
+(with-eval-after-load 'le-flymake-ansible-lint
+  (advice-add 'flymake-ansible-lint-setup :around
+              #'my-prevent-execution-only-when-code-checker-allowed))
+
 (with-eval-after-load 'le-apheleia
   (advice-add 'apheleia-mode :around
               #'my-prevent-execution-only-when-code-checker-allowed))
@@ -4471,15 +4469,9 @@ Opens a split window showing the added and removed features."
 
 ;;; flymake ansible lint
 
-(lightemacs-use-package flymake-ansible-lint
-  :commands flymake-ansible-lint-setup
-  :preface
-  (defun my-setup-flymake-ansible-lint ()
-    (when (my-code-checker-allowed-p)
-      (flymake-ansible-lint-setup)))
-
-  (defun my-setup-flymake-ansible-lint-project-dir ()
-    "Configure `flymake-ansible-lint' to use the project or VC root."
+(defun my-setup-flymake-ansible-lint-project-dir ()
+  "Configure `flymake-ansible-lint' to use the project or VC root."
+  (when (fboundp 'project-root)
     (setq-local flymake-ansible-lint-args
                 (append flymake-ansible-lint-args
                         (let* ((project (project-current nil))
@@ -4497,23 +4489,23 @@ Opens a split window showing the added and removed features."
                                   (expand-file-name project-root)))
 
                            (t
-                            nil))))))
+                            nil)))))))
 
-  :init
-  (add-hook 'ansible-mode-hook #'my-setup-flymake-ansible-lint-project-dir)
 
-  (add-hook 'ansible-mode-hook #'my-setup-flymake-ansible-lint)
+(add-hook 'ansible-mode-hook #'my-setup-flymake-ansible-lint-project-dir)
 
-  (unless noninteractive
-    (with-eval-after-load 'flymake
-      (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
-      (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)))
+(setq flymake-ansible-lint-args
+      '("--offline"
+        "--skip=yamllint"
+        "--skip-list"
+        "run-once[play],no-free-form,trailing-whitespace,yaml[line-length]"))
 
-  (setq flymake-ansible-lint-args
-        '("--offline"
-          "--skip=yamllint"
-          "--skip-list"
-          "run-once[play],no-free-form,trailing-whitespace,yaml[line-length]")))
+(setq flymake-ansible-lint-auto-project-dir t)
+
+;; (unless noninteractive
+;;   (with-eval-after-load 'flymake
+;;     (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
+;;     (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)))
 
 ;; Why does it start with elisp? TODO
 

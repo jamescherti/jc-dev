@@ -970,7 +970,7 @@ guarantees that the new window is selected, as in Vim."
 
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
 (define-key evil-normal-state-map (kbd "<leader>m") 'consult-recent-file)
-(define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
+(define-key evil-normal-state-map (kbd "<leader>b") 'consult-project-buffer)
 ;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
 
 (defun my-consult-buffer ()

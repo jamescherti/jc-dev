@@ -832,6 +832,7 @@ subsequent GCC invocations."
                            ;; le-xclip
 
                            le-package-lint-flymake
+                           le-flymake-ansible-lint
 
                            le-apheleia
 
@@ -863,7 +864,7 @@ subsequent GCC invocations."
 
                            le-recentf
                            le-savehist
-                           le-saveplace
+                           ;; le-saveplace
                            le-winner
                            le-elec-pair
 

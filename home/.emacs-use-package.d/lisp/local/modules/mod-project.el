@@ -30,6 +30,13 @@
 (require 'le-core-defaults)
 (eval-and-compile (require 'lightemacs-use-package))
 
+(setq project-switch-commands #'project-dired)
+(setq project-vc-extra-root-markers '(;; ".projectile"
+                                      ;; ".dir-locals.el"
+                                      ;; "requirements.txt"
+                                      ;; "autogen.sh"
+                                      ".project"))
+
 (lightemacs-use-package project
   :ensure nil
   :commands (;; project-try-vc
@@ -70,6 +77,47 @@
              project-vc-dir)
   :functions (project--ensure-read-project-list
               project--file-completion-table))
+
+;;; project cleanup
+
+(defvar mod-project--cleanup-timer nil
+  "Timer object for periodic project cleanup.")
+
+(defcustom mod-project-loader-idle-delay (* 8 60)
+  "Number of seconds of idle time before loading modules and files."
+  :type 'number
+  :group 'lazy-loader)
+
+(defun mod-project--setup-cleanup ()
+  "Initialize cleanup hooks and idle timers."
+  ;; Add to kill-emacs-hook correctly
+  (add-hook 'kill-emacs-hook #'project-forget-zombie-projects)
+
+  ;; Set the timer and store it in the variable
+  (setq mod-project--cleanup-timer
+        (run-with-idle-timer mod-project-loader-idle-delay t
+                             #'project-forget-zombie-projects)))
+
+;; Initialize the setup
+(mod-project--setup-cleanup)
+
+;;; auto add
+
+;; (require 'project)
+;;
+;; (defun mod-project-auto-remember ()
+;;   "Automatically add the current project to the known projects list.
+;; Only adds the project if the root directory contains a `.project` file."
+;;   (when-let* ((proj (project-current nil))
+;;               (root (project-root proj)))
+;;     (when (file-exists-p (expand-file-name ".project" root))
+;;       (project-remember-project proj))))
+;;
+;; ;; Trigger when opening a file
+;; (add-hook 'find-file-hook #'mod-project-auto-remember)
+;;
+;; ;; Trigger when opening a directory in dired
+;; (add-hook 'dired-mode-hook #'mod-project-auto-remember)
 
 ;;; Better project selector
 

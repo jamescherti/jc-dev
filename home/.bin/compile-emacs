@@ -31,6 +31,8 @@ set -euf
 # 1 to automatically handle the 2-step process: generate profile, then use it
 HANDLE_FPROFILE=1
 
+FPROFILE_GENERATE=0
+
 # 1 to use Clang on Arch Linux
 USE_CLANG=0
 
@@ -1138,13 +1140,16 @@ main() {
 
   if [[ $HANDLE_FPROFILE -ne 0 ]]; then
     echo "Building with profile generation..."
-    run_build "fprofile-generate" 1
 
-    read -r -p "Proceed with fprofile-use? [y,n] " ANSWER
-    if [[ "$ANSWER" != "y" ]]; then
-      echo "Interrupted." >&2
-      exit 1
+    if [[ $FPROFILE_GENERATE -ne 0 ]]; then
+      run_build "fprofile-generate" 1
+      read -r -p "Proceed with fprofile-use? [y,n] " ANSWER
+      if [[ "$ANSWER" != "y" ]]; then
+        echo "Interrupted." >&2
+        exit 1
+      fi
     fi
+
     make distclean
 
     echo "Building with profile use..."
