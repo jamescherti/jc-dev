@@ -2478,7 +2478,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 (lightemacs-use-package ultisnips-mode
   :commands ultisnips-mode
-  :mode ("\\.snippets\\'" . lua-mode))
+  :mode ("\\.snippets\\'" . ultisnips-mode))
 
 ;;; Use-package pathaction
 
@@ -2533,6 +2533,13 @@ If COUNT is given, move COUNT - 1 lines downward first."
 ;; (evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)
 (evil-define-key 'visual 'global (kbd "C") 'bufferwizard-copy-unindented)
 
+;; (lightemacs-use-package mod-better-grep
+;;   :ensure nil
+;;   :commands mod-better-grep
+;;   :init
+;;   (with-eval-after-load 'evil
+;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
+
 (lightemacs-use-package bufferwizard
   ;; :ensure nil
   :vc (:url "https://github.com/jamescherti/bufferwizard.el"
@@ -2548,13 +2555,15 @@ If COUNT is given, move COUNT - 1 lines downward first."
              bufferwizard-replace-symbol-at-point
              bufferwizard-hl-todo-mode
              bufferwizard-hl-todo-local-mode
-             bufferwizard-paste-indented)
+             bufferwizard-paste-indented
+             bufferwizard-better-grep)
 
   :init
   (setq bufferwizard-point-ignore-invisible t)
   ;;; Paste with current indentation
   (global-set-key (kbd "C-v") 'bufferwizard-paste-indented)
   (evil-define-key 'insert 'global (kbd "C-v") #'bufferwizard-paste-indented)
+  (evil-define-key 'normal 'global (kbd "<leader>gg") #'bufferwizard-better-grep)
 
   ;; (defun evil-clipboard-paste-adapter (text)
   ;;   "Insert TEXT using Evil's paste mechanics.
@@ -2695,15 +2704,6 @@ column layout, except when a point falls on the first visible line."
 
 (evil-define-key 'normal 'global (kbd "<leader>ur") 'bufferfile-rename)
 (evil-define-key 'normal 'global (kbd "<leader>ud") 'bufferfile-delete)
-
-;;; Better grep
-
-(lightemacs-use-package mod-better-grep
-  :ensure nil
-  :commands mod-better-grep
-  :init
-  (with-eval-after-load 'evil
-    (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
 
 ;;; lightemacs-dired-filter-toggle
 

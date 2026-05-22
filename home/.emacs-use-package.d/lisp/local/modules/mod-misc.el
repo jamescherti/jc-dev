@@ -64,11 +64,21 @@
 (with-eval-after-load 'smie
   (defun smie-indent-calculate ()
     "Compute the indentation to use for point."
-    (when (fboundp 'smie--funcall)
-      (let ((result (run-hook-wrapped 'smie-indent-functions #'smie--funcall)))
-        (if (numberp result)
-            result
-          (current-indentation))))))
+    (let ((indent (condition-case nil
+                      (run-hook-wrapped 'smie-indent-functions #'smie--funcall)
+                    (scan-error nil)))) ; Safely catch Tree-sitter scan-errors
+      (if (numberp indent)
+          indent
+        (current-indentation))))
+
+  ;; (defun smie-indent-calculate ()
+  ;;   "Compute the indentation to use for point."
+  ;;   (when (fboundp 'smie--funcall)
+  ;;     (let ((result (run-hook-wrapped 'smie-indent-functions #'smie--funcall)))
+  ;;       (if (numberp result)
+  ;;           result
+  ;;         (current-indentation)))))
+  )
 
 ;;; TODO minimal-emacs.d or lightemacs? Fix annoyance: package upgrade :vc splits
 
@@ -1455,17 +1465,25 @@ WIDTH is the tab width."
         grep-use-null-filename-separator nil
         grep-use-headings nil)
   (with-eval-after-load 'le-core-cli-tools
+    (setq grep-use-null-device nil)
+    (setq grep-command-position nil)
     (setq grep-command
-          (concat (if lightemacs--ripgrep-executable
-                      lightemacs--ripgrep-executable
-                    "rg")
-                  ;; Lightemacs
-                  " --hidden -g !.git -g !.svn -g !.hg"
-
+          (concat "rg"
+                  ;; Include hidden files
+                  " --hidden"
+                  ;; Exclude VC
+                  " -g !.git -g !.svn -g !.hg"
                   ;; Default
                   " --null --line-buffered --color=never --max-columns=1000"
                   " --path-separator / --smart-case --no-heading"
-                  " --with-filename --line-number --search-zip")))
+                  " --with-filename --line-number --search-zip"))
+    ;; Synchronize grep-template with the custom ripgrep command defined above.
+    ;; The <R> and <F> tokens serve as dynamic placeholders that Emacs replaces
+    ;; with the search regular expression and target file patterns at runtime.
+    ;; This setup ensures that built-in recursive search utilities like rgrep
+    ;; and lgrep automatically inherit the same optimized ripgrep options
+    ;; without duplicating the configuration string.
+    (setq grep-template (concat grep-command " <R> <F>")))
 
   (with-eval-after-load 'savehist
     (setq savehist-autosave-interval 650)
@@ -5023,6 +5041,9 @@ environment for accurate linting."
 ;;   ;;   "FN is the advised function. ARGS are the function arguments."
 ;;   ;;   (with-temp-buffer
 ;;   ;;     (insert (expand-file-name default-directory))
+;; Force Emacs to read and write the exact internal byte representation
+;; of the text without attempting any implicit encoding or decoding
+;; conversions.
 ;;   ;;     (let ((coding-system-for-write 'utf-8-emacs)
 ;;   ;;           (write-region-annotate-functions nil)
 ;;   ;;           (write-region-post-annotation-function nil))

@@ -365,7 +365,7 @@ subsequent GCC invocations."
               (let ((arch (match-string 1)))
                 (with-temp-buffer
                   (prin1 arch (current-buffer))
-                  ;; This forces Emacs to read and write the exact internal byte
+                  ;; Force Emacs to read and write the exact internal byte
                   ;; representation of the text without attempting any implicit
                   ;; encoding or decoding conversions.
                   (let ((coding-system-for-write 'utf-8-emacs)
@@ -407,7 +407,7 @@ subsequent GCC invocations."
 ;; (when (eq lightemacs-package-manager 'builtin-package)
 ;;   (setq package-quickstart t))
 
-(setq native-comp-jit-compilation t)
+(setq native-comp-jit-compilation nil)
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."

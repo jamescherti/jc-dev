@@ -787,6 +787,9 @@ Delegates regex matching to the C level for significantly better performance."
               (not (string= directory file-lastdir)))
       (with-temp-buffer
         (insert (expand-file-name default-directory))
+        ;; Force Emacs to read and write the exact internal byte representation
+        ;; of the text without attempting any implicit encoding or decoding
+        ;; conversions.
         (let ((coding-system-for-write 'utf-8-emacs)
               (write-region-annotate-functions nil)
               (write-region-post-annotation-function nil))

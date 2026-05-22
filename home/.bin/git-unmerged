@@ -34,13 +34,13 @@ DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD \
 if git show-ref --verify --quiet refs/heads/develop; then
   # Check if develop is fully merged into the default branch
   if git merge-base --is-ancestor develop "$DEFAULT_BRANCH"; then
-    echo "[CLEAN] 'develop' is fully merged into '$DEFAULT_BRANCH'."
+    echo "[CLEAN] 'develop' is fully merged into '$DEFAULT_BRANCH' of $PWD."
     exit 0
   else
-    echo "[UNMERGED] 'develop' has commits not in '$DEFAULT_BRANCH'."
+    echo "[UNMERGED] 'develop' has commits not in '$DEFAULT_BRANCH' of $PWD."
     exit 0
   fi
 else
-  echo "[IGNORE] 'develop' branch does not exist."
+  echo "[IGNORE] 'develop' branch does not exist in $PWD."
   exit 0
 fi
