@@ -887,6 +887,20 @@ WIDTH is the tab width."
   (setq org-agenda-start-on-weekday 1)  ; Monday
   (setq org-clock-report-include-clocking-task t)
 
+  ;; Do not insert empty lines between collapsed sections; makes folded view
+  ;; denser but reduces visual separation between headings.
+  ;; This keeps your files compact by removing empty lines between folded
+  ;; headings.
+  (setq org-cycle-separator-lines 0)
+
+  ;; Display descriptive text for links instead of raw URLs; improves
+  ;; readability
+  ;; (setq org-link-descriptive t)
+
+  ;; RET follows links; intuitive navigation but may conflict with normal line
+  ;; breaks.
+  (setq org-return-follows-link t)
+
   (setq org-fold-show-context-detail
         '(;; 'local' reveals the current heading but keeps children folded.
           ;; Useful to focus strictly on the agenda item without visual clutter.
