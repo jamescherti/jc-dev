@@ -330,21 +330,52 @@
 
 (defvar my-auto-detect-cpu-architecture t)
 
+(defvar my-cpu-architecture-cache-file (locate-user-emacs-file
+                                        "cpu-arch.cache")
+  "File path to persist the detected CPU architecture.")
+
 (defun my-get-cpu-architecture ()
   "Return the CPU architecture detected via GCC target help output.
-The detected value is stored in `my-cpu-architecture' and returned as a
-string.
+The detected value is returned as a string.
 If GCC is not available or no architecture information can be
-extracted, the function returns nil."
-  (when (executable-find "gcc")
-    (with-temp-buffer
-      (let ((exit-code (call-process "gcc" nil t nil "-march=native"
-                                     "-Q" "--help=target")))
-        (when (zerop exit-code)
+extracted, the function returns nil.
+The result is cached to `my-cpu-architecture-cache-file' to avoid
+subsequent GCC invocations."
+  (if (file-readable-p my-cpu-architecture-cache-file)
+      ;; This forces Emacs to read and write the exact internal byte
+      ;; representation of the text without attempting any implicit encoding or
+      ;; decoding conversions.
+      (let ((coding-system-for-read 'utf-8-emacs)
+            ;; Prevent Emacs from trying to guess the file
+            ;; encoding based on the filename or extension, forcing
+            ;; it to respect coding-system-for-read.
+            (file-coding-system-alist nil))
+        (with-temp-buffer
+          (insert-file-contents my-cpu-architecture-cache-file)
           (goto-char (point-min))
-          (when (re-search-forward
-                 "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
-            (match-string 1)))))))
+          (read (current-buffer))))
+    (when (executable-find "gcc")
+      (with-temp-buffer
+        (let ((exit-code (call-process "gcc" nil t nil "-march=native"
+                                       "-Q" "--help=target")))
+          (when (zerop exit-code)
+            (goto-char (point-min))
+            (when (re-search-forward
+                   "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
+              (let ((arch (match-string 1)))
+                (with-temp-buffer
+                  (prin1 arch (current-buffer))
+                  ;; This forces Emacs to read and write the exact internal byte
+                  ;; representation of the text without attempting any implicit
+                  ;; encoding or decoding conversions.
+                  (let ((coding-system-for-write 'utf-8-emacs)
+                        (write-region-annotate-functions nil)
+                        (write-region-post-annotation-function nil))
+                    (let ((inhibit-quit t))
+                      (write-region (point-min) (point-max)
+                                    my-cpu-architecture-cache-file nil
+                                    'silent))))
+                arch))))))))
 
 ;; Auto detect the CPU architecture
 (when my-auto-detect-cpu-architecture

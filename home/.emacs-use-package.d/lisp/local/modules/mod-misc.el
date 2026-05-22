@@ -59,6 +59,17 @@
     (with-eval-after-load 'evil-collection
       (require 'my-config-evil))))
 
+;;; SEND BUG TO EMACS
+
+(with-eval-after-load 'smie
+  (defun smie-indent-calculate ()
+    "Compute the indentation to use for point."
+    (when (fboundp 'smie--funcall)
+      (let ((result (run-hook-wrapped 'smie-indent-functions #'smie--funcall)))
+        (if (numberp result)
+            result
+          (current-indentation))))))
+
 ;;; TODO minimal-emacs.d or lightemacs? Fix annoyance: package upgrade :vc splits
 
 ;; Restricts the find-library completion list to actual Emacs Lisp libraries
