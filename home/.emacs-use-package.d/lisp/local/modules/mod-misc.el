@@ -3441,7 +3441,7 @@ only runs once per session to avoid redundant I/O."
 (when (and my-native-compile-prune
            (fboundp 'native-comp-available-p)
            (native-comp-available-p))
-  (add-hook 'kill-emacs-hook 'my-native-compile-prune-cache)
+  (add-hook 'kill-emacs-hook 'my-native-compile-prune-cache 95)
 
   ;; 5 minutes: This is the standard definition of "Away From Keyboard." If you
   ;; haven't touched Emacs for 5 minutes, you have likely stepped away (coffee,
