@@ -814,10 +814,10 @@ extracted, the function returns nil."
                            le-marginalia
 
                            le-corfu
+                           le-corfu-prescient
                            le-cape
                            le-prescient
                            le-vertico-prescient
-                           le-corfu-prescient
 
                            le-elisp-refs
                            le-easy-escape
