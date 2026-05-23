@@ -27,58 +27,84 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
-#
 
-set -e
-set -u
+set -Eeuo pipefail
 
 usage() {
-  echo "Usage: ${0##*/} <chroot_directory>" >&2
+  printf 'Usage: %s <chroot_directory>\n' "${0##*/}" >&2
   exit 1
 }
 
 cleanup() {
-  echo "Cleaning up mounts..."
-  # Unmount in reverse order of mounting as a best practice
-  for item in run sys proc dev; do
-    if mountpoint -q "$item"; then
-      umount "$item" || echo "Warning: failed to unmount $item" >&2
+  local target
+
+  for target in \
+    "$CHROOT_DIR/run" \
+    "$CHROOT_DIR/sys" \
+    "$CHROOT_DIR/proc" \
+    "$CHROOT_DIR/dev"; do
+    if mountpoint -q "$target"; then
+      umount -R "$target" \
+        || printf 'Warning: failed to unmount %s\n' "$target" >&2
     fi
   done
 }
 
-main() {
-  if [ "$(id -u)" -ne "0" ]; then
-    echo "Error: you need root privileges to run this script." >&2
+require_root() {
+  if [[ "$(id -u)" -ne 0 ]]; then
+    printf 'Error: root privileges required\n' >&2
+    exit 1
+  fi
+}
+
+validate_chroot() {
+  if [[ ! -d "$CHROOT_DIR" ]]; then
+    printf 'Error: directory does not exist: %s\n' "$CHROOT_DIR" >&2
     exit 1
   fi
 
-  if [ "$#" -ne 1 ]; then
+  if [[ ! -x "$CHROOT_DIR/bin/bash" ]]; then
+    printf 'Error: missing executable: %s/bin/bash\n' "$CHROOT_DIR" >&2
+    exit 1
+  fi
+}
+
+mount_fs() {
+  mkdir -p \
+    "$CHROOT_DIR/dev" \
+    "$CHROOT_DIR/proc" \
+    "$CHROOT_DIR/sys" \
+    "$CHROOT_DIR/run"
+
+  mount --rbind /dev "$CHROOT_DIR/dev"
+  mount --make-rslave "$CHROOT_DIR/dev"
+
+  mount -t proc proc "$CHROOT_DIR/proc"
+
+  mount --rbind /sys "$CHROOT_DIR/sys"
+  mount --make-rslave "$CHROOT_DIR/sys"
+
+  mount --bind /run "$CHROOT_DIR/run"
+}
+
+main() {
+  require_root
+
+  if [[ "$#" -ne 1 ]]; then
     usage
   fi
 
-  CHROOT_DIR="$1"
+  CHROOT_DIR="$(realpath "$1")"
 
-  if [ ! -d "$CHROOT_DIR" ]; then
-    echo "Error: Directory '$CHROOT_DIR' does not exist." >&2
-    exit 1
-  fi
-
-  cd "$CHROOT_DIR"
+  validate_chroot
 
   trap cleanup EXIT INT TERM
 
-  echo "Prepare chroot: $(pwd)"
-  echo "Press enter..."
-  read -r -p "" _variable </dev/tty
+  printf 'Preparing chroot: %s\n' "$CHROOT_DIR"
 
-  for item in dev proc sys run; do
-    if ! mountpoint -q "$item"; then
-      mount -o bind "/$item" "$item"
-    fi
-  done
+  mount_fs
 
-  chroot . /bin/bash -l
+  chroot "$CHROOT_DIR" /bin/bash -l
 }
 
 main "$@"
