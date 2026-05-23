@@ -596,3 +596,5 @@ fi
 alias emacs-batch="emacs --batch --init-directory=~/.emacs-use-package.d/ -l ~/.emacs-use-package.d/early-init.el -l ~/.emacs-use-package.d/init.el"
 
 alias gpg-src="git-find-repos -C ~/src --exclude ~/src/forks --exclude ~/src/local -- git check-gpg -i"
+alias emacsdiff=emacs-diff
+alias ediff=emacs-diff
