@@ -5894,19 +5894,20 @@ are editing by falling back to another visible file buffer."
 
 ;;; savefold
 
-(lightemacs-use-package savefold
-  :init
-  ;; Removed org (buggy)
-  (setq savefold-backends '(outline hideshow treesit-fold markdown))
-
-  ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
-  (setq savefold-directory
-        (expand-file-name "savefold" my-shared-user-emacs-directory))
-
-  (setq org-startup-folded 'showeverything)
-
-  :config
-  (savefold-mode 1))
+;; TODO kill emacs hook issue when editing .asc file, it asks for the password
+;; (lightemacs-use-package savefold
+;;   :init
+;;   ;; Removed org (buggy)
+;;   (setq savefold-backends '(outline hideshow treesit-fold markdown))
+;;
+;;   ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
+;;   (setq savefold-directory
+;;         (expand-file-name "savefold" my-shared-user-emacs-directory))
+;;
+;;   (setq org-startup-folded 'showeverything)
+;;
+;;   :config
+;;   (savefold-mode 1))
 
 (defun my-save-buffer-savefold-advice (&rest _)
   "Advise `save-buffer' to persist folds when the buffer is unmodified.
