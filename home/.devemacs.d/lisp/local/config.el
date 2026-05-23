@@ -137,8 +137,8 @@
                            ;; le-embark-consult
                            ;; le-embark
                            ;; le-wgrep
-                           le-vertico
-                           le-orderless
+                           ;; le-vertico
+                           ;; le-orderless
 
                            ;; TODO this module does not exist
                            ;; le-pathaction
