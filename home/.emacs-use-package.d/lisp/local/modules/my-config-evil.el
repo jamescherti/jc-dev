@@ -2556,14 +2556,14 @@ If COUNT is given, move COUNT - 1 lines downward first."
              bufferwizard-hl-todo-mode
              bufferwizard-hl-todo-local-mode
              bufferwizard-paste-indented
-             bufferwizard-better-grep)
+             bufferwizard-grep)
 
   :init
   (setq bufferwizard-point-ignore-invisible t)
   ;;; Paste with current indentation
   (global-set-key (kbd "C-v") 'bufferwizard-paste-indented)
   (evil-define-key 'insert 'global (kbd "C-v") #'bufferwizard-paste-indented)
-  (evil-define-key 'normal 'global (kbd "<leader>gg") #'bufferwizard-better-grep)
+  (evil-define-key 'normal 'global (kbd "<leader>gg") #'bufferwizard-grep)
 
   ;; (defun evil-clipboard-paste-adapter (text)
   ;;   "Insert TEXT using Evil's paste mechanics.
