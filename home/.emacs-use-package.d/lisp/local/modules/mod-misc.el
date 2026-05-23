@@ -5895,19 +5895,48 @@ are editing by falling back to another visible file buffer."
 ;;; savefold
 
 ;; TODO kill emacs hook issue when editing .asc file, it asks for the password
-;; (lightemacs-use-package savefold
-;;   :init
-;;   ;; Removed org (buggy)
-;;   (setq savefold-backends '(outline hideshow treesit-fold markdown))
-;;
-;;   ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
-;;   (setq savefold-directory
-;;         (expand-file-name "savefold" my-shared-user-emacs-directory))
-;;
-;;   (setq org-startup-folded 'showeverything)
-;;
-;;   :config
-;;   (savefold-mode 1))
+(lightemacs-use-package savefold
+  :init
+  ;; Removed org (buggy)
+  (setq savefold-backends '(outline hideshow treesit-fold markdown))
+
+  ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
+  (setq savefold-directory
+        (expand-file-name "savefold" my-shared-user-emacs-directory))
+
+  (setq org-startup-folded 'showeverything)
+
+  :preface
+  ;; Fixes: https://github.com/jcfk/savefold.el/issues/7
+  (defun my-savefold-utils--get-attr-table-fpath (fpath)
+    "Return the FPATH of the attribute table file for FPATH.
+  This naively replaces path slashes with ! (/a/b/c -> !a!b!c) leading to a chance
+  of collision."
+    (let* ((fpath (expand-file-name fpath))
+           (fpath (string-replace "/" "!" fpath))
+           (fpath (string-replace ":" "!" fpath))  ; For windows
+           (old-fpath (expand-file-name fpath savefold-directory))
+           (new-fpath (expand-file-name (concat fpath ".savefold")
+                                        savefold-directory)))
+      (if (and (file-exists-p old-fpath)
+               (not (file-exists-p new-fpath)))
+          old-fpath
+        new-fpath)))
+  (advice-add 'savefold-utils--get-attr-table-fpath :override
+              #'my-savefold-utils--get-attr-table-fpath)
+
+  :config
+  (savefold-mode 1))
+
+;; Bug fix: https://github.com/jcfk/savefold.el/issues/7
+(defun my-savefold-append-ext-advice (return-path)
+  "Append `savefold' extension to the RETURN-PATH."
+  (concat return-path ".savefold"))
+
+(with-eval-after-load 'savefold
+  (advice-add 'savefold-utils--get-attr-table-fpath
+              :filter-return
+              #'my-savefold-append-ext-advice))
 
 (defun my-save-buffer-savefold-advice (&rest _)
   "Advise `save-buffer' to persist folds when the buffer is unmodified.
