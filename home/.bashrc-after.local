@@ -526,7 +526,7 @@ alias s='esa ssh-add-exec ssh'
 alias home-update="so esa ssh-add-exec home-update"
 alias hup=home-update
 alias scp="esa ssh-add-exec scp"
-alias si=smart-install
+alias si="so smart-install"
 
 if type -P rg >/dev/null 2>&1; then
   alias gr='rg'

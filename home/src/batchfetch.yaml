@@ -93,6 +93,9 @@ tasks:
   # ----------------------------------------------------------------------------
   # Ansible
   # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/ansible-cleanup
+    path: ansible/ansible-cleanup
+
   - git: git@github.com:jamescherti/ansible-role-ofbiz
     path: ansible/ansible-role-ofbiz
 
