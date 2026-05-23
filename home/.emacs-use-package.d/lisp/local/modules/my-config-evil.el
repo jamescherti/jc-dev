@@ -969,7 +969,7 @@ guarantees that the new window is selected, as in Vim."
     (error "Undefined: consult-imenu")))
 
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
-(define-key evil-normal-state-map (kbd "<leader>m") 'consult-project-buffer)
+(define-key evil-normal-state-map (kbd "<leader>B") 'consult-project-buffer)
 (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 ;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
 
@@ -986,7 +986,7 @@ guarantees that the new window is selected, as in Vim."
                                (funcall orig-buffer-list frame)))))
         (consult-buffer)))))
 
-(define-key evil-normal-state-map (kbd "<leader>B") 'my-consult-buffer)
+(define-key evil-normal-state-map (kbd "<leader>m") 'my-consult-buffer)
 (define-key evil-normal-state-map (kbd "M-/") 'consult-line)
 
 (define-key evil-normal-state-map (kbd "C-p") 'my-consult-fd-project)

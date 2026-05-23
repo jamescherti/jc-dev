@@ -3247,11 +3247,10 @@ and suppresses all interactive confirmation prompts during teardown."
   ;; This works better than auto-mode-alist
   (when (and (not (derived-mode-p 'ansible-mode))
              buffer-file-name
-             (string-match
-              my-ansible-file-regexp
-              buffer-file-name)
+             (string-match my-ansible-file-regexp
+                           buffer-file-name)
              (fboundp 'ansible-mode))
-    (ansible-mode 1)))
+    (ansible-mode)))
 
 (defun my-config-tree-sitter ()
   "Config Tree Sitter."

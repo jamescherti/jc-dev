@@ -28,16 +28,31 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 get_vcs() {
-    local begin_path=$1
-    cd "$begin_path"
+  local begin_path="$1"
+
+  # Execute in a subshell to avoid changing the caller's working directory
+  (
+    # Suppress errors and exit the subshell if the initial path is inaccessible
+    if ! cd "$begin_path" 2>/dev/null; then
+      echo "$begin_path"
+      exit 1
+    fi
+
     while [ "$PWD" != "/" ]; do
-        if { [ -d .git ] || [ -d .hg ] ;} then
-            echo $PWD
-            return
-        fi
-        cd ..
+      if [ -d .git ] || [ -d .hg ]; then
+        echo "$PWD"
+        exit 0
+      fi
+
+      # Break the loop if permissions prevent moving up the directory tree
+      if ! cd .. 2>/dev/null; then
+        break
+      fi
     done
+
+    # Fallback if no VCS directory is found
     echo "$begin_path"
+  )
 }
 
 fasd() {
@@ -406,7 +421,7 @@ EOS
         else
           for(i in rank) print i "|" rank[i] "|" time[i]
       }' "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
+    if [ $? -ne 0 ]; then
       env rm -f "$tempfile"
     else
       env mv -f "$tempfile" "$_FASD_DATA"
@@ -430,7 +445,7 @@ EOS
 
     sed "$sed_cmd" "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
 
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
+    if [ $? -ne 0 ]; then
       env rm -f "$tempfile"
     else
       env mv -f "$tempfile" "$_FASD_DATA"
@@ -561,7 +576,7 @@ $(fasd --backend $each)"
     while [ "$1" ]; do case $1 in
       --complete) [ "$2" = "--" ] && shift; set -- $2; local lst=1 r=r comp=1;;
       --query|--add|--delete|-A|-D) fasd "$@"; return $?;;
-      --version) [ -z "$comp" ] && echo "1.0.4" && return;;
+      --version) [ -z "$comp" ] && echo "2.0.0" && return;;
       --) while [ "$2" ]; do shift; fnd="$fnd $1"; last="$1"; done;;
       -*) local o="${1#-}"; while [ "$o" ]; do case $o in
           s*) local show=1;;
