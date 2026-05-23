@@ -1179,19 +1179,46 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
                                              rust-ts-mode-hook
                                              go-ts-mode-hook
                                              ruby-ts-mode-hook
+                                             php-ts-mode-hook
+                                             csharp-ts-mode-hook
+                                             go-mod-ts-mode-hook
+                                             lua-ts-mode-hook
                                              js-ts-mode-hook
                                              typescript-ts-mode-hook
                                              tsx-ts-mode-hook
                                              css-ts-mode-hook
                                              html-ts-mode-hook
+                                             heex-ts-mode-hook
+                                             xml-ts-mode-hook
+                                             ;; bash-ts-mode-hook
                                              cmake-ts-mode-hook
                                              dockerfile-ts-mode-hook
+                                             awk-ts-mode-hook
+                                             vimscript-ts-mode-hook
+                                             nix-ts-mode-hook
                                              json-ts-mode-hook
                                              toml-ts-mode-hook
+                                             makefile-ts-mode-hook
+                                             verilog-ts-mode-hook
+                                             vhdl-ts-mode-hook
+                                             hlsl-ts-mode-hook
+                                             latex-ts-mode-hook
+                                             beancount-ts-mode-hook
                                              markdown-ts-mode-hook
-                                             ;; bash-ts-mode-hook
-
-                                             ;; Third-party packages
+                                             mermaid-ts-mode-hook
+                                             gdscript-ts-mode-hook
+                                             clojure-ts-mode-hook
+                                             caml-ts-mode-hook
+                                             ocaml-ts-mode-hook
+                                             erlang-ts-mode-hook
+                                             elixir-ts-mode-hook
+                                             scala-ts-mode-hook
+                                             dart-ts-mode-hook
+                                             haskell-ts-mode-hook
+                                             julia-ts-mode-hook
+                                             kotlin-ts-mode-hook
+                                             gleam-ts-mode-hook
+                                             noir-ts-mode-hook
                                              kotlin-ts-mode-hook
                                              swift-ts-mode-hook
                                              elixir-ts-mode-hook
