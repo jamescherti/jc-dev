@@ -588,7 +588,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                       ;; TODO remove on mac
                       exec-path-from-shell
                       groovy-mode
-                      php-mode
+                      ;; php-mode
                       erefactor
                       parent-mode
                       popup
