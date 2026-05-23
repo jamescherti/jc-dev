@@ -1,21 +1,84 @@
 #!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Description: Initialize and enter a chroot environment safely.
+#              This script validates the target directory, verifies root
+#              privileges, and binds essential system directories (dev,
+#              proc, sys, run) before dropping into an interactive shell.
+#              It implements an EXIT trap to guarantee that all bind mounts
+#              are cleanly unmounted when the user exits the chroot session.
+#
+# Usage: ./chroot_enter.sh <chroot_directory>
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+#
 
 set -e
 set -u
 
-if [ "$(id -u)" -ne "0" ]; then
-  echo "Error: you need root privileges to run this script." >&2
+usage() {
+  echo "Usage: ${0##*/} <chroot_directory>" >&2
   exit 1
-fi
+}
 
-cd "$1"
+cleanup() {
+  echo "Cleaning up mounts..."
+  # Unmount in reverse order of mounting as a best practice
+  for item in run sys proc dev; do
+    if mountpoint -q "$item"; then
+      umount "$item" || echo "Warning: failed to unmount $item" >&2
+    fi
+  done
+}
 
-echo "Prepare chroot: $(pwd)"
-echo "Press enter..."
-read -r -p "" _variable </dev/tty
+main() {
+  if [ "$(id -u)" -ne "0" ]; then
+    echo "Error: you need root privileges to run this script." >&2
+    exit 1
+  fi
 
-for item in dev proc sys run; do
-  ! mountpoint -q "$item" && mount -o bind "/$item" "$item"
-done
+  if [ "$#" -ne 1 ]; then
+    usage
+  fi
 
-chroot . /bin/bash -l
+  CHROOT_DIR="$1"
+
+  if [ ! -d "$CHROOT_DIR" ]; then
+    echo "Error: Directory '$CHROOT_DIR' does not exist." >&2
+    exit 1
+  fi
+
+  cd "$CHROOT_DIR"
+
+  trap cleanup EXIT INT TERM
+
+  echo "Prepare chroot: $(pwd)"
+  echo "Press enter..."
+  read -r -p "" _variable </dev/tty
+
+  for item in dev proc sys run; do
+    if ! mountpoint -q "$item"; then
+      mount -o bind "/$item" "$item"
+    fi
+  done
+
+  chroot . /bin/bash -l
+}
+
+main "$@"
