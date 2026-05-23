@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Author: James Cherti
 # URL: https://github.com/jamescherti/jc-dev
@@ -187,7 +186,7 @@ endsnippet
 
 snippet enter
 echo "Press enter..."
-read -r enter
+read -r enter </dev/tty
 endsnippet
 
 snippet mountpoint
@@ -399,15 +398,15 @@ main "$@"
 endsnippet
 
 snippet input
-read -r -p "${1:text}: " ${2:variable}
+read -r -p "${1:text}: " ${2:variable} </dev/tty
 endsnippet
 
 snippet pass
-read -s -r -p "${1:password}: " ${2:variable}
+read -s -r -p "${1:password}: " ${2:variable} </dev/tty
 endsnippet
 
 snippet confirm
-read -r -p "${1:Proceed}? [y,n] " ${2:ANSWER}
+read -r -p "${1:Proceed}? [y,n] " ${2:ANSWER} </dev/tty
 if [[ "$$2" != "y" ]]; then
 	echo "Interrupted." >&2
 	exit 1

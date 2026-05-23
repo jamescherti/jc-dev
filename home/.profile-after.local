@@ -181,6 +181,10 @@ export JC_DEV_UNATTENDED=1
 export BATCHFETCH_CHECK_UNTRACKED=1
 export BATCHFETCH_JOBS=5
 
+if [ -d "$HOME/Sync" ]; then
+  export GIT_CHECK_GPG_DATA_DIR="$HOME/Sync/.git-check-gpg"
+fi
+
 # Reset the SSH agent (will be loaded later)
 # shellcheck disable=SC2034
 SSH_AGENT_PID=""

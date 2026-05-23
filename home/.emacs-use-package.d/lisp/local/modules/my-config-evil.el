@@ -969,8 +969,8 @@ guarantees that the new window is selected, as in Vim."
     (error "Undefined: consult-imenu")))
 
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
-(define-key evil-normal-state-map (kbd "<leader>m") 'consult-recent-file)
-(define-key evil-normal-state-map (kbd "<leader>b") 'consult-project-buffer)
+(define-key evil-normal-state-map (kbd "<leader>m") 'consult-project-buffer)
+(define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 ;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
 
 (defun my-consult-buffer ()
@@ -1772,19 +1772,8 @@ ignored and logged as a warning. All other errors are re-raised."
   "Gen table of contents if present."
   (when (and (fboundp 'markdown-toc--toc-already-present-p)
              (fboundp 'markdown-toc-generate-toc)
-             (funcall 'markdown-toc--toc-already-present-p))
-    ;; atomic-change-group in Emacs creates a temporary “transaction” for buffer
-    ;; modifications: all changes made inside the group are treated as a single,
-    ;; atomic operation for undo purposes. This means that if the group
-    ;; completes successfully, all modifications are merged into one undo step,
-    ;; so pressing undo will revert everything in the group at once instead of
-    ;; step by step. If an error occurs inside the group, the changes are
-    ;; automatically rolled back, leaving the buffer unchanged. It also ensures
-    ;; that point and mark positions are preserved unless explicitly modified,
-    ;; which is why it’s useful for functions like markdown-toc-generate-toc
-    ;; where you want the buffer updated without losing your cursor location.
-    (atomic-change-group
-      (funcall 'markdown-toc-generate-toc))))
+             (markdown-toc--toc-already-present-p))
+    (markdown-toc-generate-toc)))
 
 (defun my-setup-markdown-toc ()
   "Setup the markdown-toc package."

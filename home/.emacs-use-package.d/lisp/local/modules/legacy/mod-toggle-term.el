@@ -204,15 +204,15 @@ WAIT-FOR-KEY asks the user to press enter before quitting."
     (cond
      ((and (fboundp 'toggle-term-vterm)
            (string= choice-terminal "vterm"))
-      (funcall 'toggle-term-vterm command))
+      (toggle-term-vterm command))
 
      ((and (fboundp 'toggle-term-eat)
            (string= choice-terminal "eat"))
-      (funcall 'toggle-term-eat command))
+      (toggle-term-eat command))
 
      ((and (fboundp 'toggle-term-term)
            (string= choice-terminal "term"))
-      (funcall 'toggle-term-term command))
+      (toggle-term-term command))
 
      (t
       (user-error "Terminal not supported: %s" choice-terminal)))))

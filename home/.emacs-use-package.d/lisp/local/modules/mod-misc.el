@@ -1528,7 +1528,6 @@ WIDTH is the tab width."
 
   ;; Change default to this
   (setq easysession-fontify t)
-  (setq easysession-debug t)
 
   (setq easysession-switch-to-exclude-current t)
   (setq easysession-save-interval (* 14 60))
@@ -1593,7 +1592,7 @@ WIDTH is the tab width."
           ;; Hide "Sending ESC to eat."
           (let ((inhibit-message t))
             (when (fboundp 'evil-collection-eat-toggle-send-escape)
-              (funcall 'evil-collection-eat-toggle-send-escape)))))
+              (evil-collection-eat-toggle-send-escape)))))
       (add-hook 'eat-mode-hook 'evil-collection-enable-eat-toggle-send-escape)))
 
   (setq show-paren-mode nil)
@@ -2120,7 +2119,7 @@ WIDTH is the tab width."
 
   (setq abbrev-file-name (expand-file-name "abbrev_defs" my-shared-user-emacs-directory))
 
-  (setq easysession-debug t)
+  ;; (setq easysession-debug t)
   (setq easysession-refresh-tab-bar t)
 
   (setq easysession-directory
@@ -3252,7 +3251,7 @@ and suppresses all interactive confirmation prompts during teardown."
               my-ansible-file-regexp
               buffer-file-name)
              (fboundp 'ansible-mode))
-    (funcall 'ansible-mode)))
+    (ansible-mode 1)))
 
 (defun my-config-tree-sitter ()
   "Config Tree Sitter."
@@ -3617,7 +3616,7 @@ ARGS - the arguments passed to the original function"
   (when (fboundp 'yas-expand-snippet)
     (condition-case nil
         (progn
-          (funcall 'yas-expand-snippet (buffer-string) (point-min) (point-max))
+          (yas-expand-snippet (buffer-string) (point-min) (point-max))
           (when (and (not (bobp))
                      (fboundp 'evil-insert-state)
                      (not (zerop (buffer-size))))
@@ -5128,9 +5127,9 @@ environment for accurate linting."
 
 ;;; jinja2-mode and csv-mode
 
-(lightemacs-use-package jinja2-mode
-  :commands jinja2-mode
-  :mode ("\\.j2\\'" . jinja2-mode))
+;; (lightemacs-use-package jinja2-mode
+;;   :commands jinja2-mode
+;;   :mode ("\\.j2\\'" . jinja2-mode))
 
 ;;; org
 
@@ -5228,7 +5227,7 @@ at the same level."
   "Switch to insert mode on org capture."
   (when (and (bound-and-true-p evil-local-mode)
              (fboundp 'evil-insert-state))
-    (funcall 'evil-insert-state)))
+    (evil-insert-state)))
 (add-hook 'org-capture-mode-hook #'my-org-capture-switch-insert)
 (with-eval-after-load 'org
   ;; The function inserts a new heading at the current cursor position, and
@@ -5247,7 +5246,7 @@ at the same level."
             (entry-is-done (org-entry-is-done-p)))
         (when (and (bound-and-true-p evil-local-mode)
                    (fboundp 'evil-insert-state))
-          (funcall 'evil-insert-state))
+          (evil-insert-state))
         (org-insert-heading-respect-content)
         (when (or entry-is-todo entry-is-done)
           (just-one-space)
@@ -5313,7 +5312,7 @@ at the same level."
     (require 'cl-lib)
     (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
       (when (fboundp 'org-agenda-goto)
-        (funcall 'org-agenda-goto))))
+        (org-agenda-goto))))
 
   (setq org-agenda-file-regexp (replace-regexp-in-string
                                 "\\\\\\.org" "\\\\.org\\\\(\\\\.gpg\\\\)?"

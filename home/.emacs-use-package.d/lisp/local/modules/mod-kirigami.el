@@ -55,12 +55,12 @@
 
 (require 'kirigami-jump)
 (when (fboundp 'kirigami-jump-mode)
-  (kirigami-jump-mode))
+  (kirigami-jump-mode 1))
 
 (with-eval-after-load 'evil
   (require 'kirigami-evil)
   (when (fboundp 'kirigami-evil-mode)
-    (kirigami-evil-mode)))
+    (kirigami-evil-mode 1)))
 
 ;;; Useful function: my-reveal-kirigami-fold-after-undo-advice
 

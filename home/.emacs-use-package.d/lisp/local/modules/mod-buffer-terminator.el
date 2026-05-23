@@ -228,7 +228,7 @@
   ;;     (eglot-shutdown-all)))
 
   (when (fboundp 'easysession-reset)
-    (funcall 'easysession-reset))
+    (easysession-reset))
   ;; (mod-buffer-terminator-only)
   ;; (scratch-buffer)
   )
