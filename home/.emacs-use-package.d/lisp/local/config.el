@@ -1253,7 +1253,10 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 ;;; pathaction
 
-(setq pathaction-term-function 'pathaction-vterm)
+(with-eval-after-load 'pathaction
+  (if (fboundp 'pathaction-vterm)
+      (setq pathaction-term-function #'pathaction-vterm)
+    (error "Undefined: pathaction-vterm")))
 
 ;;; im
 

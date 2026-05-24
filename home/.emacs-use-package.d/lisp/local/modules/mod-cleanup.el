@@ -48,7 +48,7 @@
 (defvar mod-cleanup-url-cache t
   "Enable automated purging of stale URL cache files.")
 
-(defvar mod-cleanup-auth-cache t
+(defvar mod-cleanup-auth-source-cache t
   "Enable aggressive clearing of decrypted auth-source memory cache.")
 
 ;; (defvar mod-cleanup-projectile t
@@ -242,7 +242,7 @@ Emacs session to prevent unnecessary disk I/O."
           (url-cache-prune-cache))))
 
     ;; Auth-source security flush
-    (when mod-cleanup-auth-cache
+    (when mod-cleanup-auth-source-cache
       (when (and (featurep 'auth-source)
                  (fboundp 'auth-source-forget-all-cached))
         ;; Clears internal variable caches storing decoded secrets, API keys,
