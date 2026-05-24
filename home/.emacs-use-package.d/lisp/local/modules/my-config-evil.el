@@ -2628,7 +2628,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
   "Save and call `vc-diff' silently."
   (interactive)
   (let ((inhibit-message t))
-    (buffer-guardian-save-buffer)
+    (my-save-all-buffers)
     (vc-diff)))
 
 (defun mod-better-vc-git-toplevel ()

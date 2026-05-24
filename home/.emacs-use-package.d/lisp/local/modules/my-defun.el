@@ -38,12 +38,13 @@
 
 (defun my-save-all-buffers ()
   "Save all buffers."
-  (cond
-   ((fboundp 'buffer-guardian-save-all-buffers)
-    (buffer-guardian-save-all-buffers))
+  (unless (bound-and-true-p buffer-guardian-mode)
+    (cond
+     ((fboundp 'buffer-guardian-save-all-buffers)
+      (buffer-guardian-save-all-buffers))
 
-   (t
-    (save-some-buffers t))))
+     (t
+      (save-some-buffers t)))))
 
 (defun my-project-root-dir (&optional path)
   "Search up the PATH for `project-root-markers'."
