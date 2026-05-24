@@ -80,20 +80,6 @@
   ;;         (current-indentation)))))
   )
 
-;;; TODO minimal-emacs.d or lightemacs? Fix annoyance: package upgrade :vc splits
-
-;; Restricts the find-library completion list to actual Emacs Lisp libraries
-;; instead of including other file types like C source files. This provides a
-;; cleaner and faster completion list when you only want to inspect Elisp source
-;; code.
-;;
-;; Hidden core files: Some of the foundational code in Emacs is written in C
-;; rather than Emacs Lisp. If you are deeply debugging the Emacs editor itself
-;; and actually want to read the C source files using find-library, this setting
-;; will hide them from your completion list.
-;; TODO minimal-emacs.d
-(setq find-library-include-other-files nil)
-
 ;; Automatically resizes all windows proportionally when splitting or deleting a
 ;; window. This prevents new windows from taking all the space from the current
 ;; window, maintaining a balanced layout across your frame.
@@ -1865,13 +1851,11 @@ WIDTH is the tab width."
   (setq enhanced-evil-paredit-handle-paste t)
   (setq confirm-kill-emacs 'y-or-n-p)
   (setq history-delete-duplicates t)
-  (setq comint-buffer-maximum-size 10000)
   (setq shell-kill-buffer-on-exit t)
   (setq widget-image-enable nil)
   (setq mode-line-collapse-minor-modes t)  ;; Emacs 31
   (setq abbrev-suggest t)
   (setq copy-directory-create-symlink t)
-  (setq max-mini-window-height 0.33)
   (setq echo-keystrokes-help nil) ; Emacs 30
   (setq kept-old-versions 15)
   (setq kept-new-versions 15)
@@ -2106,12 +2090,7 @@ Returns:
 (setq mac-command-modifier 'control)
 (setq mac-option-modifier 'meta)
 
-;; Ignore local variables that are declared in files
-;; https://www.gnu.org/software/emacs/manual/html_node/elisp/File-Local-Variables.html
-;; Enable loading variables from .dir-locals.el
-(setq enable-local-variables :safe)  ;; Also loads variables that are in comments
-;; (setq enable-local-variables nil)
-(setq enable-local-eval nil)
+(setq enable-local-variables :safe)
 
 ;;; ibuffer
 
