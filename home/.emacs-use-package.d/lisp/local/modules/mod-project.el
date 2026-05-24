@@ -78,29 +78,6 @@
   :functions (project--ensure-read-project-list
               project--file-completion-table))
 
-;;; project cleanup
-
-(defvar mod-project--cleanup-timer nil
-  "Timer object for periodic project cleanup.")
-
-(defcustom mod-project-loader-idle-delay (* 8 60)
-  "Number of seconds of idle time before loading modules and files."
-  :type 'number
-  :group 'lazy-loader)
-
-(defun mod-project--setup-cleanup ()
-  "Initialize cleanup hooks and idle timers."
-  ;; Add to kill-emacs-hook correctly
-  (add-hook 'kill-emacs-hook #'project-forget-zombie-projects)
-
-  ;; Set the timer and store it in the variable
-  (setq mod-project--cleanup-timer
-        (run-with-idle-timer mod-project-loader-idle-delay t
-                             #'project-forget-zombie-projects)))
-
-;; Initialize the setup
-(mod-project--setup-cleanup)
-
 ;;; auto add
 
 ;; (require 'project)

@@ -137,7 +137,7 @@
                            ;; le-embark-consult
                            ;; le-embark
                            ;; le-wgrep
-                           ;; le-vertico
+                           le-vertico
                            ;; le-orderless
 
                            ;; TODO this module does not exist

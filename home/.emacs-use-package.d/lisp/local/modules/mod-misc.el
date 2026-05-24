@@ -561,76 +561,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (current-window-only-setup)
 
-;;; Delete unused packages
-
-(defun my-delete-unused-packages ()
-  "Delete unused packages."
-  (when (eq lightemacs-package-manager 'builtin-package)
-    (require 'package)
-    (when (fboundp 'package-delete)
-      (dolist (item '(olivetti
-                      ws-butler
-                      spinner
-                      git-gutter
-                      posframe
-                      popper
-                      rainbow-mode
-                      with-editor
-                      lsp-mode
-                      git-timemachine
-                      focus
-                      shut-up
-                      llama
-                      lv
-                      jenkinsfile-mode
-                      basic-mode
-                      highlight-numbers
-                      ;; TODO remove on mac
-                      exec-path-from-shell
-                      groovy-mode
-                      ;; php-mode
-                      erefactor
-                      parent-mode
-                      popup
-                      xclip
-                      tempel
-                      tempel-collection
-                      stillness-mode
-                      golden-ratio
-                      tabgo
-                      ws-butler
-                      quickrun
-                      xterm-color
-                      ztree
-                      vundo
-                      flyspell-lazy
-                      eat
-                      magit
-                      magit-section
-                      ace-window))
-        (let ((desc (cadr (assq item package-alist))))
-          (if (not desc)
-              (when init-file-debug
-                (message "Package %s not found in alist (already deleted?)" item))
-            (condition-case err
-                (progn
-                  (package-delete desc)
-                  (message "Successfully deleted: %s" item))
-              (error
-               ;; This captures the actual error message from Emacs
-               (message "Failed to delete %s: %s: %s"
-                        item
-                        (error-message-string err)
-                        desc)))))))))
-
-;; 5 minutes: This is the standard definition of "Away From Keyboard." If you
-;; haven't touched Emacs for 5 minutes, you have likely stepped away (coffee,
-;; meeting, etc.). This is the safest time to burn CPU cycles or disk I/O
-;; without affecting user experience.
-(add-hook 'lightemacs-after-init-hook
-          #'(lambda()
-              (run-with-idle-timer (* 6 60) nil #'my-delete-unused-packages)))
-
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
 ;; integer (like 3 or 5), Emacs will force the screen to scroll before you reach
@@ -3457,43 +3387,6 @@ and suppresses all interactive confirmation prompts during teardown."
 (add-hook 'smerge-mode-hook #'my-smerge-to-fundamental-mode)
 
 ;;; Prune cache
-
-;; TODO lightemacs?
-
-(defvar my-native-compile-prune t
-  "Prune.")
-
-(defvar my-native-compile--prune-cache-done nil
-  "Flag to ensure native compile cache is pruned only once per session.")
-
-(defun my-native-compile-prune-cache ()
-  "Prune the native compile cache safely.
-This function checks for native compilation support and ensures the operation
-only runs once per session to avoid redundant I/O."
-  (interactive)
-  (let ((inhibit-message t))
-    (when (and (not my-native-compile--prune-cache-done)
-               (fboundp 'native-comp-available-p)
-               (native-comp-available-p)
-               (fboundp 'native-compile-prune-cache))
-      (setq my-native-compile--prune-cache-done t)
-      (message "[native-comp] Native compilation cache pruned")
-      (with-demoted-errors "Error pruning native cache: %S"
-        (native-compile-prune-cache)))))
-
-;; Only register the timer if native compilation is enabled
-(when (and my-native-compile-prune
-           (fboundp 'native-comp-available-p)
-           (native-comp-available-p))
-  (add-hook 'kill-emacs-hook 'my-native-compile-prune-cache 95)
-
-  ;; 5 minutes: This is the standard definition of "Away From Keyboard." If you
-  ;; haven't touched Emacs for 5 minutes, you have likely stepped away (coffee,
-  ;; meeting, etc.). This is the safest time to burn CPU cycles or disk I/O
-  ;; without affecting user experience.
-  (add-hook 'lightemacs-after-init-hook
-            #'(lambda()
-                (run-with-idle-timer (* 7 60) nil #'my-native-compile-prune-cache))))
 
 ;;; Prune native comp tmp files
 

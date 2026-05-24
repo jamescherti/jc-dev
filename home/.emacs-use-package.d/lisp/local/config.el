@@ -939,6 +939,7 @@ subsequent GCC invocations."
                            ;; mod-kirigami-alternative
 
                            ;; le-treesit-auto
+                           mod-cleanup
                            ))
 
 ;;; Add my packages to load path
