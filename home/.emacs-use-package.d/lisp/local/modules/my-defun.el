@@ -98,7 +98,7 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
                    (my-path-inside-p "~/src" file-name)
                    (not (my-path-inside-p "~/src/forks" file-name))
                    (not (my-path-inside-p "~/src/other" file-name))
-                   (not (my-path-inside-p my-tmp-files-dir file-name)))
+                   (not (my-path-inside-p tmpedit-dir file-name)))
           (setq-local config-buffer-enable-syntax-checkers t)
           t))
     (when (boundp 'config-buffer-enable-syntax-checkers)

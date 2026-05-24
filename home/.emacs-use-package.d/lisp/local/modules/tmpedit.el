@@ -27,31 +27,31 @@
 ;;-----------------------------------------------------------------------------
 ;; Temporary ediff
 ;;-----------------------------------------------------------------------------
-(defvar my-tmp-files-dir (expand-file-name "~")
+(defvar tmpedit-dir (expand-file-name "~")
   "Temporary ediff.")
 
 (with-eval-after-load 'le-compile-angel
   (with-eval-after-load 'compile-angel
     (when (fboundp 'le-compile-angel-exclude)
-      (le-compile-angel-exclude my-tmp-files-dir))))
+      (le-compile-angel-exclude tmpedit-dir))))
 
-(defvar my-tmp-file-name "tmp-file"
+(defvar tmpedit-file-name "tmp-file"
   "The name of the temporary file.")
 
-(defvar my-tmp-ediff-file1-name "tmp-file1"
+(defvar tmpedit-ediff-file1-name "tmp-file1"
   "The name of the first ediff temporary file.")
 
-(defvar my-tmp-ediff-file2-name "tmp-file2"
+(defvar tmpedit-ediff-file2-name "tmp-file2"
   "The name of the second ediff temporary file.")
 
-(defun my-prompt-extension (extension)
+(defun tmpedit--prompt-extension (extension)
   "Ask the user to enter an EXTENSION if no extension is provided."
   (if (and extension (not (string= extension "")))
       (let ((ext (replace-regexp-in-string "^\\.*" "" extension)))
         (concat "." ext))
     ""))
 
-(defun my-create-file-in-parent-directory (file-path empty-file)
+(defun tmpedit--create-file-in-parent-directory (file-path empty-file)
   "Create a file in the parent directory of FILE-PATH.
 
 If EMPTY-FILE is non-nil, ensure that the created file is empty by erasing any
@@ -78,13 +78,13 @@ EMPTY-FILE is a boolean that defaults to nil."
       (unless (file-exists-p full-path)
         (write-region "" nil full-path nil 'silent)))))
 
-(defun my-get-temporary-file-path (file-name ext)
+(defun tmpedit--get-temporary-file-path (file-name ext)
   "Get the full path to the temporary file.
 FILE-NAME is the file name.
 EXT is the extension."
-  (expand-file-name (concat file-name ext) my-tmp-files-dir))
+  (expand-file-name (concat file-name ext) tmpedit-dir))
 
-(defun my-temporary-file (extension)
+(defun tmpedit-temporary-file (extension)
   "Create and open a new temporary file with the given EXTENSION.
 If the user inputs nothing for EXTENSION, prompt for it interactively.
 
@@ -93,26 +93,26 @@ the default value is used. Then, it generates a unique filename using the
 specified extension and opens that file in a new buffer. The parent directory of
 this file must exist."
   (interactive "sExtension: ")
-  (let* ((ext (my-prompt-extension extension))
-         (file-path1 (my-get-temporary-file-path my-tmp-file-name ext)))
-    (my-create-file-in-parent-directory file-path1 nil)
+  (let* ((ext (tmpedit--prompt-extension extension))
+         (file-path1 (tmpedit--get-temporary-file-path tmpedit-file-name ext)))
+    (tmpedit--create-file-in-parent-directory file-path1 nil)
     (find-file file-path1)))
 
-(defun my-temporary-diff (extension)
+(defun tmpedit-diff (extension)
   "Open two files with the EXTENSION in ediff in a temporary directory."
   (interactive "sExtension: ")
-  (let* ((file-suffix (my-prompt-extension extension))
-         (file-path1 (my-get-temporary-file-path
-                      my-tmp-ediff-file1-name file-suffix))
-         (file-path2 (my-get-temporary-file-path
-                      my-tmp-ediff-file2-name file-suffix)))
-    (my-create-file-in-parent-directory file-path1 t)
-    (my-create-file-in-parent-directory file-path2 t)
+  (let* ((file-suffix (tmpedit--prompt-extension extension))
+         (file-path1 (tmpedit--get-temporary-file-path
+                      tmpedit-ediff-file1-name file-suffix))
+         (file-path2 (tmpedit--get-temporary-file-path
+                      tmpedit-ediff-file2-name file-suffix)))
+    (tmpedit--create-file-in-parent-directory file-path1 t)
+    (tmpedit--create-file-in-parent-directory file-path2 t)
     (ediff-files file-path1 file-path2)))
 
-;;; my-ediff: Compare the current buffer with another file
+;;; tmpedit-diff-clipboard: Compare the current buffer with another file
 
-(defun my-ediff (other-file)
+(defun tmpedit-diff-clipboard (other-file)
   "Compare the current file-visiting buffer with OTHER-FILE using ediff."
   (interactive
    (list (read-file-name "Compare with file: " nil nil t)))
@@ -123,18 +123,18 @@ this file must exist."
 
 (defun my-temporary-ediff ()
   "Compare the current buffer against a temporary file created from the clipboard.
-The temporary file is placed in `my-tmp-files-dir' using `my-tmp-file-name'."
+The temporary file is placed in `tmpedit-dir' using `tmpedit-file-name'."
   (interactive)
   (let ((current-file (buffer-file-name (buffer-base-buffer))))
     (unless current-file
       (user-error "Current buffer is not visiting a file"))
     (let* ((file-ext (file-name-extension current-file))
            (ext (if file-ext (concat "." file-ext) ""))
-           (temp-file (my-get-temporary-file-path my-tmp-file-name ext))
+           (temp-file (tmpedit--get-temporary-file-path tmpedit-file-name ext))
            (clipboard-text (or (ignore-errors (current-kill 0 t)) "")))
 
       ;; Ensure parent directories exist
-      (my-create-file-in-parent-directory temp-file nil)
+      (tmpedit--create-file-in-parent-directory temp-file nil)
 
       ;; Write the clipboard contents safely by syncing the buffer and disk
       (with-current-buffer (find-file-noselect temp-file)
