@@ -1,4 +1,4 @@
-;;; tmpedit.el --- mod-temporary-file -*- lexical-binding: t -*-
+;;; tmpedit.el --- tmpedit -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -143,6 +143,6 @@ The temporary file is placed in `tmpedit-dir' using `tmpedit-file-name'."
       ;; Compare current file against the newly created temporary file
       (ediff-files current-file temp-file))))
 
-(provide 'mod-temporary-file)
+(provide 'tmpedit)
 
 ;;; tmpedit.el ends here

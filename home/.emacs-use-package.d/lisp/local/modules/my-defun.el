@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'tmpedit)
+
 (defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
 (defconst IS-MAC (eq system-type 'darwin))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
@@ -422,16 +424,6 @@ Returns:
       "/"))))
 
 
-(defun my-previous-interesting-buffer ()
-  "Switch to the previous buffer that is a file, Dired, or vterm."
-  (interactive)
-  (previous-buffer))
-
-(defun my-next-interesting-buffer ()
-  "Switch to the next buffer that is a file, Dired, or vterm."
-  (interactive)
-  (next-buffer))
-
 ;;-----------------------------------------------------------------------------
 ;; Commands
 ;;-----------------------------------------------------------------------------
@@ -662,31 +654,59 @@ Delegates regex matching to the C level for significantly better performance."
 
 (defun my-interesting-buffer-p ()
   "Return t if this buffer is considered a file/directory or otherwise interesting."
-  (let ((b-name (buffer-name))
-        (f-name (buffer-file-name (buffer-base-buffer))))
-    (or (string-prefix-p "*Ollama" b-name)
-        ;; (string-prefix-p "*sdcv:" b-name)
-        (and (not (string-prefix-p "*" b-name))
-             (not (string-prefix-p " " b-name)))
-        (and f-name (string-suffix-p "/todo.org" f-name)))))
+  (let ((buf-name (buffer-name))
+        (file-name (buffer-file-name (buffer-base-buffer))))
+    (or
+     ;;(string-prefix-p "*Ollama" buf-name)
+     ;;(string-prefix-p "*sdcv:" buf-name)
+     ;; (derived-mode-p 'helpful-mode)
+     ;; (derived-mode-p 'quick-sdcv-mode)
+     (and (not (string-prefix-p "*" buf-name))
+          (not (string-prefix-p " " buf-name)))
+     (and file-name
+          (string-suffix-p "/todo.org" file-name)))))
+
+(defun my-smart-switch-interesting-buffer (switch-func)
+  "Switch to an interesting buffer using SWITCH-FUNC.
+SWITCH-FUNC should be a symbol for a buffer navigation function,
+such as `next-buffer' or `previous-buffer'."
+  (let ((start-buffer (current-buffer))
+        (found nil)
+        (max-iters (length (buffer-list))))
+    (funcall switch-func)
+    (while (and (> max-iters 0)
+                (not (eq (current-buffer) start-buffer))
+                (not (setq found (my-interesting-buffer-p))))
+      (funcall switch-func)
+      (setq max-iters (1- max-iters)))
+    ;; If we didn't find anything and aren't already back at the start, revert
+    ;; safely.
+    (unless (or found (eq (current-buffer) start-buffer))
+      (set-window-buffer nil start-buffer))))
 
 (defun my-smart-previous-interesting-buffer ()
   "Switch to the previous buffer that is a file, Dired, or vterm."
   (interactive)
-  (let ((start-buffer (current-buffer)))
-    (previous-buffer)
-    (while (and (not (my-interesting-buffer-p))
-                (not (eq (current-buffer) start-buffer)))
-      (previous-buffer))))
+  (my-smart-switch-interesting-buffer #'previous-buffer))
 
 (defun my-smart-next-interesting-buffer ()
   "Switch to the next buffer that is a file, Dired, or vterm."
   (interactive)
-  (let ((start-buffer (current-buffer)))
-    (next-buffer)
-    (while (and (not (my-interesting-buffer-p))
-                (not (eq (current-buffer) start-buffer)))
-      (next-buffer))))
+  (my-smart-switch-interesting-buffer #'next-buffer))
+
+(defun my-previous-interesting-buffer ()
+  "Switch to the previous buffer that is a file, Dired, or vterm."
+  (interactive)
+  (my-smart-previous-interesting-buffer)
+  ;; (previous-buffer)
+  )
+
+(defun my-next-interesting-buffer ()
+  "Switch to the next buffer that is a file, Dired, or vterm."
+  (interactive)
+  (my-smart-next-interesting-buffer)
+  ;; (next-buffer)
+  )
 
 ;; Lastdir
 

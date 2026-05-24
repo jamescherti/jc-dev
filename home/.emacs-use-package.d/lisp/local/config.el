@@ -911,7 +911,7 @@ subsequent GCC invocations."
                            le-server
 
                            mod-misc
-                           mod-temporary-file
+                           tmpedit
                            mod-cleanup))
 
 ;;; Add my packages to load path
