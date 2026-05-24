@@ -126,28 +126,29 @@ this file must exist."
   "Compare the current buffer against a temporary file created from the clipboard.
 The temporary file is placed in `my-tmp-files-dir' using `my-tmp-file-name'."
   (interactive)
-  (let* ((current-file (buffer-file-name))
+  (let* ((current-file (buffer-file-name (buffer-base-buffer)))
          (ext (if current-file
                   (concat "." (file-name-extension current-file))
                 ""))
          (temp-file (my-get-temporary-file-path my-tmp-file-name ext))
-         ;; Safely attempt to get text from the system clipboard or kill ring
-         (clipboard-text (or (gui-get-selection 'CLIPBOARD 'STRING)
-                             (condition-case nil
-                                 (current-kill 0 t)
-                               (error "")))))
+         (clipboard-text (condition-case nil
+                             (current-kill 0 t)
+                           (error ""))))
     (unless current-file
       (user-error "Current buffer is not visiting a file"))
 
     ;; Ensure parent directories exist
     (my-create-file-in-parent-directory temp-file nil)
 
-    ;; Write the clipboard contents to the temporary file
-    (with-temp-file temp-file
-      (insert clipboard-text))
+    ;; Write the clipboard contents safely by syncing the buffer and disk
+    (with-current-buffer (find-file-noselect temp-file)
+      (erase-buffer)
+      (insert clipboard-text)
+      (save-buffer))
 
     ;; Compare current file against the newly created temporary file
     (ediff-files current-file temp-file)))
 
 (provide 'mod-temporary-file)
+
 ;;; mod-temporary-file.el ends here

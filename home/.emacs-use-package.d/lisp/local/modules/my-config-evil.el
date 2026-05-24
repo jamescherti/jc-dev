@@ -675,11 +675,14 @@ This enhancement prevents the cursor from moving."
 (define-key evil-visual-state-map (kbd "C-c") 'evil-yank)
 
 (define-key evil-normal-state-map (kbd "<leader>gs") 'global-text-scale-adjust)
-(define-key evil-normal-state-map (kbd "<leader>cf") 'my-temporary-file)
-(define-key evil-normal-state-map (kbd "<leader>ce") 'my-temporary-diff)
 (define-key evil-normal-state-map (kbd "<leader>t")  'my-tab-split)
 (define-key evil-normal-state-map (kbd "<leader>T")  'tab-bar-change-tab-group)
 (define-key evil-normal-state-map (kbd "<leader>em") 'toggle-menu-bar-mode-from-frame)
+
+(with-eval-after-load 'mod-temporary-file
+  (define-key evil-normal-state-map (kbd "<leader>cf") 'my-temporary-file)
+  (define-key evil-normal-state-map (kbd "<leader>cE") 'my-temporary-diff)
+  (define-key evil-normal-state-map (kbd "<leader>ce") 'my-temporary-ediff))
 
 (defun my-go-home ()
   "Go home."
