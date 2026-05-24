@@ -648,7 +648,7 @@ Delegates regex matching to the C level for significantly better performance."
                  (cdr (nreverse dirs))))))
 
 
-;;; Buffer Management
+;;; Save buffers kill Emacs
 
 (defun my-save-buffers-kill-emacs ()
   "Handle quitting Emacs with daemon-aware frame management."
@@ -658,12 +658,14 @@ Delegates regex matching to the C level for significantly better performance."
       (easysession-save-session-and-close-frames)
     (save-buffers-kill-emacs)))
 
+;;; Interesting buffers
+
 (defun my-interesting-buffer-p ()
   "Return t if this buffer is considered a file/directory or otherwise interesting."
   (let ((b-name (buffer-name))
         (f-name (buffer-file-name (buffer-base-buffer))))
     (or (string-prefix-p "*Ollama" b-name)
-        (string-prefix-p "*sdcv:" b-name)
+        ;; (string-prefix-p "*sdcv:" b-name)
         (and (not (string-prefix-p "*" b-name))
              (not (string-prefix-p " " b-name)))
         (and f-name (string-suffix-p "/todo.org" f-name)))))
@@ -685,6 +687,8 @@ Delegates regex matching to the C level for significantly better performance."
     (while (and (not (my-interesting-buffer-p))
                 (not (eq (current-buffer) start-buffer)))
       (next-buffer))))
+
+;; Lastdir
 
 (defun my-update-bash-lastdir (&rest _)
   "Update Bash lastdir."

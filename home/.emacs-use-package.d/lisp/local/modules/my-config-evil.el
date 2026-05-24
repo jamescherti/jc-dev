@@ -682,7 +682,7 @@ This enhancement prevents the cursor from moving."
 (with-eval-after-load 'mod-temporary-file
   (define-key evil-normal-state-map (kbd "<leader>cf") 'tmpedit-temporary-file)
   (define-key evil-normal-state-map (kbd "<leader>cE") 'tmpedit-diff)
-  (define-key evil-normal-state-map (kbd "<leader>ce") 'my-temporary-ediff))
+  (define-key evil-normal-state-map (kbd "<leader>ce") 'tmpedit-ediff-clipboard))
 
 (defun my-go-home ()
   "Go home."

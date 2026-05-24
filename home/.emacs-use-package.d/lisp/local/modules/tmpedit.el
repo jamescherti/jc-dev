@@ -110,8 +110,6 @@ this file must exist."
     (tmpedit--create-file-in-parent-directory file-path2 t)
     (ediff-files file-path1 file-path2)))
 
-;;; tmpedit-diff-clipboard: Compare the current buffer with another file
-
 (defun tmpedit-diff-clipboard (other-file)
   "Compare the current file-visiting buffer with OTHER-FILE using ediff."
   (interactive
@@ -121,7 +119,7 @@ this file must exist."
         (ediff-files current-file other-file)
       (user-error "Current buffer is not visiting a file"))))
 
-(defun my-temporary-ediff ()
+(defun tmpedit-ediff-clipboard ()
   "Compare the current buffer against a temporary file created from the clipboard.
 The temporary file is placed in `tmpedit-dir' using `tmpedit-file-name'."
   (interactive)
