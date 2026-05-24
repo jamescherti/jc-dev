@@ -1,4 +1,4 @@
-;;; mod-temporary-file.el --- mod-temporary-file -*- lexical-binding: t -*-
+;;; tmpedit.el --- mod-temporary-file -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -147,4 +147,4 @@ The temporary file is placed in `my-tmp-files-dir' using `my-tmp-file-name'."
 
 (provide 'mod-temporary-file)
 
-;;; mod-temporary-file.el ends here
+;;; tmpedit.el ends here
