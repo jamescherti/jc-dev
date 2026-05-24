@@ -864,7 +864,7 @@ subsequent GCC invocations."
 
                            le-recentf
                            le-savehist
-                           ;; le-saveplace
+                           le-saveplace
                            le-winner
                            le-elec-pair
 

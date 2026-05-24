@@ -37,6 +37,18 @@
 (defvar mod-cleanup-projects t
   "Enable zombie projects cleanup.")
 
+(defvar mod-cleanup-saveplace t
+  "Enable saveplace cleanup.")
+
+(defvar mod-cleanup-url-cache t
+  "Enable automated purging of stale URL cache files.")
+
+(defvar mod-cleanup-auth-cache t
+  "Enable aggressive clearing of decrypted auth-source memory cache.")
+
+;; (defvar mod-cleanup-projectile t
+;;   "Enable Projectile known projects tracking cleanup.")
+
 (defvar mod-cleanup-recentf t
   "Enable recentf file cleanup.")
 
@@ -176,6 +188,63 @@ Emacs session to prevent unnecessary disk I/O."
       (when (and (featurep 'tramp)
                  (fboundp 'tramp-cleanup-all-connections))
         (tramp-cleanup-all-connections)))
+
+    ;; Remove non-existent files from save-place-alist
+    (when (and mod-cleanup-saveplace
+               (boundp 'save-place-alist)
+               save-place-alist)
+      (setq (and save-place-alist
+                 (fboundp 'save-place-forget-unreadable-files))
+            ;; Iterates through save-place-alist and purges cursor positions for
+            ;; files that have been deleted, renamed, or are unreadable.
+            (save-place-forget-unreadable-files)))
+
+    ;; Prune savehist minibuffer histories using built-in cons cell thresholds
+    ;; (when mod-cleanup-savehist
+    ;;   (when (and (featurep 'savehist)
+    ;;              (boundp 'savehist-minibuffer-history-variables)
+    ;;              savehist-minibuffer-history-variables)
+    ;;     (require 'cl-lib)
+    ;;     (let ((truncated-vars nil))
+    ;;       ;; Format every tracked history symbol into a (VAR . MAX-SIZE) cons cell
+    ;;       (dolist (var savehist-minibuffer-history-variables)
+    ;;         (when (boundp var)
+    ;;           (push (cons var mod-cleanup-savehist-limit) truncated-vars)))
+    ;;
+    ;;       ;; Merge with any existing custom additional variables, ensuring no duplicates
+    ;;       (setq savehist-additional-variables
+    ;;             (cl-union savehist-additional-variables truncated-vars :test #'equal)))))
+
+    ;; Enforce hard limit constraints on historical tracking variables
+    ;; (when mod-cleanup-histories
+    ;;   (setq extended-command-history (seq-take extended-command-history 100)
+    ;;         file-name-history (seq-take file-name-history 100)))
+
+    ;; Remove dead paths from Projectile history
+    ;; (when (and mod-cleanup-projectile
+    ;;            (featurep 'projectile)
+    ;;            (fboundp 'projectile-cleanup-known-projects))
+    ;;   (projectile-cleanup-known-projects))
+
+    ;; URL Cache pruning
+    (when mod-cleanup-url-cache
+      (when (and (featurep 'url-cache)
+                 (fboundp 'url-cache-prune-cache))
+        (with-demoted-errors "Error pruning web cache: %S"
+          (url-cache-prune-cache))))
+
+    ;; Auth-source security flush
+    (when mod-cleanup-auth-cache
+      (when (and (featurep 'auth-source)
+                 (fboundp 'auth-source-forget-all-cached))
+        ;; Clears internal variable caches storing decoded secrets, API keys,
+        ;; and passwords read from ~/.authinfo.gpg.
+        ;;
+        ;; Good for security. Leaving decrypted keys in memory on an idle Emacs
+        ;; instance for hours creates an unnecessary attack surface. Forcing an
+        ;; absolute wipe when away from the keyboard means keys must be safely
+        ;; re-authenticated upon return.
+        (auth-source-forget-all-cached)))
 
     ;; Prune native compilation cache
     (when (and mod-cleanup-enable-native-compile
