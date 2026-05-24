@@ -113,10 +113,10 @@
   "Number of seconds of idle time before running cleanups.")
 
 (defvar mod-cleanup-gc-threshold (* 256 1024 1024)
-  "GC threshold to use during compilation.")
+  "GC threshold to use.")
 
 (defvar mod-cleanup-gc-percentage 0.5
-  "GC percentage to use during compilation.")
+  "GC percentage to use.")
 
 ;;; Internal variables
 
@@ -157,14 +157,17 @@ Emacs session to prevent unnecessary disk I/O."
           (let ((desc (cadr (assq item package-alist))))
             (if (not desc)
                 (when init-file-debug
+                  ;; TODO use a mod-cleanup message function (verbose)
                   (message "Package %s not found in alist (already deleted?)"
                            item))
               (condition-case err
                   (progn
                     (package-delete desc)
+                    ;; TODO use a mod-cleanup message function (verbose)
                     (message "Successfully deleted: %s" item))
                 (error
                  ;; This captures the actual error message from Emacs
+                 ;; TODO use a mod-cleanup message function (verbose)
                  (message "Failed to delete %s: %s: %s"
                           item
                           (error-message-string err)
@@ -174,7 +177,8 @@ Emacs session to prevent unnecessary disk I/O."
     (when mod-cleanup-recentf
       (when (and (featurep 'recentf)
                  (fboundp 'recentf-cleanup))
-        (recentf-cleanup)))
+        (with-demoted-errors "Error pruning recentf list: %S"
+          (recentf-cleanup))))
 
     ;; Tramp cleanup
     ;; Clean up Tramp connections to avoid hanging Emacs on exit.
@@ -192,14 +196,16 @@ Emacs session to prevent unnecessary disk I/O."
     (when (and mod-cleanup-tramp on-exit)
       (when (and (featurep 'tramp)
                  (fboundp 'tramp-cleanup-all-connections))
-        (tramp-cleanup-all-connections)))
+        (with-demoted-errors "Error cleaning up Tramp connections: %S"
+          (tramp-cleanup-all-connections))))
 
     ;; Remove non-existent files from save-place-alist
     (when (and mod-cleanup-saveplace
                (fboundp 'save-place-forget-unreadable-files))
       ;; Iterates through save-place-alist and purges cursor positions for
       ;; files that have been deleted, renamed, or are unreadable.
-      (save-place-forget-unreadable-files))
+      (with-demoted-errors "Error pruning save-place data: %S"
+        (save-place-forget-unreadable-files)))
 
     ;; Prune savehist minibuffer histories using built-in cons cell thresholds
     ;; (when mod-cleanup-savehist
@@ -256,8 +262,9 @@ Emacs session to prevent unnecessary disk I/O."
                  (native-comp-available-p)
                  (fboundp 'native-compile-prune-cache))
         (setq mod-cleanup--native-compile-prune-done t)
+        ;; TODO use a mod-cleanup message function (verbose)
         (message "[native-comp] Native compilation cache pruned")
-        (with-demoted-errors "Error pruning native cache: %S"
+        (with-demoted-errors "Error pruning native compilation cache: %S"
           (native-compile-prune-cache)))))
 
   (unless on-exit
@@ -289,8 +296,8 @@ Emacs session to prevent unnecessary disk I/O."
     (when mod-cleanup--idle-timer
       (cancel-timer mod-cleanup--idle-timer)
       (setq mod-cleanup--idle-timer nil))
-
-    (remove-hook 'kill-emacs-hook #'mod-cleanup--on-exit)))
+    (remove-hook 'kill-emacs-hook #'mod-cleanup--on-exit)
+    (setq mod-cleanup--native-compile-prune-done nil)))
 
 (add-hook 'lightemacs-after-init-hook #'mod-cleanup-mode)
 
