@@ -2717,11 +2717,10 @@ the window is resized). This function fixes these issues."
 ;; Conditionally trigger `winner-undo` only if the layout remains unmutated
 (defun pkg-ediff-winner-undo ()
   "Ediff winner undo."
-  (unless pkg-diff--inhibit-winner-undo
-    (with-eval-after-load 'winner
-      (when (and (bound-and-true-p winner-mode)
-                 (fboundp 'winner-undo))
-        (winner-undo)))))
+  (when (and (not pkg-diff--inhibit-winner-undo)
+             (bound-and-true-p winner-undo)
+             (fboundp 'winner-undo))
+    (winner-undo)))
 
 (add-hook 'ediff-quit-hook #'pkg-ediff-winner-undo)
 
@@ -3474,6 +3473,9 @@ ARGS - the arguments passed to the original function"
                  )
                 "  |  "
                 mode-line-position
+                ;; Inclusion of major and minor modes
+                "  |  "
+                mode-line-modes
                 "  |  "
                 (:eval (my-gc-cons-threshold-mode-line))
                 ;; mode-line-modes
@@ -5831,7 +5833,7 @@ Standard save hooks handle persistence when the buffer is modified."
 
 ;;; outline persist fold
 
-;;; fold things when opening them
+;;; Fold things when opening them
 
 ;; TODO kirigami close fold except this one
 (defun my-kirigami-auto-open ()
@@ -5854,8 +5856,8 @@ Standard save hooks handle persistence when the buffer is modified."
                      (not (fboundp 'org-src-edit-buffer-p)))
             (kirigami-close-folds)))))))
 
-;; (add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 99)
-;; (add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 99)
+(add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 99)
+(add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 99)
 
 ;;; ghostel
 

@@ -788,7 +788,7 @@ subsequent GCC invocations."
 
 ;; Enable native-compilation and byte-compilation
 
-(setq lightemacs-modules '(le-compile-angel  ;;moved it down
+(setq lightemacs-modules '(le-compile-angel
                            le-flymake
                            le-pathaction
                            le-theme
@@ -805,10 +805,8 @@ subsequent GCC invocations."
                            le-undo-fu
                            le-undo-fu-session
                            le-vim-tab-bar
-                           ;; le-evil-commentary  ; I am using my own
+                           ;; le-evil-commentary  ; I am using my own module
 
-                           ;; Temporary: Comment out to test interaction
-                           ;; with easysession
                            le-buffer-terminator
                            le-inhibit-mouse
 
@@ -819,8 +817,6 @@ subsequent GCC invocations."
                            le-group-code-folding
 
                            ;; le-diminish
-
-                           ;; Uses too much CPU. TODO active it on AC mode only
 
                            ;; le-magit
 
@@ -836,7 +832,6 @@ subsequent GCC invocations."
 
                            le-apheleia
 
-                           ;; le-consult-dir
                            le-consult
                            le-embark-consult
                            le-embark
@@ -865,7 +860,7 @@ subsequent GCC invocations."
                            le-recentf
                            le-savehist
                            le-saveplace
-                           le-winner
+                           ;; le-winner
                            le-elec-pair
 
                            ;; le-which-key
@@ -907,7 +902,6 @@ subsequent GCC invocations."
                            le-stripspace
 
                            le-vterm
-                           ;; le-eat
                            le-term
 
                            le-persist-text-scale
@@ -917,30 +911,8 @@ subsequent GCC invocations."
                            le-server
 
                            mod-misc
-
-                           ;; My modules
-                           ;;------------------------------
-
-                           ;; My modules
-                           ;; TODO change
-                           ;; (setq lightemacs-display-line-numbers-mode-add-hook-to nil)
-                           ;; le-display-line-numbers  ;; mod-misc provides its own
-
-                           ;; Legacy (DEPRECATED)
-                           ;; mod-defun
-
-                           ;; New
-                           ;; tmp-easysession
-
-                           ;; TODO fix eldoc help more than one line. I only
-                           ;; want 1 line
-                           ;; mod-lsp-mode
-
-                           ;; mod-kirigami-alternative
-
-                           ;; le-treesit-auto
-                           mod-cleanup
-                           ))
+                           mod-temporary-file
+                           mod-cleanup))
 
 ;;; Add my packages to load path
 
@@ -1253,10 +1225,23 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 ;;; pathaction
 
-;; (with-eval-after-load 'pathaction
-;;   (if (fboundp 'pathaction-vterm)
-;;       (setq pathaction-term-function #'pathaction-vterm)
-;;     (error "Undefined: pathaction-vterm")))
+;; (defun pathaction-vterm (command name)
+;;   "Run COMMAND in `vterm' named NAME."
+;;   (if (require 'vterm nil t)
+;;       (when (fboundp 'vterm)
+;;         (let* ((inhibit-redisplay t)
+;;                ;; Override the shell to run the command directly
+;;                (vterm-shell command)
+;;                (term-buffer (vterm name)))
+;;           (ignore vterm-shell)
+;;           (pop-to-buffer term-buffer)
+;;           term-buffer))
+;;     (error "vterm is not available")))
+
+(with-eval-after-load 'pathaction
+  (if (fboundp 'pathaction-vterm)
+      (setq pathaction-term-function #'pathaction-vterm)
+    (error "Undefined: pathaction-vterm")))
 
 ;;; im
 
