@@ -29,6 +29,11 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 
+(defgroup mod-cleanup nil
+  "Customization options for `mod-cleanup-mode'."
+  :group 'mod-cleanup
+  :prefix "mod-cleanup-")
+
 ;;; Cleanup toggles
 
 (defvar mod-cleanup-enable-native-compile t
@@ -191,13 +196,10 @@ Emacs session to prevent unnecessary disk I/O."
 
     ;; Remove non-existent files from save-place-alist
     (when (and mod-cleanup-saveplace
-               (boundp 'save-place-alist)
-               save-place-alist)
-      (setq (and save-place-alist
-                 (fboundp 'save-place-forget-unreadable-files))
-            ;; Iterates through save-place-alist and purges cursor positions for
-            ;; files that have been deleted, renamed, or are unreadable.
-            (save-place-forget-unreadable-files)))
+               (fboundp 'save-place-forget-unreadable-files))
+      ;; Iterates through save-place-alist and purges cursor positions for
+      ;; files that have been deleted, renamed, or are unreadable.
+      (save-place-forget-unreadable-files))
 
     ;; Prune savehist minibuffer histories using built-in cons cell thresholds
     ;; (when mod-cleanup-savehist
@@ -270,7 +272,7 @@ Emacs session to prevent unnecessary disk I/O."
 (define-minor-mode mod-cleanup-mode
   "Global minor mode to manage idle and exit cleanup operations."
   :global t
-  :group 'lazy-loader
+  :group 'mod-cleanup
   (if mod-cleanup-mode
       (progn
         ;; Set the timer and store it in the variable
