@@ -1,4 +1,4 @@
-;;; mod-misc.el --- mod-misc -*- lexical-binding: t -*-
+;;; mod-temporary-file.el --- mod-temporary-file -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -61,9 +61,8 @@ then its buffer will be cleared and saved to achieve the same result.
 
 FILE-PATH should be a string representing the file path of the desired file.
 EMPTY-FILE is a boolean that defaults to nil."
-  (let* ((parent-dir (file-name-directory file-path))
-         (file-name (file-name-nondirectory file-path))
-         (full-path (expand-file-name file-name parent-dir)))
+  (let* ((full-path (expand-file-name file-path))
+         (parent-dir (file-name-directory full-path)))
     (unless (file-exists-p parent-dir)
       ;; Ensure the parent directory exists.
       (make-directory parent-dir t))
@@ -126,28 +125,25 @@ this file must exist."
   "Compare the current buffer against a temporary file created from the clipboard.
 The temporary file is placed in `my-tmp-files-dir' using `my-tmp-file-name'."
   (interactive)
-  (let* ((current-file (buffer-file-name (buffer-base-buffer)))
-         (ext (if current-file
-                  (concat "." (file-name-extension current-file))
-                ""))
-         (temp-file (my-get-temporary-file-path my-tmp-file-name ext))
-         (clipboard-text (condition-case nil
-                             (current-kill 0 t)
-                           (error ""))))
+  (let ((current-file (buffer-file-name (buffer-base-buffer))))
     (unless current-file
       (user-error "Current buffer is not visiting a file"))
+    (let* ((file-ext (file-name-extension current-file))
+           (ext (if file-ext (concat "." file-ext) ""))
+           (temp-file (my-get-temporary-file-path my-tmp-file-name ext))
+           (clipboard-text (or (ignore-errors (current-kill 0 t)) "")))
 
-    ;; Ensure parent directories exist
-    (my-create-file-in-parent-directory temp-file nil)
+      ;; Ensure parent directories exist
+      (my-create-file-in-parent-directory temp-file nil)
 
-    ;; Write the clipboard contents safely by syncing the buffer and disk
-    (with-current-buffer (find-file-noselect temp-file)
-      (erase-buffer)
-      (insert clipboard-text)
-      (save-buffer))
+      ;; Write the clipboard contents safely by syncing the buffer and disk
+      (with-current-buffer (find-file-noselect temp-file)
+        (erase-buffer)
+        (insert clipboard-text)
+        (save-buffer))
 
-    ;; Compare current file against the newly created temporary file
-    (ediff-files current-file temp-file)))
+      ;; Compare current file against the newly created temporary file
+      (ediff-files current-file temp-file))))
 
 (provide 'mod-temporary-file)
 
