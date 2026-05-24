@@ -2,3 +2,4 @@
 /other/
 /batchfetch.yaml
 /batchfetch-local.yaml
+*.gz

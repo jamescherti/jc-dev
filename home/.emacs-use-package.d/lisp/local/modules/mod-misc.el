@@ -4533,7 +4533,7 @@ Opens a split window showing the added and removed features."
 
   (setq buffer-guardian-verbose nil)
   (setq buffer-guardian-save-all-buffers-interval (* 60 30))
-  (setq buffer-guardian-save-all-buffers-idle 30))
+  (setq buffer-guardian-save-all-buffers-idle (* 4 60)))
 
 ;; Simpler alternative to bg
 ;; (progn
