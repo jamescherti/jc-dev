@@ -106,6 +106,9 @@
 (defvar mod-cleanup--idle-timer nil
   "Timer object for periodic project cleanup and other idle tasks.")
 
+(defvar mod-cleanup--native-compile-prune-done nil
+  "Flag to ensure native compile cache is pruned only once per session.")
+
 ;;; Unified cleanup function
 
 (defun mod-cleanup-perform-all (&optional on-exit)
@@ -172,17 +175,19 @@ Emacs session to prevent unnecessary disk I/O."
     (when (and mod-cleanup-tramp on-exit)
       (when (and (featurep 'tramp)
                  (fboundp 'tramp-cleanup-all-connections))
-        (tramp-cleanup-all-connections))))
+        (tramp-cleanup-all-connections)))
 
-  ;; Prune native compilation cache
-  (when mod-cleanup-enable-native-compile
-    (when (and (featurep 'native-compile)
-               (fboundp 'native-comp-available-p)
-               (native-comp-available-p)
-               (fboundp 'native-compile-prune-cache))
-      (message "[native-comp] Native compilation cache pruned")
-      (with-demoted-errors "Error pruning native cache: %S"
-        (native-compile-prune-cache))))
+    ;; Prune native compilation cache
+    (when (and mod-cleanup-enable-native-compile
+               (not mod-cleanup--native-compile-prune-done))
+      (when (and (featurep 'native-compile)
+                 (fboundp 'native-comp-available-p)
+                 (native-comp-available-p)
+                 (fboundp 'native-compile-prune-cache))
+        (setq mod-cleanup--native-compile-prune-done t)
+        (message "[native-comp] Native compilation cache pruned")
+        (with-demoted-errors "Error pruning native cache: %S"
+          (native-compile-prune-cache)))))
 
   (unless on-exit
     (garbage-collect)))
