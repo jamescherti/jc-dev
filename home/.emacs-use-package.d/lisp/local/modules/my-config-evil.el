@@ -680,7 +680,7 @@ This enhancement prevents the cursor from moving."
 (define-key evil-normal-state-map (kbd "<leader>em") 'toggle-menu-bar-mode-from-frame)
 
 (with-eval-after-load 'tmpedit
-  (define-key evil-normal-state-map (kbd "<leader>cf") 'tmpedit-temporary-file)
+  (define-key evil-normal-state-map (kbd "<leader>cf") 'tmpedit-file)
   (define-key evil-normal-state-map (kbd "<leader>cE") 'tmpedit-diff)
   (define-key evil-normal-state-map (kbd "<leader>ce") 'tmpedit-ediff-clipboard))
 

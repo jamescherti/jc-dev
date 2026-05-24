@@ -988,6 +988,8 @@ WIDTH is the tab width."
   (with-no-warnings
     (advice-add 'load-theme :after #'my-clear-yasnippet-field-highlight))
 
+  (setq tmpedit-dir (expand-file-name "tmpedit" "~/.emacs-data"))
+
   ;; Ensure it also applies when yasnippet is first loaded
   (with-no-warnings
     (add-hook 'yas-minor-mode-hook #'my-clear-yasnippet-field-highlight))

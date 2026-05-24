@@ -27,8 +27,8 @@
 ;;-----------------------------------------------------------------------------
 ;; Temporary ediff
 ;;-----------------------------------------------------------------------------
-(defvar tmpedit-dir (expand-file-name "~")
-  "Temporary ediff.")
+(defvar tmpedit-dir (expand-file-name "tmpedit" user-emacs-directory)
+  "Temporary edit.")
 
 (with-eval-after-load 'le-compile-angel
   (with-eval-after-load 'compile-angel
@@ -84,7 +84,7 @@ FILE-NAME is the file name.
 EXT is the extension."
   (expand-file-name (concat file-name ext) tmpedit-dir))
 
-(defun tmpedit-temporary-file (extension)
+(defun tmpedit-file (extension)
   "Create and open a new temporary file with the given EXTENSION.
 If the user inputs nothing for EXTENSION, prompt for it interactively.
 
