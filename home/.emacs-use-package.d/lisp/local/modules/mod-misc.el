@@ -3471,14 +3471,15 @@ and suppresses all interactive confirmation prompts during teardown."
 This function checks for native compilation support and ensures the operation
 only runs once per session to avoid redundant I/O."
   (interactive)
-  (when (and (not my-native-compile--prune-cache-done)
-             (fboundp 'native-comp-available-p)
-             (native-comp-available-p)
-             (fboundp 'native-compile-prune-cache))
-    (setq my-native-compile--prune-cache-done t)
-    (message "[native-comp] Native compilation cache pruned")
-    (with-demoted-errors "Error pruning native cache: %S"
-      (native-compile-prune-cache))))
+  (let ((inhibit-message t))
+    (when (and (not my-native-compile--prune-cache-done)
+               (fboundp 'native-comp-available-p)
+               (native-comp-available-p)
+               (fboundp 'native-compile-prune-cache))
+      (setq my-native-compile--prune-cache-done t)
+      (message "[native-comp] Native compilation cache pruned")
+      (with-demoted-errors "Error pruning native cache: %S"
+        (native-compile-prune-cache)))))
 
 ;; Only register the timer if native compilation is enabled
 (when (and my-native-compile-prune
