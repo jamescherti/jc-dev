@@ -1,0 +1,706 @@
+#!/usr/bin/env python
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Personal finance program."""
+
+import argparse
+import filecmp
+import os
+import re
+import readline
+import shlex
+import shutil
+import sys
+from datetime import date as Date
+from datetime import datetime as DateTime
+from os import path
+from sys import stderr
+
+import yaml
+
+import accounts
+from operations import Operations
+
+BACKUP_DIR = "~/.pf/backup"
+
+
+class MainCommandLine(object):
+    """The command line interface for pf (personal finance)."""
+
+    def __init__(self):
+        """Initialize the command line."""
+        self.loaded = False
+        self.saved = False
+        self.account = None
+        self.shell = False
+        self.oper = Operations()
+        self.year = None
+        self.month = None
+        self.day = None
+        self.aparser = None    # argparse
+
+        self.parse_arguments()    # parse sys.argv
+        self.load_operations()    # load the yaml
+
+        if len(self.args) > 0 and self.args[0] == 'shell':
+            self.cmd_shell()
+        else:
+            self.show_help_if_needed(die=True)
+            sys.exit(self.exec_right_command())
+
+    def parse_arguments(self, args=None):
+        """Parse the arguments from sys.argv."""
+        current_path = path.dirname(path.realpath(sys.argv[0]))
+        main_yaml = path.join(current_path, 'main.yaml')
+
+        dcat = "--account <account> --filename <file>"
+        desc = "\n" \
+               "       %(prog)s command arguments --option1 --option2\n" \
+               "\n" \
+               "       %(prog)s add <amount> [description] " + dcat + "\n" \
+               "       %(prog)s iadd <amount> [description] " + dcat + "\n" \
+               "       %(prog)s del <id>\n" \
+               "       %(prog)s mod <id> amount description\n" \
+               "       %(prog)s imod <id> amount description\n" \
+               "       %(prog)s ls --year <year> " \
+               "--month <month> --day <day>\n\n" \
+               "       %(prog)s monthly\n" \
+               "       %(prog)s yearly\n" \
+               "       %(prog)s addaccount <account> <currency>\n" \
+               "       %(prog)s delaccount <account> <currency>\n" \
+               "       %(prog)s curaccount <account> <currency>\n" \
+               "       %(prog)s renaccount <old-account-name> <new-name>\n" \
+               "       %(prog)s defaccount [account-name]\n" \
+               "       %(prog)s lsaccount\n\n" \
+
+        self.aparser = argparse.ArgumentParser(usage=desc, add_help=False)
+        aparser = self.aparser
+        aparser.add_argument('args', metavar='command + arguments',
+                             help="A command (like add or del) + arguments",
+                             type=str, nargs='*')
+        aparser.add_argument('--help', '-h', action='store_true',
+                             help='Show help')
+        aparser.add_argument('--account', '-a', type=str,
+                             help='Set the account (used by add/mod)')
+
+        aparser.add_argument('--filename', '-f', type=str,
+                             default=main_yaml,
+                             help='Specify the filename where the '
+                                  'operations will be stored '
+                                  '(default = main.yaml). You can use this'
+                                  'functions with del/del/mod commands).'
+                                  '"~" is supported for home.')
+
+        aparser.add_argument('--year', '-y', type=int,
+                             help='The year (for add/mod/del)')
+
+        aparser.add_argument('--month', '-m', type=int,
+                             help='The month (for add/mod/del)')
+
+        aparser.add_argument('--day', '-d', type=int,
+                             help='The day (for add/mod/del)')
+
+        aparser.add_argument('--no-year', '-Y', action="store_true",
+                             help="Ignore the year (--year / -y) or the "
+                             "default value of the year")
+
+        aparser.add_argument('--no-month', '-M', action="store_true",
+                             help="Ignore the month (--month / -y) or the "
+                             "default value of the month")
+
+        aparser.add_argument('--no-day', '-D', action="store_true",
+                             help="Ignore the day (--day / -y) or the "
+                             "default value of the day")
+
+        self.opts = aparser.parse_args(args)
+        self.args = self.opts.args
+
+        # date
+        date = {'year': self.opts.year,
+                'month': self.opts.month,
+                'day': self.opts.day}
+
+        for date_type in list(date.keys()):
+            if date[date_type]:
+                try:
+                    date[date_type] = int(date[date_type])
+                except ValueError:
+                    self.die("--%s needs to be a valid number..." % date_type)
+
+        self.year, self.month, self.day = date['year'], date['month'], \
+            date['day']
+
+        today = Date.today()
+        if self.day is not None and self.month is None:
+            self.month = today.month
+
+        if self.month is not None and self.year is None:
+            # current month + year (by default)
+            self.year = today.year
+
+    def show_help_if_needed(self, die=True):
+        """It reads the argument parser.
+
+        It shows the help if --help is defined.
+        Return True if the help was printed
+
+        """
+        if self.opts.help:
+            self.aparser.print_help()
+            if die:
+                sys.exit(0)
+            return True
+        else:
+            return False
+
+    def cmd_shell(self):
+        """A pf shell, were you can do the operations."""
+        self.shell = True
+
+        # readline history
+        readline.parse_and_bind('tab: complete')
+        history = os.path.expanduser("~/.pf/history")
+        try:
+            readline.read_history_file(history)
+        except OSError:
+            pass
+
+        # shell
+        while True:
+            try:
+                if sys.version[0] == "2":
+                    command = eval("raw_input('pf> ')")
+                else:
+                    command = eval("input('pf> ')")
+
+                command = shlex.split(command)
+            except (KeyboardInterrupt, EOFError):
+                readline.write_history_file(history)
+                print()
+                sys.exit(0)
+
+            self.parse_arguments(command)
+            if self.show_help_if_needed(die=False):
+                continue
+
+            self.exec_right_command()
+
+    def exec_right_command(self):
+        """Read the command from self.args and call the right function.
+
+        Return: the command errno
+        """
+        if len(self.args) == 0:
+            if not self.shell:
+                errno = self.cmd_ls()
+            else:
+                errno = 0
+        elif self.args[0] == "ls":
+            errno = self.cmd_ls()
+        elif self.args[0] == "add":
+            errno = self.cmd_add()
+        elif self.args[0] == "iadd":
+            errno = self.cmd_add(income=True)
+        elif self.args[0] == "del":
+            errno = self.cmd_del()
+        elif self.args[0] == "mod":
+            errno = self.cmd_add(modify=True)
+        elif self.args[0] == "imod":
+            errno = self.cmd_add(modify=True, income=True)
+        elif self.args[0] == "monthly":
+            errno = self.cmd_monthly()
+        elif self.args[0] == "yearly":
+            errno = self.cmd_yearly()
+        elif self.args[0] == "curaccount":
+            errno = self.cmd_addaccount(modify=True)
+        elif self.args[0] == "addaccount":
+            errno = self.cmd_addaccount()
+        elif self.args[0] == "delaccount":
+            errno = self.cmd_delaccount()
+        elif self.args[0] == "renaccount":
+            errno = self.cmd_renaccount()
+        elif self.args[0] == "lsaccount":
+            errno = self.cmd_lsaccount()
+        elif self.args[0] == "defaccount":
+            errno = self.cmd_defaccount()
+        else:
+            errno = 1
+            self.err("The command '%s' is invalid" % self.args[0])
+
+        return errno
+
+    @staticmethod
+    def err(string):
+        """Print an error."""
+        stderr.write("error: %s\n" % string)
+
+    @staticmethod
+    def die(string, exit_code=1):
+        """Print an error and die."""
+        stderr.write("error: %s\n" % string)
+        sys.exit(exit_code)
+
+    def load_operations(self):
+        """Load the operation from the Yaml file."""
+        filename = self.get_filename()
+        if filename == '':
+            self.die("You need to set the filename with --file")
+
+        # disable the year / month / day
+        if self.opts.no_year:
+            self.year = None
+
+        if self.opts.no_month:
+            self.month = None
+
+        if self.opts.no_day:
+            self.day = None
+
+        # load the operations
+        try:
+            self.oper.load(filename)
+        except IOError:
+            if os.path.isfile(filename):
+                # message only when the file exists
+                self.die("The file '%s' cannot be opened." % filename)
+            else:
+                print("Warning: the file %s wasn't opened "
+                      "because it doesn't exist" % filename)
+                self.loaded = True
+        except yaml.scanner.ScannerError:
+            self.die("The file format of '%s' is invalid." % filename)
+        else:
+            self.loaded = True
+
+    def save_operations(self, force=True):
+        """Save the operations."""
+        if self.loaded and (force or not self.saved):
+            filename = self.get_filename()
+            if self.shell:
+                print("Saving...")
+            self.oper.save(filename)
+
+            if len(self.args) >= 1 and \
+               not re.match(r'^ls', self.args[0]):
+                filename = self.backup(filename)
+
+    def __del__(self):
+        """Destructor : save the operations before exit."""
+        self.save_operations()
+
+    def get_filename(self):
+        """Get the filename were we will put the operations."""
+        return os.path.expanduser(self.opts.filename)
+
+    def get_account(self):
+        """Get the account when we will add/modify/del an operation.
+
+        Usually, you don't have to use this function. You can read
+        """
+        if self.account:
+            return self.account
+
+        if self.opts.account is None:
+            default = self.oper.accounts.default
+            if default is not None:
+                return default
+            else:
+                self.die("You need to specify the account with --account / -a")
+
+        if not re.match(r'[a-zA-Z]+', self.opts.account):
+            self.die("The account '%s' is invalid. "
+                     "It needs to a->z characters." % self.opts.account)
+
+        account = str(self.opts.account).strip().lower()
+        if not self.oper.accounts.exists(account):
+            self.die("The account '%s' doesn't exist. "
+                     "Add it with 'addaccount'" % account)
+
+        return account
+
+    def get_date_str(self):
+        """Get the exact date (string format).
+
+        - This function requires --year + --month + --day
+          to return a date
+
+        - Otherwise, it will return the date TODAY (if year
+        and month and day are not specified)
+
+        Returns:
+            Could return None if:
+            self.die("You need to specify --year AND --month AND --day "
+                     "at the same time, or --day alone, or --day and "
+                     "--month together.")
+
+        """
+        if self.year and self.month and self.day:
+            try:
+                date = Date(self.year, self.month, self.day)
+            except (ValueError, OverflowError):
+                self.die("The date %s-%s-%s is invalid." % (self.year,
+                                                            self.month,
+                                                            self.day))
+        else:
+            return None
+
+        return self.oper.normalize_date(date)
+
+    @staticmethod
+    def backup(filename, dest_dir=BACKUP_DIR):
+        """Backup a filename (it will save it to dest_dir/date-filename).
+
+        Exceptions:
+        IOError    The destination file can't be created
+
+        """
+        if not os.access(filename, os.R_OK):
+            raise IOError("The file '%s' cannot be opened "
+                          "(mode: read only)." % filename)
+
+        # create the directory
+        dest_dir = os.path.expanduser(dest_dir)
+
+        # delete older than x days
+        os.system("find '%s' -mtime +7 -delete" % dest_dir)
+
+        try:
+            os.makedirs(dest_dir)
+        except OSError as error:
+            # the directory exists
+            if error.errno == 17:
+                pass
+            else:
+                raise IOError
+
+        fbasename = "%s-%s" % (DateTime.today().strftime('%Y%m%d-%H%M'),
+                               os.path.basename(filename))
+
+        dest_file = os.path.join(dest_dir, fbasename)
+
+        # previous buffer
+        previous_buffer = os.path.join(dest_dir, 'previous')
+        try:
+            fhandler = open(previous_buffer)
+        except IOError:
+            previous_filename = ""
+        else:
+            previous_fbasename = fhandler.readline().rstrip("\n")
+            previous_filename = os.path.join(dest_dir, previous_fbasename)
+            fhandler.close()
+
+        shutil.copyfile(filename, dest_file)
+
+        write_previous = False
+        if previous_filename != "":
+            try:
+                if filecmp.cmp(previous_filename, dest_file):
+                    write_previous = False
+                    os.unlink(dest_file)
+                else:
+                    # they are different
+                    write_previous = True
+            except OSError:
+                write_previous = False
+
+        # write previous buffer
+        if write_previous:
+            try:
+                with open(previous_buffer, "w") as fhandler:
+                    fhandler.write("%s" % previous_fbasename)
+            except IOError:
+                stderr.write("Warning: the program can't "
+                             "write to '%s'...\n" % previous_buffer)
+
+        # delete older than
+        return dest_file
+
+    def cmd_ls(self):
+        """List the operations."""
+        date = {'year': self.year,
+                'month': self.month,
+                'day': self.day}
+
+        today = Date.today()
+
+        if date['month'] is None and not self.opts.no_month \
+           and date['year'] is None:
+            # current year by default
+            date['month'] = today.month
+
+        if date['year'] is None and not self.opts.no_year:
+            # current year by default
+            date['year'] = today.year
+
+        self.oper.show(date['year'], date['month'], date['day'])
+
+        return 0
+
+    def cmd_add(self, modify=False, income=False):
+        """Add an operation.
+
+        Arguments:
+            modify: True if we need to modify
+                The syntax changes: pf mod <ID> amount description
+
+        Example: pf add 10
+
+        """
+        modify_id = None
+        amount_index = 2 if modify else 1
+        desc_index = 3 if modify else 2
+
+        if modify:
+            try:
+                modify_id = int(self.args[1])
+            except (ValueError, OverflowError):
+                self.err("The id '%s' is invalid." % self.args[1])
+                return 1
+
+            if not self.oper.id_exists(modify_id):
+                self.err("The id '%s' doesn't exist" % self.args[1])
+                return 1
+
+            date = self.get_date_str()
+        else:
+            # when you add: no date? Put today's date!
+            if not self.year and not self.month and not self.day:
+                today = Date.today()
+                self.year = today.year
+                self.month = today.month
+                self.day = today.day
+
+            date = self.get_date_str()
+            if date is None:
+                self.err("You need to specify --year AND --month AND --day "
+                         "at the same time, or --day alone, or --day and "
+                         "--month together.")
+                return 1
+
+        # amount
+        try:
+            # negative by default
+            if income:
+                amount = self.args[amount_index]
+            else:
+                amount = '-' + self.args[amount_index]
+        except IndexError:
+            if modify:
+                # ignore the amount when modified
+                amount = None
+            else:
+                self.err("The command '%s' needs an amount" % self.args[0])
+                return 1
+
+        # get the description
+        desc = None
+        for string in self.args[desc_index:]:
+            space = "" if desc is None else " "
+            desc = "%s%s%s" % (desc if desc is not None else "",
+                               space, string)
+
+        action = "added"
+        if modify:
+            action = "modified"
+
+        account = self.get_account()
+        print("The operation was %s: %s  %s  %s (account: %s)" % (action,
+                                                                  date,
+                                                                  amount,
+                                                                  desc,
+                                                                  account))
+        print()
+
+        # show the operation before
+        if modify_id:
+            print("The operation before:")
+            self.oper.show(begin=modify_id, end=modify_id, show_total=False)
+
+        # add!
+        try:
+            index = self.oper.add(date, amount, desc,
+                                  account,
+                                  organize=True,
+                                  modify_id=modify_id)
+        except ValueError:
+            self.err("The values (date or amount) are incorrect.")
+            return 1
+
+        if modify_id:
+            print()
+            print("The operation after:")
+            self.oper.show(begin=modify_id, end=modify_id, show_total=False)
+        else:
+            self.opts.day = None
+
+            begin = index - 5
+            if begin < 0:
+                begin = 0
+
+        return 0
+
+    def cmd_del(self):
+        """Delete an operation.
+
+        Example: pf del 11
+                 pf del 0-100
+        """
+        try:
+            opid = int(self.args[1])
+        except IndexError:
+            self.err("You need to specify the operation ID (a number).")
+            return 1
+        except ValueError:
+            self.err("The operation ID needs to be a number.")
+            return 1
+
+        if self.oper.id_exists(opid):
+            print("The operation '%i' was deleted successfully:" % opid)
+            self.oper.show(begin=opid, end=opid, show_total=False)
+            self.oper.remove(opid)
+            print()
+        else:
+            self.err("The operation '%i' doesn't exist." % opid)
+            return 1
+
+        return 0
+
+    def cmd_yearly(self):
+        """Show the yearly results."""
+        self.oper.show_yearly_results()
+        return 0
+
+    def cmd_monthly(self):
+        """Show the monthly results."""
+        self.oper.show_monthly_results()
+        return 0
+
+    def cmd_addaccount(self, modify=False):
+        """Add an account.
+
+        Example: addaccount account currency
+        """
+        try:
+            account, currency = None, None
+            account = self.args[1]
+            currency = self.args[2]
+        except IndexError:
+            if not account:
+                self.err("You need to specify the account name.")
+                return 1
+            if not currency:
+                self.err("You need to specify the currency.")
+                return 1
+
+        if modify:
+            self.oper.accounts.modify(account, currency)
+            action = "modified"
+        else:
+            self.oper.accounts.add(account, currency)
+            action = "added"
+
+        print("The account '%s' was %s successfully!" % (account, action))
+        print()
+        self.cmd_lsaccount()
+
+        return 0
+
+    def cmd_renaccount(self):
+        """Rename an account.
+
+        Example: renaccount old-account-name new-name
+        """
+        try:
+            account, new_account = None, None
+            account = self.args[1]
+            new_account = self.args[2]
+        except IndexError:
+            if not account:
+                self.err("You need to specify the account name.")
+                return 1
+            if not new_account:
+                self.err("You need to specify the new name of the account.")
+                return 1
+
+        try:
+            self.oper.rename_account(account, new_account)
+        except KeyError:
+            self.err("The account '%s' doesn't exist" % account)
+            return 1
+
+        print("The account '%s' was renamed to '%s' successfully!" %
+              (account, new_account))
+        print()
+        self.cmd_lsaccount()
+        return 0
+
+    def cmd_delaccount(self):
+        """Delete an account."""
+        try:
+            account = self.args[1]
+        except IndexError:
+            if not account:
+                self.err("You need to specify the account name.")
+                return 1
+
+        try:
+            self.oper.remove_account(account)
+        except KeyError:
+            self.err("The account '%s' doesn't exist." % account)
+            return 1
+        except accounts.AccountUsed:
+            self.err("The account is used by some operations. Move "
+                     "the operations to another account before")
+            return 1
+
+        print("The account '%s' was removed." % account)
+        print()
+        self.cmd_lsaccount()
+        return 0
+
+    def cmd_lsaccount(self):
+        """List the accounts."""
+        for account in self.oper.accounts.get():
+            currency = self.oper.accounts.accounts[account]
+            print("%s: %s" % (account, currency))
+
+        return 0
+
+    def cmd_defaccount(self):
+        """Set the default account."""
+        try:
+            self.args[1]
+        except IndexError:
+            print(self.oper.accounts.default)
+            return
+
+        try:
+            self.oper.accounts.default = self.args[1]
+        except IndexError:
+            self.err("The account '%s' doesn't exist" % self.args[1])
+
+        print("The default account is now: '%s'" % self.args[1])
+        return 0
+
+
+if __name__ == '__main__':
+    MainCommandLine()
+
+# vim:ai:et:sw=4:ts=4:sts=4:tw=78:fenc=utf-8

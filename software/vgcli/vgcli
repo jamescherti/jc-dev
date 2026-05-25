@@ -1,0 +1,592 @@
+#!/usr/bin/env python
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+"""Virt CLI to manage a group of virtual machines."""
+
+
+import argparse
+import gc
+import inspect
+import logging
+import os
+import platform
+import signal
+import sys
+import timeit
+import traceback
+from pathlib import Path
+from subprocess import check_call
+
+import colorama
+import libvirt
+import setproctitle
+from colorama import Fore
+from cprompt import cinput, confirm
+
+import virtgroup
+from virt import VirtEngine
+from virtgroup import VirtGroup
+
+INIT_SNAPSHOT = 'root'    # The initial snapshot (OS + base bootstrap)
+DEFAULT_PROMPT_HISTORY = os.path.expanduser('~/.vgcli_history')
+DEFAULT_SELECTOR_HISTORY = os.path.expanduser('~/.vgcli_selector_history')
+SHOW_CMD_DURATION_AFTER_SECONDS = 3
+
+
+# pylint: disable=useless-object-inheritance
+class VirtGroupCLi(object):
+    """The command line interface for VirtGroup."""
+
+    def __init__(self, hosts_prefix=None, hosts_limit=-1):
+        """Init the CLI.
+
+        Params:
+            :hosts_prefix: the hosts prefix (to select the hosts).
+            :hosts_limit: How many hosts (-1 for all or >=0 number for a limit)
+
+        """
+
+        # init_virt_group
+        self.virt_group = None
+        self._init_virt_group(prefix=hosts_prefix, limit=hosts_limit)
+
+    def _init_virt_group(self, prefix, limit):
+        """Instantiate the selector through the CLI.
+
+        :prefix: the hosts prefix.
+        :limit: hosts limit.
+
+        """
+        if self.virt_group:
+            del self.virt_group
+            self.virt_group = None
+
+        infinite_loop = True
+        if prefix is not None or limit is not None:
+            infinite_loop = False
+
+        history_path = os.path.expanduser(DEFAULT_SELECTOR_HISTORY)
+        while True:
+            complete_with = []
+
+            # Auto detect the prefixes
+            virt_engine = VirtEngine()
+            selector = virtgroup.VirtSelector(pattern='.*',
+                                              virt_engine=VirtEngine())
+            tmp_vgroup = VirtGroup(selector=selector)
+            complete_with = list(tmp_vgroup.selector.prefixes(tmp_vgroup))
+
+            if not prefix:
+                prefix = cinput('Virtual machines regex: ',
+                                default='',
+                                verify_value=False,
+                                complete_with=complete_with,
+                                history_path=history_path)
+
+            if prefix == '':
+                if infinite_loop:
+                    continue
+                else:
+                    sys.stderr.write("You need to enter a non empty prefix.\n")
+                    sys.exit(1)
+
+            self.prefix = prefix
+
+            kwargs = {}
+            # kwargs['pattern'] = '^' + re.escape(prefix) + r'\d+'
+            kwargs['pattern'] = prefix
+            kwargs['virt_engine'] = virt_engine
+            kwargs['start_from'] = 0
+
+            kwargs['limit'] = None    # All
+
+            selector = virtgroup.VirtSelector(**kwargs)
+            try:
+                self.virt_group = VirtGroup(selector=selector)
+            except virtgroup.VirtSelectorNoVirtualMachineFound:
+                sys.stderr.write("No virtual machine is matching "
+                                 "the prefix '{}'.\n".format(prefix))
+                if infinite_loop:
+                    prefix = None
+                    continue
+                else:
+                    sys.exit(1)
+            else:
+                break
+
+            if not infinite_loop:
+                break
+
+    # pylint: disable=too-many-statements
+    def prompt(self, action=None):  # noqa
+        """Prompt that accept commands like start, stop..."""
+        # get the name of all methods
+        actions = {}
+        lst_methods = inspect.getmembers(self, predicate=inspect.ismethod)
+        for method_name, method_ref in lst_methods:
+            if method_name.startswith('cmd_'):
+                actions[method_name[len('cmd_'):]] = method_ref
+
+        # selector = virt_group.selector
+        print(self.virt_group)
+
+        infinite_loop = True
+        if action is not None:
+            infinite_loop = False
+
+        while True:
+            if infinite_loop:
+                # reset the action because we are in a loop
+                action = None
+
+            success = True
+
+            prompt = self.prefix + '@' + \
+                str(self.virt_group.selector.virt_engine)
+            prompt += '> '
+
+            if action is None:
+                action = cinput(prompt,
+                                complete_with=list(actions.keys()),
+                                history_path=DEFAULT_PROMPT_HISTORY,
+                                allow_empty_value=True)
+            else:
+                if action not in actions.keys():
+                    sys.stderr.write("The action '{}' does not exist. "
+                                     "The possible actions are: "
+                                     .format(action))
+
+                    first = True
+                    for item in actions:
+                        if not first:
+                            sys.stderr.write(", ")
+                        else:
+                            first = False
+                        sys.stderr.write("{}".format(item))
+
+                    sys.stderr.write(".\n")
+                    sys.exit(1)
+
+            time_start = timeit.default_timer()
+
+            try:
+                if not action:
+                    success = actions['state']()
+                else:
+                    success = actions[action]()
+            except libvirt.libvirtError as err:
+                # When it is not able to connect to libvirt:
+                #    Broken pipe: libvirt.VIR_ERR_SYSTEM_ERROR
+                #                 Broken pipe (the first error)
+                #    Internal error: libvirt.VIR_ERR_INTERNAL_ERROR
+                #                    client socket is closed (the
+                #                    second error)
+                print(traceback.format_exc())
+                print()
+                print('Info: you will be reconnected to libvirt.')
+                print()
+                if err.get_error_code() == libvirt.VIR_ERR_SYSTEM_ERROR or \
+                        err.get_error_code() == libvirt.VIR_ERR_INTERNAL_ERROR:
+                    self.virt_group.reconnect()
+            except Exception as err:
+                print(traceback.format_exc())
+                success = False
+            else:
+                time_total = int(timeit.default_timer() - time_start)
+                if time_total > 60:
+                    minutes = int(time_total / 60)
+                    seconds = int(time_total % 60)
+                    time_total_str = '{} minutes'.format(minutes)
+                    time_total_str += ', {} seconds'.format(seconds)
+                else:
+                    time_total_str = str(time_total) + ' seconds'
+
+                if success is not None and \
+                        time_total > SHOW_CMD_DURATION_AFTER_SECONDS:
+                    print(Fore.BLUE +
+                          ("(command executed in {})".format(time_total_str)))
+
+            if success is True:
+                print(Fore.GREEN + ('SUCCESS!'))
+            elif success is False:
+                print(Fore.RED + ('FAILURE!'))
+            elif success is None:
+                # None means nothing is going to be done
+                pass
+
+            # quit with a success
+            if not infinite_loop:
+                sys.exit(0 if success else 1)
+
+    # pylint: disable=too-many-return-statements
+    def cmd_spawn(self):
+        """Add new virtual machines."""
+        selector = self.virt_group.selector
+        if selector.limit is not None:
+            # This exception is to avoid spawning VMs while we limit the real
+            # number of machines with the same prefix
+            sys.stderr.write("ERROR: you cannot spawn new VMs "
+                             "because you specified a limit of '{}'.\n"
+                             .format(selector.limit))
+            return False
+
+        # Get the list of snapshots, if INIT_SNAPSHOT exists in one of them
+        init_snap_exists = INIT_SNAPSHOT in self.virt_group.snapshot_names()
+        if not init_snap_exists:
+            sys.stderr.write("The base snapshot '{}' does not exist.\n"
+                             .format(INIT_SNAPSHOT))
+            return False
+
+        # Get the amount
+        amount = cinput('Amount: ', default='1')
+        if amount.strip() == '':
+            return None
+        try:
+            amount = int(amount)
+            if amount <= 0:
+                return None
+        except ValueError:
+            sys.stderr.write("ERROR: the amount '{}' "
+                             "is invalid.\n"
+                             .format(amount))
+            return False
+
+        # generate the new name
+        selector = self.virt_group.selector
+        dest_vms = selector.new_domain_names(self.virt_group,
+                                             amount=amount)
+
+        # confirm the add_vm action
+        print('The new VMs names:', ', '.join(sorted(dest_vms)))
+        print()
+        print("WARNING: adding VMs will revert ALL virtual "
+              "machines to the snapshot '{}'".format(INIT_SNAPSHOT))
+        if not confirm('Do you want to add the VMs?'):
+            return None
+
+        # keep a list of all virt
+        list_virt = list(self.virt_group)
+        if not list_virt:
+            sys.stderr.write("No VM was found.\n")
+            return False
+
+        # stop them so they will not be started anymore
+        self.virt_group.stop()
+
+        # Load the state
+        self.virt_group.snapshot_load(INIT_SNAPSHOT)
+
+        # KILL all of them
+        self.virt_group.stop()
+
+        # clone the new virtual machines
+        source_vm = list_virt[0].name
+        for dest_vm in dest_vms:
+            cmd = ['virt-clone', '--auto-clone', '-o', source_vm,
+                   '-n', dest_vm]
+            print('RUN> ' + ' '.join(cmd))
+            check_call(cmd)
+
+        # after the bootstrap, we save the snapshot of the new VMs!
+        for dest_vm in dest_vms:
+            self.virt_group[dest_vm].snapshots[INIT_SNAPSHOT].save()
+
+        # start all virtual machines
+        self.virt_group.start()
+
+        return True
+
+    def _show_snapshot_status(self):
+        """Show the snapshot status and return the current snapshot.
+
+        If no snapshot is selected then None is returned.
+
+        """
+        # ALL snapshots
+        snapshot_names = self.virt_group.snapshot_names()
+        print('All snapshots:', Fore.BLUE + (', '.join(snapshot_names)))
+
+        # Current snapshot
+        try:
+            current_snapshot = self.virt_group.snapshot_current()
+            print('(current snapshot: {})'
+                  .format(Fore.YELLOW + (current_snapshot)))
+        except (virtgroup.VirtGroupInconsistentState,
+                virtgroup.VirtGroupNoCurrentSnapshot):
+            current_snapshot = ''
+
+        print()
+
+        return current_snapshot
+
+    def cmd_revert(self):
+        """Load a snapshot."""
+        default_snapshot = self._show_snapshot_status()
+        if not default_snapshot:
+            default_snapshot = ''
+
+        error_load = False
+        snapshot_names = self.virt_group.snapshot_names()
+
+        snapshot_name = cinput(question='Revert to snapshot: ',
+                               allow_empty_value=True,
+                               complete_with=list(snapshot_names),
+                               default=default_snapshot)
+        snapshot_name = snapshot_name.strip()
+        if snapshot_name == '':
+            return None
+
+        success = True
+        if snapshot_name:
+            try:
+                self.virt_group.snapshot_load(snapshot_name)
+            except virtgroup.VirtGroupInconsistentState as err:
+                error_load = True
+                logging.error("")
+                logging.error("[ERROR] %s",
+                              err)
+                success = False
+
+        if error_load:
+            sys.stderr.write("WARNING: some snapshots "
+                             "weren't loaded successfully.\n")
+        return success
+
+    def cmd_stop(self):
+        """Stop the selected virtual machines."""
+        self.virt_group.stop()
+
+    def cmd_save(self):
+        """Save the snapshot."""
+        current_snapshot = self._show_snapshot_status()
+        if not current_snapshot or current_snapshot == INIT_SNAPSHOT:
+            current_snapshot = ''
+
+        snapshot_names = self.virt_group.snapshot_names()
+        if not snapshot_names and not current_snapshot:
+            current_snapshot = INIT_SNAPSHOT
+
+        snapshot_name = cinput(question='Save snapshot to: ',
+                               complete_with=list(snapshot_names),
+                               allow_empty_value=True,
+                               verify_value=False,
+                               default=current_snapshot)
+        snapshot_name = snapshot_name.strip()
+
+        if snapshot_name:
+            if snapshot_name in snapshot_names:
+                if not confirm("Are you sure you want to OVERWRITE "
+                               "the snapshot '{}'.".format(snapshot_name)):
+                    return None
+
+            # save the state
+            state = self.virt_group.state()
+
+            # save the snapshot
+            self.virt_group.snapshot_save(snapshot_name=snapshot_name,
+                                          restore_state=False)
+
+            # restore the snapshot
+            self.virt_group.state(restore_state=state, wait_port=22)
+
+            print()
+            print('List of snapshots:',
+                  ', '.join(sorted(list(self.virt_group.snapshot_names()))))
+            print()
+
+            return True
+
+        return None
+
+    def cmd_pop(self):
+        """Delete the last virtual machine."""
+        print('The maximum you can pop:', len(self.virt_group) - 1)
+
+        amount = cinput('Amount: ', default='1')
+        if amount.strip() == '':
+            return None
+        try:
+            amount = int(amount)
+            if amount <= 0:
+                return None
+        except ValueError:
+            sys.stderr.write("ERROR: the amount '{}' "
+                             "is invalid.\n"
+                             .format(amount))
+            return False
+
+        if amount >= len(self.virt_group):
+            sys.stderr.write("Error: you cannot delete "
+                             "all virtual machines.\n")
+            return False
+
+        selector = self.virt_group.selector
+        domain_names = [virt.name for virt in
+                        selector.sort_virt_by_name(self.virt_group)]
+        if confirm('Are you sure you want to remove ' +
+                   str(domain_names[-1 * amount:])):
+            self.virt_group.pop(amount=amount)
+        else:
+            return None
+
+        return True
+
+    def cmd_start(self):
+        """Start the VMs."""
+        self.virt_group.start(press_enter=True)
+        print(self.virt_group)    # print the state of each VM
+        return True
+
+    def cmd_restart(self):
+        """Reboot the server."""
+        print(self.virt_group)    # print the state of each VM
+        if confirm('Are you sure you want to reboot all servers?'):
+            self.cmd_stop()
+            self.cmd_start()
+
+    def cmd_state(self):
+        """Show the state."""
+        print(str(self.virt_group))
+        return None    # None is done
+
+    # pylint: disable=no-self-use
+    def cmd_exit(self):
+        """Quit the cli."""
+        sys.exit(0)
+
+    # pylint: disable=no-self-use
+    def cmd_reset_term(self):
+        """Reset the terminal (bash command 'reset')."""
+        if os.system('reset') == 0:
+            return None
+
+        return False
+
+    # pylint: disable=no-self-use
+    def cmd_clear_term(self):
+        """Clear the screen (bash command 'clear')."""
+        if os.system('clear') == 0:
+            return None
+
+        return False
+
+    def cmd_kill(self):
+        """kill all virtual machine (not gracefully)."""
+        if confirm('Are you sure you want to kill the VMs'):
+            self.virt_group.stop(graceful=False)
+
+        return True
+
+    def cmd_snapshot_remove(self):
+        """Remove a snapshot."""
+        snapshot_names = self.virt_group.snapshot_names()
+        snapshot_name = cinput('Snapshot name: ',
+                               complete_with=list(snapshot_names),
+                               allow_empty_value=True)
+        if snapshot_name:
+            snapshot_name = snapshot_name.strip()
+
+            if snapshot_name:
+                if confirm("Are you sure you want to REMOVE "
+                           "the snapshot '{}'.".format(snapshot_name)):
+                    self.virt_group.snapshot_remove(snapshot_name)
+
+            return True
+
+        print()
+        print('List of snapshots:',
+              ', '.join(sorted(list(self.virt_group.snapshot_names()))))
+        print()
+
+        return None
+
+
+def parse_args():
+    """Parse the command line arguments."""
+    desc = "vgcli"
+    usage = "%(prog)s [--option] <hosts_prefix> <action> [action_args...]"
+    parser = argparse.ArgumentParser(description=desc,
+                                     usage=usage)
+    parser.add_argument('args', metavar='N', type=str, nargs='*',
+                        help="Hosts prefix, action and action args.")
+    args = parser.parse_args()
+
+    hosts_prefix = None
+    action = None
+
+    action_args = args.args
+    if len(action_args) >= 1:
+        hosts_prefix = action_args[0]
+        action_args = action_args[1:]
+
+    if len(action_args) >= 1:
+        action = action_args[0]
+        action_args = action_args[1:]
+
+    return hosts_prefix, action, action_args
+
+
+def init():
+    """Init the program."""
+    assert platform.system() == 'Linux'
+    assert sys.version_info >= (3, 2), "The Python version need to be >= 3.2"
+
+    # cd to the current dir
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    log_path = str(Path.home().joinpath('.vgcli.log'))
+
+    # logging to a file and stdout
+    log_format = '%(asctime)s %(message)s'
+    logging.basicConfig(level=logging.INFO,
+                        format=log_format,
+                        filename=log_path,
+                        filemode='a')
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter(log_format))
+    logging.getLogger('').addHandler(console_handler)
+
+    logging.info('[LOG FILE] ' + log_path)
+
+    # proc title
+    setproctitle.setproctitle("vgcli")
+
+    # pylint: disable=unused-argument
+    def garbage_collector(signum, frame):
+        """Garbage collection."""
+        gc.collect()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, garbage_collector)
+    signal.signal(signal.SIGTERM, garbage_collector)
+
+
+def main():
+    """The program starts here."""
+    init()
+
+    hosts_prefix, action, _ = parse_args()
+
+    cli = VirtGroupCLi(hosts_prefix=hosts_prefix)
+    cli.prompt(action=action)
+
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

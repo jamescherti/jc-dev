@@ -1,0 +1,5 @@
+- PF-OP-FORMAT
+- accounts:
+    main: $
+  accounts_default: main
+  operations: []
