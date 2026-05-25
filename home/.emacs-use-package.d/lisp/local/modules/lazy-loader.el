@@ -56,7 +56,7 @@ called to initialize the buffer."
                        (function :tag "Initializer function")))
   :group 'lazy-loader)
 
-(defcustom lazy-loader-idle-delay 5
+(defcustom lazy-loader-idle-delay 7
   "Number of seconds of idle time before loading modules and files."
   :type 'number
   :group 'lazy-loader)
@@ -136,8 +136,7 @@ focus state changes."
 (defun lazy-loader--start-idle-timer ()
   "Start the idle timer for lazy loading."
   (setq lazy-loader--idle-timer
-        (run-with-idle-timer lazy-loader-idle-delay t
-                             #'lazy-loader--load)))
+        (run-with-idle-timer lazy-loader-idle-delay nil #'lazy-loader--load)))
 
 (defun lazy-loader--stop-idle-timer ()
   "Stop the idle timer for lazy loading."
