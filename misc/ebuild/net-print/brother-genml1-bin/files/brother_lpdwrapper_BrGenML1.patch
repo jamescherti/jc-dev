@@ -33,7 +33,7 @@
 
  for  (my $i = 0 ; $i < @ARGV ; $i ++){
      logprint( 0 , "ARG$i      = $ARGV[$i]\n");
-@@ -733,7 +734,7 @@
+@@ -733,5 +734,5 @@
      my $lpddir = $basedir;
      my %lpr_options = %$lpr_options_ref;
 

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Icon=APP_NAME
+Exec=PATH_TO_APP
+Terminal=false
+Type=Application
+Categories=Game;Emulator;
+Name=APP_NAME
+GenericName=GENERIC_NAME
+Comment=COMMENT

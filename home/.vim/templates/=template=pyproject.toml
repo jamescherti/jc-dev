@@ -1,0 +1,46 @@
+[project]
+name = "sampleproject"
+version = "0.1.0"
+description = "Create a pyproject.toml file for an existing project."
+authors = [{name = "AUTHOR_NAME"}]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.6"
+keywords = ["keyword1", "keyword2"]
+classifiers = [
+    # "Development Status :: 3 - Alpha",
+
+    # # Indicate who your project is intended for
+    # "Intended Audience :: Developers",
+    # "Topic :: Software Development :: Build Tools",
+
+    # # Pick your license as you wish
+    # "License :: OSI Approved :: MIT License",
+
+    # # Specify the Python versions you support here. In particular, ensure
+    # # that you indicate you support Python 3. These classifiers are *not*
+    # # checked by "pip install". See instead "python_requires" below.
+    # "Programming Language :: Python :: 3",
+    # "Programming Language :: Python :: 3.6",
+    # "Programming Language :: Python :: 3.7",
+    # "Programming Language :: Python :: 3.8",
+    # "Programming Language :: Python :: 3.9",
+    # "Programming Language :: Python :: 3 :: Only",
+]
+
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.scripts]
+my-script = "my_package.module:function"
+
+# [project.urls]
+# homepage = "https://github.com/GITHUBUSER/sampleproject"
+# documentation = "https://github.com/GITHUBUSER/sampleproject"
+# repository = "https://github.com/GITHUBUSER/sampleproject"
+
+# [project.optional-dependencies]
+# pdf = ["ReportLab>=1.2", "RXP"]
+# rest = ["docutils>=0.3", "pack ==1.1, ==1.3"]

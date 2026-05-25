@@ -1,0 +1,8 @@
+---
+
+actions:
+  - path_match:
+      - "*.ext"
+    tags: install
+    list_commands:
+      - "command"

@@ -1,0 +1,6 @@
+Before (setup test):
+  " Initialize test variables
+  let g:test_var = []
+
+Execute (test1):
+  edit test/test_file.txt

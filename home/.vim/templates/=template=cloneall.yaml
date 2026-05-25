@@ -1,0 +1,6 @@
+---
+
+git_clone_args: ["--depth", "1"]
+
+git:
+  - url: https://github.com/vendor/reponame
