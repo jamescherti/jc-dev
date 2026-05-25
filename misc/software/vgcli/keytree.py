@@ -161,7 +161,3 @@ class KeyTree(UserDict):
             result += str(value)
 
         return result
-
-
-if __name__ == '__main__':
-    main()
