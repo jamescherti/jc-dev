@@ -229,23 +229,23 @@ alias git='_git_wrapper git'
 alias lrgit='_git_wrapper git-finder-exec git'
 
 _gm_wrapper() {
-  so git-find-repos -C . --if-exec "sh -c '! git-is-clean'" -- "$@"
+  so git-rexec -C . --if-exec "sh -c '! git-is-clean'" -- "$@"
 }
 
 _ga_wrapper() {
-  so git-find-repos -C . -- "$@"
+  so git-rexec -C . -- "$@"
 }
 
 _bg_git_find_repos_wrapper() {
   if [[ $# -gt 0 ]]; then
-    so git-find-repos -C . --bg -- git "$@"
+    so git-rexec -C . --bg -- git "$@"
   else
-    so git-find-repos -C .
+    so git-rexec -C .
   fi
 }
 
 _git_find_repos_wrapper() {
-  so git-find-repos -C . -- "$@"
+  so git-rexec -C . -- "$@"
 }
 
 alias gm='_gm_wrapper'
@@ -595,6 +595,6 @@ fi
 
 alias emacs-batch="emacs --batch --init-directory=~/.emacs-use-package.d/ -l ~/.emacs-use-package.d/early-init.el -l ~/.emacs-use-package.d/init.el"
 
-alias gpg-src="git-find-repos -C ~/src --exclude ~/src/forks --exclude ~/src/local -- git check-gpg -i"
+alias gpg-src="git-rexec -C ~/src --exclude ~/src/forks --exclude ~/src/local -- git check-gpg -i"
 alias emacsdiff=emacs-diff
 alias ediff=emacs-diff

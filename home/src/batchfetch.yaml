@@ -90,6 +90,9 @@ tasks:
   - git: git@github.com:jamescherti/git-smartmv
     path: git/git-smartmv
 
+  - git: git@github.com:jamescherti/git-rexec
+    path: git/git-rexec
+
   # ----------------------------------------------------------------------------
   # Ansible
   # ----------------------------------------------------------------------------
