@@ -35,18 +35,23 @@
                                                  "\\`\\(?: \\)?\\*straight.*\\*\\'"
                                                  "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
                                                  "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
-                                                 ;; "\\` \\*Minibuf-[0-9]+\\*\\'"
+                                                 ;; [buffer-terminator] Terminated the buffer: ’*ediff-errors*’ (fundamental-mode)
+                                                 ;; [buffer-terminator] Terminated the buffer: ’*ediff-fine-diff*’ (fundamental-mode)
+                                                 ;; [buffer-terminator] Terminated the buffer: ’ *ediff-tmp*’ (fundamental-mode)
+                                                 "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
+                                                 "\\`\\*vterm:" ; shell-pop
+                                                 "\\` \\*Minibuf-[0-9]+\\*\\'"
                                                  ;; "\\` \\*Compiler Input\\*-"
-                                                 ;; "\\` \\*stderr of "
+                                                 "\\` \\*stderr of " ; *stderr of elisp-flymake-byte-compile*
                                                  ;; "\\`\\*gptel"
                                                  ;; "\\` \\*flymake-.*\\*\\'"
                                                  ;; "\\` \\*Preview:.*\\*\\'"
                                                  ;; "\\` \\*Old buffer "  ; tab-bar
-                                                 ;; "\\` \\*markdown-code-fontification:.*\\*\\'"
                                                  ;; "\\` \\*wgrep "
                                                  ;; "\\` \\*Org "
-                                                 ;; "\\` \\*org-src-"
-                                                 ;; "\\` \\*Echo Area [0-9]+\\*\\'"
+                                                 "\\` \\*markdown-code-fontification:.*\\*\\'"
+                                                 "\\` \\*org-src-" ; org-src-fontification
+                                                 "\\` \\*Echo Area [0-9]+\\*\\'"
                                                  ))
 
 (defvar mod-buffer-terminator-always-keep nil)
@@ -64,7 +69,6 @@
 
                                           ;; Internal ediff buffers
                                           "*Ediff Registry*"
-                                          "*ediff-"
 
                                           "*Flymake log*"
                                           "*Async-native-compile-log*"
@@ -77,14 +81,14 @@
 
                                           ;; " *server*"
                                           ;; " *counsel*"
-                                          ;; " *eldoc*"
+                                          " *eldoc*"
                                           ;; " *code-converting-work*"
-                                          ;; " *code-conversion-work*"
+                                          " *code-conversion-work*"
                                           ;; " *Compiler Input*"
-                                          ;; " *jka-compr-wr-temp*"
-                                          ;; " *elisp-flymake-byte-compile*"
-                                          ;; " *consult-async*"
-                                          ;; " *consult-async-stderr*"
+                                          " *jka-compr-wr-temp*"
+                                          " *elisp-flymake-byte-compile*"
+                                          " *consult-async*"
+                                          " *consult-async-stderr*"
                                           "*Org string width*"
                                           "*Async-native-compile-log*"))
 
