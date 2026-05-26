@@ -93,37 +93,37 @@ if [[ -z "$DEFAULT_TMOUT" && -n "$TMOUT" ]]; then
   export DEFAULT_TMOUT="$TMOUT"
 fi
 
-_jc_manage_tmux_tmout() {
-  # If the TMUX environment variable is missing, we are outside a session.
-  # Restore the default TMOUT and exit the function.
-  if [[ -z "$TMUX" ]]; then
-    if [[ -n "$DEFAULT_TMOUT" ]]; then
-      export TMOUT="$DEFAULT_TMOUT"
-    fi
-
-    return
-  fi
-
-  # We are inside tmux. Query the number of windows in the current session.
-  local window_count
-  window_count=$(tmux display-message -p '#{session_windows}' 2>/dev/null)
-
-  # If there is exactly 1 window, unset TMOUT so the session does not quit.
-  if [[ "$window_count" -eq 1 ]]; then
-    unset TMOUT
-  else
-    # If there are multiple windows, re-enable the default TMOUT.
-    if [[ -n "$DEFAULT_TMOUT" ]]; then
-      export TMOUT="$DEFAULT_TMOUT"
-    fi
-  fi
-}
-
-# Append the function to PROMPT_COMMAND so it runs before each prompt.
-# We check to ensure we do not add it multiple times if ~/.bashrc is re-sourced.
-if [[ "$PROMPT_COMMAND" != *"_jc_manage_tmux_tmout"* ]]; then
-  PROMPT_COMMAND="_jc_manage_tmux_tmout${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
-fi
+# _jc_manage_tmux_tmout() {
+#   # If the TMUX environment variable is missing, we are outside a session.
+#   # Restore the default TMOUT and exit the function.
+#   if [[ -z "$TMUX" ]]; then
+#     if [[ -n "$DEFAULT_TMOUT" ]]; then
+#       export TMOUT="$DEFAULT_TMOUT"
+#     fi
+#
+#     return
+#   fi
+#
+#   # We are inside tmux. Query the number of windows in the current session.
+#   local window_count
+#   window_count=$(tmux display-message -p '#{session_windows}' 2>/dev/null)
+#
+#   # If there is exactly 1 window, unset TMOUT so the session does not quit.
+#   if [[ "$window_count" -eq 1 ]]; then
+#     unset TMOUT
+#   else
+#     # If there are multiple windows, re-enable the default TMOUT.
+#     if [[ -n "$DEFAULT_TMOUT" ]]; then
+#       export TMOUT="$DEFAULT_TMOUT"
+#     fi
+#   fi
+# }
+#
+# # Append the function to PROMPT_COMMAND so it runs before each prompt.
+# # We check to ensure we do not add it multiple times if ~/.bashrc is re-sourced.
+# if [[ "$PROMPT_COMMAND" != *"_jc_manage_tmux_tmout"* ]]; then
+#   PROMPT_COMMAND="_jc_manage_tmux_tmout${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+# fi
 
 # Init bashrc improved {{{
 

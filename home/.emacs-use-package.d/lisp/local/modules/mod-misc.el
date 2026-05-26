@@ -361,7 +361,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-(setq fast-but-imprecise-scrolling t)
+;; Maximizes screen real estate by hiding the mode-line.
+(setq-local redisplay-skip-fontification-on-input nil)
+(setq fast-but-imprecise-scrolling nil)
 ;; (setq scroll-step 1)
 
 ;; TODO minimal-emacs.d
@@ -4320,14 +4322,14 @@ Opens a split window showing the added and removed features."
 ;;; Golden-ratio
 
 ;; package cl is deprecated
-;; (lightemacs-use-package golden-ratio
-;;   :commands (golden-ratio
-;;              golden-ratio-mode
-;;              golden-ratio-toggle-widescreen
-;;              golden-ratio-adjust)
-;;   ;; :hook
-;;   ;; (add-hook 'lightemacs-after-init-hook #'golden-ratio-mode)
-;;   )
+(lightemacs-use-package golden-ratio
+  :commands (golden-ratio
+             golden-ratio-mode
+             golden-ratio-toggle-widescreen
+             golden-ratio-adjust)
+  ;; :hook
+  ;; (add-hook 'lightemacs-after-init-hook #'golden-ratio-mode)
+  )
 
 
 ;;; Focus

@@ -40,6 +40,7 @@
                                                  ;; [buffer-terminator] Terminated the buffer: ’ *ediff-tmp*’ (fundamental-mode)
                                                  "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
                                                  "\\`\\*vterm:" ; shell-pop
+                                                 "\\`\\*buffer-terminator:" ; shell-pop
                                                  "\\` \\*Minibuf-[0-9]+\\*\\'"
                                                  ;; "\\` \\*Compiler Input\\*-"
                                                  "\\` \\*stderr of " ; *stderr of elisp-flymake-byte-compile*
@@ -84,7 +85,7 @@
                                           " *eldoc*"
                                           ;; " *code-converting-work*"
                                           " *code-conversion-work*"
-                                          ;; " *Compiler Input*"
+                                          " *Compiler Input*"
                                           " *jka-compr-wr-temp*"
                                           " *elisp-flymake-byte-compile*"
                                           " *consult-async*"
@@ -174,7 +175,6 @@
 
         ;; Kill
         (return . :kill)))
-(setq buffer-terminator-verbose t)
 
 (defun mod-buffer-terminator-crazy ()
   "Buffer terminator crazy."

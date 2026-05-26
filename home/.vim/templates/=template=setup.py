@@ -2,10 +2,12 @@
 """A setuptools based setup module."""
 
 from pathlib import Path
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 CURRENT_DIRECTORY = Path(__file__).parent.resolve()
-LONG_DESCRIPTION = (CURRENT_DIRECTORY / "README.md").read_text(encoding="utf-8")
+LONG_DESCRIPTION = \
+    (CURRENT_DIRECTORY / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="sampleproject",
