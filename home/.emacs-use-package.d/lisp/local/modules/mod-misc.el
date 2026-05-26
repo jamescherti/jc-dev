@@ -33,6 +33,65 @@
 (require 'seq)
 (require 'my-defun)
 
+
+;;; Modeline
+(add-hook 'lightemacs-after-init-hook #'display-time-mode)
+(setq display-time-mail-function #'ignore)
+(setq display-time-mail-string "")
+(setq display-time-mail-directory nil)
+(setq display-time-use-mail-icon nil)
+(setq display-time-mail-face nil)
+(setq display-time-format " %Y-%m-%d  %I:%M %p")
+
+(defun mode-line-right ()
+  "Render the `mode-line-right-format'."
+  (let* ((mode-line-right-format '(mode-line-front-space
+                                   mode-line-misc-info
+                                   mode-line-end-spaces))
+         (formatted-line (format-mode-line mode-line-right-format)))
+    (list (propertize
+           " "
+           'display
+           `(space :align-to (+ 2
+                                (- right
+                                   (+ ,(string-width formatted-line) right-fringe
+                                      right-margin)))))
+          formatted-line)))
+
+(defun my-gc-cons-threshold-mode-line ()
+  "Return a short string with the current `gc-cons-threshold`."
+  (format " GC:%s" (cond
+                    ((= gc-cons-threshold most-positive-fixnum) "∞")
+                    (t (format "%sM" (/ gc-cons-threshold 1000000))))))
+
+(setq-default mode-line-format
+              '("%e"
+                mode-line-front-space
+                mode-line-modified
+                "  |  "
+                mode-line-buffer-identification
+                "  |  "
+                (vc-mode vc-mode)
+                (:eval
+                 (if (fboundp 'my-project-name)
+                     (let ((project-name (my-project-name)))
+                       (if project-name
+                           (format "  |  Project:%s" project-name)
+                         (format "  |  Dir:%s"
+                                 (abbreviate-file-name (buffer-cwd)))))
+                   "")
+                 )
+                "  |  "
+                mode-line-position
+                ;; Inclusion of major and minor modes
+                ;; "  |  "
+                ;; mode-line-modes
+                "  |  "
+                (:eval (my-gc-cons-threshold-mode-line))
+                ;; mode-line-modes
+                ;; Slow eval
+                (:eval (mode-line-right))))
+
 ;;; Other modules
 
 (unless noninteractive
@@ -3429,64 +3488,6 @@ ARGS - the arguments passed to the original function"
 
 (add-to-list 'auto-mode-alist
              '("/COMMIT_EDITMSG\\'" . diff-mode))
-
-;;; Modeline
-(add-hook 'lightemacs-after-init-hook #'display-time-mode)
-(setq display-time-mail-function #'ignore)
-(setq display-time-mail-string "")
-(setq display-time-mail-directory nil)
-(setq display-time-use-mail-icon nil)
-(setq display-time-mail-face nil)
-(setq display-time-format " %Y-%m-%d  %I:%M %p")
-
-(defun mode-line-right ()
-  "Render the `mode-line-right-format'."
-  (let* ((mode-line-right-format '(mode-line-front-space
-                                   mode-line-misc-info
-                                   mode-line-end-spaces))
-         (formatted-line (format-mode-line mode-line-right-format)))
-    (list (propertize
-           " "
-           'display
-           `(space :align-to (+ 2
-                                (- right
-                                   (+ ,(string-width formatted-line) right-fringe
-                                      right-margin)))))
-          formatted-line)))
-
-(defun my-gc-cons-threshold-mode-line ()
-  "Return a short string with the current `gc-cons-threshold`."
-  (format " GC:%s" (cond
-                    ((= gc-cons-threshold most-positive-fixnum) "∞")
-                    (t (format "%sM" (/ gc-cons-threshold 1000000))))))
-
-(setq-default mode-line-format
-              '("%e"
-                mode-line-front-space
-                mode-line-modified
-                "  |  "
-                mode-line-buffer-identification
-                "  |  "
-                (vc-mode vc-mode)
-                (:eval
-                 (if (fboundp 'my-project-name)
-                     (let ((project-name (my-project-name)))
-                       (if project-name
-                           (format "  |  Project:%s" project-name)
-                         (format "  |  Dir:%s"
-                                 (abbreviate-file-name (buffer-cwd)))))
-                   "")
-                 )
-                "  |  "
-                mode-line-position
-                ;; Inclusion of major and minor modes
-                "  |  "
-                mode-line-modes
-                "  |  "
-                (:eval (my-gc-cons-threshold-mode-line))
-                ;; mode-line-modes
-                ;; Slow eval
-                (:eval (mode-line-right))))
 
 ;;; auto insert if new file
 

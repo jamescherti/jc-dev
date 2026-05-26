@@ -120,14 +120,14 @@ main() {
 
   if [[ "${XDG_SESSION_TYPE:-}" = wayland ]]; then
     # By default, GTK applications try to guess the best backend to use. If you
-    # want to guarantee that Emacs runs natively as a Wayland client and does not
-    # fall back to XWayland, you should explicitly set the backend.
+    # want to guarantee that Emacs runs natively as a Wayland client and does
+    # not fall back to XWayland, you should explicitly set the backend.
     export GDK_BACKEND=wayland
 
     # A common issue with the Emacs PGTK build involves input lag, freezing, or
-    # swallowed keystrokes when typing or scrolling. This is often caused by GTK's
-    # default input method module interfering with Emacs's internal event loop.
-    # Disabling the GTK input module resolves most of these issues.
+    # swallowed keystrokes when typing or scrolling. This is often caused by
+    # GTK's default input method module interfering with Emacs's internal event
+    # loop. Disabling the GTK input module resolves most of these issues.
     #
     # https://github.com/emacs-mirror/emacs/blob/master/etc/PROBLEMS
     #
