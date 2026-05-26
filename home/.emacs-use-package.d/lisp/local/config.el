@@ -408,7 +408,7 @@ subsequent GCC invocations."
 ;;   (setq package-quickstart t))
 
 (setq native-comp-jit-compilation t)
-(setq compile-angel-enable-native-compile nil)
+(setq compile-angel-enable-native-compile t)
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."

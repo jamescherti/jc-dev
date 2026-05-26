@@ -64,12 +64,14 @@
 (with-eval-after-load 'smie
   (defun smie-indent-calculate ()
     "Compute the indentation to use for point."
-    (let ((indent (condition-case nil
-                      (run-hook-wrapped 'smie-indent-functions #'smie--funcall)
-                    (scan-error nil)))) ; Safely catch Tree-sitter scan-errors
-      (if (numberp indent)
-          indent
-        (current-indentation))))
+    (when (fboundp 'smie--funcall)
+      (let ((indent
+             (condition-case nil
+                 (run-hook-wrapped 'smie-indent-functions #'smie--funcall)
+               (scan-error nil)))) ; Safely catch Tree-sitter scan-errors
+        (if (numberp indent)
+            indent
+          (current-indentation)))))
 
   ;; (defun smie-indent-calculate ()
   ;;   "Compute the indentation to use for point."
@@ -2706,11 +2708,11 @@ the window is resized). This function fixes these issues."
 
 ;; Ediff: Ignore all whitespace differences (-w) to reduce visual noise from
 ;; indentation changes or auto-formatters, keeping the focus on logic.
-(setq ediff-diff-options "-w")
+;; (setq ediff-diff-options "-w")
 
 ;; Ediff: Skip over regions where the only differences are whitespace (or other
 ;; ignored options) when navigating with 'n' and 'p'.
-(setq ediff-ignore-similar-regions t)
+;; (setq ediff-ignore-similar-regions t)
 
 (add-hook 'ediff-startup-hook 'ediff-next-difference)
 
