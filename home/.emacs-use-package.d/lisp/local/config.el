@@ -407,7 +407,7 @@ subsequent GCC invocations."
 ;; (when (eq lightemacs-package-manager 'builtin-package)
 ;;   (setq package-quickstart t))
 
-(setq native-comp-jit-compilation t)
+(setq native-comp-jit-compilation nil)
 (setq compile-angel-enable-native-compile t)
 
 (defun lightemacs-user-post-early-init ()
