@@ -35,6 +35,13 @@
                                                  "\\`\\(?: \\)?\\*straight.*\\*\\'"
                                                  "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
                                                  "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
+
+                                                 ;; [buffer-terminator]
+                                                 ;; Terminated the buffer: ’
+                                                 ;; *tar-data *temp*-79904*’
+                                                 ;; (fundamental-mode)
+                                                 "\\` \\*tar-data "
+
                                                  ;; [buffer-terminator] Terminated the buffer: ’*ediff-errors*’ (fundamental-mode)
                                                  ;; [buffer-terminator] Terminated the buffer: ’*ediff-fine-diff*’ (fundamental-mode)
                                                  ;; [buffer-terminator] Terminated the buffer: ’ *ediff-tmp*’ (fundamental-mode)
@@ -44,6 +51,8 @@
                                                  "\\` \\*Minibuf-[0-9]+\\*\\'"
                                                  ;; "\\` \\*Compiler Input\\*-"
                                                  "\\` \\*stderr of " ; *stderr of elisp-flymake-byte-compile*
+                                                 ;; [buffer-terminator] Terminated the buffer: ’ *http melpa.org:443*’ (fundamental-mode)
+                                                 "\\` \\*http "
                                                  ;; "\\`\\*gptel"
                                                  ;; "\\` \\*flymake-.*\\*\\'"
                                                  ;; "\\` \\*Preview:.*\\*\\'"
@@ -80,10 +89,14 @@
                                           "*pylsp*"
                                           "*pylsp::stderr*"
 
-                                          ;; " *server*"
+                                          ;; [buffer-terminator] Terminated the
+                                          ;; buffer: ’ *server*’
+                                          ;; (fundamental-mode)
+                                          " *server*"
+
                                           ;; " *counsel*"
                                           " *eldoc*"
-                                          ;; " *code-converting-work*"
+                                          " *code-converting-work*"
                                           " *code-conversion-work*"
                                           " *Compiler Input*"
                                           " *jka-compr-wr-temp*"

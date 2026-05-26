@@ -238,7 +238,7 @@ _ga_wrapper() {
 
 _bg_git_find_repos_wrapper() {
   if [[ $# -gt 0 ]]; then
-    so git-rexec -C . --bg -- git "$@"
+    so git-rexec -C . --parallel -- git "$@"
   else
     so git-rexec -C .
   fi

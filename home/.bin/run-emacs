@@ -73,7 +73,7 @@ is-emacs-server-running() {
 load_emacs_profile() {
   RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
   OSFAMILY=$(~/.local/bin/osid)
-  if [[ $OSFAMILY = arch ]]; then
+  if [[ $OSFAMILY = DISABLEarch ]]; then
     # Emacs master
     export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
     EMACS_D="$HOME/.emacs-master.d/"
