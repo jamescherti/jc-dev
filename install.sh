@@ -313,6 +313,11 @@ config-pip-packages() {
   fi
 
   if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+    || ! type -P git-rexec &>/dev/null; then
+    MY_PIP_PACKAGES+=(git+https://github.com/jamescherti/git-rexec)
+  fi
+
+  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
     || ! type -P git-commitflow &>/dev/null; then
     MY_PIP_PACKAGES+=(git-commitflow)
   fi
