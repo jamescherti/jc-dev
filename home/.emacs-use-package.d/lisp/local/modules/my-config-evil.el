@@ -2588,10 +2588,10 @@ If COUNT is given, move COUNT - 1 lines downward first."
   ;; :ensure nil
   :vc (:url "https://github.com/jamescherti/bufferwizard.el"
             :rev :newest)
-  ;; :straight (bufferwizard
-  ;;            :type git
-  ;;            :host github
-  ;;            :repo "jamescherti/bufferwizard.el")
+  :straight (bufferwizard
+             :type git
+             :host github
+             :repo "jamescherti/bufferwizard.el")
   :commands (bufferwizard-clone-and-switch-to-indirect-buffer
              bufferwizard-unhighlight
              bufferwizard-toggle-highlight-at-point
