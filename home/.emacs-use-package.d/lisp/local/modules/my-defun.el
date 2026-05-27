@@ -735,6 +735,82 @@ such as `next-buffer' or `previous-buffer'."
             (write-region (point-min) (point-max) file
                           nil 'silent)))))))
 
+;;; check parens
+
+;; TODO buffer wizard
+
+(defun my-check-parens-no-jump (&optional no-error)
+  "Check for unbalanced parentheses in the current buffer.
+This function scans the entire buffer for balanced parentheses. If an imbalance
+is found, it either triggers a user error or simply shows a message, depending
+on the optional argument NO-ERROR.
+If NO-ERROR is non-nil, it only displays a message about the unmatched
+parenthesis or quote, including the line number, column, and file name, but does
+not raise an error.
+If NO-ERROR is nil or omitted, a user error is raised with the same details, and
+the function returns nil.
+If the parentheses are balanced, the function returns t."
+  (interactive)
+  (condition-case data
+      (progn
+        (scan-sexps (point-min) (point-max))
+        ;; Return t
+        t)
+    (scan-error
+     (let* ((char (nth 2 data))
+            (msg
+             (format "Unmatched bracket or quote in line %s, column %s in %s"
+                     (line-number-at-pos char)
+                     (let ((column (save-excursion (goto-char char)
+                                                   (current-column))))
+                       (when (integerp column)
+                         (1+ column)))
+                     (let ((file-name (buffer-file-name (buffer-base-buffer))))
+                       (when file-name
+                         (abbreviate-file-name file-name))))))
+
+       (if no-error
+           (message msg)
+         (user-error msg))
+       ;; Return nil
+       nil))))
+
+(advice-add 'check-parens :override #'my-check-parens-no-jump)
+
+(defun my-before-save-check-parens-no-jump ()
+  "Before save hook: check parens no jump."
+  (my-check-parens-no-jump))
+
+(defun my-setup-my-check-parens-no-jump ()
+  "Check parens no jump."
+  (add-hook 'before-save-hook #'my-check-parens-no-jump))
+(add-hook 'emacs-lisp-mode-hook #'my-setup-my-check-parens-no-jump)
+
+;; Use va( instead
+;; (defun my-elisp-mode-select-sexp ()
+;;   "Select the sexp at point."
+;;   (interactive)
+;;   (let ((bounds (bounds-of-thing-at-point 'sexp)))
+;;     (if bounds
+;;         (progn
+;;           (goto-char (car bounds))
+;;           (push-mark (point) t t)
+;;           (goto-char (cdr bounds))
+;;           (activate-mark))
+;;       (message "No sexp at point."))))
+
+;; apheleia does this
+;; (add-hook 'emacs-lisp-mode-hook
+;;           #'(lambda ()
+;;               (with-eval-after-load 'evil
+;;                 (evil-define-key 'normal 'global (kbd "gV")
+;;                   #'my-elisp-mode-select-sexp)
+;;                 (add-hook 'evil-insert-state-exit-hook
+;;                           #'(lambda() (when (evil-insert-state-p)
+;;                                         (my-check-parens-no-jump t)))
+;;                           nil t))
+;;               (add-hook 'after-save-hook #'my-check-parens-no-jump -99 t)))
+
 ;;; Provide
 (provide 'my-defun)
 

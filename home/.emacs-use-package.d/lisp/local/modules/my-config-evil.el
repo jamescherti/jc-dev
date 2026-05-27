@@ -1753,7 +1753,7 @@ ignored and logged as a warning. All other errors are re-raised."
      (let ((error-message (error-message-string err))
            (inhibit-message t))
        (message "[WARNING] Flymake: %s: %s"
-                buffer-file-name
+                (buffer-file-name (buffer-base-buffer))
                 error-message))
      ;; (if (string-match-p "find a suitable init function"
      ;;                     error-message)

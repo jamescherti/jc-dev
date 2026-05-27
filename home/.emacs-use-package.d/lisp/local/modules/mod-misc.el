@@ -3261,14 +3261,27 @@ and suppresses all interactive confirmation prompts during teardown."
 ;; (add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
 ;; (add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate)
 
+(defvar my-ansible-file-regexp
+  (rx "/"
+      (group (or "tasks"
+                 "handlers"
+                 "vars"
+                 "defaults"
+                 "ansible"
+                 "playbooks"))
+      "/" (+ (not (any "/\\")))
+      "." (regexp "[yY][aA]?[mM][lL]")
+      string-end))
+
+(add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-mode))
+
 ;; When auto-mode-alist is bypassed, use a hook function
 (defun ansible-detect-and-enable-mode ()
   "Enable `ansible-mode' for YAML files in Ansible-related directories."
   ;; This works better than auto-mode-alist
   (when (and (not (derived-mode-p 'ansible-mode))
-             buffer-file-name
-             (string-match my-ansible-file-regexp
-                           buffer-file-name)
+             (buffer-file-name (buffer-base-buffer))
+             (string-match my-ansible-file-regexp buffer-file-name)
              (fboundp 'ansible-mode))
     (ansible-mode)))
 
@@ -3333,26 +3346,27 @@ and suppresses all interactive confirmation prompts during teardown."
                 (rassq-delete-all 'yaml-ts-mode auto-mode-alist))
 
           (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))
-
         ;; Treesitter
         (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode))
+    (lightemacs-use-package flymake-yamllint
+      :after flymake
+      :commands flymake-yamllint-setup
+
+      :preface
+      (defun my-flymake-yamllint-setup ()
+        "Setup Flymake yamllint."
+        (when (my-code-checker-allowed-p)
+          (flymake-yamllint-setup)))
+
+      :init
+      (setq flymake-yamllint-arguments
+            (list "-c" (expand-file-name "~/.yamllint_global.yml")))
+      (add-hook 'yaml-mode-hook #'my-flymake-yamllint-setup)
+      (add-hook 'yaml-ts-mode-hook #'my-flymake-yamllint-setup))
+
     (when (fboundp 'yaml-mode)
       (define-derived-mode ansible-mode yaml-mode "Ansible"
         "Major mode for editing Ansible files.")))
-
-  (defvar my-ansible-file-regexp
-    (rx "/"
-        (group (or "tasks"
-                   "handlers"
-                   "vars"
-                   "defaults"
-                   "ansible"
-                   "playbooks"))
-        "/" (+ (not (any "/\\")))
-        "." (regexp "[yY][aA]?[mM][lL]")
-        string-end))
-
-  (add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-mode))
 
   (add-hook 'yaml-mode-hook #'ansible-detect-and-enable-mode)
   (add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-mode)
@@ -4456,24 +4470,6 @@ Opens a split window showing the added and removed features."
 
   (add-hook 'bash-ts-mode-hook 'my-setup-flymake-bashate)
   (add-hook 'sh-mode-hook 'my-setup-flymake-bashate))
-
-;;; flymake yamllint
-
-(lightemacs-use-package flymake-yamllint
-  :after flymake
-  :commands flymake-yamllint-setup
-
-  :preface
-  (defun my-flymake-yamllint-setup ()
-    "Setup Flymake yamllint."
-    (when (my-code-checker-allowed-p)
-      (flymake-yamllint-setup)))
-
-  :init
-  (setq flymake-yamllint-arguments
-        (list "-c" (expand-file-name "~/.yamllint_global.yml")))
-  (add-hook 'yaml-mode-hook #'my-flymake-yamllint-setup)
-  (add-hook 'yaml-ts-mode-hook #'my-flymake-yamllint-setup))
 
 ;;; Disabled packages
 
