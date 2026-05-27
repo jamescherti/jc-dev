@@ -198,11 +198,12 @@
             (when (fboundp 'my-jinx-setup)
               (my-jinx-setup))
             (jinx-mode 1))
-        ;; TODO remove when?
-        (when (or (derived-mode-p 'yaml-mode)
-                  (derived-mode-p 'yaml-ts-mode)
-                  (derived-mode-p 'ansible-mode))
-          (flyspell-prog-mode))))))
+        (flyspell-prog-mode)
+        ;; (when (or (derived-mode-p 'yaml-mode)
+        ;;           (derived-mode-p 'yaml-ts-mode)
+        ;;           (derived-mode-p 'ansible-mode))
+        ;;   (flyspell-prog-mode))
+        ))))
 
 (add-hook 'prog-mode-hook #'my-setup-spell-checker)
 (add-hook 'text-mode-hook #'my-setup-spell-checker)
@@ -972,7 +973,7 @@ guarantees that the new window is selected, as in Vim."
     (error "Undefined: consult-imenu")))
 
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
-(define-key evil-normal-state-map (kbd "<leader>B") 'switch-to-buffer)
+(define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 ;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
 

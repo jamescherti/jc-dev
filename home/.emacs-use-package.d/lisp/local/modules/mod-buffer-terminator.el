@@ -46,7 +46,7 @@
                                                  ;; [buffer-terminator] Terminated the buffer: ’*ediff-fine-diff*’ (fundamental-mode)
                                                  ;; [buffer-terminator] Terminated the buffer: ’ *ediff-tmp*’ (fundamental-mode)
                                                  "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
-                                                 "\\`\\*vterm:" ; shell-pop
+                                                 ;; "\\`\\*vterm:" ; shell-pop
                                                  "\\`\\*buffer-terminator:" ; shell-pop
                                                  "\\` \\*Minibuf-[0-9]+\\*\\'"
                                                  ;; "\\` \\*Compiler Input\\*-"

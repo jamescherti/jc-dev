@@ -1647,31 +1647,78 @@ WIDTH is the tab width."
 
   ;; Non-nil means suppress messages in ispell-word.
   (setq ispell-quietly t)
-  (setq flyspell-issue-welcome-flag nil)
-  (setq flyspell-issue-message-flag nil)
 
   ;; If non-nil, add correction to abbreviation table.
-  (setq flyspell-abbrev-p nil)
+  ;; (setq flyspell-abbrev-p nil)
   ;; (setq flyspell-use-global-abbrev-table-p t)
 
-  (with-eval-after-load 'flyspell
-    ;; Remove strings from Flyspell
-    (setq flyspell-prog-text-faces (delq 'font-lock-string-face
-                                         flyspell-prog-text-faces))
-
-    ;; Remove doc from Flyspell
-    (setq flyspell-prog-text-faces (delq 'font-lock-doc-face
-                                         flyspell-prog-text-faces)))
+  ;; (with-eval-after-load 'flyspell
+  ;;   ;; Remove strings from Flyspell
+  ;;   (setq flyspell-prog-text-faces (delq 'font-lock-string-face
+  ;;                                        flyspell-prog-text-faces))
+  ;;
+  ;;   ;; Remove doc from Flyspell
+  ;;   (setq flyspell-prog-text-faces (delq 'font-lock-doc-face
+  ;;                                        flyspell-prog-text-faces)))
 
   (setq ispell-program-name "aspell")
   (setq ispell-local-dictionary "en_US")
 
   ;; Configures Aspell's suggestion mode to "ultra", which provides more
-  ;; aggressive and detailed suggestions for misspelled words. The language
-  ;; is set to "en_US" for US English, which can be replaced with your desired
-  ;; language code (e.g., "en_GB" for British English, "de_DE" for German).
-  (setq ispell-extra-args '("--sug-mode=ultra"
+  ;; aggressive and detailed suggestions for misspelled words.
+  ;;
+  ;; The language is set to "en_US" for US English, which can be replaced with
+  ;; your desired language code (e.g., "en_GB" for British English, "de_DE" for
+  ;; German).
+  (setq ispell-extra-args '(;; This flag changes the internal algorithm Aspell
+                            ;; uses to find replacement words when it detects a
+                            ;; typo. Aspell has multiple modes (ultra, fast,
+                            ;; normal, and bad-spellers).
+                            ;;
+                            ;; Benefits:
+                            ;; Zero UI Blocking: It prioritizes execution speed
+                            ;; above all else. When Flyspell requests suggestions,
+                            ;; Aspell returns them instantly. This prevents the
+                            ;; single-threaded Emacs UI from locking up while you
+                            ;; are typing.
+                            ;; Lower CPU Usage: It prevents Emacs from spiking
+                            ;; your CPU when running bulk checks over large
+                            ;; files.
+                            ;;
+                            ;; Drawbacks:
+                            ;; Reduced Accuracy: Because the search algorithm is
+                            ;; shallow, it is less forgiving of heavy typos or
+                            ;; phonetic mistakes. If a word is severely
+                            ;; misspelled, the correct replacement might not
+                            ;; appear in the generated suggestion list.
+                            "--sug-mode=ultra"
+                            ;; This flag instructs Aspell to accept words formed
+                            ;; by combining two or more valid dictionary words
+                            ;; without spaces, treating the resulting string as
+                            ;; valid.
+                            ;;
+                            ;; Benefits: Excellent for Source Code: Code is
+                            ;; heavily populated with compound variable names
+                            ;; and technical terms (e.g., filepath, buffername,
+                            ;; checkbox). This flag stops the spell checker from
+                            ;; highlighting every combined word as an error,
+                            ;; significantly reducing false positives and visual
+                            ;; noise in your programming buffers.
+                            ;;
+                            ;; Drawback: Masks Real Typos in Prose: It makes the
+                            ;; spell checker too lenient for standard text or
+                            ;; markdown files. If you accidentally miss a space
+                            ;; while typing regular sentences (e.g., typing
+                            ;; "andthe" instead of "and the"), Aspell will
+                            ;; consider it a valid run-together string and fail
+                            ;; to flag the typo.
+                            "--run-together"
                             "--lang=en_US"))
+
+  (add-hook 'text-mode-hook
+            #'(lambda()
+                (setq-local ispell-extra-args
+                            (remove "--run-together" ispell-extra-args))))
 
   (setq ispell-dictionary "en_US")
 
