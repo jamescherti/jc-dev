@@ -78,12 +78,13 @@ load_emacs_profile() {
     export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
     EMACS_D="$HOME/.emacs-master.d/"
 
-    # export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+    # EMACS_D="$HOME/.emacs-straight.d/"
+    # EMACS_D="$HOME/.emacs-elpaca.d/"
+
     # EMACS_D="$HOME/.emacs-master.d/"
 
     # Emacs stable
     # export RUN_EMACS_BIN="/usr/bin/emacs"
-    # EMACS_D="$HOME/.emacs-use-package.d/"
   else
     # Emacs 31
     export RUN_EMACS_BIN="/usr/bin/emacs"

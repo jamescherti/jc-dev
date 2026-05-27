@@ -51,16 +51,18 @@
     (global-set-key (kbd "C-c z m") 'kirigami-close-folds)
     (global-set-key (kbd "C-c z r") 'kirigami-open-folds)
     (global-set-key (kbd "C-c z O") 'kirigami-open-fold-rec)
-    (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold)))
+    (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold))
 
-(require 'kirigami-jump)
-(when (fboundp 'kirigami-jump-mode)
-  (kirigami-jump-mode 1))
+  :config
+  (require 'kirigami-jump)
+  (when (fboundp 'kirigami-jump-mode)
+    (kirigami-jump-mode 1))
 
-(with-eval-after-load 'evil
-  (require 'kirigami-evil)
-  (when (fboundp 'kirigami-evil-mode)
-    (kirigami-evil-mode 1)))
+  (with-eval-after-load 'evil
+    (require 'kirigami-evil)
+    (when (fboundp 'kirigami-evil-mode)
+      (kirigami-evil-mode 1))))
+
 
 ;;; Useful function: my-reveal-kirigami-fold-after-undo-advice
 

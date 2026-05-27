@@ -819,7 +819,12 @@ subsequent GCC invocations."
 
                            le-quick-sdcv
 
-                           le-group-code-folding
+                           ;; le-group-code-folding:
+                           le-outline
+                           le-outline-indent
+                           le-hideshow
+                           le-treesit-fold
+                           ;; le-kirigami ; replaced with mod-kirigami
 
                            ;; le-diminish
 
