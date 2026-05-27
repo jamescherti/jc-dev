@@ -33,7 +33,6 @@
 (require 'seq)
 (require 'my-defun)
 
-
 ;;; Modeline
 (add-hook 'lightemacs-after-init-hook #'display-time-mode)
 (setq display-time-mail-function #'ignore)
@@ -422,6 +421,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(setq redisplay-skip-fontification-on-input nil)
+
 ;; Maximizes screen real estate by hiding the mode-line.
 (setq-local redisplay-skip-fontification-on-input nil)
 (setq fast-but-imprecise-scrolling nil)
@@ -551,12 +552,12 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; TODO: package-upgrade
 (defun my-enable-package-review-policy ()
   "Enable package review policy."
-  (setq package-review-policy t
-        package-review-diff-command '("git" "--no-pager" "diff"
-                                      "--no-ext-diff"
-                                      "--no-index"
-                                      "--color=never"
-                                      "--diff-filter=d")))
+  (setq ; package-review-policy t
+   package-review-diff-command '("git" "--no-pager" "diff"
+                                 "--no-ext-diff"
+                                 "--no-index"
+                                 "--color=never"
+                                 "--diff-filter=d")))
 
 (add-hook 'after-init-hook #'my-enable-package-review-policy)
 
@@ -3285,25 +3286,33 @@ and suppresses all interactive confirmation prompts during teardown."
              (fboundp 'ansible-mode))
     (ansible-mode)))
 
-(defun my-config-tree-sitter ()
-  "Config Tree Sitter."
-  (when (my-treesit-language-available-p 'c)
-    (push '(c-mode . c-ts-mode) major-mode-remap-alist))
+(when (my-treesit-language-available-p 'c)
+  (push '(c-mode . c-ts-mode) major-mode-remap-alist))
 
-  (when (my-treesit-language-available-p 'cpp)
-    (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
+(when (my-treesit-language-available-p 'cpp)
+  (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
 
-  (when (my-treesit-language-available-p 'go)
-    (add-to-list 'auto-mode-alist '("\.[gG][oO]\\'" . go-ts-mode)))
+(when (my-treesit-language-available-p 'go)
+  (add-to-list 'auto-mode-alist '("\.[gG][oO]\\'" . go-ts-mode)))
 
-  (when (my-treesit-language-available-p 'java)
-    (push '(java-mode . java-ts-mode) major-mode-remap-alist))
+(when (my-treesit-language-available-p 'java)
+  (push '(java-mode . java-ts-mode) major-mode-remap-alist))
 
-  (when (my-treesit-language-available-p 'json)
-    (push '(js-json-mode . json-ts-mode) major-mode-remap-alist))
+(when (my-treesit-language-available-p 'json)
+  (push '(js-json-mode . json-ts-mode) major-mode-remap-alist))
 
-  (if (my-treesit-language-available-p 'yaml)
+(setq flymake-yamllint-arguments
+      (list "-c" (expand-file-name "~/.yamllint_global.yml")))
+(setq yaml-ts-mode-yamllint-options
+      (copy-sequence flymake-yamllint-arguments))
+
+(let ((treesit-yaml-available (my-treesit-language-available-p 'yaml)))
+  (if treesit-yaml-available
       (progn
+        (with-eval-after-load 'mod-cleanup
+          (push 'flymake-yamllint mod-cleanup-packages-list)
+          (push 'yaml-mode mod-cleanup-packages-list))
+
         (define-derived-mode ansible-mode yaml-ts-mode "Ansible"
           "Major mode for editing Ansible files.")
 
@@ -3346,8 +3355,10 @@ and suppresses all interactive confirmation prompts during teardown."
                 (rassq-delete-all 'yaml-ts-mode auto-mode-alist))
 
           (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))
-        ;; Treesitter
         (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode))
+    ;; non tree sitter
+    (require 'le-group-yaml)
+
     (lightemacs-use-package flymake-yamllint
       :after flymake
       :commands flymake-yamllint-setup
@@ -3359,61 +3370,79 @@ and suppresses all interactive confirmation prompts during teardown."
           (flymake-yamllint-setup)))
 
       :init
-      (setq flymake-yamllint-arguments
-            (list "-c" (expand-file-name "~/.yamllint_global.yml")))
       (add-hook 'yaml-mode-hook #'my-flymake-yamllint-setup)
       (add-hook 'yaml-ts-mode-hook #'my-flymake-yamllint-setup))
 
     (when (fboundp 'yaml-mode)
       (define-derived-mode ansible-mode yaml-mode "Ansible"
-        "Major mode for editing Ansible files.")))
+        "Major mode for editing Ansible files."))))
 
-  (add-hook 'yaml-mode-hook #'ansible-detect-and-enable-mode)
-  (add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-mode)
+(add-hook 'yaml-mode-hook #'ansible-detect-and-enable-mode)
+(add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-mode)
 
-  (if (my-treesit-language-available-p 'bash)
-      (progn
-        (push '(shell-script-mode . bash-ts-mode) major-mode-remap-alist)
-        (push '(sh-mode . bash-ts-mode) major-mode-remap-alist))
-    ;; use-package sh-mode
-    ;; :ensure nil
-    ;; :commands shell-script-mode
-    ;; :mode (("\\.sh\\'" . shell-script-mode)
-    ;;        ("\\.bash\\'" . shell-script-mode)
-    ;;        ("\\.pbs\\'" . shell-script-mode))
-    ;; :custom
-    (with-eval-after-load 'sh-script
-      (when (fboundp 'sh-indent-supported)
-        (sh-indent-supported (append sh-indent-supported '((bash . sh)))))))
-
-  (if (my-treesit-language-available-p 'javascript)
-      (progn
-        (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
-        (push '(js-mode . js-ts-mode) major-mode-remap-alist)
-        (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode)))
+(if (my-treesit-language-available-p 'bash)
     (progn
-      (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
+      (push '(shell-script-mode . bash-ts-mode) major-mode-remap-alist)
+      (push '(sh-mode . bash-ts-mode) major-mode-remap-alist))
+  ;; use-package sh-mode
+  ;; :ensure nil
+  ;; :commands shell-script-mode
+  ;; :mode (("\\.sh\\'" . shell-script-mode)
+  ;;        ("\\.bash\\'" . shell-script-mode)
+  ;;        ("\\.pbs\\'" . shell-script-mode))
+  ;; :custom
+  (with-eval-after-load 'sh-script
+    (when (fboundp 'sh-indent-supported)
+      (sh-indent-supported (append sh-indent-supported '((bash . sh)))))))
 
-      ;; Not required
-      ;; (use-package js2-mode
-      ;;   :commands js2-mode
-      ;;   ;; :mode
-      ;;   ;; ("\\.js\\'" . js2-mode)
-      ;;   )
-      ))
+(if (my-treesit-language-available-p 'javascript)
+    (progn
+      (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
+      (push '(js-mode . js-ts-mode) major-mode-remap-alist)
+      (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode)))
+  (progn
+    (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
+
+    ;; Not required
+    ;; (use-package js2-mode
+    ;;   :commands js2-mode
+    ;;   ;; :mode
+    ;;   ;; ("\\.js\\'" . js2-mode)
+    ;;   )
+    ))
 
 
-  (when (my-treesit-language-available-p 'markdown)
-    (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode)))
+(if (my-treesit-language-available-p 'lua)
+    (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode))
+  (lightemacs-use-package lua-mode
+    :commands lua-mode
+    :mode
+    ("\\.lua\\'" . lua-mode)
+    ;; :init
+    ;; (add-hook 'lua-mode-hook
+    ;;           #'(lambda ()
+    ;;               (my-set-tab-width 3)))
+    ))
 
-  (when (my-treesit-language-available-p 'dockerfile)
-    (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR]\\'"
-                                    . dockerfile-ts-mode))
-    (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'"
-                                    . dockerfile-ts-mode)))
-  )
-
-(add-hook 'lightemacs-after-init-hook #'my-config-tree-sitter)
+(if (my-treesit-language-available-p 'dockerfile)
+    (progn
+      (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR]\\'"
+                                      . dockerfile-ts-mode))
+      (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'"
+                                      . dockerfile-ts-mode)))
+  ;;(use-package dockerfile-mode
+  ;;  :defer t
+  ;;  :commands dockerfile-mode
+  ;;  :init
+  ;;  ;; For some reason, this path is not automatically added to load-path
+  ;;  (add-to-list 'load-path (expand-file-name "dockerfile-mode"
+  ;;                                            emacs-packages-dir))
+  ;;  (add-to-list 'auto-mode-alist
+  ;;               (cons (concat "[/\\]"
+  ;;                             "\\(?:Containerfile\\|Dockerfile\\)"
+  ;;                             "\\(?:\\.[^/\\]*\\)?\\'")
+  ;;                     'dockerfile-mode)))
+  t)
 
 ;;; ansible
 
@@ -4973,6 +5002,10 @@ environment for accurate linting."
 (lightemacs-use-package vimrc-mode
   :commands vimrc-mode
   :mode
+  ("/vim\\(rc\\)?\\'" . vimrc-mode)
+  ("\\.vim\\(rc\\)?\\'" . vimrc-mode)
+  ("\\.vimrc.local?\\'" . vimrc-mode)
+  ("\\.lvimrc?\\'" . vimrc-mode)
   ("/\\.vim\\(rc\\)?\\'" . vimrc-mode))
 
 (add-hook 'vimrc-mode-hook #'(lambda ()
@@ -5045,9 +5078,16 @@ environment for accurate linting."
     ;;   (web-mode-css-indent-offset 2)
     ;;   (web-mode-code-indent-offset 2))
 
-    ;; Add the hook for both html-mode and mhtml-mode
-    (add-hook 'html-mode-hook 'sgml-electric-tag-pair-mode)
-    (add-hook 'mhtml-mode-hook 'sgml-electric-tag-pair-mode)))
+    (use-package sgml-mode
+      :ensure nil
+      :commands (sgml-mode
+                 sgml-electric-tag-pair-mode
+                 sgml-name-8bit-mode)
+      :hook
+      (html-mode . sgml-electric-tag-pair-mode)
+      (mhtml-mode . sgml-electric-tag-pair-mode)
+      (html-mode . sgml-name-8bit-mode)
+      (mhtml-mode . sgml-name-8bit-mode))))
 
 ;;; jinja2-mode and csv-mode
 
@@ -5271,19 +5311,6 @@ at the same level."
 ;;   ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
 ;;   ;; code." t)
 ;;   (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
-
-;;; Lua
-
-(unless (my-treesit-language-available-p 'markdown)
-  (lightemacs-use-package lua-mode
-    :commands lua-mode
-    :mode
-    ("\\.lua\\'" . lua-mode)
-    ;; :init
-    ;; (add-hook 'lua-mode-hook
-    ;;           #'(lambda ()
-    ;;               (my-set-tab-width 3)))
-    ))
 
 ;;; org-ibullets
 
@@ -5954,6 +5981,14 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   ;; 'auto routes ESC to the shell if an alt-screen TUI (like vim) is running,
 ;;   ;; otherwise it switches the buffer frame to evil normal state.
 ;;   (evil-ghostel-escape 'auto))
+
+;;; yaml
+
+(with-eval-after-load 'le-group-yaml
+  (with-eval-after-load 'mod-cleanup
+    (when (my-treesit-language-available-p 'yaml)
+      (push 'flymake-yamllint mod-cleanup-packages-list)
+      (push 'yaml-mode mod-cleanup-packages-list))))
 
 ;;; Provide
 

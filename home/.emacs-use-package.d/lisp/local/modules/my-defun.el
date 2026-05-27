@@ -122,7 +122,11 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
   "Check if `treesit-ready-p' exists.
 LANGUAGE is the programming language."
   (require 'treesit)
-  (if (and (fboundp 'treesit-language-available-p))
+  ;; During byte-compilation macro expansion, avoid installing legacy
+  ;; non tree sitter libraries
+  (if (or (bound-and-true-p byte-compile-current-file)
+          noninteractive
+          (and (fboundp 'treesit-language-available-p)))
       (treesit-language-available-p language)
     nil)
   ;; (if (and (fboundp 'treesit-ready-p))
@@ -766,24 +770,22 @@ If the parentheses are balanced, the function returns t."
                        (when (integerp column)
                          (1+ column)))
                      (let ((file-name (buffer-file-name (buffer-base-buffer))))
-                       (when file-name
-                         (abbreviate-file-name file-name))))))
+                       (if file-name
+                           (abbreviate-file-name file-name)
+                         (buffer-name))))))
 
        (if no-error
-           (message msg)
+           (user-error msg)
          (user-error msg))
        ;; Return nil
        nil))))
 
-(advice-add 'check-parens :override #'my-check-parens-no-jump)
-
-(defun my-before-save-check-parens-no-jump ()
-  "Before save hook: check parens no jump."
-  (my-check-parens-no-jump))
+;; (advice-add 'check-parens :override #'my-check-parens-no-jump)
 
 (defun my-setup-my-check-parens-no-jump ()
   "Check parens no jump."
-  (add-hook 'before-save-hook #'my-check-parens-no-jump))
+  (add-hook 'before-save-hook #'my-check-parens-no-jump nil t))
+
 (add-hook 'emacs-lisp-mode-hook #'my-setup-my-check-parens-no-jump)
 
 ;; Use va( instead

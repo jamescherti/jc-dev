@@ -877,14 +877,14 @@ subsequent GCC invocations."
                            le-org
                            le-org-appear
 
-                           le-markdown-mode
-                           le-markdown-toc
+                           ;; le-markdown-mode
+                           ;; le-markdown-toc
                            le-edit-indirect
 
                            le-yasnippet
                            ;; le-yasnippet-snippets
 
-                           le-group-yaml
+                           ;; le-group-yaml
                            ;; le-yaml-mode
                            ;; le-yaml-ts-mode
 

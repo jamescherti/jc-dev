@@ -711,8 +711,8 @@ This enhancement prevents the cursor from moving."
     (dabbrev-completion arg)))
 
 (with-eval-after-load 'vertico
-  ;; TODO move somewhere else like mod-vertico-evil
-  (evil-define-key '(insert normal) 'global (kbd "S-<return>") 'embark-dwim)
+  ;; Conflict with markdown-mode
+  ;; (evil-define-key '(insert normal) 'global (kbd "S-<return>") 'embark-dwim)
   (evil-define-key 'insert vertico-map (kbd "C-f") 'vertico-scroll-up)
   (evil-define-key 'normal vertico-map (kbd "C-f") 'vertico-scroll-up)
   (evil-define-key 'insert vertico-map (kbd "C-b") 'vertico-scroll-down)
@@ -1452,12 +1452,63 @@ If the parentheses are balanced, the function returns t."
 
 ;;; markdown mode
 
-(with-eval-after-load 'markdown-mode
-  ;; (define-key markdown-mode-map (kbd "TAB") #'ignore)
+(if (my-treesit-language-available-p 'markdown)
+    (with-eval-after-load 'mod-cleanup
+      (push 'markdown-mode mod-cleanup-packages-list))
+  (require 'le-markdown-mode)
+  (with-eval-after-load 'markdown-mode
+    ;; (define-key markdown-mode-map (kbd "TAB") #'ignore)
 
-  ;; (evil-define-key 'normal markdown-mode-map (kbd "TAB") #'ignore)
-  ;; (evil-define-key 'normal markdown-mode-map (kbd "<tab>") #'ignore)
-  (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block))
+    ;; (evil-define-key 'normal markdown-mode-map (kbd "TAB") #'ignore)
+    ;; (evil-define-key 'normal markdown-mode-map (kbd "<tab>") #'ignore)
+    (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block)
+
+    ;; Lock list indentation to 2 spaces. When you hit Tab to nest a list item
+    ;; under a dash, it aligns perfectly with a 2-space structure, matching
+    ;; standard configuration habits (like your YAML spacing).
+    (setq markdown-list-indent-width 2)
+
+    (setq markdown-disable-tooltip-prompt t)
+    (setq markdown-split-window-direction 'right)
+    ;; Automates your formatting standard. When you press M-RET
+    ;; (markdown-insert-list-item), Emacs will insert the dash automatically
+    ;; rather than the default asterisk.
+    ;; (setq markdown-unordered-list-item-prefix "  - ")
+    (setq markdown-unordered-list-item-prefix "-   ")
+
+    ;; (setq markdown-enable-wiki-links t)
+    ;; (setq markdown-use-pandoc-style-yaml-metadata t)
+    ;; (setq markdown-footnote-location 'immediately)
+    ;; (setq markdown-enable-math nil)
+    ;; (setq markdown-display-remote-images nil)
+    ;; (setq markdown-italic-underscore t)
+    ;; (setq markdown-blockquote-display-char '("┃" ">"))
+    ;; (setq markdown-list-item-bullets '("⏺" "▪" "◆" "►" "•" "◇"))
+    ;; (setq markdown-asymmetric-header t)
+    ;; (setq markdown-make-gfm-checkboxes-buttons t)
+    ;; (setq markdown-open-command "~/.bin/run-markdown.sh")
+    ;; Contain bugs when make-window-start-visible is set to t
+    ;; (setq markdown-hide-markup t)
+    ;; (setq markdown-nested-imenu-heading-index t)
+
+    ;; Enables Previewing: Without configuring markdown-command, features like
+    ;; markdown-preview (C-c C-c p) or markdown-export will fail if Emacs cannot
+    ;; find a default compiler on your system path.
+    ;;
+    ;; Advanced Syntax: multimarkdown supports robust extensions that standard
+    ;; Markdown lacks, such as native tables, footnotes, and metadata blocks.
+    ;; (setq markdown-command "multimarkdown")
+
+    (setq markdown-fontify-whole-heading-line t)
+
+    ;; (custom-set-faces
+    ;;  '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.5 :weight bold))))
+    ;;  '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4 :weight bold))))
+    ;;  '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.3 :weight bold))))
+    ;;  '(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2 :weight bold)))))
+    ))
+
+
 
 (setq markdown-gfm-use-electric-backquote nil)
 (setq markdown-heading-scaling t)
