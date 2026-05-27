@@ -5858,8 +5858,8 @@ are editing by falling back to another visible file buffer."
   ;; Fixes: https://github.com/jcfk/savefold.el/issues/7
   (defun my-savefold-utils--get-attr-table-fpath (fpath)
     "Return the FPATH of the attribute table file for FPATH.
-  This naively replaces path slashes with ! (/a/b/c -> !a!b!c) leading to a chance
-  of collision."
+  This naively replaces path slashes with ! (/a/b/c -> !a!b!c) leading to a
+  chance of collision."
     (let* ((fpath (expand-file-name fpath))
            (fpath (string-replace "/" "!" fpath))
            (fpath (string-replace ":" "!" fpath))  ; For windows
