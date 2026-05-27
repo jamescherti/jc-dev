@@ -121,18 +121,21 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
 (defun my-treesit-language-available-p (language)
   "Check if `treesit-ready-p' exists.
 LANGUAGE is the programming language."
-  (require 'treesit)
   ;; During byte-compilation macro expansion, avoid installing legacy
   ;; non tree sitter libraries
-  (if (or (bound-and-true-p byte-compile-current-file)
-          noninteractive
-          (and (fboundp 'treesit-language-available-p)))
-      (treesit-language-available-p language)
-    nil)
-  ;; (if (and (fboundp 'treesit-ready-p))
-  ;;     (treesit-ready-p language)
-  ;;   nil)
-  )
+  (cond
+   ((or (bound-and-true-p byte-compile-current-file)
+        noninteractive
+        (and (fboundp 'treesit-language-available-p)))
+    t)
+
+   (t
+    (require 'treesit nil t)
+    (if (or (bound-and-true-p byte-compile-current-file)
+            noninteractive
+            (and (fboundp 'treesit-language-available-p)))
+        (treesit-language-available-p language)
+      nil))))
 
 ;; https://emacs.stackexchange.com/questions/35936/disassembly-of-a-bytecode-file
 (defun disassemble-file (filename)

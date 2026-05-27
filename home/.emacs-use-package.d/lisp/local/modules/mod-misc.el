@@ -692,14 +692,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
         ;; markdown-mode-hook
         ))
 
-;;; straight
-
-;; (defvar my-straight-default-profile (expand-file-name
-;;                                      "~/.emacs-data/etc/straight-profile.el")
-;;   "The default straight profile.")
-;; (setq straight-profiles
-;;       `((nil . ,my-straight-default-profile)))
-
 ;;; Packages: use-package
 
 ;; (defun my-package-pin (package repository)
@@ -5661,6 +5653,12 @@ The result is displayed in a pretty-printed temporary buffer."
 ;; (setq term-buffer-maximum-size 10000)
 
 ;;; straight
+
+(defvar my-straight-default-profile (expand-file-name
+                                     "~/.emacs-data/etc/straight-profile.el")
+  "The default straight profile.")
+(setq straight-profiles
+      `((nil . ,my-straight-default-profile)))
 
 (defun my-copy-straight-profile-advice (orig-fun &rest args)
   "Advise `straight-freeze-versions' to copy the profile.

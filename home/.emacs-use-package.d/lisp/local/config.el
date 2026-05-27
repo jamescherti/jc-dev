@@ -420,14 +420,14 @@ subsequent GCC invocations."
   ;;   (setq use-package-compute-statistics t))
   )
 
-(when (eq lightemacs-package-manager 'straight)
-  ;; TODO compile angel readme?
-  (setq straight-disable-native-compile t)
-  (setq straight-disable-compile t)
-
-  ;; Causes issues
-  ;; (setq straight-disable-autoloads t)
-  )
+;; (when (eq lightemacs-package-manager 'straight)
+;;   ;; TODO compile angel readme?
+;;   (setq straight-disable-native-compile t)
+;;   (setq straight-disable-compile t)
+;;
+;;   ;; Causes issues
+;;   ;; (setq straight-disable-autoloads t)
+;;   )
 
 ;; TODO remove from devemacs and my emacs and add this to lightemacs
 (with-eval-after-load 'cus-edit
@@ -939,12 +939,12 @@ subsequent GCC invocations."
 (defvar my--package-load-path-cache nil
   "Internal cache storing the list of discovered package directories.")
 
-(when (eq lightemacs-package-manager 'straight)
-  (setq straight-recipe-overrides nil)
-  (add-to-list 'straight-recipe-overrides
-               '(bufferwizard
-                 :type git :host github
-                 :repo "jamescherti/bufferwizard.el")))
+;; (when (eq lightemacs-package-manager 'straight)
+;;   (setq straight-recipe-overrides nil)
+;;   (add-to-list 'straight-recipe-overrides
+;;                '(bufferwizard
+;;                  :type git :host github
+;;                  :repo "jamescherti/bufferwizard.el")))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
