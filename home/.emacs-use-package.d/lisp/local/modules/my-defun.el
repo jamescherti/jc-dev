@@ -131,11 +131,7 @@ LANGUAGE is the programming language."
 
    (t
     (require 'treesit nil t)
-    (if (or (bound-and-true-p byte-compile-current-file)
-            noninteractive
-            (and (fboundp 'treesit-language-available-p)))
-        (treesit-language-available-p language)
-      nil))))
+    (treesit-language-available-p language))))
 
 ;; https://emacs.stackexchange.com/questions/35936/disassembly-of-a-bytecode-file
 (defun disassemble-file (filename)
