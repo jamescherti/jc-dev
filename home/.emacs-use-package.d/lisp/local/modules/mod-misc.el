@@ -3351,19 +3351,7 @@ and suppresses all interactive confirmation prompts during teardown."
     ;; non tree sitter
     (require 'le-group-yaml)
 
-    (lightemacs-use-package flymake-yamllint
-      :after flymake
-      :commands flymake-yamllint-setup
-
-      :preface
-      (defun my-flymake-yamllint-setup ()
-        "Setup Flymake yamllint."
-        (when (my-code-checker-allowed-p)
-          (flymake-yamllint-setup)))
-
-      :init
-      (add-hook 'yaml-mode-hook #'my-flymake-yamllint-setup)
-      (add-hook 'yaml-ts-mode-hook #'my-flymake-yamllint-setup))
+    (require 'mod-flymake-yamllint)
 
     (when (fboundp 'yaml-mode)
       (define-derived-mode ansible-mode yaml-mode "Ansible"

@@ -76,8 +76,8 @@ load_emacs_profile() {
   if [[ $OSFAMILY = arch ]]; then
     # Emacs master
     export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
-    EMACS_D="$HOME/.emacs-master.d/"
-    # EMACS_D="$HOME/.emacs-straight.d/"
+    # EMACS_D="$HOME/.emacs-master.d/"
+    EMACS_D="$HOME/.emacs-straight.d/"
     # EMACS_D="$HOME/.emacs-elpaca.d/"
 
     # Emacs stable
