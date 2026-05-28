@@ -73,30 +73,40 @@ is-emacs-server-running() {
 load_emacs_profile() {
   RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
   OSFAMILY=$(~/.local/bin/osid)
+  EMACS_PROFILE="${EMACS_PROFILE:-}"
   if [[ $OSFAMILY = arch ]]; then
-    # Emacs master
     export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
-    # EMACS_D="$HOME/.emacs-master.d/"
-    # EMACS_D="$HOME/.emacs-straight.d/"
-    EMACS_D="$HOME/.emacs-elpaca.d/"
-
-    # Emacs stable
-    # export RUN_EMACS_BIN="/usr/bin/emacs"
-  else
-    # Emacs 31
-    export RUN_EMACS_BIN="/usr/bin/emacs"
-    if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-      if [[ $OSFAMILY = arch ]]; then
-        export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-30.2/bin/emacs"
-      else
-        export RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-30/bin/emacs"
-      fi
-    fi
-
-    EMACS_D="$HOME/.emacs-use-package.d/"
   fi
 
+  if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+    export RUN_EMACS_BIN="/usr/bin/emacs"
+  fi
+
+  if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+    echo "Error: The Emacs binary does not exist: $RUN_EMACS_BIN" >&2
+    exit 1
+  fi
+
+  if [[ $EMACS_PROFILE != "" ]]; then
+    EMACS_D="$HOME/.emacs-$EMACS_PROFILE.d/"
+  else
+    if [[ $OSFAMILY = arch ]]; then
+      # Emacs master
+      EMACS_D="$HOME/.emacs-master.d/"
+      # EMACS_D="$HOME/.emacs-straight.d/"
+      # EMACS_D="$HOME/.emacs-elpaca.d/"
+    else
+      # Emacs 31
+      EMACS_D="$HOME/.emacs-use-package.d/"
+    fi
+  fi
+
+  if [[ -f "$EMACS_D" ]]; then
+    echo "Error: The Emacs user directory does not exist: $EMACS_D" >&2
+    exit 1
+  fi
   export EMACSNATIVELOADPATH="$EMACS_D/var/eln-cache/:"
+  export RUN_EMACS_BIN
 }
 
 main() {
