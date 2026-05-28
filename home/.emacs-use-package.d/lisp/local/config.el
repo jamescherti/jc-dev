@@ -387,7 +387,7 @@ subsequent GCC invocations."
 
 ;;; Optimization
 
-(setq minimal-emacs-inhibit-redisplay-during-startup nil)
+(setq minimal-emacs-inhibit-redisplay-during-startup t)
 (setq minimal-emacs-inhibit-message-during-startup nil)
 (setq lightemacs-easysession-load-session-on-startup t)
 
