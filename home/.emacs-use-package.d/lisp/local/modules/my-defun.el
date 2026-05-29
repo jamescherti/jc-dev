@@ -812,6 +812,33 @@ If the parentheses are balanced, the function returns t."
 ;;                           nil t))
 ;;               (add-hook 'after-save-hook #'my-check-parens-no-jump -99 t)))
 
+;;; From Lightemacs
+
+;; (defmacro lightemacs-shield-macros (&rest body)
+;;   "Eval BODY while preventing premature macro expansion.
+;;
+;; Use this when a form contains code to be evaluated later, and that code depends
+;; on a macro not yet defined. If the macro treats its arguments specially, an
+;; argument resembling a macro call might be expanded too early, breaking
+;; evaluation. Wrapping the outer (or higher) macro in this form avoids that
+;; problem."
+;;   (declare (indent 0))
+;;   `(eval '(progn ,@body) lexical-binding))
+
+;; (defmacro lightemacs-shield-macros-when-compiling (feature &rest body)
+;;   "Evaluate BODY, shielding macros only if FEATURE is not yet available.
+;; If FEATURE is already present, expand BODY normally.
+;; During byte-compilation, attempt to load FEATURE eagerly."
+;;   (declare (indent 0))
+;;   (let ((available (featurep feature)))
+;;     (when (bound-and-true-p byte-compile-current-file)
+;;       (setq available (require feature nil 'noerror)))
+;;     (if available
+;;         `(progn ,@body)
+;;       `(lightemacs-shield-macros
+;;          (progn ,@body)))))
+
+
 ;;; Provide
 (provide 'my-defun)
 
