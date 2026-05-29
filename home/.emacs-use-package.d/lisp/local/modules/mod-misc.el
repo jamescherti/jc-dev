@@ -2823,7 +2823,7 @@ the window is resized). This function fixes these issues."
 (defun pkg-ediff-winner-undo ()
   "Ediff winner undo."
   (when (and (not pkg-diff--inhibit-winner-undo)
-             (bound-and-true-p winner-undo)
+             (boundp 'winner-mode)
              (fboundp 'winner-undo))
     (winner-undo)))
 
