@@ -563,53 +563,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq-default search-invisible nil)
 
-;;; Always current window
-
-(defun current-window-only--setup-display-buffer-alist ()
-  "Setup display buffer alist using push for performance."
-  (unless noninteractive
-    (dolist (regexp '("\\*Man"
-                      "\\*eat"
-                      "\\*Memory-Report\\*"
-                      "\\*helpful"
-                      "\\*Backtrace\\*"
-                      "\\*\\(Help\\|eldoc\\)\\*"
-                      "\\*[Hh]elp:"
-                      ;; markdown-mode. I want to edit in a separate window
-                      "\\*edit-indirect "
-                      "\\*Proced\\*"
-                      "\\*Embark Export"))
-      (push `(,regexp (display-buffer-same-window)) display-buffer-alist))))
-
-(defun always-current-window---display-buffer-from-compilation-p (_buffer-name _action)
-  "Display buffer from compilation."
-  (unless current-prefix-arg
-    (with-current-buffer (window-buffer)
-      (derived-mode-p 'compilation-mode))))
+;;; Misc (previously part of mod-same-window, but not useful for it)
 
 ;; (defun lightemacs-user-post-init ()
 ;;   "User post init."
 ;;   (my-add-packages-to-load-path))
-
-(defun current-window-only-setup ()
-  "Make Emacs only use the current window."
-  (unless noninteractive
-    ;; org-mode
-    (setq org-src-window-setup 'current-window) ;; Edit source in current window
-    (setq org-agenda-window-setup 'current-window)
-
-    ;; Open links in help windows (like links to files) in the current window
-    (setq help-window-keep-selected t)
-
-    ;; Compilation buffers. Also used by wgrep buffers / Embark export.
-    ;; (push '(always-current-window---display-buffer-from-compilation-p
-    ;;         display-buffer-same-window
-    ;;         (inhibit-same-window . nil))
-    ;;       display-buffer-alist)
-
-    (current-window-only--setup-display-buffer-alist)))
-
-(current-window-only-setup)
 
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
@@ -1108,11 +1066,10 @@ WIDTH is the tab width."
   ;; (setq scroll-conservatively most-positive-fixnum)
   (setq scroll-conservatively 20)
 
-  ;; TODO put them back
-  ;;(setq eldoc-idle-delay 0.5)
-  ;;(setq eldoc-echo-area-display-truncation-message t)
+  (setq eldoc-idle-delay 0.5)
+  (setq eldoc-echo-area-display-truncation-message nil)
   ;; (setq eldoc-echo-area-prefer-doc-buffer nil)
-  (setq eldoc-echo-area-use-multiline-p nil)  ;; Prevent some errors from showing
+  (setq eldoc-echo-area-use-multiline-p nil)
 
   (with-eval-after-load 'recentf
     (setq recentf-exclude

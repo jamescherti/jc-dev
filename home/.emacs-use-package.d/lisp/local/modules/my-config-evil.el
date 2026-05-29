@@ -2473,10 +2473,6 @@ If COUNT is given, move COUNT - 1 lines downward first."
 (add-hook 'quick-sdcv-mode-hook 'my-setup-quick-sdcv)
 (add-hook 'quick-sdcv-mode-hook 'goto-address-mode)
 
-(add-to-list 'display-buffer-alist '("\\*sdcv"
-                                     (display-buffer-same-window)))
-
-
 (setq quick-sdcv-fold-on-search t)
 
 (with-eval-after-load 'evil

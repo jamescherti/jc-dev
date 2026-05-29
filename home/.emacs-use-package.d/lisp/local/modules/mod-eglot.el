@@ -69,7 +69,9 @@ CONT is the continuation function.
 RESULT is the result from the server.
 ERROR is the error (if any)."
   (if (and (vectorp result) (zerop (length result)))
-      nil
+      ;; Pass nil instead of dropping the callback.
+      ;; This prevents ElDoc async requests from hanging.
+      (funcall orig-fun conn id cont nil error)
     (funcall orig-fun conn id cont result error)))
 
 (with-eval-after-load 'jsonrpc
@@ -184,7 +186,7 @@ ERROR is the error (if any)."
           ;;   #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>)(#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result []))
           ;;   apply(#f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])))
           ;;   timer-event-handler([t 26700 21804 803197 nil #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])) nil 238000 nil])
-          :signatureHelpProvider  ; For showing the function signature/arguments.
+          ;; :signatureHelpProvider  ; For showing the function signature/arguments.
 
           ;; Disable "go to definition" feature
           ;; :definitionProvider
