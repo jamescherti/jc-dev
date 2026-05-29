@@ -101,8 +101,7 @@
                                     flyspell-lazy
                                     eat
                                     magit
-                                    magit-section
-                                    ace-window)
+                                    magit-section)
   "Packages to delete.")
 
 ;; 5 minutes: This is the standard definition of "Away From Keyboard." If you

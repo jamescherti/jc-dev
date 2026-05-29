@@ -2756,302 +2756,6 @@ the window is resized). This function fixes these issues."
 
   (setq persist-text-scale-buffer-category-function 'my-persist-text-scale-function))
 
-;;; ediff: settings
-
-(setq ediff-keep-variants t)
-;; (setq ediff-make-buffers-readonly-at-startup nil) ; default nil
-;; (setq ediff-confirm-copy t)
-
-;; Ediff: Ignore all whitespace differences (-w) to reduce visual noise from
-;; indentation changes or auto-formatters, keeping the focus on logic.
-;; (setq ediff-diff-options "-w")
-
-;; Ediff: Skip over regions where the only differences are whitespace (or other
-;; ignored options) when navigating with 'n' and 'p'.
-;; (setq ediff-ignore-similar-regions t)
-
-(add-hook 'ediff-startup-hook 'ediff-next-difference)
-
-;;; ediff: winner-undo
-
-(defvar pkg-diff--inhibit-winner-undo nil)
-
-;; Conditionally trigger `winner-undo` only if the layout remains unmutated
-(defun pkg-ediff-winner-undo ()
-  "Ediff winner undo."
-  (when (and (not pkg-diff--inhibit-winner-undo)
-             (boundp 'winner-mode)
-             (fboundp 'winner-undo))
-    (winner-undo)))
-
-(add-hook 'ediff-quit-hook #'pkg-ediff-winner-undo)
-
-;;; ediff: kill control buffer
-
-;; this function is not useful. In fact, it is an architectural anti-pattern for
-;; Emacs state management and should be removed from your configuration.
-;;
-;; While the developer's intent was to prevent Ediff from leaking memory and
-;; leaving "garbage" buffers behind, the implementation relies on brute-force
-;; imperative logic rather than leveraging Ediff's built-in declarative
-;; configurations.
-
-;; (defun my/ediff-kill-control-buffer ()
-;;   "Kill the Ediff control buffer and temporary buffers upon quitting.
-;; Safely handles multiple concurrent Ediff sessions and numbered buffers."
-;;   ;; Keep the fallback logic for the local control buffer
-;;   (when (and (boundp 'ediff-control-buffer)
-;;              (buffer-live-p ediff-control-buffer))
-;;     (kill-buffer ediff-control-buffer))
-;;
-;;   ;; Check if there are any other active Ediff sessions
-;;   (let ((active-ediffs (seq-filter
-;;                         (lambda (buf)
-;;                           (with-current-buffer buf
-;;                             (eq major-mode 'ediff-control-mode)))
-;;                         (buffer-list))))
-;;     ;; If this is the last one (or zero left), kill the shared buffers
-;;     (when (<= (length active-ediffs) 1)
-;;       (dolist (buf (buffer-list))
-;;         (let ((name (buffer-name buf)))
-;;           ;; We are using `string-prefix-p' because Ediff sometimes creates
-;;           ;; variants of these names such as *ediff-diffs<2>*.
-;;           (when (or (string-prefix-p "*ediff-errors" name)
-;;                     (string-prefix-p "*ediff-diff" name)
-;;                     (string-prefix-p "*ediff-fine-diff" name)
-;;                     (string-prefix-p "*Ediff Registry" name))
-;;             (kill-buffer buf)))))))
-;;
-;; (add-hook 'ediff-quit-hook #'(lambda()
-;;                                (when (fboundp 'my/ediff-kill-control-buffer)
-;;                                  (my/ediff-kill-control-buffer))))
-
-;;; ediff: Sync text scale when ediff starts
-;; TODO patch?
-
-(defun pkg-diff--ediff-sync-zoom-startup ()
-  "Synchronize text scale in all Ediff buffers based on Buffer A."
-  (when (and (boundp 'ediff-buffer-A)
-             (buffer-live-p ediff-buffer-A))
-    (let ((zoom-level (with-current-buffer ediff-buffer-A
-                        (if (boundp 'text-scale-mode-amount)
-                            text-scale-mode-amount
-                          0))))
-      (dolist (buf (list (and (boundp 'ediff-buffer-B) ediff-buffer-B)
-                         (and (boundp 'ediff-buffer-C) ediff-buffer-C)))
-        (when (buffer-live-p buf)
-          (with-current-buffer buf
-            (text-scale-set zoom-level)))))))
-
-(add-hook 'ediff-startup-hook #'pkg-diff--ediff-sync-zoom-startup)
-
-;; (defun pkg-diff-get-all-control-buffers ()
-;;   "Return a list of all live buffers currently in `ediff-mode'."
-;;   (seq-filter (lambda (buf)
-;;                 (with-current-buffer buf
-;;                   (eq major-mode 'ediff-mode)))
-;;               (buffer-list)))
-
-;; (defun pkg-diff-get-control-buffers-from-registry ()
-;;   "Return all control buffers registered in the Ediff session registry."
-;;   (when (boundp 'ediff-session-registry)
-;;     (delq nil
-;;           (mapcar (lambda (session)
-;;                     (let ((buf (car session)))
-;;                       (if (buffer-live-p buf) buf nil)))
-;;                   ediff-session-registry))))
-
-;; (defun pkg-diff-get-current-control-buffer ()
-;;   "Get the control buffer for the current Ediff session.
-;; This works when called from within Ediff buffer A, B, or C."
-;;   (when (boundp 'ediff-control-buffer)
-;;     ediff-control-buffer))
-
-;;; ediff: Synchronize text scale when the user changes it
-;; TODO patch?
-;; (defun pkg-diff--ediff-control-panel-window ()
-;;   "Return the window displaying the *Ediff Control Panel* buffer, if any."
-;;   (seq-find (lambda (win)
-;;               ;; The Ediff control panel buffer name may have suffixes like
-;;               ;; "<2>", e.g., "*Ediff Control Panel<2>*", if multiple sessions
-;;               ;; are active.
-;;               (string-prefix-p "*Ediff Control Panel"
-;;                                (buffer-name (window-buffer win))))
-;;             (window-list)))
-
-(defun pkg-diff--ediff-buffers-from-control-panel ()
-  "Return list of live ediff buffers A, B, and C, if bound."
-  (delq nil
-        (list (and (bound-and-true-p ediff-buffer-A) ediff-buffer-A)
-              (and (bound-and-true-p ediff-buffer-B) ediff-buffer-B)
-              (and (bound-and-true-p ediff-buffer-C) ediff-buffer-C))))
-
-(defun pkg-diff--ediff-buffers ()
-  "Return list of live ediff buffers A, B, and C for the current session.
-Searches `ediff-session-registry' to locate the control buffer associated
-with the current buffer, bypassing frame or window visibility limitations."
-  (let ((current-buf (current-buffer))
-        matched-buffers)
-    (message "[EDIFF] Registry: %s" ediff-session-registry)
-    (when (boundp 'ediff-session-registry)
-      (catch 'found
-        (dolist (session ediff-session-registry)
-          (let ((ctrl-buf session))
-            (when (buffer-live-p ctrl-buf)
-              (with-current-buffer ctrl-buf
-                (let ((buf-a (and (bound-and-true-p ediff-buffer-A) ediff-buffer-A))
-                      (buf-b (and (bound-and-true-p ediff-buffer-B) ediff-buffer-B))
-                      (buf-c (and (bound-and-true-p ediff-buffer-C) ediff-buffer-C)))
-                  ;; Check if the current buffer is participating in this Ediff
-                  ;; session (either as the control buffer itself, or as A, B,
-                  ;; or C).
-                  (when (memq current-buf (list ctrl-buf buf-a buf-b buf-c))
-                    (setq matched-buffers (delq nil (list buf-a buf-b buf-c)))
-                    (throw 'found t)))))))))
-    matched-buffers))
-
-(defun pkg-diff--setup-ediff-auto-text-scale ()
-  "Add a buffer-local hook to keep text scale synchronized during Ediff sessions.
-This installs `pkg-diff--ediff-auto-text-scale` on `text-scale-mode-hook` in
-each Ediff buffer when the session starts, and cleans up automatically when the
-session ends."
-  (with-no-warnings
-    (add-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale 99 t)))
-
-(defun pkg-diff--ediff-auto-text-scale (&rest _)
-  "Synchronize text scale across all Ediff buffers based on the current buffer."
-  (when (and (boundp 'text-scale-mode-hook)
-             (bound-and-true-p text-scale-mode-amount))
-    (let ((original-buf (current-buffer))
-          (original-buf-text-scale-amount text-scale-mode-amount)
-          (ediff-bufs (pkg-diff--ediff-buffers)))
-      (if ediff-bufs
-          ;; Session is active: synchronize scale across peers
-          (dolist (buf ediff-bufs)
-            (when (and (buffer-live-p buf)
-                       (not (eq buf original-buf)))
-              (with-current-buffer buf
-                ;; Temporarily shadow the hook to prevent infinite recursion
-                (let ((text-scale-mode-hook
-                       (remove 'pkg-diff--ediff-auto-text-scale
-                               text-scale-mode-hook)))
-                  (ignore text-scale-mode-hook)
-                  (text-scale-set original-buf-text-scale-amount)))))
-        ;; Session is dead or buffer detached: teardown hook
-        (with-no-warnings
-          (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))))))
-
-;; (defun pkg-diff--ediff-auto-text-scale (&rest _)
-;;   "Synchronize text scale across all Ediff buffers based on Ediff buffer A."
-;;   (when (and (boundp 'text-scale-mode-hook)
-;;              (bound-and-true-p text-scale-mode-amount))
-;;     (let ((original-buf (current-buffer))
-;;           (original-buf-text-scale-amount text-scale-mode-amount)
-;;           (window (pkg-diff--ediff-control-panel-window)))
-;;       (if (window-live-p window)
-;;           ;; Sync
-;;           (with-selected-window window
-;;             (dolist (buf (pkg-diff--ediff-buffers))
-;;               (when (and (buffer-live-p buf)
-;;                          (not (eq buf original-buf)))
-;;                 (with-current-buffer buf
-;;                   ;; Prevent infinite loops
-;;                   (let ((text-scale-mode-hook
-;;                          (remove 'pkg-diff--ediff-auto-text-scale
-;;                                  text-scale-mode-hook)))
-;;                     (ignore text-scale-mode-hook)
-;;                     (text-scale-set original-buf-text-scale-amount))))))
-;;         ;; Remove
-;;         (with-no-warnings
-;;           (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t))))))
-
-(defun pkg-diff--ediff-teardown-auto-text-scale ()
-  "Remove text scale synchronization hooks when an Ediff session ends.
-This function executes within the Ediff Control Buffer."
-  (message "[EDIFF] BEGIN: Teardown auto text scale")
-  (let ((bufs (pkg-diff--ediff-buffers-from-control-panel)))
-    (dolist (buf bufs)
-      (message "[EDIFF] Teardown auto text scale: %s" buf)
-      (when (buffer-live-p buf)
-        (with-current-buffer buf
-          (with-no-warnings
-            ;; TODO make something to restore initial text scale
-            (remove-hook 'text-scale-mode-hook #'pkg-diff--ediff-auto-text-scale t)))))))
-
-(add-hook 'ediff-prepare-buffer-hook #'pkg-diff--setup-ediff-auto-text-scale)
-(add-hook 'ediff-cleanup-hook #'pkg-diff--ediff-teardown-auto-text-scale)
-
-;;; ediff: disable/enable minor modes
-
-(defvar pkg-diff-ediff-disabled-minor-modes '(aggressive-indent-mode)
-  "List of minor modes to disable automatically during an Ediff session.")
-
-(defvar-local pkg-diff--ediff-restorable-minor-modes nil
-  "Buffer-local list storing the minor modes that were disabled.")
-
-(defun pkg-diff--ediff-disable-minor-modes ()
-  "Disable specific minor modes in Ediff buffers and record them for restoration.
-This function is intended to be added to `ediff-prepare-buffer-hook'."
-  (message "[EDIFF] BEGIN: Disable minor modes")
-  (setq pkg-diff--ediff-restorable-minor-modes nil)
-  (dolist (mode pkg-diff-ediff-disabled-minor-modes)
-    (when (and (fboundp mode)
-               (boundp mode)
-               (symbol-value mode))
-      (push mode pkg-diff--ediff-restorable-minor-modes)
-      (message "[EDIFF] Disable: %s" mode)
-      (funcall mode -1))))
-
-(defun pkg-diff--ediff-restore-minor-modes ()
-  "Restore minor modes that were disabled during the Ediff session.
-This function executes within the Ediff Control Buffer."
-  (message "[EDIFF] BEGIN: Restore minor modes")
-  (let ((bufs (pkg-diff--ediff-buffers-from-control-panel)))
-    (dolist (buf bufs)
-      (message "[EDIFF] Check modes that should be restored: %s" buf)
-      (when (buffer-live-p buf)
-        (with-current-buffer buf
-          (dolist (mode pkg-diff--ediff-restorable-minor-modes)
-            (when (fboundp mode)
-              (message "[EDIFF] Enable: %s" mode)
-              (funcall mode 1)))
-          (setq pkg-diff--ediff-restorable-minor-modes nil))))))
-
-(add-hook 'ediff-prepare-buffer-hook #'pkg-diff--ediff-disable-minor-modes)
-(add-hook 'ediff-cleanup-hook #'pkg-diff--ediff-restore-minor-modes)
-
-;;; ediff: quit
-
-(defun pkg-diff-ediff-quit-all ()
-  "Gracefully terminate all active Ediff sessions unconditionally.
-Bypasses the $O(N)$ buffer list scan by utilizing the `ediff-session-registry'
-and suppresses all interactive confirmation prompts during teardown."
-  (interactive)
-  (let ((win-config (current-window-configuration)))
-    (save-window-excursion
-      (when (boundp 'ediff-session-registry)
-        ;; Snapshot the registry. `ediff-quit' destructively mutates
-        ;; `ediff-session-registry'. We must iterate over a copy.
-        (let ((sessions (copy-sequence ediff-session-registry))
-              (pkg-diff--inhibit-winner-undo t)
-              (inhibit-redisplay t))
-          ;; Mock interactive prompts. We intercept and automatically
-          ;; return `t` to allow batch processing without thread blocking.
-          (cl-letf (((symbol-function 'y-or-n-p) #'always)
-                    ((symbol-function 'yes-or-no-p) #'always))
-            (dolist (session sessions)
-              (let ((ctrl-buf session))
-                (when (buffer-live-p ctrl-buf)
-                  (with-current-buffer ctrl-buf
-                    (when (fboundp 'ediff-quit)
-                      ;; Execute teardown from within the control buffer context.
-                      ;; Passing `t` handles the `reverse-default-keep-variants`
-                      ;; argument, suppressing further variant-saving prompts.
-                      (ediff-quit nil))))))
-
-            (when (window-configuration-p win-config)
-              (set-window-configuration win-config))))))))
-
 ;;; tree sitter
 
 (setq treesit-language-source-alist
@@ -5210,7 +4914,6 @@ at the same level."
   (defun my-org-agenda-goto-in-same-window ()
     "`org-agenda-goto` that opens the target buffer in the current window."
     (interactive)
-    (require 'cl-lib)
     (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
       (when (fboundp 'org-agenda-goto)
         (org-agenda-goto))))
@@ -5219,6 +4922,19 @@ at the same level."
                                 "\\\\\\.org" "\\\\.org\\\\(\\\\.gpg\\\\)?"
                                 org-agenda-file-regexp)))
 
+
+;;; org-ibullets
+
+(lightemacs-use-package org-ibullets
+  :vc (:url "https://github.com/jamescherti/org-ibullets.el"
+            :rev :newest)
+  :ensure nil
+  :after org
+  :commands org-ibullets-mode
+  :hook (org-mode . org-ibullets-mode)
+  ;; :custom
+  ;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
+  )
 
 ;;; Jenkinsfile
 ;; (lightemacs-use-package jenkinsfile-mode
@@ -5248,19 +4964,6 @@ at the same level."
 ;;   ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
 ;;   ;; code." t)
 ;;   (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
-
-;;; org-ibullets
-
-(lightemacs-use-package org-ibullets
-  :vc (:url "https://github.com/jamescherti/org-ibullets.el"
-            :rev :newest)
-  :ensure nil
-  :after org
-  :commands org-ibullets-mode
-  :hook (org-mode . org-ibullets-mode)
-  ;; :custom
-  ;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
-  )
 
 ;;; olivetti
 
@@ -5850,8 +5553,6 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;                 #'my-save-buffer-savefold-advice)
 ;;     (advice-add 'buffer-guardian-save-buffer-maybe :before
 ;;                 #'my-save-buffer-savefold-advice)))
-
-;;; outline persist fold
 
 ;;; Fold things when opening them
 

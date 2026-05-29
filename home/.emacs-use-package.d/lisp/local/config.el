@@ -921,6 +921,7 @@ subsequent GCC invocations."
                            le-server
 
                            mod-misc
+                           mod-ediff
                            mod-same-window
                            tmpedit
                            mod-cleanup))

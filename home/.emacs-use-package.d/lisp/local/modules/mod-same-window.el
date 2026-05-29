@@ -63,6 +63,7 @@
                     "\\*edit-indirect "
 
                     "\\*Proced\\*"
+                    "\\*Embark Collect"
                     "\\*Embark Export"))
     (push `(,regexp (display-buffer-same-window)) display-buffer-alist)))
 
