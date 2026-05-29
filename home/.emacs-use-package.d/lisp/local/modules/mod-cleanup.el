@@ -128,6 +128,8 @@
 
 ;;; Unified cleanup function
 
+(defvar package-alist)
+
 (defun mod-cleanup-perform-all (&optional on-exit)
   "Perform all enabled cleanup operations.
 
