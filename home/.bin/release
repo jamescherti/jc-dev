@@ -279,7 +279,7 @@ class Release:
             while True:
                 try:
                     subprocess.check_call(
-                        "python -m twine upload dist/*", shell=True)
+                        "python -m twine upload --verbose dist/*", shell=True)
                     break
                 except subprocess.CalledProcessError:
                     if not self.confirm("Twine upload failed. Try again?"):
