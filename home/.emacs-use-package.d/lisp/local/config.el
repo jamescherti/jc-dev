@@ -412,6 +412,11 @@ subsequent GCC invocations."
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."
+  ;; TODO: Lightemacs?
+  (let ((no-border '(internal-border-width . 0)))
+    (add-to-list 'default-frame-alist no-border)
+    (add-to-list 'initial-frame-alist no-border))
+
   (setq native-comp-async-report-warnings-errors t)
 
   ;; Ignore X resources
@@ -672,11 +677,7 @@ subsequent GCC invocations."
   ;;  (message "Warning: Font '%s' not found. Using system default." my-font-choice))
 
   ;; (add-to-list 'default-frame-alist '(font . "Iosevka Term-13"))
-
-  ;; TODO: Lightemacs?
-  (let ((no-border '(internal-border-width . 0)))
-    (add-to-list 'default-frame-alist no-border)
-    (add-to-list 'initial-frame-alist no-border)))
+  )
 
 ;; On some window managers (fvwm 2.2.5 and KDE 2.1), Emacs can pause because Xt
 ;; waits for a `ConfigureNotify` event that the WM does not send, timing out
