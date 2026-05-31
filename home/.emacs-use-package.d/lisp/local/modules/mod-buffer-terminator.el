@@ -77,6 +77,23 @@
                                           "*vc*"
                                           "*Help*"
 
+                                          ;; [buffer-terminator] Terminated the
+                                          ;; buffer: ' *flymake-shellcheck*'
+                                          ;; (fundamental-mode)
+                                          " *flymake-shellcheck*"
+                                          ;; [buffer-terminator] Terminated the
+                                          ;; buffer: '
+                                          ;; *flymake-bashate-backend-flymake*'
+                                          ;; (fundamental-mode)
+                                          " *flymake-bashate-backend-flymake*"
+
+                                          ;; [buffer-terminator] Terminated the
+                                          ;; buffer: ' *work*'
+                                          ;; (fundamental-mode)
+                                          " *work*"
+
+                                          "*Shell Command Output*"
+
                                           ;; Internal ediff buffers
                                           "*Ediff Registry*"
 
