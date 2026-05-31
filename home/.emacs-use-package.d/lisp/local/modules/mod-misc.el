@@ -1230,10 +1230,6 @@ WIDTH is the tab width."
   (with-no-warnings
     (add-hook 'conf-mode-hook #'my-setup-conf-mode))
 
-  (setq markdown-toc-mode-map nil)
-  (setq markdown-toc-header-toc-title "## Table of Contents")
-  (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
-
   ;; The function that is called by default is `vc-shrink-buffer-window',
   ;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
   ;; This function shrinks height of WINDOW if its buffer doesn't need so many
@@ -1395,10 +1391,6 @@ WIDTH is the tab width."
   (setq bufferfile-use-vc t)
   ;; (setq bufferfile-delete-switch-to 'previous-buffer)
   (setq bufferfile-delete-switch-to 'parent-directory)
-
-  (unless noninteractive
-    (with-eval-after-load 'markdown-mode
-      (define-key markdown-mode-map (kbd "TAB") #'ignore)))
 
   (setq grep-use-null-device nil
         grep-use-null-filename-separator nil
@@ -1683,6 +1675,7 @@ WIDTH is the tab width."
 
   ;; Abbrev
   (add-hook 'markdown-mode-hook #'abbrev-mode)
+  (add-hook 'markdown-ts-mode-hook #'abbrev-mode)
   (add-hook 'markdown-ts-mode-hook #'abbrev-mode)
   (add-hook 'org-mode-hook #'abbrev-mode)
   (define-abbrev-table 'global-abbrev-table
@@ -2141,7 +2134,7 @@ Returns:
 
 ;;; Ignored errors
 
-;; Org + vertico preview error: Debugger entered--Lisp error: (error "rx ‘**’
+;; Org + vertico preview error: Debugger entered--Lisp error: (error "rx '**'
 ;; range error")
 
 ;;; Other settings
@@ -2357,6 +2350,7 @@ Returns:
   "Setup `display-line-numbers-mode'."
   (cond
    ((or (derived-mode-p 'markdown-mode)
+        (derived-mode-p 'markdown-ts-mode)
         (derived-mode-p 'org-mode))
     ;; (setq-local display-line-numbers-type 'relative)
     (display-line-numbers-mode 1))
@@ -5625,12 +5619,6 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   ;; 'auto routes ESC to the shell if an alt-screen TUI (like vim) is running,
 ;;   ;; otherwise it switches the buffer frame to evil normal state.
 ;;   (evil-ghostel-escape 'auto))
-
-(when (>= emacs-major-version 31)
-  (with-eval-after-load 'mod-cleanup
-    (when (my-treesit-language-available-p 'markdown)
-      (push 'markdown-mode mod-cleanup-packages-list)
-      (push 'markdown-toc mod-cleanup-packages-list))))
 
 ;;; Provide
 

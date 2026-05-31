@@ -1157,6 +1157,8 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
                                               lisp-mode-hook
                                               conf-mode-hook
                                               markdown-mode-hook
+                                              ;; TODO?
+                                              ;; markdown-ts-mode-hook
                                               diff-mode-hook))
 
 (setq lightemacs-treesit-fold-target-hooks '(c-ts-mode-hook

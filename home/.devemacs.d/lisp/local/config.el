@@ -123,7 +123,7 @@
                            le-compile-angel
                            ;; le-autorevert
 
-                           le-markdown-mode
+                           le-maybe-markdown-ts
                            le-org
 
                            le-group-evil

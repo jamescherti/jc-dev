@@ -31,7 +31,7 @@ set -euf
 # 1 to automatically handle the 2-step process: generate profile, then use it
 HANDLE_FPROFILE=1
 
-FPROFILE_GENERATE=1
+FPROFILE_GENERATE=0
 
 # 1 to use Clang on Arch Linux
 USE_CLANG=0

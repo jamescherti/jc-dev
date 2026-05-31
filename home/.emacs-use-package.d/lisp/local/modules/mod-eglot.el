@@ -43,7 +43,7 @@
       ))
   (push '(python-mode . python-ts-mode) major-mode-remap-alist))
 
-;; Debugger entered--Lisp error: (error "Can’t find state for python-flymake in ‘flymake--state’")
+;; Debugger entered--Lisp error: (error "Can't find state for python-flymake in 'flymake--state'")
 ;; error("Can't find state for %s in `flymake--state'" python-flymake)
 ;; flymake--handle-report(python-flymake backend-token7 nil)
 ;; apply(flymake--handle-report python-flymake backend-token7 nil)
@@ -98,9 +98,9 @@ ERROR is the error (if any)."
 ;; servers are unaware of Emacs completion-styles, therefore the candidates from
 ;; the language server are only post-filtered by the completion style. Corfu
 ;; retrieves the candidate completion table once at the beginning of a
-;; completion session and doesn’t reload it while the word is being typed. This
+;; completion session and doesn't reload it while the word is being typed. This
 ;; is advantageous for most completion-at-point-functions since it opens up
-;; caching opportunities. Eglot completion function doesn’t refresh the
+;; caching opportunities. Eglot completion function doesn't refresh the
 ;; completion table itself. This is problematic, as language servers often only
 ;; provide limited list of completions. Therefore, when using auto completion
 ;; and typing slowly, possible completion candidates may be missing, because the

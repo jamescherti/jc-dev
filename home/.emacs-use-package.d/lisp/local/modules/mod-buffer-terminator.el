@@ -37,21 +37,21 @@
                                                  "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
 
                                                  ;; [buffer-terminator]
-                                                 ;; Terminated the buffer: ’
-                                                 ;; *tar-data *temp*-79904*’
+                                                 ;; Terminated the buffer: '
+                                                 ;; *tar-data *temp*-79904*'
                                                  ;; (fundamental-mode)
                                                  "\\` \\*tar-data "
 
-                                                 ;; [buffer-terminator] Terminated the buffer: ’*ediff-errors*’ (fundamental-mode)
-                                                 ;; [buffer-terminator] Terminated the buffer: ’*ediff-fine-diff*’ (fundamental-mode)
-                                                 ;; [buffer-terminator] Terminated the buffer: ’ *ediff-tmp*’ (fundamental-mode)
+                                                 ;; [buffer-terminator] Terminated the buffer: '*ediff-errors*' (fundamental-mode)
+                                                 ;; [buffer-terminator] Terminated the buffer: '*ediff-fine-diff*' (fundamental-mode)
+                                                 ;; [buffer-terminator] Terminated the buffer: ' *ediff-tmp*' (fundamental-mode)
                                                  "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
                                                  ;; "\\`\\*vterm:" ; shell-pop
                                                  "\\`\\*buffer-terminator:" ; shell-pop
                                                  "\\` \\*Minibuf-[0-9]+\\*\\'"
                                                  ;; "\\` \\*Compiler Input\\*-"
                                                  "\\` \\*stderr of " ; *stderr of elisp-flymake-byte-compile*
-                                                 ;; [buffer-terminator] Terminated the buffer: ’ *http melpa.org:443*’ (fundamental-mode)
+                                                 ;; [buffer-terminator] Terminated the buffer: ' *http melpa.org:443*' (fundamental-mode)
                                                  "\\` \\*http "
                                                  ;; "\\`\\*gptel"
                                                  ;; "\\` \\*flymake-.*\\*\\'"
@@ -90,7 +90,7 @@
                                           "*pylsp::stderr*"
 
                                           ;; [buffer-terminator] Terminated the
-                                          ;; buffer: ’ *server*’
+                                          ;; buffer: ' *server*'
                                           ;; (fundamental-mode)
                                           " *server*"
 

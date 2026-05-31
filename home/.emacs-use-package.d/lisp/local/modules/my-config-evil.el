@@ -174,6 +174,7 @@
   (when (and (not (derived-mode-p 'conf-mode))
              (not (derived-mode-p 'txt-file-mode)))
     (if (or (derived-mode-p 'markdown-mode)
+            (derived-mode-p 'markdown-ts-mode)
             (derived-mode-p 'org-mode))
         ;; Other (e.g., Markdown)
         (let* ((file-name (buffer-file-name (buffer-base-buffer)))
@@ -430,6 +431,7 @@
   "Evaluate the current region and display a message."
   (interactive)
   (unless (or (derived-mode-p 'markdown-mode)
+              (derived-mode-p 'markdown-ts-mode)
               (derived-mode-p 'org-mode)
               (derived-mode-p 'emacs-lisp-mode))
     (error "This function supports only emacs-lisp-mode"))
@@ -520,7 +522,7 @@ ORIG-FUN is the function and ARGS the arguments."
   ;; custom command to M-[ in your Emacs configuration, you effectively
   ;; "highjack" the prefix of these incoming messages; Emacs consumes the first
   ;; two characters to trigger your function, leaving the remaining coordinate
-  ;; or paste data orphaned and uninterpreted. Consequently, the terminal’s
+  ;; or paste data orphaned and uninterpreted. Consequently, the terminal's
   ;; attempt to say "the mouse clicked at these coordinates" is chopped up, and
   ;; the tail end of that technical string—the "gibberish" you see—is dumped
   ;; directly into your buffer as literal text. Would you like me to provide a
@@ -534,7 +536,7 @@ ORIG-FUN is the function and ARGS the arguments."
 ;; Do not fail when the kill-ring is empty
 ;; To prevent the p command in Evil mode from failing when the paste ring
 ;; (akin to the clipboard in Vim) is empty, you can redefine the paste
-;; function to check if the ring is empty before attempting to paste. Here’s
+;; function to check if the ring is empty before attempting to paste. Here's
 ;; how you can do it using Emacs Lisp:
 (defun ignore-empty-ring-errors (orig-func &rest args)
   "Ignore errors related to the empty ring when calling ORIG-FUNC with ARGS."
@@ -1452,8 +1454,18 @@ If the parentheses are balanced, the function returns t."
 
 ;;; markdown mode
 
-(unless (my-treesit-language-available-p 'markdown)
+(if (my-treesit-language-available-p 'markdown)
+    (when (>= emacs-major-version 31)
+      (with-eval-after-load 'mod-cleanup
+        (when (my-treesit-language-available-p 'markdown)
+          (push 'markdown-mode mod-cleanup-packages-list)
+          (push 'markdown-toc mod-cleanup-packages-list))))
   (with-eval-after-load 'markdown-mode
+    (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
+
+    (unless noninteractive
+      (define-key markdown-mode-map (kbd "TAB") #'ignore))
+
     ;; (define-key markdown-mode-map (kbd "TAB") #'ignore)
 
     ;; (evil-define-key 'normal markdown-mode-map (kbd "TAB") #'ignore)
@@ -1570,7 +1582,10 @@ If the parentheses are balanced, the function returns t."
       (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
 
   (when (fboundp 'my-setup-markdown-toc)
-    (add-hook 'markdown-mode-hook #'my-setup-markdown-toc)))
+    (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
+
+  (setq markdown-toc-mode-map nil)
+  (setq markdown-toc-header-toc-title "## Table of Contents"))
 
 ;;; Code that replaces evil visualstar
 
@@ -2477,6 +2492,7 @@ If COUNT is given, move COUNT - 1 lines downward first."
 ;; (add-hook 'org-mode-hook 'my-evil-quick-sdcv-search-at-point)
 ;; (add-hook 'txt-file-mode-hook 'my-evil-quick-sdcv-search-at-point)
 (dolist (mode-hook '(markdown-mode-hook
+                     markdown-ts-mode-hook
                      org-mode-hook
                      txt-file-mode-hook))
   (add-hook mode-hook
