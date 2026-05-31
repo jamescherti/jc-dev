@@ -1,4 +1,6 @@
 /forks/
 /other/
+*/legacy/*
+*/trash/*
 /batchfetch.yaml
 /batchfetch-local.yaml
