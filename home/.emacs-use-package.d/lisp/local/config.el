@@ -547,7 +547,7 @@ subsequent GCC invocations."
 ;;                                    elpaca-build-steps)))
 
 (setq compile-angel-verbose t)
-(setq compile-angel-debug t)
+(setq compile-angel-debug nil)
 
 (setq buffer-terminator-verbose t)
 (setq buffer-terminator-debug nil)
