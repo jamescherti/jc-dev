@@ -4574,15 +4574,12 @@ environment for accurate linting."
               (list "vterm"
                     buf-name
                     `(lambda ()
-                       (let ((tmux-buffer (vterm ,buf-name)))
-                         (with-current-buffer tmux-buffer
-                           ;; (sleep-for 0.1)
-                           (vterm-send-string
-                            (format "exec tmux-session emacs-%s"
-                                    (replace-regexp-in-string
-                                     "[^a-z0-9]+" "-"
-                                     (shell-quote-argument ,proj-name))))
-                           (vterm-send-return)))))))))
+                       (let* ((vterm-shell
+                               (format "tmux-session emacs-%s"
+                                       (replace-regexp-in-string
+                                        "[^a-z0-9]+" "-"
+                                        (shell-quote-argument ,proj-name))))
+                              (tmux-buffer (vterm ,buf-name))))))))))
 
 (with-eval-after-load 'shell-pop
   ;; Apply the new global setting advice
