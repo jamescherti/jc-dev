@@ -99,6 +99,7 @@
                                     ztree
                                     vundo
                                     flyspell-lazy
+                                    savefold
                                     eat
                                     magit
                                     magit-section)
