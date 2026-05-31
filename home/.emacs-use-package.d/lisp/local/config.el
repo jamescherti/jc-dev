@@ -883,8 +883,8 @@ subsequent GCC invocations."
                            le-org
                            le-org-appear
 
-                           ;; le-markdown-mode
-                           ;; le-markdown-toc
+                           le-maybe-markdown-ts
+
                            le-edit-indirect
 
                            le-yasnippet

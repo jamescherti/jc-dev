@@ -5626,13 +5626,11 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   ;; otherwise it switches the buffer frame to evil normal state.
 ;;   (evil-ghostel-escape 'auto))
 
-;;; yaml
-
-(with-eval-after-load 'le-group-yaml
+(when (>= emacs-major-version 31)
   (with-eval-after-load 'mod-cleanup
-    (when (my-treesit-language-available-p 'yaml)
-      (push 'flymake-yamllint mod-cleanup-packages-list)
-      (push 'yaml-mode mod-cleanup-packages-list))))
+    (when (my-treesit-language-available-p 'markdown)
+      (push 'markdown-mode mod-cleanup-packages-list)
+      (push 'markdown-toc mod-cleanup-packages-list))))
 
 ;;; Provide
 

@@ -1452,10 +1452,7 @@ If the parentheses are balanced, the function returns t."
 
 ;;; markdown mode
 
-(if (my-treesit-language-available-p 'markdown)
-    (with-eval-after-load 'mod-cleanup
-      (push 'markdown-mode mod-cleanup-packages-list))
-  (require 'le-markdown-mode)
+(unless (my-treesit-language-available-p 'markdown)
   (with-eval-after-load 'markdown-mode
     ;; (define-key markdown-mode-map (kbd "TAB") #'ignore)
 
@@ -1506,62 +1503,74 @@ If the parentheses are balanced, the function returns t."
     ;;  '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4 :weight bold))))
     ;;  '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.3 :weight bold))))
     ;;  '(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2 :weight bold)))))
-    ))
+    (setq markdown-gfm-use-electric-backquote nil)
+    (setq markdown-heading-scaling t)
 
+    ;; (with-eval-after-load 'markdown-mode
+    ;;   (evil-define-key 'normal markdown-mode (kbd "RET") nil)
+    ;;   (evil-define-key 'normal markdown-mode (kbd "{") bufferwizard-point-backward-to-empty-line)
+    ;;   (evil-define-key 'normal markdown-mode (kbd "}") indentnav-forward-to-empty-line))
 
+    (with-eval-after-load 'markdown-mode
+      (evil-collection-define-key 'normal 'markdown-mode-map
+        ;; Intercept
+        ;; "{" 'bufferwizard-point-backward-to-empty-line
+        ;; "}" 'bufferwizard-point-forward-to-empty-line
+        ;; RET can sometimes check and uncheck boxes. This is not
+        ;; something I want.
+        "RET" nil
+        [tab] nil
+        [S-tab] nil
+        ;; `evil-markdown' doesn't bind but spacemacs does.
+        (kbd "RET") 'markdown-do))
 
-(setq markdown-gfm-use-electric-backquote nil)
-(setq markdown-heading-scaling t)
+    ;; Already merged to upstream
+    ;; (with-eval-after-load 'markdown-mode
+    ;;   ;; Modify the shared syntax table globally for all markdown buffers
+    ;;   (modify-syntax-entry ?' "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?* "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?> "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
 
-;; (with-eval-after-load 'markdown-mode
-;;   (evil-define-key 'normal markdown-mode (kbd "RET") nil)
-;;   (evil-define-key 'normal markdown-mode (kbd "{") bufferwizard-point-backward-to-empty-line)
-;;   (evil-define-key 'normal markdown-mode (kbd "}") indentnav-forward-to-empty-line))
+    (defun my-setup-markdown-mode ()
+      "Setup markdown modes."
+      ;; In gptel buffers we set `nobreak-char-display' to nil locally so that the
+      ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
+      ;; space. This suppresses the distinct glyph or face Emacs normally applies
+      ;; to NBSP, keeping the buffer free of distracting blue highlights while
+      ;; preserving the character's internal no-break semantics.
+      ;;
+      ;; Here is an example of what is highlighted: $5 billion-valued.
+      ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
+      ;; and the hyphen after n are rendered as highlighted glyphs.
+      (setq-local nobreak-char-display nil)
 
-(with-eval-after-load 'markdown-mode
-  (evil-collection-define-key 'normal 'markdown-mode-map
-    ;; Intercept
-    ;; "{" 'bufferwizard-point-backward-to-empty-line
-    ;; "}" 'bufferwizard-point-forward-to-empty-line
-    ;; RET can sometimes check and uncheck boxes. This is not
-    ;; something I want.
-    "RET" nil
-    [tab] nil
-    [S-tab] nil
-    ;; `evil-markdown' doesn't bind but spacemacs does.
-    (kbd "RET") 'markdown-do))
+      ;; visual-line-mode is slow?
+      ;; (visual-line-mode 1)
 
-;; Already merged to upstream
-;; (with-eval-after-load 'markdown-mode
-;;   ;; Modify the shared syntax table globally for all markdown buffers
-;;   (modify-syntax-entry ?' "." markdown-mode-syntax-table)
-;;   (modify-syntax-entry ?* "." markdown-mode-syntax-table)
-;;   (modify-syntax-entry ?> "." markdown-mode-syntax-table)
-;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
-;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
+      (let ((inhibit-message t))
+        (toggle-truncate-lines 0)))
 
-(defun my-setup-markdown-mode ()
-  "Setup markdown modes."
-  ;; In gptel buffers we set `nobreak-char-display' to nil locally so that the
-  ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
-  ;; space. This suppresses the distinct glyph or face Emacs normally applies
-  ;; to NBSP, keeping the buffer free of distracting blue highlights while
-  ;; preserving the character's internal no-break semantics.
-  ;;
-  ;; Here is an example of what is highlighted: $5 billion-valued.
-  ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
-  ;; and the hyphen after n are rendered as highlighted glyphs.
-  (setq-local nobreak-char-display nil)
+    ;; (add-hook 'gfm-mode-hook #'my-setup-markdown-mode)
+    (when (fboundp 'my-setup-markdown-mode)
+      (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
+      (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)))
 
-  ;; visual-line-mode is slow?
-  ;; (visual-line-mode 1)
+  (defun my-markdown-toc-gen-if-present ()
+    "Gen table of contents if present."
+    (when (and (fboundp 'markdown-toc--toc-already-present-p)
+               (fboundp 'markdown-toc-generate-toc)
+               (markdown-toc--toc-already-present-p))
+      (markdown-toc-generate-toc)))
 
-  (let ((inhibit-message t))
-    (toggle-truncate-lines 0)))
+  (defun my-setup-markdown-toc ()
+    "Setup the markdown-toc package."
+    (when (fboundp 'my-markdown-toc-gen-if-present)
+      (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
 
-(add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
-(add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)
-;; (add-hook 'gfm-mode-hook #'my-setup-markdown-mode)
+  (when (fboundp 'my-setup-markdown-toc)
+    (add-hook 'markdown-mode-hook #'my-setup-markdown-toc)))
 
 ;;; Code that replaces evil visualstar
 
@@ -1818,24 +1827,6 @@ ignored and logged as a warning. All other errors are re-raised."
 (with-eval-after-load 'flymake-proc
   (advice-add 'flymake-proc-legacy-flymake :around
               #'my-flymake-proc-legacy-safe-advice))
-
-;;; markdown toc
-
-;;; Markdown
-
-(defun my-markdown-toc-gen-if-present ()
-  "Gen table of contents if present."
-  (when (and (fboundp 'markdown-toc--toc-already-present-p)
-             (fboundp 'markdown-toc-generate-toc)
-             (markdown-toc--toc-already-present-p))
-    (markdown-toc-generate-toc)))
-
-(defun my-setup-markdown-toc ()
-  "Setup the markdown-toc package."
-  (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t))
-
-(add-hook 'markdown-ts-mode-hook #'my-setup-markdown-toc)
-(add-hook 'markdown-mode-hook #'my-setup-markdown-toc)
 
 ;;; Silence C-f
 
