@@ -800,7 +800,7 @@ subsequent GCC invocations."
                            le-theme
                            le-default-settings
                            le-default-keybindings
-                           le-gcmh
+                           ;; le-gcmh
 
                            le-evil
                            le-evil-collection

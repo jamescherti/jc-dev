@@ -421,6 +421,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(setq archive-hidden-columns '(Mode Ids Date&Time Ratio))
+(setq archive-alternate-hidden-columns '())
+
 (setq redisplay-skip-fontification-on-input nil)
 
 ;; Maximizes screen real estate by hiding the mode-line.
@@ -1662,6 +1665,12 @@ WIDTH is the tab width."
                 (setq-local ispell-extra-args
                             (remove "--run-together" ispell-extra-args))))
 
+  ;; (defun my-ispell-perl-mode-setup ()
+  ;;   "Remove the --run-together argument from Aspell in text modes."
+  ;;   (setq-local ispell-extra-args (append '("--mode=perl") ispell-extra-args)))
+  ;; (add-hook 'bash-ts-mode-hook #'my-ispell-perl-mode-setup)
+  ;; (add-hook 'sh-mode-hook #'my-ispell-perl-mode-setup)
+
   (setq ispell-dictionary "en_US")
 
   (with-eval-after-load 'which-key
@@ -1833,6 +1842,9 @@ WIDTH is the tab width."
 
                  ;; easysession
                  treesit-query-error
+
+                 ;; scan-error: "Unbalanced parentheses"
+                 scan-error
 
                  "Bad diff region number"))
     (push err debug-ignored-errors))
@@ -2573,8 +2585,14 @@ ORIG-FUN is the advised function.  DESC is the package description struct."
                     (quick-fasd-add-path file)
                   (message "Warning: Undefined: `quick-fasd-add-path'"))
                 (call-process shell-cmd nil nil nil file))
-            (dired--find-possibly-alternative-file file))))
-    (error "Undefined: dired-get-file-for-visit or dired--find-possibly-alternative-file")))
+            (condition-case err
+                (dired--find-possibly-alternative-file file)
+              (error
+               (message "Container parsing failed (%s). Opening literally."
+                        (error-message-string err))
+               (find-file-literally file))))))
+    (error
+     "Undefined: dired-get-file-for-visit or dired--find-possibly-alternative-file")))
 
 (with-eval-after-load 'dired
 

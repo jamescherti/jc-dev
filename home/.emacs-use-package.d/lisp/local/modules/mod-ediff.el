@@ -68,11 +68,30 @@ vertical split."
 
 ;; Conditionally trigger `winner-undo` only if the layout remains unmutated
 (defun mod-ediff-winner-undo ()
-  "Ediff winner undo."
+  "Ediff winner undo.
+Restores the window configuration while ensuring point position is preserved
+for the compared buffers."
   (when (and (not mod-ediff--inhibit-winner-undo)
              (bound-and-true-p winner-mode)
              (fboundp 'winner-undo))
-    (winner-undo)))
+    (let ((buf-points
+           (delq nil
+                 (mapcar (lambda (buf)
+                           (when (and buf (buffer-live-p buf))
+                             (cons buf (with-current-buffer buf (point)))))
+                         (list (and (boundp 'ediff-buffer-A) ediff-buffer-A)
+                               (and (boundp 'ediff-buffer-B) ediff-buffer-B)
+                               (and (boundp 'ediff-buffer-C) ediff-buffer-C))))))
+      (winner-undo)
+      (dolist (bp buf-points)
+        (let ((buf (car bp))
+              (pt (cdr bp)))
+          (when (buffer-live-p buf)
+            (with-current-buffer buf
+              (goto-char pt))
+            (let ((win (get-buffer-window buf t)))
+              (when (window-live-p win)
+                (set-window-point win pt)))))))))
 
 (add-hook 'ediff-quit-hook #'mod-ediff-winner-undo)
 
@@ -212,6 +231,52 @@ This function executes within the Ediff Control Buffer."
 
 (add-hook 'ediff-prepare-buffer-hook #'mod-ediff--setup-ediff-auto-text-scale)
 (add-hook 'ediff-cleanup-hook #'mod-ediff--ediff-teardown-auto-text-scale)
+
+;;; ediff: Synchronize truncate-lines
+
+(defun mod-ediff--ediff-sync-truncate-startup ()
+  "Synchronize `truncate-lines' in all Ediff buffers based on Buffer A."
+  (when (and (boundp 'ediff-buffer-A)
+             (buffer-live-p ediff-buffer-A))
+    (let ((truncate-state (with-current-buffer ediff-buffer-A truncate-lines)))
+      (dolist (buf (mod-ediff--ediff-buffers-from-control-panel))
+        (when (buffer-live-p buf)
+          (with-current-buffer buf
+            (setq truncate-lines truncate-state)))))))
+
+(add-hook 'ediff-startup-hook #'mod-ediff--ediff-sync-truncate-startup)
+
+(defun mod-ediff--sync-truncate-advice (&rest _)
+  "Advice to synchronize line truncation across active Ediff buffers."
+  (let ((ediff-bufs (mod-ediff--ediff-buffers)))
+    ;; Only execute the synchronization if we are inside an active Ediff session
+    (when ediff-bufs
+      (let ((current-state truncate-lines)
+            (original-buf (current-buffer)))
+        (dolist (buf ediff-bufs)
+          (when (and (buffer-live-p buf)
+                     (not (eq buf original-buf)))
+
+            ;; 1. Update the buffer-local variable
+            (with-current-buffer buf
+              (setq truncate-lines current-state))
+
+            ;; 2. Find the window displaying the buffer and redraw it
+            (let ((win (get-buffer-window buf t)))
+              (when (window-live-p win)
+                (with-selected-window win
+                  (recenter))))))))))
+
+(defun mod-ediff--setup-ediff-auto-truncate ()
+  "Apply the synchronization advice to `toggle-truncate-lines'."
+  (advice-add 'toggle-truncate-lines :after #'mod-ediff--sync-truncate-advice))
+
+(defun mod-ediff--ediff-teardown-auto-truncate ()
+  "Remove the synchronization advice when the session terminates."
+  (advice-remove 'toggle-truncate-lines #'mod-ediff--sync-truncate-advice))
+
+(add-hook 'ediff-prepare-buffer-hook #'mod-ediff--setup-ediff-auto-truncate)
+(add-hook 'ediff-cleanup-hook #'mod-ediff--ediff-teardown-auto-truncate)
 
 ;;; ediff: disable/enable minor modes
 

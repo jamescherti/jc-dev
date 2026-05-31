@@ -2416,8 +2416,6 @@ If COUNT is given, move COUNT - 1 lines downward first."
     (add-hook hook #'evil-matchit-mode))
 
   :config
-  (add-to-list 'debug-ignored-errors "Unbalanced parentheses")
-
   (when (fboundp 'evilmi-load-plugin-rules)
     (evilmi-load-plugin-rules '(cmake-ts-mode) '(cmake))
     (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(c simple))
