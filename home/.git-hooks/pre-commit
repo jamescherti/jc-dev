@@ -185,9 +185,7 @@ check_typographic_apostrophes() {
     echo "Check modified file: $file"
     # Extract only the added lines in the staged changes and grep for
     # typographic quotes
-    # TODO check the git file
-    git diff --cached -- "$file" | grep -E '^\+([^+]|$)' | grep -q -E "’|‘" || true
-    if git diff --cached -- "$file" \
+    if git diff --no-ext-diff --cached -- "$file" \
       | grep -E '^\+([^+]|$)' | grep -q -E "’|‘"; then
       error "[ERROR] Typographic apostrophe ('’' or '‘') introduced in: $file"
       fault=1
