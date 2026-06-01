@@ -2113,6 +2113,8 @@ WIDTH is the tab width."
   (setq recentf-save-file
         (expand-file-name "recentf" my-shared-user-emacs-directory)))
 
+(add-hook 'lightemacs-after-modules-hook #'lightemacs-user-post-init)
+
 ;;; Useful functions
 
 (defun my-dir-config--buffer-cwd ()

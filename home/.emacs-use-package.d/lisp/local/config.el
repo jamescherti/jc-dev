@@ -425,6 +425,8 @@ subsequent GCC invocations."
   ;;   (setq use-package-compute-statistics t))
   )
 
+(add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
+
 ;; (when (eq lightemacs-package-manager 'straight)
 ;;   ;; TODO compile angel readme?
 ;;   (setq straight-disable-native-compile t)
@@ -1130,14 +1132,17 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 ;;; pre/post modules
 
-(defun lightemacs-user-pre-modules ()
+(defun lightemacs-user-before-modules ()
   "Pre-modules."
   (my-add-packages-to-load-path)
   (my-config-display-buffer-alist))
 
-(defun lightemacs-user-post-modules ()
+(defun lightemacs-user-after-modules ()
   "Post-modules."
   (my-add-packages-to-load-path))
+
+(add-hook 'lightemacs-before-modules-hook #'lightemacs-user-before-modules)
+(add-hook 'lightemacs-after-modules-hook #'lightemacs-user-after-modules)
 
 ;;; Customize code folding
 
