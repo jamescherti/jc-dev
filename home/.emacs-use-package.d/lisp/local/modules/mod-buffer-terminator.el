@@ -42,17 +42,25 @@
                                                  ;; (fundamental-mode)
                                                  "\\` \\*tar-data "
 
-                                                 ;; [buffer-terminator] Terminated the buffer: '*ediff-errors*' (fundamental-mode)
-                                                 ;; [buffer-terminator] Terminated the buffer: '*ediff-fine-diff*' (fundamental-mode)
-                                                 ;; [buffer-terminator] Terminated the buffer: ' *ediff-tmp*' (fundamental-mode)
+                                                 ;; ' *diff-hl* '
+                                                 ;; ' *diff-hl-reference* '
+                                                 "\\` \\*diff-hl"
+
+                                                 ;; '*ediff-errors*' (fundamental-mode)
+                                                 ;; '*ediff-fine-diff*' (fundamental-mode)
+                                                 ;; ' *ediff-tmp*' (fundamental-mode)
                                                  "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
                                                  "\\`\\*vterm:" ; shell-pop
                                                  "\\`\\*buffer-terminator:" ; shell-pop
                                                  "\\` \\*Minibuf-[0-9]+\\*\\'"
                                                  ;; "\\` \\*Compiler Input\\*-"
-                                                 "\\` \\*stderr of " ; *stderr of elisp-flymake-byte-compile*
-                                                 ;; [buffer-terminator] Terminated the buffer: ' *http melpa.org:443*' (fundamental-mode)
+
+                                                 ;; *stderr of elisp-flymake-byte-compile*
+                                                 "\\` \\*stderr of "
+
+                                                 ;; ' *http melpa.org:443*' (fundamental-mode)
                                                  "\\` \\*http "
+
                                                  ;; "\\`\\*gptel"
                                                  ;; "\\` \\*flymake-.*\\*\\'"
                                                  ;; "\\` \\*Preview:.*\\*\\'"
