@@ -53,9 +53,7 @@ export LIBVIRT_DEFAULT_URI=qemu:///system
 # Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
 # lsp-use-plists flag. plists provide better performance in deserialization and
 # also put less presure than hash-tables.
-export LSP_USE_PLISTS=true
-
-export VIM_PERSISTENT_SESSION_ENABLED=0
+# export LSP_USE_PLISTS=true
 
 #------------------------------------------------------------------------------
 # CUSTOM ENV
