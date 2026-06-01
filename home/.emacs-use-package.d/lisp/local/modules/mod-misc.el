@@ -2106,6 +2106,8 @@ WIDTH is the tab width."
   (setq easysession-directory
         (expand-file-name "easysession" my-shared-user-emacs-directory))
 
+  (setq project-list-file (when (boundp 'lightemacs-var-directory)
+                            (expand-file-name "projects" my-shared-user-emacs-directory)))
   (setq my-project-list-file-auto
         (expand-file-name "projects-auto"
                           my-shared-user-emacs-directory))
@@ -5447,28 +5449,28 @@ are editing by falling back to another visible file buffer."
 
 ;;; git gutter
 
-;; (lightemacs-use-package git-gutter
-;;   :commands (git-gutter-mode)
-;;
-;;   :init
-;;   (setq git-gutter:added-sign "+"
-;;         git-gutter:deleted-sign "-"
-;;         git-gutter:ask-p nil
-;;         git-gutter:diff-option "-w"
-;;         git-gutter:handled-backends '(git)
-;;         git-gutter:disabled-modes '(image-mode fundamental-mode)
-;;         git-gutter:hide-gutter t
-;;         git-gutter:modified-sign "="
-;;         ;; git-gutter:visual-line t        ; Better for wrapped lines
-;;         git-gutter:update-interval 0
-;;         git-gutter:verbosity 0)
-;;
-;;   :config
-;;   (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
-;;   (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
-;;   (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
-;;   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
-;;   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
+(lightemacs-use-package git-gutter
+  :commands (git-gutter-mode)
+
+  :init
+  (setq git-gutter:added-sign "+"
+        git-gutter:deleted-sign "-"
+        git-gutter:ask-p nil
+        git-gutter:diff-option "-w"
+        git-gutter:handled-backends '(git)
+        git-gutter:disabled-modes '(image-mode fundamental-mode)
+        git-gutter:hide-gutter t
+        git-gutter:modified-sign "="
+        ;; git-gutter:visual-line t        ; Better for wrapped lines
+        git-gutter:update-interval 0
+        git-gutter:verbosity 0)
+
+  :config
+  (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
+  (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
+  (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
+  (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
+  (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
 
 ;; (lightemacs-use-package git-gutter-fringe
 ;;   :after git-gutter)

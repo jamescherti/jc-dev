@@ -152,8 +152,9 @@ The selection is limited to projects already listed in the project database; see
   "Automatically generated project list.")
 
 ;; The project list
-(setq project-list-file (when (boundp 'lightemacs-var-directory)
-                          (expand-file-name "projects" lightemacs-var-directory)))
+;; Already configured in mod-misc
+;; (setq project-list-file (when (boundp 'lightemacs-var-directory)
+;;                           (expand-file-name "projects" lightemacs-var-directory)))
 
 (defvar my-project-list-file-auto-mtime nil
   "Stores the last known modification time of the file.")
