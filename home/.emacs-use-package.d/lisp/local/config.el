@@ -1303,6 +1303,13 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 ;; the Emacs event loop.
 (setq pgtk-use-im-context-on-new-connection nil)
 
+;;; Kirigami
+
+(setq kirigami-menu-bar-label "Folds")
+(setq kirigami-context-menu-label "Contextual folds")
+(setq kirigami-show-menu-bar t)
+(setq kirigami-show-context-menu t)
+
 ;;; Provide
 
 (provide 'config)
