@@ -85,6 +85,9 @@
                                           "*vc*"
                                           "*Help*"
 
+                                          ;; '*Org Agenda*' (org-agenda-mode)
+                                          "*Org Agenda*"
+
                                           ;; [buffer-terminator] Terminated the
                                           ;; buffer: ' *flymake-shellcheck*'
                                           ;; (fundamental-mode)
