@@ -180,8 +180,10 @@ gen_dict_from_unified_spell_file() {
   fi
 
   # ENCHANT (EMACS JINX)
-  mkdir -p "$ENCHANT_DIR"
-  cat "$UNIFIED_SPELL_FILE" >"$ENCHANT_FILE"
+  if [[ $ENCHANT -ne 0 ]]; then
+    mkdir -p "$ENCHANT_DIR"
+    cat "$UNIFIED_SPELL_FILE" >"$ENCHANT_FILE"
+  fi
 
   # FIREFOX
   if [[ $FIREFOX -ne 0 ]]; then
