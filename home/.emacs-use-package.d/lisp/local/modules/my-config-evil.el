@@ -1849,7 +1849,7 @@ ignored and logged as a warning. All other errors are re-raised."
   "Scroll the window COUNT pages downwards.
 This prevents `evil-scroll-page-down' from displaying: End of buffer."
   :repeat nil
-  ;; :keep-visual t
+  :keep-visual t
   (interactive "p")
   (ignore-errors (evil-scroll-page-down count)))
 
