@@ -264,6 +264,30 @@ OBJECT can be nil (current window), a window, or a frame."
 ;;
 ;; (add-hook 'outline-minor-mode-hook #'my-setup-outline-minor-mode-kirigami)
 
+;;; comment/uncomment
+
+(defcustom kirigami-unfold-before-comment t
+  "When non-nil, automatically unfold before commenting.
+This advises standard Emacs comment commands to unfold the text at point
+or within the active region before applying the comment."
+  :type 'boolean
+  :group 'kirigami)
+
+(defun kirigami--unfold-for-comment-advice (&rest _args)
+  "Advice function to unfold text before commenting operations."
+  (when kirigami-unfold-before-comment
+    (save-excursion
+      (if (use-region-p)
+          (goto-char (region-beginning))
+        (beginning-of-line))
+      (ignore-errors
+        (kirigami-open-fold-rec)))))
+
+(advice-add 'comment-dwim :before #'kirigami--unfold-for-comment-advice)
+(advice-add 'comment-region :before #'kirigami--unfold-for-comment-advice)
+(advice-add 'comment-or-uncomment-region :before #'kirigami--unfold-for-comment-advice)
+(advice-add 'uncomment-region :before #'kirigami--unfold-for-comment-advice)
+
 ;;; Provide
 
 (provide 'mod-kirigami)

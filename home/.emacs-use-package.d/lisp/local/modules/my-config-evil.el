@@ -2321,20 +2321,36 @@ If COUNT is given, move COUNT - 1 lines downward first."
 
 ;;; Toggle comment
 
+(defun le--toggle-comment-region (beg end)
+  "Toggle comments between BEG and END.
+In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first."
+  ;; (cond
+  ;;  ((derived-mode-p 'org-mode)
+  ;;   (if (fboundp 'org-fold-region)
+  ;;       (org-fold-region beg end nil)
+  ;;     (outline-flag-region beg end nil)))
+  ;;  ((or (derived-mode-p 'outline-mode)
+  ;;       (bound-and-true-p outline-minor-mode))
+  ;;   (outline-flag-region beg end nil)))
+  (comment-or-uncomment-region beg end))
+
 (evil-define-operator le-evil-toggle-comment-visual (beg end)
   "Toggle comment from BEG to END."
   (interactive "<r>")
-  (unless (derived-mode-p 'org-mode)
-    (comment-or-uncomment-region beg end)))
+  (le--toggle-comment-region beg end))
 
 (defun le-evil-toggle-comment-line ()
   "Toggle comment in the current line."
   (interactive)
-  (unless (derived-mode-p 'org-mode)
-    (comment-or-uncomment-region (line-beginning-position)
-                                 (line-end-position))))
+  (le--toggle-comment-region (pos-bol) (pos-eol)))
 
-(define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-line)
+;; (defun le-evil-toggle-comment-line ()
+;;   "Toggle comment in the current line."
+;;   (interactive)
+;;   (le--toggle-comment-region (pos-bol) (pos-eol)))
+
+;; (define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-line)
+(define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
 (define-key evil-visual-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
 
 ;;; Packages
