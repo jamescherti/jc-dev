@@ -60,8 +60,9 @@ Calling it a second time takes you to history index 1 (the collect buffer)."
                (string-match-p "Embark Collect" (buffer-name (car (nth 1 prev)))))
       (set-window-prev-buffers win (cdr prev)))))
 
-(advice-add 'embark-collect-default-action :after
-            #'fix-embark-collect-window-history)
+(with-eval-after-load 'embark
+  (advice-add 'embark-collect-default-action :after
+              #'fix-embark-collect-window-history))
 
 ;;; Always current window
 
