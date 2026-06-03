@@ -2337,6 +2337,8 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 
 (evil-define-operator le-evil-toggle-comment-visual (beg end)
   "Toggle comment from BEG to END."
+  :move-point nil
+  :restore-point t
   (interactive "<r>")
   (le--toggle-comment-region beg end))
 
@@ -2350,7 +2352,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 ;;   (interactive)
 ;;   (le--toggle-comment-region (pos-bol) (pos-eol)))
 
-;; (define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-line)
+(define-key evil-normal-state-map (kbd "gC") #'le-evil-toggle-comment-line)
 (define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
 (define-key evil-visual-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
 
