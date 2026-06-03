@@ -5,6 +5,10 @@ options:
   git_pull: false
   exec_after: ["update-project-list"]
   ignore_untracked:
+    - wip
+    - home-settings
+    - batchfetch-enc.yaml
+    - notes
     - .rgignore
     - other
     - .fdignore

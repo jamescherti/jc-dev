@@ -177,7 +177,8 @@ export JC_DOTFILES_UNATTENDED=1
 export JC_DEV_UNATTENDED=1
 
 export BATCHFETCH_CHECK_UNTRACKED=1
-export BATCHFETCH_JOBS=5
+export BATCHFETCH_JOBS=1
+BATCHFETCH_JOBS=$(nproc)
 
 if [ -d "$HOME/Sync" ]; then
   export GIT_CHECK_GPG_DATA_DIR="$HOME/Sync/.git-check-gpg"
