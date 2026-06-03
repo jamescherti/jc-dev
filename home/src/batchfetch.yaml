@@ -63,7 +63,8 @@ tasks:
   - git: git@github.com:jamescherti/cherrybuckle
     # revision: master
     path: tools/cherrybuckle
-    exec_before: ["git", "upstream", "https://github.com/zevv/bucklespring"]
+    remote:
+      upstream: https://github.com/zevv/bucklespring
 
   - git: git@github.com:jamescherti/pdfcipher
     path: tools/pdfcipher
@@ -157,16 +158,19 @@ tasks:
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/diff-hl
     path: forks/diff-hl
-    exec_before: ["git", "upstream", "https://github.com/dgutov/diff-hl"]
+    remote:
+      upstream: https://github.com/dgutov/diff-hl
 
   - git: git@github.com:jamescherti/ananicy-rules
     path: forks/ananicy-rules
-    exec_before: ["git", "upstream", "https://github.com/CachyOS/ananicy-rules"]
+    remote:
+      upstream: https://github.com/CachyOS/ananicy-rules
 
   - git: git@github.com:jamescherti/fasd
     path: forks/fasd
     revision: master
-    exec_before: ["git", "upstream", "https://github.com/whjvenyl/fasd"]
+    remote:
+      upstream: https://github.com/whjvenyl/fasd
 
   - git: git@github.com:jamescherti/gcmh
     path: forks/gcmh
@@ -176,42 +180,50 @@ tasks:
   - git: git@github.com:jamescherti/run-or-raise.git
     path: forks/run-or-raise
     revision: main
-    exec_before: ["git", "upstream", "https://github.com/CZ-NIC/run-or-raise"]
+    remote:
+      upstream: https://github.com/CZ-NIC/run-or-raise
 
   - git: git@github.com:jamescherti/org-mode
     path: forks/org-mode
     revision: main
-    exec_before: ["git", "upstream", "https://git.savannah.gnu.org/git/emacs/org-mode.git"]
+    remote:
+      upstream: https://git.savannah.gnu.org/git/emacs/org-mode.git
 
   - git: git@github.com:jamescherti/avy
     path: forks/avy
     revision: master
-    exec_before: ["git", "upstream", "https://github.com/abo-abo/avy"]
+    remote:
+      upstream: https://github.com/abo-abo/avy
 
   - git: git@github.com:jamescherti/ansible-doc
     path: forks/ansible-doc
     revision: master
-    exec_before: ["git", "upstream", "https://github.com/emacsorphanage/ansible-doc"]
+    remote:
+      upstream: https://github.com/emacsorphanage/ansible-doc
 
   - git: git@github.com:jamescherti/yasnippet
     path: forks/yasnippet
     revision: master
-    exec_before: ["git", "upstream", "https://github.com/joaotavora/yasnippet"]
+    remote:
+      upstream: https://github.com/joaotavora/yasnippet
 
   - git: git@github.com:jamescherti/emacs-elpa
     path: forks/emacs-elpa
     revision: main
-    exec_before: ["git", "upstream", "https://git.savannah.gnu.org/git/emacs/elpa.git"]
+    remote:
+      upstream: https://git.savannah.gnu.org/git/emacs/elpa.git
 
   - git: git@github.com:jamescherti/emacs-nongnu-elpa
     path: forks/emacs-nongnu-elpa
     revision: main
-    exec_before: ["git", "upstream", "https://git.savannah.gnu.org/git/emacs/nongnu.git"]
+    remote:
+      upstream: https://git.savannah.gnu.org/git/emacs/nongnu.git
 
   - git: git@github.com:jamescherti/emacs.git
     path: forks/emacs
     revision: master
-    exec_before: ["git", "upstream", "https://github.com/emacs-mirror/emacs"]
+    remote:
+      upstream: https://github.com/emacs-mirror/emacs
 
   - git: git@github.com:jamescherti/emacs-shfmt
     path: forks/emacs-shfmt
@@ -224,11 +236,13 @@ tasks:
 
   - git: git@github.com:jamescherti/lua-mode
     path: forks/lua-mode
-    exec_before: ["git", "upstream", "https://github.com/immerrr/lua-mode"]
+    remote:
+      upstream: https://github.com/immerrr/lua-mode
 
   - git: git@github.com:jamescherti/jinja2-mode
     path: forks/jinja2-mode
-    exec_before: ["git", "upstream", "https://github.com/paradoxxxzero/jinja2-mode"]
+    remote:
+      upstream: https://github.com/paradoxxxzero/jinja2-mode
 
   - git: git@github.com:jamescherti/vline
     path: forks/vline
@@ -238,17 +252,20 @@ tasks:
 
   - git: git@github.com:jamescherti/paredit
     path: forks/paredit
-    exec_before: ["git", "upstream", "https://paredit.org/cgit/paredit"]
+    remote:
+      upstream: https://paredit.org/cgit/paredit
 
   # - git: ssh://git@codeberg.org/jamescherti/emacs-eat.git
   # I have change it and the developer hasn't merged my changes yet.
   - git: git@github.com:jamescherti/emacs-eat
     path: forks/emacs-eat
-    exec_before: ["git", "upstream", "https://codeberg.org/akib/emacs-eat"]
+    remote:
+      upstream: https://codeberg.org/akib/emacs-eat
 
   - git: git@github.com:jamescherti/emacs-goto-chg
     path: forks/emacs-goto-chg
-    exec_before: ["git", "upstream", "https://github.com/emacs-evil/goto-chg"]
+    remote:
+      upstream: https://github.com/emacs-evil/goto-chg
 
   - git: git@codeberg.org:jamescherti/git-timemachine
     path: forks/git-timemachine
@@ -261,49 +278,59 @@ tasks:
 
   - git: git@github.com:jamescherti/markdown-mode
     path: forks/markdown-mode
-    exec_before: ["git", "upstream", "https://github.com/jrblevin/markdown-mode"]
+    remote:
+      upstream: https://github.com/jrblevin/markdown-mode
 
   - git: git@github.com:jamescherti/dtrt-indent
     path: forks/dtrt-indent
 
   - git: git@github.com:jamescherti/markdown-toc
     path: forks/markdown-toc
-    exec_before: ["git", "upstream", "https://github.com/ardumont/markdown-toc"]
+    remote:
+      upstream: https://github.com/ardumont/markdown-toc
 
   - git: git@github.com:jamescherti/awesome-emacs
     path: forks/awesome-emacs
-    exec_before: ["git", "upstream", "https://github.com/emacs-tw/awesome-emacs"]
+    remote:
+      upstream: https://github.com/emacs-tw/awesome-emacs
 
   - git: git@github.com:jamescherti/highlight-sexp
     path: forks/highlight-sexp
-    exec_before: ["git", "upstream", "https://github.com/daimrod/highlight-sexp"]
+    remote:
+      upstream: https://github.com/daimrod/highlight-sexp
 
   - git: git@github.com:jamescherti/evil
     path: forks/evil
-    exec_before: ["git", "upstream", "https://github.com/emacs-evil/evil"]
+    remote:
+      upstream: https://github.com/emacs-evil/evil
 
   - git: git@github.com:jamescherti/evil-collection
     path: forks/evil-collection
-    exec_before: ["git", "upstream", "https://github.com/emacs-evil/evil-collection"]
+    remote:
+      upstream: https://github.com/emacs-evil/evil-collection
 
   - git: git@github.com:jamescherti/evil-snipe
     path: forks/evil-snipe
 
   - git: git@github.com:jamescherti/emacs-libvterm
     path: forks/emacs-libvterm
-    exec_before: ["git", "upstream", "https://github.com/akermu/emacs-libvterm"]
+    remote:
+      upstream: https://github.com/akermu/emacs-libvterm
 
   - git: git@github.com:jamescherti/dired-hacks
     path: forks/dired-hacks
-    exec_before: ["git", "upstream", "https://github.com/Fuco1/dired-hacks"]
+    remote:
+      upstream: https://github.com/Fuco1/dired-hacks
 
   - git: git@github.com:jamescherti/melpa
     path: forks/melpa
-    exec_before: ["git", "upstream", "https://github.com/melpa/melpa"]
+    remote:
+      upstream: https://github.com/melpa/melpa
 
   - git: git@github.com:jamescherti/parsedown
     path: forks/parsedown
-    exec_before: ["git", "upstream", "https://github.com/erusev/parsedown"]
+    remote:
+      upstream: https://github.com/erusev/parsedown
 
   # ----------------------------------------------------------------------------
   # Vim
@@ -392,7 +419,8 @@ tasks:
   - git: git@github.com:jamescherti/shell-pop-el
     path: emacs/shell-pop-el
     revision: master
-    exec_before: ["git", "upstream", "https://github.com/kyagi/shell-pop-el"]
+    remote:
+      upstream: https://github.com/kyagi/shell-pop-el
 
   - git: git@github.com:jamescherti/outline-yaml.el
     path: emacs/outline-yaml.el
