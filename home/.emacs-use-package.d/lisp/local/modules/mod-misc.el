@@ -421,6 +421,17 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO patch dumb-jump
+;; Push the current position to the Xref marker stack right before dumb-jump
+;; calculates a definition search. This guarantees that your original location
+;; is saved to the history (allowing you to return via M-,), even if external
+;; completion frameworks or incomplete backend metadata interrupt the native
+;; Xref history mechanism.
+(with-eval-after-load 'dumb-jump
+  (cl-defmethod xref-backend-definitions :before ((_backend (eql dumb-jump))
+                                                  _identifier)
+    (xref-push-marker-stack)))
+
 (setq archive-hidden-columns '(Mode Ids Date&Time Ratio))
 (setq archive-alternate-hidden-columns '())
 
@@ -692,6 +703,7 @@ any new ones."
 
         (markdown-mode                 . "melpa")
 
+        (dumb-jump                 . "melpa")
         ;; Latest
         (vterm                         . "melpa")
 
