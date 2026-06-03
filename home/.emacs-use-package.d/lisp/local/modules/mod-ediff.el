@@ -28,6 +28,19 @@
 
 (require 'cl-lib)
 
+;;; ediff: next/previous diff `rencenter'
+
+(defun my-ediff-recenter ()
+  "Force recentering of both buffers in the current ediff session."
+  (dolist (buf (mod-ediff--ediff-buffers-from-control-panel))
+    (when (buffer-live-p buf)
+      (let ((win (get-buffer-window buf t)))
+        (when (window-live-p win)
+          (with-selected-window win
+            (recenter)))))))
+
+(add-hook 'ediff-select-hook #'my-ediff-recenter)
+
 ;;; ediff: settings
 
 (setq ediff-keep-variants t)

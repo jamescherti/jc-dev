@@ -4,6 +4,7 @@ options:
   exec_before: ["sh", "-c", "set -e; git-setup"]
   git_pull: false
   exec_after: ["update-project-list"]
+  git_update_strategy: reset
   ignore_untracked:
     - wip
     - home-settings
