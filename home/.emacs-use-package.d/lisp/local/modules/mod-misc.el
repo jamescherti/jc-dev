@@ -110,7 +110,8 @@
   (require 'mod-eglot)
   (require 'smartindent)
   ;; (require 'battery-angel)
-  (require 'point-manager))
+  ;; (require 'point-manager)
+  )
 
 (unless noninteractive
   (with-eval-after-load 'evil
