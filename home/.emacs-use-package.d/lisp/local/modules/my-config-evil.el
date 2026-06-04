@@ -34,6 +34,22 @@
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'mod-project)
 
+;;; Testing
+
+;; Allow moving cursor beyond end-of-line in visual block mode
+;; Good option to prevent the cursor going beyond the org ellipsis
+(setq evil-move-beyond-eol t)
+
+;; Default
+;; (setq evil-cross-lines nil)
+;; (setq evil-auto-indent t)
+;; (setq evil-regexp-search t)
+;; (setq evil-ex-search-case 'smart)
+;; (setq evil-ex-substitute-case nil)
+
+;; TODO
+;; (setq evil-visual-char 'exclusive)  ;; evil collection
+
 ;;; cursor color
 
 ;; (setq evil-normal-state-cursor '("#DD0000" box))
