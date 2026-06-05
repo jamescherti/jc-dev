@@ -38,7 +38,7 @@
 
 ;; Allow moving cursor beyond end-of-line in visual block mode
 ;; Good option to prevent the cursor going beyond the org ellipsis
-(setq evil-move-beyond-eol t)
+;; (setq evil-move-beyond-eol t)
 
 ;; Default
 ;; (setq evil-cross-lines nil)
