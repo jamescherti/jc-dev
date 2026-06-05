@@ -3046,8 +3046,6 @@ the window is resized). This function fixes these issues."
           (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))
         (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode))
     ;; non tree sitter
-    (require 'le-group-yaml)
-
     (require 'mod-flymake-yamllint)
 
     (when (fboundp 'yaml-mode)

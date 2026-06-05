@@ -125,8 +125,7 @@ LANGUAGE is the programming language."
   ;; non tree sitter libraries
   (cond
    ((or (bound-and-true-p byte-compile-current-file)
-        noninteractive
-        (and (fboundp 'treesit-language-available-p)))
+        noninteractive)
     t)
 
    (t
