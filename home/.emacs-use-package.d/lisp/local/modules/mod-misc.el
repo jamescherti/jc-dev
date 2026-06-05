@@ -2998,9 +2998,9 @@ the window is resized). This function fixes these issues."
 (let ((treesit-yaml-available (my-treesit-language-available-p 'yaml)))
   (if treesit-yaml-available
       (progn
-        (with-eval-after-load 'mod-cleanup
-          (push 'flymake-yamllint mod-cleanup-packages-list)
-          (push 'yaml-mode mod-cleanup-packages-list))
+        ;; (with-eval-after-load 'mod-cleanup
+        ;;   (push 'flymake-yamllint mod-cleanup-packages-list)
+        ;;   (push 'yaml-mode mod-cleanup-packages-list))
 
         (define-derived-mode ansible-mode yaml-ts-mode "Ansible"
           "Major mode for editing Ansible files.")

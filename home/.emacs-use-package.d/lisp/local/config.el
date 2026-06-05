@@ -802,7 +802,7 @@ subsequent GCC invocations."
                            le-theme
                            le-default-settings
                            le-default-keybindings
-                           ;; le-gcmh
+                           le-gcmh
 
                            le-evil
                            le-evil-collection
@@ -822,16 +822,11 @@ subsequent GCC invocations."
 
                            le-quick-sdcv
 
-                           ;; le-group-code-folding:
                            le-outline
                            le-outline-indent
                            le-hideshow
                            le-treesit-fold
                            ;; le-kirigami ; replaced with mod-kirigami
-
-                           ;; le-diminish
-
-                           ;; le-magit
 
                            ;; xclip (Emacs handles the clipboard natively with
                            ;; your (setq select-enable-clipboard t) setting; you
@@ -868,7 +863,6 @@ subsequent GCC invocations."
                            ;; le-page-break-lines
 
                            le-autorevert
-                           ;; mod-lazy-autorevert
 
                            le-recentf
                            le-savehist
@@ -876,7 +870,7 @@ subsequent GCC invocations."
                            le-winner
                            le-elec-pair
 
-                           ;; le-which-key
+                           le-which-key
                            ;; le-paren
 
                            le-dired
@@ -885,16 +879,14 @@ subsequent GCC invocations."
                            le-org
                            le-org-appear
 
-                           le-maybe-markdown-ts
 
                            le-edit-indirect
 
                            le-yasnippet
                            ;; le-yasnippet-snippets
 
-                           ;; le-group-yaml
-                           ;; le-yaml-mode
-                           ;; le-yaml-ts-mode
+                           le-maybe-markdown-ts
+                           le-maybe-yaml-ts
 
                            le-avy
                            le-ace-window
