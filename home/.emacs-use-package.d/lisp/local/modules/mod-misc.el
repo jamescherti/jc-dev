@@ -5667,7 +5667,7 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;; diff-hl setup
 
 (defun my-setup-diff-hl-mode ()
-  "Setup diff-hl mode if the buffer or its base buffer is backed by a file."
+  "Setup diff-hl mode if the buffer is backed by a suitable file."
   (when (and (fboundp 'diff-hl-mode)
              (not (bound-and-true-p diff-hl-mode)))
     (let ((file (buffer-file-name)))
@@ -5675,6 +5675,7 @@ Standard save hooks handle persistence when the buffer is modified."
         (setq file (expand-file-name file)))
 
       (when (and file
+                 (not (string= (file-name-nondirectory file) "todo.org"))
                  (not (file-remote-p file))
                  (or (project-current nil (file-name-directory file))
                      (vc-backend file)))
