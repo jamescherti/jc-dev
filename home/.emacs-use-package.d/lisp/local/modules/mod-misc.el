@@ -1784,6 +1784,7 @@ WIDTH is the tab width."
                       "^\*Native-compile-Log\*"
                       "^\*Async-native-compile-log\*"
                       "^tmp-"
+                      "^\*Ediff"
                       "^\*Compile-Log\*"
                       "^\*ansible-doc"))
       (push regexp consult-buffer-filter)))
