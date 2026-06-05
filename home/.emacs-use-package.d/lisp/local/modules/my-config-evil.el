@@ -1471,14 +1471,15 @@ If the parentheses are balanced, the function returns t."
 
 ;;; markdown mode
 
-(if (my-treesit-language-available-p 'markdown)
-    (when (>= emacs-major-version 31)
-      t
-      ;; (with-eval-after-load 'mod-cleanup
-      ;;   (when (my-treesit-language-available-p 'markdown)
-      ;;     (push 'markdown-mode mod-cleanup-packages-list)
-      ;;     (push 'markdown-toc mod-cleanup-packages-list)))
-      )
+;; (when (>= emacs-major-version 31)
+;;   t
+;;   ;; (with-eval-after-load 'mod-cleanup
+;;   ;;   (when (my-treesit-language-available-p 'markdown)
+;;   ;;     (push 'markdown-mode mod-cleanup-packages-list)
+;;   ;;     (push 'markdown-toc mod-cleanup-packages-list)))
+;;   )
+
+(unless (my-treesit-language-available-p 'markdown)
   (with-eval-after-load 'markdown-mode
     (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
 
