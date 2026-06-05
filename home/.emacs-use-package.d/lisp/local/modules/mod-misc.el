@@ -5671,10 +5671,8 @@ Standard save hooks handle persistence when the buffer is modified."
   (when (and (fboundp 'diff-hl-mode)
              (not (bound-and-true-p diff-hl-mode)))
     (let ((file (buffer-file-name)))
-      (when file
-        (setq file (expand-file-name file)))
-
       (when (and file
+                 (setq file (expand-file-name file))
                  (not (string= (file-name-nondirectory file) "todo.org"))
                  (not (file-remote-p file))
                  (or (project-current nil (file-name-directory file))
