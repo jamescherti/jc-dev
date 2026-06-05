@@ -422,6 +422,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+
+(setq treesit-auto-install-grammar nil)
+
 ;; (setq package-native-compile t)
 
 ;; TODO patch dumb-jump
@@ -1301,6 +1304,8 @@ WIDTH is the tab width."
                                        tramp-file-name-regexp
                                        "[/\\\\]node_modules")))
 
+  (setq kirigami-enhance-outline-open t)
+  (setq kirigami-enhance-outline-close-all t)
   (setq kirigami-preserve-visual-position t)
 
   ;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
