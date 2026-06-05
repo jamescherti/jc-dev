@@ -79,7 +79,7 @@
                                           "*Flymake log*"
                                           "*Compile-Log*"
                                           "*Warnings*"
-                                          "*Ollama*"
+                                          ;; "*Ollama*"
                                           ;; "*Non-Native-Compiled*"
                                           "*compile-angel:debug*"
                                           "*vc*"
