@@ -5607,6 +5607,10 @@ Standard save hooks handle persistence when the buffer is modified."
       (ignore-errors
         (when (require 'kirigami nil t)
           (when (and (fboundp 'kirigami-close-folds)
+                     (let ((name (buffer-name)))
+                       (and (not (string-prefix-p "*" (buffer-name)))
+                            (not (string-prefix-p " " (buffer-name)))
+                            (not (string-suffix-p "*" (buffer-name)))))
                      (not (bound-and-true-p edit-indirect--overlay))
                      (not (fboundp 'org-src-edit-buffer-p)))
             (kirigami-close-folds)))))))
@@ -5659,6 +5663,24 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   ;; 'auto routes ESC to the shell if an alt-screen TUI (like vim) is running,
 ;;   ;; otherwise it switches the buffer frame to evil normal state.
 ;;   (evil-ghostel-escape 'auto))
+
+;;; diff-hl setup
+
+(defun my-setup-diff-hl-mode ()
+  "Setup diff-hl mode if the buffer or its base buffer is backed by a file."
+  (when (and (fboundp 'diff-hl-mode)
+             (not (bound-and-true-p diff-hl-mode)))
+    (let ((file (buffer-file-name)))
+      (when file
+        (setq file (expand-file-name file)))
+
+      (when (and file
+                 (not (file-remote-p file))
+                 (or (project-current nil (file-name-directory file))
+                     (vc-backend file)))
+        (diff-hl-mode 1)))))
+
+(add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
 ;;; Provide
 
