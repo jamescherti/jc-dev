@@ -91,8 +91,6 @@ Enable this to trace the window and buffer change hooks."
     (when (> (- current-time lazy-autorevert--last-global-check-time)
              lazy-autorevert-throttle-interval)
       (setq lazy-autorevert--last-global-check-time current-time)
-      ;; `walk-windows' iterates over windows without allocating intermediate lists,
-      ;; reducing garbage collection overhead.
       (walk-windows
        (lambda (win)
          (with-current-buffer (window-buffer win)
@@ -117,7 +115,6 @@ operations to a few active viewports instead of the entire session."
              #'lazy-autorevert-buffer-handler)
     (funcall fn 'window-selection-change-functions
              #'lazy-autorevert-buffer-handler)
-    ;; (funcall fn 'after-save-hook #'lazy-autorevert-visible-buffers-handler)
     (if (boundp 'after-focus-change-function)
         (if lazy-autorevert-mode
             (add-function :after after-focus-change-function
