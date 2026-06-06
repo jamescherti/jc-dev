@@ -33,8 +33,8 @@
 
 (defcustom lazy-autorevert-verbose t
   "If non-nil, print a message when a buffer is successfully reverted.
-This variable dynamically overrides `auto-revert-verbose' during the
-execution of the lazy auto-revert handler."
+This variable dynamically overrides `auto-revert-verbose' during the execution
+of the lazy auto-revert handler."
   :type 'boolean
   :group 'auto-revert)
 
@@ -43,6 +43,16 @@ execution of the lazy auto-revert handler."
 Enable this to trace the window and buffer change hooks."
   :type 'boolean
   :group 'auto-revert)
+
+(defcustom lazy-autorevert-delay 0.2
+  "Delay in seconds before checking for buffer changes.
+This debounces rapid events (like splitting windows or saving multiple files)
+to prevent calling the revert handler excessively."
+  :type 'number
+  :group 'auto-revert)
+
+(defvar lazy-autorevert--timer nil
+  "Timer used to debounce auto-revert checks.")
 
 (defun lazy-autorevert-buffer-h (&rest _)
   "Auto revert current buffer, if necessary."
@@ -80,6 +90,13 @@ Enable this to trace the window and buffer change hooks."
    'nomini
    'visible))
 
+(defun lazy-autorevert-schedule-h (&rest _)
+  "Schedule a debounced check of visible windows."
+  (when lazy-autorevert--timer
+    (cancel-timer lazy-autorevert--timer))
+  (setq lazy-autorevert--timer
+        (run-with-timer lazy-autorevert-delay nil #'lazy-autorevert-buffers-h)))
+
 ;;;###autoload
 (define-minor-mode lazy-autorevert-mode
   "A more performant alternative to `global-auto-revert-mode'.
@@ -95,10 +112,16 @@ operations to a few active viewports instead of the entire session."
     (global-auto-revert-mode -1))
   (let ((fn (if lazy-autorevert-mode #'add-hook #'remove-hook)))
     ;; Replace doom-specific hooks with standard Emacs window and focus hooks
-    (funcall fn 'window-buffer-change-functions #'lazy-autorevert-buffer-h)
-    (funcall fn 'window-selection-change-functions #'lazy-autorevert-buffer-h)
-    ;; (funcall fn 'focus-in-hook #'lazy-autorevert-buffers-h)
-    (funcall fn 'after-save-hook #'lazy-autorevert-buffers-h)))
+    (funcall fn 'window-buffer-change-functions #'lazy-autorevert-schedule-h)
+    (funcall fn 'window-selection-change-functions #'lazy-autorevert-schedule-h)
+    (funcall fn 'after-save-hook #'lazy-autorevert-schedule-h)
+    (when (boundp 'after-focus-change-function)
+      (if lazy-autorevert-mode
+          (add-function :after after-focus-change-function #'lazy-autorevert-schedule-h)
+        (remove-function after-focus-change-function #'lazy-autorevert-schedule-h)))
+    (funcall fn 'focus-in-hook #'lazy-autorevert-schedule-h)))
+
+;;; Provide
 
 (provide 'lazy-autorevert)
 
