@@ -44,7 +44,7 @@ Enable this to trace the window and buffer change hooks."
   :type 'boolean
   :group 'auto-revert)
 
-(defcustom lazy-autorevert-throttle-interval 0.2
+(defcustom lazy-autorevert-throttle-interval 0.3
   "Minimum time in seconds between auto-revert checks to prevent chaining."
   :type 'number
   :group 'auto-revert)
