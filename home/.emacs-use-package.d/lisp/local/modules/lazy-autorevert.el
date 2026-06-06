@@ -31,8 +31,18 @@
 
 (require 'autorevert)
 
-(defvar lazy-autorevert-verbose t)
-(defvar lazy-autorevert-debug t)
+(defcustom lazy-autorevert-verbose t
+  "If non-nil, print a message when a buffer is successfully reverted.
+This variable dynamically overrides `auto-revert-verbose' during the
+execution of the lazy auto-revert handler."
+  :type 'boolean
+  :group 'auto-revert)
+
+(defcustom lazy-autorevert-debug t
+  "If non-nil, print debug messages showing which buffer is being checked.
+Enable this to trace the window and buffer change hooks."
+  :type 'boolean
+  :group 'auto-revert)
 
 (defun lazy-autorevert-buffer-h (&rest _)
   "Auto revert current buffer, if necessary."
