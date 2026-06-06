@@ -5773,17 +5773,18 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   (with-eval-after-load 'flymake
 ;;     (require 'consult-flymake)))
 
-(lightemacs-use-package vertico-repeat
-  ;; Vertico repeat last command
-  :ensure nil
-  :after vertico
-  :commands (vertico-repeat-last
-             vertico-repeat
-             vertico-repeat-save)
-  :hook
-  (minibuffer-setup . vertico-repeat-save)
-  :init
-  (evil-define-key 'normal 'global (kbd "<leader>vr") #'vertico-repeat-last))
+;; TODO fix vertico after enabling this
+;; (lightemacs-use-package vertico-repeat
+;;   ;; Vertico repeat last command
+;;   :ensure nil
+;;   :after vertico
+;;   :commands (vertico-repeat-last
+;;              vertico-repeat
+;;              vertico-repeat-save)
+;;   :hook
+;;   (minibuffer-setup . vertico-repeat-save)
+;;   :init
+;;   (evil-define-key 'normal 'global (kbd "<leader>vr") #'vertico-repeat-last))
 
 ;; (lightemacs-use-package consult-org
 ;;   :ensure nil
