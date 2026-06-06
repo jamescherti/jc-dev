@@ -459,6 +459,7 @@
 
 (evil-define-key 'normal 'global (kbd "<leader>er") 'evileval-region)
 (evil-define-key 'normal 'global (kbd "<leader>eb") 'evileval-buffer)
+(evil-define-key 'normal 'global (kbd "<leader>ll") 'my-reload-current-buffer)
 
 ;; Goto end buffer
 (define-key evil-normal-state-map "G" 'my-goto-end-of-buffer)
