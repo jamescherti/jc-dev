@@ -31,7 +31,8 @@
 
 (require 'autorevert)
 
-(defvar lazy-auto-revert-verbose t)
+(defvar lazy-autorevert-verbose t)
+(defvar lazy-autorevert-debug t)
 
 (defun lazy-autorevert-buffer-h (&rest _)
   "Auto revert current buffer, if necessary."
@@ -48,11 +49,11 @@
                    (verify-visited-file-modtime (current-buffer))))
     (let ((auto-revert-mode t)
           (revert-without-query (list "."))
-          (auto-revert-verbose lazy-auto-revert-verbose)
+          (auto-revert-verbose lazy-autorevert-verbose)
           (auto-revert-use-notify nil)
           (auto-revert-stop-on-user-input nil))
-      ;; Rely on `auto-revert-verbose' for logging. An unconditional
-      ;; `message' call here forces I/O on every window switch, causing lag.
+      (when lazy-autorevert-debug
+        (message "Auto revert %s" (buffer-name)))
       (auto-revert-handler))))
 
 (defun lazy-autorevert-buffers-h (&rest _)
@@ -83,7 +84,7 @@ operations to a few active viewports instead of the entire session."
     ;; Replace doom-specific hooks with standard Emacs window and focus hooks
     (funcall fn 'window-buffer-change-functions #'lazy-autorevert-buffer-h)
     (funcall fn 'window-selection-change-functions #'lazy-autorevert-buffer-h)
-    (funcall fn 'focus-in-hook #'lazy-autorevert-buffers-h)
+    ;; (funcall fn 'focus-in-hook #'lazy-autorevert-buffers-h)
     (funcall fn 'after-save-hook #'lazy-autorevert-buffers-h)))
 
 (provide 'lazy-autorevert)
