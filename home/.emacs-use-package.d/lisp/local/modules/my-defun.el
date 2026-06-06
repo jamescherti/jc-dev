@@ -168,34 +168,43 @@ LANGUAGE is the programming language."
 (defun my-reload-current-buffer ()
   "Completely reload the current buffer by killing and reopening it."
   (interactive)
-  (let* ((file buffer-file-name))
+  (let ((file buffer-file-name))
     (unless file
-      (user-error "Current buffer is not visiting a file"))
+      (error "Current buffer is not visiting a file"))
+
+    (unless (file-exists-p file)
+      (error "The file doesn't exist: %s" file))
+
     (let* ((buffer (current-buffer))
            (window (selected-window))
            (window-hscroll (when window
                              (window-hscroll)))
+           (window-vscroll (when window
+                             (window-vscroll)))
            (window-start (when window
                            (window-start)))
            (point (point)))
-      (when (buffer-live-p buffer)
-        (with-current-buffer buffer
-          (when (buffer-modified-p)
-            (save-buffer)))
+      (when (and (buffer-live-p buffer)
+                 (buffer-modified-p buffer))
+        (save-buffer buffer))
 
-        (kill-buffer buffer)
+      (kill-buffer buffer)
 
-        (let ((new-buffer (find-file-noselect file)))
-          (set-window-buffer nil new-buffer)
-          (with-current-buffer new-buffer
-            (goto-char point)
-            ;; TODO This does not seem to work
-            (when (and (window-live-p window)
-                       (numberp window-hscroll)
-                       (numberp window-start)
-                       (eq (current-buffer) (window-buffer window)))
-              (set-window-start window window-start t)
-              (set-window-hscroll window window-hscroll))))))))
+      (let ((new-buffer (find-file-noselect file)))
+        (set-window-buffer nil new-buffer)
+        (with-current-buffer new-buffer
+          (goto-char point)
+          (when (and (window-live-p window)
+                     (numberp window-hscroll)
+                     (numberp window-vscroll)
+                     (numberp window-start)
+                     (eq (current-buffer) (window-buffer window)))
+            (set-window-point window point)
+            (set-window-start window window-start)
+            (set-window-vscroll window window-vscroll)
+            (set-window-hscroll window window-hscroll))
+          (when (called-interactively-p 'any)
+            (message "Reloaded: %s" (buffer-name))))))))
 
 (defun my-tab-bar-move-tab (&optional arg)
   "Move the current tab ARG positions to the right without cycling."

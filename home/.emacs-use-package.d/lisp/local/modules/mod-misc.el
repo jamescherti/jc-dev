@@ -5682,10 +5682,10 @@ Standard save hooks handle persistence when the buffer is modified."
 
 (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
-(setq diff-hl-ask-before-revert-hunk nil)
+(setq diff-hl-ask-before-revert-hunk t)
 (setq diff-hl-disable-on-remote t)
 (setq diff-hl-draw-borders nil)
-(setq diff-hl-next-previous-hunk-auto-recenter t)
+(setq diff-hl-next-previous-hunk-auto-recenter nil)
 (setq diff-hl-autohide-margin t)
 (setq diff-hl-bmp-max-width 16)
 (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
