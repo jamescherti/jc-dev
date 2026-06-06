@@ -93,13 +93,17 @@ operations to a few active viewports instead of the entire session."
   (when global-auto-revert-mode
     (global-auto-revert-mode -1))
   (let ((fn (if lazy-autorevert-mode #'add-hook #'remove-hook)))
-    (funcall fn 'window-buffer-change-functions #'lazy-autorevert-buffer-handler)
-    (funcall fn 'window-selection-change-functions #'lazy-autorevert-buffer-handler)
+    (funcall fn 'window-buffer-change-functions
+             #'lazy-autorevert-buffer-handler)
+    (funcall fn 'window-selection-change-functions
+             #'lazy-autorevert-buffer-handler)
     ;; (funcall fn 'after-save-hook #'lazy-autorevert-visible-buffers-handler)
     (if (boundp 'after-focus-change-function)
         (if lazy-autorevert-mode
-            (add-function :after after-focus-change-function #'lazy-autorevert-visible-buffers-handler)
-          (remove-function after-focus-change-function #'lazy-autorevert-visible-buffers-handler))
+            (add-function :after after-focus-change-function
+                          #'lazy-autorevert-visible-buffers-handler)
+          (remove-function after-focus-change-function
+                           #'lazy-autorevert-visible-buffers-handler))
       (funcall fn 'focus-in-hook #'lazy-autorevert-visible-buffers-handler))))
 
 (provide 'lazy-autorevert)
