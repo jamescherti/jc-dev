@@ -33,8 +33,8 @@
 
 (defcustom lazy-autorevert-verbose t
   "If non-nil, print a message when a buffer is successfully reverted.
-This variable dynamically overrides `auto-revert-verbose' during the execution
-of the lazy auto-revert handler."
+This variable dynamically overrides `auto-revert-verbose' during the
+execution of the lazy auto-revert handler."
   :type 'boolean
   :group 'auto-revert)
 
@@ -43,16 +43,6 @@ of the lazy auto-revert handler."
 Enable this to trace the window and buffer change hooks."
   :type 'boolean
   :group 'auto-revert)
-
-(defcustom lazy-autorevert-delay 0.2
-  "Delay in seconds before checking for buffer changes.
-This debounces rapid events (like splitting windows or saving multiple files)
-to prevent calling the revert handler excessively."
-  :type 'number
-  :group 'auto-revert)
-
-(defvar lazy-autorevert--timer nil
-  "Timer used to debounce auto-revert checks.")
 
 (defun lazy-autorevert-buffer-handler (&rest _)
   "Auto revert current buffer, if necessary."
@@ -79,7 +69,7 @@ to prevent calling the revert handler excessively."
           (message "Auto revert %s" (buffer-name target-buffer)))
         (auto-revert-handler)))))
 
-(defun lazy-autorevert-buffers-h (&rest _)
+(defun lazy-autorevert-visible-buffers-handler (&rest _)
   "Auto revert stale buffers in visible windows, if necessary."
   ;; `walk-windows' iterates over windows without allocating intermediate lists,
   ;; reducing garbage collection overhead.
@@ -90,17 +80,9 @@ to prevent calling the revert handler excessively."
    'nomini
    'visible))
 
-(defun lazy-autorevert-schedule-h (&rest _)
-  "Schedule a debounced check of visible windows."
-  (when lazy-autorevert--timer
-    (cancel-timer lazy-autorevert--timer))
-  (setq lazy-autorevert--timer
-        (run-with-timer lazy-autorevert-delay nil #'lazy-autorevert-buffers-h)))
-
 ;;;###autoload
 (define-minor-mode lazy-autorevert-mode
   "A more performant alternative to `global-auto-revert-mode'.
-
 Default auto-revert relies on heavy file watching or polling, which can tank
 performance when external tools modify files or when managing hundreds of
 buffers. This lazy alternative updates visible windows only on frame focus or
@@ -111,17 +93,14 @@ operations to a few active viewports instead of the entire session."
   (when global-auto-revert-mode
     (global-auto-revert-mode -1))
   (let ((fn (if lazy-autorevert-mode #'add-hook #'remove-hook)))
-    ;; Replace doom-specific hooks with standard Emacs window and focus hooks
-    (funcall fn 'window-buffer-change-functions #'lazy-autorevert-schedule-h)
-    (funcall fn 'window-selection-change-functions #'lazy-autorevert-schedule-h)
-    (funcall fn 'after-save-hook #'lazy-autorevert-schedule-h)
-    (when (boundp 'after-focus-change-function)
-      (if lazy-autorevert-mode
-          (add-function :after after-focus-change-function #'lazy-autorevert-schedule-h)
-        (remove-function after-focus-change-function #'lazy-autorevert-schedule-h)))
-    (funcall fn 'focus-in-hook #'lazy-autorevert-schedule-h)))
-
-;;; Provide
+    (funcall fn 'window-buffer-change-functions #'lazy-autorevert-buffer-handler)
+    (funcall fn 'window-selection-change-functions #'lazy-autorevert-buffer-handler)
+    ;; (funcall fn 'after-save-hook #'lazy-autorevert-visible-buffers-handler)
+    (if (boundp 'after-focus-change-function)
+        (if lazy-autorevert-mode
+            (add-function :after after-focus-change-function #'lazy-autorevert-visible-buffers-handler)
+          (remove-function after-focus-change-function #'lazy-autorevert-visible-buffers-handler))
+      (funcall fn 'focus-in-hook #'lazy-autorevert-visible-buffers-handler))))
 
 (provide 'lazy-autorevert)
 
