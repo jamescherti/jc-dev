@@ -103,8 +103,8 @@ Enable this to trace the window and buffer change hooks."
   "A more performant alternative to `global-auto-revert-mode'.
 Default auto-revert relies on heavy file watching or polling, which can tank
 performance when external tools modify files or when managing hundreds of
-buffers. This lazy alternative updates visible windows only on frame focus or
-file save. Hidden buffers stay untouched until you switch to them, bounding
+buffers. This lazy alternative updates visible windows only on frame focus.
+Hidden buffers stay untouched until you switch to them, bounding
 operations to a few active viewports instead of the entire session."
   :global t
   :group 'auto-revert
