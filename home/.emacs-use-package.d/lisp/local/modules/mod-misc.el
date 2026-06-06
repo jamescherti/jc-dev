@@ -5693,15 +5693,135 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;; elisp cape
 
 (with-eval-after-load 'cape
+  ;; SH
+  (defun le-cape--setup-cape-sh-mode ()
+    "Dabbrev is better than the default configuration for `sh-mode'."
+    (setq-local completion-at-point-functions '(cape-dabbrev cape-file)))
+  (when (fboundp 'le-cape--setup-cape-sh-mode)
+    (add-hook 'bash-ts-mode-hook #'le-cape--setup-cape-sh-mode)
+    (add-hook 'sh-mode-hook #'le-cape--setup-cape-sh-mode))
+
+  ;; Elisp
   (defun my-cape-elisp-setup ()
     "Configure Cape to provide real Elisp completion merged with dabbrev."
     (setq-local completion-at-point-functions
                 (list (cape-super-capf #'elisp-completion-at-point #'cape-dabbrev))))
-
-  ;; For some reason, without this, it only uses dabbrev
   (when (fboundp 'my-cape-elisp-setup)
+    ;; For some reason, without this, it only uses dabbrev
     (add-hook 'emacs-lisp-mode-hook #'my-cape-elisp-setup)
     (add-hook 'lisp-interaction-mode-hook #'my-cape-elisp-setup)))
+
+;;; Icons corfu
+
+(lightemacs-use-package corfu-popupinfo
+  :ensure nil
+  :commands corfu-popupinfo-mode
+  :hook
+  (corfu-mode . corfu-popupinfo-mode)
+  :custom
+  (corfu-popupinfo-delay '(1.0 . 0.6))
+  (corfu-popupinfo-max-width 80)
+  (corfu-popupinfo-max-height 15))
+
+(lightemacs-use-package nerd-icons-completion
+  :after marginalia
+  :if (display-graphic-p)
+  :commands nerd-icons-completion-marginalia-setup
+  :config
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+
+(lightemacs-use-package nerd-icons-corfu
+  :after corfu
+  :if (display-graphic-p)
+  :commands nerd-icons-corfu-formatter
+  :custom
+  (nerd-icons-font-family "Symbols Nerd Font Mono")
+  ;; (setq nerd-icons-font-family "Iosevka Nerd Font Mono")
+  ;; (setq nerd-icons-font-family "Jetbrains Mono")
+  :init
+  (with-eval-after-load 'corfu
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+
+;; (use-package kind-icon
+;;   ;; :after corfu
+;;   ;;:init
+;;   ;; (setq kind-icon-blend-background t)
+;;   ;; (setq kind-icon-default-face 'corfu-default) ; only needed with blend-background
+;;   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+;;; Icons dired
+
+(use-package nerd-icons-dired
+  :if (display-graphic-p)
+  ;;:diminish nerd-icons-dired-mode
+  :commands nerd-icons-dired-mode
+  ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
+  ;; aligned properly)
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+;;; Emacs Consult / Vertico
+
+;; (setq consult-imenu-config
+;;       '((emacs-lisp-mode :toplevel "Functions"
+;;                          :types ((?f "Functions" font-lock-function-name-face)
+;;                                  (?m "Macros"    font-lock-function-name-face)
+;;                                  (?p "Packages"  font-lock-constant-face)
+;;                                  (?t "Types"     font-lock-type-face)
+;;                                  (?v "Variables" font-lock-variable-name-face)))))
+
+;; (with-eval-after-load 'consult
+;;   (with-eval-after-load 'flymake
+;;     (require 'consult-flymake)))
+
+(lightemacs-use-package vertico-repeat
+  ;; Vertico repeat last command
+  :ensure nil
+  :after vertico
+  :commands (vertico-repeat-last
+             vertico-repeat
+             vertico-repeat-save)
+  :hook
+  (minibuffer-setup . vertico-repeat-save)
+  :init
+  (evil-define-key 'normal 'global (kbd "<leader>vr") #'vertico-repeat-last))
+
+;; (lightemacs-use-package consult-org
+;;   :ensure nil
+;;   :commands consult-org-heading
+;;   :init
+;;   (with-eval-after-load 'org
+;;     (add-hook 'org-mode-hook
+;;               #'(lambda()
+;;                   (evil-define-key 'normal 'local (kbd "C-c /") #'consult-org-heading)))))
+
+;;(lightemacs-use-package vertico-quick
+;;  :ensure nil
+;;  :after (vertico)
+;;  :custom
+;;  (vertico-quick1 "aoeuid")
+;;  (vertico-quick2 "htns")
+;;  :commands (vertico-quick-insert
+;;             vertico-quick-exit
+;;             vertico-quick-jump)
+;;  :general
+;;  (emacs-map
+;;   'vertico-map
+;;   "M-f" #'vertico-quick-insert
+;;   "M-," #'vertico-quick-insert
+;;   "M-." #'vertico-quick-exit))
+
+;; (lightemacs-use-package vertico-directory
+;;   :ensure nil
+;;   :after vertico
+;;   :defer t
+;;   :commands vertico-directory-tidy
+;;   ;; More convenient directory navigation commands
+;;   :bind (:map vertico-map
+;;               ("DEL" . vertico-directory-delete-char)
+;;               ("M-DEL" . vertico-directory-delete-word))
+;;   ;; Tidy shadowed file names
+;;   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 ;;; Provide
 
