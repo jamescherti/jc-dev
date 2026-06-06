@@ -862,7 +862,7 @@ subsequent GCC invocations."
                            le-elisp-autofmt
                            ;; le-page-break-lines
 
-                           le-autorevert
+                           ;; le-autorevert
 
                            le-recentf
                            le-savehist
