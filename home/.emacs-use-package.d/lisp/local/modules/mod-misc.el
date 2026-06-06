@@ -5704,8 +5704,7 @@ Standard save hooks handle persistence when the buffer is modified."
   ;; Elisp
   (defun my-cape-elisp-setup ()
     "Configure Cape to provide real Elisp completion merged with dabbrev."
-    (setq-local completion-at-point-functions
-                (list (cape-super-capf #'elisp-completion-at-point #'cape-dabbrev))))
+    (setq-local completion-at-point-functions (list #'elisp-completion-at-point)))
   (when (fboundp 'my-cape-elisp-setup)
     ;; For some reason, without this, it only uses dabbrev
     (add-hook 'emacs-lisp-mode-hook #'my-cape-elisp-setup)

@@ -459,7 +459,6 @@
 
 (evil-define-key 'normal 'global (kbd "<leader>er") 'evileval-region)
 (evil-define-key 'normal 'global (kbd "<leader>eb") 'evileval-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>ll") 'my-reload-current-buffer)
 
 ;; Goto end buffer
 (define-key evil-normal-state-map "G" 'my-goto-end-of-buffer)
@@ -2640,7 +2639,8 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
              bufferwizard-hl-todo-mode
              bufferwizard-hl-todo-local-mode
              bufferwizard-paste-indented
-             bufferwizard-grep)
+             bufferwizard-grep
+             bufferwizard-reload-current-buffer)
 
   :init
   (setq bufferwizard-point-ignore-invisible t)
@@ -2648,6 +2648,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (global-set-key (kbd "C-v") 'bufferwizard-paste-indented)
   (evil-define-key 'insert 'global (kbd "C-v") #'bufferwizard-paste-indented)
   (evil-define-key 'normal 'global (kbd "<leader>gg") #'bufferwizard-grep)
+  (evil-define-key 'normal 'global (kbd "<leader>ll") 'bufferwizard-reload-current-buffer)
 
   ;; (defun evil-clipboard-paste-adapter (text)
   ;;   "Insert TEXT using Evil's paste mechanics.
