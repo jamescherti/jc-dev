@@ -130,7 +130,8 @@ update_list_files() {
   DELETED_FILES=()
 
   # A=added C=Copied M=Modified R=Renamed
-  for file in $(git diff-index --cached --name-only --diff-filter=ACMR HEAD || true); do
+  for file in $(git \
+    diff-index --cached --name-only --diff-filter=ACMR HEAD || true); do
     if ! [ -e "$file" ]; then
       echo "[IGNORED] $file"
       continue
@@ -139,7 +140,8 @@ update_list_files() {
     MODIFIED_FILES+=("$file")
   done
 
-  for file in $(git diff-index --cached --name-only --diff-filter=D HEAD || true); do
+  for file in $(git \
+    diff-index --cached --name-only --diff-filter=D HEAD || true); do
     DELETED_FILES+=("$file")
   done
 }
@@ -159,20 +161,22 @@ check_non_ascii() {
     # bracket bytes happen to fall in the designated range.
     local result=''
     # TODO: REUSE the list of files
-    result=$(git diff --cached --name-only --diff-filter=A -z "$AGAINST" | LC_ALL=C tr -d '[ -~]\0' | wc -c)
+    result=$(git diff --cached --name-only --diff-filter=A \
+      -z "$AGAINST" | LC_ALL=C tr -d '[ -~]\0' | wc -c)
     if [ "$result" -ne "0" ]; then
-      error "--------------------------------------------------------------------"
-      echo "[ERROR] Attempt to add a non-ASCII file name (a file name with accents?):"
+      error "------------------------------------------------------------------"
+      echo "[ERROR] Attempt to add a non-ASCII file name:"
       git diff --cached --name-only --diff-filter=A -z "$AGAINST" | LC_ALL=C cat
 
       echo
       echo
-      echo "[ERROR] non-ASCII file names can cause problems because we work with people "
-      echo "        who use different operating systems. To be portable, would you please"
-      echo "        rename the non-ASCII file name to an valid ASCII name with:"
+      echo "[ERROR] non-ASCII file names can cause problems because we work "
+      echo "        with people who use different operating systems. To be "
+      echo "        portable, would you please rename the non-ASCII file name "
+      echo "        to an valid ASCII name with:"
       echo "        git mv nonasciifile validfilename"
       echo
-      error "--------------------------------------------------------------------"
+      error "------------------------------------------------------------------"
       exit 1
     fi
   fi
