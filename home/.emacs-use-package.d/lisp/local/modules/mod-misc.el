@@ -5670,16 +5670,38 @@ Standard save hooks handle persistence when the buffer is modified."
   "Setup diff-hl mode if the buffer is backed by a suitable file."
   (when (and (fboundp 'diff-hl-mode)
              (not (bound-and-true-p diff-hl-mode)))
-    (let ((file (buffer-file-name)))
+    (let ((file (buffer-file-name))
+          expanded-file)
       (when (and file
-                 (setq file (expand-file-name file))
-                 (not (string= (file-name-nondirectory file) "todo.org"))
-                 (not (file-remote-p file))
-                 (or (project-current nil (file-name-directory file))
-                     (vc-backend file)))
+                 (setq expanded-file (expand-file-name file))
+                 (not (string= (file-name-nondirectory expanded-file) "todo.org"))
+                 (not (and (bound-and-true-p diff-hl-disable-on-remote)
+                           (file-remote-p expanded-file)))
+                 (vc-backend expanded-file))
         (diff-hl-mode 1)))))
 
 (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
+
+(setq diff-hl-ask-before-revert-hunk nil)
+(setq diff-hl-disable-on-remote t)
+(setq diff-hl-draw-borders nil)
+(setq diff-hl-next-previous-hunk-auto-recenter t)
+(setq diff-hl-autohide-margin t)
+(setq diff-hl-bmp-max-width 16)
+(setq diff-hl-global-modes '(not image-mode pdf-view-mode))
+
+;;; elisp cape
+
+(with-eval-after-load 'cape
+  (defun my-cape-elisp-setup ()
+    "Configure Cape to provide real Elisp completion merged with dabbrev."
+    (setq-local completion-at-point-functions
+                (list (cape-super-capf #'elisp-completion-at-point #'cape-dabbrev))))
+
+  ;; For some reason, without this, it only uses dabbrev
+  (when (fboundp 'my-cape-elisp-setup)
+    (add-hook 'emacs-lisp-mode-hook #'my-cape-elisp-setup)
+    (add-hook 'lisp-interaction-mode-hook #'my-cape-elisp-setup)))
 
 ;;; Provide
 
