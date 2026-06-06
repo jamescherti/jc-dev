@@ -44,41 +44,61 @@ Enable this to trace the window and buffer change hooks."
   :type 'boolean
   :group 'auto-revert)
 
+(defcustom lazy-autorevert-throttle-interval 0.2
+  "Minimum time in seconds between auto-revert checks to prevent chaining."
+  :type 'number
+  :group 'auto-revert)
+
+(defvar-local lazy-autorevert--last-check-time 0.0
+  "Time when the current buffer was last checked.")
+
+(defvar lazy-autorevert--last-global-check-time 0.0
+  "Time when the visible buffers were last checked globally.")
+
 (defun lazy-autorevert-buffer-handler (&rest _)
   "Auto revert current buffer, if necessary."
-  (let* ((target-buffer (current-buffer))
-         (base-buffer (or (buffer-base-buffer target-buffer) target-buffer))
-         (file-name (buffer-file-name base-buffer)))
-    (unless (or auto-revert-mode
-                (active-minibuffer-window)
-                (and file-name
-                     auto-revert-remote-files
-                     (file-remote-p file-name nil t))
-                ;; The `verify-visited-file-modtime' check acts as a fast path. It
-                ;; is an optimized C function that returns t if the file on disk
-                ;; matches the buffer's modification time, allowing us to bypass
-                ;; the handler entirely when no changes exist.
-                (and file-name
-                     (verify-visited-file-modtime base-buffer)))
-      (let ((auto-revert-mode t)
-            (revert-without-query (list "."))
-            (auto-revert-verbose lazy-autorevert-verbose)
-            (auto-revert-use-notify nil)
-            (auto-revert-stop-on-user-input nil))
-        (when lazy-autorevert-debug
-          (message "Auto revert %s" (buffer-name target-buffer)))
-        (auto-revert-handler)))))
+  (let ((current-time (float-time)))
+    (when (> (- current-time lazy-autorevert--last-check-time)
+             lazy-autorevert-throttle-interval)
+      (setq lazy-autorevert--last-check-time current-time)
+      (let* ((target-buffer (current-buffer))
+             (base-buffer (or (buffer-base-buffer target-buffer) target-buffer))
+             (file-name (buffer-file-name base-buffer)))
+        (unless (or auto-revert-mode
+                    (active-minibuffer-window)
+                    (and file-name
+                         auto-revert-remote-files
+                         (file-remote-p file-name nil t))
+                    ;; The `verify-visited-file-modtime' check acts as a fast
+                    ;; path. It is an optimized C function that returns t if the
+                    ;; file on disk matches the buffer's modification time,
+                    ;; allowing us to bypass the handler entirely when no
+                    ;; changes exist.
+                    (and file-name
+                         (verify-visited-file-modtime base-buffer)))
+          (let ((auto-revert-mode t)
+                (revert-without-query (list "."))
+                (auto-revert-verbose lazy-autorevert-verbose)
+                (auto-revert-use-notify nil)
+                (auto-revert-stop-on-user-input nil))
+            (when lazy-autorevert-debug
+              (message "Auto revert %s" (buffer-name target-buffer)))
+            (auto-revert-handler)))))))
 
 (defun lazy-autorevert-visible-buffers-handler (&rest _)
   "Auto revert stale buffers in visible windows, if necessary."
-  ;; `walk-windows' iterates over windows without allocating intermediate lists,
-  ;; reducing garbage collection overhead.
-  (walk-windows
-   (lambda (win)
-     (with-current-buffer (window-buffer win)
-       (lazy-autorevert-buffer-handler)))
-   'nomini
-   'visible))
+  (let ((current-time (float-time)))
+    (when (> (- current-time lazy-autorevert--last-global-check-time)
+             lazy-autorevert-throttle-interval)
+      (setq lazy-autorevert--last-global-check-time current-time)
+      ;; `walk-windows' iterates over windows without allocating intermediate lists,
+      ;; reducing garbage collection overhead.
+      (walk-windows
+       (lambda (win)
+         (with-current-buffer (window-buffer win)
+           (lazy-autorevert-buffer-handler)))
+       'nomini
+       'visible))))
 
 ;;;###autoload
 (define-minor-mode lazy-autorevert-mode
