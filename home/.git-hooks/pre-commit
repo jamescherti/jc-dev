@@ -178,7 +178,7 @@ check_non_ascii() {
   fi
 }
 
-check_typographic_apostrophes() {
+check_forbidden_characters() {
   local file
   local fault=0
   for file in "${MODIFIED_FILES[@]}"; do
@@ -186,8 +186,8 @@ check_typographic_apostrophes() {
     # Extract only the added lines in the staged changes and grep for
     # typographic quotes
     if git diff --no-ext-diff --cached -- "$file" \
-      | grep -E '^\+([^+]|$)' | grep -q -E "’|‘"; then
-      error "[ERROR] Typographic apostrophe ('’' or '‘') introduced in: $file"
+      | grep -E '^\+([^+]|$)' | grep -q -E "’|‘|—"; then
+      error "[ERROR] Forbidden characters ('’', '‘', —...) introduced in: $file"
       fault=1
     fi
   done
@@ -269,7 +269,7 @@ main() {
   check_email_change "$@"
   check_gpg
   check_non_ascii
-  check_typographic_apostrophes
+  check_forbidden_characters
   # check_syntax
 
   check_arch_linux
