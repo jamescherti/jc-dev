@@ -54,7 +54,7 @@ to prevent calling the revert handler excessively."
 (defvar lazy-autorevert--timer nil
   "Timer used to debounce auto-revert checks.")
 
-(defun lazy-autorevert-buffer-h (&rest _)
+(defun lazy-autorevert-buffer-handler (&rest _)
   "Auto revert current buffer, if necessary."
   (let* ((target-buffer (current-buffer))
          (base-buffer (or (buffer-base-buffer target-buffer) target-buffer))
@@ -86,7 +86,7 @@ to prevent calling the revert handler excessively."
   (walk-windows
    (lambda (win)
      (with-current-buffer (window-buffer win)
-       (lazy-autorevert-buffer-h)))
+       (lazy-autorevert-buffer-handler)))
    'nomini
    'visible))
 
