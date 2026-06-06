@@ -64,25 +64,29 @@ Enable this to trace the window and buffer change hooks."
       (let* ((target-buffer (current-buffer))
              (base-buffer (or (buffer-base-buffer target-buffer) target-buffer))
              (file-name (buffer-file-name base-buffer)))
-        (unless (or auto-revert-mode
-                    (active-minibuffer-window)
-                    (and file-name
-                         auto-revert-remote-files
-                         (file-remote-p file-name nil t))
-                    ;; The `verify-visited-file-modtime' check acts as a fast
-                    ;; path. It is an optimized C function that returns t if the
-                    ;; file on disk matches the buffer's modification time,
-                    ;; allowing us to bypass the handler entirely when no
-                    ;; changes exist.
-                    (and file-name
-                         (verify-visited-file-modtime base-buffer)))
+        (if (or auto-revert-mode
+                (active-minibuffer-window)
+                (and file-name
+                     auto-revert-remote-files
+                     (file-remote-p file-name nil t))
+                ;; The `verify-visited-file-modtime' check acts as a fast
+                ;; path. It is an optimized C function that returns t if the
+                ;; file on disk matches the buffer's modification time,
+                ;; allowing us to bypass the handler entirely when no
+                ;; changes exist.
+                (and file-name
+                     (verify-visited-file-modtime base-buffer)))
+            (when lazy-autorevert-debug
+              (message "[lazy-autorevert] Ignore: '%s'"
+                       (buffer-name target-buffer)))
           (let ((auto-revert-mode t)
                 (revert-without-query (list "."))
                 (auto-revert-verbose lazy-autorevert-verbose)
                 (auto-revert-use-notify nil)
                 (auto-revert-stop-on-user-input nil))
             (when lazy-autorevert-debug
-              (message "Auto revert %s" (buffer-name target-buffer)))
+              (message "[lazy-autorevert] Check: %s"
+                       (buffer-name target-buffer)))
             (auto-revert-handler)))))))
 
 (defun lazy-autorevert-visible-buffers-handler (&rest _)
