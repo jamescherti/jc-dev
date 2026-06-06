@@ -8,4 +8,5 @@ ${3:}
 ${4:}
 
 (provide '$1)
+
 ;;; $1.el ends here

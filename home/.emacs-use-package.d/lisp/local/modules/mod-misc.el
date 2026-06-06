@@ -5835,53 +5835,11 @@ Standard save hooks handle persistence when the buffer is modified."
 ;; (add-hook 'window-buffer-change-functions #'my-force-auto-revert)
 ;; (add-hook 'focus-in-hook #'my-force-auto-revert)
 
-;;; Lazy auto revert
+;;; Lazy autorevert
 
-(setq auto-revert-verbose t
-      auto-revert-use-notify nil
-      auto-revert-stop-on-user-input nil
-      revert-without-query (list "."))
-
-(defun my-auto-revert-buffer-h (&rest _)
-  "Auto revert current buffer, if necessary."
-  (unless (or auto-revert-mode
-              (active-minibuffer-window)
-              (and buffer-file-name
-                   auto-revert-remote-files
-                   (file-remote-p buffer-file-name nil t)))
-    (let ((auto-revert-mode t))
-      (message "Auto revert")
-      (auto-revert-handler))))
-
-(defun my-auto-revert-buffers-h (&rest _)
-  "Auto revert stale buffers in visible windows, if necessary."
-  (let ((visible-buffers (delete-dups
-                          (mapcar #'window-buffer
-                                  (window-list nil 'nomini 'visible)))))
-    (dolist (buf visible-buffers)
-      (with-current-buffer buf
-        (my-auto-revert-buffer-h)))))
-
-;; Default auto-revert relies on heavy file watching or polling, which can tank
-;; performance when external tools modify files or when managing hundreds of
-;; buffers. This lazy alternative updates visible windows only on frame focus or
-;; file save. Hidden buffers stay untouched until you switch to them, bounding
-;; operations to a few active viewports instead of the entire session.
-(define-minor-mode my-lazy-auto-revert-mode
-  "A more performant alternative to `global-auto-revert-mode'."
-  :global t
-  :group 'auto-revert
-  (when global-auto-revert-mode
-    (setq my-lazy-auto-revert-mode nil))
-  (let ((fn (if my-lazy-auto-revert-mode #'add-hook #'remove-hook)))
-    ;; Replace doom-specific hooks with standard Emacs window and focus hooks
-    (funcall fn 'window-buffer-change-functions #'my-auto-revert-buffer-h)
-    (funcall fn 'window-selection-change-functions #'my-auto-revert-buffer-h)
-    (funcall fn 'focus-in-hook #'my-auto-revert-buffers-h)
-    (funcall fn 'after-save-hook #'my-auto-revert-buffers-h)))
-
-;; Enable the mode
-(my-lazy-auto-revert-mode 1)
+(lightemacs-use-package lazy-autorevert
+  :commands my-lazy-auto-revert-mode
+  :hook (lightemacs-on-first-file . my-lazy-auto-revert-mode))
 
 ;;; Provide
 

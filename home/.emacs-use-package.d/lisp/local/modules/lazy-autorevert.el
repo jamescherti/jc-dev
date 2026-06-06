@@ -1,0 +1,86 @@
+;;; lazy-autorevert.el --- Description -*- lexical-binding: t -*-
+
+;; Author: James Cherti
+;; URL: https://github.com/jamescherti/jc-dev
+;; Package-Requires: ((emacs "29.1"))
+;; Keywords: maint
+;; Version: 0.0.9
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Lazy autorevert.
+
+;;; Code:
+
+(require 'autorevert)
+
+(setq auto-revert-verbose t
+      auto-revert-use-notify nil
+      auto-revert-stop-on-user-input nil
+      revert-without-query (list "."))
+
+(defun my-auto-revert-buffer-h (&rest _)
+  "Auto revert current buffer, if necessary."
+  (unless (or auto-revert-mode
+              (active-minibuffer-window)
+              (and buffer-file-name
+                   auto-revert-remote-files
+                   (file-remote-p buffer-file-name nil t))
+              ;; The `verify-visited-file-modtime' check acts as a fast path. It
+              ;; is an optimized C function that returns t if the file on disk
+              ;; matches the buffer's modification time, allowing us to bypass
+              ;; the handler entirely when no changes exist.
+              (and buffer-file-name
+                   (verify-visited-file-modtime (current-buffer))))
+    (let ((auto-revert-mode t))
+      ;; Rely on `auto-revert-verbose' for logging. An unconditional
+      ;; `message' call here forces I/O on every window switch, causing lag.
+      (auto-revert-handler))))
+
+(defun my-auto-revert-buffers-h (&rest _)
+  "Auto revert stale buffers in visible windows, if necessary."
+  ;; `walk-windows' iterates over windows without allocating intermediate lists,
+  ;; reducing garbage collection overhead.
+  (walk-windows
+   (lambda (win)
+     (with-current-buffer (window-buffer win)
+       (my-auto-revert-buffer-h)))
+   'nomini
+   'visible))
+
+(define-minor-mode my-lazy-auto-revert-mode
+  "A more performant alternative to `global-auto-revert-mode'.
+
+Default auto-revert relies on heavy file watching or polling, which can tank
+performance when external tools modify files or when managing hundreds of
+buffers. This lazy alternative updates visible windows only on frame focus or
+file save. Hidden buffers stay untouched until you switch to them, bounding
+operations to a few active viewports instead of the entire session."
+  :global t
+  :group 'auto-revert
+  (when global-auto-revert-mode
+    (global-auto-revert-mode -1))
+  (let ((fn (if my-lazy-auto-revert-mode #'add-hook #'remove-hook)))
+    ;; Replace doom-specific hooks with standard Emacs window and focus hooks
+    (funcall fn 'window-buffer-change-functions #'my-auto-revert-buffer-h)
+    (funcall fn 'window-selection-change-functions #'my-auto-revert-buffer-h)
+    (funcall fn 'focus-in-hook #'my-auto-revert-buffers-h)
+    (funcall fn 'after-save-hook #'my-auto-revert-buffers-h)))
+
+(provide 'lazy-autorevert)
+
+;;; lazy-autorevert.el ends here
