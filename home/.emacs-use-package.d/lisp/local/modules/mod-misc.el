@@ -5844,7 +5844,7 @@ Standard save hooks handle persistence when the buffer is modified."
   :commands lazy-autorevert-mode
   :hook (lightemacs-on-first-file . lazy-autorevert-mode)
   :init
-  (setq lazy-autorevert-debug t))
+  (setq lazy-autorevert-debug nil))
 
 ;;; Provide
 
