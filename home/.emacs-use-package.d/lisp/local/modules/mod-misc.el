@@ -5672,46 +5672,47 @@ This function uses `vc' to detect the default branch and its upstream (which
 properly handles remote files over Tramp), applying the setting only if
 `diff-hl-mode' is enabled."
   (interactive)
-  (let (default-branch
-        upstream)
+  (let (target-remote
+        reference)
     ;; Only proceed if the current directory is controlled by Git
     (when (and (fboundp 'vc-git-command)
                (eq (vc-backend (buffer-file-name (buffer-base-buffer))) 'Git))
-      ;; Detect the default branch using vc-git-command
+      ;; Determine the target remote (prefer 'upstream' over 'origin')
       (with-temp-buffer
-        (if (ignore-errors
-              (vc-git-command
-               (current-buffer) 0 nil
-               "symbolic-ref" "--short" "refs/remotes/origin/HEAD")
-              t)
-            (progn
-              (goto-char (point-min))
-              (when (looking-at "origin/\\([^\n]+\\)")
-                (setq default-branch (match-string 1))))
-          (when (ignore-errors
-                  (vc-git-command (current-buffer) 0 nil
-                                  "branch" "--format=%(refname:short)")
-                  t)
-            (goto-char (point-min))
-            (cond ((re-search-forward "^main$" nil t)
-                   (setq default-branch "main"))
-                  ((re-search-forward "^master$" nil t)
-                   (setq default-branch "master"))))))
+        (when (ignore-errors
+                (vc-git-command (current-buffer) 0 nil "remote")
+                t)
+          (let ((remotes (split-string (buffer-string) "\n" t)))
+            (setq target-remote (cond ((member "upstream" remotes) "upstream")
+                                      ((member "origin" remotes) "origin"))))))
 
-      ;; Check if there is an upstream branch linked to the default branch
-      (when default-branch
+      (when target-remote
+        ;; Detect the default branch on the target remote
         (with-temp-buffer
-          (when (ignore-errors
-                  (vc-git-command (current-buffer) 0 nil "rev-parse" "--abbrev-ref" (concat default-branch "@{u}"))
-                  t)
-            (goto-char (point-min))
-            (when (looking-at "[^\n]+")
-              (setq upstream (match-string 0))))))
+          (if (ignore-errors
+                (vc-git-command (current-buffer) 0 nil
+                                "symbolic-ref" "--short"
+                                (format "refs/remotes/%s/HEAD" target-remote))
+                t)
+              (progn
+                (goto-char (point-min))
+                (when (looking-at "[^\n]+")
+                  (setq reference (match-string 0))))
+            ;; Fallback if remote HEAD is not set locally: look for main or master
+            (when (ignore-errors
+                    (vc-git-command (current-buffer) 0 nil
+                                    "branch" "-r" "--format=%(refname:short)")
+                    t)
+              (goto-char (point-min))
+              (cond ((re-search-forward (format "^%s/main$" target-remote) nil t)
+                     (setq reference (match-string 0)))
+                    ((re-search-forward (format "^%s/master$" target-remote) nil t)
+                     (setq reference (match-string 0))))))))
 
       ;; Set the local variable and update diff-hl
-      (when upstream
-        (setq-local diff-hl-reference-revision upstream)
-        (message "Update reference: %s" upstream)
+      (when reference
+        (setq-local diff-hl-reference-revision reference)
+        (message "Update reference: %s" reference)
         (when (and (bound-and-true-p diff-hl-mode)
                    (fboundp 'diff-hl-update))
           (diff-hl-update))))))
