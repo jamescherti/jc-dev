@@ -5666,6 +5666,56 @@ Standard save hooks handle persistence when the buffer is modified."
 
 ;;; diff-hl setup
 
+(defun my-diff-hl-set-upstream-reference ()
+  "Set `diff-hl-reference-revision' to the default branch's upstream.
+This function uses `vc' to detect the default branch and its upstream (which
+properly handles remote files over Tramp), applying the setting only if
+`diff-hl-mode' is enabled."
+  (interactive)
+  (let (default-branch
+        upstream)
+    ;; Only proceed if the current directory is controlled by Git
+    (when (and (fboundp 'vc-git-command)
+               (eq (vc-backend (buffer-file-name (buffer-base-buffer))) 'Git))
+      ;; Detect the default branch using vc-git-command
+      (with-temp-buffer
+        (if (ignore-errors
+              (vc-git-command
+               (current-buffer) 0 nil
+               "symbolic-ref" "--short" "refs/remotes/origin/HEAD")
+              t)
+            (progn
+              (goto-char (point-min))
+              (when (looking-at "origin/\\([^\n]+\\)")
+                (setq default-branch (match-string 1))))
+          (when (ignore-errors
+                  (vc-git-command (current-buffer) 0 nil
+                                  "branch" "--format=%(refname:short)")
+                  t)
+            (goto-char (point-min))
+            (cond ((re-search-forward "^main$" nil t)
+                   (setq default-branch "main"))
+                  ((re-search-forward "^master$" nil t)
+                   (setq default-branch "master"))))))
+
+      ;; Check if there is an upstream branch linked to the default branch
+      (when default-branch
+        (with-temp-buffer
+          (when (ignore-errors
+                  (vc-git-command (current-buffer) 0 nil "rev-parse" "--abbrev-ref" (concat default-branch "@{u}"))
+                  t)
+            (goto-char (point-min))
+            (when (looking-at "[^\n]+")
+              (setq upstream (match-string 0))))))
+
+      ;; Set the local variable and update diff-hl
+      (when upstream
+        (setq-local diff-hl-reference-revision upstream)
+        (message "Update reference: %s" upstream)
+        (when (and (bound-and-true-p diff-hl-mode)
+                   (fboundp 'diff-hl-update))
+          (diff-hl-update))))))
+
 (defun my-setup-diff-hl-mode ()
   "Setup diff-hl mode if the buffer is backed by a suitable file."
   (when (and (fboundp 'diff-hl-mode)
@@ -5678,10 +5728,12 @@ Standard save hooks handle persistence when the buffer is modified."
                  (not (and (bound-and-true-p diff-hl-disable-on-remote)
                            (file-remote-p expanded-file)))
                  (vc-backend expanded-file))
+        (my-diff-hl-set-upstream-reference)
         (diff-hl-mode 1)))))
 
 (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
+(setq-default diff-hl-reference-revision "upstream/main")
 (setq diff-hl-ask-before-revert-hunk t)
 (setq diff-hl-disable-on-remote t)
 (setq diff-hl-draw-borders nil)
