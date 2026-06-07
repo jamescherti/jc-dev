@@ -38,7 +38,7 @@ execution of the lazy auto-revert handler."
   :type 'boolean
   :group 'auto-revert)
 
-(defcustom lazy-autorevert-debug t
+(defcustom lazy-autorevert-debug nil
   "If non-nil, print debug messages showing which buffer is being checked.
 Enable this to trace the window and buffer change hooks."
   :type 'boolean
