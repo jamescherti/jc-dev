@@ -5712,7 +5712,8 @@ properly handles remote files over Tramp), applying the setting only if
       ;; Set the local variable and update diff-hl
       (when reference
         (setq-local diff-hl-reference-revision reference)
-        (message "Update reference: %s" reference)
+        (when (called-interactively-p 'any)
+          (message "Update reference: %s" reference))
         (when (and (bound-and-true-p diff-hl-mode)
                    (fboundp 'diff-hl-update))
           (diff-hl-update))))))
