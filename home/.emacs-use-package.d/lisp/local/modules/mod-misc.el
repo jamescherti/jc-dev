@@ -5706,7 +5706,30 @@ properly handles remote files over Tramp), applying the setting only if
                     t)
               (goto-char (point-min))
               (when (re-search-forward (format "^%s/\\(main\\|master\\)$" target-remote) nil t)
-                (setq reference (match-string 0)))))))
+                (setq reference (match-string 0))))))
+
+        ;; Fallback to local main or master if no upstream reference was found
+        (unless reference
+          (erase-buffer)
+          (let (current-branch)
+            ;; Get the current local branch
+            (when (ignore-errors
+                    (vc-git-command (current-buffer) 0 nil
+                                    "rev-parse" "--abbrev-ref" "HEAD")
+                    t)
+              (goto-char (point-min))
+              (when (looking-at "[^\n]+")
+                (setq current-branch (match-string 0))))
+            ;; Only search for a fallback if the current branch is not main or master
+            (unless (member current-branch '("main" "master"))
+              (erase-buffer)
+              (when (ignore-errors
+                      (vc-git-command (current-buffer) 0 nil
+                                      "branch" "--format=%(refname:short)")
+                      t)
+                (goto-char (point-min))
+                (when (re-search-forward "^\\(main\\|master\\)$" nil t)
+                  (setq reference (match-string 0))))))))
 
       ;; Set the local variable and update diff-hl
       (when reference
@@ -5728,8 +5751,9 @@ properly handles remote files over Tramp), applying the setting only if
                  (not (and (bound-and-true-p diff-hl-disable-on-remote)
                            (file-remote-p expanded-file)))
                  (vc-backend expanded-file))
-        (my-diff-hl-set-upstream-reference)
         (diff-hl-mode 1)))))
+
+(advice-add 'my-diff-hl-set-upstream-reference :before #'diff-hl-mode)
 
 (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
