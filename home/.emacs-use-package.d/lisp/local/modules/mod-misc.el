@@ -5740,7 +5740,9 @@ properly handles remote files over Tramp), applying the setting only if
                   (setq reference (match-string 0))))))))
 
       ;; Set the local variable and update diff-hl
-      (message "Update Git reference to: %s" reference)
+      (when (called-interactively-p 'any)
+        (message "Update Git reference to: %s" reference))
+
       (if (not reference)
           (setq-local diff-hl-reference-revision nil)
         (setq-local diff-hl-reference-revision reference)
