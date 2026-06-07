@@ -54,9 +54,6 @@ source .cfg.sh
 
 set -euf -o pipefail
 
-export TMPDIR="$HOME/.tmp/pip"
-export PIP_DOWNLOAD_CACHE="$HOME/.cache/pip_download_cache"
-
 PYTHON_VENV_DIR="$HOME/.python_venv/main_$PYTHON_VERSION"
 
 ID=$(osid)
@@ -74,10 +71,6 @@ atexit() {
   local errno="$?"
   trap - EXIT INT TERM
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
-    if [[ -d "$TMPDIR" ]]; then
-      rm -fr "$TMPDIR"
-    fi
-
     if [[ -f "$REQUIREMENTS_LOG" ]]; then
       sort <"$REQUIREMENTS_LOG" | uniq >"$REQUIREMENTS_LOG.new"
       mv "$REQUIREMENTS_LOG.new" "$REQUIREMENTS_LOG"
@@ -97,11 +90,6 @@ atexit() {
 
 init() {
   trap 'atexit' INT TERM EXIT
-
-  mkdir -p "$TMPDIR"
-  chmod 700 "$TMPDIR"
-
-  mkdir -p "$PIP_DOWNLOAD_CACHE"
 
   if ! [[ -f "$PYTHON_VENV_DIR/bin/activate" ]]; then
     rm -fr "$PYTHON_VENV_DIR"
