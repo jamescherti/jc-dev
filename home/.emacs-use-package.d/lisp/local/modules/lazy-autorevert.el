@@ -64,36 +64,59 @@ Enable this to trace the window and buffer change hooks."
       (let* ((target-buffer (current-buffer))
              (base-buffer (or (buffer-base-buffer target-buffer) target-buffer))
              (file-name (buffer-file-name base-buffer)))
-        (if (or auto-revert-mode
-                (active-minibuffer-window)
-                (and file-name
-                     (not auto-revert-remote-files)
-                     (file-remote-p file-name nil t))
-                ;; The `verify-visited-file-modtime' check acts as a fast
-                ;; path. It is an optimized C function that returns t if the
-                ;; file on disk matches the buffer's modification time,
-                ;; allowing us to bypass the handler entirely when no
-                ;; changes exist.
-                (and file-name
-                     (verify-visited-file-modtime base-buffer))
-                (and (not global-auto-revert-non-file-buffers)
-                     (not file-name)))
-            (when lazy-autorevert-debug
-              (message "[lazy-autorevert] Ignore: '%s'"
-                       (buffer-name target-buffer)))
+        (cond
+         (auto-revert-mode
+          (when lazy-autorevert-debug
+            (message
+             "[lazy-autorevert] Ignoring (auto-revert-mode active): '%s'"
+             (buffer-name target-buffer))))
+
+         ((active-minibuffer-window)
+          (when lazy-autorevert-debug
+            (message
+             "[lazy-autorevert] Ignoring (minibuffer active): '%s'"
+             (buffer-name target-buffer))))
+
+         ((and file-name
+               (not auto-revert-remote-files)
+               (file-remote-p file-name nil t))
+          (when lazy-autorevert-debug
+            (message
+             "[lazy-autorevert] Ignoring (remote file): '%s'"
+             (buffer-name target-buffer))))
+
+         ;; The `verify-visited-file-modtime' check acts as a fast
+         ;; path. It is an optimized C function that returns t if the
+         ;; file on disk matches the buffer's modification time,
+         ;; allowing us to bypass the handler entirely when no
+         ;; changes exist.
+         ((and file-name
+               (verify-visited-file-modtime base-buffer))
+          (when lazy-autorevert-debug
+            (message
+             "[lazy-autorevert] Ignoring (up-to-date): '%s'"
+             (buffer-name target-buffer))))
+
+         ((and (not global-auto-revert-non-file-buffers)
+               (not file-name))
+          (when lazy-autorevert-debug
+            (message "[lazy-autorevert] Ignoring (non-file buffer): '%s'"
+                     (buffer-name target-buffer))))
+
+         (t
           (let ((auto-revert-mode t)
                 (revert-without-query (list "."))
                 (auto-revert-verbose lazy-autorevert-verbose)
                 (auto-revert-use-notify nil)
                 (auto-revert-stop-on-user-input nil))
             (when lazy-autorevert-debug
-              (message "[lazy-autorevert] Check: %s"
+              (message "[lazy-autorevert] Checking buffer: '%s'"
                        (buffer-name target-buffer)))
             (if (eq (current-buffer) base-buffer)
                 (auto-revert-handler)
               ;; Indirect buffers/clones
               (with-current-buffer base-buffer
-                (auto-revert-handler)))))))))
+                (auto-revert-handler))))))))))
 
 (defun lazy-autorevert-visible-buffers-handler (&rest _)
   "Auto revert stale buffers in visible windows, if necessary."
