@@ -85,6 +85,10 @@
                 ;; Inclusion of major and minor modes
                 ;; "  |  "
                 ;; mode-line-modes
+                (:eval
+                 (let ((ref (bound-and-true-p diff-hl-reference-revision)))
+                   (when (and (bound-and-true-p diff-hl-mode) ref)
+                     (format "  |  diff-hl-ref:%s" ref))))
                 "  |  "
                 (:eval (my-gc-cons-threshold-mode-line))
                 ;; mode-line-modes
@@ -5699,7 +5703,8 @@ properly handles remote files over Tramp), applying the setting only if
                 (goto-char (point-min))
                 (when (looking-at "[^\n]+")
                   (setq reference (match-string 0))))
-            ;; Fallback if remote HEAD is not set locally: look for main or master
+            ;; Fallback if remote HEAD is not set locally: look for main or
+            ;; master
             (erase-buffer)
             (when (ignore-errors
                     (vc-git-command (current-buffer) 0 nil
@@ -5735,9 +5740,10 @@ properly handles remote files over Tramp), applying the setting only if
                   (setq reference (match-string 0))))))))
 
       ;; Set the local variable and update diff-hl
-      (when reference
+      (message "Update Git reference to: %s" reference)
+      (if (not reference)
+          (setq-local diff-hl-reference-revision nil)
         (setq-local diff-hl-reference-revision reference)
-        (message "Update reference: %s" reference)
         (when (and (bound-and-true-p diff-hl-mode)
                    (fboundp 'diff-hl-update))
           (diff-hl-update))))))
