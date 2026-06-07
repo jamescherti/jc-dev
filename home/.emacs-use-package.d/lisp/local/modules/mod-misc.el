@@ -5677,18 +5677,18 @@ properly handles remote files over Tramp), applying the setting only if
     ;; Only proceed if the current directory is controlled by Git
     (when (and (fboundp 'vc-git-command)
                (eq (vc-backend (buffer-file-name (buffer-base-buffer))) 'Git))
-      ;; Determine the target remote (prefer 'upstream' over 'origin')
       (with-temp-buffer
+        ;; Determine the target remote (prefer 'upstream' over 'origin')
         (when (ignore-errors
                 (vc-git-command (current-buffer) 0 nil "remote")
                 t)
           (let ((remotes (split-string (buffer-string) "\n" t)))
             (setq target-remote (cond ((member "upstream" remotes) "upstream")
-                                      ((member "origin" remotes) "origin"))))))
+                                      ((member "origin" remotes) "origin")))))
 
-      (when target-remote
-        ;; Detect the default branch on the target remote
-        (with-temp-buffer
+        (when target-remote
+          (erase-buffer)
+          ;; Detect the default branch on the target remote
           (if (ignore-errors
                 (vc-git-command (current-buffer) 0 nil
                                 "symbolic-ref" "--short"
@@ -5699,21 +5699,19 @@ properly handles remote files over Tramp), applying the setting only if
                 (when (looking-at "[^\n]+")
                   (setq reference (match-string 0))))
             ;; Fallback if remote HEAD is not set locally: look for main or master
+            (erase-buffer)
             (when (ignore-errors
                     (vc-git-command (current-buffer) 0 nil
                                     "branch" "-r" "--format=%(refname:short)")
                     t)
               (goto-char (point-min))
-              (cond ((re-search-forward (format "^%s/main$" target-remote) nil t)
-                     (setq reference (match-string 0)))
-                    ((re-search-forward (format "^%s/master$" target-remote) nil t)
-                     (setq reference (match-string 0))))))))
+              (when (re-search-forward (format "^%s/\\(main\\|master\\)$" target-remote) nil t)
+                (setq reference (match-string 0)))))))
 
       ;; Set the local variable and update diff-hl
       (when reference
         (setq-local diff-hl-reference-revision reference)
-        (when (called-interactively-p 'any)
-          (message "Update reference: %s" reference))
+        (message "Update reference: %s" reference)
         (when (and (bound-and-true-p diff-hl-mode)
                    (fboundp 'diff-hl-update))
           (diff-hl-update))))))
