@@ -5690,6 +5690,8 @@ Standard save hooks handle persistence when the buffer is modified."
 (setq diff-hl-bmp-max-width 16)
 (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
 
+(define-key diff-hl-mode-map (kbd "C-x v b") #'diff-hl-set-reference-rev)
+
 ;;; elisp cape
 
 (with-eval-after-load 'cape

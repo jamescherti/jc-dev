@@ -2,7 +2,7 @@
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
-;; Package-Requires: ((emacs "29.1"))
+;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: maint
 ;; Version: 0.0.9
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -67,7 +67,7 @@ Enable this to trace the window and buffer change hooks."
         (if (or auto-revert-mode
                 (active-minibuffer-window)
                 (and file-name
-                     auto-revert-remote-files
+                     (not auto-revert-remote-files)
                      (file-remote-p file-name nil t))
                 ;; The `verify-visited-file-modtime' check acts as a fast
                 ;; path. It is an optimized C function that returns t if the
@@ -75,7 +75,9 @@ Enable this to trace the window and buffer change hooks."
                 ;; allowing us to bypass the handler entirely when no
                 ;; changes exist.
                 (and file-name
-                     (verify-visited-file-modtime base-buffer)))
+                     (verify-visited-file-modtime base-buffer))
+                (and (not global-auto-revert-non-file-buffers)
+                     (not file-name)))
             (when lazy-autorevert-debug
               (message "[lazy-autorevert] Ignore: '%s'"
                        (buffer-name target-buffer)))
@@ -87,20 +89,25 @@ Enable this to trace the window and buffer change hooks."
             (when lazy-autorevert-debug
               (message "[lazy-autorevert] Check: %s"
                        (buffer-name target-buffer)))
-            (auto-revert-handler)))))))
+            (if (eq (current-buffer) base-buffer)
+                (auto-revert-handler)
+              ;; Indirect buffers/clones
+              (with-current-buffer base-buffer
+                (auto-revert-handler)))))))))
 
 (defun lazy-autorevert-visible-buffers-handler (&rest _)
   "Auto revert stale buffers in visible windows, if necessary."
-  (let ((current-time (float-time)))
-    (when (> (- current-time lazy-autorevert--last-global-check-time)
-             lazy-autorevert-throttle-interval)
-      (setq lazy-autorevert--last-global-check-time current-time)
-      (walk-windows
-       (lambda (win)
-         (with-current-buffer (window-buffer win)
-           (lazy-autorevert-buffer-handler)))
-       'nomini
-       'visible))))
+  (when (frame-focus-state)
+    (let ((current-time (float-time)))
+      (when (> (- current-time lazy-autorevert--last-global-check-time)
+               lazy-autorevert-throttle-interval)
+        (setq lazy-autorevert--last-global-check-time current-time)
+        (walk-windows
+         (lambda (win)
+           (with-current-buffer (window-buffer win)
+             (lazy-autorevert-buffer-handler)))
+         'nomini
+         'visible)))))
 
 ;;;###autoload
 (define-minor-mode lazy-autorevert-mode
@@ -115,8 +122,10 @@ operations to a few active viewports instead of the entire session."
   (when global-auto-revert-mode
     (global-auto-revert-mode -1))
   (let ((fn (if lazy-autorevert-mode #'add-hook #'remove-hook)))
+    ;; TODO switch to lazy-autorevert-visible-buffers-handler?
     (funcall fn 'window-buffer-change-functions
-             #'lazy-autorevert-buffer-handler)
+             #'lazy-autorevert-visible-buffers-handler)
+    ;; TODO switch to lazy-autorevert-visible-buffers-handler?
     (funcall fn 'window-selection-change-functions
              #'lazy-autorevert-buffer-handler)
     (if (boundp 'after-focus-change-function)
