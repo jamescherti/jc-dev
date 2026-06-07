@@ -471,9 +471,20 @@ config-fonts() {
   fi
 }
 
+install_python_deps() {
+  cd "$SCRIPT_DIR/misc/deps"
+  if [[ "${VIRTUAL_ENV:-}" = "" ]]; then
+    ./deps-python-pip-user.sh
+  else
+    ./deps-python-pyenv.sh
+  fi
+}
+
 main() {
   init
   confirm
+
+  install_python_deps
 
   copy_dotfiles
   config-jc-dotfiles
