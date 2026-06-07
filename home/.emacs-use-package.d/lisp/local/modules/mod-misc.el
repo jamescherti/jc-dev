@@ -5666,17 +5666,18 @@ Standard save hooks handle persistence when the buffer is modified."
 
 ;;; diff-hl setup
 
-(defun my-diff-hl-set-upstream-reference ()
+(defun my-diff-hl-set-upstream-reference (&rest _)
   "Set `diff-hl-reference-revision' to the default branch's upstream.
 This function uses `vc' to detect the default branch and its upstream (which
 properly handles remote files over Tramp), applying the setting only if
 `diff-hl-mode' is enabled."
   (interactive)
   (let (target-remote
-        reference)
+        reference
+        (file-name (buffer-file-name (buffer-base-buffer))))
     ;; Only proceed if the current directory is controlled by Git
     (when (and (fboundp 'vc-git-command)
-               (eq (vc-backend (buffer-file-name (buffer-base-buffer))) 'Git))
+               (eq (vc-backend file-name) 'Git))
       (with-temp-buffer
         ;; Determine the target remote (prefer 'upstream' over 'origin')
         (when (ignore-errors
@@ -5705,7 +5706,8 @@ properly handles remote files over Tramp), applying the setting only if
                                     "branch" "-r" "--format=%(refname:short)")
                     t)
               (goto-char (point-min))
-              (when (re-search-forward (format "^%s/\\(main\\|master\\)$" target-remote) nil t)
+              (when (re-search-forward
+                     (format "^%s/\\(main\\|master\\)$" target-remote) nil t)
                 (setq reference (match-string 0))))))
 
         ;; Fallback to local main or master if no upstream reference was found
@@ -5720,7 +5722,8 @@ properly handles remote files over Tramp), applying the setting only if
               (goto-char (point-min))
               (when (looking-at "[^\n]+")
                 (setq current-branch (match-string 0))))
-            ;; Only search for a fallback if the current branch is not main or master
+            ;; Only search for a fallback if the current branch is not main or
+            ;; master
             (unless (member current-branch '("main" "master"))
               (erase-buffer)
               (when (ignore-errors
@@ -5753,7 +5756,9 @@ properly handles remote files over Tramp), applying the setting only if
                  (vc-backend expanded-file))
         (diff-hl-mode 1)))))
 
-(advice-add 'my-diff-hl-set-upstream-reference :before #'diff-hl-mode)
+(with-eval-after-load 'diff-hl
+  (define-key diff-hl-mode-map (kbd "C-x v b") #'diff-hl-set-reference-rev)
+  (advice-add 'diff-hl-mode :before #'my-diff-hl-set-upstream-reference))
 
 (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
@@ -5766,7 +5771,6 @@ properly handles remote files over Tramp), applying the setting only if
 (setq diff-hl-bmp-max-width 16)
 (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
 
-(define-key diff-hl-mode-map (kbd "C-x v b") #'diff-hl-set-reference-rev)
 
 ;;; elisp cape
 
