@@ -1,4 +1,4 @@
-;;; mod-project.el --- project -*- lexical-binding: t -*-
+;;; sub-project.el --- project -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -82,7 +82,7 @@
 
 ;; (require 'project)
 ;;
-;; (defun mod-project-auto-remember ()
+;; (defun sub-project-auto-remember ()
 ;;   "Automatically add the current project to the known projects list.
 ;; Only adds the project if the root directory contains a `.project` file."
 ;;   (when-let* ((proj (project-current nil))
@@ -91,10 +91,10 @@
 ;;       (project-remember-project proj))))
 ;;
 ;; ;; Trigger when opening a file
-;; (add-hook 'find-file-hook #'mod-project-auto-remember)
+;; (add-hook 'find-file-hook #'sub-project-auto-remember)
 ;;
 ;; ;; Trigger when opening a directory in dired
-;; (add-hook 'dired-mode-hook #'mod-project-auto-remember)
+;; (add-hook 'dired-mode-hook #'sub-project-auto-remember)
 
 ;;; Better project selector
 
@@ -353,10 +353,10 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 ;;; Provide
 
-(provide 'mod-project)
+(provide 'sub-project)
 
 ;; Local variables:
 ;; byte-compile-warnings: (not lexical free-vars)
 ;; End:
 
-;;; mod-project.el ends here
+;;; sub-project.el ends here

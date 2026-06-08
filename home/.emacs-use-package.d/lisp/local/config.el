@@ -920,7 +920,17 @@ subsequent GCC invocations."
                            mod-same-window
                            tmpedit
                            mod-cleanup
-                           mod-treesit))
+                           mod-treesit
+
+                           mod-kirigami
+                           sub-project
+                           mod-buffer-terminator
+                           buffer-guardian
+                           mod-eglot
+                           smartindent
+                           ;; point-manager
+                           ;; battery-angel
+                           ))
 
 ;;; Add my packages to load path
 

@@ -32,7 +32,7 @@
 (require 'lightemacs)  ; lightemacs-save-window-start
 (eval-and-compile
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
-(require 'mod-project)
+(require 'sub-project)
 
 ;;; Testing
 

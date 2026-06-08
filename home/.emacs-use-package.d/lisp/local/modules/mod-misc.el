@@ -99,23 +99,7 @@
 
 (unless noninteractive
   ;; Optional
-  (require 'mod-misc2 nil t)
-
-  ;; (require 'mod-toggle-term)
-  ;; TODO put it back
-
-  ;; (when (< emacs-major-version 31)
-  ;;   (require 'mod-kirigami))
-  (require 'mod-kirigami)
-
-  (require 'mod-project)
-  (require 'mod-buffer-terminator)
-  (require 'buffer-guardian)
-  (require 'mod-eglot)
-  (require 'smartindent)
-  ;; (require 'battery-angel)
-  ;; (require 'point-manager)
-  )
+  (require 'mod-misc2 nil t))
 
 (unless noninteractive
   (with-eval-after-load 'evil
