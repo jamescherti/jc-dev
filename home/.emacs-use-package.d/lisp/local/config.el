@@ -919,7 +919,8 @@ subsequent GCC invocations."
                            mod-ediff
                            mod-same-window
                            tmpedit
-                           mod-cleanup))
+                           mod-cleanup
+                           mod-treesit))
 
 ;;; Add my packages to load path
 
