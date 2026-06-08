@@ -2862,8 +2862,8 @@ generally one of the lines that are folded."
         (c-sharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
         (commonlisp "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp")
         (css "https://github.com/tree-sitter/tree-sitter-css")
+        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
         (glsl "https://github.com/tree-sitter-grammars/tree-sitter-glsl")
-        (go "https://github.com/tree-sitter/tree-sitter-go")
         (julia "https://github.com/tree-sitter/tree-sitter-julia")
         (make "https://github.com/tree-sitter-grammars/tree-sitter-make")
         (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
@@ -2900,7 +2900,9 @@ generally one of the lines that are folded."
         (cmake "https://github.com/uyha/tree-sitter-cmake")
         (dart "https://github.com/ast-grep/tree-sitter-dart")
         (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
-        (go-mod "https://github.com/camdencheek/tree-sitter-go-mod")))
+        (go "https://github.com/tree-sitter/tree-sitter-go")
+        (gowork "https://github.com/omertuc/tree-sitter-go-work")
+        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")))
 
 (defun my-treesit-update-language-grammar ()
   "Update language grammar."
