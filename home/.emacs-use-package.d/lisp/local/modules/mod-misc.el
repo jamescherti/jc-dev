@@ -2742,68 +2742,76 @@ generally one of the lines that are folded."
 
 ;;; Persist text scale
 
-(defun my-window-redisplay ()
-  "Redisplay window."
-  (when (bound-and-true-p text-scale-mode-amount)
-    (let ((amount text-scale-mode-amount))
-      (when (or (not (bound-and-true-p
-                      my-window-redisplay-last-text-scale-amount))
-                (/= amount my-window-redisplay-last-text-scale-amount))
-        (setq-local my-window-redisplay-last-text-scale-amount amount)
-        (let ((window (selected-window)))
-          (cond
-           ((<= emacs-major-version 27)
-            (run-hook-with-args 'window-size-change-functions window))
-           ((> emacs-major-version 27)
-            (run-hook-with-args 'window-state-change-functions window)))))))
+;; (defvar-local my-window-redisplay-last-text-scale-amount nil
+;;   "Store the last text scale amount for window redisplay checks.")
+;;
+;; (defun my-window-redisplay ()
+;;   "Redisplay window."
+;;   (when (bound-and-true-p text-scale-mode-amount)
+;;     (let ((amount text-scale-mode-amount))
+;;       (when (or (null my-window-redisplay-last-text-scale-amount)
+;;                 (/= amount my-window-redisplay-last-text-scale-amount))
+;;         (setq my-window-redisplay-last-text-scale-amount amount)
+;;         (let ((window (selected-window)))
+;;           (if (<= emacs-major-version 27)
+;;               (run-hook-with-args 'window-size-change-functions window)
+;;             (run-hook-with-args 'window-state-change-functions window))))))
+;;   (run-hooks 'window-configuration-change-hook))
+;;
+;; (defun my-persist-text-scale-adjust ()
+;;   "Ensure the window is updated.
+;; I have identified an issue that affects Emacs packages such as eat (terminal)
+;; and visual-fill-column. Functions like `text-scale-increase`,
+;; `text-scale-decrease`, and `text-scale-set` do not trigger hooks like
+;; `window-configuration-change-hook`. As a result, the eat package does not
+;; immediately update the window when the text scale is changed, and
+;; visual-fill-column does not update the margin right away (it updates only after
+;; the window is resized). This function fixes these issues."
+;;   (when (or (derived-mode-p 'eat-mode)
+;;             (bound-and-true-p visual-fill-column-mode))
+;;     (my-window-redisplay)))
+;;
+;; ;; Force windows update
+;; (add-hook 'text-scale-mode-hook #'my-persist-text-scale-adjust)
 
-  (run-hooks 'window-configuration-change-hook))
+(defvar my-window-redisplay-last-text-scale-amount nil)
 
-(defun my-persist-text-scale-adjust ()
-  "Ensure the window is updated.
-I have identified an issue that affects Emacs packages such as eat (terminal)
-and visual-fill-column. Functions like `text-scale-increase`,
-`text-scale-decrease`, and `text-scale-set` do not trigger hooks like
-`window-configuration-change-hook`. As a result, the eat package does not
-immediately update the window when the text scale is changed, and
-visual-fill-column does not update the margin right away (it updates only after
-the window is resized). This function fixes these issues."
-  (when (or (derived-mode-p 'eat-mode)
-            (bound-and-true-p visual-fill-column-mode))
-    (my-window-redisplay)))
+(defun my-persist-text-scale-function ()
+  "Return the persist text scale category."
+  ;; Corfu context menu adjusts the text size based on the size of the
+  ;; window from which the text completion is triggered. It should be
+  ;; ignored.
+  (let ((buffer-name (buffer-name)))
+    (cond
+     ;; Temporary / Popup Buffers to Ignore
+     ((or (string= buffer-name " *transient*")
+          (string= buffer-name " *which-key*")  ; TODO add to official package
+          (string= buffer-name " *lv*")                  ; Hydra/LV popups
+          (string-match-p "\\` \\*posframe" buffer-name)   ; Posframe popups
+          (string-match-p "\\` \\*company" buffer-name))   ; Company popups
+      :ignore)
+
+     ;;((string-prefix-p ))
+
+     ;; TODO: add to the official one
+     ((string-prefix-p "*Embark Export:" buffer-name)
+      "c:embark-export")
+
+     ((string-prefix-p "*Org Src" buffer-name)
+      "c:org-src")
+
+     ((string-prefix-p "*magit" buffer-name)
+      "c:magit")
+
+     ((string-prefix-p "*helpful" buffer-name)
+      "c:helpful")
+
+     ((string-prefix-p "*sdcv:" buffer-name)
+      "c:sdcv"))))
 
 (with-eval-after-load 'persist-text-scale
-  (defun my-persist-text-scale-function ()
-    ;; TODO: Add to the official?
-    ;;
-    ;; Corfu context menu adjusts the text size based on the size of the
-    ;; window from which the text completion is triggered. It should be
-    ;; ignored.
-    (let ((buffer-name (buffer-name)))
-      (cond
-       ((string= buffer-name " *transient*")
-        :ignore)
-
-
-       ((string= buffer-name " *which-key*")
-        :ignore)
-
-       ;;((string-prefix-p ))
-
-       ;; TODO: add to the official one
-       ((string-prefix-p "*Embark Export:" buffer-name)
-        "c:embark-export")
-
-       ((string-prefix-p "*sdcv:" buffer-name)
-        "c:sdcv"))))
-
-  (defvar my-window-redisplay-last-text-scale-amount nil)
-
-  ;; Force windows update
-  (progn
-    (add-hook 'text-scale-mode-hook #'my-persist-text-scale-adjust))
-
-  (setq persist-text-scale-buffer-category-function 'my-persist-text-scale-function))
+  (setq persist-text-scale-buffer-category-function
+        #'my-persist-text-scale-function))
 
 ;;; tree sitter
 
