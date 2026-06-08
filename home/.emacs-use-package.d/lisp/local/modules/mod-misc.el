@@ -5771,7 +5771,7 @@ properly handles remote files over Tramp), applying the setting only if
 
 (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
-(setq-default diff-hl-reference-revision "upstream/main")
+;; (setq-default diff-hl-reference-revision "origin/main")
 (setq diff-hl-ask-before-revert-hunk t)
 (setq diff-hl-disable-on-remote t)
 (setq diff-hl-draw-borders nil)
