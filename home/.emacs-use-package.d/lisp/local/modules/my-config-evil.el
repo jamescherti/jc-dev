@@ -3172,6 +3172,11 @@ Accepts any arguments so it can be used as advice or a hook."
 ;; (global-set-key (kbd "C-c b c") 'my-copy-whole-buffer-evil)
 (evil-define-key 'normal 'global (kbd "<leader>cb") #'my-copy-whole-buffer-evil)
 
+;;; markdown-ts-mode
+
+;; (with-eval-after-load 'markdown-ts-mode
+;;   (define-key markdown-ts-mode-map (kbd "TAB") nil))
+
 ;;; Provide
 
 (provide 'my-config-evil)
