@@ -1,4 +1,4 @@
-;;; mod-php-mode.el --- Force buffers to open in the same window -*- lexical-binding: t -*-
+;;; sub-php-mode.el --- Force buffers to open in the same window -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -33,10 +33,10 @@
   ("\\.php3\\'" . php-mode)
   ("\\.php\\'" . php-mode))
 
-(provide 'mod-php-mode)
+(provide 'sub-php-mode)
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 
-;;; mod-php-mode.el ends here
+;;; sub-php-mode.el ends here

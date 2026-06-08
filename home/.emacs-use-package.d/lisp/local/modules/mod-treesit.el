@@ -326,7 +326,7 @@
       (push '(php-mode . php-ts-mode) major-mode-remap-alist)
       (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]\\'" . php-ts-mode))
       (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]3\\'" . php-ts-mode)))
-  (require 'mod-php-mode))
+  (require 'sub-php-mode))
 
 ;;; Bash
 
@@ -368,7 +368,7 @@
 
 (if (my-treesit-language-available-p 'lua)
     (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode))
-  (require 'mod-lua-mode))
+  (require 'sub-lua-mode))
 
 ;;; Dockerfile
 

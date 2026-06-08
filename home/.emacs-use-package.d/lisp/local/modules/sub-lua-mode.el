@@ -1,4 +1,4 @@
-;;; mod-lua-mode.el --- Force buffers to open in the same window -*- lexical-binding: t -*-
+;;; sub-lua-mode.el --- Force buffers to open in the same window -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -32,10 +32,10 @@
   :mode
   ("\\.lua\\'" . lua-mode))
 
-(provide 'mod-lua-mode)
+(provide 'sub-lua-mode)
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 
-;;; mod-lua-mode.el ends here
+;;; sub-lua-mode.el ends here
