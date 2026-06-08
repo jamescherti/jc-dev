@@ -2870,8 +2870,8 @@ generally one of the lines that are folded."
         (rust "https://github.com/tree-sitter/tree-sitter-rust")
         (scala "https://github.com/tree-sitter/tree-sitter-scala")
         (toml "https://github.com/tree-sitter/tree-sitter-toml")
-        (tsx "https://github.com/tree-sitter/tree-sitter-typescript")
-        (typescript "https://github.com/tree-sitter/tree-sitter-typescript")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
         (vue "https://github.com/tree-sitter-grammars/tree-sitter-vue")
 
         (heex "https://github.com/phoenixframework/tree-sitter-heex")
@@ -2900,7 +2900,7 @@ generally one of the lines that are folded."
         (cmake "https://github.com/uyha/tree-sitter-cmake")
         (dart "https://github.com/ast-grep/tree-sitter-dart")
         (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
-        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")))
+        (go-mod "https://github.com/camdencheek/tree-sitter-go-mod")))
 
 (defun my-treesit-update-language-grammar ()
   "Update language grammar."
