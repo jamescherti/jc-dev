@@ -273,7 +273,11 @@ main() {
   check_email_change "$@"
   check_gpg
   check_non_ascii
-  check_forbidden_characters
+
+  if [[ "${FORBIDDEN_CHARACTERS:-}" = "" ]] \
+    || [[ "${FORBIDDEN_CHARACTERS:-}" -eq 0 ]]; then
+    check_forbidden_characters
+  fi
   # check_syntax
 
   check_arch_linux
