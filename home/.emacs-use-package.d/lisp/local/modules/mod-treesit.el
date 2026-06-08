@@ -239,7 +239,7 @@
         (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))
       (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode))
   ;; non tree sitter
-  (require 'mod-flymake-yamllint)
+  (require 'sub-flymake-yamllint)
 
   (when (fboundp 'yaml-mode)
     (define-derived-mode ansible-mode yaml-mode "Ansible"
@@ -252,7 +252,6 @@
     (define-derived-mode ansible-mode yaml-ts-mode "Ansible"
       "Major mode for editing Ansible files.")
   ;; Non tree-sitter
-  (require 'mod-flymake-yamllint)
   (when (fboundp 'yaml-mode)
     (define-derived-mode ansible-mode yaml-mode "Ansible"
       "Major mode for editing Ansible files.")))

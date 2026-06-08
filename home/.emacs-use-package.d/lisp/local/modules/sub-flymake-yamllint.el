@@ -1,4 +1,4 @@
-;;; mod-flymake-yamllint.el --- mod-flymake-yamllint -*- lexical-binding: t -*-
+;;; sub-flymake-yamllint.el --- sub-flymake-yamllint -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
@@ -22,5 +22,5 @@
   (add-hook 'yaml-mode-hook #'my-flymake-yamllint-setup)
   (add-hook 'yaml-ts-mode-hook #'my-flymake-yamllint-setup))
 
-(provide 'mod-flymake-yamllint)
-;;; mod-flymake-yamllint.el ends here
+(provide 'sub-flymake-yamllint)
+;;; sub-flymake-yamllint.el ends here
