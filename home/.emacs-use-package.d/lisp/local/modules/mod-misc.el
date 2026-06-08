@@ -2784,6 +2784,12 @@ the window is resized). This function fixes these issues."
        ((string= buffer-name " *transient*")
         :ignore)
 
+
+       ((string= buffer-name " *which-key*")
+        :ignore)
+
+       ;;((string-prefix-p ))
+
        ;; TODO: add to the official one
        ((string-prefix-p "*Embark Export:" buffer-name)
         "c:embark-export")

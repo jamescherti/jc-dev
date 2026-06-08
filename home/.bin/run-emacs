@@ -35,6 +35,7 @@ EMACS_ARGS_DICT=(
   --no-loadup
 )
 EMACS_EDIT_TIMEOUT="${EMACS_EDIT_TIMEOUT:-3}"
+EMACS_D="${EMACS_D:-}"
 
 # shellcheck disable=SC1090
 # In case .profile or .bashrc modify the current directory
