@@ -96,6 +96,41 @@
 ;; ;; Trigger when opening a directory in dired
 ;; (add-hook 'dired-mode-hook #'sub-project-auto-remember)
 
+;;; Ignore
+
+(with-eval-after-load 'project
+  ;; Add a predicate to exclude any project rooted in the package directory
+  (setq project-list-exclude nil)
+  (add-to-list 'project-list-exclude
+               (lambda (project)
+                 ;; (message "COMPARE PROJECT: %s: '%s' / '%s'"
+                 ;;          (file-in-directory-p (project-root project) package-user-dir)
+                 ;;          (project-root project) package-user-dir)
+                 (file-in-directory-p (project-root project) package-user-dir))))
+
+;; TODO patch Emacs?
+(defun my-project-forget-excluded-projects ()
+  "Remove projects matching `project-list-exclude' from the known projects list."
+  (interactive)
+  (when (and (fboundp 'project--find-in-directory)
+             (fboundp 'project--write-project-list))
+    (dolist (proj (project-known-project-roots))
+      (let ((pr (project--find-in-directory proj)))
+        (when (seq-some (lambda (rule)
+                          (if (functionp rule)
+                              (and pr (funcall rule pr))
+                            (string-match-p rule proj)))
+                        project-list-exclude)
+          (project-forget-project proj))))))
+
+;; TODO can this be useful somewhere?
+;; (let ((project-list-length (length project--list)))
+;;   (my-project-forget-excluded-projects)
+;;   (when (/= (length project--list) project-list-length)
+;;     (project--write-project-list)))
+
+;; TODO add to mod cleanup
+
 ;;; Better project selector
 
 (defun my-project-prompt-project-dir ()
@@ -107,7 +142,8 @@ following differences:
 The selection is limited to projects already listed in the project database; see
 `project-list-file'."
   (when (and (fboundp 'project--ensure-read-project-list)
-             (fboundp 'project--file-completion-table))
+             (fboundp 'project--file-completion-table)
+             (fboundp 'project--write-project-list))
     (project--ensure-read-project-list)
     (let* ((choices
             ;; Just using this for the category (substring completion style).
