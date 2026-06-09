@@ -1054,8 +1054,8 @@ DIR is the directory."
 ;;; evil org
 
 ;; TODO put this back?
-;; (when (fboundp 'bufferwizard-point-backward-to-empty-line)
-;;   (evil-define-key 'normal 'local (kbd "{") 'bufferwizard-point-backward-to-empty-line))
+;; (when (fboundp 'wizard-point-backward-to-empty-line)
+;;   (evil-define-key 'normal 'local (kbd "{") 'wizard-point-backward-to-empty-line))
 ;; (when (fboundp 'indentnav-forward-to-empty-line)
 ;;   (evil-define-key 'normal 'local (kbd "}") 'indentnav-forward-to-empty-line))
 
@@ -1348,8 +1348,8 @@ on text following the cursor."
   )
 
 (evil-define-key '(normal visual) my-intercept-mode-map
-  "{" 'bufferwizard-point-backward-to-empty-line
-  "}" 'bufferwizard-point-forward-to-empty-line)
+  "{" 'wizard-point-backward-to-empty-line
+  "}" 'wizard-point-forward-to-empty-line)
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
   ;; (kbd "M-RET") 'toggle-term-tmux
@@ -1397,8 +1397,8 @@ on text following the cursor."
 
 ;;; check parens no jump
 
-(define-key evil-visual-state-map (kbd "M-j") 'bufferwizard-move-region-down)
-(define-key evil-visual-state-map (kbd "M-k") 'bufferwizard-move-region-up)
+(define-key evil-visual-state-map (kbd "M-j") 'wizard-move-region-down)
+(define-key evil-visual-state-map (kbd "M-k") 'wizard-move-region-up)
 
 ;; TODO: Part of smooth cursor?
 ;;-----------------------------
@@ -1540,14 +1540,14 @@ If the parentheses are balanced, the function returns t."
 
     ;; (with-eval-after-load 'markdown-mode
     ;;   (evil-define-key 'normal markdown-mode (kbd "RET") nil)
-    ;;   (evil-define-key 'normal markdown-mode (kbd "{") bufferwizard-point-backward-to-empty-line)
+    ;;   (evil-define-key 'normal markdown-mode (kbd "{") wizard-point-backward-to-empty-line)
     ;;   (evil-define-key 'normal markdown-mode (kbd "}") indentnav-forward-to-empty-line))
 
     (with-eval-after-load 'markdown-mode
       (evil-collection-define-key 'normal 'markdown-mode-map
         ;; Intercept
-        ;; "{" 'bufferwizard-point-backward-to-empty-line
-        ;; "}" 'bufferwizard-point-forward-to-empty-line
+        ;; "{" 'wizard-point-backward-to-empty-line
+        ;; "}" 'wizard-point-forward-to-empty-line
         ;; RET can sometimes check and uncheck boxes. This is not
         ;; something I want.
         "RET" nil
@@ -2594,7 +2594,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 
 (add-hook 'ultisnips-mode-hook #'hs-minor-mode)
 
-;;; use-package bufferwizard
+;;; use-package wizard
 
 ;; Copy with without indentation
 
@@ -2604,17 +2604,17 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 ;; text by that amount."
 ;;   (interactive)
 ;;   (when (and (use-region-p)
-;;              (fboundp 'bufferwizard--unindent-string))
+;;              (fboundp 'wizard--unindent-string))
 ;;     (evil-yank (region-beginning) (region-end))
 ;;     (dolist (register '(?\" ?*))
 ;;       (let ((original-contents (evil-get-register register t)))
 ;;         (when original-contents
 ;;           (evil-set-register
-;;            register (bufferwizard--unindent-string
+;;            register (wizard--unindent-string
 ;;                      (substring-no-properties original-contents))))))))
 
 ;; (evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)
-(evil-define-key 'visual 'global (kbd "C") 'bufferwizard-copy-unindented)
+(evil-define-key 'visual 'global (kbd "C") 'wizard-copy-unindented)
 
 ;; (lightemacs-use-package mod-better-grep
 ;;   :ensure nil
@@ -2623,32 +2623,32 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 ;;   (with-eval-after-load 'evil
 ;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
 
-(lightemacs-use-package bufferwizard
+(lightemacs-use-package wizard
   ;; :ensure nil
-  :vc (:url "https://github.com/jamescherti/bufferwizard.el"
+  :vc (:url "https://github.com/jamescherti/wizard.el"
             :rev :newest)
-  ;; :straight (bufferwizard
+  ;; :straight (wizard
   ;;            :type git
   ;;            :host github
-  ;;            :repo "jamescherti/bufferwizard.el")
-  :commands (bufferwizard-clone-and-switch-to-indirect-buffer
-             bufferwizard-unhighlight
-             bufferwizard-toggle-highlight-at-point
-             bufferwizard-switch-to-base-buffer
-             bufferwizard-replace-symbol-at-point
-             bufferwizard-hl-todo-mode
-             bufferwizard-hl-todo-local-mode
-             bufferwizard-paste-indented
-             bufferwizard-grep
-             bufferwizard-reload-current-buffer)
+  ;;            :repo "jamescherti/wizard.el")
+  :commands (wizard-clone-and-switch-to-indirect-buffer
+             wizard-unhighlight
+             wizard-toggle-highlight-at-point
+             wizard-switch-to-base-buffer
+             wizard-replace-symbol-at-point
+             wizard-hl-todo-mode
+             wizard-hl-todo-local-mode
+             wizard-paste-indented
+             wizard-grep
+             wizard-reload-current-buffer)
 
   :init
-  (setq bufferwizard-point-ignore-invisible t)
+  (setq wizard-point-ignore-invisible t)
   ;;; Paste with current indentation
-  (global-set-key (kbd "C-v") 'bufferwizard-paste-indented)
-  (evil-define-key 'insert 'global (kbd "C-v") #'bufferwizard-paste-indented)
-  (evil-define-key 'normal 'global (kbd "<leader>gg") #'bufferwizard-grep)
-  (evil-define-key 'normal 'global (kbd "<leader>ll") 'bufferwizard-reload-current-buffer)
+  (global-set-key (kbd "C-v") 'wizard-paste-indented)
+  (evil-define-key 'insert 'global (kbd "C-v") #'wizard-paste-indented)
+  (evil-define-key 'normal 'global (kbd "<leader>gg") #'wizard-grep)
+  (evil-define-key 'normal 'global (kbd "<leader>ll") 'wizard-reload-current-buffer)
 
   ;; (defun evil-clipboard-paste-adapter (text)
   ;;   "Insert TEXT using Evil's paste mechanics.
@@ -2669,26 +2669,26 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   ;; ;; Assign the adapter to the global paste variable
   ;; (setq clipboard-paste-function #'evil-clipboard-paste-adapter)
 
-  (add-hook-text-editing-modes #'bufferwizard-hl-todo-local-mode)
+  (add-hook-text-editing-modes #'wizard-hl-todo-local-mode)
 
   ;; Indirect buffer
-  (evil-define-key 'normal 'global (kbd "<leader>ec") #'bufferwizard-clone-and-switch-to-indirect-buffer)
-  (evil-define-key 'normal 'global (kbd "<leader>eC") #'bufferwizard-switch-to-base-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>ec") #'wizard-clone-and-switch-to-indirect-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>eC") #'wizard-switch-to-base-buffer)
 
   ;; Rename
-  (evil-define-key 'normal 'global (kbd "<leader>R") #'bufferwizard-replace-symbol-at-point)
+  (evil-define-key 'normal 'global (kbd "<leader>R") #'wizard-replace-symbol-at-point)
 
   ;; Highlight
-  ;; (evil-define-key 'normal 'global (kbd "C-h") #'bufferwizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eh") #'bufferwizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eH") #'bufferwizard-unhighlight))
+  ;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
+  (evil-define-key 'normal 'global (kbd "<leader>eh") #'wizard-toggle-highlight-at-point)
+  (evil-define-key 'normal 'global (kbd "<leader>eH") #'wizard-unhighlight))
 
-(when (fboundp 'bufferwizard-hl-todo-local-mode)
-  (add-hook-text-editing-modes #'bufferwizard-hl-todo-local-mode)
+(when (fboundp 'wizard-hl-todo-local-mode)
+  (add-hook-text-editing-modes #'wizard-hl-todo-local-mode)
   (with-eval-after-load 'consult
-    (add-hook 'consult-preview-allowed-hooks #'bufferwizard-hl-todo-local-mode)))
+    (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode)))
 
-(defun pkg-bufferwizard-smart-rename ()
+(defun pkg-wizard-smart-rename ()
   "Smartly decide how to rename the symbol at point."
   (interactive)
   (cond
@@ -2710,10 +2710,10 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
    ;; Replace string
    (t
     (ignore-errors
-      (when (fboundp 'bufferwizard-replace-symbol-at-point)
-        (bufferwizard-replace-symbol-at-point))))))
+      (when (fboundp 'wizard-replace-symbol-at-point)
+        (wizard-replace-symbol-at-point))))))
 
-(evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-bufferwizard-smart-rename)
+(evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename)
 
 ;;; better vc
 

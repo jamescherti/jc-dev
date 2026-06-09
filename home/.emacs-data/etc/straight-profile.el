@@ -8,7 +8,7 @@
  ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
  ("buffer-terminator.el" . "ade87fbae0451f228421ed06ea4a6da79ffec568")
  ("bufferfile.el" . "4b1be54492ff1605f053e560dd23d0a8d29e10df")
- ("bufferwizard.el" . "947e94404bdc11188a65bede5f517b6b10a2af30")
+ ("wizard.el" . "947e94404bdc11188a65bede5f517b6b10a2af30")
  ("cape" . "c99911b08831c26179145686b4beffa96f1f8a68")
  ("compat" . "67688415683b74e2504b59bda4532891a46e3822")
  ("compile-angel.el" . "3e828ff32c11c637c8c709f4d1546c25eec1e074")

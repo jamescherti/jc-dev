@@ -3394,7 +3394,7 @@ This function is intended for use as :around advice."
                               ;; bibtex
                               ;; bookmark
                               ;; buffer-terminator
-                              ;; bufferwizard
+                              ;; wizard
                               ;; byte-opt
                               ;; c++-ts-mode
                               ;; c-ts-common

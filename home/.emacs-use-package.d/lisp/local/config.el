@@ -950,9 +950,9 @@ subsequent GCC invocations."
 ;; (when (eq lightemacs-package-manager 'straight)
 ;;   (setq straight-recipe-overrides nil)
 ;;   (add-to-list 'straight-recipe-overrides
-;;                '(bufferwizard
+;;                '(wizard
 ;;                  :type git :host github
-;;                  :repo "jamescherti/bufferwizard.el")))
+;;                  :repo "jamescherti/wizard.el")))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
@@ -962,7 +962,7 @@ subsequent GCC invocations."
 ;; (dolist (item '(be-quiet
 ;;                 bufferfile
 ;;                 buffer-terminator
-;;                 bufferwizard
+;;                 wizard
 ;;                 compile-angel
 ;;                 cursorcolumn
 ;;                 dir-config
