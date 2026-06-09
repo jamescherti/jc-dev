@@ -59,6 +59,7 @@ set -o errtrace
 # Atexit
 #-------------------------------------------------------------------------------
 TMP_FILE=$(mktemp)
+TMP_OUT=$(mktemp)
 ATEXIT_DONE=0
 atexit() {
   trap - EXIT INT TERM HUP QUIT
@@ -67,6 +68,11 @@ atexit() {
     if [[ -f "$TMP_FILE" ]]; then
       rm -f "$TMP_FILE" || true
     fi
+
+    if [[ -f "$TMP_OUT" ]]; then
+      rm -f "$TMP_OUT" || true
+    fi
+
     ATEXIT_DONE=1
   fi
   exit "$errno"
@@ -94,7 +100,7 @@ gen_unified_spell_file() {
   if [[ -f "$UNIFIED_SPELL_FILE" ]]; then
     cp "$UNIFIED_SPELL_FILE" "$TMP_FILE"
   else
-    touch "$TMP_FILE"
+    : >"$TMP_FILE"
   fi
 
   # ASPELL
@@ -151,7 +157,14 @@ gen_unified_spell_file() {
   # Unified spell file (Source of truth)
   # tr removes carriage returns before grep processes the text
   tr -d '\r' <"$TMP_FILE" | grep -v '^$' | grep -E "^[[:alpha:]'-]+$" \
-    | LC_ALL=C sort -u >"$UNIFIED_SPELL_FILE"
+    | LC_ALL=C sort -u >"$TMP_OUT" || true
+
+  if [[ -s "$TMP_OUT" ]]; then
+    mv "$TMP_OUT" "$UNIFIED_SPELL_FILE"
+  else
+    echo "Warning: Generated dictionary is empty. Aborting to prevent data loss." >&2
+    exit 1
+  fi
 }
 
 #-------------------------------------------------------------------------------
@@ -206,7 +219,7 @@ remove_exact_line() {
   local string="$2"
   if [[ -f $file ]]; then
     echo "Remove $string from: $file"
-    awk -v s="$string" '$0 != s' "$file" >"$TMP_FILE" && mv "$TMP_FILE" "$file"
+    awk -v s="$string" '$0 != s' "$file" >"$TMP_OUT" && mv "$TMP_OUT" "$file"
   fi
 }
 
@@ -229,7 +242,9 @@ main() {
       wc -l "$VIM_SPELL_FILE"
     fi
 
-    wc -l "$ENCHANT_FILE"
+    if [[ -f "$ENCHANT_FILE" ]]; then
+      wc -l "$ENCHANT_FILE"
+    fi
 
     if [[ $FIREFOX -ne 0 ]]; then
       for item in "${LIST_FIREFOX_DICTS[@]}"; do
