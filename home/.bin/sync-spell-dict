@@ -20,6 +20,7 @@
 #
 
 set -euf
+shopt -s extglob
 
 UNIFIED_SPELL_FILE="$HOME/src/home-settings/work_cfg/home/.sync-spell-dict"
 if ! [[ -f $UNIFIED_SPELL_FILE ]]; then
@@ -37,6 +38,7 @@ THUNDERBIRD=0
 VIM=0
 ASPELL=0
 ENCHANT=0
+FIRST_ASPELL_LINE=""
 
 declare -a LIST_FIREFOX_DICTS=()
 declare -a LIST_THUNDERBIRD_DICTS=()
@@ -160,7 +162,7 @@ gen_unified_spell_file() {
     | LC_ALL=C sort -u >"$TMP_OUT" || true
 
   if [[ -s "$TMP_OUT" ]]; then
-    mv "$TMP_OUT" "$UNIFIED_SPELL_FILE"
+    cat "$TMP_OUT" >"$UNIFIED_SPELL_FILE"
   else
     echo "Warning: Generated dictionary is empty. Aborting to prevent data loss." >&2
     exit 1
@@ -219,7 +221,7 @@ remove_exact_line() {
   local string="$2"
   if [[ -f $file ]]; then
     echo "Remove $string from: $file"
-    awk -v s="$string" '$0 != s' "$file" >"$TMP_OUT" && mv "$TMP_OUT" "$file"
+    awk -v s="$string" '$0 != s' "$file" >"$TMP_OUT" && cat "$TMP_OUT" >"$file"
   fi
 }
 
@@ -261,6 +263,11 @@ main() {
     echo
     echo "Success."
   elif [[ $1 = remove ]]; then
+    if [[ -z "${2-}" ]]; then
+      echo "Error: Missing string to remove." >&2
+      exit 1
+    fi
+
     remove_exact_line "$ASPELL_FILE" "$2"
     remove_exact_line "$UNIFIED_SPELL_FILE" "$2"
     remove_exact_line "$VIM_SPELL_FILE" "$2"
