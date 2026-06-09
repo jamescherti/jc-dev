@@ -2738,6 +2738,7 @@ generally one of the lines that are folded."
      ((or (string= buffer-name " *transient*")
           (string= buffer-name " *which-key*")  ; TODO add to official package
           (string= buffer-name " *lv*")                  ; Hydra/LV popups
+          (string= buffer-name "*Ediff Control Panel*")
           (string-match-p "\\` \\*posframe" buffer-name)   ; Posframe popups
           (string-match-p "\\` \\*company" buffer-name))   ; Company popups
       :ignore)
