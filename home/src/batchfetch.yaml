@@ -412,8 +412,8 @@ tasks:
   - git: git@github.com:jamescherti/buffer-guardian.el
     path: emacs/buffer-guardian.el
 
-  - git: git@github.com:jamescherti/bufferwizard.el
-    path: emacs/bufferwizard.el
+  - git: git@github.com:jamescherti/wizard.el
+    path: emacs/wizard.el
 
   - git: git@github.com:jamescherti/tomorrow-night-deepblue-theme.el
     path: emacs/tomorrow-night-deepblue-theme.el
