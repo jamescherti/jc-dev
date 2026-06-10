@@ -58,12 +58,22 @@ else
   exit 1
 fi
 
-# Step 2: Identify the current branch or reference
+# Step 2: Identify references and commit SHAs
 CURRENT_REF=$(git rev-parse --abbrev-ref HEAD)
+CURRENT_SHA=$(git rev-parse HEAD)
+TARGET_SHA=$(git rev-parse "$COMPARE_REF")
 
+# Fail if the current branch name matches the default branch name
 if [ "$CURRENT_REF" = "$DEFAULT_BRANCH" ]; then
   echo "Error: Current branch is already the" \
     "default branch '$DEFAULT_BRANCH'." >&2
+  exit 1
+fi
+
+# Fail if the current commit hash matches the target branch commit hash
+if [ "$CURRENT_SHA" = "$TARGET_SHA" ]; then
+  echo "Error: Current reference is already at the same" \
+    "commit as '$DEFAULT_BRANCH'." >&2
   exit 1
 fi
 
@@ -79,11 +89,11 @@ echo "Diff Stat:"
 git diff --stat "${COMPARE_REF}..HEAD"
 echo "--------------------------------------------------------"
 
-printf "Proceed with fast-forward merge of '%s' into '%s'? (y/N): " \
+printf "Proceed with fast-forward merge and push of '%s' into '%s'? (y/N): " \
   "$CURRENT_REF" "$DEFAULT_BRANCH"
 read -r response
 if [[ ! "$response" =~ ^[Yy]$ ]]; then
-  echo "Aborted: Merge canceled by user." >&2
+  echo "Aborted: Operation canceled by user." >&2
   exit 1
 fi
 
@@ -95,5 +105,12 @@ if ! git fetch . HEAD:"$DEFAULT_BRANCH"; then
   exit 1
 fi
 
-echo "Successfully updated '$DEFAULT_BRANCH' to '$CURRENT_REF' without" \
+# Step 5: Push the updated default branch to remote
+echo "Pushing '$DEFAULT_BRANCH' to origin..."
+if ! git push origin "$DEFAULT_BRANCH"; then
+  echo "Error: Failed to push '$DEFAULT_BRANCH' to origin." >&2
+  exit 1
+fi
+
+echo "Successfully updated and pushed '$DEFAULT_BRANCH' without" \
   "changing the current branch."
