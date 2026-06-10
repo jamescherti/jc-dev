@@ -843,7 +843,6 @@ subsequent GCC invocations."
                            le-consult
                            le-embark-consult
                            le-embark
-                           le-wgrep
                            le-vertico
                            le-orderless
                            le-marginalia

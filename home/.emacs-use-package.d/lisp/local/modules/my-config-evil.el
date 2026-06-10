@@ -760,36 +760,36 @@ This enhancement prevents the cursor from moving."
                   (when (fboundp 'tab-new-func-buffer-from-other-window)
                     (tab-new-func-buffer-from-other-window 'embark-dwim))))
 
-  ;; TODO part of this is sub-better-evil.el
-
+  (if (< emacs-major-version 31)
+      (require 'le-wgrep)
+    (push 'wgrep-mode mod-cleanup-packages-list))
   (add-hook
    'embark-after-export-hook
    #'(lambda()
        ;; wgrep
-       (if (or t (< emacs-major-version 31))
-           (when (fboundp 'wgrep-change-to-wgrep-mode)
-             (wgrep-change-to-wgrep-mode)
-             (when (fboundp 'wgrep-finish-edit)
-               ;; TODO: save and restore the cursor: wgrep-finish-edit
-               (evil-define-key 'normal 'local (kbd "C-s")
-                 #'(lambda()
-                     (interactive)
-                     (lightemacs-save-window-scroll
-                       (lightemacs-save-window-start
-                         (save-mark-and-excursion
-                           (wgrep-finish-edit)
-                           (wgrep-change-to-wgrep-mode))))))))
-
+       (if (< emacs-major-version 31)
+           (progn
+             (when (fboundp 'wgrep-change-to-wgrep-mode)
+               (wgrep-change-to-wgrep-mode)
+               (when (fboundp 'wgrep-finish-edit)
+                 ;; TODO: save and restore the cursor: wgrep-finish-edit
+                 (evil-define-key 'normal 'local (kbd "C-s")
+                   #'(lambda()
+                       (interactive)
+                       (lightemacs-save-window-scroll
+                         (lightemacs-save-window-start
+                           (save-mark-and-excursion
+                             (wgrep-finish-edit)
+                             (wgrep-change-to-wgrep-mode)))))))))
          ;; Emacs >= 31
          (when (fboundp 'grep-change-to-grep-edit-mode)
            (grep-change-to-grep-edit-mode)
            (when (fboundp 'grep-edit-save-changes)
              ;; TODO: save and restore the cursor: wgrep-finish-edit
-             ;; (evil-define-key 'normal 'local (kbd "C-s")
-             ;;   #'(lambda()
-             ;;       (interactive)
-             ;;       (grep-edit-save-changes)))
-             )))))
+             (evil-define-key 'normal 'local (kbd "C-s")
+               #'(lambda()
+                   (interactive)
+                   (grep-edit-save-changes))))))))
 
   (evil-define-key 'normal 'global (kbd "<leader>ed") 'embark-dwim)
   (evil-define-key 'normal 'global (kbd "<leader>ea") 'embark-act))

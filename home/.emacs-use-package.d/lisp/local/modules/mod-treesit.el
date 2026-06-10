@@ -58,22 +58,22 @@
           (markdown
            ;; For split parsers like Markdown, the extra two fields are
            ;; required:
-           ;; 1. "split_parser" indicates that this language uses a parser split
-           ;;    into multiple components.
-           ;; 2. The directory path (e.g., "tree-sitter-markdown/src") points to
-           ;;    the location of the parser source within the repository.
+           ;; 1. "split_parser" indicates that this language uses a parser
+           ;;    split into multiple components.
+           ;; 2. The directory path (e.g., "tree-sitter-markdown/src") points
+           ;;    to the location of the parser source within the repository.
            ;;    Without these, treesit would not be able to find and compile
            ;;    the parser correctly.
            ;;
            ;; A split parser is a Tree-sitter parser that is divided into
-           ;; multiple smaller parsers instead of being a single file or module.
-           ;; Each smaller parser handles a part of the language, such as
-           ;; different syntaxes or embedded languages, and together they form
-           ;; the complete parser. This approach makes it easier to manage
-           ;; complex languages, like Markdown, which can contain code blocks,
-           ;; inline formatting, and other embedded languages. In Emacs,
-           ;; specifying "split_parser" and the source directory tells treesit
-           ;; how to find and build all the pieces correctly.
+           ;; multiple smaller parsers instead of being a single file or
+           ;; module. Each smaller parser handles a part of the language, such
+           ;; as different syntaxes or embedded languages, and together they
+           ;; form the complete parser. This approach makes it easier to
+           ;; manage complex languages, like Markdown, which can contain code
+           ;; blocks, inline formatting, and other embedded languages. In
+           ;; Emacs, specifying "split_parser" and the source directory tells
+           ;; treesit how to find and build all the pieces correctly.
            "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
            "split_parser"
            "tree-sitter-markdown/src")
