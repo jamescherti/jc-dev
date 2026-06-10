@@ -1824,6 +1824,9 @@ WIDTH is the tab width."
                  ;; scan-error: "Unbalanced parentheses"
                  scan-error
 
+                 ;; hideshow
+                 "Already at end of element"
+
                  "Bad diff region number"))
     (push err debug-ignored-errors))
 

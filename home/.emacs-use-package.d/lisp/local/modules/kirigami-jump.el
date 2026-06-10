@@ -68,7 +68,6 @@ itself from the hook to conserve resources."
 
 (defun kirigami-jump--open-fold (&rest _args)
   "Ensure the current heading and body are fully visible.
-
 This command will only open the fold if `kirigami-jump--last-opened-point'
 is nil or differs from the current point."
   (interactive)
