@@ -205,7 +205,7 @@ _git_wrapper() {
     local key
     local ssh_agent_needed=0
     for cur_arg in "$@"; do
-      for key in fetch pull pullall pa cip rcip pullall push up pf p; do
+      for key in fetch pull ship pullall pa cip rcip pullall push up pf p; do
         if [[ $cur_arg = "$key" ]] || [[ $cur_arg = "git $key" ]]; then
           ssh_agent_needed=1
         fi

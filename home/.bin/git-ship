@@ -97,20 +97,26 @@ if [[ ! "$response" =~ ^[Yy]$ ]]; then
   exit 1
 fi
 
-# Step 4: Perform fast-forward merge without switching branches
-echo "Fast-forwarding '$DEFAULT_BRANCH' to match '$CURRENT_REF'..."
-if ! git fetch . HEAD:"$DEFAULT_BRANCH"; then
+# Step 4: Perform the merge using standard checkout
+echo "Checking out '$DEFAULT_BRANCH' and merging '$CURRENT_REF'..."
+git checkout "$DEFAULT_BRANCH"
+
+if ! git merge --ff-only "$CURRENT_REF"; then
   echo "Error: Fast-forward failed. '$DEFAULT_BRANCH' and " \
     "'$CURRENT_REF' have diverged." >&2
+  git checkout "$CURRENT_REF"
   exit 1
 fi
 
-# Step 5: Push the updated default branch to remote
+# Step 5: Push the updated default branch to remote and restore original branch
 echo "Pushing '$DEFAULT_BRANCH' to origin..."
 if ! git push origin "$DEFAULT_BRANCH"; then
   echo "Error: Failed to push '$DEFAULT_BRANCH' to origin." >&2
+  git checkout "$CURRENT_REF"
   exit 1
 fi
 
-echo "Successfully updated and pushed '$DEFAULT_BRANCH' without" \
-  "changing the current branch."
+echo "Restoring original branch '$CURRENT_REF'..."
+git checkout "$CURRENT_REF"
+
+echo "Successfully merged and pushed '$DEFAULT_BRANCH'."

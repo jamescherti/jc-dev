@@ -46,6 +46,9 @@
                                                  ;; ' *diff-hl-reference* '
                                                  "\\` \\*diff-hl"
 
+                                                 ;; `vc'
+                                                 "\\`\\*vc-"
+
                                                  ;; '*ediff-errors*' (fundamental-mode)
                                                  ;; '*ediff-fine-diff*' (fundamental-mode)
                                                  ;; ' *ediff-tmp*' (fundamental-mode)

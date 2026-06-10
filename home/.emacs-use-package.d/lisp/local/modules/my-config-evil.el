@@ -3182,6 +3182,63 @@ Accepts any arguments so it can be used as advice or a hook."
 ;; (with-eval-after-load 'markdown-ts-mode
 ;;   (define-key markdown-ts-mode-map (kbd "TAB") nil))
 
+;;; Manual recenter and scroll margin
+
+;; (defun my-ensure-scroll-context (&rest _)
+;;   "Ensure at least 5 lines of context around point after a motion.
+;; This executes only when `scroll-margin' is less than or equal to 1."
+;;   (let ((margin 5)
+;;         (target-point nil))
+;;     ;; Check if we are too close to the physical buffer boundaries
+;;     ;; where window scrolling cannot provide the required margin.
+;;     (save-excursion
+;;       (let ((failed (forward-line (- margin))))
+;;         (when (< failed 0)
+;;           (setq target-point (progn (goto-char (point-min)) (forward-line margin) (point))))))
+;;     (unless target-point
+;;       (save-excursion
+;;         (let ((failed (forward-line margin)))
+;;           (when (> failed 0)
+;;             (setq target-point (progn (goto-char (point-max)) (forward-line (- margin)) (point)))))))
+;;     ;; If buffer boundaries lack context, move the cursor
+;;     (when target-point
+;;       (goto-char target-point))
+;;
+;;     ;; Trigger redisplay to update point visibility and window properties
+;;     ;; after the movement command has executed.
+;;     (redisplay)
+;;     (when-let ((posn (posn-at-point)))
+;;       (let* ((row (cdr (posn-col-row posn)))
+;;              (win-height (window-text-height)))
+;;         (cond
+;;          ;; Point is too close to the top
+;;          ((< row margin)
+;;           (let ((current-start (window-start)))
+;;             (set-window-start nil (save-excursion
+;;                                     (goto-char current-start)
+;;                                     (forward-line (- row margin))
+;;                                     (point)))))
+;;          ;; Point is too close to the bottom
+;;          ;; Subtract 1 because rows are zero-indexed
+;;          ((> row (- win-height margin 1))
+;;           ;; Negative recenter counts from the bottom upwards.
+;;           ;; -(margin + 1) ensures exactly 'margin' lines are visible below.
+;;           (let ((current-start (window-start))
+;;                 (delta (- row (- win-height margin 1))))
+;;             (set-window-start nil (save-excursion
+;;                                     (goto-char current-start)
+;;                                     (forward-line delta)
+;;                                     (point))))))))))
+
+;; (with-eval-after-load 'log-view
+;;   (when (fboundp 'my-ensure-scroll-context)
+;;     ;; vc-print-log
+;;     (advice-add 'log-view-msg-next :after #'my-ensure-scroll-context)
+;;     (advice-add 'log-view-msg-prev :after #'my-ensure-scroll-context)))
+;; (advice-add 'evil-goto-line :after #'my-ensure-scroll-context)
+;; (advice-add 'evil-goto-first-line :after #'my-ensure-scroll-context)
+
+
 ;;; Provide
 
 (provide 'my-config-evil)
