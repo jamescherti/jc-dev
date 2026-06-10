@@ -28,6 +28,8 @@
 
 set -euo pipefail
 
+git-is-clean
+
 # Step 1: Find the default branch
 # Attempt to resolve origin/HEAD first
 DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null \
