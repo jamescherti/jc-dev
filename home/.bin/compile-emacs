@@ -29,7 +29,7 @@ fi
 set -euf
 
 # 1 to automatically handle the 2-step process: generate profile, then use it
-HANDLE_FPROFILE=1
+HANDLE_FPROFILE=0
 
 FPROFILE_GENERATE=1
 
