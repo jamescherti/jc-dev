@@ -803,8 +803,6 @@ This enhancement prevents the cursor from moving."
   (evil-define-key 'insert vterm-mode-map (kbd "M-H") 'my-vterm--send-Alt-Shift-H)
   (evil-define-key 'insert vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L)
 
-  (define-key vterm-mode-map (kbd "C-x") 'vterm--self-insert)
-
   (define-key vterm-mode-map (kbd "C-c C-c") 'vterm--self-insert)
 
   (define-key vterm-mode-map (kbd "M-j") 'vterm--self-insert)
