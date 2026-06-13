@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2015-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
+"""Quickly check if files have been backed up with borgmachine."""
+
+import os
+import sys
+
+
+def load_file(path):
+    result = []
+    with open(path, "r", encoding="utf-8") as fhandler:
+        for line in fhandler.readlines():
+            line = line.rstrip()
+            if line:
+                result.append(line)
+    return result
+
+
+def main():
+    """The command-line interface."""
+    list_backed_up_files = load_file(
+        os.path.expanduser("~/.borgmachine/reports/main.backed_up_files")
+    )
+
+    try:
+        path = sys.argv[1]
+    except IndexError:
+        path = "."
+
+    path = os.path.abspath(path)
+    for subfile in os.listdir(path):
+        if subfile == ".":
+            continue
+
+        abs_subfile = os.path.join(path, subfile)
+        # if subfile.startswith("."):
+        #     continue
+
+        if abs_subfile in list_backed_up_files:
+            # print("[B] " + subfile)
+            pass
+        else:
+            print("    " + subfile)
+
+
+if __name__ == '__main__':
+    main()

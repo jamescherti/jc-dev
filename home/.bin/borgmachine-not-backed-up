@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2015-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
+"""Quickly check if files have been backed up with borgmachine."""
+
+import os
+import sys
+from pathlib import Path
+
+
+def load_borgmachine_report(report_path):
+    result = set()
+    with open(report_path, "r", encoding="utf-8") as fhandler:
+        for path in fhandler.readlines():
+            path = path.rstrip()
+            if path:
+                result.add(Path(path))
+    return result
+
+
+def main():
+    """The command-line interface."""
+    list_backed_up_files = load_borgmachine_report(
+        os.path.expanduser("~/.borgmachine/reports/main.backed_up_files")
+    )
+
+    try:
+        arg_path = sys.argv[1]
+    except IndexError:
+        arg_path = "."
+
+    list_files = set()
+    list_dirs = set()
+    for path in Path(arg_path).glob("**/*"):
+        if path.is_dir():
+            list_dirs.add(path)
+        else:
+            list_files.add(path)
+
+    list_backed_up_dirs = set()
+    for path in sorted(list_dirs):
+        if path.parent in list_backed_up_dirs:
+            continue
+
+        abs_path = path.absolute()
+        list_backed_up_dirs.add(abs_path)
+        # if abs_path not in list_backed_up_files:
+        #     print(f"{path}{os.path.sep}")
+
+    for path in sorted(list_files):
+        abs_path = path.absolute()
+        if abs_path.parent in list_backed_up_files:
+            continue
+
+        if abs_path not in list_backed_up_files:
+            print(path)
+
+
+if __name__ == '__main__':
+    main()

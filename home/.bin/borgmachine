@@ -1,0 +1,469 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2015-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
+set -euf -o pipefail
+
+# export BORG_PASSPHRASE=''  # Allow the user to define this variable
+export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+
+# Variables that can be modified
+_BORG_ENCRYPTION=none
+_BORG_SCRIPT_PRE_HOOK=""
+_BORG_INCLUDES=("$HOME")
+_BORG_BACKUP_ARGS=()
+_BORG_PRUNE_ARGS=(
+  --keep-daily 7
+  --keep-weekly 4
+  --keep-monthly 6
+  --keep-yearly 1
+  --keep-hourly 12
+  --keep-minutely 60
+)
+_BORG_BACKUP_ARCHIVE_NAME="backup"
+_BORG_LOG_DIR="$HOME/.logs"
+if ! [[ -d "$_BORG_LOG_DIR" ]]; then
+  mkdir -p "$_BORG_LOG_DIR"
+fi
+
+_BORG_LOG_FILE="$_BORG_LOG_DIR/borg-backup.log"
+
+# Private variables
+_INTERNAL_BORG_BACKUP_ARGS=(--verbose
+  --filter AME
+  --list
+  --stats
+  --show-rc
+  --exclude-caches
+)
+
+_BORG_EXE="$(type -P borg || true)"
+if [[ -z "$_BORG_EXE" ]]; then
+  echo "Error: 'borg' executable not found." >&2
+  exit 1
+fi
+
+BORGMACHINE_REPORTS_PATH="$HOME/.borgmachine/reports"
+
+# check if stdout is a terminal...
+GREEN=""
+NOCOLOR=""
+if test -t 1; then
+  # see if it supports colors...
+  _NCOLORS=$(tput colors)
+
+  if [[ -n "$_NCOLORS" ]] && [[ "$_NCOLORS" -ge 8 ]]; then
+    GREEN="\033[1;32m"
+    NOCOLOR="\033[0m"
+  fi
+fi
+
+_borg_log() {
+  # local line
+  # line="$(date +%Y-%m-%d-%T): $*"
+  echo "$*"
+  # echo "$line" >>"$_BORG_LOG_FILE"
+}
+
+_borg_nolog() {
+  chrt -i 0 ionice -c3 nice -n 19 "$_BORG_EXE" "$@" 2>&1 || return 0
+  return 0
+}
+
+_borg_run() {
+  # local RED="\033[1;31m"
+  echo -e "${GREEN}"
+  _borg_log "[CMD] $*"
+  echo -e "${NOCOLOR}"
+  chrt -i 0 ionice -c3 nice -n 19 "$_BORG_EXE" "$@" 2>&1 #\
+  # | tee -a "$_BORG_LOG_FILE" || return 1
+  return 0
+}
+
+_borg_init() {
+  if ! [[ -f "$_BORG_LOG_FILE" ]]; then
+    touch "$_BORG_LOG_FILE"
+    chmod 640 "$_BORG_LOG_FILE"
+  fi
+
+  #if ! grep -q segments_per_dir "$BORG_REPO/config" >/dev/null 2>&1; then
+  #    _borg_log "Error: you need to init the backup path '$BORG_REPO' with:" >&2
+  #    _borg_log "borg init --encryption=$_BORG_ENCRYPTION $BORG_REPO" >&2
+  #    return 1
+  #fi
+
+  _borg_log "[BACKUP PATH] $BORG_REPO"
+  return 0
+}
+
+#
+# BORG RESTORE
+#
+_borg_archive_exists() {
+  local borg_list_archives
+  readarray -t borg_list_archives < <(borg list --format "{archive}{NEWLINE}")
+  if [[ ${#borg_list_archives[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  local archive
+  local needle="$1"
+  for archive in "${borg_list_archives[@]}"; do
+    if [[ $archive = "$needle" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+BORG_SELECTED_ARCHIVE=''
+BORG_MOST_RECENT_ARCHIVE=''
+_borg_select_archives() {
+  BORG_MOST_RECENT_ARCHIVE=''
+
+  borg list
+  BORG_MOST_RECENT_ARCHIVE=$(borg list --last 1 \
+    --format "{archive}{NEWLINE}")
+
+  if [[ "$BORG_MOST_RECENT_ARCHIVE" = "" ]]; then
+    echo "Error: there are no archives in the backup." >&2
+    exit 1
+  fi
+
+  echo
+
+  while true; do
+    read -r -p "Archive [default: $BORG_MOST_RECENT_ARCHIVE]: " \
+      BORG_SELECTED_ARCHIVE
+    if [[ "$BORG_SELECTED_ARCHIVE" = "" ]]; then
+      BORG_SELECTED_ARCHIVE="$BORG_MOST_RECENT_ARCHIVE"
+    fi
+
+    if ! _borg_archive_exists "$BORG_SELECTED_ARCHIVE"; then
+      echo "Error: The archive $BORG_SELECTED_ARCHIVE does not exist." >&2
+      sleep 1
+      continue
+    fi
+
+    break
+  done
+}
+
+BORG_RESTORE_ATEXIT=0
+BORG_RESTORE_TMP_DIR=""
+borg_restore_atexit() {
+  local errno="$?"
+  if [[ "$BORG_RESTORE_ATEXIT" -eq 0 ]]; then
+    if [[ $BORG_RESTORE_TMP_DIR != "" ]] \
+      && [[ -e "$BORG_RESTORE_TMP_DIR" ]]; then
+      echo "[INFO] Delete tmp dir: $BORG_RESTORE_TMP_DIR"
+      rm -fr "$BORG_RESTORE_TMP_DIR"
+      BORG_RESTORE_TMP_DIR=""
+    fi
+    BORG_RESTORE_ATEXIT=1
+  fi
+  exit "$errno"
+}
+
+_borg_restore() {
+  trap 'borg_restore_atexit' EXIT INT TERM HUP QUIT
+
+  if [[ $# -eq 0 ]]; then
+    echo "Error: you have to specify the file or the directory" \
+      "in the first argument" >&2
+    exit 1
+  fi
+
+  local borg_filename="$1"
+  local borg_real_filename
+  borg_real_filename=$(readlink -e --canonicalize-missing "$borg_filename")
+  if [[ -e "$borg_real_filename" ]]; then
+    echo "Error: $borg_real_filename exists already." >&2
+    exit 1
+  else
+    echo "Path: $borg_real_filename"
+    echo
+  fi
+
+  local borg_real_dirname
+  borg_real_dirname=$(dirname "$borg_real_filename")
+
+  #
+  # Remove leading slash
+  #
+  local borg_path
+  borg_path=$(echo "$borg_real_filename" | sed -e 's/^\///')
+
+  # Choose the package:
+  _borg_select_archives
+
+  cd "$borg_real_dirname"
+
+  #
+  # Tmp directory
+  #
+  local relative_tmp_dir
+  relative_tmp_dir=$(mktemp --tmpdir=. --directory)
+  BORG_RESTORE_TMP_DIR=$(readlink -e --canonicalize-missing \
+    "$relative_tmp_dir")
+  cd "$BORG_RESTORE_TMP_DIR"
+  if [[ $(find . -print | wc -l) -gt 1 ]]; then
+    echo "Error: The temporary directory is not empty." >&2
+    exit 1
+  fi
+
+  #
+  # Extract file/dir
+  #
+  _borg_run extract "$BORG_REPO::$BORG_SELECTED_ARCHIVE" "$borg_path"
+  mv "$borg_path" "$borg_real_filename"
+
+  #
+  # Delete the temporary directory
+  #
+  rm -fr "$BORG_RESTORE_TMP_DIR"
+  BORG_RESTORE_TMP_DIR=''
+
+  #
+  # Print result
+  #
+  if [[ -e "$borg_real_filename" ]]; then
+    echo "Restore successful: $borg_real_filename"
+    return 0
+  else
+    echo "Restore FAILED: $borg_real_filename"
+    return 1
+  fi
+}
+
+_prune_and_compact() {
+  # Prune and compact
+  local errno=0
+  local prune_exit=0
+  _borg_run prune \
+    --show-rc \
+    --glob-archives "${_BORG_BACKUP_ARCHIVE_NAME}-*" \
+    "${_BORG_PRUNE_ARGS[@]}" || prune_exit="$?"
+
+  if [[ ${prune_exit} -gt 1 ]]; then
+    echo "ERROR: Borg prune finished with an error." >&2
+    errno=1
+  fi
+
+  # COMPAT: Free the disk space
+  if type -P apt-get &>/dev/null; then
+    # Debian stable version of borg does not support compact
+    if ! _borg_run compact; then
+      echo "WARNING: Borg compact finished with an error."
+    fi
+  else
+    if ! _borg_run compact; then
+      echo "ERROR: Borg compact finished with an error." >&2
+      errno=1
+    fi
+  fi
+
+  return "$errno"
+}
+
+_borg_backup() {
+  local borg_archive_name_suffix=""
+  if [[ $# -gt 0 ]]; then
+    borg_archive_name_suffix="-$1"
+    echo "[ARCHIVE NAME] suffix added: $borg_archive_name_suffix"
+  fi
+
+  local item
+  for item in "${_BORG_INCLUDES[@]}"; do
+    if ! [[ $item =~ ^/ ]]; then
+      echo "Error: '$item' has to be an absolute path." >&2
+      exit 1
+    fi
+
+    if ! [[ -e "$item" ]]; then
+      echo "Error: '$item' does not exist." >&2
+      exit 1
+    fi
+  done
+
+  # Read last log
+  # local previous_borg_archive_name
+  # previous_borg_archive_name=$(_borg_nolog list --last 1 --format '{archive}{NEWLINE}')
+
+  # Prune and compact
+  local errno=0
+  _prune_and_compact || errno="$?"
+
+  # Backup
+  local backup_exit=0
+  local borg_archive_name
+  borg_archive_name="::$_BORG_BACKUP_ARCHIVE_NAME-$(date +%Y%m%d-%H%M%S)$borg_archive_name_suffix"
+  _borg_run create \
+    "${_INTERNAL_BORG_BACKUP_ARGS[@]}" \
+    "${_BORG_BACKUP_ARGS[@]}" \
+    "$borg_archive_name" \
+    "${_BORG_INCLUDES[@]}" || backup_exit="$?"
+
+  if [[ ${backup_exit} -eq 1 ]]; then
+    echo "ERROR: Borg backup finished with an error. Borg prune canceled." >&2
+    exit 1
+  fi
+
+  # Check if the size is too big
+  _borg_nolog info "$borg_archive_name"
+
+  # local deduplicated_size
+  # deduplicated_size=$(_borg_nolog info "$borg_archive_name" --json | jq '.archives[0].stats.deduplicated_size')
+  #
+  # deduplicated_size=$((deduplicated_size / 1000)) # kb
+  #
+  # if [[ $deduplicated_size -gt 600000 ]]; then
+  #   echo >&2
+  #   echo "You can delete the archive with:" >&2
+  #   echo "BORG_REPO=$BORG_REPO borg delete '$borg_archive_name'" >&2
+  #   echo "" >&2
+  #   echo "[WARNING] the archive '$borg_archive_name' is too big: $deduplicated_size Kb" >&2
+  #   echo
+  # fi
+
+  # Save the list
+  mkdir -p "$BORGMACHINE_REPORTS_PATH"
+  borg list --format '{path}{NL}' \
+    "$borg_archive_name" | sed -e 's/^\(.\+\)$/\/\1/g' \
+    >"$BORGMACHINE_REPORT_BACKED_UP_FILES_PATH"
+
+  # Prune and compact
+  # local errno=0
+  # _prune_and_compact || errno="$?"
+
+  # Does not work with remote
+  # local borg_repo_size
+  # borg_repo_size=$(du -hs "$BORG_REPO")
+  # echo "Borg repo size: $borg_repo_size"
+
+  exit "$errno"
+}
+
+_borg_archive_size() {
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: 'jq' command is required to parse archive size." >&2
+    return 1
+  fi
+
+  local list_archives
+  readarray -t list_archives < <(_borg_nolog list --format '{archive}{NL}') \
+    || return 1
+  for archive in "${list_archives[@]}"; do
+    local deduplicated_size
+    deduplicated_size=$(_borg_nolog info "::$archive" --json \
+      | jq '.archives[0].stats.deduplicated_size')
+    deduplicated_size=$((deduplicated_size / 1000)) # kb
+    echo "$archive: ${deduplicated_size} Mb"
+  done
+}
+
+main() {
+  if [[ $# -lt 1 ]]; then
+    echo "Usage: $0 <profile> <command> [args...]" >&2
+    echo "" >&2
+    echo "Commands:" >&2
+    echo "--------"
+    echo "backup" >&2
+    echo "restore" >&2
+    echo "borg" >&2
+    echo "size" >&2
+    echo
+    echo "Profiles:"
+    echo "---------"
+    if [[ -d "$HOME/.borgmachine/profiles/" ]]; then
+      ls -1 "$HOME/.borgmachine/profiles/"
+    else
+      echo "(No profiles directory found)"
+    fi
+    exit 1
+  fi
+
+  BORGMACHINE_PROFILE="$1"
+  BORGMACHINE_REPORT_BACKED_UP_FILES_PATH="$BORGMACHINE_REPORTS_PATH/${BORGMACHINE_PROFILE}.backed_up_files"
+  shift
+
+  if [[ ! -f "$HOME/.borgmachine/profiles/$BORGMACHINE_PROFILE" ]]; then
+    echo "Error: Profile '$BORGMACHINE_PROFILE' not found." >&2
+    exit 1
+  fi
+
+  # shellcheck disable=SC1090
+  source "$HOME/.borgmachine/profiles/$BORGMACHINE_PROFILE"
+
+  if [[ -z "${BORG_REPO:-}" ]]; then
+    echo "Error: BORG_REPO is not defined in the " \
+      "profile '$BORGMACHINE_PROFILE'." >&2
+    exit 1
+  fi
+
+  if [[ $# -eq 0 ]]; then
+    echo "BORG INCLUDES:     ${_BORG_INCLUDES[*]}"
+    echo "BORG REPO:         ${BORG_REPO[*]}"
+    echo "BORG PRUNE ARGS:   ${_BORG_PRUNE_ARGS[*]}"
+    echo "BORG PRE HOOK:     ${_BORG_SCRIPT_PRE_HOOK[*]}"
+    echo "BORG ARCHIVE NAME: ${_BORG_BACKUP_ARCHIVE_NAME[*]}"
+    # echo "BORG LOG FILE:     ${_BORG_LOG_FILE[*]}"
+    echo "BORG ARGS:         ${_BORG_BACKUP_ARGS[*]}"
+    exit
+  fi
+
+  local cmd
+  cmd="$1"
+  shift
+
+  export BORG_REPO
+
+  if [[ $_BORG_SCRIPT_PRE_HOOK != "" ]]; then
+    "$_BORG_SCRIPT_PRE_HOOK" "$@" || exit 1
+  fi
+
+  _borg_init || exit 1
+  case "$cmd" in
+  size)
+    _borg_archive_size "$@"
+    ;;
+  backup)
+    _borg_backup "$@"
+    ;;
+  restore)
+    _borg_restore "$@"
+    ;;
+  ls)
+    _borg_select_archives
+    local borg_path
+    borg_path=$(pwd | sed -e 's/^\///')
+    borg list "::$BORG_SELECTED_ARCHIVE" --format '{path}{extra}{NL}'
+    ;;
+  borg)
+    borg "$@"
+    ;;
+  *)
+    echo "Error: the command '$cmd' is invalid.'" >&2
+    exit 1
+    ;;
+  esac
+}
+
+main "$@"
