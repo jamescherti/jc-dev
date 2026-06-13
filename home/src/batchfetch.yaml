@@ -384,96 +384,127 @@ tasks:
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/quick-fasd.el
     path: emacs/quick-fasd.el
+    revision: develop
 
   - git: git@github.com:jamescherti/persist-text-scale.el
     path: emacs/persist-text-scale.el
+    revision: develop
 
   - git: git@github.com:jamescherti/stripspace.el
     path: emacs/stripspace.el
+    revision: develop
 
   - git: git@github.com:jamescherti/ultisnips-mode.el
     path: emacs/ultisnips-mode.el
+    revision: develop
 
   - git: git@github.com:jamescherti/ultyas
     path: emacs/ultyas
+    revision: develop
 
   - git: git@github.com:jamescherti/pathaction.el
     path: emacs/pathaction.el
+    revision: develop
 
   - git: git@github.com:jamescherti/buffer-terminator.el
     path: emacs/buffer-terminator.el
+    revision: develop
 
   - git: git@github.com:jamescherti/enhanced-evil-paredit.el
     path: emacs/enhanced-evil-paredit.el
+    revision: develop
 
   - git: git@github.com:jamescherti/bufferfile.el
     path: emacs/bufferfile.el
+    revision: develop
 
   - git: git@github.com:jamescherti/buffer-guardian.el
     path: emacs/buffer-guardian.el
+    revision: develop
 
   - git: git@github.com:jamescherti/wizard.el
     path: emacs/wizard.el
+    revision: develop
 
   - git: git@github.com:jamescherti/tomorrow-night-deepblue-theme.el
     path: emacs/tomorrow-night-deepblue-theme.el
+    revision: develop
 
   - git: git@github.com:jamescherti/vim-tab-bar.el
     path: emacs/vim-tab-bar.el
+    revision: develop
 
   - git: git@github.com:jamescherti/quick-sdcv.el
     path: emacs/quick-sdcv.el
+    revision: develop
 
   - git: git@github.com:jamescherti/cursorcolumn.el
     path: emacs/cursorcolumn.el
+    revision: develop
 
   - git: git@github.com:jamescherti/pre-commit-elisp
     path: emacs/pre-commit-elisp
+    revision: develop
 
   - git: git@github.com:jamescherti/minimal-emacs.d
     path: emacs/minimal-emacs.d
+    revision: develop
 
   - git: git@github.com:jamescherti/lightemacs
     path: emacs/lightemacs
+    revision: develop
 
   - git: git@github.com:jamescherti/kirigami.el
     path: emacs/kirigami.el
+    revision: develop
 
   - git: git@github.com:jamescherti/easysession.el
     path: emacs/easysession.el
+    revision: develop
 
   - git: git@github.com:jamescherti/shell-pop-el
     path: emacs/shell-pop-el
     revision: master
     remote:
       upstream: https://github.com/kyagi/shell-pop-el
+    revision: develop
 
   - git: git@github.com:jamescherti/outline-yaml.el
     path: emacs/outline-yaml.el
+    revision: develop
 
   - git: git@github.com:jamescherti/outline-indent.el
     path: emacs/outline-indent.el
+    revision: develop
 
   - git: git@github.com:jamescherti/elispcomp
     path: emacs/elispcomp
+    revision: develop
 
   - git: git@github.com:jamescherti/dir-config.el
     path: emacs/dir-config.el
+    revision: develop
 
   - git: git@github.com:jamescherti/be-quiet.el
     path: emacs/be-quiet.el
+    revision: develop
 
   - git: git@github.com:jamescherti/flymake-bashate.el
     path: emacs/flymake-bashate.el
+    revision: develop
 
   - git: git@github.com:jamescherti/flymake-ansible-lint.el
     path: emacs/flymake-ansible-lint.el
+    revision: develop
 
   - git: git@github.com:jamescherti/org-ibullets.el
     path: emacs/org-ibullets.el
+    revision: develop
 
   - git: git@github.com:jamescherti/compile-angel.el
     path: emacs/compile-angel.el
+    revision: develop
 
   - git: git@github.com:jamescherti/inhibit-mouse.el
     path: emacs/inhibit-mouse.el
+    revision: develop
