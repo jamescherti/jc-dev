@@ -85,12 +85,12 @@ load_emacs_profile() {
     fi
   fi
 
-  if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-    export RUN_EMACS_BIN="/usr/bin/emacs"
-    if [[ $EMACS_D = "" ]]; then
-      EMACS_D="$HOME/.emacs-use-package.d/"
-    fi
-  fi
+  # if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+  #   export RUN_EMACS_BIN="/usr/bin/emacs"
+  #   if [[ $EMACS_D = "" ]]; then
+  #     EMACS_D="$HOME/.emacs-use-package.d/"
+  #   fi
+  # fi
 
   if ! [[ -f "$RUN_EMACS_BIN" ]]; then
     export \

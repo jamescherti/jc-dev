@@ -1744,91 +1744,97 @@ WIDTH is the tab width."
                       "^\*ansible-doc"))
       (push regexp consult-buffer-filter)))
 
-  (dolist (err '("\\`rx ['']\\*\\*[''] range error"
-                 search-failed
+  (when debug-on-error
+    ;; TODO le-default config?
+    (push 'search-failed debug-ignored-errors)
 
-                 ;; Wrong syntax (PDF)
-                 invalid-read-syntax
+    (dolist (err '("\\`rx ['']\\*\\*[''] range error"
+                   search-failed
 
-                 "This function supports only emacs-lisp-mode"
+                   ;; Wrong syntax (PDF)
+                   invalid-read-syntax
 
-                 "Cannot find a suitable checker"
+                   "This function supports only emacs-lisp-mode"
 
-                 ;; "Attempt to delete the sole visible or iconified frame"
-                 ;; (push "Attempt to delete the sole visible or iconified frame" debug-ignored-errors)
+                   "Cannot find a suitable checker"
 
-                 "Selecting deleted buffer"
+                   ;; "Attempt to delete the sole visible or iconified frame"
+                   ;; (push "Attempt to delete the sole visible or iconified frame" debug-ignored-errors)
 
-                 "Already at top level of the outline"
+                   "Selecting deleted buffer"
 
-                 "This buffer cannot use 'imenu-default-create-index-function'"
+                   "Already at top level of the outline"
 
-                 ;; Debugger entered--Lisp error: (permission-denied "Setting current directory"
-                 ;; "Permission denied" "/dir/")
-                 permission-denied
+                   "This buffer cannot use 'imenu-default-create-index-function'"
 
-                 ;; Debugger entered--Lisp error: (invalid-regexp "Unmatched [ or [^")
-                 ;;  evil-ex-search-find-next-pattern(("[\"" t t) forward)
-                 ;;  evil-ex-find-next(("[\"" t t) forward t)
-                 ;;  evil-ex-search-full-pattern("[\"" nil forward)
-                 ;;  evil-ex-start-search(forward nil)
-                 ;;  evil-ex-search-forward(nil)
-                 ;;  funcall-interactively(evil-ex-search-forward nil)
-                 ;;  command-execute(evil-ex-search-forward)
-                 invalid-regexp
+                   ;; Debugger entered--Lisp error: (permission-denied "Setting current directory"
+                   ;; "Permission denied" "/dir/")
+                   permission-denied
 
-                 ;; Debugger entered--Lisp error: (error "Accessing an empty ring")
-                 ;;  error("Accessing an empty ring")
-                 ;;  ring-ref((0 0 . [nil nil nil nil nil nil nil nil nil nil]) 0)
-                 ;;  evil-repeat(nil nil)
-                 ;;  funcall-interactively(evil-repeat nil nil)
-                 ;;  command-execute(evil-repeat)
-                 "Accessing an empty ring"
+                   ;; Debugger entered--Lisp error: (invalid-regexp "Unmatched [ or [^")
+                   ;;  evil-ex-search-find-next-pattern(("[\"" t t) forward)
+                   ;;  evil-ex-find-next(("[\"" t t) forward t)
+                   ;;  evil-ex-search-full-pattern("[\"" nil forward)
+                   ;;  evil-ex-start-search(forward nil)
+                   ;;  evil-ex-search-forward(nil)
+                   ;;  funcall-interactively(evil-ex-search-forward nil)
+                   ;;  command-execute(evil-ex-search-forward)
+                   invalid-regexp
 
-                 ;; goto last change
-                 ;; ----------------
-                 ;; Debugger entered--Lisp error: (error "Negative arg: Cannot reverse as the first operation")
-                 ;; error("Negative arg: Cannot reverse as the first operation")
-                 ;; goto-last-change(-)
-                 ;; goto-last-change-reverse(nil)
-                 ;; evil-goto-last-change-reverse(nil)
-                 ;; funcall-interactively(evil-goto-last-change-reverse nil)
-                 ;; command-execute(evil-goto-last-change-reverse)
-                 "Negative arg: Cannot reverse as the first operation"
+                   ;; Debugger entered--Lisp error: (error "Accessing an empty ring")
+                   ;;  error("Accessing an empty ring")
+                   ;;  ring-ref((0 0 . [nil nil nil nil nil nil nil nil nil nil]) 0)
+                   ;;  evil-repeat(nil nil)
+                   ;;  funcall-interactively(evil-repeat nil nil)
+                   ;;  command-execute(evil-repeat)
+                   "Accessing an empty ring"
 
-                 ;; goto-chg
-                 "Buffer has not been changed"
+                   ;; goto last change
+                   ;; ----------------
+                   ;; Debugger entered--Lisp error: (error "Negative arg: Cannot reverse as the first operation")
+                   ;; error("Negative arg: Cannot reverse as the first operation")
+                   ;; goto-last-change(-)
+                   ;; goto-last-change-reverse(nil)
+                   ;; evil-goto-last-change-reverse(nil)
+                   ;; funcall-interactively(evil-goto-last-change-reverse nil)
+                   ;; command-execute(evil-goto-last-change-reverse)
+                   "Negative arg: Cannot reverse as the first operation"
 
-                 ;; Paredit
-                 "Mismatched parenthesis depth"
-                 "Mismatched character quotation"
-                 "Mismatched comment state:"
-                 "Mismatched string state:"
+                   ;; goto-chg
+                   "Buffer has not been changed"
 
-                 ;; Outline next/previous heading
-                 ;; (outline-back-to-heading) and (show-children)
-                 outline-before-first-heading
-                 "No previous same-level heading"
-                 "No following same-level heading"
+                   ;; Paredit
+                   "Mismatched parenthesis depth"
+                   "Mismatched character quotation"
+                   "Mismatched comment state:"
+                   "Mismatched string state:"
 
-                 ;; Debugger entered--Lisp error: (error "Last directory")
-                 ;;   error("%s directory" "Last")
-                 ;;   dired-next-subdir(1)
-                 ;;   funcall-interactively(dired-next-subdir 1)
-                 ;;   command-execute(dired-next-subdir)
-                 "Last directory"
+                   ;; Outline next/previous heading
+                   ;; (outline-back-to-heading) and (show-children)
+                   outline-before-first-heading
+                   "No previous same-level heading"
+                   "No following same-level heading"
 
-                 ;; easysession
-                 treesit-query-error
+                   ;; Debugger entered--Lisp error: (error "Last directory")
+                   ;;   error("%s directory" "Last")
+                   ;;   dired-next-subdir(1)
+                   ;;   funcall-interactively(dired-next-subdir 1)
+                   ;;   command-execute(dired-next-subdir)
+                   "Last directory"
 
-                 ;; scan-error: "Unbalanced parentheses"
-                 scan-error
+                   ;; easysession
+                   treesit-query-error
 
-                 ;; hideshow
-                 "Already at end of element"
+                   ;; scan-error: "Unbalanced parentheses"
+                   scan-error
 
-                 "Bad diff region number"))
-    (push err debug-ignored-errors))
+                   ;; hideshow
+                   "Already at end of element"
+
+                   imenu-unavailable
+
+                   "Bad diff region number"))
+      (push err debug-ignored-errors)))
 
   (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
                                          "\\`/[^/|:]+:" "\\.gpg\\'"))

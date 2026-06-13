@@ -2748,6 +2748,8 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (define-key evil-normal-state-map (kbd "<leader>vt") #'mod-better-vc-git-toplevel)
   (define-key evil-normal-state-map (kbd "<leader>vd") #'mod-better-vc-diff)
 
+  (global-set-key (kbd "C-x ve") 'vc-ediff)
+
   ;; TODO: Not available in emacs 31
   ;; (define-key evil-normal-state-map (kbd "<leader>vb") #'vc-print-branch-log)
   )

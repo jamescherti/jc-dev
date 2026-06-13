@@ -93,11 +93,6 @@
 
 (setq lightemacs-load-compiled-init-files t)
 
-;; (setq debug-on-error t)
-(when debug-on-error
-  ;; TODO le-default config?
-  (push 'search-failed debug-ignored-errors))
-
 (setq enable-dir-local-variables t)
 (setq enable-local-variables :safe)
 
