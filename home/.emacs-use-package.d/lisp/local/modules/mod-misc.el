@@ -2423,7 +2423,8 @@ Returns:
   (setf (alist-get 'autopep8 apheleia-formatters)
         '("autopep8"
           "--max-line-length=79"
-          "--aggressive"
+          ;; --aggressive is too aggressive when it comes to max-line-length
+          ;; "--aggressive"
           ;; "--aggressive"
           "-"))
   (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
