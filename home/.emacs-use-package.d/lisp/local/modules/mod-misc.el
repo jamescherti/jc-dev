@@ -410,9 +410,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; TODO minimal emacs?
-(setq sh-indent-after-continuation 'always)
-
 (setq electric-quote-comment nil)
 (setq electric-quote-string nil)
 
@@ -2786,34 +2783,34 @@ generally one of the lines that are folded."
   (setq persist-text-scale-buffer-category-function
         #'my-persist-text-scale-function))
 
-;;; Highlight sh-mode and bash-ts-mode $variables
+;;; DISABLED: sh-mode: Highlight sh-mode and bash-ts-mode $variables
 
-(progn
-  (defun sh-script-match-variables (limit)
-    "Search forward for env vars up to LIMIT, skipping comments and quotes."
-    (catch 'found
-      ;; The regex now matches ${anything_except_newline_and_closing_brace}
-      ;; or standard unbracketed variables like $var, $1, $#
-      (while (re-search-forward "\\$\\({[^}\n]+}\\|[[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)" limit t)
-        (let ((state (syntax-ppss)))
-          ;; (nth 4 state) is non-nil if we are inside a comment
-          ;; (nth 3 state) is the string delimiter character (e.g., ?\')
-          (unless (or (nth 4 state)
-                      (eq (nth 3 state) ?\'))
-            (throw 'found t))))
-      nil))
-
-  ;; This one works, but it also highlights the variable that are in comments
-  (defvar sh-script-extra-font-lock-keywords
-    '((sh-script-match-variables
-       (0 font-lock-variable-name-face prepend))))
-
-  (defun sh-script-extra-font-lock-activate ()
-    "Activate additional font-locking for variables in double-quoted strings."
-    (font-lock-add-keywords nil sh-script-extra-font-lock-keywords))
-
-  (add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
-  (add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate))
+;; (progn
+;;   (defun sh-script-match-variables (limit)
+;;     "Search forward for env vars up to LIMIT, skipping comments and quotes."
+;;     (catch 'found
+;;       ;; The regex now matches ${anything_except_newline_and_closing_brace}
+;;       ;; or standard unbracketed variables like $var, $1, $#
+;;       (while (re-search-forward "\\$\\({[^}\n]+}\\|[[:alpha:]_][[:alnum:]_]*\\|[-#?@!]\\|[[:digit:]]+\\)" limit t)
+;;         (let ((state (syntax-ppss)))
+;;           ;; (nth 4 state) is non-nil if we are inside a comment
+;;           ;; (nth 3 state) is the string delimiter character (e.g., ?\')
+;;           (unless (or (nth 4 state)
+;;                       (eq (nth 3 state) ?\'))
+;;             (throw 'found t))))
+;;       nil))
+;;
+;;   ;; This one works, but it also highlights the variable that are in comments
+;;   (defvar sh-script-extra-font-lock-keywords
+;;     '((sh-script-match-variables
+;;        (0 font-lock-variable-name-face prepend))))
+;;
+;;   (defun sh-script-extra-font-lock-activate ()
+;;     "Activate additional font-locking for variables in double-quoted strings."
+;;     (font-lock-add-keywords nil sh-script-extra-font-lock-keywords))
+;;
+;;   (add-hook 'sh-mode-hook #'sh-script-extra-font-lock-activate)
+;;   (add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate))
 
 ;; NOTE: DEPRECATED
 ;; Highlight $variables
@@ -2828,6 +2825,68 @@ generally one of the lines that are folded."
 ;; (add-hook 'bash-ts-mode-hook #'sh-script-extra-font-lock-activate)
 
 
+
+;;; Better highlight sh-mode and bash-ts-mode variables
+
+(defvar my-sh-builtin-keywords
+  '("cat" "cd" "chmod" "chown" "cp" "curl" "date" "echo" "find" "git" "grep"
+    "kill" "less" "ln" "ls" "make" "mkdir" "mv" "pgrep" "pkill" "pwd" "rm"
+    "sleep" "sudo" "touch")
+  "A list of common shell commands to be fontified especially in `sh-mode'.")
+
+;; Custom functions required to replace Doom's autoloaded regex matchers
+(defun my-sh--match-variables-in-quotes (limit)
+  "Match shell variables inside double quotes up to LIMIT."
+  (re-search-forward "\\(\\$\\)\\([a-zA-Z0-9_]+\\|{[^}]*}\\)" limit t))
+
+(defun my-sh--match-command-subst-in-quotes (limit)
+  "Match command substitutions inside double quotes up to LIMIT."
+  (re-search-forward "\\(\\$(.*?)\\)" limit t))
+
+(with-eval-after-load 'sh-script
+  ;; Replace (modulep! +lsp) with standard feature check
+  ;; (when (featurep 'lsp-mode)
+  ;;   (add-hook 'sh-mode-hook #'lsp append))
+
+  ;; TODO minimal emacs?
+  (setq sh-indent-after-continuation 'always)
+
+  ;; (add-hook 'sh-mode-hook (lambda () (setq mode-name "Sh")))
+
+  ;; recognize function names with dashes in them
+  ;; (add-to-list 'sh-imenu-generic-expression
+  ;;              '(sh (nil "^\\s-*function\\s-+\\([[:alpha:]_-][[:alnum:]_-]*\\)\\s-*\\(?:()\\)?" 1)
+  ;;                   (nil "^\\s-*\\([[:alpha:]_-][[:alnum:]_-]*\\)\\s-*()" 1)))
+
+  ;; `sh-set-shell' is verbose about setting up indentation
+  (when (fboundp 'sh-set-shell)
+    (advice-add #'sh-set-shell :around
+                (lambda (orig-fn &rest args)
+                  (let ((inhibit-message t))
+                    (apply orig-fn args)))))
+
+  ;; 1. Fontifies variables in double quotes
+  ;; 2. Fontify command substitution in double quotes
+  ;; 3. Fontify built-in/common commands (see `my-sh-builtin-keywords')
+  (defun my-sh-init-extra-fontification-h ()
+    (font-lock-add-keywords
+     nil `((my-sh--match-variables-in-quotes
+            (1 'font-lock-constant-face prepend)
+            (2 'font-lock-variable-name-face prepend))
+           (my-sh--match-command-subst-in-quotes
+            (1 'sh-quoted-exec prepend))
+           (,(regexp-opt my-sh-builtin-keywords 'symbols)
+            (0 'font-lock-type-face append)))))
+
+  (when (fboundp 'my-sh-init-extra-fontification-h)
+    (add-hook 'bash-ts-mode-hook #'my-sh-init-extra-fontification-h)
+    (add-hook 'sh-mode-hook #'my-sh-init-extra-fontification-h))
+
+  ;; autoclose backticks Ensure this only runs if smartparens is installed and
+  ;; loaded
+  ;; (with-eval-after-load 'smartparens
+  ;;   (sp-local-pair 'sh-mode "`" "`" :unless '(sp-point-before-word-p sp-point-before-same-p)))
+  )
 
 ;;; ansible
 
