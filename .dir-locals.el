@@ -1,4 +1,39 @@
-;; pre-commit-elisp .dir-locals.el - https://github.com/jamescherti/pre-commit-elisp
-((nil . ((pre-commit-elisp-load-path . ("home/.emacs-use-package.d/lisp/local/"
+;;; Directory Local Variables         -*- no-byte-compile: t; -*-
+
+((nil . (;; pre-commit-elisp .dir-locals.el - https://github.com/jamescherti/pre-commit-elisp
+         (pre-commit-elisp-load-path . ("home/.emacs-use-package.d/lisp/local/"
                                         "../../emacs/lightemacs/"))
-         (pre-commit-elisp-error-on-compile-warning . t))))
+         (pre-commit-elisp-error-on-compile-warning . t)
+         ;; Other
+         (indent-tabs-mode . nil)
+         (tab-width . 4)
+         (fill-column . 80)
+         (sentence-end-double-space . nil)
+         ;; (whitespace-style face tabs trailing lines-tail)
+         ;; (whitespace-line-column . 80)
+         (require-final-newline . t)))
+ (html-mode . ((css-indent-offset . 2) (js-indent-level . 2)))
+ (js2-mode . ((js2-strict-missing-semi-warning . nil)
+               (subdirs . t)
+               (js-indent-level . 2)
+               (css-indent-offset . 2)))
+ (javascript-mode . ((subdirs . t)
+                      (js-indent-level . 2)
+                      (css-indent-offset . 2)))
+ (emacs-lisp-mode . ((tab-width . 2)
+                     ;; (flycheck-disabled-checkers . (emacs-lisp-checkdoc))
+                     ;; (compile-command . "make install")
+                     (emacs-lisp-docstring-fill-column . 72)
+                     (electric-quote-comment . nil)
+                     (electric-quote-string . nil)))
+ (python-ts-mode . ((python-indent-offset . 4)
+                    (python-indent-guess-indent-offset-verbose . nil)))
+ (python-mode . ((python-indent-offset . 4)
+                 (python-indent-guess-indent-offset-verbose . nil)))
+ (bash-ts-mode . ((tab-width . 2)
+                  (sh-basic-offset . 2)
+                  (sh-indent-after-continuation . 'always)))
+ (sh-mode . ((tab-width . 2)
+             (sh-basic-offset . 2)
+             (sh-indent-after-continuation . 'always)))
+ (diff-mode . ((diff-add-log-use-relative-names . t))))

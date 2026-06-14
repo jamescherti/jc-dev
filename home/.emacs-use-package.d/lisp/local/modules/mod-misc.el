@@ -410,6 +410,14 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO minimal emacs?
+(setq sh-indent-after-continuation 'always)
+
+(setq electric-quote-comment nil)
+(setq electric-quote-string nil)
+
+(setq diff-add-log-use-relative-names t)
+
 ;; (setq package-native-compile t)
 
 ;; TODO patch dumb-jump
