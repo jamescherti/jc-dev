@@ -1484,6 +1484,30 @@ If the parentheses are balanced, the function returns t."
 ;;   ;;     (push 'markdown-toc mod-cleanup-packages-list)))
 ;;   )
 
+(defun my-setup-markdown-mode ()
+  "Setup markdown modes."
+  ;; In gptel buffers we set `nobreak-char-display' to nil locally so that the
+  ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
+  ;; space. This suppresses the distinct glyph or face Emacs normally applies
+  ;; to NBSP, keeping the buffer free of distracting blue highlights while
+  ;; preserving the character's internal no-break semantics.
+  ;;
+  ;; Here is an example of what is highlighted: $5 billion-valued.
+  ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
+  ;; and the hyphen after n are rendered as highlighted glyphs.
+  (setq-local nobreak-char-display nil)
+
+  ;; visual-line-mode is slow?
+  ;; (visual-line-mode 1)
+
+  (let ((inhibit-message t))
+    (toggle-truncate-lines 0)))
+
+;; (add-hook 'gfm-mode-hook #'my-setup-markdown-mode)
+(when (fboundp 'my-setup-markdown-mode)
+  (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
+  (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
+
 (unless (my-treesit-language-available-p 'markdown)
   (with-eval-after-load 'markdown-mode
     (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
@@ -1570,29 +1594,7 @@ If the parentheses are balanced, the function returns t."
     ;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
     ;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
 
-    (defun my-setup-markdown-mode ()
-      "Setup markdown modes."
-      ;; In gptel buffers we set `nobreak-char-display' to nil locally so that the
-      ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
-      ;; space. This suppresses the distinct glyph or face Emacs normally applies
-      ;; to NBSP, keeping the buffer free of distracting blue highlights while
-      ;; preserving the character's internal no-break semantics.
-      ;;
-      ;; Here is an example of what is highlighted: $5 billion-valued.
-      ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
-      ;; and the hyphen after n are rendered as highlighted glyphs.
-      (setq-local nobreak-char-display nil)
-
-      ;; visual-line-mode is slow?
-      ;; (visual-line-mode 1)
-
-      (let ((inhibit-message t))
-        (toggle-truncate-lines 0)))
-
-    ;; (add-hook 'gfm-mode-hook #'my-setup-markdown-mode)
-    (when (fboundp 'my-setup-markdown-mode)
-      (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
-      (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)))
+    )
 
   (defun my-markdown-toc-gen-if-present ()
     "Gen table of contents if present."

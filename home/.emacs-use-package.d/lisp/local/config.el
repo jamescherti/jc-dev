@@ -103,7 +103,8 @@
                                      ;;
                                      ;; These are .eln files, not Emacs C
                                      ;; source.
-                                     "-fomit-frame-pointer"
+                                     ;; "-fomit-frame-pointer"
+                                     "-fno-omit-frame-pointer"
 
                                      ;; The -fno-finite-math-only flag prevents
                                      ;; the compiler from assuming that

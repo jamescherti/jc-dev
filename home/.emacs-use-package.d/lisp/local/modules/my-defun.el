@@ -616,8 +616,7 @@ Delegates regex matching to the C level for significantly better performance."
 (defun my-save-buffers-kill-emacs ()
   "Handle quitting Emacs with daemon-aware frame management."
   (interactive)
-  (if (and (daemonp)
-           (fboundp 'easysession-save-session-and-close-frames))
+  (if (and (fboundp 'easysession-save-session-and-close-frames))
       (easysession-save-session-and-close-frames)
     (save-buffers-kill-emacs)))
 
