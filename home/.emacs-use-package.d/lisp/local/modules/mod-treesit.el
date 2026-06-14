@@ -44,95 +44,95 @@
 (setq treesit-auto-install-grammar nil)
 
 (with-suppressed-warnings ((free-vars treesit-language-source-alist))
-  (setq treesit-language-source-alist
-        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-          (python "https://github.com/tree-sitter/tree-sitter-python")
-          (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
-          (json "https://github.com/tree-sitter/tree-sitter-json")
-          (html "https://github.com/tree-sitter/tree-sitter-html")
-          (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-          (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-          (java "https://github.com/tree-sitter/tree-sitter-java")
-          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
-          ;; TODO: add markdown to treesit auto
-          (markdown
-           ;; For split parsers like Markdown, the extra two fields are
-           ;; required:
-           ;; 1. "split_parser" indicates that this language uses a parser
-           ;;    split into multiple components.
-           ;; 2. The directory path (e.g., "tree-sitter-markdown/src") points
-           ;;    to the location of the parser source within the repository.
-           ;;    Without these, treesit would not be able to find and compile
-           ;;    the parser correctly.
-           ;;
-           ;; A split parser is a Tree-sitter parser that is divided into
-           ;; multiple smaller parsers instead of being a single file or
-           ;; module. Each smaller parser handles a part of the language, such
-           ;; as different syntaxes or embedded languages, and together they
-           ;; form the complete parser. This approach makes it easier to
-           ;; manage complex languages, like Markdown, which can contain code
-           ;; blocks, inline formatting, and other embedded languages. In
-           ;; Emacs, specifying "split_parser" and the source directory tells
-           ;; treesit how to find and build all the pieces correctly.
-           "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
-           "split_parser"
-           "tree-sitter-markdown/src")
-          ;; TODO: add markdown-inline to treesit auto
-          (markdown-inline
-           "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
-           "split_parser"
-           "tree-sitter-markdown-inline/src")
-          ;; TODO: add php to treesit auto
-          (php
-           "https://github.com/tree-sitter/tree-sitter-php"
-           "master"
-           "php/src")
-          (c "https://github.com/tree-sitter/tree-sitter-c")
-          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-          (c-sharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
-          (commonlisp "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp")
-          (css "https://github.com/tree-sitter/tree-sitter-css")
-          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-          (glsl "https://github.com/tree-sitter-grammars/tree-sitter-glsl")
-          (julia "https://github.com/tree-sitter/tree-sitter-julia")
-          (make "https://github.com/tree-sitter-grammars/tree-sitter-make")
-          (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-          (rust "https://github.com/tree-sitter/tree-sitter-rust")
-          (scala "https://github.com/tree-sitter/tree-sitter-scala")
-          (toml "https://github.com/tree-sitter/tree-sitter-toml")
-          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-          (vue "https://github.com/tree-sitter-grammars/tree-sitter-vue")
+  (defvar mod-treesit--treesit-language-source-alist
+    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+      (python "https://github.com/tree-sitter/tree-sitter-python")
+      (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
+      (json "https://github.com/tree-sitter/tree-sitter-json")
+      (html "https://github.com/tree-sitter/tree-sitter-html")
+      (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+      (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+      (java "https://github.com/tree-sitter/tree-sitter-java")
+      (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+      ;; TODO: add markdown to treesit auto
+      (markdown
+       ;; For split parsers like Markdown, the extra two fields are
+       ;; required:
+       ;; 1. "split_parser" indicates that this language uses a parser
+       ;;    split into multiple components.
+       ;; 2. The directory path (e.g., "tree-sitter-markdown/src") points
+       ;;    to the location of the parser source within the repository.
+       ;;    Without these, treesit would not be able to find and compile
+       ;;    the parser correctly.
+       ;;
+       ;; A split parser is a Tree-sitter parser that is divided into
+       ;; multiple smaller parsers instead of being a single file or
+       ;; module. Each smaller parser handles a part of the language, such
+       ;; as different syntaxes or embedded languages, and together they
+       ;; form the complete parser. This approach makes it easier to
+       ;; manage complex languages, like Markdown, which can contain code
+       ;; blocks, inline formatting, and other embedded languages. In
+       ;; Emacs, specifying "split_parser" and the source directory tells
+       ;; treesit how to find and build all the pieces correctly.
+       "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+       "split_parser"
+       "tree-sitter-markdown/src")
+      ;; TODO: add markdown-inline to treesit auto
+      (markdown-inline
+       "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+       "split_parser"
+       "tree-sitter-markdown-inline/src")
+      ;; TODO: add php to treesit auto
+      (php
+       "https://github.com/tree-sitter/tree-sitter-php"
+       "master"
+       "php/src")
+      (c "https://github.com/tree-sitter/tree-sitter-c")
+      (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+      (c-sharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
+      (commonlisp "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp")
+      (css "https://github.com/tree-sitter/tree-sitter-css")
+      (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+      (glsl "https://github.com/tree-sitter-grammars/tree-sitter-glsl")
+      (julia "https://github.com/tree-sitter/tree-sitter-julia")
+      (make "https://github.com/tree-sitter-grammars/tree-sitter-make")
+      (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+      (rust "https://github.com/tree-sitter/tree-sitter-rust")
+      (scala "https://github.com/tree-sitter/tree-sitter-scala")
+      (toml "https://github.com/tree-sitter/tree-sitter-toml")
+      (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+      (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+      (vue "https://github.com/tree-sitter-grammars/tree-sitter-vue")
 
-          (heex "https://github.com/phoenixframework/tree-sitter-heex")
-          (janet "https://github.com/sogaiu/tree-sitter-janet-simple")
-          (kotlin "https://github.com/fwcd/tree-sitter-kotlin")
-          (latex "https://github.com/latex-lsp/tree-sitter-latex")
-          (magik "https://github.com/krn-robin/tree-sitter-magik")
-          (nix "https://github.com/nix-community/tree-sitter-nix")
-          (nu "https://github.com/nushell/tree-sitter-nu")
-          (org "https://github.com/milisims/tree-sitter-org")
-          (perl "https://github.com/ganezdragon/tree-sitter-perl")
-          (proto "https://github.com/mitchellh/tree-sitter-proto")
-          (r "https://github.com/r-lib/tree-sitter-r")
-          (sql "https://github.com/DerekStride/tree-sitter-sql")
-          (surface "https://github.com/connorlay/tree-sitter-surface")
-          (typst "https://github.com/uben0/tree-sitter-typst")
-          (verilog "https://github.com/gmlarumbe/tree-sitter-verilog")
-          (vhdl "https://github.com/alemuller/tree-sitter-vhdl")
-          (wast "https://github.com/wasm-lsp/tree-sitter-wasm")
-          (wat "https://github.com/wasm-lsp/tree-sitter-wasm")
-          (wgsl "https://github.com/mehmetoguzderin/tree-sitter-wgsl")
-          (awk "https://github.com/Beaglefoot/tree-sitter-awk")
-          (bibtex "https://github.com/latex-lsp/tree-sitter-bibtex")
-          (blueprint "https://github.com/huanie/tree-sitter-blueprint")
-          (clojure "https://github.com/sogaiu/tree-sitter-clojure")
-          (cmake "https://github.com/uyha/tree-sitter-cmake")
-          (dart "https://github.com/ast-grep/tree-sitter-dart")
-          (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
-          (go "https://github.com/tree-sitter/tree-sitter-go")
-          (gowork "https://github.com/omertuc/tree-sitter-go-work")
-          (gomod "https://github.com/camdencheek/tree-sitter-go-mod"))))
+      (heex "https://github.com/phoenixframework/tree-sitter-heex")
+      (janet "https://github.com/sogaiu/tree-sitter-janet-simple")
+      (kotlin "https://github.com/fwcd/tree-sitter-kotlin")
+      (latex "https://github.com/latex-lsp/tree-sitter-latex")
+      (magik "https://github.com/krn-robin/tree-sitter-magik")
+      (nix "https://github.com/nix-community/tree-sitter-nix")
+      (nu "https://github.com/nushell/tree-sitter-nu")
+      (org "https://github.com/milisims/tree-sitter-org")
+      (perl "https://github.com/ganezdragon/tree-sitter-perl")
+      (proto "https://github.com/mitchellh/tree-sitter-proto")
+      (r "https://github.com/r-lib/tree-sitter-r")
+      (sql "https://github.com/DerekStride/tree-sitter-sql")
+      (surface "https://github.com/connorlay/tree-sitter-surface")
+      (typst "https://github.com/uben0/tree-sitter-typst")
+      (verilog "https://github.com/gmlarumbe/tree-sitter-verilog")
+      (vhdl "https://github.com/alemuller/tree-sitter-vhdl")
+      (wast "https://github.com/wasm-lsp/tree-sitter-wasm")
+      (wat "https://github.com/wasm-lsp/tree-sitter-wasm")
+      (wgsl "https://github.com/mehmetoguzderin/tree-sitter-wgsl")
+      (awk "https://github.com/Beaglefoot/tree-sitter-awk")
+      (bibtex "https://github.com/latex-lsp/tree-sitter-bibtex")
+      (blueprint "https://github.com/huanie/tree-sitter-blueprint")
+      (clojure "https://github.com/sogaiu/tree-sitter-clojure")
+      (cmake "https://github.com/uyha/tree-sitter-cmake")
+      (dart "https://github.com/ast-grep/tree-sitter-dart")
+      (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
+      (go "https://github.com/tree-sitter/tree-sitter-go")
+      (gowork "https://github.com/omertuc/tree-sitter-go-work")
+      (gomod "https://github.com/camdencheek/tree-sitter-go-mod"))))
 
 ;;; Bug fix: `treesit--install-language-grammar-out-dir-history'
 
@@ -157,26 +157,98 @@
 
 ;;; Functions
 
+;; (defun my-treesit-require-and-override (feature)
+;;   "Require FEATURE and override `treesit-language-source-alist' with its entries."
+;;   (let ((new-entries nil))
+;;     (let ((treesit-language-source-alist nil))
+;;       (require feature)
+;;       (setq new-entries treesit-language-source-alist))
+;;     (dolist (entry new-entries)
+;;       (setq treesit-language-source-alist
+;;             (assq-delete-all (car entry) treesit-language-source-alist))
+;;       (push entry treesit-language-source-alist))))
+
+(defun mod-treesit-install (package lang-keys &optional install-fn)
+  "Load PACKAGE and prepare the tree-sitter sources for LANG-KEYS.
+LANG-KEYS can be a single symbol or a list of symbols.
+INSTALL-FN is an optional function to call to install the parsers.
+It adds the configuration from `mod-treesit--treesit-language-source-alist'
+to `treesit-language-source-alist' if missing, then installs the grammars
+only if they are not already available."
+  (when package
+    (require package nil t))
+  (let ((keys (if (listp lang-keys) lang-keys (list lang-keys)))
+        (missing-grammar nil))
+    (dolist (key keys)
+      (unless (assq key treesit-language-source-alist)
+        (let ((recipe (assq key mod-treesit--treesit-language-source-alist)))
+          (when recipe
+            (push recipe treesit-language-source-alist))))
+      ;; Flag if at least one grammar from the list needs installation
+      (unless (treesit-language-available-p key)
+        (setq missing-grammar t)))
+    (when missing-grammar
+      (if (and install-fn (fboundp install-fn))
+          (funcall install-fn)
+        (dolist (key keys)
+          (unless (treesit-language-available-p key)
+            (treesit-install-language-grammar key)))))))
+
 (defun my-treesit-update-language-grammar ()
   "Update language grammar."
   (interactive)
-  (treesit-install-language-grammar 'markdown)
-  (treesit-install-language-grammar 'markdown-inline)
-  (treesit-install-language-grammar 'python)
-  (treesit-install-language-grammar 'bash)
-  (treesit-install-language-grammar 'yaml)
-  (treesit-install-language-grammar 'json)
-  (treesit-install-language-grammar 'html)
-  (treesit-install-language-grammar 'lua)
-  (treesit-install-language-grammar 'c)
-  (treesit-install-language-grammar 'cpp)
-  (treesit-install-language-grammar 'dockerfile)
-  (treesit-install-language-grammar 'go)
-  (treesit-install-language-grammar 'java)
-  (treesit-install-language-grammar 'javascript)
-  (treesit-install-language-grammar 'php)
-  ;; (treesit-install-language-grammar 'toml)
-  ;; (treesit-install-language-grammar 'make)
+  (mod-treesit-install 'python 'python)
+  (mod-treesit-install 'sh-script 'bash)
+  (mod-treesit-install 'json-ts-mode 'json)
+  (mod-treesit-install 'lua-ts-mode 'lua)
+  (mod-treesit-install 'c-ts-mode '(c cpp))
+  (mod-treesit-install 'dockerfile-ts-mode 'dockerfile)
+  (mod-treesit-install 'go-ts-mode 'go)
+  (mod-treesit-install 'js 'javascript)
+  (mod-treesit-install 'java-ts-mode 'java)
+  (mod-treesit-install 'php-ts-mode 'php 'php-ts-mode-install-parsers)
+  (mod-treesit-install 'markdown-mode '(markdown markdown-inline)
+                       'markdown-ts-mode-install-parsers)
+  (mod-treesit-install 'mhtml-ts-mode 'html
+                       'mhtml-ts-mode-install-parsers)
+
+  (mod-treesit-install nil '(python
+                             bash
+                             yaml
+                             json
+                             lua
+                             c
+                             cpp
+                             dockerfile
+                             go
+                             java
+                             javascript))
+
+  ;; (treesit-install-language-grammar 'python)
+  ;; (treesit-install-language-grammar 'bash)
+  ;; (treesit-install-language-grammar 'yaml)
+  ;; (treesit-install-language-grammar 'json)
+  ;; (treesit-install-language-grammar 'lua)
+  ;; (treesit-install-language-grammar 'c)
+  ;; (treesit-install-language-grammar 'cpp)
+  ;; (treesit-install-language-grammar 'dockerfile)
+  ;; (treesit-install-language-grammar 'go)
+  ;; (treesit-install-language-grammar 'java)
+  ;; (treesit-install-language-grammar 'javascript)
+  ;;
+  ;; (if (fboundp 'mhtml-ts-mode-install-parsers)
+  ;;     (mhtml-ts-mode-install-parsers)
+  ;;   (treesit-install-language-grammar 'html))
+  ;;
+  ;; (if (fboundp 'markdown-ts-mode-install-parsers)
+  ;;     (markdown-ts-mode-install-parsers)
+  ;;   (treesit-install-language-grammar 'markdown)
+  ;;   (treesit-install-language-grammar 'markdown-inline))
+  ;;
+  ;; (if (fboundp 'php-ts-mode-install-parsers)
+  ;;     (php-ts-mode-install-parsers)
+  ;;   (treesit-install-language-grammar 'php))
+
   )
 
 ;;; Misc languages
