@@ -906,6 +906,7 @@ WIDTH is the tab width."
 
   (setq sgml-basic-offset 2)  ;; HTML
   (setq css-indent-offset 2)
+  (setq js-indent-level 2)
   (setq javascript-indent-level 2)
   (setq html-indent-offset 2)
   (setq sgml-basic-offset 2)
