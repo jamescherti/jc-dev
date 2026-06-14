@@ -421,7 +421,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (with-eval-after-load 'dumb-jump
   (cl-defmethod xref-backend-definitions :before ((_backend (eql dumb-jump))
                                                   _identifier)
-    (xref-push-marker-stack)))
+    (when (fboundp 'xref-push-marker-stack)
+      (xref-push-marker-stack))))
 
 (setq archive-hidden-columns '(Mode Ids Date&Time Ratio))
 (setq archive-alternate-hidden-columns '())
