@@ -27,11 +27,16 @@
                      (emacs-lisp-docstring-fill-column . 72)
                      (electric-quote-comment . nil)
                      (electric-quote-string . nil)))
+ ;; LUA
+ (lua-mode . (lua-indent-level . 2))
+ (lua-ts-mode . (lua-ts-indent-offset . 2))
  ;; Python
- (python-ts-mode . ((python-indent-offset . 4)
-                    (python-indent-guess-indent-offset-verbose . nil)))
- (python-mode . ((python-indent-offset . 4)
-                 (python-indent-guess-indent-offset-verbose . nil)))
+ ;; (python-ts-mode . ((python-indent-offset . 4)
+ ;;                    (python-indent-guess-indent-offset-verbose . nil)))
+ ;; (python-mode . ((python-indent-offset . 4)
+ ;;                 (python-indent-guess-indent-offset-verbose . nil)))
+ (python-base-mode . ((python-indent-offset . 4)
+                       (python-indent-guess-indent-offset-verbose . nil)))
  ;; Sh or Bash
  (bash-ts-mode . ((tab-width . 2)
                   (sh-basic-offset . 2)
@@ -40,7 +45,8 @@
              (sh-basic-offset . 2)
              (sh-indent-after-continuation . 'always)))
  ;; YAML
- (ansible-mode . ((tab-width . 2)))
+ (ansible-mode . ((tab-width . 2)
+                  (yaml-indent-offset . 2)))
  (yaml-ts-mode . ((tab-width . 2)))
  (yaml-mode . ((tab-width . 2)
                (yaml-indent-offset . 2)))

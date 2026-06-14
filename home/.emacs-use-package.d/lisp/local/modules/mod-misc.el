@@ -911,6 +911,7 @@ WIDTH is the tab width."
   (setq html-indent-offset 2)
   (setq sgml-basic-offset 2)
   (setq lua-indent-level 2)
+  (setq lua-ts-indent-offset 2)
   (setq yaml-indent-offset 2)
 
   ;; python
