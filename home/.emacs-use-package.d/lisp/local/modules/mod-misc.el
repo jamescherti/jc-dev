@@ -2836,22 +2836,19 @@ generally one of the lines that are folded."
 ;; Custom functions required to replace Doom's autoloaded regex matchers
 (defun my-sh--match-variables-in-quotes (limit)
   "Match shell variables inside double quotes up to LIMIT."
-  (let (found)
-    (while (and (not found)
-                (re-search-forward "\\(\\$\\)\\([a-zA-Z0-9_]+\\|{[^}]*}\\)" limit t))
-      ;; (nth 3 (syntax-ppss)) returns the string delimiter if inside a string
+  (catch 'found
+    (while (re-search-forward "\\(\\$\\)\\([a-zA-Z0-9_]+\\|{[^}]*}\\)" limit t)
       (when (eq (nth 3 (syntax-ppss)) ?\")
-        (setq found t)))
-    found))
+        (throw 'found t)))))
 
 (defun my-sh--match-command-subst-in-quotes (limit)
   "Match command substitutions inside double quotes up to LIMIT."
-  (let (found)
-    (while (and (not found)
-                (re-search-forward "\\(\\$(.*?)\\)" limit t))
+  (catch 'found
+    ;; Replaced slow non-greedy "\\(\\$(.*?)\\)" with a fast
+    ;; character class [^)]+
+    (while (re-search-forward "\\(\\$\\([^)]+\\)\\)" limit t)
       (when (eq (nth 3 (syntax-ppss)) ?\")
-        (setq found t)))
-    found))
+        (throw 'found t)))))
 
 (with-eval-after-load 'sh-script
   ;; Replace (modulep! +lsp) with standard feature check
@@ -2878,7 +2875,7 @@ generally one of the lines that are folded."
   ;; 1. Fontifies variables in double quotes
   ;; 2. Fontify command substitution in double quotes
   ;; 3. Fontify built-in/common commands (see `my-sh-builtin-keywords')
-  (defun my-sh-init-extra-fontification-h ()
+  (defun my-sh-init-extra-fontification-handler ()
     (font-lock-add-keywords
      nil `((my-sh--match-variables-in-quotes
             (1 'font-lock-constant-face prepend)
@@ -2889,9 +2886,9 @@ generally one of the lines that are folded."
             ;; Changed `append` to `keep` so it doesn't overwrite comments
             (0 'font-lock-type-face keep)))))
 
-  (when (fboundp 'my-sh-init-extra-fontification-h)
-    (add-hook 'bash-ts-mode-hook #'my-sh-init-extra-fontification-h)
-    (add-hook 'sh-mode-hook #'my-sh-init-extra-fontification-h))
+  (when (fboundp 'my-sh-init-extra-fontification-handler)
+    ;; Removed bash-ts-mode-hook to prevent severe performance penalties
+    (add-hook 'sh-mode-hook #'my-sh-init-extra-fontification-handler))
 
   ;; autoclose backticks Ensure this only runs if smartparens is installed and
   ;; loaded
