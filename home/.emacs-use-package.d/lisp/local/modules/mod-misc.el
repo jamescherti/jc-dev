@@ -2827,7 +2827,6 @@ generally one of the lines that are folded."
 
 
 ;;; Better highlight sh-mode and bash-ts-mode variables
-
 (defvar my-sh-builtin-keywords
   '("cat" "cd" "chmod" "chown" "cp" "curl" "date" "echo" "find" "git" "grep"
     "kill" "less" "ln" "ls" "make" "mkdir" "mv" "pgrep" "pkill" "pwd" "rm"
@@ -2837,11 +2836,22 @@ generally one of the lines that are folded."
 ;; Custom functions required to replace Doom's autoloaded regex matchers
 (defun my-sh--match-variables-in-quotes (limit)
   "Match shell variables inside double quotes up to LIMIT."
-  (re-search-forward "\\(\\$\\)\\([a-zA-Z0-9_]+\\|{[^}]*}\\)" limit t))
+  (let (found)
+    (while (and (not found)
+                (re-search-forward "\\(\\$\\)\\([a-zA-Z0-9_]+\\|{[^}]*}\\)" limit t))
+      ;; (nth 3 (syntax-ppss)) returns the string delimiter if inside a string
+      (when (eq (nth 3 (syntax-ppss)) ?\")
+        (setq found t)))
+    found))
 
 (defun my-sh--match-command-subst-in-quotes (limit)
   "Match command substitutions inside double quotes up to LIMIT."
-  (re-search-forward "\\(\\$(.*?)\\)" limit t))
+  (let (found)
+    (while (and (not found)
+                (re-search-forward "\\(\\$(.*?)\\)" limit t))
+      (when (eq (nth 3 (syntax-ppss)) ?\")
+        (setq found t)))
+    found))
 
 (with-eval-after-load 'sh-script
   ;; Replace (modulep! +lsp) with standard feature check
@@ -2876,7 +2886,8 @@ generally one of the lines that are folded."
            (my-sh--match-command-subst-in-quotes
             (1 'sh-quoted-exec prepend))
            (,(regexp-opt my-sh-builtin-keywords 'symbols)
-            (0 'font-lock-type-face append)))))
+            ;; Changed `append` to `keep` so it doesn't overwrite comments
+            (0 'font-lock-type-face keep)))))
 
   (when (fboundp 'my-sh-init-extra-fontification-h)
     (add-hook 'bash-ts-mode-hook #'my-sh-init-extra-fontification-h)
@@ -2887,7 +2898,6 @@ generally one of the lines that are folded."
   ;; (with-eval-after-load 'smartparens
   ;;   (sp-local-pair 'sh-mode "`" "`" :unless '(sp-point-before-word-p sp-point-before-same-p)))
   )
-
 ;;; ansible
 
 
