@@ -410,6 +410,10 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO minimal-emacs readme?
+(add-to-list 'auto-mode-alist '("/LICENSE\\'" . text-mode))
+(add-to-list 'auto-mode-alist '("rc\\'" . conf-mode) 'append)
+
 (setq electric-quote-comment nil)
 (setq electric-quote-string nil)
 
