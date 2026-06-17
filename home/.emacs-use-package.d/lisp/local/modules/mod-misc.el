@@ -1626,6 +1626,9 @@ WIDTH is the tab width."
                             ;; misspelled, the correct replacement might not
                             ;; appear in the generated suggestion list.
                             "--sug-mode=ultra"
+                            ;; Ignore 1 and 2 characters words
+                            "--ignore=2"
+                            ;; "--ignore-case"
                             ;; This flag instructs Aspell to accept words formed
                             ;; by combining two or more valid dictionary words
                             ;; without spaces, treating the resulting string as

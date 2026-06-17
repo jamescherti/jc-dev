@@ -169,6 +169,12 @@ def main() -> None:
 
     if which("evince"):
         app_pdf = "org.gnome.Evince"
+    elif which("papers"):
+        app_pdf = "org.gnome.Papers"
+    else:
+        print("Error: None of the supported document viewers were "
+              "found (evince, paper).", file=sys.stderr)
+        sys.exit(1)
 
     # Audio and video
     app_audio = "vlc"

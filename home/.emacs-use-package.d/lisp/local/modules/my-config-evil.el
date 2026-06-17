@@ -3243,6 +3243,26 @@ Accepts any arguments so it can be used as advice or a hook."
 ;; (advice-add 'evil-goto-first-line :after #'my-ensure-scroll-context)
 
 
+;;; Paste and fill
+
+(defun my-evil-paste-and-fill ()
+  "Paste text after point and fill the pasted region."
+  (interactive)
+  (atomic-change-group
+    (call-interactively #'evil-paste-after)
+    (fill-region (evil-get-marker ?\[) (evil-get-marker ?\]))))
+
+(defun my-evil-paste-before-and-fill ()
+  "Paste text before point and fill the pasted region."
+  (interactive)
+  (atomic-change-group
+    (call-interactively #'evil-paste-before)
+    (fill-region (evil-get-marker ?\[) (evil-get-marker ?\]))))
+
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "<leader>fp") #'my-evil-paste-and-fill)
+  (define-key evil-normal-state-map (kbd "<leader>fP") #'my-evil-paste-before-and-fill))
+
 ;;; Provide
 
 (provide 'my-config-evil)
