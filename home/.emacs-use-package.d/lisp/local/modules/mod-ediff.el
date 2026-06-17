@@ -80,6 +80,8 @@ This wraps `ediff-setup' to dynamically bind options based on the major mode."
 
 (advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options)
 
+;;; ediff startup: go to the next difference
+
 (add-hook 'ediff-startup-hook 'ediff-next-difference)
 
 ;; ediff: Dynamic ediff-split-window-function

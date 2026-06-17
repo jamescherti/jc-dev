@@ -1466,9 +1466,9 @@ WIDTH is the tab width."
   ;; Suppress the display of Flymake error counters when there are no errors.
   (setq flymake-suppress-zero-counters t)
 
-  (with-no-warnings
-    (add-hook 'org-mode-hook 'hl-line-mode)
-    (add-hook 'grep-mode-hook 'hl-line-mode))
+  ;; (with-no-warnings
+  ;;   (add-hook 'org-mode-hook 'hl-line-mode)
+  ;;   (add-hook 'grep-mode-hook 'hl-line-mode))
   (unless noninteractive
     (with-eval-after-load 'icomplete
       (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit)))
@@ -3355,7 +3355,15 @@ visibility when navigation commands are executed."
   "FN is the advised function. ARGS are the function arguments."
   (unwind-protect
       (apply fn args)
-    (lightemacs-default-settings--recenter-maybe)))
+    (lightemacs-recenter-maybe)))
+
+(defun lightemacs-default-settings--advice-recenter-always (fn &rest args)
+  "FN is the advised function. ARGS are the function arguments."
+  (unwind-protect
+      (apply fn args)
+    (when (and (eq (current-buffer) (window-buffer))
+               (not (pos-visible-in-window-p (point))))
+      (recenter))))
 
 (with-eval-after-load 'evil-commands
   (advice-add 'evil-goto-last-change-reverse :around
@@ -3365,9 +3373,9 @@ visibility when navigation commands are executed."
 
 (with-eval-after-load 'diff-hl
   (advice-add 'diff-hl-next-hunk :around
-              #'lightemacs-default-settings--advice-recenter-maybe)
+              #'lightemacs-default-settings--advice-recenter-always)
   (advice-add 'diff-hl-next-hunk :around
-              #'lightemacs-default-settings--advice-recenter-maybe))
+              #'lightemacs-default-settings--advice-recenter-always))
 
 (with-eval-after-load 'git-gutter
   (advice-add 'git-gutter:previous-hunk :around
