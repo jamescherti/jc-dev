@@ -20,11 +20,26 @@
 #
 
 vars:
-  debug: true
-  verbose: true
+  # debug: true
+  # verbose: true
   last: true
 
 actions:
+  - path_match: "{{ cwd }}/.pathaction.yaml"
+    shell: true
+    tags: install
+    command:
+      - "cp"
+      - ".pathaction.yaml"
+      - "{{ '~/src/.pathaction.yaml' | expanduser }}"
+
+  - path_match:
+      - "{{ cwd }}/forks/fasd/*"
+      - "{{ cwd }}/forks/fasd"
+    tags: install
+    list_commands:
+      - "cp forks/fasd/fasd {{ '~/src/dotfiles/jc-dev/home/.bin/fasd' | expanduser | quote }}"
+
   - path_match:
       - "*/update-iptables.sh"
       - "*/update-iptables/*"
