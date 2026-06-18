@@ -34,11 +34,11 @@ actions:
       - "{{ '~/src/.pathaction.yaml' | expanduser }}"
 
   - path_match:
-      - "{{ cwd }}/forks/fasd/*"
-      - "{{ cwd }}/forks/fasd"
+      - "{{ cwd }}/tools/efasd/*"
+      - "{{ cwd }}/tools/efasd"
     tags: install
     list_commands:
-      - "cp forks/fasd/fasd {{ '~/src/dotfiles/jc-dev/home/.bin/fasd' | expanduser | quote }}"
+      - "cp tools/efasd/fasd {{ '~/src/dotfiles/jc-dev/home/.bin/fasd' | expanduser | quote }}"
 
   - path_match:
       - "*/update-iptables.sh"

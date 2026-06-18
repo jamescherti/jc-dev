@@ -92,6 +92,9 @@ tasks:
     remote:
       upstream: https://github.com/zevv/bucklespring
 
+  - git: git@github.com:jamescherti/efasd
+    path: tools/efasd
+
   - git: git@github.com:jamescherti/pdfcipher
     path: tools/pdfcipher
 
