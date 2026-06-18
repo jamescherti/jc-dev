@@ -19,6 +19,8 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
+export EMACSLOADPREFERNEWER=1
+
 # Safely assign default values
 RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
 
