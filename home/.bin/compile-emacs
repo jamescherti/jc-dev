@@ -632,7 +632,7 @@ CONFIGURE_ARGS=(
   --without-ns
   --without-xaw3d
 
-  --with-cairo # Uses cairo and pango (instead of xft)
+  --without-cairo # Uses cairo and pango (instead of xft)
 
   # is the preferred option for modern systems due to its
   # performance benefits and alignment with current X11 development trends.
