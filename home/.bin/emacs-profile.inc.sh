@@ -3,7 +3,7 @@
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
 OSFAMILY=$(~/.local/bin/osid 2>/dev/null || echo "unknown")
 
-if [[ $OSFAMILY = arch ]]; then
+if [[ $OSFAMILY = gentoo ]] || [[ $OSFAMILY = arch ]]; then
   export \
     RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
   if [[ $EMACS_D = "" ]]; then
@@ -11,12 +11,12 @@ if [[ $OSFAMILY = arch ]]; then
   fi
 fi
 
-# if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-#   export RUN_EMACS_BIN="/usr/bin/emacs"
-#   if [[ $EMACS_D = "" ]]; then
-#     EMACS_D="$HOME/.emacs-use-package.d/"
-#   fi
-# fi
+#if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+#  export RUN_EMACS_BIN="/usr/bin/emacs"
+#  if [[ $EMACS_D = "" ]]; then
+#    EMACS_D="$HOME/.emacs-use-package.d/"
+#  fi
+#fi
 
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
   export \
