@@ -1185,6 +1185,10 @@ WIDTH is the tab width."
            ("\\.profile\\'" . conf-mode)  ; firejail profiles
            ("^/etc/[^/]+" . conf-unix-mode)
 
+           ;; Gentoo (/etc/portage files)
+           ("package\\.\\(?:license\\|mask\\|use\\|accept_keywords\\)/.+\\'" . conf-unix-mode)
+           ("package\\.\\(?:env\\|unmask\\)\\'" . conf-unix-mode)
+
            ;; /etc/hosts and ansible /hosts
 
            ;; Replace with git-modes

@@ -34,6 +34,22 @@ actions:
       - "{{ '~/src/.pathaction.yaml' | expanduser }}"
 
   - path_match:
+      - "{{ cwd }}/dotfiles/jc-gentoo-portage/*"
+      - "{{ cwd }}/dotfiles/jc-gentoo-portage"
+    tags: install
+    command:
+      - sudo
+      - rsync
+      - "-av"
+      - "--delete"
+      - "--exclude=README.md"
+      - "--exclude=LICENSE"
+      - "--exclude=00cpu-flags"
+      - "--exclude=00hardware-nvidia"
+      - "{{ cwd }}/dotfiles/jc-gentoo-portage/"
+      - "/etc/portage/"
+
+  - path_match:
       - "{{ cwd }}/tools/efasd/*"
       - "{{ cwd }}/tools/efasd"
     tags: install
