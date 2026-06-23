@@ -46,6 +46,7 @@ actions:
       - "--exclude=LICENSE"
       - "--exclude=00my-*"
       - "--exclude=my-*"
+      - "--exclude=.git"
       - "{{ cwd }}/dotfiles/jc-gentoo-portage/"
       - "/etc/portage/"
 
