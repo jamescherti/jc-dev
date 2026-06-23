@@ -44,8 +44,8 @@ actions:
       - "--delete"
       - "--exclude=README.md"
       - "--exclude=LICENSE"
-      - "--exclude=00cpu-flags"
-      - "--exclude=00hardware-nvidia"
+      - "--exclude=00my-*"
+      - "--exclude=my-*"
       - "{{ cwd }}/dotfiles/jc-gentoo-portage/"
       - "/etc/portage/"
 
