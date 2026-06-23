@@ -3454,8 +3454,15 @@ This function is intended for use as :around advice."
 This function is intended for use as :around advice."
   (when (and (fboundp 'my-code-checker-allowed-p)
              (my-code-checker-allowed-p))
-    (when
-        (bound-and-true-p my-buffer-enable-flymake)
+    (when (bound-and-true-p my-buffer-enable-flymake)
+      (apply orig-fun args))))
+
+(defun my-apheleia-execution-only-when-code-checker-allowed (orig-fun &rest args)
+  "Execute ORIG-FUN with ARGS only if it is allowed.
+This function is intended for use as :around advice."
+  (when (and (fboundp 'my-code-checker-allowed-p)
+             (my-code-checker-allowed-p))
+    (when (bound-and-true-p my-buffer-enable-apheleia)
       (apply orig-fun args))))
 
 (with-eval-after-load 'le-aggressive-indent
@@ -3472,7 +3479,7 @@ This function is intended for use as :around advice."
 
 (with-eval-after-load 'le-apheleia
   (advice-add 'apheleia-mode :around
-              #'my-prevent-execution-only-when-code-checker-allowed))
+              #'my-apheleia-execution-only-when-code-checker-allowed))
 
 (with-eval-after-load 'le-flymake
   (advice-add 'flymake-mode :around

@@ -105,7 +105,10 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
           (if (and (not (string= base-name "/make.conf")) ; Gentoo
                    (not (string-suffix-p "/PKGBUILD" file-name))
                    (not (string-suffix-p ".ebuild" file-name)))
-              (setq-local my-buffer-enable-flymake nil)
+              (progn
+                (setq-local my-buffer-enable-apheleia nil)
+                (setq-local my-buffer-enable-flymake nil))
+            (setq-local my-buffer-enable-apheleia t)
             (setq-local my-buffer-enable-flymake t))
           t))
     (when (boundp 'config-buffer-enable-syntax-checkers)
