@@ -96,13 +96,17 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
         (when (and file-name
                    base-name
                    ;; (not (string-match-p "cookiecutter" file-name))
-                   (not (string-suffix-p ".ebuild" file-name))
-                   (not (string-suffix-p "/PKGBUILD" file-name))
                    (my-path-inside-p "~/src" file-name)
                    (not (my-path-inside-p "~/src/forks" file-name))
                    (not (my-path-inside-p "~/src/other" file-name))
                    (not (my-path-inside-p tmpedit-dir file-name)))
           (setq-local config-buffer-enable-syntax-checkers t)
+
+          (if (and (not (string= base-name "/make.conf")) ; Gentoo
+                   (not (string-suffix-p "/PKGBUILD" file-name))
+                   (not (string-suffix-p ".ebuild" file-name)))
+              (setq-local my-buffer-enable-flymake nil)
+            (setq-local my-buffer-enable-flymake t))
           t))
     (when (boundp 'config-buffer-enable-syntax-checkers)
       config-buffer-enable-syntax-checkers)))

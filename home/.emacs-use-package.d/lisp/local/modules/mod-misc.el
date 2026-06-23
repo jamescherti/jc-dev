@@ -1180,6 +1180,9 @@ WIDTH is the tab width."
   (push (cons "\\.[Tt][Xx][Tt]\\'" 'txt-file-mode) auto-mode-alist)
   (push (cons "\\.[Tt][Xx][Tt]\\.[aA][sS][cC]\\'" 'txt-file-mode) auto-mode-alist)
 
+  (setq auto-mode-alist (append '(("/make\\.conf\\'" . sh-mode))
+                                auto-mode-alist))
+
   (nconc auto-mode-alist
          '(;; conf-mode
            ("\\.profile\\'" . conf-mode)  ; firejail profiles
@@ -3446,6 +3449,15 @@ This function is intended for use as :around advice."
              (my-code-checker-allowed-p))
     (apply orig-fun args)))
 
+(defun my-flymake-execution-only-when-code-checker-allowed (orig-fun &rest args)
+  "Execute ORIG-FUN with ARGS only if it is allowed.
+This function is intended for use as :around advice."
+  (when (and (fboundp 'my-code-checker-allowed-p)
+             (my-code-checker-allowed-p))
+    (when
+        (bound-and-true-p my-buffer-enable-flymake)
+      (apply orig-fun args))))
+
 (with-eval-after-load 'le-aggressive-indent
   (advice-add 'aggressive-indent-mode :around
               #'my-prevent-execution-only-when-code-checker-allowed))
@@ -3464,7 +3476,7 @@ This function is intended for use as :around advice."
 
 (with-eval-after-load 'le-flymake
   (advice-add 'flymake-mode :around
-              #'my-prevent-execution-only-when-code-checker-allowed))
+              #'my-flymake-execution-only-when-code-checker-allowed))
 
 ;;; Lazy loader
 
