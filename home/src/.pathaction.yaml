@@ -70,7 +70,7 @@ actions:
       - "*/ananicy-rules"
     shell: true
     tags: install
-    command: reset; echo "rsync forks/ananicy-rules/ -> /etc/ananicy.d/"; sudo sh -c "rsync --delete -v -ar forks/ananicy-rules/ /etc/ananicy.d/ && systemctl restart ananicy-cpp && echo && echo ananicy-cpp has been restarted"
+    command: reset; echo "rsync forks/ananicy-rules/ -> /etc/ananicy.d/"; sudo sh -c "rsync --delete -v -ar forks/ananicy-rules/ /etc/ananicy.d/ && ( systemctl restart ananicy &>/dev/null; systemctl restart ananicy-cpp &>/dev/null; exit 0; )"
 
   - path_match:
       - "*/lightvim/*"
