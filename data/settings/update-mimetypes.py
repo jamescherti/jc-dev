@@ -177,7 +177,8 @@ def main() -> None:
         sys.exit(1)
 
     # Audio and video
-    app_audio = "vlc"
+    # app_audio = "vlc"
+    app_audio = "mpv"
     app_video = "mpv"
 
     add_mime(app_file, "inode/directory")
