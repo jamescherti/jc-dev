@@ -1589,7 +1589,20 @@ WIDTH is the tab width."
            "[[:alpha:]]"
            "[^[:alpha:]]"
            "['‘’]"
-           t
+           ;; When set to nil: A word can contain the defined "other characters"
+           ;; (like an apostrophe), but only one at a time between valid word
+           ;; characters. For example, FFmpeg's is parsed as a single word, but
+           ;; if a typo like FFmpeg''s occurs, the parser will split it at the
+           ;; consecutive apostrophes.
+           ;;
+           ;; When set to t: The parser allows multiple consecutive instances of
+           ;; the defined "other characters" inside a word without breaking the
+           ;; word boundary.
+           ;;
+           ;; For a standard English dictionary configuration, nil is the
+           ;; correct and expected value, because standard English grammar does
+           ;; not use consecutive apostrophes within a single word.
+           nil
            ("-d" "en_US")
            nil
            utf-8)))
