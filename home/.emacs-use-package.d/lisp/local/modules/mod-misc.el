@@ -1585,7 +1585,18 @@ WIDTH is the tab width."
   ;; inside words, treat non-alphabetic characters as word boundaries, and pass
   ;; -d en_US to the underlying spell-check program.
   (setq ispell-local-dictionary-alist
-        '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)))
+        '(("en_US"
+           "[[:alpha:]]"
+           "[^[:alpha:]]"
+           "['‘’]"
+           t
+           ("-d" "en_US")
+           nil
+           utf-8)))
+
+  ;; (setq ispell-extra-args '("--add-word-chars='")
+  (setq flyspell-default-dictionary "en_US")
+  (setq ispell-dictionary "en_US")
 
   ;; Non-nil means suppress messages in ispell-word.
   (setq ispell-quietly t)
@@ -1670,8 +1681,6 @@ WIDTH is the tab width."
   ;;   (setq-local ispell-extra-args (append '("--mode=perl") ispell-extra-args)))
   ;; (add-hook 'bash-ts-mode-hook #'my-ispell-perl-mode-setup)
   ;; (add-hook 'sh-mode-hook #'my-ispell-perl-mode-setup)
-
-  (setq ispell-dictionary "en_US")
 
   (with-eval-after-load 'which-key
     (when (bound-and-true-p which-key-buffer-name)
