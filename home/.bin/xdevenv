@@ -588,7 +588,7 @@ init() {
   fi
 
   local cmd_name
-  for cmd_name in wmctrl tmux borg; do
+  for cmd_name in tmux; do
     if ! type -P "$cmd_name" >/dev/null 2>&1; then
       notify "The command '$cmd_name' does not exist."
       exit 1
