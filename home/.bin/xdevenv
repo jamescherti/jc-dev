@@ -332,7 +332,12 @@ xdevenv-terminal() {
   # VIRTUAL_ENV=""
   TERMINAL_CMD=()
   if is_gnome && is_wayland && has_run_or_raise; then
-    if type -P ghostty; then
+    if type -P kgx &>/dev/null; then
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",kgx -e '$TMUX_CMD',org.gnome.Console,"
+    elif type -P ghostty; then
       gdbus call --session --dest org.gnome.Shell \
         --object-path /org/gnome/Shell/Extensions/RunOrRaise \
         --method org.gnome.Shell.Extensions.RunOrRaise.Call \
