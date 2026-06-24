@@ -41,6 +41,7 @@ actions:
       - sudo
       - rsync
       - "-av"
+      - "--chown=root:root"
       - "--delete"
       - "--exclude=README.md"
       - "--exclude=LICENSE"

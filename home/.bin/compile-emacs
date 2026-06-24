@@ -281,7 +281,7 @@ export BASE_CFLAGS="$BASE_CFLAGS -fno-plt"
 # It has essentially zero impact on execution speed. The only minor overhead
 # occurs during the load time when the operating system changes the memory page
 # permissions to read-only.
-export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
+# export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
 
 # -fgraphite-identity & -floop-nest-optimize
 #
