@@ -317,19 +317,12 @@ enable_gnome_tracker() {
 }
 
 xdevenv-terminal() {
-  # exec "$0" emacs-terminal
-  # TERMINATOR_OPTIONS_STR="--borderless"
   TERMINATOR_OPTS=(--borderless)
   TERMINATOR_OPTS_STR=--borderless
 
-  TMUX_CMD="$HOME/.local/bin/tmux-session xdevenv"
-  TMUX_CMD_LIST=("$HOME/.local/bin/tmux-session" xdevenv)
-  # TMUX_CMD="bash -c 'tmux-session xdevenv'"
-  # TMUX_CMD_LIST=(bash -c 'tmux-session xdevenv')
-  # TMUX_CMD="bash -c 'tmux -2 attach-session -t xdevenv || tmux -2 new -s xdevenv'"
-  # TMUX_CMD_LIST=(bash -c 'tmux -2 attach-session -t xdevenv || tmux -2 new -s xdevenv')
+  TMUX_CMD="$HOME/.local/bin/tmux-session -l xdevenv"
+  TMUX_CMD_LIST=("$HOME/.local/bin/tmux-session" -l xdevenv)
   PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin
-  # VIRTUAL_ENV=""
   TERMINAL_CMD=()
   if is_gnome && is_wayland && has_run_or_raise; then
     if type -P kgx &>/dev/null; then
