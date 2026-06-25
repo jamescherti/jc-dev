@@ -7,9 +7,6 @@ options:
   exec_before: ["sh", "-c", "set -e; rm -fr .git/hooks; git reset --hard HEAD; git gc"]
 
 tasks:
-  # TODO the - key doesn't work
-  - git: https://github.com/justinmk/vim-dirvish
-    delete: true
 
   #
   # Color Schemes
@@ -41,9 +38,6 @@ tasks:
   - git: https://github.com/jamescherti/vim-pathaction
 
   # - git: https://github.com/aperezdc/vim-template
-  - git: https://github.com/jamescherti/vim-template
-    revision: df6d29a8549a13db026818c27a6b060978db7a3d
-
   # - git: https://github.com/tpope/vim-surround
   - git: https://github.com/jamescherti/vim-surround
     revision: 3d188ed2113431cf8dac77be61b842acb64433d9
@@ -61,22 +55,35 @@ tasks:
   - git: https://github.com/jamescherti/Vim-Jinja2-Syntax
     path: jinja2
     revision: 2c17843b074b06a835f88587e1023ceff7e2c7d1
+    delete: true
 
   - git: https://github.com/jamescherti/vim-pythonmodeindent
     revision: 7f5aee238861abbcc337c6044f65217ebadd0220
-
-  # - git: https://github.com/honza/vim-snippets
-  - git: https://github.com/jamescherti/vim-snippets
-    revision: f0a3184d9f90b96b044d5914625a25c554d7f301
+    delete: true
 
   # - git: https://github.com/machakann/vim-Verdin
   - git: https://github.com/jamescherti/vim-Verdin
     revision: b96fc398ffe09c9910bd469f22ee5170b5a46a12
+    delete: true
+
+  # - git: https://github.com/honza/vim-snippets
+  - git: https://github.com/jamescherti/vim-snippets
+    revision: f0a3184d9f90b96b044d5914625a25c554d7f301
+    delete: true
+
+  - git: https://github.com/jamescherti/vim-template
+    revision: df6d29a8549a13db026818c27a6b060978db7a3d
+    delete: true
+
+  # TODO the - key doesn't work
+  - git: https://github.com/justinmk/vim-dirvish
+    delete: true
 
   # - git: https://github.com/sirver/ultisnips
   - git: https://github.com/jamescherti/vim-ultisnips
     path: ultisnips
     revision: dbc458e110bb49299da76ec53f8b09b4f6dce28a
+    delete: true
 
   # Deleted themes
   - git: https://github.com/altercation/vim-colors-solarized
@@ -88,8 +95,10 @@ tasks:
 
   - git: https://github.com/jamescherti/vim-easysession
     revision: main
+    delete: true
   - git: https://github.com/jamescherti/vim-hjklmode
     revision: develop
+    delete: true
   # Deleted plugins
   - git: https://github.com/jamescherti/vim-jedipydoc
     delete: true
