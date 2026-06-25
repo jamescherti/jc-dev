@@ -59,6 +59,9 @@ if [[ $MODIFY_BACKGROUND -ne 0 ]]; then
 fi
 #-------------------------------------------------------------------->
 
+gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us')]"
+gsettings set org.gnome.desktop.interface gtk-im-module 'gtk-im-context-simple'
+
 gset org.gnome.system.locale region en_US.UTF-8
 # gset org.gnome.system.locale region en_CA.UTF-8
 

@@ -48,6 +48,7 @@ actions:
       - "--exclude=00my-*"
       - "--exclude=my-*"
       - "--exclude=.git"
+      - "--exclude=make-local.conf"
       - "{{ cwd }}/dotfiles/jc-gentoo-portage/"
       - "/etc/portage/"
 
