@@ -356,13 +356,13 @@ xdevenv-terminal() {
     if type -P ghostty; then
       local win_name="com.mitchellh.ghostty"
       TERMINAL_CMD=(show_window_maximized_devilspie ghostty "$win_name"
-        ghostty -e "${TMUX_CMD_LIST[@]}")
+                    ghostty -e "${TMUX_CMD_LIST[@]}")
     elif type -P terminator; then
       # TERMINAL_OPTS=(--maximize --borderless)
       local win_name="terminator.Terminator"
       TERMINAL_CMD=(show_window_maximized_devilspie terminator "$win_name"
-        terminator "${TERMINATOR_OPTS[@]}"
-        --title=tmux --execute "${TMUX_CMD_LIST[@]}")
+                    terminator "${TERMINATOR_OPTS[@]}"
+                    --title=tmux --execute "${TMUX_CMD_LIST[@]}")
     elif type -P gnome-terminal >/dev/null 2>&1; then
       local win_name="gnome-terminal-server.Gnome-terminal"
       # show_window_maximized_devilspie "$win_name" gnome-terminal --hide-menubar --title=tmux -e 'sh -c "tmux -2 attach || TERM=xterm-256color tmux -2"'
@@ -394,7 +394,7 @@ xdevenv-terminal() {
 }
 
 xdevenv-keepassxc() {
-  if type -P keepassxc; then
+  if type -P keepassxc &>/dev/null; then
     if is_wayland; then
       if is_gnome && has_run_or_raise; then
         gdbus call --session --dest org.gnome.Shell \
@@ -404,6 +404,17 @@ xdevenv-keepassxc() {
       fi
     else
       show_window keepassxc keepassxc.KeePassXC keepassxc
+    fi
+  elif type -P flatpak &>/dev/null && flatpak info org.keepassxc.KeePassXC &>/dev/null; then
+    if is_wayland; then
+      if is_gnome && has_run_or_raise; then
+        gdbus call --session --dest org.gnome.Shell \
+          --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+          --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+          ",gtk-launch org.keepassxc.KeePassXC.desktop,org.keepassxc.KeePassXC"
+      fi
+    else
+      show_window keepassxc keepassxc.KeePassXC flatpak run org.keepassxc.KeePassXC
     fi
   fi
 }
@@ -482,6 +493,8 @@ xdevenv-startup-apps() {
 
   if type -P keepassxc &>/dev/null; then
     bg_run "$0" keepassxc --minimized
+  elif type -P flatpak &>/dev/null && flatpak info org.keepassxc.KeePassXC &>/dev/null; then
+    bg_run flatpak run org.keepassxc.KeePassXC --minimized
   fi
 
   xdevenv-terminal
@@ -505,8 +518,17 @@ xdevenv-web-browsers() {
     else
       show_window_maximized firefox Navigator.firefox firejail firefox
     fi
-  # elif type -P midori &>/dev/null; then
-  #   show_window midori midori.Midori firejail midori
+  elif type -P flatpak &>/dev/null && flatpak info org.mozilla.firefox &>/dev/null; then
+    if has_run_or_raise && is_gnome && is_wayland; then
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",gtk-launch org.mozilla.firefox.desktop,firefox"
+    else
+      show_window_maximized firefox Navigator.firefox flatpak run org.mozilla.firefox
+    fi
+    # elif type -P midori &>/dev/null; then
+    #   show_window midori midori.Midori firejail midori
   elif type -P apt-get &>/dev/null; then
     show_window_maximized chromium chromium.Chromium firejail chromium \
       --profile=chromium \
@@ -667,10 +689,10 @@ main() {
   #   # If running this inside a function or script
   #   if flatpak info com.google.Chrome >/dev/null 2>&1; then
   #     flatpak run com.google.Chrome \
-  #       --enable-features=VaapiVideoDecoder \
-  #       --start-maximized \
-  #       --password-store=basic \
-  #       "$@"
+    #       --enable-features=VaapiVideoDecoder \
+    #       --start-maximized \
+    #       --password-store=basic \
+    #       "$@"
   #   else
   #     echo "Error: com.google.Chrome Flatpak is not installed." >&2
   #   fi
@@ -678,8 +700,8 @@ main() {
   #   # local name
   #   # for name in chromium chromium-bin; do
   #   #   firejail --profile=chromium "$name" \
-  #   #     --enable-features=VaapiVideoDecoder \
-  #   #     --start-maximized --password-store=basic
+    #   #     --enable-features=VaapiVideoDecoder \
+    #   #     --start-maximized --password-store=basic
   #   #   break
   #   # done
   #   ;;
@@ -709,7 +731,7 @@ main() {
   #
   #     if [[ $USE_COMPOSING = true ]]; then
   #       xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' \
-  #         --type 'bool' --set 'false'
+    #         --type 'bool' --set 'false'
   #       sleep 1
   #     fi
   #   fi
@@ -812,9 +834,9 @@ main() {
   #   pulseaudio_mute
   #   ;;
   *)
-    echo "Error: '$1' is not supported." >&2
-    exit 1
-    ;;
+  echo "Error: '$1' is not supported." >&2
+  exit 1
+  ;;
   esac
 
   exit 0
