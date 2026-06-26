@@ -238,9 +238,9 @@ _ga_wrapper() {
 
 _bg_git_find_repos_wrapper() {
   if [[ $# -gt 0 ]]; then
-    so git-rexec -C . --parallel -- git "$@"
+    so git-rexec --exclude ~/src/forks/ -C . --parallel -- git "$@"
   else
-    so git-rexec -C .
+    so git-rexec --exclude ~/src/forks/ -C .
   fi
 }
 
