@@ -2454,14 +2454,34 @@ Returns:
   (setf (alist-get 'emacs-lisp-mode apheleia-mode-alist) 'lisp-indent)
 
   ;; Python
+  ;; (setf (alist-get 'python-mode apheleia-mode-alist) '())
+  ;; (setf (alist-get 'python-ts-mode apheleia-mode-alist) '())
   (cond
    ((executable-find "ruff")
     ;; Ruff
+
+    ;; Create one super-formatter that sorts imports (I) and fixes PEP 8 (E, W)
     (setf (alist-get 'ruff apheleia-formatters)
-          '("ruff" "format" "--silent" "-"))
-    (setf (alist-get 'ruff-isort apheleia-formatters)
-          '("ruff" "check" "-n" "--select" "I" "--fix" "--fix-only"
-            "--stdin-filename" filepath "-")))
+          '("ruff" "check"
+            "-n"
+            "--select" "I,E,W"   ;; I = isort, E/W = pycodestyle (autopep8)
+            "--fix" "--fix-only"
+            "--stdin-filename" filepath
+            "-"))
+
+    ;; (setf (alist-get 'ruff apheleia-formatters)
+    ;;       '("ruff" "format"
+    ;;         "--line-length=79"         ;; Set your strict line length
+    ;;         ;; "--target-version=py311"   ;; Example: Tell Ruff your Python version
+    ;;         ;; "--skip-magic-trailing-comma" ;; Example: Another formatting tweak
+    ;;         "--silent"                 ;; Keep Apheleia quiet
+    ;;         "-"))
+    ;; (setf (alist-get 'ruff-isort apheleia-formatters)
+    ;;       '("ruff" "check" "-n" "--select" "I" "--fix" "--fix-only"
+    ;;         "--stdin-filename" filepath "-"))
+
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-isort ruff))
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-isort ruff)))
 
    (t
     ;; Legacy
@@ -2473,7 +2493,10 @@ Returns:
             ;; "--aggressive"
             "-"))
 
-    (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))))
+    (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
+
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(isort autopep8))
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8))))
 
   ;; SH/Bash shell scripts
   (setf (alist-get 'shfmt apheleia-formatters)
@@ -2494,12 +2517,7 @@ Returns:
       (setq-local apheleia-formatter nil)))
 
   (add-hook 'bash-ts-mode-hook 'my-apheleia-sh-mode-setup)
-  (add-hook 'sh-mode-hook 'my-apheleia-sh-mode-setup)
-
-  (setf (alist-get 'python-mode apheleia-mode-alist) '())
-  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '())
-  (setf (alist-get 'python-mode apheleia-mode-alist) '(isort autopep8))
-  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8)))
+  (add-hook 'sh-mode-hook 'my-apheleia-sh-mode-setup))
 
 ;;; Elisp
 
