@@ -2480,8 +2480,8 @@ Returns:
     ;;       '("ruff" "check" "-n" "--select" "I" "--fix" "--fix-only"
     ;;         "--stdin-filename" filepath "-"))
 
-    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-isort ruff))
-    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-isort ruff)))
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff))
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff)))
 
    (t
     ;; Legacy
