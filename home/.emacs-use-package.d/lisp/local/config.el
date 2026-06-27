@@ -552,7 +552,7 @@ subsequent GCC invocations."
 (setq compile-angel-verbose t)
 (setq compile-angel-debug nil)
 
-(setq buffer-terminator-verbose t)
+(setq buffer-terminator-verbose nil)
 (setq buffer-terminator-debug nil)
 
 ;; (setq compile-angel-enable-byte-compile nil)
