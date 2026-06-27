@@ -142,7 +142,7 @@
 ;; - Prevents accidental data loss. If you copy text from an external
 ;; application and then execute a kill command inside Emacs before pasting, the
 ;; external clipboard content is automatically preserved in the kill ring first.
-;; You can safely retrieve it later using `yank-pop`.
+;; You can safely retrieve it later using `yank-pop'.
 ;;
 ;; Drawback:
 ;; - Clutters the kill ring history. If you frequently copy items in your
@@ -159,7 +159,7 @@
 ;; first, and then it processes your dd command. This ensures your external
 ;; clipboard data is preserved and remains accessible via the yank-pop command
 ;; or Evil registers.
-;; (setq save-interprogram-paste-before-kill t)
+(setq save-interprogram-paste-before-kill t)
 
 ;; Disable displaying a bookmark icon on the fringe. Removing this icon reduces
 ;; visual clutter in the margins, especially if you use bookmarks frequently and
@@ -508,6 +508,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; for text you cut hours ago, treating your clipboard as a safe, long-term
 ;; scratchpad rather than a fragile queue.
 (setq kill-ring-max 1024)
+(setq mark-ring-max 32)
 
 ;; If this variable is t, splitting a window tries to get the space
 ;; proportionally from all windows in the same combination.  This also
@@ -1972,28 +1973,29 @@ WIDTH is the tab width."
   (setq select-enable-clipboard t)
   (setq select-enable-primary nil)
 
-  ;; (setq yank-excluded-properties
-  ;;       '(category field follow-link fontified font-lock-face help-echo
-  ;;                  intangible invisible keymap local-map mouse-face read-only
-  ;;                  yank-handler))
-
-  ;; When I copy paste from an org buffer into the minibuffer, it somehow
-  ;; inherits the colors
-  ;; (setq yank-excluded-properties t)
-
-  ;; Strip 'fontified' and other text properties when pasting so jit-lock
-  ;; rescans the text, allowing org-indent-mode to apply the correct visual
-  ;; indentation.
-  ;; (setq yank-excluded-properties
-  ;;       '(category field follow-link fontified font-lock-face help-echo
-  ;;                  intangible invisible keymap local-map mouse-face read-only
-  ;;                  yank-handler))
-
-  ;; ;; Define custom handler functions to process the 'font-lock-face' and
-  ;; ;; 'category' text properties when pasting text.
-  ;; (setq yank-handled-properties
-  ;;       '((font-lock-face . yank-handle-font-lock-face-property)
-  ;;         (category . yank-handle-category-property)))
+  ;; Plain Text Pasting (Fixing "Org-Mode Bleed")
+  ;;
+  ;; Copying text from an Org buffer often results in unwanted colors,
+  ;; backgrounds, or text weights bleeding into the destination buffer.
+  ;;
+  ;; By default, vanilla Emacs preserves explicit text formatting (face
+  ;; properties) when copying and pasting to support rich-text environments.
+  ;; While standard syntax highlighting (font-lock-face) is automatically
+  ;; stripped, modes like org-mode rely heavily on the face property for their
+  ;; visual styling.
+  ;;
+  ;; Benefits of (push 'face yank-excluded-properties):
+  ;; - Prevents visual formatting bleed between different major modes.
+  ;; - Unlike the common workaround of stripping all text properties entirely
+  ;;   (setq yank-excluded-properties t), this method is surgical. It only
+  ;;   removes visual properties, ensuring that functional text properties
+  ;;   remain fully intact.
+  ;;
+  ;; This configuration intentionally disables the ability to copy and paste
+  ;; rich-text formatting. If you specifically require the preservation of text
+  ;; colors or weights across buffers (for example, when using enriched-mode or
+  ;; composing HTML emails), you should omit this setting.
+  (push 'face yank-excluded-properties)
 
   ;; Shows all options when running apropos. For more info,
   (setq calendar-week-start-day 1)
@@ -2006,10 +2008,6 @@ WIDTH is the tab width."
   (setq tab-bar-close-tab-select 'right)
 
   (setq history-length 200)
-
-  ;; (setq kill-ring-max 60)
-  (setq kill-ring-max 240)
-  (setq mark-ring-max 32)
 
   ;; testing
   (setq transient-detect-key-conflicts t)
