@@ -49,7 +49,7 @@
 
 ;; Ediff: Ignore all whitespace differences (-w) to reduce visual noise from
 ;; indentation changes or auto-formatters, keeping the focus on logic.
-;; (setq ediff-diff-options "-w")
+(setq ediff-diff-options "-w")
 
 ;; Ediff: Skip over regions where the only differences are whitespace (or other
 ;; ignored options) when navigating with 'n' and 'p'.

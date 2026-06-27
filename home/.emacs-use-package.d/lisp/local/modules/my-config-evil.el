@@ -2995,72 +2995,43 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 
 (add-hook 'term-mode-hook #'my-term-setup t)
 
-;;; org
-
-;; TODO patch?
-(defun my-org-move-subtree-preserve-column-advice (orig-fun &rest args)
-  "Advice to preserve the column when moving Org subtrees.
-ORIG-FUN and ARGS is the function and its arguments."
-  (let ((col (current-column)))
-    (condition-case nil
-        (apply orig-fun args)
-      (error nil))
-    (move-to-column col)))
-
-;; Apply the advice to both up and down movements
-(with-eval-after-load 'org
-  (advice-add 'org-move-subtree-up :around #'my-org-move-subtree-preserve-column-advice)
-  (advice-add 'org-move-subtree-down :around #'my-org-move-subtree-preserve-column-advice))
-
 ;;; Only yank visible text
 
+;; TODO article
 ;; (defun evilbuffer-buffer-substring-visible (beg end)
 ;;   "Return the visible text between BEG and END, excluding invisible regions."
-;;   (let (parts)
+;;   (let ((text ""))
 ;;     (save-excursion
 ;;       (goto-char beg)
 ;;       (while (< (point) end)
-;;         (let ((next (next-single-char-property-change (point) 'invisible nil end)))
-;;           (unless (invisible-p (point))
-;;             (push (buffer-substring-no-properties (point) next) parts))
+;;         (let* ((next (next-single-char-property-change (point) 'invisible nil end))
+;;                (invis (invisible-p (point))))
+;;           (unless invis
+;;             (setq text (concat text (buffer-substring-no-properties (point) next))))
 ;;           (goto-char next))))
-;;     (apply #'concat (nreverse parts))))
-
-;; TODO article
-(defun evilbuffer-buffer-substring-visible (beg end)
-  "Return the visible text between BEG and END, excluding invisible regions."
-  (let ((text ""))
-    (save-excursion
-      (goto-char beg)
-      (while (< (point) end)
-        (let* ((next (next-single-char-property-change (point) 'invisible nil end))
-               (invis (invisible-p (point))))
-          (unless invis
-            (setq text (concat text (buffer-substring-no-properties (point) next))))
-          (goto-char next))))
-    text))
-
-(defun evilbuffer-substring--filter-visible (beg end &optional delete)
-  "Filter for `filter-buffer-substring-function' that preserves visible text.
-
-BEG and END specify the region bounds. If DELETE is non-nil, the region is
-deleted and its text is returned. Otherwise, the function returns only the
-visible text between BEG and END, excluding regions with the invisible text
-property.
-
-This function also respects the obsolete wrapper hook
-`filter-buffer-substring-functions' via `with-wrapper-hook'. No filtering occurs
-unless a wrapper hook is active."
-  (subr--with-wrapper-hook-no-warnings
-   filter-buffer-substring-function (beg end delete)
-   (cond
-    (delete
-     (save-excursion
-       (goto-char beg)
-       (delete-and-extract-region beg end)))
-
-    (t
-     (evilbuffer-buffer-substring-visible beg end)))))
+;;     text))
+;;
+;; (defun evilbuffer-substring--filter-visible (beg end &optional delete)
+;;   "Filter for `filter-buffer-substring-function' that preserves visible text.
+;;
+;; BEG and END specify the region bounds. If DELETE is non-nil, the region is
+;; deleted and its text is returned. Otherwise, the function returns only the
+;; visible text between BEG and END, excluding regions with the invisible text
+;; property.
+;;
+;; This function also respects the obsolete wrapper hook
+;; `filter-buffer-substring-functions' via `with-wrapper-hook'. No filtering occurs
+;; unless a wrapper hook is active."
+;;   (subr--with-wrapper-hook-no-warnings
+;;    filter-buffer-substring-function (beg end delete)
+;;    (cond
+;;     (delete
+;;      (save-excursion
+;;        (goto-char beg)
+;;        (delete-and-extract-region beg end)))
+;;
+;;     (t
+;;      (evilbuffer-buffer-substring-visible beg end)))))
 
 ;; Useful for yanking =text= in org mode. I do not want to include invisible
 ;; text
@@ -3141,8 +3112,10 @@ Accepts any arguments so it can be used as advice or a hook."
 
   (advice-add 'org-metaup :after #'my-evil-refresh-search-highlight)
   (advice-add 'org-metadown :after #'my-evil-refresh-search-highlight)
+
   (advice-add 'org-move-subtree-up :after #'my-evil-refresh-search-highlight)
   (advice-add 'org-move-subtree-down :after #'my-evil-refresh-search-highlight)
+
   (advice-add 'org-move-item-up :after #'my-evil-refresh-search-highlight)
   (advice-add 'org-move-item-down :after #'my-evil-refresh-search-highlight)
   ;; It is also highly recommended to refresh after toggling visibility
