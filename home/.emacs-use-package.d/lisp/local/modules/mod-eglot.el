@@ -292,6 +292,10 @@ ERROR is the error (if any)."
                 `(:pylsp (:plugins
                           (; Improve syntax
                            :isort (:enabled :json-false)
+                           ;; Enable Ruff for linting and formatting
+                           ;; :ruff (:enabled t
+                           ;;                 :formatEnabled t
+                           ;;                 :lineLength 79)
                            ;; Note autopep uses some pycodestyle settings
                            :autopep8 (:enabled :json-false)
 

@@ -49,7 +49,7 @@
 
 ;; Ediff: Ignore all whitespace differences (-w) to reduce visual noise from
 ;; indentation changes or auto-formatters, keeping the focus on logic.
-(setq ediff-diff-options "-w")
+(setq ediff-diff-options "")
 
 ;; Ediff: Skip over regions where the only differences are whitespace (or other
 ;; ignored options) when navigating with 'n' and 'p'.
@@ -57,28 +57,29 @@
 
 ;;; diff-options
 
-(defun my-ediff-setup-elisp-options (orig-fn &rest args)
-  "Apply whitespace-ignoring Ediff settings only for Emacs Lisp buffers.
-ORIG-FN and ARGS is the functions and its arguments.
-This wraps `ediff-setup' to dynamically bind options based on the major mode."
-  (let* ((buffer-a (nth 1 args))
-         (is-elisp (when (buffer-live-p buffer-a)
-                     (with-current-buffer buffer-a
-                       (derived-mode-p 'emacs-lisp-mode))))
-         ;; Bind the variables to your preferred values if it is an Elisp buffer.
-         (ediff-diff-options (if is-elisp
-                                 "-w"
-                               ediff-diff-options))
-         (ediff-ignore-similar-regions (if is-elisp
-                                           t
-                                         ediff-ignore-similar-regions)))
-    (ignore ediff-diff-options)
-    (ignore ediff-ignore-similar-regions)
-    ;; When `ediff-setup' executes, it will make these variables buffer-local
-    ;; in its control buffer, capturing these let-bound values for the session.
-    (apply orig-fn args)))
-
-(advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options)
+;; TODO fix this
+;; (defun my-ediff-setup-elisp-options (orig-fn &rest args)
+;;   "Apply whitespace-ignoring Ediff settings only for Emacs Lisp buffers.
+;; ORIG-FN and ARGS is the functions and its arguments.
+;; This wraps `ediff-setup' to dynamically bind options based on the major mode."
+;;   (let* ((buffer-a (nth 1 args))
+;;          (is-elisp (when (buffer-live-p buffer-a)
+;;                      (with-current-buffer buffer-a
+;;                        (derived-mode-p 'emacs-lisp-mode))))
+;;          ;; Bind the variables to your preferred values if it is an Elisp buffer.
+;;          (ediff-diff-options (if is-elisp
+;;                                  "-w"
+;;                                ediff-diff-options))
+;;          (ediff-ignore-similar-regions (if is-elisp
+;;                                            t
+;;                                          ediff-ignore-similar-regions)))
+;;     (ignore ediff-diff-options)
+;;     (ignore ediff-ignore-similar-regions)
+;;     ;; When `ediff-setup' executes, it will make these variables buffer-local
+;;     ;; in its control buffer, capturing these let-bound values for the session.
+;;     (apply orig-fn args)))
+;;
+;; (advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options)
 
 ;;; ediff startup: go to the next difference
 

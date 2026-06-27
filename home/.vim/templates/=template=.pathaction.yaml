@@ -2,7 +2,7 @@
 
 actions:
   - path_match:
-      - "*.ext"
+      - "*/file.ext"
     tags: install
-    list_commands:
-      - "command"
+    shell: true
+    command: "command"

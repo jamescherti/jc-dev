@@ -2453,7 +2453,29 @@ Returns:
         'apheleia-indent-lisp-buffer)
   (setf (alist-get 'emacs-lisp-mode apheleia-mode-alist) 'lisp-indent)
 
-  ;; Bash shell scripts
+  ;; Python
+  (cond
+   ((executable-find "ruff")
+    ;; Ruff
+    (setf (alist-get 'ruff apheleia-formatters)
+          '("ruff" "format" "--silent" "-"))
+    (setf (alist-get 'ruff-isort apheleia-formatters)
+          '("ruff" "check" "-n" "--select" "I" "--fix" "--fix-only"
+            "--stdin-filename" filepath "-")))
+
+   (t
+    ;; Legacy
+    (setf (alist-get 'autopep8 apheleia-formatters)
+          '("autopep8"
+            "--max-line-length=79"
+            ;; --aggressive is too aggressive when it comes to max-line-length
+            ;; "--aggressive"
+            ;; "--aggressive"
+            "-"))
+
+    (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))))
+
+  ;; SH/Bash shell scripts
   (setf (alist-get 'shfmt apheleia-formatters)
         '("shfmt" "--binary-next-line"
           "-filename" filepath
@@ -2461,17 +2483,6 @@ Returns:
                      (boundp 'sh-basic-offset))
             (list "-i" (number-to-string sh-basic-offset)))
           "-"))
-
-  ;; Python
-  (setf (alist-get 'autopep8 apheleia-formatters)
-        '("autopep8"
-          "--max-line-length=79"
-          ;; --aggressive is too aggressive when it comes to max-line-length
-          ;; "--aggressive"
-          ;; "--aggressive"
-          "-"))
-  (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
-
   (setf (alist-get 'bash-ts-mode apheleia-mode-alist) nil)
   (setf (alist-get 'sh-mode apheleia-mode-alist) nil)
 
