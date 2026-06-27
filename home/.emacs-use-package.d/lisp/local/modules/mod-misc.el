@@ -410,6 +410,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO is eager better?
+;; compose is broken. It makes erases the content of the message the help
+;; buffer.
+;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose)
+
 ;; TODO minimal-emacs readme?
 (add-to-list 'auto-mode-alist '("/LICENSE\\'" . text-mode))
 (add-to-list 'auto-mode-alist '("rc\\'" . conf-mode) 'append)

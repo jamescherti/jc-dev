@@ -79,9 +79,6 @@ ERROR is the error (if any)."
 
 ;;; eglot
 
-;;   (when (fboundp 'jsonrpc--log-event)
-;;     (fset #'jsonrpc--log-event #'ignore)))
-
 ;; (defun my-eglot-format-buffer ()
 ;;   "Eglot format buffer."
 ;;   (when (and
@@ -291,25 +288,77 @@ ERROR is the error (if any)."
   (setq-default eglot-workspace-configuration
                 `(:pylsp (:plugins
                           (; Improve syntax
-                           :isort (:enabled :json-false)
-                           ;; Enable Ruff for linting and formatting
-                           ;; :ruff (:enabled t
-                           ;;                 :formatEnabled t
-                           ;;                 :lineLength 79)
-                           ;; Note autopep uses some pycodestyle settings
-                           :autopep8 (:enabled :json-false)
+
+                           :ruff (;; Core
+                                  :enabled t
+                                  ;; :formatEnabled :json-false ; Use Apheleia
+                                  :lineLength 79
+
+                                  ;; Rule Selection
+                                  ;; By default, Ruff only checks 'E' and 'F'
+                                  ;; rules.
+                                  ;; Let's add 'I' (isort), 'W' (warnings), and
+                                  ;; 'UP' (pyupgrade)
+                                  :extendSelect ["I" "W" "UP"]
+
+                                  ;; Target your specific Python version
+                                  ;; :targetVersion "py310"
+
+                                  ;; File Management
+                                  ;; Exclude specific files from being linted
+                                  ;; :exclude ["__about__.py" "docs/"]
+
+                                  ;; Advanced: Per-file ignores (Dictionary/Plist translation)
+                                  ;; E.g., Ignore missing docstrings (D100) in __init__.py
+                                  ;; :perFileIgnores (:__init__.py ["D100"])
+
+                                  ;; Advanced: Custom Severities
+                                  ;; E.g., Make 'I' (isort) violations show as
+                                  ;; Info instead of Warning
+                                  ;; :severities (:I "I")
+
+                                  ;; Code Actions
+                                  ;; :unsafeFixes :json-false
+                                  ;; :unfixable ["F401"]
+                                  )
 
                            ;; Syntax checkers
-                           :pylint (:enabled t)
-                           ;; Executed by flake8
-                           :pycodestyle (:enabled :json-false
-                                                  :match "(?!test_).*\\.py"
-                                                  :maxLineLength 79
-                                                  :convention "pep257"
-                                                  :ignore ["W293"]
-                                                  :hangClosing nil)
-                           :flake8 (:enabled t)
+                           :pylint (:enabled t)  ; TODO replace with ruff
+
+                           ;; Old, slow linters
+                           :mccabe (:enabled :json-false)
+                           :flake8 (:enabled :json-false)
                            :pyflakes (:enabled :json-false :ignore ["W293"])
+                           :pycodestyle (;; This is also executed by flake8
+                                         :enabled :json-false
+                                         :match "(?!test_).*\\.py"
+                                         :maxLineLength 79
+                                         :convention "pep257"
+                                         :ignore ["W293"]
+                                         :hangClosing nil)
+                           :pydocstyle (:enabled :json-false
+                                                 ;; :ignore ["W293"]
+                                                 ;; ,(if eglot-code-checker
+                                                 ;;      t
+                                                 ;;    :json-false)
+                                                 ;; string (one of: 'pep257',
+                                                 ;; 'numpy', 'google', None)
+                                                 ;; :convention "google"
+
+                                                 ;; 213: Multi-line docstring
+                                                 ;; summary should start in the
+                                                 ;; second line.
+                                                 ;;
+                                                 ;; 202: no blank lines allowed
+                                                 ;; after function docstring.
+                                                 :ignore ["W213",
+                                                          "W202"])
+
+                           ;; Disable old formatters (Handled by Apheleia)
+                           :yapf (:enabled :json-false)
+                           :isort (:enabled :json-false)
+                           :autopep8 (:enabled :json-false)
+
                            :jedi_completion
                            (:enabled t
                                      ;; Controls whether Jedi (the
@@ -358,26 +407,7 @@ ERROR is the error (if any)."
                            ;;                      "sys"
                            ;;                      "subprocess"
                            ;;                      "pathlib"])
-                           :mccabe (:enabled :json-false)
-                           :pydocstyle (:enabled :json-false
-                                                 ;; :ignore ["W293"]
-                                                 ;; ,(if eglot-code-checker
-                                                 ;;      t
-                                                 ;;    :json-false)
-                                                 ;; string (one of: 'pep257',
-                                                 ;; 'numpy', 'google', None)
-                                                 ;; :convention "google"
 
-                                                 ;; 213: Multi-line docstring
-                                                 ;; summary should start in the
-                                                 ;; second line.
-                                                 ;;
-                                                 ;; 202: no blank lines allowed
-                                                 ;; after function docstring.
-                                                 :ignore ["W213",
-                                                          "W202"]
-                                                 )
-                           :yapf (:enabled :json-false)
                            :rope_autoimport (:enabled :json-false))))))
 
 (advice-add 'eglot--message :around
