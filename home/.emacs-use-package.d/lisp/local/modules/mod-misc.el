@@ -2459,8 +2459,6 @@ Returns:
   (setf (alist-get 'emacs-lisp-mode apheleia-mode-alist) 'lisp-indent)
 
   ;; Python
-  ;; (setf (alist-get 'python-mode apheleia-mode-alist) '())
-  ;; (setf (alist-get 'python-ts-mode apheleia-mode-alist) '())
   (cond
    ((executable-find "ruff")
     ;; Ruff
@@ -2511,8 +2509,9 @@ Returns:
                      (boundp 'sh-basic-offset))
             (list "-i" (number-to-string sh-basic-offset)))
           "-"))
-  (setf (alist-get 'bash-ts-mode apheleia-mode-alist) nil)
-  (setf (alist-get 'sh-mode apheleia-mode-alist) nil)
+
+  (setf (alist-get 'sh-mode apheleia-mode-alist) '(shfmt))
+  (setf (alist-get 'bash-ts-mode apheleia-mode-alist) '(shfmt))
 
   (defun my-apheleia-sh-mode-setup ()
     "Enable shfmt in `sh-mode' only if the shell is Bash."

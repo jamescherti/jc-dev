@@ -110,29 +110,27 @@
 (setq lightemacs-dired-omit-parent-directory t)
 (setq lightemacs-cycle nil)
 
-(setq native-comp-jit-compilation nil)
+(setq lightemacs-modules '(
 
-(setq lightemacs-modules '(le-flavor-micro
+                           le-flavor-micro
                            le-pathaction
-
-                           le-compile-angel
-                           ;; le-autorevert
-
                            le-maybe-markdown-ts
                            le-org
-
                            le-group-evil
                            le-persist-text-scale
+                           le-consult
+                           le-vertico
+                           le-xclip
 
+                           ;; le-compile-angel
+                           ;; le-autorevert
                            ;; le-undo-fu
                            ;; le-undo-fu-session
 
                            ;; le-consult-dir
-                           le-consult
                            ;; le-embark-consult
                            ;; le-embark
                            ;; le-wgrep
-                           le-vertico
                            ;; le-orderless
 
                            ;; TODO this module does not exist
@@ -140,7 +138,6 @@
 
                            ;; le-evil-visualstar
                            ;; le-git-modes
-                           le-xclip
                            ))
 
 (setq lightemacs-theme-name 'tomorrow-night-deepblue)
