@@ -36,9 +36,8 @@ options:
     - home-settings
     - batchfetch-enc.yaml
     - notes
-    - .rgignore
+    - .ignore
     - other
-    - .fdignore
     - .dir-settings.el
     - .pathaction.yaml
     - .quickaction.yaml

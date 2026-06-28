@@ -543,6 +543,9 @@ main() {
   echo "[INFO] Update Emacs snippets"
   update-emacs-snippets
 
+  # Legacy files. Replace with .ignore files
+  rm -f ~/.rgignore ~/.fdignore ~/src/.rgignore ~/src/.fdignore
+
   echo
   echo Success.
 }
