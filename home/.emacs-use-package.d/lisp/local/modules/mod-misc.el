@@ -794,122 +794,6 @@ WIDTH is the tab width."
 (defun my-setup-filetype ()
   "Setup filetype."
   (add-to-list 'auto-mode-alist '("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode))
-  (defun my-org-mode-setup ()
-    "When active, indent text according to outline structure."
-    ;; (auto-fill-mode -1)
-
-    ;; In org buffers we set `nobreak-char-display' to nil locally so that the
-    ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
-    ;; space. This suppresses the distinct glyph or face Emacs normally applies
-    ;; to NBSP, keeping the buffer free of distracting blue highlights while
-    ;; preserving the character's internal no-break semantics.
-    ;;
-    ;; Here is an example of what is highlighted: $5 billion-valued.
-    ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
-    ;; and the hyphen after n are rendered as highlighted glyphs.
-    (setq-local nobreak-char-display nil)
-
-    ;; TODO: bug. When jumping to org file from org agenda todo list,
-    ;; org-indent-mode is not enabled by default.
-    (when (fboundp 'org-indent-mode)
-      (org-indent-mode 1))
-
-    ;; (display-line-numbers-mode -1)
-
-    (when (derived-mode-p 'org-mode)
-      ;; It makes o not auto indent after a bullet list like * or -
-      (setq-local evil-auto-indent nil)
-
-      ;; (setq-local indent-line-function nil)
-      ;; (setq-local search-invisible nil)
-
-      ;; Fixes a bug of jumping in org mode when scrolling many lines in my
-      ;; file
-      ;; TODO: bug?
-      ;; (setq-local scroll-margin 1)
-
-      ;; (toggle-truncate-lines 0)
-
-      ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
-      ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
-      ;; (custom-set-faces `(org-block-end-line ((t (:height 0.6 :extend t)))))
-      ))
-
-  (when (fboundp 'my-org-mode-setup)
-    (add-hook 'org-mode-hook #'my-org-mode-setup))
-
-  (setq org-agenda-start-on-weekday 1)  ; Monday
-  (setq org-clock-report-include-clocking-task t)
-
-  ;; Do not insert empty lines between collapsed sections; makes folded view
-  ;; denser but reduces visual separation between headings.
-  ;; This keeps your files compact by removing empty lines between folded
-  ;; headings.
-  (setq org-cycle-separator-lines 0)
-
-  ;; Display descriptive text for links instead of raw URLs; improves
-  ;; readability
-  ;; (setq org-link-descriptive t)
-
-  ;; RET follows links; intuitive navigation but may conflict with normal line
-  ;; breaks.
-  (setq org-return-follows-link t)
-
-  (setq org-fold-show-context-detail
-        '(;; 'local' reveals the current heading but keeps children folded.
-          ;; Useful to focus strictly on the agenda item without visual clutter.
-          ;; (agenda . local)
-
-          ;; This fixes:
-          ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2025-08/msg01128.html
-          ;; TODO patch org?
-          ;;
-          ;; 'canonical' reveals the current headline, its direct ancestors, and
-          ;; its immediate children. This is ideal for searching. It gives you
-          ;; enough structural context to know exactly where you are in the
-          ;; document hierarchy without unfolding the entire tree.
-          (isearch . canonical)
-
-          ;; when exposing a bookmark location 'canonical' is highly useful for
-          ;; bookmarks that point to project roots or major category headers,
-          ;; allowing you to see the immediate contents upon jumping.
-          (bookmark-jump . canonical)
-
-          ;; when using the command org-occur (C-c / /)
-          ;; 'canonical' is useful here because it shows the immediate children
-          ;; of the matched headings, providing a broader overview of the
-          ;; matched section in your sparse tree rather than just an isolated
-          ;; line.
-          (occur-tree . canonical)
-
-          ;; When using the command org-goto (C-c C-j)
-          ;; 'canonical' is useful here if you frequently jump to parent
-          ;; headings and immediately need to see their sub-headings to navigate
-          ;; further.
-          ;; (org-goto . canonical)
-
-          ;; when constructing a sparse tree based on tags matches 'canonical'
-          ;; is useful if your tags are applied to high-level categories and you
-          ;; want the sparse tree to automatically reveal the specific items
-          ;; underneath them.
-          ;; (tags-tree . canonical)
-
-          ;; when exposing search matches associated with a link 'canonical' is
-          ;; useful if your internal links frequently point to index or parent
-          ;; nodes and you want to see the associated subcategories immediately
-          ;; upon arrival.
-          ;; (link-search . canonical)
-
-          ;; when exposing the jump goal of a mark 'canonical' helps re-orient
-          ;; you by showing the immediate children of the location you just
-          ;; popped back to via the mark ring.
-          (mark-goto . canonical)
-
-          ;; The fallback for any context not explicitly defined above.
-          ;; 'ancestors' keeps the buffer as tidy as possible by only unfolding
-          ;; the direct path from the top level down to your target, leaving all
-          ;; other sibling and child trees completely folded.
-          (default . canonical)))
 
   (setq sgml-basic-offset 2)  ;; HTML
   (setq css-indent-offset 2)
@@ -1289,100 +1173,6 @@ WIDTH is the tab width."
   (setq kirigami-enhance-outline-open t)
   (setq kirigami-enhance-outline-close-all t)
   (setq kirigami-preserve-visual-position t)
-
-  ;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
-  ;; editing emphasis.
-  ;; TODO add again
-  (setq org-hide-emphasis-markers t)
-
-  ;; No extra indentation for source blocks. It keeps code aligned with text.
-  (with-no-warnings
-    ;; Obsolete
-    (setq org-edit-src-content-indentation 0))
-  (setq org-src-content-indentation 0)
-
-  ;; Fast todo selection without popup; efficient for experts but hides guidance
-  ;; for beginners.
-  (setq org-use-fast-todo-selection 'expert)
-
-  ;; Source block settings
-  (setq org-directory "~/src/wip/notes")
-  (setq org-edit-src-persistent-message nil)
-  (setq org-modules '())
-  (setq org-export-backends '(html texinfo md))
-
-  ;; Lists
-  (setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
-
-  (setq org-babel-load-languages '((emacs-lisp . t)
-                                   (shell . t)
-                                   (python . t)))
-
-  (setq org-tag-alist '((:startgroup)
-                        ;; Status
-                        ("next" . ?n)
-                        ("wip" . ?w)
-                        ("soon" . ?o)
-                        ("future" . ?f)
-                        ("maybe" . ?e)
-                        (:endgroup)
-
-                        (:startgroup)
-                        ;; Contexts
-                        ("@home" . ?h)
-                        ("@work" . ?r)
-                        ("@outside" . ?u)
-                        (:endgroup)
-
-                        (:startgroup)
-                        ;; Priorities
-                        ("high" . ?i)
-                        ("medium" . ?m)
-                        ("low" . ?l)
-                        (:endgroup)
-
-                        (:startgroup)
-                        ("quick" . ?q)
-                        ("mediumtime" . ?t)
-                        ("long" . ?g)
-                        (:endgroup)))
-
-
-  (setq org-src-lang-modes '(("python" . python)
-                             ("sh" . sh)
-                             ("bash" . sh)
-                             ("elisp" . emacs-lisp)))
-  ;; Tag colors
-  (setq org-tag-faces
-        '(("@home" . (:foreground "green" :weight bold))
-          ("@work" . (:foreground "green" :weight bold))
-          ("@outside" . (:foreground "green" :weight bold))
-          ("@computer" . (:foreground "green" :weight bold))
-          ("@phone" . (:foreground "green" :weight bold))
-
-          ("next" . (:foreground "cyan"  :weight bold))
-          ("wip" . (:foreground "cyan"  :weight bold))
-          ("soon" . (:foreground "cyan"  :weight bold))
-          ("future" . (:foreground "cyan"  :weight bold))
-          ("maybe" . (:foreground "cyan"  :weight bold))
-
-          ("high" . (:foreground "orange"    :weight bold))
-          ("medium" . (:foreground "orange"    :weight bold))
-          ("low" . (:foreground "orange"    :weight bold))
-
-          ("quick"        . (:foreground "red"        :weight bold))
-          ("medium-time"        . (:foreground "red"        :weight bold))
-          ("long"        . (:foreground "red"        :weight bold))
-
-          ;; ("meeting"   . (:foreground "yellow1"       :weight bold))
-          ;; ("CRITICAL"  . (:foreground "red1"          :weight bold))
-          ))
-
-  ;; Set tag column to 0 (tags appear immediately after heading); simplifies
-  ;; layout but may make long headings with tags harder to read.
-  ;;
-  ;; Setting this to t will fold  stuff
-  (setq org-hide-block-startup nil)
 
   (setq savehist-autosave-interval 650)
   (setq tab-bar-history-limit 15)
@@ -5739,6 +5529,234 @@ properly handles remote files over Tramp), applying the setting only if
   :hook (lightemacs-on-first-file . lazy-autorevert-mode)
   :init
   (setq lazy-autorevert-debug nil))
+
+;;; org
+
+(defun my-org-mode-setup ()
+  "When active, indent text according to outline structure."
+  ;; In org buffers we set `nobreak-char-display' to nil locally so that the
+  ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
+  ;; space. This suppresses the distinct glyph or face Emacs normally applies
+  ;; to NBSP, keeping the buffer free of distracting blue highlights while
+  ;; preserving the character's internal no-break semantics.
+  ;;
+  ;; Here is an example of what is highlighted: $5 billion-valued.
+  ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
+  ;; and the hyphen after n are rendered as highlighted glyphs.
+  (setq-local nobreak-char-display nil)
+
+  ;; TODO bug. Send a patch to org?
+  ;; When jumping to org file from org agenda todo list, org-indent-mode is not
+  ;; enabled by default.
+  (when (and (not (bound-and-true-p org-indent-mode))
+             (fboundp 'org-indent-mode))
+    (org-indent-mode 1))
+
+  ;; (when (derived-mode-p 'org-mode)
+  ;;   ;; It makes o not auto indent after a bullet list like * or -
+  ;;   (setq-local evil-auto-indent nil)
+  ;;   ;; (setq-local indent-line-function nil)
+  ;;   ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
+  ;;   ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
+  ;;   ;; (custom-set-faces `(org-block-end-line ((t (:height 0.6 :extend t)))))
+  ;;   )
+  )
+
+(add-hook 'org-mode-hook #'my-org-mode-setup)
+
+(setq org-clock-report-include-clocking-task t)
+
+;; Do not insert empty lines between collapsed sections; makes folded view
+;; denser but reduces visual separation between headings.
+;; This keeps your files compact by removing empty lines between folded
+;; headings.
+(setq org-cycle-separator-lines 0)
+
+;; Display descriptive text for links instead of raw URLs; improves
+;; readability
+;; (setq org-link-descriptive t)
+
+;; RET follows links; intuitive navigation but may conflict with normal line
+;; breaks.
+(setq org-return-follows-link t)
+
+(setq org-fold-show-context-detail
+      '(;; 'local' reveals the current heading but keeps children folded.
+        ;; Useful to focus strictly on the agenda item without visual clutter.
+        ;; (agenda . local)
+
+        ;; This fixes:
+        ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2025-08/msg01128.html
+        ;; TODO patch org?
+        ;;
+        ;; 'canonical' reveals the current headline, its direct ancestors, and
+        ;; its immediate children. This is ideal for searching. It gives you
+        ;; enough structural context to know exactly where you are in the
+        ;; document hierarchy without unfolding the entire tree.
+        (isearch . canonical)
+
+        ;; when exposing a bookmark location 'canonical' is highly useful for
+        ;; bookmarks that point to project roots or major category headers,
+        ;; allowing you to see the immediate contents upon jumping.
+        (bookmark-jump . canonical)
+
+        ;; when using the command org-occur (C-c / /)
+        ;; 'canonical' is useful here because it shows the immediate children
+        ;; of the matched headings, providing a broader overview of the
+        ;; matched section in your sparse tree rather than just an isolated
+        ;; line.
+        (occur-tree . canonical)
+
+        ;; When using the command org-goto (C-c C-j)
+        ;; 'canonical' is useful here if you frequently jump to parent
+        ;; headings and immediately need to see their sub-headings to navigate
+        ;; further.
+        ;; (org-goto . canonical)
+
+        ;; when constructing a sparse tree based on tags matches 'canonical'
+        ;; is useful if your tags are applied to high-level categories and you
+        ;; want the sparse tree to automatically reveal the specific items
+        ;; underneath them.
+        ;; (tags-tree . canonical)
+
+        ;; when exposing search matches associated with a link 'canonical' is
+        ;; useful if your internal links frequently point to index or parent
+        ;; nodes and you want to see the associated subcategories immediately
+        ;; upon arrival.
+        ;; (link-search . canonical)
+
+        ;; when exposing the jump goal of a mark 'canonical' helps re-orient
+        ;; you by showing the immediate children of the location you just
+        ;; popped back to via the mark ring.
+        (mark-goto . canonical)
+
+        ;; The fallback for any context not explicitly defined above.
+        ;; 'ancestors' keeps the buffer as tidy as possible by only unfolding
+        ;; the direct path from the top level down to your target, leaving all
+        ;; other sibling and child trees completely folded.
+        (default . canonical)))
+
+;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
+;; editing emphasis.
+;; TODO add again
+(setq org-hide-emphasis-markers t)
+
+;; Fast todo selection without popup; efficient for experts but hides guidance
+;; for beginners.
+(setq org-use-fast-todo-selection 'expert)
+
+;; Source block settings
+(setq org-edit-src-persistent-message nil)
+(setq org-modules '())
+(setq org-export-backends '(html texinfo md))
+
+;; Lists
+(setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
+
+(setq org-babel-load-languages '((emacs-lisp . t)
+                                 (shell . t)
+                                 (python . t)))
+
+(setq org-tag-alist '((:startgroup)
+                      ;; Status
+                      ("next" . ?n)
+                      ("wip" . ?w)
+                      ("soon" . ?o)
+                      ("future" . ?f)
+                      ("maybe" . ?e)
+                      (:endgroup)
+
+                      (:startgroup)
+                      ;; Contexts
+                      ("@home" . ?h)
+                      ("@work" . ?r)
+                      ("@outside" . ?u)
+                      (:endgroup)
+
+                      (:startgroup)
+                      ;; Priorities
+                      ("high" . ?i)
+                      ("medium" . ?m)
+                      ("low" . ?l)
+                      (:endgroup)
+
+                      (:startgroup)
+                      ("quick" . ?q)
+                      ("mediumtime" . ?t)
+                      ("long" . ?g)
+                      (:endgroup)))
+;; Tag colors
+(setq org-tag-faces
+      '(("@home" . (:foreground "green" :weight bold))
+        ("@work" . (:foreground "green" :weight bold))
+        ("@outside" . (:foreground "green" :weight bold))
+        ("@computer" . (:foreground "green" :weight bold))
+        ("@phone" . (:foreground "green" :weight bold))
+
+        ("next" . (:foreground "cyan"  :weight bold))
+        ("wip" . (:foreground "cyan"  :weight bold))
+        ("soon" . (:foreground "cyan"  :weight bold))
+        ("future" . (:foreground "cyan"  :weight bold))
+        ("maybe" . (:foreground "cyan"  :weight bold))
+
+        ("high" . (:foreground "orange"    :weight bold))
+        ("medium" . (:foreground "orange"    :weight bold))
+        ("low" . (:foreground "orange"    :weight bold))
+
+        ("quick"        . (:foreground "red"        :weight bold))
+        ("medium-time"        . (:foreground "red"        :weight bold))
+        ("long"        . (:foreground "red"        :weight bold))
+
+        ;; ("meeting"   . (:foreground "yellow1"       :weight bold))
+        ;; ("CRITICAL"  . (:foreground "red1"          :weight bold))
+        ))
+
+;; Set tag column to 0 (tags appear immediately after heading); simplifies
+;; layout but may make long headings with tags harder to read.
+;;
+;; Setting this to t will fold  stuff
+(setq org-hide-block-startup nil)
+
+;;; org-agenda
+
+(setq org-agenda-start-on-weekday 1)  ; Monday
+
+;;; org-src
+
+;; (setq org-src-lang-modes '(("python" . python)
+;;                            ("sh" . sh)
+;;                            ("bash" . sh)
+;;                            ("elisp" . emacs-lisp)))
+
+;; Enforce zero indentation for code within Org source blocks. This prevents Org
+;; mode from adding artificial leading spaces, ensuring that code copied
+;; directly from the file remains correctly aligned and syntactically valid.
+(setq org-src-content-indentation 0)
+(with-no-warnings
+  ;; The `with-no-warnings' macro maintains compatibility with older Org
+  ;; versions where the variable was named `org-edit-src-content-indentation'.
+  (setq org-edit-src-content-indentation 0))
+
+;; org-src modes
+(defvar my-org-src-minor-mode-alist
+  '((emacs-lisp-mode . aggressive-indent-mode))
+  "Alist mapping major modes to minor modes for Org source buffers.
+Each element is a cons cell of the form (MAJOR-MODE . MINOR-MODE).
+When an Org source buffer is initialized with MAJOR-MODE, the
+corresponding MINOR-MODE is enabled.")
+
+(defun my-org-src-apply-minor-modes ()
+  "Apply minor modes to the current Org source buffer.
+
+This function checks `my-org-src-minor-mode-alist' and activates
+any minor mode associated with the current `major-mode'."
+  (dolist (entry my-org-src-minor-mode-alist)
+    (when (eq major-mode (car entry))
+      (let ((minor-mode (cdr entry)))
+        (when (fboundp minor-mode)
+          (funcall minor-mode 1))))))
+
+(add-hook 'org-src-mode-hook #'my-org-src-apply-minor-modes)
 
 ;;; Provide
 

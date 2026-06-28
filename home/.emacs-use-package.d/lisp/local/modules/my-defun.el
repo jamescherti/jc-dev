@@ -88,18 +88,31 @@ buffer's associated file name.
 
 Returns: boolean: t if code checking is allowed, nil otherwise."
   (if (not (boundp 'config-buffer-enable-syntax-checkers))
-      (let* ((file-name (if file-name
+      (let* ((buffer (or
+                      (and (fboundp 'org-src-edit-buffer-p)
+                           (org-src-edit-buffer-p)
+                           (when-let* ((new-buffer (org-src-source-buffer)))
+                             (when (buffer-live-p new-buffer)
+                               (with-current-buffer new-buffer
+                                 (current-buffer)))))
+                      ;; TODO
+                      ;; (bound-and-true-p edit-indirect--overlay)
+                      (buffer-base-buffer)
+                      (current-buffer)))
+             (file-name (if file-name
                             file-name
-                          (buffer-file-name (buffer-base-buffer))))
+                          (buffer-file-name buffer)))
              (base-name (when file-name
                           (file-name-nondirectory file-name))))
-        (when (and file-name
-                   base-name
-                   ;; (not (string-match-p "cookiecutter" file-name))
-                   (my-path-inside-p "~/src" file-name)
-                   (not (my-path-inside-p "~/src/forks" file-name))
-                   (not (my-path-inside-p "~/src/other" file-name))
-                   (not (my-path-inside-p tmpedit-dir file-name)))
+        (when (or
+               (and file-name
+                    base-name
+                    ;; (not (string-match-p "cookiecutter" file-name))
+                    (my-path-inside-p "~/src" file-name)
+                    (not (my-path-inside-p "~/src/forks" file-name))
+                    (not (my-path-inside-p "~/src/local/emacs-worktrees" file-name))
+                    (not (my-path-inside-p "~/src/other" file-name))
+                    (not (my-path-inside-p tmpedit-dir file-name))))
           (setq-local config-buffer-enable-syntax-checkers t)
 
           (if (and (not (string= base-name "/make.conf")) ; Gentoo
