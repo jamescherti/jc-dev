@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # name: s
 # key: s
-# expand-env: ((yas-indent-line 'auto))
+# expand-env: ((yas-indent-line 'fixed))
 # --
 snippet ${1:}
 ${2:}

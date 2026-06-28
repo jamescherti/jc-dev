@@ -3236,6 +3236,21 @@ Accepts any arguments so it can be used as advice or a hook."
   (define-key evil-normal-state-map (kbd "<leader>fp") #'my-evil-paste-and-fill)
   (define-key evil-normal-state-map (kbd "<leader>fP") #'my-evil-paste-before-and-fill))
 
+;;; Disable emacs state
+
+;; The key combination C-z (Control-z) is bound to toggle the editor into
+;; evil-emacs-state. Entering Emacs state temporarily suspends normal Vim
+;; bindings, causing standard Emacs keybindings to take over until C-z is
+;; pressed again.
+;;
+;; The following disables this behavior and prevent accidental state switching,
+;; unbind C-z in the relevant Evil maps. Add the following Emacs Lisp code to
+;; the configuration file (e.g., init.el or .emacs):
+(define-key evil-insert-state-map (kbd "C-z") #'ignore)
+(define-key evil-motion-state-map (kbd "C-z") #'ignore)
+
+(setq evil-toggle-key "")
+
 ;;; Provide
 
 (provide 'my-config-evil)

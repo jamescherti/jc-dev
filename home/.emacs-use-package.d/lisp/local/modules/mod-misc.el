@@ -625,9 +625,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (setq-default indicate-buffer-boundaries nil)
 ;; (setq-default indicate-empty-lines nil)
 
-;; Number of lines of margin at the top and bottom of a window.
-;; (setq scroll-margin 0)
-
 ;;; gc sentinel
 
 (lightemacs-use-package gcsentinel
@@ -836,6 +833,8 @@ WIDTH is the tab width."
 
   (my-setup-filetype)
 
+  (setq tmpedit-dir (expand-file-name "tmpedit" "~/.emacs-data"))
+
   (setq uniquify-buffer-name-style 'reverse)
   (setq uniquify-separator "•")
 
@@ -864,65 +863,6 @@ WIDTH is the tab width."
   (setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
                                              dired-filter-by-git-ignored
                                              dired-filter-by-dot-files))
-
-  ;; Prevent yasnippet from highlighting inserted fields, you need to modify the
-  ;; display face that it uses for overlays. This is done by changing the
-  ;; attributes of yas-field-highlight-face.
-  (defun my-clear-yasnippet-field-highlight (&rest _args)
-    "Clear yasnippet field highlight face to keep original syntax highlighting."
-    (when (facep 'yas-field-highlight-face)
-      (set-face-attribute 'yas-field-highlight-face nil
-                          :inherit 'unspecified
-                          :background 'unspecified
-                          :foreground 'unspecified
-                          :box 'unspecified
-                          :underline 'unspecified)))
-  ;; Apply the fix whenever a theme is loaded
-  (with-no-warnings
-    (advice-add 'load-theme :after #'my-clear-yasnippet-field-highlight))
-
-  (setq tmpedit-dir (expand-file-name "tmpedit" "~/.emacs-data"))
-
-  ;; Ensure it also applies when yasnippet is first loaded
-  (with-no-warnings
-    (add-hook 'yas-minor-mode-hook #'my-clear-yasnippet-field-highlight))
-
-  (setq yas-snippet-dirs '())
-  (add-to-list 'yas-snippet-dirs
-               (expand-file-name "yasnippet/snippets" "~/.emacs-data/etc"))
-  (add-to-list 'yas-snippet-dirs
-               (expand-file-name "yasnippet/snippets-auto" "~/.emacs-data/etc"))
-
-  ;; TODO fix when enter is pressed, yas it does not behave as well
-  ;; as without this
-  ;; (defun my-yas-next-field-or-corfu ()
-  ;;   "Insert the selected Corfu candidate or move to the next Yasnippet field."
-  ;;   (interactive)
-  ;;   (if (and (bound-and-true-p corfu-mode)
-  ;;            (fboundp 'corfu-insert)
-  ;;            (>= corfu--index 0))
-  ;;       (corfu-insert)
-  ;;     (when (fboundp 'yas-next-field)
-  ;;       (yas-next-field))))
-
-  (with-eval-after-load 'yasnippet
-    ;; (define-key yas-keymap (kbd "RET") 'my-yas-next-field-or-corfu)
-    ;; (define-key yas-keymap (kbd "<return>") 'my-yas-next-field-or-corfu)
-
-    ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
-    (unless noninteractive
-      (define-key yas-minor-mode-map (kbd "C-f") 'yas-expand))
-
-    (setq yas-prompt-functions '(yas-no-prompt))  ; Do not ask the user
-
-    ;; (add-to-list 'yas-snippet-dirs
-    ;;              (expand-file-name "yasnippet/snippets" emacs-var-dir))
-    ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
-
-    ;; (define-key yas-keymap (kbd "RET") (yas-filtered-definition
-    ;;                                     'yas-next-field-or-maybe-expand))
-
-    )
 
   (setq hs-hide-comments-when-hiding-all nil)
   (setq hs-isearch-open t)  ;; Open both comments and code
@@ -5757,6 +5697,93 @@ any minor mode associated with the current `major-mode'."
           (funcall minor-mode 1))))))
 
 (add-hook 'org-src-mode-hook #'my-org-src-apply-minor-modes)
+
+;;; yasnippet: Clear highlights after changing the theme
+
+;; Prevent yasnippet from highlighting inserted fields, you need to modify the
+;; display face that it uses for overlays. This is done by changing the
+;; attributes of yas-field-highlight-face.
+(defun my-clear-yasnippet-field-highlight (&rest _args)
+  "Clear yasnippet field highlight face to keep original syntax highlighting."
+  (when (facep 'yas-field-highlight-face)
+    (set-face-attribute 'yas-field-highlight-face nil
+                        :inherit 'unspecified
+                        :background 'unspecified
+                        :foreground 'unspecified
+                        :box 'unspecified
+                        :underline 'unspecified)))
+;; Apply the fix whenever a theme is loaded
+(with-no-warnings
+  (advice-add 'load-theme :after #'my-clear-yasnippet-field-highlight))
+
+;;; yasnippet: final new line
+
+;; Prevent adding new lines
+(defun my-snippet-mode-disable-final-newline ()
+  (setq-local mode-require-final-newline nil))
+(if (fboundp 'my-snippet-mode-disable-final-newline)
+    (add-hook 'snippet-mode-hook
+              #'my-snippet-mode-disable-final-newline)
+  (error "Undefined: my-snippet-mode-disable-final-newline"))
+
+(defun my-snippet-remove-final-newline ()
+  "Remove all final newlines at the end of the buffer."
+  (save-excursion
+    (goto-char (point-max))
+    (while (and (not (bobp))
+                (eq (char-before) ?\n))
+      (delete-char -1))))
+
+(defun my-snippet-mode-setup ()
+  "Configure `snippet-mode' to prevent and remove final newlines."
+  (setq-local require-final-newline nil)
+  (setq-local mode-require-final-newline nil)
+  (add-hook 'before-save-hook #'my-snippet-remove-final-newline nil t))
+
+(add-hook 'snippet-mode-hook #'my-snippet-mode-setup)
+
+;;; yasnippet
+
+;; Ensure it also applies when yasnippet is first loaded
+(with-no-warnings
+  (add-hook 'yas-minor-mode-hook #'my-clear-yasnippet-field-highlight))
+
+(setq yas-snippet-dirs '())
+(add-to-list 'yas-snippet-dirs
+             (expand-file-name "yasnippet/snippets" "~/.emacs-data/etc"))
+(add-to-list 'yas-snippet-dirs
+             (expand-file-name "yasnippet/snippets-auto" "~/.emacs-data/etc"))
+
+;; TODO fix when enter is pressed, yas it does not behave as well
+;; as without this
+;; (defun my-yas-next-field-or-corfu ()
+;;   "Insert the selected Corfu candidate or move to the next Yasnippet field."
+;;   (interactive)
+;;   (if (and (bound-and-true-p corfu-mode)
+;;            (fboundp 'corfu-insert)
+;;            (>= corfu--index 0))
+;;       (corfu-insert)
+;;     (when (fboundp 'yas-next-field)
+;;       (yas-next-field))))
+
+(with-eval-after-load 'yasnippet
+  ;; (define-key yas-keymap (kbd "RET") 'my-yas-next-field-or-corfu)
+  ;; (define-key yas-keymap (kbd "<return>") 'my-yas-next-field-or-corfu)
+
+  ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
+  (unless noninteractive
+    (define-key yas-minor-mode-map (kbd "C-f") 'yas-expand))
+
+  (setq yas-prompt-functions '(yas-no-prompt))  ; Do not ask the user
+
+  ;; (add-to-list 'yas-snippet-dirs
+  ;;              (expand-file-name "yasnippet/snippets" emacs-var-dir))
+  ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
+
+  ;; (define-key yas-keymap (kbd "RET") (yas-filtered-definition
+  ;;                                     'yas-next-field-or-maybe-expand))
+
+  )
 
 ;;; Provide
 
