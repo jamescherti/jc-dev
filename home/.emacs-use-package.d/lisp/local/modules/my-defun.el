@@ -582,7 +582,8 @@ TO-STRING."
                                     path from-string)
                             from-string))))
         (my-save-all-buffers)
-        (call-process "sre" nil t nil from-string to-string path)))))
+        (let ((default-directory temporary-file-directory))
+          (call-process "sre" nil t nil from-string to-string path))))))
 
 ;;; indentnav
 
