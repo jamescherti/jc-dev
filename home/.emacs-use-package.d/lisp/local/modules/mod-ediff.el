@@ -47,38 +47,52 @@
 ;; (setq ediff-make-buffers-readonly-at-startup nil) ; default nil
 ;; (setq ediff-confirm-copy t)
 
+;;; diff-options
+
 ;; Ediff: Ignore all whitespace differences (-w) to reduce visual noise from
 ;; indentation changes or auto-formatters, keeping the focus on logic.
 (setq ediff-diff-options "")
 
 ;; Ediff: Skip over regions where the only differences are whitespace (or other
 ;; ignored options) when navigating with 'n' and 'p'.
-;; (setq ediff-ignore-similar-regions t)
-
-;;; diff-options
+(setq ediff-ignore-similar-regions nil)
 
 (defun my-ediff-setup-elisp-options (orig-fn &rest args)
   "Apply whitespace-ignoring Ediff settings only for Emacs Lisp buffers.
-ORIG-FN and ARGS is the functions and its arguments.
-This wraps `ediff-setup' to dynamically bind options based on the major mode."
-  (let* ((buffer-a (nth 1 args))
-         (is-elisp (when (buffer-live-p buffer-a)
-                     (with-current-buffer buffer-a
-                       (derived-mode-p 'emacs-lisp-mode))))
-         ;; Bind the variables to your preferred values if it is an Elisp buffer.
-         (ediff-diff-options (if is-elisp
-                                 "-w"
-                               ediff-diff-options))
-         (ediff-ignore-similar-regions (if is-elisp
-                                           t
-                                         ediff-ignore-similar-regions)))
-    (ignore ediff-diff-options)
-    (ignore ediff-ignore-similar-regions)
-    ;; When `ediff-setup' executes, it will make these variables buffer-local
-    ;; in its control buffer, capturing these let-bound values for the session.
-    (apply orig-fn args)))
+ORIG-FN is the original function, and ARGS are its arguments.
+This wraps `ediff-setup' to configure the control buffer dynamically."
+  (let* ((buffer-a (car args))
+         (is-elisp (and (bufferp buffer-a)
+                        (buffer-live-p buffer-a)
+                        (provided-mode-derived-p
+                         (buffer-local-value 'major-mode buffer-a)
+                         'emacs-lisp-mode)))
+         (new-diff-opts (if is-elisp
+                            (let ((opts (split-string
+                                         (or ediff-diff-options "")
+                                         "[ \t]+" t)))
+                              (if (member "-w" opts)
+                                  ediff-diff-options
+                                (string-join (append opts '("-w")) " ")))
+                          ediff-diff-options))
+         (new-ignore-sim (if is-elisp t ediff-ignore-similar-regions))
+         cbuf)
+    (let ((ediff-diff-options new-diff-opts)
+          (ediff-ignore-similar-regions new-ignore-sim))
+      ;; Execute ediff-setup and capture the resulting control buffer
+      (ignore ediff-diff-options)
+      (ignore ediff-ignore-similar-regions)
+      (setq cbuf (apply orig-fn args)))
+    (when (and is-elisp (bufferp cbuf) (buffer-live-p cbuf))
+      (with-current-buffer cbuf
+        (with-no-warnings
+          (setq-local ediff-diff-options new-diff-opts)
+          (setq-local ediff-ignore-similar-regions new-ignore-sim))))
+    ;; Return the control buffer to maintain the original function signature
+    cbuf))
 
-(advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options)
+(with-eval-after-load 'ediff
+  (advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options))
 
 ;;; ediff startup: go to the next difference
 
