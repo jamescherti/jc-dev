@@ -96,7 +96,7 @@
 (setq enable-dir-local-variables t)
 (setq enable-local-variables :safe)
 
-(setq native-comp-jit-compilation nil)
+(setq native-comp-jit-compilation t)
 (setq native-comp-deferred-compilation nil)
 (setq package-native-compile nil)
 
@@ -110,9 +110,7 @@
 (setq lightemacs-dired-omit-parent-directory t)
 (setq lightemacs-cycle nil)
 
-(setq lightemacs-modules '(
-
-                           le-flavor-micro
+(setq lightemacs-modules '(le-flavor-micro
                            le-pathaction
                            le-maybe-markdown-ts
                            le-org
@@ -122,7 +120,8 @@
                            le-vertico
                            le-xclip
 
-                           ;; le-compile-angel
+                           le-compile-angel
+
                            ;; le-autorevert
                            ;; le-undo-fu
                            ;; le-undo-fu-session
@@ -132,9 +131,6 @@
                            ;; le-embark
                            ;; le-wgrep
                            ;; le-orderless
-
-                           ;; TODO this module does not exist
-                           ;; le-pathaction
 
                            ;; le-evil-visualstar
                            ;; le-git-modes
