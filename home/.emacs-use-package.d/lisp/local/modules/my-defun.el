@@ -420,6 +420,14 @@ This function uses the selected files as arguments."
 ;;      (t
 ;;       "/"))))
 
+(defun buffer-cwd ()
+  "Return the directory of the current buffer."
+  (interactive)
+  (or (my-dir-config--buffer-cwd) default-directory))
+
+;;-----------------------------------------------------------------------------
+;; Commands
+;;-----------------------------------------------------------------------------
 (defun my-dir-config--buffer-cwd ()
   "Return the directory associated with the current buffer.
 Returns:
@@ -434,19 +442,12 @@ Returns:
                                     raw-path
                                   (car raw-path)))
                             default-directory)))
-             (expand-file-name (or raw-dir default-directory))))
+             (file-name-as-directory
+              (expand-file-name (or raw-dir default-directory)))))
 
           (file-name
-           (expand-file-name file-name)))))
+           (expand-file-name (file-name-directory file-name))))))
 
-(defun buffer-cwd ()
-  "Return the directory of the current buffer."
-  (interactive)
-  (or (my-dir-config--buffer-cwd) default-directory))
-
-;;-----------------------------------------------------------------------------
-;; Commands
-;;-----------------------------------------------------------------------------
 (defun exec-command (command &rest args)
   "Execute shell COMMAND with ARGS without displaying the output."
   (apply 'call-process command nil nil nil args))
