@@ -1884,24 +1884,6 @@ WIDTH is the tab width."
 
 ;;; Useful functions
 
-(defun my-dir-config--buffer-cwd ()
-  "Return the directory associated with the current buffer.
-Returns:
-- The directory path if the buffer is in `dired-mode', or
-- The directory of the file if the buffer is visiting a file, or
-- nil if neither condition is met."
-  (let ((file-name (buffer-file-name (buffer-base-buffer))))
-    (cond ((derived-mode-p 'dired-mode)
-           default-directory)
-
-          (file-name
-           (file-name-directory file-name)))))
-
-(defun buffer-cwd ()
-  "Return the directory of the current buffer."
-  (interactive)
-  (or (my-dir-config--buffer-cwd) default-directory))
-
 ;;; Startup time
 
 (defun display-startup-time ()
