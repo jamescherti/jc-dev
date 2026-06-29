@@ -57,33 +57,81 @@
 ;; ignored options) when navigating with 'n' and 'p'.
 (setq ediff-ignore-similar-regions nil)
 
-(defun my-ediff-setup-elisp-options (orig-fn &rest args)
-  "Apply whitespace-ignoring Ediff settings only for Emacs Lisp buffers.
+(defcustom my-ediff-whitespace-safe-modes
+  '(;; Lisp dialects
+    emacs-lisp-mode
+    lisp-mode
+    lisp-data-mode
+    scheme-mode
+    clojure-mode
+
+    ;; Shell scripts
+    sh-mode
+    bash-ts-mode
+
+    ;; C-family and bracketed languages
+    c-mode
+    c-ts-mode
+    c++-mode
+    c++-ts-mode
+    java-mode
+    java-ts-mode
+    csharp-mode
+    csharp-ts-mode
+    objc-mode
+    rust-mode
+    rust-ts-mode
+    go-mode
+    go-ts-mode
+
+    ;; Web and scripting
+    js-mode
+    js-ts-mode
+    typescript-mode
+    typescript-ts-mode
+    tsx-ts-mode
+    php-mode
+
+    ;; Markup and data formatting
+    html-mode
+    html-ts-mode
+    css-mode
+    css-ts-mode
+    sgml-mode
+    xml-mode
+    nxml-mode
+    js-json-mode
+    json-ts-mode)
+  "List of major modes where Ediff should ignore whitespace differences."
+  :type '(repeat symbol)
+  :group 'ediff)
+
+(defun my-ediff-setup-whitespace-options (orig-fn &rest args)
+  "Apply whitespace-ignoring Ediff settings for specific major modes.
 ORIG-FN is the original function, and ARGS are its arguments.
 This wraps `ediff-setup' to configure the control buffer dynamically."
   (let* ((buffer-a (car args))
-         (is-elisp (and (bufferp buffer-a)
-                        (buffer-live-p buffer-a)
-                        (provided-mode-derived-p
-                         (buffer-local-value 'major-mode buffer-a)
-                         'emacs-lisp-mode)))
-         (new-diff-opts (if is-elisp
-                            (let ((opts (split-string
-                                         (or ediff-diff-options "")
-                                         "[ \t]+" t)))
+         (major-m (when (and (bufferp buffer-a) (buffer-live-p buffer-a))
+                    (buffer-local-value 'major-mode buffer-a)))
+         (is-safe-mode (when major-m
+                         (seq-some (lambda (mode)
+                                     (provided-mode-derived-p major-m mode))
+                                   my-ediff-whitespace-safe-modes)))
+         (new-diff-opts (if is-safe-mode
+                            (let ((opts (split-string (or ediff-diff-options "") "[ \t]+" t)))
                               (if (member "-w" opts)
                                   ediff-diff-options
                                 (string-join (append opts '("-w")) " ")))
                           ediff-diff-options))
-         (new-ignore-sim (if is-elisp t ediff-ignore-similar-regions))
+         (new-ignore-sim (if is-safe-mode t ediff-ignore-similar-regions))
          cbuf)
     (let ((ediff-diff-options new-diff-opts)
           (ediff-ignore-similar-regions new-ignore-sim))
-      ;; Execute ediff-setup and capture the resulting control buffer
       (ignore ediff-diff-options)
       (ignore ediff-ignore-similar-regions)
+      ;; Execute ediff-setup and capture the resulting control buffer
       (setq cbuf (apply orig-fn args)))
-    (when (and is-elisp (bufferp cbuf) (buffer-live-p cbuf))
+    (when (and is-safe-mode (bufferp cbuf) (buffer-live-p cbuf))
       (with-current-buffer cbuf
         (with-no-warnings
           (setq-local ediff-diff-options new-diff-opts)
@@ -91,8 +139,13 @@ This wraps `ediff-setup' to configure the control buffer dynamically."
     ;; Return the control buffer to maintain the original function signature
     cbuf))
 
+;; Remove the previous Elisp-only advice to prevent conflict
+(advice-add 'ediff-setup :around #'my-ediff-setup-whitespace-options)
+
 (with-eval-after-load 'ediff
-  (advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options))
+  (if (fboundp 'my-ediff-setup-elisp-options)
+      (advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options)
+    (error "Undefined: my-ediff-setup-elisp-options")))
 
 ;;; ediff startup: go to the next difference
 
