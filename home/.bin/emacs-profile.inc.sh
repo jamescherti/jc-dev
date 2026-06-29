@@ -15,6 +15,14 @@ if ! [[ -f "$RUN_EMACS_BIN" ]]; then
   export \
     RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
   if [[ $EMACS_D = "" ]]; then
+    EMACS_D="$HOME/.emacs-straight.d/"
+  fi
+fi
+
+if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+  export \
+    RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+  if [[ $EMACS_D = "" ]]; then
     EMACS_D="$HOME/.emacs-master.d/"
   fi
 fi
