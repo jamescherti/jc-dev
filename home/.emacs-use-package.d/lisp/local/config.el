@@ -357,13 +357,15 @@ subsequent GCC invocations."
           (read (current-buffer))))
     (when (executable-find "gcc")
       (with-temp-buffer
-        (let ((exit-code (call-process "gcc" nil t nil "-march=native"
-                                       "-Q" "--help=target")))
+        (let* ((default-directory temporary-file-directory)
+               (exit-code (call-process "gcc" nil t nil "-march=native"
+                                        "-Q" "--help=target")))
           (when (zerop exit-code)
             (goto-char (point-min))
             (when (re-search-forward
                    "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
               (let ((arch (match-string 1)))
+                (make-directory (file-name-directory my-cpu-architecture-cache-file) t)
                 (with-temp-buffer
                   (prin1 arch (current-buffer))
                   ;; Force Emacs to read and write the exact internal byte
