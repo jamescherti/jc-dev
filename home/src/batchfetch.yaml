@@ -360,6 +360,13 @@ tasks:
     remote:
       upstream: https://github.com/erusev/parsedown
 
+  - git: git@github.com:jamescherti/shell-pop-el
+    path: forks/shell-pop-el
+    # revision: master
+    revision: develop
+    remote:
+      upstream: https://github.com/kyagi/shell-pop-el
+
   # ----------------------------------------------------------------------------
   # Vim
   # ----------------------------------------------------------------------------
@@ -462,13 +469,6 @@ tasks:
 
   - git: git@github.com:jamescherti/easysession.el
     path: emacs/easysession.el
-    revision: develop
-
-  - git: git@github.com:jamescherti/shell-pop-el
-    path: emacs/shell-pop-el
-    revision: master
-    remote:
-      upstream: https://github.com/kyagi/shell-pop-el
     revision: develop
 
   - git: git@github.com:jamescherti/outline-yaml.el

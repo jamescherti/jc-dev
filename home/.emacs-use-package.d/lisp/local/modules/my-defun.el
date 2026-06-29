@@ -385,41 +385,6 @@ This function uses the selected files as arguments."
 ;;---------------------------------------------------------------
 ;; save
 ;;---------------------------------------------------------------
-;; (defun my-dir-config--buffer-cwd ()
-;;   "Return the directory associated with the current buffer.
-;; Returns:
-;; - The directory path if the buffer is in `dired-mode', or
-;; - The directory of the file if the buffer is visiting a file, or
-;; - nil if neither condition is met."
-;;   (let ((file-name (buffer-file-name (buffer-base-buffer))))
-;;     (cond ((derived-mode-p 'dired-mode)
-;;            (let ((raw-dir (if (bound-and-true-p dired-directory)
-;;                               (let ((raw-path dired-directory))
-;;                                 (if (stringp raw-path)
-;;                                     raw-path
-;;                                   (car raw-path)))
-;;                             default-directory)))
-;;              (expand-file-name (or raw-dir default-directory))))
-;;
-;;           (file-name
-;;            (expand-file-name (file-name-directory file-name))))))
-;;
-;; (defun buffer-cwd ()
-;;   "Return the directory of the current buffer."
-;;   (interactive)
-;;   (let* ((dir (or (my-dir-config--buffer-cwd)
-;;                   default-directory
-;;                   "~"))
-;;          (path (expand-file-name dir)))
-;;     (cond
-;;      ((file-directory-p path)
-;;       (file-name-as-directory path))
-;;      ((file-directory-p default-directory)
-;;       (file-name-as-directory
-;;        (expand-file-name default-directory)))
-;;      (t
-;;       "/"))))
-
 (defun buffer-cwd ()
   "Return the directory of the current buffer."
   (interactive)
@@ -436,14 +401,7 @@ Returns:
 - nil if neither condition is met."
   (let ((file-name (buffer-file-name (buffer-base-buffer))))
     (cond ((derived-mode-p 'dired-mode)
-           (let ((raw-dir (if (bound-and-true-p dired-directory)
-                              (let ((raw-path dired-directory))
-                                (if (stringp raw-path)
-                                    raw-path
-                                  (car raw-path)))
-                            default-directory)))
-             (file-name-as-directory
-              (expand-file-name (or raw-dir default-directory)))))
+           (file-name-as-directory (expand-file-name default-directory)))
 
           (file-name
            (expand-file-name (file-name-directory file-name))))))
