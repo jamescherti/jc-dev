@@ -437,7 +437,7 @@ Returns:
              (expand-file-name (or raw-dir default-directory))))
 
           (file-name
-           (file-name-directory file-name)))))
+           (expand-file-name file-name)))))
 
 (defun buffer-cwd ()
   "Return the directory of the current buffer."
