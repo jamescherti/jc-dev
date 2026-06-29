@@ -143,9 +143,9 @@ This wraps `ediff-setup' to configure the control buffer dynamically."
 (advice-add 'ediff-setup :around #'my-ediff-setup-whitespace-options)
 
 (with-eval-after-load 'ediff
-  (if (fboundp 'my-ediff-setup-elisp-options)
-      (advice-add 'ediff-setup :around #'my-ediff-setup-elisp-options)
-    (error "Undefined: my-ediff-setup-elisp-options")))
+  (if (fboundp 'my-ediff-setup-whitespace-options)
+      (advice-add 'ediff-setup :around #'my-ediff-setup-whitespace-options)
+    (error "Undefined: my-ediff-setup-whitespace-options")))
 
 ;;; ediff startup: go to the next difference
 
