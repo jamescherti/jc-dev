@@ -121,7 +121,7 @@ This wraps `ediff-setup' to configure the control buffer dynamically."
                             (let ((opts (split-string (or ediff-diff-options "") "[ \t]+" t)))
                               (if (member "-w" opts)
                                   ediff-diff-options
-                                (string-join (append opts '("-w")) " ")))
+                                (mapconcat #'identity (append opts '("-w")) " ")))
                           ediff-diff-options))
          (new-ignore-sim (if is-safe-mode t ediff-ignore-similar-regions))
          cbuf)
