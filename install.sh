@@ -546,6 +546,12 @@ main() {
   # Legacy files. Replace with .ignore files
   rm -f ~/.rgignore ~/.fdignore ~/src/.rgignore ~/src/.fdignore
 
+  # Vim packages
+  (
+    cd ~/.vim_bundle/packpath/pack/git-plugins/start
+    batchfetch
+  )
+
   echo
   echo Success.
 }
