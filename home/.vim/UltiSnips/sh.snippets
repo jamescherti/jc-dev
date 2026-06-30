@@ -530,8 +530,8 @@ fi
 endsnippet
 
 snippet atexit
-# shellcheck disable=SC2329
 ATEXIT_DONE=0
+# shellcheck disable=SC2329
 atexit() {
 	trap - EXIT INT TERM
 	local errno="$?"
