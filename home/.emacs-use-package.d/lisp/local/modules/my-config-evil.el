@@ -1021,6 +1021,7 @@ guarantees that the new window is selected, as in Vim."
            (full-path (expand-file-name selected-file))
            (existing-buffer (get-file-buffer full-path))
            (bufs (if existing-buffer (list existing-buffer) nil)))
+      ;; t = no-new-tab
       (my-jump-to-buffers-or-open bufs full-path t))))
 
 (define-key evil-normal-state-map (kbd "<leader>b") 'my-consult-recent-file)

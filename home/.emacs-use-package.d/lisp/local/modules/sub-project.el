@@ -400,7 +400,7 @@ DIR is the project directory."
          (project-current-directory-override dir))
 
     ;; Pass the project buffers and the root fallback file to the jumper
-    (my-jump-to-buffers-or-open project-bufs root t)))
+    (my-jump-to-buffers-or-open project-bufs root nil)))
 
 ;;; Provide
 
