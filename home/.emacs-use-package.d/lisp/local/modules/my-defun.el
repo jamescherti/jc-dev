@@ -150,7 +150,7 @@ LANGUAGE is the programming language."
 
    (t
     (require 'treesit nil t)
-    (treesit-language-available-p language))))
+    (treesit-ready-p language t))))
 
 ;; https://emacs.stackexchange.com/questions/35936/disassembly-of-a-bytecode-file
 (defun disassemble-file (filename)
