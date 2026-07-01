@@ -410,7 +410,7 @@ _git_checkout() {
   esac
 }
 
-switch_to_project() {
+project-switch() {
   local project
   project=$(cat ~/.projects | fzf) || return 1
 
@@ -419,7 +419,8 @@ switch_to_project() {
   fi
 }
 
-alias p=switch_to_project
+alias p=project-switch
+bind '"\ep":"\C-e \C-u project-switch\n"'
 
 loop() {
   if [[ $# -lt 1 ]]; then
