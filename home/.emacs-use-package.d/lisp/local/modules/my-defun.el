@@ -794,11 +794,24 @@ If the parentheses are balanced, the function returns t."
   :type '(repeat symbol)
   :group 'convenience)
 
+(defcustom my-ephemeral-file-names
+  '("todo.org")
+  "List of file names from which file jumps should reuse the current tab."
+  :type '(repeat string)
+  :group 'convenience)
+
 (defun my-ephemeral-buffer-p ()
   "Return non-nil if the current buffer is considered transient or ephemeral.
-Checks against `my-ephemeral-buffer-names' and `my-ephemeral-major-modes'."
-  (or (member (buffer-name) my-ephemeral-buffer-names)
-      (apply #'derived-mode-p my-ephemeral-major-modes)))
+Checks against `my-ephemeral-buffer-names', `my-ephemeral-major-modes',
+and `my-ephemeral-file-names'.  Properly resolves indirect buffers to
+check their base buffer's file name."
+  (let ((base-file-name (buffer-file-name (or (buffer-base-buffer)
+                                              (current-buffer)))))
+    (or (member (buffer-name) my-ephemeral-buffer-names)
+        (apply #'derived-mode-p my-ephemeral-major-modes)
+        (and base-file-name
+             (member (file-name-nondirectory base-file-name)
+                     my-ephemeral-file-names)))))
 
 (defun my-jump-to-buffers-or-open (bufs fallback-file no-new-tab)
   "Jump to a visible window displaying any buffer in BUFS.
