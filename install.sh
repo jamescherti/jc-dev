@@ -519,21 +519,8 @@ main() {
   echo "[INFO] Update Emacs templates"
   update-emacs-templates
 
-  if [[ -f /etc/os-release ]]; then
-    # shellcheck disable=SC1091
-    source /etc/os-release
-
-    if [[ $ID = arch ]] && [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
-      echo "[INFO] Install Arch Linux desktop files"
-      rsync -a "$SCRIPT_DIR/data/dist/arch/" "$HOME/"
-    fi
-
-    # TODO adapt this for debian
-    if [[ $ID = debian ]] && [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
-      echo "[INFO] Install Arch Linux desktop files"
-      rsync -a "$SCRIPT_DIR/data/dist/arch/" "$HOME/"
-    fi
-  fi
+  echo "[INFO] Install desktop files"
+  rsync -a "$SCRIPT_DIR/data/dist/desktop/" "$HOME/"
 
   config-mimetypes
 
