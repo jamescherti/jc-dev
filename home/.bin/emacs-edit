@@ -58,10 +58,15 @@ main() {
   if is-emacs-server-running; then
     # EMACS_DAEMON=$(run-emacsclient -e '(daemonp)' || :)
 
+    # Just raise
+    EMACS_BIN="true" xdevenv-emacs &>/dev/null &
+    disown
+
     emacs-open-file "$@" || :
     # run-emacsclient "$@" || :
   else
-    "$EMACS_EDIT_EMACS_BIN" &>/dev/null &
+    # "$EMACS_EDIT_EMACS_BIN" &>/dev/null &
+    xdevenv-emacs &>/dev/null &
     disown
 
     wait_cycles=0

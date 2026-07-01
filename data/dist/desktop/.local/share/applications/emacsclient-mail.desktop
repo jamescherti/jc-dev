@@ -10,6 +10,7 @@ Terminal=false
 Type=Application
 Keywords=emacsclient;
 Actions=new-window;new-instance;
+Hidden=true
 
 [Desktop Action new-window]
 Name=New Window

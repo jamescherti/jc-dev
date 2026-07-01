@@ -8,3 +8,4 @@ MimeType=x-scheme-handler/mailto;
 NoDisplay=true
 Terminal=false
 Type=Application
+Hidden=true
