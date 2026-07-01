@@ -442,7 +442,7 @@ DIR is the project directory."
         ;; and pulse
         (let ((default-directory root)
               (project-current-directory-override dir))
-          (call-interactively #'find-file)
+          (find-file root)
           (pulse-momentary-highlight-one-line (point))))))))
 
 ;;; Provide
