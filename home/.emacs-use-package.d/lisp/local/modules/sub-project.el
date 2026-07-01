@@ -396,19 +396,19 @@ DIR is the project directory."
   (let* ((proj (project-current t dir))
          (root (project-root proj))
          (project-bufs (project-buffers proj))
-         ;; 1. Check if a project buffer is already visible in the current frame
+         ;; Check if a project buffer is already visible in the current frame
          (target-window (seq-find (lambda (w)
                                     (memq (window-buffer w) project-bufs))
                                   (window-list)))
          found-tab-info)
 
     (cond
-     ;; 2. If it is already in a window on the current frame, switch and pulse
+     ;; If it is already in a window on the current frame, switch and pulse
      (target-window
       (select-window target-window)
       (pulse-momentary-highlight-one-line (point)))
 
-     ;; 3. Otherwise, check for it in a tab across all frames
+     ;; Otherwise, check for it in a tab across all frames
      (t
       (when (bound-and-true-p tab-bar-mode)
         (catch 'found
@@ -429,14 +429,17 @@ DIR is the project directory."
             (unless (eq (car found-tab-info) 'current-tab)
               (tab-bar-select-tab (1+ index)))
 
-            ;; 4. Unconditionally search for the window in this tab, select it, and pulse
-            (when-let ((target-tab-window (seq-find (lambda (w)
-                                                      (memq (window-buffer w) project-bufs))
-                                                    (window-list))))
+            ;; Unconditionally search for the window in this tab, select it, and
+            ;; pulse
+            (when-let* ((target-tab-window
+                         (seq-find (lambda (w)
+                                     (memq (window-buffer w) project-bufs))
+                                   (window-list))))
               (select-window target-tab-window)
               (pulse-momentary-highlight-one-line (point))))
 
-        ;; 5. Fallback: Bind default-directory to the selected project root, find, and pulse
+        ;; Fallback: Bind default-directory to the selected project root, find,
+        ;; and pulse
         (let ((default-directory root)
               (project-current-directory-override dir))
           (call-interactively #'find-file)
