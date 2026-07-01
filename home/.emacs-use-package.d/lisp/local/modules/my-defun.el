@@ -40,19 +40,34 @@
   "Save all file-visiting buffers whose files do not exist on disk.
 Prompts the user for confirmation before saving each buffer."
   (interactive)
-  (let ((saved-count 0))
-    (dolist (buf (buffer-list))
+  (dolist (buf (buffer-list))
+    (when (buffer-live-p buf)
       (with-current-buffer buf
         (let ((file-path buffer-file-name))
           ;; Check if the buffer is visiting a file and that file does not exist
-          (when (and file-path (not (file-exists-p file-path)))
+          (when (and file-path
+                     (not (file-exists-p file-path)))
             (if (y-or-n-p (format "Buffer '%s' does not exist on disk. Save it? "
                                   file-path))
                 (progn
-                  (save-buffer)
-                  (setq saved-count (1+ saved-count)))
-              (message "Skipped saving '%s'" (buffer-name buf)))))))
-    (message "Finished. Saved %d new file buffer(s)." saved-count)))
+                  (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
+                        (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
+                        (inhibit-interaction t))
+                    (ignore inhibit-interaction)
+                    (condition-case err
+                        (save-buffer)
+                      (inhibited-interaction
+                       (message
+                        (concat
+                         "Error: 'save-buffer' attempted an "
+                         "interactive prompt in buffer '%s'. It is expected to "
+                         "be non-interactive.")
+                        (buffer-name)))
+                      (error
+                       (when (bound-and-true-p buffer-guardian-verbose)
+                         (message "Failed to save '%s': %s"
+                                  (buffer-name)
+                                  (error-message-string err))))))))))))))
 
 (defun my-save-all-buffers ()
   "Save all buffers."
