@@ -387,32 +387,27 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 ;;; Switch to the project
 
-(defun my-project-switch-project (dir)
-  "Prompt for a project, then switch to a window/tab containing it or edit it.
-DIR is the project directory."
-  (interactive (list (funcall project-prompter)))
+(defun my-jump-to-buffers-or-open (bufs fallback-file)
+  "Jump to a visible window containing any buffer in BUFS across all tabs/frames.
+If none are found, run `find-file' on FALLBACK-FILE.
+Pulses the cursor location after successfully switching or opening."
   (require 'pulse)
-
-  (let* ((proj (project-current t dir))
-         (root (project-root proj))
-         (project-bufs (project-buffers proj))
-         ;; Check if a project buffer is already visible in the current frame
-         (target-window (seq-find (lambda (w)
-                                    (memq (window-buffer w) project-bufs))
+  (let* ((target-window (seq-find (lambda (w)
+                                    (memq (window-buffer w) bufs))
                                   (window-list)))
          found-tab-info)
 
     (cond
-     ;; If it is already in a window on the current frame, switch and pulse
+     ;; 1. If it is already in a window on the current frame, switch and pulse
      (target-window
       (select-window target-window)
       (pulse-momentary-highlight-one-line (point)))
 
-     ;; Otherwise, check for it in a tab across all frames
+     ;; 2. Otherwise, check for it in a tab across all frames
      (t
       (when (bound-and-true-p tab-bar-mode)
         (catch 'found
-          (dolist (buf project-bufs)
+          (dolist (buf bufs)
             (when-let* ((tab-info (tab-bar-get-buffer-tab buf t)))
               (setq found-tab-info tab-info)
               (throw 'found t)))))
@@ -433,17 +428,30 @@ DIR is the project directory."
             ;; pulse
             (when-let* ((target-tab-window
                          (seq-find (lambda (w)
-                                     (memq (window-buffer w) project-bufs))
+                                     (memq (window-buffer w) bufs))
                                    (window-list))))
               (select-window target-tab-window)
               (pulse-momentary-highlight-one-line (point))))
 
-        ;; Fallback: Bind default-directory to the selected project root, find,
-        ;; and pulse
-        (let ((default-directory root)
-              (project-current-directory-override dir))
-          (find-file root)
+        ;; 3. Fallback: Find the fallback file and pulse
+        (when fallback-file
+          (find-file fallback-file)
           (pulse-momentary-highlight-one-line (point))))))))
+
+(defun my-project-switch-project (dir)
+  "Prompt for a project, then switch to a window/tab containing it or edit it.
+DIR is the project directory."
+  (interactive (list (funcall project-prompter)))
+
+  (let* ((proj (project-current t dir))
+         (root (project-root proj))
+         (project-bufs (project-buffers proj))
+         ;; Set up the environment for the fallback find-file context
+         (default-directory root)
+         (project-current-directory-override dir))
+
+    ;; Pass the project buffers and the root fallback file to the jumper
+    (my-jump-to-buffers-or-open project-bufs root)))
 
 ;;; Provide
 
