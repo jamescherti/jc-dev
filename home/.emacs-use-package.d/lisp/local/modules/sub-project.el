@@ -385,40 +385,62 @@ MTIME-VAR is a symbol storing the last known modification time."
 ;;
 ;; (setq dabbrev-friend-buffer-function 'my-project-dabbrev-friend-buffer)
 
+;;; Switch to the project
+
 (defun my-project-switch-project (dir)
-  "Prompt for a project, then switch to a tab containing it or edit it.
+  "Prompt for a project, then switch to a window/tab containing it or edit it.
 DIR is the project directory."
   (interactive (list (funcall project-prompter)))
+  (require 'pulse)
 
   (let* ((proj (project-current t dir))
          (root (project-root proj))
          (project-bufs (project-buffers proj))
+         ;; 1. Check if a project buffer is already visible in the current frame
+         (target-window (seq-find (lambda (w)
+                                    (memq (window-buffer w) project-bufs))
+                                  (window-list)))
          found-tab-info)
-    ;; Find the first project buffer currently displayed in a tab
-    (when (bound-and-true-p tab-bar-mode)
-      (catch 'found
-        (dolist (buf project-bufs)
-          (when-let* ((tab-info (tab-bar-get-buffer-tab buf t)))
-            (setq found-tab-info tab-info)
-            (throw 'found t)))))
 
-    ;; Switch to the tab, or run find-file
-    (if found-tab-info
-        (let ((frame (alist-get 'frame found-tab-info))
-              (index (alist-get 'index found-tab-info)))
+    (cond
+     ;; 2. If it is already in a window on the current frame, switch and pulse
+     (target-window
+      (select-window target-window)
+      (pulse-momentary-highlight-one-line (point)))
 
-          ;; Focus the target frame if it's not the currently active one
-          (when (and frame (frame-live-p frame))
-            (select-frame-set-input-focus frame))
+     ;; 3. Otherwise, check for it in a tab across all frames
+     (t
+      (when (bound-and-true-p tab-bar-mode)
+        (catch 'found
+          (dolist (buf project-bufs)
+            (when-let* ((tab-info (tab-bar-get-buffer-tab buf t)))
+              (setq found-tab-info tab-info)
+              (throw 'found t)))))
 
-          ;; Switch to the tab using its internal index (1-based)
-          (unless (eq (car found-tab-info) 'current-tab)
-            (tab-bar-select-tab (1+ index))))
+      (if found-tab-info
+          (let ((frame (alist-get 'frame found-tab-info))
+                (index (alist-get 'index found-tab-info)))
 
-      ;; 4. Fallback: Bind default-directory to the selected project root
-      (let ((default-directory root)
-            (project-current-directory-override dir))
-        (call-interactively #'find-file)))))
+            ;; Focus the target frame if it's not the currently active one
+            (when (and frame (frame-live-p frame))
+              (select-frame-set-input-focus frame))
+
+            ;; Switch to the tab using its internal index (1-based)
+            (unless (eq (car found-tab-info) 'current-tab)
+              (tab-bar-select-tab (1+ index)))
+
+            ;; 4. Unconditionally search for the window in this tab, select it, and pulse
+            (when-let ((target-tab-window (seq-find (lambda (w)
+                                                      (memq (window-buffer w) project-bufs))
+                                                    (window-list))))
+              (select-window target-tab-window)
+              (pulse-momentary-highlight-one-line (point))))
+
+        ;; 5. Fallback: Bind default-directory to the selected project root, find, and pulse
+        (let ((default-directory root)
+              (project-current-directory-override dir))
+          (call-interactively #'find-file)
+          (pulse-momentary-highlight-one-line (point))))))))
 
 ;;; Provide
 

@@ -597,7 +597,7 @@ ORIG-FUN is the function and ARGS the arguments."
 (evil-define-key 'normal 'global (kbd "<leader>sre") 'my-bash-stdops-sre)
 
 (evil-define-key 'normal 'global (kbd "<leader>ev") 'tab-bar-switch-to-tab)
-(evil-define-key '(visual normal insert) 'global (kbd "M-p") 'project-switch-project)
+(evil-define-key '(visual normal insert) 'global (kbd "M-p") 'my-project-switch-project)
 
 (evil-define-key 'insert 'global (kbd "M-H") 'evil-backward-word-begin)
 (evil-define-key 'insert 'global (kbd "M-L") 'evil-forward-word-begin)
