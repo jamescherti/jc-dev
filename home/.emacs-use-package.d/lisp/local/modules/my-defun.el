@@ -144,13 +144,14 @@ LANGUAGE is the programming language."
   ;; During byte-compilation macro expansion, avoid installing legacy
   ;; non tree sitter libraries
   (cond
-   ((or (bound-and-true-p byte-compile-current-file)
-        noninteractive)
-    t)
+   ;; ((or (bound-and-true-p byte-compile-current-file)
+   ;;      noninteractive)
+   ;;  t)
 
    (t
     (require 'treesit nil t)
-    (treesit-ready-p language t))))
+    (when (fboundp 'treesit-ready-p)
+      (treesit-ready-p language t)))))
 
 ;; https://emacs.stackexchange.com/questions/35936/disassembly-of-a-bytecode-file
 (defun disassemble-file (filename)
