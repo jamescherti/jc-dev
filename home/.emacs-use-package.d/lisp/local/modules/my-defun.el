@@ -782,12 +782,31 @@ If the parentheses are balanced, the function returns t."
 
 ;;; jump to the buffer's tab TODO wizard
 
+(defcustom my-ephemeral-buffer-names
+  '("*scratch*" "*Messages*" "*Warnings*" "*Help*")
+  "List of buffer names from which file jumps should reuse the current tab."
+  :type '(repeat string)
+  :group 'convenience)
+
+(defcustom my-ephemeral-major-modes
+  '(help-mode compilation-mode dired-mode)
+  "List of major modes from which file jumps should reuse the current tab."
+  :type '(repeat symbol)
+  :group 'convenience)
+
+(defun my-ephemeral-buffer-p ()
+  "Return non-nil if the current buffer is considered transient or ephemeral.
+Checks against `my-ephemeral-buffer-names' and `my-ephemeral-major-modes'."
+  (or (member (buffer-name) my-ephemeral-buffer-names)
+      (apply #'derived-mode-p my-ephemeral-major-modes)))
+
 (defun my-jump-to-buffers-or-open (bufs fallback-file no-new-tab)
   "Jump to a visible window displaying any buffer in BUFS.
 Searches the current frame first, then across all tabs and frames.
 If no buffer is found, open FALLBACK-FILE.  When NO-NEW-TAB is
-non-nil, the file opens in the current tab; otherwise, it opens
-in a new tab.  Pulses the cursor upon switching or opening."
+non-nil or the current buffer is ephemeral, the file opens in the
+current tab; otherwise, it opens in a new tab.  Pulses the cursor
+upon switching or opening."
   (require 'pulse)
   (let ((target-window (seq-find (lambda (w)
                                    (memq (window-buffer w) bufs))
@@ -824,15 +843,13 @@ in a new tab.  Pulses the cursor upon switching or opening."
               (pulse-momentary-highlight-one-line (point))))
         ;; Fallback: Open a new tab, find the fallback file, and pulse
         (when fallback-file
-          (when (member (buffer-name) '("*scratch*"))
-            (setq no-new-tab t))
-
-          (when (and (bound-and-true-p tab-bar-mode)
-                     (fboundp 'tab-bar-new-tab)
-                     (not no-new-tab))
-            (tab-bar-new-tab))
-          (find-file fallback-file)
-          (pulse-momentary-highlight-one-line (point)))))))
+          (let ((open-in-current-tab (or no-new-tab (my-ephemeral-buffer-p))))
+            (when (and (bound-and-true-p tab-bar-mode)
+                       (fboundp 'tab-bar-new-tab)
+                       (not open-in-current-tab))
+              (tab-bar-new-tab))
+            (find-file fallback-file)
+            (pulse-momentary-highlight-one-line (point))))))))
 
 ;;; From Lightemacs
 
