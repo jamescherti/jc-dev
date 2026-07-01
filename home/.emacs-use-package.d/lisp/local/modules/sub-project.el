@@ -387,57 +387,6 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 ;;; Switch to the project
 
-(defun my-jump-to-buffers-or-open (bufs fallback-file)
-  "Jump to a visible window containing any buffer in BUFS across all tabs/frames.
-If none are found, run `find-file' on FALLBACK-FILE.
-Pulses the cursor location after successfully switching or opening."
-  (require 'pulse)
-  (let* ((target-window (seq-find (lambda (w)
-                                    (memq (window-buffer w) bufs))
-                                  (window-list)))
-         found-tab-info)
-
-    (cond
-     ;; 1. If it is already in a window on the current frame, switch and pulse
-     (target-window
-      (select-window target-window)
-      (pulse-momentary-highlight-one-line (point)))
-
-     ;; 2. Otherwise, check for it in a tab across all frames
-     (t
-      (when (bound-and-true-p tab-bar-mode)
-        (catch 'found
-          (dolist (buf bufs)
-            (when-let* ((tab-info (tab-bar-get-buffer-tab buf t)))
-              (setq found-tab-info tab-info)
-              (throw 'found t)))))
-
-      (if found-tab-info
-          (let ((frame (alist-get 'frame found-tab-info))
-                (index (alist-get 'index found-tab-info)))
-
-            ;; Focus the target frame if it's not the currently active one
-            (when (and frame (frame-live-p frame))
-              (select-frame-set-input-focus frame))
-
-            ;; Switch to the tab using its internal index (1-based)
-            (unless (eq (car found-tab-info) 'current-tab)
-              (tab-bar-select-tab (1+ index)))
-
-            ;; Unconditionally search for the window in this tab, select it, and
-            ;; pulse
-            (when-let* ((target-tab-window
-                         (seq-find (lambda (w)
-                                     (memq (window-buffer w) bufs))
-                                   (window-list))))
-              (select-window target-tab-window)
-              (pulse-momentary-highlight-one-line (point))))
-
-        ;; 3. Fallback: Find the fallback file and pulse
-        (when fallback-file
-          (find-file fallback-file)
-          (pulse-momentary-highlight-one-line (point))))))))
-
 (defun my-project-switch-project (dir)
   "Prompt for a project, then switch to a window/tab containing it or edit it.
 DIR is the project directory."
@@ -451,7 +400,7 @@ DIR is the project directory."
          (project-current-directory-override dir))
 
     ;; Pass the project buffers and the root fallback file to the jumper
-    (my-jump-to-buffers-or-open project-bufs root)))
+    (my-jump-to-buffers-or-open project-bufs root nil)))
 
 ;;; Provide
 

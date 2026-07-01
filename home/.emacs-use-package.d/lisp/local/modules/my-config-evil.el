@@ -999,7 +999,32 @@ guarantees that the new window is selected, as in Vim."
 
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
 (define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
-(define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
+
+(defun my-consult-recent-file ()
+  "Find recent file using `completing-read'."
+  (interactive)
+  (when (and (fboundp 'consult--read)
+             (fboundp 'consult--file-preview)
+             (fboundp 'consult--fast-abbreviate-file-name))
+    (let* ((selected-file (consult--read
+                           (or
+                            (mapcar #'consult--fast-abbreviate-file-name
+                                    (bound-and-true-p recentf-list))
+                            (user-error "No recent files, `recentf-mode' is %s"
+                                        (if recentf-mode "enabled" "disabled")))
+                           :prompt "Find recent file: "
+                           :sort nil
+                           :require-match t
+                           :category 'file
+                           :state (consult--file-preview)
+                           :history 'file-name-history))
+           (full-path (expand-file-name selected-file))
+           (existing-buffer (get-file-buffer full-path))
+           (bufs (if existing-buffer (list existing-buffer) nil)))
+      (my-jump-to-buffers-or-open bufs full-path t))))
+
+(define-key evil-normal-state-map (kbd "<leader>b") 'my-consult-recent-file)
+;; (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 ;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
 
 (defun my-consult-buffer ()
