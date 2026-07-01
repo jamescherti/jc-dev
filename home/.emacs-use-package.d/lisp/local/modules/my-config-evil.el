@@ -971,7 +971,7 @@ guarantees that the new window is selected, as in Vim."
 ;;; evil consult
 
 (defun my-consult-fd-project ()
-  "Run `consult-fd` in the root directory of the current project."
+  "Run `consult-fd' in the root directory of the current project."
   (interactive)
   (require 'consult)
   (let* ((project (project-current nil "."))
