@@ -233,7 +233,7 @@ _git_find_repos_wrapper() {
 }
 
 _gm_wrapper() {
-  _git_find_repos_wrapper -- --if-exec "sh -c '! git-is-clean'" -- "$@"
+  _git_find_repos_wrapper --if-exec "sh -c '! git-is-clean'" -- "$@"
 }
 
 _ga_wrapper() {

@@ -82,18 +82,17 @@ buffer's associated file name.
 
 Returns: boolean: t if code checking is allowed, nil otherwise."
   (if (not (boundp 'config-buffer-enable-syntax-checkers))
-      (let* ((buffer (or
-                      (and (fboundp 'org-src-edit-buffer-p)
-                           (fboundp 'org-src-source-buffer)
-                           (org-src-edit-buffer-p)
-                           (when-let* ((new-buffer (org-src-source-buffer)))
-                             (when (buffer-live-p new-buffer)
-                               (with-current-buffer new-buffer
-                                 (current-buffer)))))
-                      ;; TODO
-                      ;; (bound-and-true-p edit-indirect--overlay)
-                      (buffer-base-buffer)
-                      (current-buffer)))
+      (let* ((buffer (or (and (fboundp 'org-src-edit-buffer-p)
+                              (fboundp 'org-src-source-buffer)
+                              (org-src-edit-buffer-p)
+                              (when-let* ((new-buffer (org-src-source-buffer)))
+                                (when (buffer-live-p new-buffer)
+                                  (with-current-buffer new-buffer
+                                    (current-buffer)))))
+                         ;; TODO
+                         ;; (bound-and-true-p edit-indirect--overlay)
+                         (buffer-base-buffer)
+                         (current-buffer)))
              (file-name (if file-name
                             file-name
                           (buffer-file-name buffer)))
@@ -212,11 +211,11 @@ LANGUAGE is the programming language."
   (interactive "p")
   (my-tab-next (- (or arg 1))))
 
-(defun my-woman (&optional topic)
-  "Prompt for a man page name and display it using the woman package.
-If TOPIC is provided, use that as the default."
-  (interactive "MMan page name: ")
-  (woman topic))
+;; (defun my-woman (&optional topic)
+;;   "Prompt for a man page name and display it using the woman package.
+;; If TOPIC is provided, use that as the default."
+;;   (interactive "MMan page name: ")
+;;   (woman topic))
 
 (defun remove-dash-lines (beg end)
   "Remove all lines made entirely of '-' characters in region from BEG to END.
