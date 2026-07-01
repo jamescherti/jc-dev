@@ -2612,11 +2612,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (when (fboundp 'pathaction-run)
     (pathaction-run "main")))
 
-(defun my-save-some-buffers ()
-  "Prevent `save-some-buffers' from prompting by passing 1 to it."
-  ;; (save-some-buffers 1)
-  (my-save-all-buffers))
-
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "<leader>ee") #'pathaction-main)
   (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
@@ -2625,7 +2620,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 (with-eval-after-load 'pathaction
   (remove-hook 'pathaction-before-run-hook 'save-some-buffers)
   (remove-hook 'pathaction-before-run-hook 'pathaction--save-buffer)
-  (add-hook 'pathaction-before-run-hook #'my-save-some-buffers))
+  (add-hook 'pathaction-before-run-hook #'my-save-all-buffers))
 
 (add-hook 'ultisnips-mode-hook #'hs-minor-mode)
 

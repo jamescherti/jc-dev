@@ -36,8 +36,27 @@
   (interactive)
   (message "%s" (frame-parameter nil 'font)))
 
+(defun save-all-new-file-buffers ()
+  "Save all file-visiting buffers whose files do not exist on disk.
+Prompts the user for confirmation before saving each buffer."
+  (interactive)
+  (let ((saved-count 0))
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (let ((file-path buffer-file-name))
+          ;; Check if the buffer is visiting a file and that file does not exist
+          (when (and file-path (not (file-exists-p file-path)))
+            (if (y-or-n-p (format "Buffer '%s' does not exist on disk. Save it? "
+                                  file-path))
+                (progn
+                  (save-buffer)
+                  (setq saved-count (1+ saved-count)))
+              (message "Skipped saving '%s'" (buffer-name buf)))))))
+    (message "Finished. Saved %d new file buffer(s)." saved-count)))
+
 (defun my-save-all-buffers ()
   "Save all buffers."
+  (save-all-new-file-buffers)
   (unless (bound-and-true-p buffer-guardian-mode)
     (cond
      ((fboundp 'buffer-guardian-save-all-buffers)
