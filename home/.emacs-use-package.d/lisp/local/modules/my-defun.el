@@ -41,33 +41,34 @@
 Prompts the user for confirmation before saving each buffer."
   (interactive)
   (dolist (buf (buffer-list))
-    (when (buffer-live-p buf)
-      (with-current-buffer buf
-        (let ((file-path buffer-file-name))
-          ;; Check if the buffer is visiting a file and that file does not exist
-          (when (and file-path
-                     (not (file-exists-p file-path)))
-            (if (y-or-n-p (format "Buffer '%s' does not exist on disk. Save it? "
-                                  file-path))
-                (progn
-                  (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
-                        (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
-                        (inhibit-interaction t))
-                    (ignore inhibit-interaction)
-                    (condition-case err
-                        (save-buffer)
-                      (inhibited-interaction
-                       (message
-                        (concat
-                         "Error: 'save-buffer' attempted an "
-                         "interactive prompt in buffer '%s'. It is expected to "
-                         "be non-interactive.")
-                        (buffer-name)))
-                      (error
-                       (when (bound-and-true-p buffer-guardian-verbose)
-                         (message "Failed to save '%s': %s"
-                                  (buffer-name)
-                                  (error-message-string err))))))))))))))
+    (with-current-buffer buf
+      (let ((file-path buffer-file-name))
+        ;; Check if the buffer is visiting a file and that file does not exist
+        (when (and file-path (not (file-exists-p file-path)))
+          (if (y-or-n-p (format "File '%s' does not exist on disk. Save it? "
+                                file-path))
+              (progn
+                (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
+                      (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
+                      (inhibit-interaction t)
+                      (parent-dir (file-name-directory file-path)))
+                  (ignore inhibit-interaction)
+                  (unless (file-exists-p parent-dir)
+                    (make-directory parent-dir t))
+                  (condition-case err
+                      (save-buffer)
+                    (inhibited-interaction
+                     (message
+                      (concat
+                       "Error: 'save-buffer' attempted an "
+                       "interactive prompt in buffer '%s'. It is expected to "
+                       "be non-interactive.")
+                      (buffer-name)))
+                    (error
+                     (when (bound-and-true-p buffer-guardian-verbose)
+                       (message "Failed to save '%s': %s"
+                                (buffer-name)
+                                (error-message-string err)))))))))))))
 
 (defun my-save-all-buffers ()
   "Save all buffers."
