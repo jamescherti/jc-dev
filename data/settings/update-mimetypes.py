@@ -8,7 +8,7 @@
 # Copyright (C) 2004-2026 James Cherti
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the “Software”), to deal
+# of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
@@ -17,7 +17,7 @@
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -52,14 +52,15 @@ def run(*args: str) -> None:
 
 def add_mime(app_id: str, mime_type: str) -> None:
     """Set the default application for a given MIME type using xdg-mime."""
-    print(f"[DEBUG] app_id:{app_id} mime_type:{mime_type}")
-    desktop_file = f"/usr/share/applications/{app_id}.desktop"
-    desktop_file2 = Path(f"~/.local/share/applications/{app_id}.desktop") \
-        .expanduser()
-    print(
-        f"[DEBUG] desktop_file1:{desktop_file} desktop_file2:{desktop_file2}")
+    if not app_id:
+        return
 
-    if not os.path.isfile(desktop_file) and not desktop_file2.is_file():
+    print(f"[DEBUG] app_id:{app_id} mime_type:{mime_type}")
+    desktop_file: Path = Path(f"/usr/share/applications/{app_id}.desktop")
+    desktop_file2: Path = Path(f"~/.local/share/applications/{app_id}.desktop").expanduser()
+    print(f"[DEBUG] desktop_file1:{desktop_file} desktop_file2:{desktop_file2}")
+
+    if not desktop_file.is_file() and not desktop_file2.is_file():
         print(f"Error: '{desktop_file}' does not exist.", file=sys.stderr)
         sys.exit(1)
 
@@ -70,13 +71,14 @@ def add_mime(app_id: str, mime_type: str) -> None:
 
 
 def main() -> None:
+    """Execute the application to register default MIME types."""
     app_text: str = ""
     app_images: str = ""
     app_file: str = ""
     app_pdf: str = ""
     app_audio: str = ""
     app_video: str = ""
-    app_web_browser = ""
+    # app_web_browser: str = ""
 
     # Archives
     add_mime("org.gnome.FileRoller", "application/x-gzip")

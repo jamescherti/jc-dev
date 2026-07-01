@@ -646,8 +646,9 @@ This enhancement prevents the cursor from moving."
     :move-point nil
     :type line
     :restore-point t
-    (save-excursion
-      (evil-fill-and-move beg end))))
+    (let ((inhibit-redisplay t))
+      (save-excursion
+        (evil-fill-and-move beg end)))))
 (define-key evil-normal-state-map "gq" 'my-evil-fill-and-move-operator)
 
 ;; It seems to only work when declared as default
