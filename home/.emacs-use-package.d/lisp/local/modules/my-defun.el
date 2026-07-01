@@ -38,7 +38,8 @@
 
 (defun save-all-new-file-buffers ()
   "Save all file-visiting buffers whose files do not exist on disk.
-Prompts the user for confirmation before saving each buffer."
+Prompts the operator for confirmation before creating directories and saving
+each buffer."
   (interactive)
   (dolist (buf (buffer-list))
     (with-current-buffer buf
@@ -47,28 +48,33 @@ Prompts the user for confirmation before saving each buffer."
         (when (and file-path (not (file-exists-p file-path)))
           (if (y-or-n-p (format "File '%s' does not exist on disk. Save it? "
                                 file-path))
-              (progn
-                (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
-                      (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
-                      (inhibit-interaction t)
-                      (parent-dir (file-name-directory file-path)))
-                  (ignore inhibit-interaction)
-                  (unless (file-exists-p parent-dir)
-                    (make-directory parent-dir t))
-                  (condition-case err
-                      (save-buffer)
-                    (inhibited-interaction
-                     (message
-                      (concat
-                       "Error: 'save-buffer' attempted an "
-                       "interactive prompt in buffer '%s'. It is expected to "
-                       "be non-interactive.")
-                      (buffer-name)))
-                    (error
-                     (when (bound-and-true-p buffer-guardian-verbose)
-                       (message "Failed to save '%s': %s"
-                                (buffer-name)
-                                (error-message-string err)))))))))))))
+              (let ((parent-dir (file-name-directory file-path))
+                    (proceed-to-save t))
+                (unless (file-exists-p parent-dir)
+                  (if (y-or-n-p (format "Directory '%s' does not exist. Create it? "
+                                        parent-dir))
+                      (make-directory parent-dir t)
+                    (setq proceed-to-save nil)
+                    (message "Skipped saving '%s': missing parent directory." (buffer-name))))
+                (when proceed-to-save
+                  (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
+                        (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
+                        (inhibit-interaction t))
+                    (ignore inhibit-interaction)
+                    (condition-case err
+                        (save-buffer)
+                      (inhibited-interaction
+                       (message
+                        (concat
+                         "Error: 'save-buffer' attempted an "
+                         "interactive prompt in buffer '%s'. It is expected to "
+                         "be non-interactive.")
+                        (buffer-name)))
+                      (error
+                       (when (bound-and-true-p buffer-guardian-verbose)
+                         (message "Failed to save '%s': %s"
+                                  (buffer-name)
+                                  (error-message-string err))))))))))))))
 
 (defun my-save-all-buffers ()
   "Save all buffers."
