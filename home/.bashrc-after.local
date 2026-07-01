@@ -228,24 +228,24 @@ alias git='_git_wrapper git'
 # alias rgit='_git_wrapper git find git'
 alias lrgit='_git_wrapper git-finder-exec git'
 
+_git_find_repos_wrapper() {
+  so git-rexec --exclude ~/src/forks/ -C . "$@"
+}
+
 _gm_wrapper() {
-  so git-rexec -C . --if-exec "sh -c '! git-is-clean'" -- "$@"
+  _git_find_repos_wrapper -- --if-exec "sh -c '! git-is-clean'" -- "$@"
 }
 
 _ga_wrapper() {
-  so git-rexec -C . -- "$@"
+  _git_find_repos_wrapper -- "$@"
 }
 
 _bg_git_find_repos_wrapper() {
   if [[ $# -gt 0 ]]; then
-    so git-rexec --exclude ~/src/forks/ -C . --parallel -- git "$@"
+    _git_find_repos_wrapper --parallel -- git "$@"
   else
-    so git-rexec --exclude ~/src/forks/ -C .
+    _git_find_repos_wrapper "$@"
   fi
-}
-
-_git_find_repos_wrapper() {
-  so git-rexec -C . -- "$@"
 }
 
 alias gm='_gm_wrapper'

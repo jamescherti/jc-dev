@@ -74,12 +74,6 @@ directory is not open yet, open it in the current window."
       (when (and buffer (not (my-tab-bar-switch-to-buffer buffer)))
         (set-window-buffer nil buffer)))))
 
-(defun my-path-inside-p (path1 path2)
-  "Check if PATH2 is inside PATH1."
-  (let ((absolute-path1 (file-truename path1))
-        (absolute-path2 (file-truename path2)))
-    (string-prefix-p absolute-path1 absolute-path2)))
-
 (defun my-code-checker-allowed-p (&optional file-name)
   "Return t if code checking is allowed for current buffer or specified file.
 
@@ -90,6 +84,7 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
   (if (not (boundp 'config-buffer-enable-syntax-checkers))
       (let* ((buffer (or
                       (and (fboundp 'org-src-edit-buffer-p)
+                           (fboundp 'org-src-source-buffer)
                            (org-src-edit-buffer-p)
                            (when-let* ((new-buffer (org-src-source-buffer)))
                              (when (buffer-live-p new-buffer)
@@ -104,15 +99,14 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
                           (buffer-file-name buffer)))
              (base-name (when file-name
                           (file-name-nondirectory file-name))))
-        (when (or
-               (and file-name
-                    base-name
-                    ;; (not (string-match-p "cookiecutter" file-name))
-                    (my-path-inside-p "~/src" file-name)
-                    (not (my-path-inside-p "~/src/forks" file-name))
-                    (not (my-path-inside-p "~/src/local/emacs-worktrees" file-name))
-                    (not (my-path-inside-p "~/src/other" file-name))
-                    (not (my-path-inside-p tmpedit-dir file-name))))
+        (when (or (and file-name
+                       base-name
+                       ;; (not (string-match-p "cookiecutter" file-name))
+                       (file-in-directory-p file-name "~/src")
+                       (not (file-in-directory-p file-name "~/src/forks"))
+                       (not (file-in-directory-p file-name "~/src/local/emacs-worktrees"))
+                       (not (file-in-directory-p file-name "~/src/other"))
+                       (not (file-in-directory-p file-name tmpedit-dir))))
           (setq-local config-buffer-enable-syntax-checkers t)
 
           (if (and (not (string= base-name "/make.conf")) ; Gentoo
