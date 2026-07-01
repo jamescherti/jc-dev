@@ -824,6 +824,9 @@ in a new tab.  Pulses the cursor upon switching or opening."
               (pulse-momentary-highlight-one-line (point))))
         ;; Fallback: Open a new tab, find the fallback file, and pulse
         (when fallback-file
+          (when (member (buffer-name) '("*scratch*"))
+            (setq no-new-tab t))
+
           (when (and (bound-and-true-p tab-bar-mode)
                      (fboundp 'tab-bar-new-tab)
                      (not no-new-tab))
