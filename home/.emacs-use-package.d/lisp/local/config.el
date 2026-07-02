@@ -804,6 +804,7 @@ subsequent GCC invocations."
                            mod-dired
                            mod-kirigami
                            mod-flymake
+                           mod-gc
 
                            le-compile-angel
                            le-flymake
