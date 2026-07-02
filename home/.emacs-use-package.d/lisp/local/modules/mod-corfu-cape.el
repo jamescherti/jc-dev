@@ -58,6 +58,8 @@
   (with-eval-after-load 'corfu
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
 
+;;; Provide
+
 (provide 'mod-corfu-cape)
 
 ;;; mod-corfu-cape.el ends here

@@ -802,6 +802,8 @@ subsequent GCC invocations."
 
 (setq lightemacs-modules '(mod-same-window
                            mod-dired
+                           mod-kirigami
+                           mod-flymake
 
                            le-compile-angel
                            le-flymake
@@ -928,7 +930,6 @@ subsequent GCC invocations."
                            mod-cleanup
                            mod-treesit
 
-                           mod-kirigami
                            sub-project
                            mod-buffer-terminator
                            buffer-guardian
@@ -1095,103 +1096,14 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 (add-hook 'lightemacs-before-modules-hook #'lightemacs-user-before-modules)
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-after-modules)
 
-;;; Customize code folding
-
-(setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook
-                                                     yaml-ts-mode-hook
-                                                     python-mode-hook
-                                                     python-ts-mode-hook
-                                                     haskell-mode-hook
-                                                     ;; My preference
-                                                     sh-mode-hook
-                                                     bash-ts-mode-hook
-                                                     php-mode-hook
-                                                     php-ts-mode-hook
-                                                     txt-file-mode-hook))
-
-(setq lightemacs-outline-minor-target-hooks '(emacs-lisp-mode-hook
-                                              lisp-mode-hook
-                                              conf-mode-hook
-                                              markdown-mode-hook
-                                              ;; TODO?
-                                              ;; markdown-ts-mode-hook
-                                              diff-mode-hook))
-
-(setq lightemacs-treesit-fold-target-hooks '(c-ts-mode-hook
-                                             c++-ts-mode-hook
-                                             java-ts-mode-hook
-                                             rust-ts-mode-hook
-                                             go-ts-mode-hook
-                                             ruby-ts-mode-hook
-                                             php-ts-mode-hook
-                                             csharp-ts-mode-hook
-                                             go-mod-ts-mode-hook
-                                             lua-ts-mode-hook
-                                             js-ts-mode-hook
-                                             typescript-ts-mode-hook
-                                             tsx-ts-mode-hook
-                                             css-ts-mode-hook
-                                             html-ts-mode-hook
-                                             heex-ts-mode-hook
-                                             xml-ts-mode-hook
-                                             ;; bash-ts-mode-hook
-                                             cmake-ts-mode-hook
-                                             dockerfile-ts-mode-hook
-                                             awk-ts-mode-hook
-                                             vimscript-ts-mode-hook
-                                             nix-ts-mode-hook
-                                             json-ts-mode-hook
-                                             toml-ts-mode-hook
-                                             makefile-ts-mode-hook
-                                             verilog-ts-mode-hook
-                                             vhdl-ts-mode-hook
-                                             hlsl-ts-mode-hook
-                                             latex-ts-mode-hook
-                                             beancount-ts-mode-hook
-                                             markdown-ts-mode-hook
-                                             mermaid-ts-mode-hook
-                                             gdscript-ts-mode-hook
-                                             clojure-ts-mode-hook
-                                             caml-ts-mode-hook
-                                             ocaml-ts-mode-hook
-                                             erlang-ts-mode-hook
-                                             elixir-ts-mode-hook
-                                             scala-ts-mode-hook
-                                             dart-ts-mode-hook
-                                             haskell-ts-mode-hook
-                                             julia-ts-mode-hook
-                                             kotlin-ts-mode-hook
-                                             gleam-ts-mode-hook
-                                             noir-ts-mode-hook
-                                             kotlin-ts-mode-hook
-                                             swift-ts-mode-hook
-                                             elixir-ts-mode-hook
-                                             zig-ts-mode-hook))
-
-(setq lightemacs-hs-minor-target-hooks '(;; Systems and General Purpose
-                                         c-mode-hook
-                                         c++-mode-hook
-                                         java-mode-hook
-                                         rust-mode-hook
-                                         go-mode-hook
-                                         ruby-mode-hook
-                                         perl-mode-hook
-
-                                         ;; Web and frontend
-                                         js-mode-hook
-                                         typescript-mode-hook
-                                         css-mode-hook
-
-                                         ;; Scripting, Data, and Infrastructure
-                                         json-mode-hook
-                                         lua-mode-hook
-                                         nxml-mode-hook
-                                         html-mode-hook))
-
 ;;; evil
 
 ;; Fixes bug: https://github.com/emacs-evil/evil-collection/issues/905
-(setq evil-collection-repl-submit-state 'insert)
+;; NOTE: obsolete
+;; config.el:1102:7: Warning: evil-collection-repl-submit-state is an obsolete
+;; variable (as of evil-collection 2.0.0); use
+;; evil-collection-binding-overrides: repl-submit, repl-newline.
+;; (setq evil-collection-repl-submit-state 'insert)
 ;; (setq evil-collection-repl-submit-state 'normal)
 
 ;;; pathaction
@@ -1254,12 +1166,148 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 ;; the Emacs event loop.
 (setq pgtk-use-im-context-on-new-connection nil)
 
-;;; Kirigami
+;;; Settings
 
-(setq kirigami-menu-bar-label "Folds")
-(setq kirigami-context-menu-label "Contextual folds")
-(setq kirigami-show-menu-bar t)
-(setq kirigami-show-context-menu t)
+(setq gcmh-high-cons-threshold (* 600 1024 1024))
+
+;;; buffer guardian
+
+(setq buffer-guardian-override-save-some-buffers t)
+(setq buffer-guardian-verbose nil)
+(setq buffer-guardian-save-all-buffers-interval (* 60 30))
+(setq buffer-guardian-save-all-buffers-idle (* 4 60))
+
+;; (defun buffer-guardian--save-some-buffers-hook (&rest _)
+;;   "Trigger `buffer-guardian' save logic during `save-some-buffers' safely."
+;;   (when (bound-and-true-p buffer-guardian-mode)
+;;     (buffer-guardian-save-all-buffers))
+;;   nil) ; Return nil so native save-some-buffers continues cleanly if needed
+;; (add-hook 'save-some-buffers-functions #'buffer-guardian--save-some-buffers-hook)
+
+;; Simpler alternative to bg
+;; (progn
+;;   (setq auto-save-visited-interval 30)
+;;   ;; (auto-save-visited-mode 1)
+;;
+;;   ;; Make (save-some-buffers 1) only save buffers when they exist in the disk
+;;
+;;   ;; Focus
+;;   ;; (defun my-save-on-focus-change ()
+;;   ;;   "Save all buffers when Emacs loses focus."
+;;   ;;   (when (not (frame-focus-state))
+;;   ;;     (my-save-all-buffers)))
+;;   ;; (add-function :after after-focus-change-function #'my-save-on-focus-change)
+;;
+;;   ;; Save some buffers
+;;   (setq save-some-buffers-default-predicate
+;;         (lambda ()
+;;           (and (buffer-file-name (buffer-base-buffer))
+;;                (file-exists-p buffer-file-name)))))
+
+
+;;; Frame geometry
+
+;; TODO Migrate this to lightemacs
+(defvar my-frame-geometry-file (expand-file-name "frame-geometry"
+                                                 user-emacs-directory))
+
+(defvar my-frame-geometry-modified-p nil
+  "Was the frame geometry modified.")
+
+(defun my-frame-geometry-save ()
+  "Save the current frame's geometry."
+  (when (display-graphic-p)
+    (let ((inhibit-message t)
+          (frame (selected-frame))
+          (file my-frame-geometry-file))
+      (with-temp-buffer
+        (let ((make-backup-files nil)
+              (font (frame-parameter frame 'font))
+              (left (frame-parameter frame 'left))
+              (top (frame-parameter frame 'top))
+              (width (frame-parameter frame 'width))
+              (height (frame-parameter frame 'height))
+              (pixel-width (frame-pixel-width frame))
+              (pixel-height (frame-pixel-height frame)))
+          (insert
+           ";; -*- mode: emacs-lisp; lexical-binding: t; coding: utf-8-unix -*-\n")
+          (insert ";; Frame geometry file, automatically generated "
+                  "by 'my-frame-geometry*' functions.\n")
+          (insert
+           "(setq initial-frame-alist nil)\n"
+           (format "(add-to-list 'initial-frame-alist '(font . \"%s\"))\n"
+                   (replace-regexp-in-string "\"" "\\\\\"" font))
+           (when top
+             (format "(add-to-list 'initial-frame-alist '(top . %s))\n" top))
+           (when left
+             (format "(add-to-list 'initial-frame-alist '(left . %s))\n" left))
+           (when width
+             (format "(add-to-list 'initial-frame-alist '(width . %s))\n" width))
+           (when height
+             (format "(add-to-list 'initial-frame-alist '(height . %s))\n" height))
+           "\n"
+           (when pixel-width
+             (format "(setq my-frame-geometry-pixel-width %s)\n" pixel-width))
+           (when pixel-height
+             (format "(setq my-frame-geometry-pixel-height %s)\n" pixel-height)))
+          (when (file-writable-p file)
+            (let ((save-silently t))
+              (write-file file))))))))
+
+(defun my-frame-geometry-load-initial-frame-alist ()
+  "Load the previous frames geometry.
+Call it from \='early-init.el\='."
+  (let ((file my-frame-geometry-file)
+        (inhibit-message t))
+    (when (file-readable-p file)
+      (load (expand-file-name file) t t t))))
+
+(defun my-frame-geometry-set-pixel-width-height (&optional frame)
+  "Set the frame width and height.
+Call it from \='init.el\='.
+FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
+  (unless frame
+    (setq frame (selected-frame)))
+
+  (when (and (display-graphic-p)
+             (boundp 'my-frame-geometry-pixel-width)
+             (boundp 'my-frame-geometry-pixel-height))
+    (message "Set frame size: %sx%s"
+             my-frame-geometry-pixel-width
+             my-frame-geometry-pixel-height)
+    (set-frame-size frame
+                    my-frame-geometry-pixel-width
+                    my-frame-geometry-pixel-height
+                    t)))
+
+(defun my-set-frame-size-and-position (&optional frame)
+  "Set position and size of FRAME when it's the first frame."
+  (unless frame
+    (setq frame (selected-frame)))
+  (unless my-frame-geometry-modified-p
+    ;; when (eq frame (selected-frame))
+    (when (not (frame-parameter frame 'parent-frame))
+      (when (fboundp 'my-frame-geometry-set-pixel-width-height)
+        (setq my-frame-geometry-modified-p t)
+        (my-frame-geometry-set-pixel-width-height frame)))))
+
+(unless noninteractive
+  (my-frame-geometry-load-initial-frame-alist)
+  ;; (setq initial-frame-alist nil)
+  (add-hook 'kill-emacs-hook 'my-frame-geometry-save))
+
+;; (add-hook 'after-make-frame-functions #'my-set-frame-size-and-position)
+
+;; Issue with Emacs 31 and shut-up
+;; (with-eval-after-load "shut-up"
+;;   (with-no-warnings
+;;     (defun my-around-my-frame-geometry-save (fn &rest args)
+;;       "FN is the advised function. ARGS are the function arguments."
+;;       (shut-up
+;;         (apply fn args)))
+;;
+;;     (advice-add 'my-frame-geometry-save :around
+;;                 #'my-around-my-frame-geometry-save)))
 
 ;;; Provide
 

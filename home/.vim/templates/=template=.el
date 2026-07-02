@@ -5,7 +5,15 @@ ${3:}
 
 ;;; Code:
 
+;;; Require
+
+;; TODO: Add require
+
+;;; Main code
+
 ${4:}
+
+;;; Provide
 
 (provide '$1)
 

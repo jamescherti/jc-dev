@@ -22,6 +22,8 @@
 
 ;;; Commentary:
 
+;; Miscellaneous.
+
 ;;; Code:
 
 ;;; Require
@@ -105,29 +107,6 @@
   (with-eval-after-load 'evil
     (with-eval-after-load 'evil-collection
       (require 'my-config-evil))))
-
-;;; SEND BUG TO EMACS
-
-(with-eval-after-load 'smie
-  (defun smie-indent-calculate ()
-    "Compute the indentation to use for point."
-    (when (fboundp 'smie--funcall)
-      (let ((indent
-             (condition-case nil
-                 (run-hook-wrapped 'smie-indent-functions #'smie--funcall)
-               (scan-error nil)))) ; Safely catch Tree-sitter scan-errors
-        (if (numberp indent)
-            indent
-          (current-indentation)))))
-
-  ;; (defun smie-indent-calculate ()
-  ;;   "Compute the indentation to use for point."
-  ;;   (when (fboundp 'smie--funcall)
-  ;;     (let ((result (run-hook-wrapped 'smie-indent-functions #'smie--funcall)))
-  ;;       (if (numberp result)
-  ;;           result
-  ;;         (current-indentation)))))
-  )
 
 ;; Automatically resizes all windows proportionally when splitting or deleting a
 ;; window. This prevents new windows from taking all the space from the current
@@ -417,8 +396,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq font-lock-maximum-decoration t)
 
-(setq gcmh-high-cons-threshold (* 600 1024 1024))
-
 ;; Auto-scroll to bottom only when you type, not when output arrives
 (setq-default comint-scroll-to-bottom-on-input t)
 ;; (setq-default comint-scroll-to-bottom-on-output nil)
@@ -574,15 +551,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Disable visual indicators in the fringe for buffer boundaries and empty lines
 ;; (setq-default indicate-buffer-boundaries nil)
 ;; (setq-default indicate-empty-lines nil)
-
-;;; gc sentinel
-
-(lightemacs-use-package gcsentinel
-  :ensure nil
-  :commands gcsentinel-mode
-  :init
-  (add-hook 'lightemacs-emacs-startup-hook #'gcsentinel-mode 200)
-  (setq gcsentinel-low-cons-threshold minimal-emacs-gc-cons-threshold))
 
 ;;; Target hooks
 
@@ -935,7 +903,6 @@ WIDTH is the tab width."
   (setq modus-themes-italic-constructs t)
   (setq modus-themes-bold-constructs t)
   (setq modus-themes-mixed-fonts nil)
-  (setq modus-themes-prompts '(bold intense))
 
   ;;; Simple text file
   ;; To avoid text-mode interfering with other modes like org or markdown,
@@ -1146,14 +1113,6 @@ WIDTH is the tab width."
   ;;     t))
   ;; (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
   (add-hook 'easysession-new-session-hook 'easysession-reset)
-
-  (setq flymake-start-on-flymake-mode (when (> (num-processors) 8) t))
-  ;; (setq flymake-no-changes-timeout (when (> (num-processors) 8) 0.8))
-  (setq flymake-no-changes-timeout 0.8)
-  (setq flymake-start-on-save-buffer t)  ;; Do not enable or it will enable it on save
-
-  ;; Suppress the display of Flymake error counters when there are no errors.
-  (setq flymake-suppress-zero-counters t)
 
   (unless noninteractive
     (with-eval-after-load 'icomplete
@@ -1420,7 +1379,7 @@ WIDTH is the tab width."
   ;; This seems to change ediff
   (setq diff-default-read-only t)
 
-  ;; TODO minimal-emacs
+  ;; TODO minimal-emacs?
   (fringe-mode (frame-char-width))
   ;; (if (fboundp 'fringe-mode) (fringe-mode '20))
 
@@ -2230,56 +2189,6 @@ WIDTH is the tab width."
                  1)
                t))
 
-;;; Flymake
-
-(defun my-limit-package-lint-flymake-setup-a (orig-fn &rest args)
-  "Limit package lint flymake setup.
-ORIG-FN and ARGS is the functions and its arguments."
-  ;;(setq-local package-lint-main-file
-  ;;            (file-name-nondirectory
-  ;;             (buffer-file-name (buffer-base-buffer))))
-  (when (my-code-checker-allowed-p)
-    (let* ((filename (buffer-file-name (buffer-base-buffer)))
-           (basename (if filename (file-name-nondirectory filename) "")))
-      (when (and filename
-                 (not (string-match-p "/lisp/local/" filename))
-                 (not (string= basename ".dir-locals.el"))
-                 (not (string= basename ".dir-config.el"))
-                 (not (string= basename ".dir-settings.el"))
-                 (not (string= basename "init.el"))
-                 (not (string= basename "early-init.el"))
-                 (not (string-prefix-p "le-" basename)))
-        (apply orig-fn args)))))
-
-(with-eval-after-load 'le-package-lint-flymake
-  (advice-add 'package-lint-flymake-setup :around
-              #'my-limit-package-lint-flymake-setup-a))
-
-;; ignore pckage lint: The word "emacs" is redundant in Emacs package names.
-
-(defun my-package-lint-ignore (orig-fun desc)
-  "Bypass the \"emacs\" name check for files in a specific directory.
-ORIG-FUN is the advised function.  DESC is the package description struct."
-  (let ((target-dir (expand-file-name "~/src/emacs/lightemacs"))
-        (file-name (buffer-file-name (buffer-base-buffer))))
-    (when file-name
-      (if (and (buffer-file-name (buffer-base-buffer))
-               (buffer-file-name (buffer-base-buffer))
-               (file-in-directory-p file-name target-dir))
-          ;; Condition met: return nil to skip the original function
-          nil
-        ;; Condition not met: execute the original function
-        (funcall orig-fun desc)))))
-
-(with-eval-after-load 'package-lint
-  ;; Apply the :around advice to the specific package-lint function
-
-  (advice-add 'package-lint--check-package-summary :around
-              #'my-package-lint-ignore)
-
-  (advice-add 'package-lint--check-no-emacs-in-package-name :around
-              #'my-package-lint-ignore))
-
 ;;; Last resort hjkl
 
 (defun my-forward-char-same-line ()
@@ -2735,111 +2644,6 @@ ARGS - the arguments passed to the original function"
                            display-string)
         (overlay-put ov 'display display-string))))
   (setq hs-set-up-overlay 'display-code-line-counts))
-
-;;===========================================================================
-;; Geometry
-;;===========================================================================
-;; TODO Migrate this to lightemacs
-(defvar my-frame-geometry-file (expand-file-name "frame-geometry"
-                                                 user-emacs-directory))
-
-(defvar my-frame-geometry-modified-p nil
-  "Was the frame geometry modified.")
-
-(defun my-frame-geometry-save ()
-  "Save the current frame's geometry."
-  (when (display-graphic-p)
-    (let ((inhibit-message t)
-          (frame (selected-frame))
-          (file my-frame-geometry-file))
-      (with-temp-buffer
-        (let ((make-backup-files nil)
-              (font (frame-parameter frame 'font))
-              (left (frame-parameter frame 'left))
-              (top (frame-parameter frame 'top))
-              (width (frame-parameter frame 'width))
-              (height (frame-parameter frame 'height))
-              (pixel-width (frame-pixel-width frame))
-              (pixel-height (frame-pixel-height frame)))
-          (insert
-           ";; -*- mode: emacs-lisp; lexical-binding: t; coding: utf-8-unix -*-\n")
-          (insert ";; Frame geometry file, automatically generated "
-                  "by 'my-frame-geometry*' functions.\n")
-          (insert
-           "(setq initial-frame-alist nil)\n"
-           (format "(add-to-list 'initial-frame-alist '(font . \"%s\"))\n"
-                   (replace-regexp-in-string "\"" "\\\\\"" font))
-           (when top
-             (format "(add-to-list 'initial-frame-alist '(top . %s))\n" top))
-           (when left
-             (format "(add-to-list 'initial-frame-alist '(left . %s))\n" left))
-           (when width
-             (format "(add-to-list 'initial-frame-alist '(width . %s))\n" width))
-           (when height
-             (format "(add-to-list 'initial-frame-alist '(height . %s))\n" height))
-           "\n"
-           (when pixel-width
-             (format "(setq my-frame-geometry-pixel-width %s)\n" pixel-width))
-           (when pixel-height
-             (format "(setq my-frame-geometry-pixel-height %s)\n" pixel-height)))
-          (when (file-writable-p file)
-            (let ((save-silently t))
-              (write-file file))))))))
-
-(defun my-frame-geometry-load-initial-frame-alist ()
-  "Load the previous frames geometry.
-Call it from \='early-init.el\='."
-  (let ((file my-frame-geometry-file)
-        (inhibit-message t))
-    (when (file-readable-p file)
-      (load (expand-file-name file) t t t))))
-
-(defun my-frame-geometry-set-pixel-width-height (&optional frame)
-  "Set the frame width and height.
-Call it from \='init.el\='.
-FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
-  (unless frame
-    (setq frame (selected-frame)))
-
-  (when (and (display-graphic-p)
-             (boundp 'my-frame-geometry-pixel-width)
-             (boundp 'my-frame-geometry-pixel-height))
-    (message "Set frame size: %sx%s"
-             my-frame-geometry-pixel-width
-             my-frame-geometry-pixel-height)
-    (set-frame-size frame
-                    my-frame-geometry-pixel-width
-                    my-frame-geometry-pixel-height
-                    t)))
-
-(defun my-set-frame-size-and-position (&optional frame)
-  "Set position and size of FRAME when it's the first frame."
-  (unless frame
-    (setq frame (selected-frame)))
-  (unless my-frame-geometry-modified-p
-    ;; when (eq frame (selected-frame))
-    (when (not (frame-parameter frame 'parent-frame))
-      (when (fboundp 'my-frame-geometry-set-pixel-width-height)
-        (setq my-frame-geometry-modified-p t)
-        (my-frame-geometry-set-pixel-width-height frame)))))
-
-(unless noninteractive
-  (my-frame-geometry-load-initial-frame-alist)
-  ;; (setq initial-frame-alist nil)
-  (add-hook 'kill-emacs-hook 'my-frame-geometry-save))
-
-;; (add-hook 'after-make-frame-functions #'my-set-frame-size-and-position)
-
-;; Issue with Emacs 31 and shut-up
-;; (with-eval-after-load "shut-up"
-;;   (with-no-warnings
-;;     (defun my-around-my-frame-geometry-save (fn &rest args)
-;;       "FN is the advised function. ARGS are the function arguments."
-;;       (shut-up
-;;         (apply fn args)))
-;;
-;;     (advice-add 'my-frame-geometry-save :around
-;;                 #'my-around-my-frame-geometry-save)))
 
 ;;; server
 
@@ -3528,69 +3332,6 @@ Opens a split window showing the added and removed features."
 ;;              focus-read-only-mode
 ;;              focus-turn-off-read-only-mode))
 
-;;; flymake ansible lint
-
-(defun my-setup-flymake-ansible-lint-project-dir ()
-  "Configure `flymake-ansible-lint' to use the project or VC root."
-  (when (fboundp 'project-root)
-    (setq-local flymake-ansible-lint-args
-                (append flymake-ansible-lint-args
-                        (let* ((project (project-current nil))
-                               (project-root (when project
-                                               (project-root project)))
-                               (vc-root (unless project-root
-                                          (vc-root-dir))))
-                          (cond
-                           (project-root
-                            (list "--project-dir"
-                                  (expand-file-name project-root)))
-
-                           (vc-root
-                            (list "--project-dir"
-                                  (expand-file-name project-root)))
-
-                           (t
-                            nil)))))))
-
-
-(add-hook 'ansible-mode-hook #'my-setup-flymake-ansible-lint-project-dir)
-
-(setq flymake-ansible-lint-args
-      '("--offline"
-        "--skip=yamllint"
-        "--skip-list"
-        "run-once[play],no-free-form,trailing-whitespace,yaml[line-length]"))
-
-(setq flymake-ansible-lint-auto-project-dir t)
-
-;; (unless noninteractive
-;;   (with-eval-after-load 'flymake
-;;     (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
-;;     (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)))
-
-;; Why does it start with elisp? TODO
-
-;;; flymake bashate
-(lightemacs-use-package flymake-bashate
-  :commands flymake-bashate-setup
-  :config
-  (setq flymake-bashate-max-line-length 80)
-  ;; To make bashate ignore specific Bashate rules, such as E003 (ensure all
-  ;; indents are a multiple of 4 spaces) and E006 (check for lines longer than
-  ;; 79 columns), set the following variable:
-  ;; (flymake-bashate-ignore "E003,E006")
-  ;;
-  ;; E001: trailing whitespace
-  (setq flymake-bashate-ignore "E003,E001")
-
-  :init
-  (defun my-setup-flymake-bashate ()
-    (when (my-code-checker-allowed-p)
-      (flymake-bashate-setup)))
-
-  (add-hook 'bash-ts-mode-hook 'my-setup-flymake-bashate)
-  (add-hook 'sh-mode-hook 'my-setup-flymake-bashate))
-
 ;;; Disabled packages
 
 ;; (lightemacs-use-package ws-butler
@@ -3685,48 +3426,6 @@ Opens a split window showing the added and removed features."
 ;; (add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
 ;; (add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
 
-;;; buffer guardian
-
-(lightemacs-use-package buffer-guardian
-  :ensure nil
-  :commands buffer-guardian-mode
-  :hook
-  (lightemacs-emacs-startup . buffer-guardian-mode)
-
-  :init
-  (setq buffer-guardian-override-save-some-buffers t)
-
-  ;; (defun buffer-guardian--save-some-buffers-hook (&rest _)
-  ;;   "Trigger `buffer-guardian' save logic during `save-some-buffers' safely."
-  ;;   (when (bound-and-true-p buffer-guardian-mode)
-  ;;     (buffer-guardian-save-all-buffers))
-  ;;   nil) ; Return nil so native save-some-buffers continues cleanly if needed
-  ;; (add-hook 'save-some-buffers-functions #'buffer-guardian--save-some-buffers-hook)
-
-  (setq buffer-guardian-verbose nil)
-  (setq buffer-guardian-save-all-buffers-interval (* 60 30))
-  (setq buffer-guardian-save-all-buffers-idle (* 4 60)))
-
-;; Simpler alternative to bg
-;; (progn
-;;   (setq auto-save-visited-interval 30)
-;;   ;; (auto-save-visited-mode 1)
-;;
-;;   ;; Make (save-some-buffers 1) only save buffers when they exist in the disk
-;;
-;;   ;; Focus
-;;   ;; (defun my-save-on-focus-change ()
-;;   ;;   "Save all buffers when Emacs loses focus."
-;;   ;;   (when (not (frame-focus-state))
-;;   ;;     (my-save-all-buffers)))
-;;   ;; (add-function :after after-focus-change-function #'my-save-on-focus-change)
-;;
-;;   ;; Save some buffers
-;;   (setq save-some-buffers-default-predicate
-;;         (lambda ()
-;;           (and (buffer-file-name (buffer-base-buffer))
-;;                (file-exists-p buffer-file-name)))))
-
 ;;; Rainbow
 
 ;; (lightemacs-use-package rainbow-mode
@@ -3742,24 +3441,6 @@ Opens a split window showing the added and removed features."
   (require 'easysession-scratch)
   (when (fboundp 'easysession-scratch-mode)
     (easysession-scratch-mode 1)))
-
-;;; flymake elisp done
-
-(defvar lightemacs-flymake--setup-elisp-done nil
-  "Non-nil once `elisp-flymake-byte-compile-load-path' has been extended.")
-
-(defun lightemacs-flymake-initialize-elisp-path ()
-  "Extend `elisp-flymake-byte-compile-load-path' with the current `load-path'.
-This function ensures that the Flymake subprocess inherits the session's library
-environment for accurate linting."
-  (with-eval-after-load 'elisp-mode
-    (unless lightemacs-flymake--setup-elisp-done
-      (setq elisp-flymake-byte-compile-load-path
-            (append elisp-flymake-byte-compile-load-path load-path))
-      (setq lightemacs-flymake--setup-elisp-done t))))
-
-(add-hook 'lightemacs-emacs-startup-hook
-          #'lightemacs-flymake-initialize-elisp-path 99)
 
 ;;; git-timemachine
 
@@ -4681,10 +4362,6 @@ are editing by falling back to another visible file buffer."
           "^/tmp/"
           "^/var/tmp/")))
 
-;;; Filetype: PHP and HTML
-
-
-
 ;;; savefold
 
 ;; TODO kill emacs hook issue when editing .asc file, it asks for the password
@@ -4919,6 +4596,8 @@ properly handles remote files over Tramp), applying the setting only if
 ;;                                  (?t "Types"     font-lock-type-face)
 ;;                                  (?v "Variables" font-lock-variable-name-face)))))
 
+;;; consult flymake
+
 ;; (with-eval-after-load 'consult
 ;;   (with-eval-after-load 'flymake
 ;;     (require 'consult-flymake)))
@@ -5008,6 +4687,7 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;; Prevent adding new lines
 (defun my-snippet-mode-disable-final-newline ()
+  "Disable the final newline in Yasnippet `snippet-mode'."
   (setq-local mode-require-final-newline nil))
 (if (fboundp 'my-snippet-mode-disable-final-newline)
     (add-hook 'snippet-mode-hook
