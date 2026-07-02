@@ -45,6 +45,7 @@ actions:
       - "--delete"
       - "--exclude=README.md"
       - "--exclude=LICENSE"
+      - "--exclude=savedconfig"
       - "--exclude=00my-*"
       - "--exclude=my-*"
       - "--exclude=.git"
