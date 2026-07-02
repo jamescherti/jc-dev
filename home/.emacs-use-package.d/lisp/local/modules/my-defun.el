@@ -952,6 +952,17 @@ upon switching or opening."
 ;;           (find-file fallback-file)
 ;;           (pulse-momentary-highlight-one-line (point)))))))
 
+;;; tab width
+
+(defun my-set-tab-width (width)
+  "Set the tab width.
+WIDTH is the tab width."
+  (setq-local indent-tabs-mode nil)
+  (setq-local tab-width width)
+  (setq-local standard-indent width)
+  ;; (setq-local evil-shift-width width)
+  )
+
 ;;; From Lightemacs
 
 ;; (defmacro lightemacs-shield-macros (&rest body)

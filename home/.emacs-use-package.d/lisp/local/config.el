@@ -805,6 +805,7 @@ subsequent GCC invocations."
                            mod-kirigami
                            mod-flymake
                            mod-gc
+                           mod-yasnippet
 
                            le-compile-angel
                            le-flymake
@@ -1309,6 +1310,72 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;;
 ;;     (advice-add 'my-frame-geometry-save :around
 ;;                 #'my-around-my-frame-geometry-save)))
+
+;;; emacs-data
+
+(defvar my-shared-user-emacs-directory (expand-file-name "~/.emacs-data/var"))
+(setq tmpedit-dir (expand-file-name "tmpedit" "~/.emacs-data"))
+
+;; Update paths
+(setq undo-fu-session-directory
+      (expand-file-name "undo-fu-session"
+                        my-shared-user-emacs-directory))
+
+(setq savehist-file (expand-file-name "history" my-shared-user-emacs-directory))
+
+(setq persist-text-scale-file (expand-file-name "persist-text-scale"
+                                                my-shared-user-emacs-directory))
+
+(setq prescient-save-file (expand-file-name "prescient-save.el"
+                                            my-shared-user-emacs-directory))
+(with-eval-after-load 'compile-angel
+  (when (fboundp 'compile-angel-exclude-file)
+    (compile-angel-exclude-file
+     (expand-file-name "prescient-save.el"
+                       my-shared-user-emacs-directory))))
+
+(setq backup-directory-alist
+      `(("." . ,(expand-file-name "backup" my-shared-user-emacs-directory))))
+(setq tramp-backup-directory-alist backup-directory-alist)
+
+(setq auto-save-list-file-prefix
+      (expand-file-name "autosave/" my-shared-user-emacs-directory))
+(setq tramp-auto-save-directory
+      (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
+(setq auto-save-file-name-transforms
+        `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+           ;; Redirect TRAMP (remote) file auto-saves to the local machine
+           ;; (prefixed with "tramp-") to prevent Emacs from hanging due to
+           ;; network latency during auto-save operations.
+           ,(file-name-concat auto-save-list-file-prefix "tramp-\\2-") sha1)
+          ("\\`/\\([^/]+/\\)*\\([^/]+\\)\\'"
+           ;; Redirect absolute file paths auto-saves to the
+           ;; `auto-save-list-file-prefix' directory. This appends the base
+           ;; filename to the prefix, avoiding #file.txt# files across the system.
+           ,(file-name-concat auto-save-list-file-prefix "\\2-") sha1)))
+(when (memq system-type '(windows-nt cygwin ms-dos))
+    (push `("\\`\\(/\\|[a-zA-Z]:/\\|//\\)\\([^/]+/\\)*\\([^/]+\\)\\'"
+            ,(file-name-concat auto-save-list-file-prefix "\\3-") sha1)
+          auto-save-file-name-transforms))
+
+(setq tramp-auto-save-directory
+      (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
+
+(setq save-place-file (expand-file-name "saveplace" my-shared-user-emacs-directory))
+
+(setq abbrev-file-name (expand-file-name "abbrev_defs" my-shared-user-emacs-directory))
+
+(setq easysession-directory
+      (expand-file-name "easysession" my-shared-user-emacs-directory))
+
+(setq project-list-file (when (boundp 'lightemacs-var-directory)
+                          (expand-file-name "projects" my-shared-user-emacs-directory)))
+(setq my-project-list-file-auto
+      (expand-file-name "projects-auto"
+                        my-shared-user-emacs-directory))
+
+(setq recentf-save-file
+      (expand-file-name "recentf" my-shared-user-emacs-directory))
 
 ;;; Provide
 

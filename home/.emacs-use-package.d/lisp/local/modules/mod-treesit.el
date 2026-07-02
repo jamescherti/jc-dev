@@ -28,6 +28,81 @@
 ;;; Require
 
 (require 'my-defun)
+(eval-and-compile
+  (require 'lightemacs-use-package))
+
+;;; Filetype defaults
+
+(setq sgml-basic-offset 2)  ;; HTML
+(setq css-indent-offset 2)
+(setq js-indent-level 2)
+(setq javascript-indent-level 2)
+(setq html-indent-offset 2)
+(setq sgml-basic-offset 2)
+(setq lua-indent-level 2)
+(setq lua-ts-indent-offset 2)
+(setq yaml-indent-offset 2)
+
+;;; txt-file-mode
+
+;;; Simple text file
+;; To avoid text-mode interfering with other modes like org or markdown,
+;; I created a dedicated mode for *.txt files.
+(define-derived-mode txt-file-mode text-mode "SimpleTextFile"
+  "Major mode for editing *.txt files.")
+(defun setup-txt-file-mode ()
+  "Setup txt file mode."
+  ;; (setq-local evil-shift-width 2)
+  (setq-local indent-tabs-mode nil)
+  (setq-local tab-width 2)
+  (setq-local standard-indent 2))
+
+;; Bad idea. It loads too many modes.
+;; (setq initial-major-mode 'txt-file-mode)
+(push (cons "\\.[Tt][Xx][Tt]\\'" 'txt-file-mode) auto-mode-alist)
+(push (cons "\\.[Tt][Xx][Tt]\\.[aA][sS][cC]\\'" 'txt-file-mode) auto-mode-alist)
+
+;;; conf-mode
+
+(defun my-setup-conf-mode ()
+  "Setup `conf-mode'."
+  (setq-local evil-auto-indent nil)
+  (setq-local indent-line-function #'ignore))
+(with-no-warnings
+  (add-hook 'conf-mode-hook #'my-setup-conf-mode))
+
+;;; Elisp
+
+(dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook lisp-interaction-mode-hook))
+  (add-hook hook #'(lambda ()
+                     (display-fill-column-indicator-mode)
+                     (if (fboundp 'my-set-tab-width)
+                         (my-set-tab-width 2)
+                       (error "Undefined: my-set-tab-width")))))
+
+;;; Vimrc mode
+
+(lightemacs-use-package vimrc-mode
+  :commands vimrc-mode
+  ;; :mode
+  ;; ("/vim\\(rc\\)?\\'" . vimrc-mode)
+  ;; ("\\.vim\\(rc\\)?\\'" . vimrc-mode)
+  ;; ("\\.vimrc.local?\\'" . vimrc-mode)
+  ;; ("\\.lvimrc?\\'" . vimrc-mode)
+  ;; ("/\\.vim\\(rc\\)?\\'" . vimrc-mode)
+  )
+
+(add-hook 'vimrc-mode-hook #'(lambda ()
+                               (setq-local indent-tabs-mode nil)
+                               (if (fboundp 'my-set-tab-width)
+                                   (my-set-tab-width 2)
+                                 (error "Undefined: my-set-tab-width"))))
+
+;; ("/\\.vimrc.local?\\'" . vimrc-mode)
+;; March .vimrc, .vimrc.local, .vim-after, .vim-before...
+;; ("/\\.l?vim[^/]*\\'" . vimrc-mode)
+;; ("/\\.lvimrc?\\'" . vimrc-mode)
+(add-to-list 'auto-mode-alist '("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode))
 
 ;;; Tree-sitter defaults
 
@@ -401,6 +476,17 @@ only if they are not already available."
 
 ;;; Bash
 
+(setq sh-basic-offset 2)
+(defun setup-sh-mode ()
+  "Setup `sh-mode'."
+  (display-fill-column-indicator-mode)
+  (unless (string-suffix-p ".ebuild" (buffer-file-name (buffer-base-buffer)))
+    (my-set-tab-width sh-basic-offset)
+    (setq-local fill-column 80)))
+
+(add-hook 'sh-mode-hook #'setup-sh-mode)
+(add-hook 'bash-ts-mode-hook #'setup-sh-mode)
+
 (if (my-treesit-language-available-p 'bash)
     (progn
       (push '(shell-script-mode . bash-ts-mode) major-mode-remap-alist)
@@ -511,6 +597,109 @@ only if they are not already available."
     (mhtml-mode . sgml-electric-tag-pair-mode)
     (html-mode . sgml-name-8bit-mode)
     (mhtml-mode . sgml-name-8bit-mode)))
+
+;;; Python
+
+(defun setup-python-mode ()
+  "Setup `python-mode'."
+  (display-fill-column-indicator-mode)
+  (my-set-tab-width 4)
+  (setq-local fill-column 79))
+
+(when (fboundp 'setup-python-mode)
+  (add-hook 'python-mode-hook #'setup-python-mode)
+  (add-hook 'python-ts-mode-hook #'setup-python-mode))
+
+;;; jinja2-mode and csv-mode
+
+;; (lightemacs-use-package jinja2-mode
+;;   :commands jinja2-mode
+;;   :mode ("\\.j2\\'" . jinja2-mode))
+
+;;; ultisnips-mode
+
+(lightemacs-use-package ultisnips-mode
+  :commands ultisnips-mode
+  :mode ("\\.snippets\\'" . ultisnips-mode))
+
+;;; Jenkinsfile
+;; (lightemacs-use-package jenkinsfile-mode
+;;   :commands jenkinsfile-mode
+;;   :mode
+;;   (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
+;;    ("/Jenkinsfile\\'" . jenkinsfile-mode))
+;;   :init
+;;   ;; (add-to-list 'auto-mode-alist '("/Jenkinsfile.*\\'" . jenkinsfile-mode))
+;;   ;; (add-to-list 'auto-mode-alist '("Jenkinsfile[^/]*\\'" . jenkinsfile-mode))
+;;   ;; (add-to-list 'auto-mode-alist '("Jenkinsfile\\'" . jenkinsfile-mode))
+;;   )
+
+;;; BASIC
+;; (lightemacs-use-package basic-mode
+;;   :commands (cp437-dos
+;;              basic-qb45-mode)
+;;   :init
+;;   ;; (setq default-buffer-file-coding-system 'cp437-dos)
+;;
+;;   ;; Djgpp and rhide
+;;   (add-to-list 'file-coding-system-alist '("\\.C\\'" . cp437-dos))
+;;   (add-to-list 'file-coding-system-alist '("\\.H\\'" . cp437-dos))
+;;
+;;   (add-to-list 'file-coding-system-alist '("\\.[bB][aA][sS]\\'" . cp437-dos))
+;;
+;;   ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
+;;   ;; code." t)
+;;   (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
+
+;;; auto-mode-alist
+
+;; TODO minimal-emacs readme?
+(add-to-list 'auto-mode-alist '("/LICENSE\\'" . text-mode))
+(add-to-list 'auto-mode-alist '("rc\\'" . conf-mode) 'append)
+
+;; This regular expression matches the full file path for any .conf file
+;; residing within either /etc/fonts/ or .config/fontconfig/ and maps them
+;; directly to xml-mode.
+(add-to-list 'auto-mode-alist '("/etc/fonts/.*\\.conf\\'" . xml-mode))
+(add-to-list 'auto-mode-alist
+             (cons (concat
+                    (regexp-quote (expand-file-name "~/.config/fontconfig/"))
+                    ".*\\.conf\\'")
+                   'xml-mode))
+
+(nconc auto-mode-alist
+       '(;; conf-mode
+         ("\\.profile\\'" . conf-mode)  ; firejail profiles
+         ("^/etc/[^/]+" . conf-unix-mode)
+
+         ("/COMMIT_EDITMSG\\'" . diff-mode)
+         ("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode)
+
+         ;; Gentoo
+         ("/make\\.conf\\'" . sh-mode)
+
+         ;; Gentoo (/etc/portage files)
+         ("package\\.\\(?:license\\|mask\\|use\\|accept_keywords\\)/.+\\'" . conf-unix-mode)
+         ("package\\.\\(?:env\\|unmask\\)\\'" . conf-unix-mode)
+
+         ;; /etc/hosts and ansible /hosts
+
+         ;; Replace with git-modes
+         ;; ("/\\.gitignore" . conf-unix-mode)
+         ;; ("/\\.gitattributes" . conf-space-mode)
+
+         ;; Git
+
+         ;; hexl-mode
+         ;; ("\\.\\(?:hex\\|nes\\)\\'" . hexl-mode)
+
+         ;; txt-file-mode
+         ;; ("\\.log\\'" . txt-file-mode)
+         ))
+
+(add-to-list 'auto-mode-alist '("/\\.gitconfig\\.local\\'" . gitconfig-mode))
+(add-to-list 'auto-mode-alist '("/\\.gitignore\\.local\\'" . gitignore-mode))
+(add-to-list 'auto-mode-alist '("/\\.gitattributes\\.local\\'" . gitattributes-mode))
 
 ;;; Provide
 

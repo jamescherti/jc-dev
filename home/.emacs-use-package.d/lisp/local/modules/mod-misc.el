@@ -36,6 +36,7 @@
 (require 'my-defun)
 
 ;;; Modeline
+
 (add-hook 'lightemacs-after-init-hook #'display-time-mode)
 (setq display-time-mail-function #'ignore)
 (setq display-time-mail-string "")
@@ -361,10 +362,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; buffer.
 ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose)
 
-;; TODO minimal-emacs readme?
-(add-to-list 'auto-mode-alist '("/LICENSE\\'" . text-mode))
-(add-to-list 'auto-mode-alist '("rc\\'" . conf-mode) 'append)
-
 (setq electric-quote-comment nil)
 (setq electric-quote-string nil)
 
@@ -644,9 +641,6 @@ any new ones."
         ;; (gptel                         . "melpa")
         ))
 
-(defvar my-shared-user-emacs-directory (expand-file-name "~/.emacs-data/var"))
-
-
 ;;; config
 
 (defun my-evil-config ()
@@ -706,52 +700,11 @@ WIDTH is the tab width."
   ;; (setq-local evil-shift-width width)
   )
 
-(defun my-setup-filetype ()
-  "Setup filetype."
-  (add-to-list 'auto-mode-alist '("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode))
-
-  (setq sgml-basic-offset 2)  ;; HTML
-  (setq css-indent-offset 2)
-  (setq js-indent-level 2)
-  (setq javascript-indent-level 2)
-  (setq html-indent-offset 2)
-  (setq sgml-basic-offset 2)
-  (setq lua-indent-level 2)
-  (setq lua-ts-indent-offset 2)
-  (setq yaml-indent-offset 2)
-
-  ;; python
-  (defun setup-python-mode ()
-    "Setup `python-mode'."
-    (display-fill-column-indicator-mode)
-    (my-set-tab-width 4)
-    (setq-local fill-column 79))
-
-  (when (fboundp 'setup-python-mode)
-    (add-hook 'python-mode-hook #'setup-python-mode)
-    (add-hook 'python-ts-mode-hook #'setup-python-mode))
-
-  ;; sh
-  (setq sh-basic-offset 2)
-  (defun setup-sh-mode ()
-    "Setup `sh-mode'."
-    (display-fill-column-indicator-mode)
-    (unless (string-suffix-p ".ebuild" (buffer-file-name (buffer-base-buffer)))
-      (my-set-tab-width sh-basic-offset)
-      (setq-local fill-column 80)))
-  (when (fboundp 'setup-sh-mode)
-    (add-hook 'sh-mode-hook #'setup-sh-mode)
-    (add-hook 'bash-ts-mode-hook #'setup-sh-mode)))
-
 ;;; user post init
 
 (defun lightemacs-user-post-init ()
   "This function is executed right before loading modules."
   ;; pre early init
-
-  (my-setup-filetype)
-
-  (setq tmpedit-dir (expand-file-name "tmpedit" "~/.emacs-data"))
 
   (setq uniquify-buffer-name-style 'reverse)
   (setq uniquify-separator "•")
@@ -918,49 +871,8 @@ WIDTH is the tab width."
 
   ;; Bad idea. It loads too many modes.
   ;; (setq initial-major-mode 'txt-file-mode)
-
   (push (cons "\\.[Tt][Xx][Tt]\\'" 'txt-file-mode) auto-mode-alist)
   (push (cons "\\.[Tt][Xx][Tt]\\.[aA][sS][cC]\\'" 'txt-file-mode) auto-mode-alist)
-
-  (setq auto-mode-alist (append '(("/make\\.conf\\'" . sh-mode))
-                                auto-mode-alist))
-
-  (nconc auto-mode-alist
-         '(;; conf-mode
-           ("\\.profile\\'" . conf-mode)  ; firejail profiles
-           ("^/etc/[^/]+" . conf-unix-mode)
-
-           ;; Gentoo (/etc/portage files)
-           ("package\\.\\(?:license\\|mask\\|use\\|accept_keywords\\)/.+\\'" . conf-unix-mode)
-           ("package\\.\\(?:env\\|unmask\\)\\'" . conf-unix-mode)
-
-           ;; /etc/hosts and ansible /hosts
-
-           ;; Replace with git-modes
-           ;; ("/\\.gitignore" . conf-unix-mode)
-           ;; ("/\\.gitattributes" . conf-space-mode)
-
-           ;; Git
-
-           ;; hexl-mode
-           ;; ("\\.\\(?:hex\\|nes\\)\\'" . hexl-mode)
-
-           ;; txt-file-mode
-           ;; ("\\.log\\'" . txt-file-mode)
-           ))
-  (add-to-list 'auto-mode-alist '("/\\.gitconfig\\.local\\'" . gitconfig-mode))
-  (add-to-list 'auto-mode-alist '("/\\.gitignore\\.local\\'" . gitignore-mode))
-  (add-to-list 'auto-mode-alist '("/\\.gitattributes\\.local\\'" . gitattributes-mode))
-
-  ;; This regular expression matches the full file path for any .conf file
-  ;; residing within either /etc/fonts/ or .config/fontconfig/ and maps them
-  ;; directly to xml-mode.
-  (add-to-list 'auto-mode-alist '("/etc/fonts/.*\\.conf\\'" . xml-mode))
-  (add-to-list 'auto-mode-alist
-               (cons (concat
-                      (regexp-quote (expand-file-name "~/.config/fontconfig/"))
-                      ".*\\.conf\\'")
-                     'xml-mode))
 
   (defun my-setup-conf-mode ()
     "Setup `conf-mode'."
@@ -1718,39 +1630,7 @@ WIDTH is the tab width."
   ;;         obsolete
   ;;         ))  ;; Use of deprecated functions slated for removal
 
-  ;; Update paths
-  (setq undo-fu-session-directory
-        (expand-file-name "undo-fu-session"
-                          my-shared-user-emacs-directory))
 
-  (setq savehist-file (expand-file-name "history" my-shared-user-emacs-directory))
-
-  (setq persist-text-scale-file (expand-file-name "persist-text-scale"
-                                                  my-shared-user-emacs-directory))
-
-  (setq prescient-save-file (expand-file-name "prescient-save.el"
-                                              my-shared-user-emacs-directory))
-  (with-eval-after-load 'compile-angel
-    (when (fboundp 'compile-angel-exclude-file)
-      (compile-angel-exclude-file
-       (expand-file-name "prescient-save.el"
-                         my-shared-user-emacs-directory))))
-
-
-  (setq backup-directory-alist
-        `(("." . ,(expand-file-name "backup" my-shared-user-emacs-directory))))
-  (setq tramp-backup-directory-alist backup-directory-alist)
-
-  ;;-------------------------------------> BLOCK CHANGE AUTO SAVE PATH
-  (setq auto-save-list-file-prefix
-        (expand-file-name "autosave/" my-shared-user-emacs-directory))
-  (setq tramp-auto-save-directory
-        (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
-  (setq auto-save-file-name-transforms
-        `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
-           ,(file-name-concat auto-save-list-file-prefix "tramp-\\2-") sha1)
-          ("\\`/\\([^/]+/\\)*\\([^/]+\\)\\'"
-           ,(file-name-concat auto-save-list-file-prefix "\\2-") sha1)))
 
   (when auto-save-default
     (let ((auto-save-dir (file-name-directory auto-save-list-file-prefix)))
@@ -1759,27 +1639,10 @@ WIDTH is the tab width."
           (make-directory auto-save-dir t)))))
   ;;-------------------------------------> BLOCK CHANGE AUTO SAVE PATH
 
-  (setq tramp-auto-save-directory
-        (expand-file-name "tramp-autosave/" my-shared-user-emacs-directory))
-
-  (setq save-place-file (expand-file-name "saveplace" my-shared-user-emacs-directory))
-
-  (setq abbrev-file-name (expand-file-name "abbrev_defs" my-shared-user-emacs-directory))
-
   ;; (setq easysession-debug t)
   (setq easysession-refresh-tab-bar t)
 
-  (setq easysession-directory
-        (expand-file-name "easysession" my-shared-user-emacs-directory))
-
-  (setq project-list-file (when (boundp 'lightemacs-var-directory)
-                            (expand-file-name "projects" my-shared-user-emacs-directory)))
-  (setq my-project-list-file-auto
-        (expand-file-name "projects-auto"
-                          my-shared-user-emacs-directory))
-
-  (setq recentf-save-file
-        (expand-file-name "recentf" my-shared-user-emacs-directory)))
+  )
 
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-post-init)
 
@@ -2550,59 +2413,6 @@ ARGS - the arguments passed to the original function"
 
 (with-eval-after-load 'log-view
   (advice-add 'log-view-diff :around #'my-log-view-diff-stay))
-
-(add-to-list 'auto-mode-alist
-             '("/COMMIT_EDITMSG\\'" . diff-mode))
-
-;;; auto insert if new file
-
-;; This is called by main.el
-(defun my/autoinsert-yas-expand()
-  "Replace text with Yasnippet template."
-  (when (fboundp 'yas-expand-snippet)
-    (condition-case nil
-        (progn
-          (yas-expand-snippet (buffer-string) (point-min) (point-max))
-          (when (and (not (bobp))
-                     (fboundp 'evil-insert-state)
-                     (not (zerop (buffer-size))))
-            (evil-insert-state)))
-      (error
-       nil))))
-
-(defun my-auto-insert-if-new-file ()
-  "Auto-insert template only if the file is newly created and does not exist."
-  (when-let* ((file-name (buffer-file-name (buffer-base-buffer))))
-    (when (and (not (file-exists-p file-name))
-               (= (buffer-size) 0))
-      ;; Execute the default auto-insert function or custom logic here. For
-      ;; simplicity, we invoke `auto-insert` directly.
-      (condition-case nil
-          (progn
-            (when (bound-and-true-p yas-minor-mode) (auto-insert)))
-        ;; Ignore errors
-        (error
-         nil)))))
-
-(defun config-template-system ()
-  "Configure the template system."
-  ;; Add the custom function to `find-file-hook`
-  (add-hook 'find-file-hook 'my-auto-insert-if-new-file)
-
-  ;; :config
-  (let ((template-elisp-file (expand-file-name "main.el"
-                                               auto-insert-directory)))
-    (let ((inhibit-message t))
-      (load template-elisp-file :no-error :no-message))))
-
-(setq auto-insert 'other)
-(setq auto-insert-query nil)
-(setq auto-insert-alist nil)  ;; Will be changed by template-elisp-file
-(setq auto-insert-directory (expand-file-name "file-templates-auto/"
-                                              "~/.emacs-data/etc")) ;;; Or use custom, *NOTE* Trailing slash important
-(setq auto-insert-query nil) ;;; If you don't want to be prompted before insertion
-
-(add-hook 'lightemacs-after-init-hook 'config-template-system)
 
 ;;; hideshow
 
@@ -4665,94 +4475,6 @@ properly handles remote files over Tramp), applying the setting only if
   (setq lazy-autorevert-debug nil))
 
 
-;;; yasnippet: Clear highlights after changing the theme
-
-;; Prevent yasnippet from highlighting inserted fields, you need to modify the
-;; display face that it uses for overlays. This is done by changing the
-;; attributes of yas-field-highlight-face.
-(defun my-clear-yasnippet-field-highlight (&rest _args)
-  "Clear yasnippet field highlight face to keep original syntax highlighting."
-  (when (facep 'yas-field-highlight-face)
-    (set-face-attribute 'yas-field-highlight-face nil
-                        :inherit 'unspecified
-                        :background 'unspecified
-                        :foreground 'unspecified
-                        :box 'unspecified
-                        :underline 'unspecified)))
-;; Apply the fix whenever a theme is loaded
-(with-no-warnings
-  (advice-add 'load-theme :after #'my-clear-yasnippet-field-highlight))
-
-;;; yasnippet: final new line
-
-;; Prevent adding new lines
-(defun my-snippet-mode-disable-final-newline ()
-  "Disable the final newline in Yasnippet `snippet-mode'."
-  (setq-local mode-require-final-newline nil))
-(if (fboundp 'my-snippet-mode-disable-final-newline)
-    (add-hook 'snippet-mode-hook
-              #'my-snippet-mode-disable-final-newline)
-  (error "Undefined: my-snippet-mode-disable-final-newline"))
-
-(defun my-snippet-remove-final-newline ()
-  "Remove all final newlines at the end of the buffer."
-  (save-excursion
-    (goto-char (point-max))
-    (while (and (not (bobp))
-                (eq (char-before) ?\n))
-      (delete-char -1))))
-
-(defun my-snippet-mode-setup ()
-  "Configure `snippet-mode' to prevent and remove final newlines."
-  (setq-local require-final-newline nil)
-  (setq-local mode-require-final-newline nil)
-  (add-hook 'before-save-hook #'my-snippet-remove-final-newline nil t))
-
-(add-hook 'snippet-mode-hook #'my-snippet-mode-setup)
-
-;;; yasnippet
-
-;; Ensure it also applies when yasnippet is first loaded
-(with-no-warnings
-  (add-hook 'yas-minor-mode-hook #'my-clear-yasnippet-field-highlight))
-
-(setq yas-snippet-dirs '())
-(add-to-list 'yas-snippet-dirs
-             (expand-file-name "yasnippet/snippets" "~/.emacs-data/etc"))
-(add-to-list 'yas-snippet-dirs
-             (expand-file-name "yasnippet/snippets-auto" "~/.emacs-data/etc"))
-
-;; TODO fix when enter is pressed, yas it does not behave as well
-;; as without this
-;; (defun my-yas-next-field-or-corfu ()
-;;   "Insert the selected Corfu candidate or move to the next Yasnippet field."
-;;   (interactive)
-;;   (if (and (bound-and-true-p corfu-mode)
-;;            (fboundp 'corfu-insert)
-;;            (>= corfu--index 0))
-;;       (corfu-insert)
-;;     (when (fboundp 'yas-next-field)
-;;       (yas-next-field))))
-
-(with-eval-after-load 'yasnippet
-  ;; (define-key yas-keymap (kbd "RET") 'my-yas-next-field-or-corfu)
-  ;; (define-key yas-keymap (kbd "<return>") 'my-yas-next-field-or-corfu)
-
-  ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
-  (unless noninteractive
-    (define-key yas-minor-mode-map (kbd "C-f") 'yas-expand))
-
-  (setq yas-prompt-functions '(yas-no-prompt))  ; Do not ask the user
-
-  ;; (add-to-list 'yas-snippet-dirs
-  ;;              (expand-file-name "yasnippet/snippets" emacs-var-dir))
-  ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
-
-  ;; (define-key yas-keymap (kbd "RET") (yas-filtered-definition
-  ;;                                     'yas-next-field-or-maybe-expand))
-
-  )
-
 ;;; dir-config
 
 (lightemacs-use-package dir-config
@@ -4796,6 +4518,56 @@ properly handles remote files over Tramp), applying the setting only if
 
   :config
   (dir-config-mode 1))
+
+;;; auto-mode-alist
+
+;; TODO minimal-emacs readme?
+(add-to-list 'auto-mode-alist '("/LICENSE\\'" . text-mode))
+(add-to-list 'auto-mode-alist '("rc\\'" . conf-mode) 'append)
+
+;; This regular expression matches the full file path for any .conf file
+;; residing within either /etc/fonts/ or .config/fontconfig/ and maps them
+;; directly to xml-mode.
+(add-to-list 'auto-mode-alist '("/etc/fonts/.*\\.conf\\'" . xml-mode))
+(add-to-list 'auto-mode-alist
+             (cons (concat
+                    (regexp-quote (expand-file-name "~/.config/fontconfig/"))
+                    ".*\\.conf\\'")
+                   'xml-mode))
+
+(nconc auto-mode-alist
+       '(;; conf-mode
+         ("\\.profile\\'" . conf-mode)  ; firejail profiles
+         ("^/etc/[^/]+" . conf-unix-mode)
+
+         ("/COMMIT_EDITMSG\\'" . diff-mode)
+         ("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode)
+
+         ;; Gentoo
+         ("/make\\.conf\\'" . sh-mode)
+
+         ;; Gentoo (/etc/portage files)
+         ("package\\.\\(?:license\\|mask\\|use\\|accept_keywords\\)/.+\\'" . conf-unix-mode)
+         ("package\\.\\(?:env\\|unmask\\)\\'" . conf-unix-mode)
+
+         ;; /etc/hosts and ansible /hosts
+
+         ;; Replace with git-modes
+         ;; ("/\\.gitignore" . conf-unix-mode)
+         ;; ("/\\.gitattributes" . conf-space-mode)
+
+         ;; Git
+
+         ;; hexl-mode
+         ;; ("\\.\\(?:hex\\|nes\\)\\'" . hexl-mode)
+
+         ;; txt-file-mode
+         ;; ("\\.log\\'" . txt-file-mode)
+         ))
+
+(add-to-list 'auto-mode-alist '("/\\.gitconfig\\.local\\'" . gitconfig-mode))
+(add-to-list 'auto-mode-alist '("/\\.gitignore\\.local\\'" . gitignore-mode))
+(add-to-list 'auto-mode-alist '("/\\.gitattributes\\.local\\'" . gitattributes-mode))
 
 ;;; Provide
 
