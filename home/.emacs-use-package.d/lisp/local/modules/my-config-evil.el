@@ -2592,12 +2592,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (evil-define-key 'normal 'global (kbd "<leader>fd")
     #'quick-fasd-find-path))
 
-;;; ultisnips-mode
-
-(lightemacs-use-package ultisnips-mode
-  :commands ultisnips-mode
-  :mode ("\\.snippets\\'" . ultisnips-mode))
-
 ;;; Use-package pathaction
 
 (defun pathaction-install ()
