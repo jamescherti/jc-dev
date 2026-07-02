@@ -930,7 +930,7 @@ subsequent GCC invocations."
                            mod-ediff
                            tmpedit
                            mod-cleanup
-                           mod-treesit
+                           mod-filetype
 
                            sub-project
                            mod-buffer-terminator

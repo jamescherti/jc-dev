@@ -1,4 +1,4 @@
-;;; mod-treesit.el --- mod-treesit -*- lexical-binding: t -*-
+;;; mod-filetype.el --- mod-filetype -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -119,7 +119,7 @@
 (setq treesit-auto-install-grammar nil)
 
 (with-suppressed-warnings ((free-vars treesit-language-source-alist))
-  (defvar mod-treesit--treesit-language-source-alist
+  (defvar mod-filetype--treesit-language-source-alist
     '((bash "https://github.com/tree-sitter/tree-sitter-bash")
       (python "https://github.com/tree-sitter/tree-sitter-python")
       (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
@@ -243,11 +243,11 @@
 ;;             (assq-delete-all (car entry) treesit-language-source-alist))
 ;;       (push entry treesit-language-source-alist))))
 
-(defun mod-treesit-install (package lang-keys &optional install-fn)
+(defun mod-filetype-install (package lang-keys &optional install-fn)
   "Load PACKAGE and prepare the tree-sitter sources for LANG-KEYS.
 LANG-KEYS can be a single symbol or a list of symbols.
 INSTALL-FN is an optional function to call to install the parsers.
-It adds the configuration from `mod-treesit--treesit-language-source-alist'
+It adds the configuration from `mod-filetype--treesit-language-source-alist'
 to `treesit-language-source-alist' if missing, then installs the grammars
 only if they are not already available."
   (when package
@@ -256,7 +256,7 @@ only if they are not already available."
         (missing-grammar nil))
     (dolist (key keys)
       (unless (assq key treesit-language-source-alist)
-        (let ((recipe (assq key mod-treesit--treesit-language-source-alist)))
+        (let ((recipe (assq key mod-filetype--treesit-language-source-alist)))
           (when recipe
             (push recipe treesit-language-source-alist))))
       ;; Flag if at least one grammar from the list needs installation
@@ -272,22 +272,22 @@ only if they are not already available."
 (defun my-treesit-update-language-grammar ()
   "Update language grammar."
   (interactive)
-  (mod-treesit-install 'python 'python)
-  (mod-treesit-install 'sh-script 'bash)
-  (mod-treesit-install 'json-ts-mode 'json)
-  (mod-treesit-install 'lua-ts-mode 'lua)
-  ;; (mod-treesit-install 'c-ts-mode '(c cpp))
-  (mod-treesit-install 'dockerfile-ts-mode 'dockerfile)
-  ;; (mod-treesit-install 'go-ts-mode 'go)
-  (mod-treesit-install 'js 'javascript)
-  ;; (mod-treesit-install 'java-ts-mode 'java)
-  (mod-treesit-install 'php-ts-mode 'php 'php-ts-mode-install-parsers)
-  (mod-treesit-install 'markdown-mode '(markdown markdown-inline)
+  (mod-filetype-install 'python 'python)
+  (mod-filetype-install 'sh-script 'bash)
+  (mod-filetype-install 'json-ts-mode 'json)
+  (mod-filetype-install 'lua-ts-mode 'lua)
+  ;; (mod-filetype-install 'c-ts-mode '(c cpp))
+  (mod-filetype-install 'dockerfile-ts-mode 'dockerfile)
+  ;; (mod-filetype-install 'go-ts-mode 'go)
+  (mod-filetype-install 'js 'javascript)
+  ;; (mod-filetype-install 'java-ts-mode 'java)
+  (mod-filetype-install 'php-ts-mode 'php 'php-ts-mode-install-parsers)
+  (mod-filetype-install 'markdown-mode '(markdown markdown-inline)
                        'markdown-ts-mode-install-parsers)
-  (mod-treesit-install 'mhtml-ts-mode 'html
+  (mod-filetype-install 'mhtml-ts-mode 'html
                        'mhtml-ts-mode-install-parsers)
 
-  (mod-treesit-install nil '(python
+  (mod-filetype-install nil '(python
                              bash
                              yaml
                              json
@@ -703,10 +703,10 @@ only if they are not already available."
 
 ;;; Provide
 
-(provide 'mod-treesit)
+(provide 'mod-filetype)
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 
-;;; mod-treesit.el ends here
+;;; mod-filetype.el ends here
