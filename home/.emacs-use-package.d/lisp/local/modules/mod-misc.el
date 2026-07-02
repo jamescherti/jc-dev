@@ -1285,7 +1285,7 @@ any new ones."
   ;; (setq diff-update-on-the-fly t)
 
   ;; Set this to nil if you want to do it on demand
-  (setq diff-refine nil)
+  ;; (setq diff-refine nil)
 
   (setq vertico-count 13)
   (with-eval-after-load 'consult
