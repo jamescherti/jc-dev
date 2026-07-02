@@ -16,18 +16,16 @@
 (defun mod-corfu-cape--setup-cape-sh-mode ()
   "Dabbrev is better than the default configuration for `sh-mode'."
   (setq-local completion-at-point-functions '(cape-dabbrev cape-file)))
-(when (fboundp 'mod-corfu-cape--setup-cape-sh-mode)
-  (add-hook 'bash-ts-mode-hook #'mod-corfu-cape--setup-cape-sh-mode)
-  (add-hook 'sh-mode-hook #'mod-corfu-cape--setup-cape-sh-mode))
+(add-hook 'bash-ts-mode-hook #'mod-corfu-cape--setup-cape-sh-mode)
+(add-hook 'sh-mode-hook #'mod-corfu-cape--setup-cape-sh-mode)
 
 ;; Elisp
 (defun mod-corfu-cape--cape-elisp-setup ()
   "Configure Cape to provide real Elisp completion merged with dabbrev."
   (setq-local completion-at-point-functions (list #'elisp-completion-at-point)))
-(when (fboundp 'mod-corfu-cape--cape-elisp-setup)
-  ;; For some reason, without this, it only uses dabbrev
-  (add-hook 'emacs-lisp-mode-hook #'mod-corfu-cape--cape-elisp-setup)
-  (add-hook 'lisp-interaction-mode-hook #'mod-corfu-cape--cape-elisp-setup))
+;; For some reason, without this, it only uses dabbrev
+(add-hook 'emacs-lisp-mode-hook #'mod-corfu-cape--cape-elisp-setup)
+(add-hook 'lisp-interaction-mode-hook #'mod-corfu-cape--cape-elisp-setup)
 
 ;;; Icons corfu
 
