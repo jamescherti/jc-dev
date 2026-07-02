@@ -26,7 +26,7 @@
 
 ;;; Fix embark
 
-(defun fix-embark-collect-window-history (&rest _)
+(defun mod-same-window--fix-embark-collect-window-history (&rest _)
   "Remove intermediate buffer from history.
 This ensures `previous-buffer' returns to Embark Collect.
 
@@ -62,11 +62,11 @@ Calling it a second time takes you to history index 1 (the collect buffer)."
 
 (with-eval-after-load 'embark
   (advice-add 'embark-collect-choose :after
-              #'fix-embark-collect-window-history))
+              #'mod-same-window--fix-embark-collect-window-history))
 
 ;;; Always current window
 
-(defun always-current-window---display-buffer-from-compilation-p (_buffer-name _action)
+(defun mod-same-window---display-buffer-from-compilation-p (_buffer-name _action)
   "Display buffer from compilation."
   (unless current-prefix-arg
     (with-current-buffer (window-buffer)
@@ -74,7 +74,7 @@ Calling it a second time takes you to history index 1 (the collect buffer)."
        (derived-mode-p 'embark-collect-mode)
        (derived-mode-p 'compilation-mode)))))
 
-(defun current-window-only-setup ()
+(defun mod-same-window--current-window-only-setup ()
   "Make Emacs only use the current window."
   ;; org-mode
   (setq org-src-window-setup 'current-window) ;; Edit source in current window
@@ -84,7 +84,7 @@ Calling it a second time takes you to history index 1 (the collect buffer)."
   (setq help-window-keep-selected t)
 
   ;; Compilation buffers. Also used by wgrep buffers / Embark export.
-  (push '(always-current-window---display-buffer-from-compilation-p
+  (push '(mod-same-window---display-buffer-from-compilation-p
           display-buffer-same-window
           (inhibit-same-window . nil))
         display-buffer-alist)
@@ -108,7 +108,64 @@ Calling it a second time takes you to history index 1 (the collect buffer)."
     (push `(,regexp (display-buffer-same-window)) display-buffer-alist)))
 
 (unless noninteractive
-  (current-window-only-setup))
+  (mod-same-window--current-window-only-setup))
+
+;;; Exceptions
+
+(unless noninteractive
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '((or . ((derived-mode . occur-mode)
+  ;;                       (derived-mode . Buffer-menu-mode)
+  ;;                       (derived-mode . grep-mode)
+  ;;                       (derived-mode . log-view-mode)
+  ;;                       (derived-mode . help-mode)))
+  ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
+  ;;                (body-function . select-window)))
+  ;;
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '("\\`\\*\\(Org \\(Select\\|Note\\)\\|Agenda Commands\\)\\*\\'"
+  ;;                (display-buffer-in-side-window)
+  ;;                (dedicated . t)
+  ;;                (side . bottom)
+  ;;                (slot . 0)
+  ;;                (window-parameters . ((mode-line-format . none)))))
+  ;;
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '((derived-mode . calendar-mode)
+  ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
+  ;;                (mode . (calendar-mode bookmark-edit-annotation-mode ert-results-mode))
+  ;;                (inhibit-switch-frame . t)
+  ;;                (dedicated . t)
+  ;;                (window-height . fit-window-to-buffer)))
+  ;;
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '((derived-mode . reb-mode) ; M-x re-builder
+  ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
+  ;;                (inhibit-switch-frame . t)
+  ;;                (window-height . 4) ; note this is literal lines, not relative
+  ;;                (dedicated . t)
+  ;;                (preserve-size . (t . t))))
+
+  (dolist (entry
+           '(("\\*pathaction:" (display-buffer-at-bottom) (window-height . 0.33))
+             ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
+             ("\\*Memory-Profiler-Report" (display-buffer-at-bottom))
+             ("\\*Calendar\\*" (display-buffer-at-bottom))
+             ("\\*tmux" (display-buffer-same-window))
+             ("\\*grep\\*" (display-buffer-same-window))))
+    (push entry display-buffer-alist))
+
+  ;; Handle the complex Org entry separately or add it to the list above
+  (push `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
+          display-buffer-in-side-window
+          (side . right)
+          (slot . 0)
+          (window-parameters . ((no-delete-other-windows . t)))
+          (window-width . 100)
+          (dedicated . t))
+        display-buffer-alist))
+
+;;; Provide
 
 (provide 'mod-same-window)
 

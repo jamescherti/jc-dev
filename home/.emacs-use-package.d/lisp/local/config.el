@@ -800,7 +800,10 @@ subsequent GCC invocations."
 
 ;; Enable native-compilation and byte-compilation
 
-(setq lightemacs-modules '(le-compile-angel
+(setq lightemacs-modules '(mod-same-window
+                           mod-dired
+
+                           le-compile-angel
                            le-flymake
                            le-pathaction
                            le-theme
@@ -856,6 +859,7 @@ subsequent GCC invocations."
                            le-cape
                            le-prescient
                            le-vertico-prescient
+                           mod-corfu-cape
 
                            le-elisp-refs
                            le-easy-escape
@@ -881,7 +885,7 @@ subsequent GCC invocations."
 
                            le-org
                            le-org-appear
-
+                           mod-org
 
                            le-edit-indirect
 
@@ -920,7 +924,6 @@ subsequent GCC invocations."
 
                            mod-misc
                            mod-ediff
-                           mod-same-window
                            tmpedit
                            mod-cleanup
                            mod-treesit
@@ -1079,69 +1082,11 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 ;;     ;; (push path load-path)
 ;;     (push path load-path)))
 
-;;; display buffer alist
-
-(defun my-config-display-buffer-alist ()
-  "Config display buffer alist using push for performance."
-  (unless noninteractive
-    ;; (add-to-list 'display-buffer-alist
-    ;;              '((or . ((derived-mode . occur-mode)
-    ;;                       (derived-mode . Buffer-menu-mode)
-    ;;                       (derived-mode . grep-mode)
-    ;;                       (derived-mode . log-view-mode)
-    ;;                       (derived-mode . help-mode)))
-    ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
-    ;;                (body-function . select-window)))
-    ;;
-    ;; (add-to-list 'display-buffer-alist
-    ;;              '("\\`\\*\\(Org \\(Select\\|Note\\)\\|Agenda Commands\\)\\*\\'"
-    ;;                (display-buffer-in-side-window)
-    ;;                (dedicated . t)
-    ;;                (side . bottom)
-    ;;                (slot . 0)
-    ;;                (window-parameters . ((mode-line-format . none)))))
-    ;;
-    ;; (add-to-list 'display-buffer-alist
-    ;;              '((derived-mode . calendar-mode)
-    ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
-    ;;                (mode . (calendar-mode bookmark-edit-annotation-mode ert-results-mode))
-    ;;                (inhibit-switch-frame . t)
-    ;;                (dedicated . t)
-    ;;                (window-height . fit-window-to-buffer)))
-    ;;
-    ;; (add-to-list 'display-buffer-alist
-    ;;              '((derived-mode . reb-mode) ; M-x re-builder
-    ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
-    ;;                (inhibit-switch-frame . t)
-    ;;                (window-height . 4) ; note this is literal lines, not relative
-    ;;                (dedicated . t)
-    ;;                (preserve-size . (t . t))))
-
-    (dolist (entry
-             '(("\\*pathaction:" (display-buffer-at-bottom) (window-height . 0.33))
-               ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
-               ("\\*Memory-Profiler-Report" (display-buffer-at-bottom))
-               ("\\*Calendar\\*" (display-buffer-at-bottom))
-               ("\\*tmux" (display-buffer-same-window))
-               ("\\*grep\\*" (display-buffer-same-window))))
-      (push entry display-buffer-alist))
-
-    ;; Handle the complex Org entry separately or add it to the list above
-    (push `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
-            display-buffer-in-side-window
-            (side . right)
-            (slot . 0)
-            (window-parameters . ((no-delete-other-windows . t)))
-            (window-width . 100)
-            (dedicated . t))
-          display-buffer-alist)))
-
 ;;; pre/post modules
 
 (defun lightemacs-user-before-modules ()
   "Pre-modules."
-  (my-add-packages-to-load-path)
-  (my-config-display-buffer-alist))
+  (my-add-packages-to-load-path))
 
 (defun lightemacs-user-after-modules ()
   "Post-modules."

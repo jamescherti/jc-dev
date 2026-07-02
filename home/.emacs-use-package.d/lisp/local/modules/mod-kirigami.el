@@ -288,6 +288,37 @@ or within the active region before applying the comment."
 (advice-add 'comment-or-uncomment-region :before #'kirigami--unfold-for-comment-advice)
 (advice-add 'uncomment-region :before #'kirigami--unfold-for-comment-advice)
 
+;;; Kirigami: Fold things when opening them
+
+;; TODO kirigami close fold except this one
+(defun my-kirigami-auto-open ()
+  "Close all folds."
+  (unless (bound-and-true-p easysession-load-in-progress)
+    (save-excursion
+      (ignore-errors
+        (require 'kirigami nil t)
+        (when (fboundp 'kirigami-open-fold)
+          (kirigami-open-fold))))))
+
+(defun my-kirigami-auto-close-all ()
+  "Close all folds."
+  (unless (bound-and-true-p easysession-load-in-progress)
+    (save-excursion
+      (ignore-errors
+        (when (and (require 'kirigami nil t)
+                   (fboundp 'kirigami-close-folds)
+                   (let ((name (buffer-name)))
+                     (and (not (string-prefix-p "*" name))
+                          (not (string-prefix-p " " name))
+                          (not (string-suffix-p "*" name))))
+                   (not (bound-and-true-p edit-indirect--overlay))
+                   (not (and (fboundp 'org-src-edit-buffer-p)
+                             (org-src-edit-buffer-p))))
+          (kirigami-close-folds))))))
+
+(add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 99)
+(add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 99)
+
 ;;; Provide
 
 (provide 'mod-kirigami)

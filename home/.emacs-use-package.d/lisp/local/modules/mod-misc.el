@@ -166,31 +166,6 @@
 ;; prefer a minimalist interface.
 (setq bookmark-fringe-mark nil)
 
-;; Asks for confirmation before creating missing parent directories during file
-;; copy or rename operations. This protects against creating unintended
-;; directories due to typos while remaining convenient.
-;; (setq dired-create-destination-dirs 'ask)
-
-;; Automatically creates destination directories without asking if the
-;; destination path ends with a trailing slash. This is highly efficient because
-;; the trailing slash indicates clear intent to create a directory.
-;; (setq dired-create-destination-dirs-on-trailing-dirsep t) ; Emacs 29
-
-;; Reuses a single buffer for Dired navigation instead of opening a new buffer
-;; for every directory. This keeps your buffer list clean and prevents Dired
-;; buffer proliferation.
-(setq dired-kill-when-opening-new-dired-buffer t)
-
-;; Allows wdired to automatically create missing parent directories when you
-;; rename files to paths that do not exist yet. This makes bulk project
-;; restructuring incredibly fast.
-;; (setq wdired-create-parent-directories t)
-
-;; Automatically kills the buffers of files that you delete or rename within
-;; Dired. This prevents you from accidentally interacting with stale buffers
-;; that no longer correspond to the filesystem.
-;; (setq dired-clean-up-buffers-too t)
-
 ;; t is bad for accessibility HTML email in dark themes. Disabling custom colors
 ;; in HTML rendering ensures the text uses your active theme's colors,
 ;; preventing unreadable situations like dark text on a dark background.
@@ -209,14 +184,6 @@
 
 ;; (setq lazy-count-prefix-format "(%s/%s) ")
 ;; (setq lazy-count-suffix-format nil)
-
-;; TODO: add to minimal-emacs.d?
-;; Doesn't work
-;; (setq dired-create-destination-dirs-on-trailing-dirsep t)
-
-(setq dired-hide-details-hide-symlink-targets nil)
-
-(setq dired-create-destination-dirs 'ask)
 
 (setq resize-mini-windows t)
 
@@ -447,23 +414,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq-local redisplay-skip-fontification-on-input nil)
 (setq fast-but-imprecise-scrolling nil)
 ;; (setq scroll-step 1)
-
-;; TODO minimal-emacs.d
-;; setq native-comp-async-on-battery-power nil) is an excellent default, for
-;; users running Emacs on laptops. Background native compilation (via gccemacs)
-;; is a highly CPU-intensive task. When packages are installed or updated,
-;; spawning multiple asynchronous compiler processes on battery power can cause
-;; rapid battery drain and thermal throttling. Suspending this behavior until
-;; the machine is connected to AC power is a sensible optimization.
-;;
-;; NOTE: Issue. This stops native compilation, even when the laptop is charging.
-;; (setq native-comp-async-on-battery-power nil)
-
-;; Disable the optimization locally for dired to guarantee directory
-;; fontification
-;; (add-hook 'dired-mode-hook
-;;           (lambda ()
-;;             (setq-local redisplay-skip-fontification-on-input nil)))
 
 (setq font-lock-maximum-decoration t)
 
@@ -859,11 +809,6 @@ WIDTH is the tab width."
     (global-set-key (kbd "C-k") 'my-tab-previous)
     (global-set-key (kbd "C-j") 'my-tab-next))
 
-  (setq lightemacs-dired-filter-global-enabled t)
-  (setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
-                                             dired-filter-by-git-ignored
-                                             dired-filter-by-dot-files))
-
   (setq hs-hide-comments-when-hiding-all nil)
   (setq hs-isearch-open t)  ;; Open both comments and code
 
@@ -1210,9 +1155,6 @@ WIDTH is the tab width."
   ;; Suppress the display of Flymake error counters when there are no errors.
   (setq flymake-suppress-zero-counters t)
 
-  ;; (with-no-warnings
-  ;;   (add-hook 'org-mode-hook 'hl-line-mode)
-  ;;   (add-hook 'grep-mode-hook 'hl-line-mode))
   (unless noninteractive
     (with-eval-after-load 'icomplete
       (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit)))
@@ -2337,113 +2279,6 @@ ORIG-FUN is the advised function.  DESC is the package description struct."
 
   (advice-add 'package-lint--check-no-emacs-in-package-name :around
               #'my-package-lint-ignore))
-
-
-
-;;; dired
-
-(defun my-dired-get-file-open-command (file-path)
-  "Return FILE-PATH corresponding command from `dired-guess-shell-alist-user'."
-  (let* ((case-fold-search nil)
-         (result (seq-find (lambda (pattern)
-                             (string-match-p (car pattern) file-path))
-                           dired-guess-shell-alist-user)))
-    (when result
-      (car (cdr result)))))
-
-(defun my-dired-open-with-external-command ()
-  "Open the current file in `dired' using an external command based on file type."
-  (interactive nil dired-mode)
-  (if (and (fboundp 'dired-get-file-for-visit)
-           (fboundp 'dired--find-possibly-alternative-file))
-      (let* ((file (dired-get-file-for-visit)))
-        (let ((shell-cmd (my-dired-get-file-open-command file)))
-          (if shell-cmd
-              (progn
-                ;; (message "[RUN] %s %s" shell-cmd file)
-                (if (fboundp 'quick-fasd-add-path)
-                    (quick-fasd-add-path file)
-                  (message "Warning: Undefined: `quick-fasd-add-path'"))
-                (call-process shell-cmd nil nil nil file))
-            (condition-case err
-                (dired--find-possibly-alternative-file file)
-              (error
-               (message "Container parsing failed (%s). Opening literally."
-                        (error-message-string err))
-               (find-file-literally file))))))
-    (error
-     "Undefined: dired-get-file-for-visit or dired--find-possibly-alternative-file")))
-
-(with-eval-after-load 'dired
-
-  ;; --------------------------------------------------------------------------
-  ;; Functions
-  ;; --------------------------------------------------------------------------
-  (defun my-dired-home ()
-    "Dired home."
-    (interactive)
-    (dired "~/"))
-
-  ;; --------------------------------------------------------------------------
-  ;; Abbreviate dired header
-  ;; https://emacs.stackexchange.com/questions/33799/is-there-any-way-to-abbreviate-dired-header
-  ;;
-  ;; I modified it to make it only modify the first line
-  ;;
-  ;; NOTE: does not work. it sometimes changes where the directory is
-  ;; --------------------------------------------------------------------------
-  ;; TODO: Contribution to Emacs?
-  ;; (defvar dired-abbreviate-header t)
-  ;;
-  ;; (defun my-dired-readin-abbreviate-header (&rest _)
-  ;;   "Abbreviate home directory path to '~' in the first line of the buffer."
-  ;;   (when dired-abbreviate-header
-  ;;     (save-excursion
-  ;;       (goto-char (point-min))
-  ;;       (let ((inhibit-read-only t)
-  ;;             (case-fold-search nil)
-  ;;             (home (expand-file-name "~"))
-  ;;             (line-end (line-end-position)))
-  ;;         (while (search-forward home line-end t)
-  ;;           (replace-match "~" t t))))))
-  ;;
-  ;; (advice-add 'dired-readin :after 'my-dired-readin-abbreviate-header)
-
-  ;; --------------------------------------------------------------------------
-  ;; Using xdg-open/open/start for certain filetypes
-  ;; --------------------------------------------------------------------------
-  (defvar my-dired-xdg-open-cmd nil)
-
-  (defun my-dired-xdg-open ()
-    "Make Dired open the file under the cursor."
-    (interactive)
-    ;; Removed: (dired-get-filename nil t)
-    (if (fboundp 'dired-get-file-for-visit)
-        (let* ((file (dired-get-file-for-visit)))
-          (when my-dired-xdg-open-cmd
-            (call-process my-dired-xdg-open-cmd nil nil nil file)))
-      (error "Undefined: dired-get-file-for-visit")))
-
-  (when-let* ((cmd (cond (IS-MAC "open")
-                         (IS-LINUX "xdg-open")
-                         (IS-WINDOWS "start"))))
-    (when cmd
-      (setq my-dired-xdg-open-cmd cmd)
-      (setq dired-guess-shell-alist-user
-            `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
-              ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
-              ("\\.\\(?:xcf\\)\\'" ,cmd)
-              ("\\.tex\\'" ,cmd)
-              ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
-              ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)
-              ;; ("\\.csv\\'" ,cmd)
-              ;; ("\\.html?\\'" ,cmd)
-              ;; ("\\.md\\'" ,cmd)
-              ))))
-
-  ;; Advise `dired-find-file' to use `my-dired-open-with-external-command'
-  ;; instead
-  (advice-add 'dired-find-file :override #'my-dired-open-with-external-command))
 
 ;;; Last resort hjkl
 
@@ -3670,14 +3505,15 @@ Opens a split window showing the added and removed features."
 ;;; Golden-ratio
 
 ;; package cl is deprecated
-(lightemacs-use-package golden-ratio
-  :commands (golden-ratio
-             golden-ratio-mode
-             golden-ratio-toggle-widescreen
-             golden-ratio-adjust)
-  ;; :hook
-  ;; (add-hook 'lightemacs-after-init-hook #'golden-ratio-mode)
-  )
+;; NOTE: For some reason, this is always reinstalled.
+;; (lightemacs-use-package golden-ratio
+;;   :commands (golden-ratio
+;;              golden-ratio-mode
+;;              golden-ratio-toggle-widescreen
+;;              golden-ratio-adjust)
+;;   ;; :hook
+;;   ;; (add-hook 'lightemacs-after-init-hook #'golden-ratio-mode)
+;;   )
 
 
 ;;; Focus
@@ -4306,199 +4142,6 @@ environment for accurate linting."
 ;;   :commands jinja2-mode
 ;;   :mode ("\\.j2\\'" . jinja2-mode))
 
-;;; org
-
-(defun my-hide-rng-what-schema-message (orig-fun &rest args)
-  "Hide `rng-what-schema' message.
-ORIG-FUN is the function and ARGS are its arguments."
-  (cl-letf* ((old-msg (symbol-function 'message))
-             ((symbol-function 'message)
-              (lambda (format-string &rest msg-args)
-                (unless (and (stringp format-string)
-                             (string-match-p "Using .*schema" format-string))
-                  (apply old-msg format-string msg-args)))))
-    (apply orig-fun args)))
-
-(with-eval-after-load 'rng-loc
-  (advice-add 'rng-what-schema :around #'my-hide-rng-what-schema-message))
-
-(defun my-org-agenda-switch-to-todos ()
-  "Open the Org Agenda directly showing all TODO items."
-  (interactive)
-  (let ((buffer (get-buffer "*Org Agenda*")))
-    (if buffer
-        (switch-to-buffer buffer)
-      (org-agenda nil "t"))))
-
-(defun my-org-move-todo-before-first-done ()
-  "Move the current TODO heading down, right before the first DONE heading.
-If there are no DONE headings, it will be moved below all TODO headings
-at the same level."
-  (interactive)
-  (if (and (fboundp 'org-at-heading-p)
-           (fboundp 'org-back-to-heading)
-           (fboundp 'org-get-todo-state)
-           (fboundp 'org-forward-heading-same-level)
-           (fboundp 'org-move-subtree-down))
-      (progn
-        (unless (org-at-heading-p)
-          (org-back-to-heading t))
-
-        (let ((moving t)
-              (last-point -1))
-          (while moving
-            (if (= (point) last-point)
-                (setq moving nil) ;; Break loop if movement failed silently
-              (setq last-point (point))
-              (let ((is-next-done
-                     (save-excursion
-                       (if (org-forward-heading-same-level 1)
-                           (let ((state (org-get-todo-state)))
-                             (member
-                              (if state (substring-no-properties state) "")
-                              org-done-keywords))
-                         'no-next))))
-                (if (or (eq is-next-done 'no-next) is-next-done)
-                    (setq moving nil)
-                  (org-move-subtree-down 1)))))))
-    (error "Org functions are not defined")))
-
-(defun my-org-todo-and-toggle ()
-  "Toggle the current Org mode item's TODO/DONE."
-  (interactive)
-  (when (and (fboundp 'org-todo)
-             (fboundp 'org-hide-entry)
-             (fboundp 'org-get-todo-state)
-             (fboundp 'org-back-to-heading)
-             (fboundp 'org-at-heading-p))
-    (let ((column (current-column)))
-      (unwind-protect
-          (save-excursion
-            (org-back-to-heading)
-            (when (org-at-heading-p)
-              (let ((current-state (substring-no-properties
-                                    (let ((state (org-get-todo-state)))
-                                      (if state state "")))))
-                (if (string= current-state "DONE")
-                    (org-todo "TODO")
-                  (org-todo "DONE")
-                  (when (string= (substring-no-properties
-                                  (let ((state (org-get-todo-state)))
-                                    (if state state "")))
-                                 "DONE")
-                    (my-org-move-todo-before-first-done)))))
-            (org-hide-entry))
-        (move-to-column column)))))
-
-;; TODO lightemacs?
-(defun my-org-capture-switch-insert ()
-  "Switch to insert mode on org capture."
-  (when (and (bound-and-true-p evil-local-mode)
-             (fboundp 'evil-insert-state))
-    (evil-insert-state)))
-(add-hook 'org-capture-mode-hook #'my-org-capture-switch-insert)
-(with-eval-after-load 'org
-  ;; The function inserts a new heading at the current cursor position, and
-  ;; prepends it with "TODO " if activated while on a "TODO" task, thus creating
-  ;; a new to-do item. In addition to that, for those utilizing evil-mode the
-  ;; function transitions the user into insert mode right after the "TODO "
-  ;; insertion.
-  (defun my-org-insert-heading-respect-content-and-prepend-todo ()
-    "Insert a new org heading respecting content and prepend it with TODO.
-  Additionally, ensure entry into insert state when evil-mode is active."
-    (interactive)
-    (when (and (fboundp 'org-entry-is-todo-p)
-               (fboundp 'org-entry-is-done-p)
-               (fboundp 'org-insert-heading-respect-content))
-      (let ((entry-is-todo (org-entry-is-todo-p))
-            (entry-is-done (org-entry-is-done-p)))
-        (when (and (bound-and-true-p evil-local-mode)
-                   (fboundp 'evil-insert-state))
-          (evil-insert-state))
-        (org-insert-heading-respect-content)
-        (when (or entry-is-todo entry-is-done)
-          (just-one-space)
-          (insert "TODO")
-          (just-one-space)))))
-
-  (unless noninteractive
-    (define-key org-mode-map (kbd "C-<return>")
-                'my-org-insert-heading-respect-content-and-prepend-todo)
-
-    (define-key org-mode-map (kbd "C-c C-e") 'org-babel-execute-maybe)
-    (define-key org-mode-map (kbd "C-c C-c") 'org-edit-src-code)
-    (define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit)
-    (define-key org-mode-map (kbd "C-c C-d") 'my-org-todo-and-toggle)
-
-    (define-key org-mode-map (kbd "M-h") nil))
-
-  ;; (defun org-todo-and-close-fold ()
-  ;;   "Mark the current Org mode item as TODO and close its subtree."
-  ;;   (interactive)
-  ;;   (org-todo 'done)
-  ;;   (org-hide-entry))
-
-  (defun org-toggle-emphasis ()
-    "Toggle hiding/showing of org emphasize markers."
-    (interactive)
-    (if org-hide-emphasis-markers
-        (set-variable 'org-hide-emphasis-markers nil)
-      (set-variable 'org-hide-emphasis-markers t)))
-
-  ;; (custom-set-faces
-  ;;  ;; Face used for todo keywords that indicate DONE items.
-  ;;  '(org-done ((t (:strike-through t))))
-  ;;  ;; Face used to indicate that a headline is DONE. This face is only used if
-  ;;  ;; `org-fontify-done-headline' is set. If applies to the part of the headline
-  ;;  ;; after the DONE keyword.
-  ;;  '(org-headline-done ((t (:strike-through t)))))
-
-  ;; (set-face-attribute 'org-done nil :strike-through t)
-  ;; (set-face-attribute 'org-headline-done nil :strike-through t)
-
-  (face-spec-set 'org-done
-                 '((t (:strike-through t))))
-
-  (face-spec-set 'org-headline-done
-                 '((t (:strike-through t)))))
-
-(defun my-org-capture-move-cursor-end-line ()
-  "Move cursor to end line."
-  (when (eq major-mode 'org-mode)
-    (goto-char (line-end-position))))
-
-(when (fboundp 'my-org-capture-move-cursor-end-line)
-  (add-hook 'org-capture-before-finalize-hook
-            #'my-org-capture-move-cursor-end-line))
-
-(with-eval-after-load 'org-agenda
-  (unless noninteractive
-    (define-key org-agenda-keymap (kbd "<tab>") #'ignore))
-  (defun my-org-agenda-goto-in-same-window ()
-    "`org-agenda-goto` that opens the target buffer in the current window."
-    (interactive)
-    (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
-      (when (fboundp 'org-agenda-goto)
-        (org-agenda-goto))))
-
-  (setq org-agenda-file-regexp (replace-regexp-in-string
-                                "\\\\\\.org" "\\\\.org\\\\(\\\\.gpg\\\\)?"
-                                org-agenda-file-regexp)))
-
-
-;;; org-ibullets
-
-(lightemacs-use-package org-ibullets
-  :vc (:url "https://github.com/jamescherti/org-ibullets.el"
-            :rev :newest)
-  :ensure nil
-  :after org
-  :commands org-ibullets-mode
-  :hook (org-mode . org-ibullets-mode)
-  ;; :custom
-  ;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
-  )
-
 ;;; Jenkinsfile
 ;; (lightemacs-use-package jenkinsfile-mode
 ;;   :commands jenkinsfile-mode
@@ -5108,37 +4751,6 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;     (advice-add 'buffer-guardian-save-buffer-maybe :before
 ;;                 #'my-save-buffer-savefold-advice)))
 
-;;; Fold things when opening them
-
-;; TODO kirigami close fold except this one
-(defun my-kirigami-auto-open ()
-  "Close all folds."
-  (unless (bound-and-true-p easysession-load-in-progress)
-    (save-excursion
-      (ignore-errors
-        (require 'kirigami nil t)
-        (when (fboundp 'kirigami-open-fold)
-          (kirigami-open-fold))))))
-
-(defun my-kirigami-auto-close-all ()
-  "Close all folds."
-  (unless (bound-and-true-p easysession-load-in-progress)
-    (save-excursion
-      (ignore-errors
-        (when (and (require 'kirigami nil t)
-                   (fboundp 'kirigami-close-folds)
-                   (let ((name (buffer-name)))
-                     (and (not (string-prefix-p "*" name))
-                          (not (string-prefix-p " " name))
-                          (not (string-suffix-p "*" name))))
-                   (not (bound-and-true-p edit-indirect--overlay))
-                   (not (and (fboundp 'org-src-edit-buffer-p)
-                             (org-src-edit-buffer-p))))
-          (kirigami-close-folds))))))
-
-(add-hook 'outline-minor-mode-hook #'my-kirigami-auto-close-all 99)
-(add-hook 'save-place-after-find-file-hook #'my-kirigami-auto-open 99)
-
 ;;; ghostel
 
 ;; (lightemacs-use-package ghostel
@@ -5297,76 +4909,6 @@ properly handles remote files over Tramp), applying the setting only if
 (setq diff-hl-bmp-max-width 16)
 (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
 
-
-;;; elisp cape
-
-(with-eval-after-load 'cape
-  ;; SH
-  (defun le-cape--setup-cape-sh-mode ()
-    "Dabbrev is better than the default configuration for `sh-mode'."
-    (setq-local completion-at-point-functions '(cape-dabbrev cape-file)))
-  (when (fboundp 'le-cape--setup-cape-sh-mode)
-    (add-hook 'bash-ts-mode-hook #'le-cape--setup-cape-sh-mode)
-    (add-hook 'sh-mode-hook #'le-cape--setup-cape-sh-mode))
-
-  ;; Elisp
-  (defun my-cape-elisp-setup ()
-    "Configure Cape to provide real Elisp completion merged with dabbrev."
-    (setq-local completion-at-point-functions (list #'elisp-completion-at-point)))
-  (when (fboundp 'my-cape-elisp-setup)
-    ;; For some reason, without this, it only uses dabbrev
-    (add-hook 'emacs-lisp-mode-hook #'my-cape-elisp-setup)
-    (add-hook 'lisp-interaction-mode-hook #'my-cape-elisp-setup)))
-
-;;; Icons corfu
-
-(lightemacs-use-package corfu-popupinfo
-  :ensure nil
-  :commands corfu-popupinfo-mode
-  :hook
-  (corfu-mode . corfu-popupinfo-mode)
-  :custom
-  (corfu-popupinfo-delay '(1.0 . 0.6))
-  (corfu-popupinfo-max-width 80)
-  (corfu-popupinfo-max-height 15))
-
-(lightemacs-use-package nerd-icons-completion
-  :after marginalia
-  :if (display-graphic-p)
-  :commands nerd-icons-completion-marginalia-setup
-  :config
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-
-(lightemacs-use-package nerd-icons-corfu
-  :after corfu
-  :if (display-graphic-p)
-  :commands nerd-icons-corfu-formatter
-  :custom
-  (nerd-icons-font-family "Symbols Nerd Font Mono")
-  ;; (setq nerd-icons-font-family "Iosevka Nerd Font Mono")
-  ;; (setq nerd-icons-font-family "Jetbrains Mono")
-  :init
-  (with-eval-after-load 'corfu
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
-
-;; (use-package kind-icon
-;;   ;; :after corfu
-;;   ;;:init
-;;   ;; (setq kind-icon-blend-background t)
-;;   ;; (setq kind-icon-default-face 'corfu-default) ; only needed with blend-background
-;;   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
-;;; Icons dired
-
-(use-package nerd-icons-dired
-  :if (display-graphic-p)
-  ;;:diminish nerd-icons-dired-mode
-  :commands nerd-icons-dired-mode
-  ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
-  ;; aligned properly)
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
-
 ;;; Emacs Consult / Vertico
 
 ;; (setq consult-imenu-config
@@ -5393,15 +4935,6 @@ properly handles remote files over Tramp), applying the setting only if
 ;;   (minibuffer-setup . vertico-repeat-save)
 ;;   :init
 ;;   (evil-define-key 'normal 'global (kbd "<leader>vr") #'vertico-repeat-last))
-
-;; (lightemacs-use-package consult-org
-;;   :ensure nil
-;;   :commands consult-org-heading
-;;   :init
-;;   (with-eval-after-load 'org
-;;     (add-hook 'org-mode-hook
-;;               #'(lambda()
-;;                   (evil-define-key 'normal 'local (kbd "C-c /") #'consult-org-heading)))))
 
 ;;(lightemacs-use-package vertico-quick
 ;;  :ensure nil
@@ -5452,233 +4985,6 @@ properly handles remote files over Tramp), applying the setting only if
   :init
   (setq lazy-autorevert-debug nil))
 
-;;; org
-
-(defun my-org-mode-setup ()
-  "When active, indent text according to outline structure."
-  ;; In org buffers we set `nobreak-char-display' to nil locally so that the
-  ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
-  ;; space. This suppresses the distinct glyph or face Emacs normally applies
-  ;; to NBSP, keeping the buffer free of distracting blue highlights while
-  ;; preserving the character's internal no-break semantics.
-  ;;
-  ;; Here is an example of what is highlighted: $5 billion-valued.
-  ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
-  ;; and the hyphen after n are rendered as highlighted glyphs.
-  (setq-local nobreak-char-display nil)
-
-  ;; TODO bug. Send a patch to org?
-  ;; When jumping to org file from org agenda todo list, org-indent-mode is not
-  ;; enabled by default.
-  (when (and (not (bound-and-true-p org-indent-mode))
-             (fboundp 'org-indent-mode))
-    (org-indent-mode 1))
-
-  ;; (when (derived-mode-p 'org-mode)
-  ;;   ;; It makes o not auto indent after a bullet list like * or -
-  ;;   (setq-local evil-auto-indent nil)
-  ;;   ;; (setq-local indent-line-function nil)
-  ;;   ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
-  ;;   ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
-  ;;   ;; (custom-set-faces `(org-block-end-line ((t (:height 0.6 :extend t)))))
-  ;;   )
-  )
-
-(add-hook 'org-mode-hook #'my-org-mode-setup)
-
-(setq org-clock-report-include-clocking-task t)
-
-;; Do not insert empty lines between collapsed sections; makes folded view
-;; denser but reduces visual separation between headings.
-;; This keeps your files compact by removing empty lines between folded
-;; headings.
-(setq org-cycle-separator-lines 0)
-
-;; Display descriptive text for links instead of raw URLs; improves
-;; readability
-;; (setq org-link-descriptive t)
-
-;; RET follows links; intuitive navigation but may conflict with normal line
-;; breaks.
-(setq org-return-follows-link t)
-
-(setq org-fold-show-context-detail
-      '(;; 'local' reveals the current heading but keeps children folded.
-        ;; Useful to focus strictly on the agenda item without visual clutter.
-        ;; (agenda . local)
-
-        ;; This fixes:
-        ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2025-08/msg01128.html
-        ;; TODO patch org?
-        ;;
-        ;; 'canonical' reveals the current headline, its direct ancestors, and
-        ;; its immediate children. This is ideal for searching. It gives you
-        ;; enough structural context to know exactly where you are in the
-        ;; document hierarchy without unfolding the entire tree.
-        (isearch . canonical)
-
-        ;; when exposing a bookmark location 'canonical' is highly useful for
-        ;; bookmarks that point to project roots or major category headers,
-        ;; allowing you to see the immediate contents upon jumping.
-        (bookmark-jump . canonical)
-
-        ;; when using the command org-occur (C-c / /)
-        ;; 'canonical' is useful here because it shows the immediate children
-        ;; of the matched headings, providing a broader overview of the
-        ;; matched section in your sparse tree rather than just an isolated
-        ;; line.
-        (occur-tree . canonical)
-
-        ;; When using the command org-goto (C-c C-j)
-        ;; 'canonical' is useful here if you frequently jump to parent
-        ;; headings and immediately need to see their sub-headings to navigate
-        ;; further.
-        ;; (org-goto . canonical)
-
-        ;; when constructing a sparse tree based on tags matches 'canonical'
-        ;; is useful if your tags are applied to high-level categories and you
-        ;; want the sparse tree to automatically reveal the specific items
-        ;; underneath them.
-        ;; (tags-tree . canonical)
-
-        ;; when exposing search matches associated with a link 'canonical' is
-        ;; useful if your internal links frequently point to index or parent
-        ;; nodes and you want to see the associated subcategories immediately
-        ;; upon arrival.
-        ;; (link-search . canonical)
-
-        ;; when exposing the jump goal of a mark 'canonical' helps re-orient
-        ;; you by showing the immediate children of the location you just
-        ;; popped back to via the mark ring.
-        (mark-goto . canonical)
-
-        ;; The fallback for any context not explicitly defined above.
-        ;; 'ancestors' keeps the buffer as tidy as possible by only unfolding
-        ;; the direct path from the top level down to your target, leaving all
-        ;; other sibling and child trees completely folded.
-        (default . canonical)))
-
-;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
-;; editing emphasis.
-;; TODO add again
-(setq org-hide-emphasis-markers t)
-
-;; Fast todo selection without popup; efficient for experts but hides guidance
-;; for beginners.
-(setq org-use-fast-todo-selection 'expert)
-
-;; Source block settings
-(setq org-edit-src-persistent-message nil)
-(setq org-modules '())
-(setq org-export-backends '(html texinfo md))
-
-;; Lists
-(setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
-
-(setq org-babel-load-languages '((emacs-lisp . t)
-                                 (shell . t)
-                                 (python . t)))
-
-(setq org-tag-alist '((:startgroup)
-                      ;; Status
-                      ("next" . ?n)
-                      ("wip" . ?w)
-                      ("soon" . ?o)
-                      ("future" . ?f)
-                      ("maybe" . ?e)
-                      (:endgroup)
-
-                      (:startgroup)
-                      ;; Contexts
-                      ("@home" . ?h)
-                      ("@work" . ?r)
-                      ("@outside" . ?u)
-                      (:endgroup)
-
-                      (:startgroup)
-                      ;; Priorities
-                      ("high" . ?i)
-                      ("medium" . ?m)
-                      ("low" . ?l)
-                      (:endgroup)
-
-                      (:startgroup)
-                      ("quick" . ?q)
-                      ("mediumtime" . ?t)
-                      ("long" . ?g)
-                      (:endgroup)))
-;; Tag colors
-(setq org-tag-faces
-      '(("@home" . (:foreground "green" :weight bold))
-        ("@work" . (:foreground "green" :weight bold))
-        ("@outside" . (:foreground "green" :weight bold))
-        ("@computer" . (:foreground "green" :weight bold))
-        ("@phone" . (:foreground "green" :weight bold))
-
-        ("next" . (:foreground "cyan"  :weight bold))
-        ("wip" . (:foreground "cyan"  :weight bold))
-        ("soon" . (:foreground "cyan"  :weight bold))
-        ("future" . (:foreground "cyan"  :weight bold))
-        ("maybe" . (:foreground "cyan"  :weight bold))
-
-        ("high" . (:foreground "orange"    :weight bold))
-        ("medium" . (:foreground "orange"    :weight bold))
-        ("low" . (:foreground "orange"    :weight bold))
-
-        ("quick"        . (:foreground "red"        :weight bold))
-        ("medium-time"        . (:foreground "red"        :weight bold))
-        ("long"        . (:foreground "red"        :weight bold))
-
-        ;; ("meeting"   . (:foreground "yellow1"       :weight bold))
-        ;; ("CRITICAL"  . (:foreground "red1"          :weight bold))
-        ))
-
-;; Set tag column to 0 (tags appear immediately after heading); simplifies
-;; layout but may make long headings with tags harder to read.
-;;
-;; Setting this to t will fold  stuff
-(setq org-hide-block-startup nil)
-
-;;; org-agenda
-
-(setq org-agenda-start-on-weekday 1)  ; Monday
-
-;;; org-src
-
-;; (setq org-src-lang-modes '(("python" . python)
-;;                            ("sh" . sh)
-;;                            ("bash" . sh)
-;;                            ("elisp" . emacs-lisp)))
-
-;; Enforce zero indentation for code within Org source blocks. This prevents Org
-;; mode from adding artificial leading spaces, ensuring that code copied
-;; directly from the file remains correctly aligned and syntactically valid.
-(setq org-src-content-indentation 0)
-(with-no-warnings
-  ;; The `with-no-warnings' macro maintains compatibility with older Org
-  ;; versions where the variable was named `org-edit-src-content-indentation'.
-  (setq org-edit-src-content-indentation 0))
-
-;; org-src modes
-(defvar my-org-src-minor-mode-alist
-  '((emacs-lisp-mode . aggressive-indent-mode))
-  "Alist mapping major modes to minor modes for Org source buffers.
-Each element is a cons cell of the form (MAJOR-MODE . MINOR-MODE).
-When an Org source buffer is initialized with MAJOR-MODE, the
-corresponding MINOR-MODE is enabled.")
-
-(defun my-org-src-apply-minor-modes ()
-  "Apply minor modes to the current Org source buffer.
-
-This function checks `my-org-src-minor-mode-alist' and activates
-any minor mode associated with the current `major-mode'."
-  (dolist (entry my-org-src-minor-mode-alist)
-    (when (eq major-mode (car entry))
-      (let ((minor-mode (cdr entry)))
-        (when (fboundp minor-mode)
-          (funcall minor-mode 1))))))
-
-(add-hook 'org-src-mode-hook #'my-org-src-apply-minor-modes)
 
 ;;; yasnippet: Clear highlights after changing the theme
 
@@ -5766,8 +5072,6 @@ any minor mode associated with the current `major-mode'."
   ;;                                     'yas-next-field-or-maybe-expand))
 
   )
-
-;;; dir-config
 
 ;;; dir-config
 
