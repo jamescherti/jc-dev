@@ -4278,7 +4278,8 @@ properly handles remote files over Tramp), applying the setting only if
                  (not (and (bound-and-true-p diff-hl-disable-on-remote)
                            (file-remote-p expanded-file)))
                  (vc-backend expanded-file))
-        (diff-hl-mode 1)))))
+        (diff-hl-mode 1)
+        (diff-hl-flydiff-mode 1)))))
 
 (with-eval-after-load 'diff-hl
   (define-key diff-hl-mode-map (kbd "C-x v b") #'diff-hl-set-reference-rev)
