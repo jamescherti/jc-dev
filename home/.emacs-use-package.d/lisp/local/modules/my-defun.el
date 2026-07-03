@@ -78,11 +78,11 @@ each buffer."
 
 (defun my-save-all-buffers ()
   "Save all buffers."
-  (save-all-new-file-buffers)
   (unless (bound-and-true-p buffer-guardian-mode)
     (cond
      ((fboundp 'buffer-guardian-save-all-buffers)
-      (buffer-guardian-save-all-buffers))
+      (buffer-guardian-save-all-buffers)
+      (save-all-new-file-buffers))
 
      (t
       (save-some-buffers t)))))
