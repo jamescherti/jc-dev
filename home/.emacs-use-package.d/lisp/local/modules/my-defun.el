@@ -78,14 +78,13 @@ each buffer."
 
 (defun my-save-all-buffers ()
   "Save all buffers."
-  (unless (bound-and-true-p buffer-guardian-mode)
-    (cond
-     ((fboundp 'buffer-guardian-save-all-buffers)
-      (buffer-guardian-save-all-buffers)
-      (save-all-new-file-buffers))
+  (cond
+   ((fboundp 'buffer-guardian-save-all-buffers)
+    (buffer-guardian-save-all-buffers)
+    (save-all-new-file-buffers))
 
-     (t
-      (save-some-buffers t)))))
+   (t
+    (save-some-buffers t))))
 
 (defun my-project-root-dir (&optional path)
   "Search up the PATH for `project-root-markers'."
@@ -659,6 +658,7 @@ Delegates regex matching to the C level for significantly better performance."
 (defun my-save-buffers-kill-emacs ()
   "Handle quitting Emacs with daemon-aware frame management."
   (interactive)
+  (my-save-all-buffers)
   (if (and (fboundp 'easysession-save-session-and-close-frames))
       (easysession-save-session-and-close-frames)
     (save-buffers-kill-emacs)))
@@ -872,7 +872,7 @@ upon switching or opening."
         (progn
           ;; If it is already in a window on the current frame, switch and pulse
           (select-window target-window)
-          (pulse-momentary-highlight-one-line (point)))
+          (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point)))
       ;; Otherwise, check for it in a tab across all frames
       (when (bound-and-true-p tab-bar-mode)
         (catch 'found
@@ -896,7 +896,7 @@ upon switching or opening."
                                      (memq (window-buffer w) bufs))
                                    (window-list))))
               (select-window target-tab-window)
-              (pulse-momentary-highlight-one-line (point))))
+              (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point))))
         ;; Fallback: Open a new tab, find the fallback file, and pulse
         (when fallback-file
           (let ((open-in-current-tab (or no-new-tab (my-ephemeral-buffer-p))))
@@ -905,7 +905,7 @@ upon switching or opening."
                        (not open-in-current-tab))
               (tab-bar-new-tab))
             (find-file fallback-file)
-            (pulse-momentary-highlight-one-line (point))))))))
+            (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point))))))))
 
 ;;; Simple version: my-jump-to-buffers-or-open
 
