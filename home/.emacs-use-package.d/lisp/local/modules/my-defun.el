@@ -864,10 +864,12 @@ non-nil or the current buffer is ephemeral, the file opens in the
 current tab; otherwise, it opens in a new tab.  Pulses the cursor
 upon switching or opening."
   (require 'pulse)
-  (let ((target-window (seq-find (lambda (w)
-                                   (memq (window-buffer w) bufs))
-                                 (window-list)))
-        found-tab-info)
+  (let* ((buf-objs (delq nil (mapcar #'get-buffer bufs)))
+         (target-window (seq-find (lambda (w)
+                                    (memq (window-buffer w) buf-objs))
+                                  (window-list)))
+         found-tab-info
+         found-buf)
     (if target-window
         (progn
           ;; If it is already in a window on the current frame, switch and pulse
@@ -878,7 +880,8 @@ upon switching or opening."
         (catch 'found
           (dolist (buf bufs)
             (when-let* ((tab-info (tab-bar-get-buffer-tab buf t)))
-              (setq found-tab-info tab-info)
+              (setq found-tab-info tab-info
+                    found-buf buf)
               (throw 'found t)))))
       (if found-tab-info
           (let ((frame (alist-get 'frame found-tab-info))
@@ -891,11 +894,15 @@ upon switching or opening."
               (tab-bar-select-tab (1+ index)))
             ;; Unconditionally search for the window in this tab, select it, and
             ;; pulse
-            (when-let* ((target-tab-window
-                         (seq-find (lambda (w)
-                                     (memq (window-buffer w) bufs))
-                                   (window-list))))
-              (select-window target-tab-window)
+            (if-let* ((target-tab-window
+                       (seq-find (lambda (w)
+                                   (memq (window-buffer w) buf-objs))
+                                 (window-list))))
+                (progn
+                  (select-window target-tab-window)
+                  (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point)))
+              ;; If the expected buffer is missing after the tab switch, force it
+              (switch-to-buffer found-buf)
               (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point))))
         ;; Fallback: Open a new tab, find the fallback file, and pulse
         (when fallback-file
