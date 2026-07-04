@@ -608,51 +608,6 @@ TO-STRING."
           (message "sre %s" path)
           (call-process "sre" nil t nil from-string to-string path))))))
 
-;;; Add to load-path recursively
-
-(defun directory-contains-extension-p (dir extension)
-  "Return non-nil if at least one file with EXTENSION exists in DIR.
-Delegates regex matching to the C level for significantly better performance."
-  (catch 'found
-    (dolist (file (directory-files dir nil (concat (regexp-quote extension) "\\'") t))
-      (when (file-regular-p (expand-file-name file dir))
-        (throw 'found t)))
-    nil))
-
-(defun optimized-normal-top-level-add-subdirs-to-load-path ()
-  "Recursively add all subdirectories of `default-directory' to `load-path'."
-  (let (dirs
-        attrs
-        (file-name-handler-alist nil) ;; JC: OPTIMIZATION
-        (pending (list default-directory)))
-    (while pending
-      (push (pop pending) dirs)
-      (let* ((this-dir (car dirs))
-             (contents (directory-files this-dir))
-             (default-directory this-dir)
-             (canonicalized (if (fboundp 'w32-untranslated-canonical-name)
-                                (w32-untranslated-canonical-name this-dir))))
-        (setq attrs (or canonicalized
-                        (file-attribute-file-identifier (file-attributes this-dir))))
-        (unless (member attrs normal-top-level-add-subdirs-inode-list)
-          (push attrs normal-top-level-add-subdirs-inode-list)
-          (dolist (file contents)
-            (and (not (string= file "."))
-                 (not (string= file ".."))
-                 (not (member file '(".git" ".github" ".svn" ".hg")))
-                 ;; Safer directory matching (avoids matching "latest")
-                 (not (string-match-p "\\`test" file))
-                 (file-directory-p file)
-                 (let ((expanded (expand-file-name file)))
-                   (or (file-exists-p (expand-file-name ".nosearch" expanded))
-                       (setq pending (nconc pending (list expanded))))))))))
-
-    ;; Only add dirs that contain .el files
-    (normal-top-level-add-to-load-path
-     (seq-filter (lambda (d) (directory-contains-extension-p d ".el"))
-                 (cdr (nreverse dirs))))))
-
-
 ;;; Save buffers kill Emacs
 
 (defun my-save-buffers-kill-emacs ()
