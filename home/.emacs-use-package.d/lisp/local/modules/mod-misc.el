@@ -4058,8 +4058,8 @@ are editing by falling back to another visible file buffer."
   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
 
-;; (lightemacs-use-package git-gutter-fringe
-;;   :after git-gutter)
+(lightemacs-use-package git-gutter-fringe
+  :after git-gutter)
 
 ;;; le-undo-fu
 
