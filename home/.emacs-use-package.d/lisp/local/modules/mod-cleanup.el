@@ -66,7 +66,8 @@
 (defvar mod-cleanup-packages-list '(olivetti
                                     ws-butler
                                     spinner
-                                    git-gutter
+                                    ;; git-gutter
+                                    ;; git-gutter-fringe
                                     posframe
                                     popper
                                     rainbow-mode
