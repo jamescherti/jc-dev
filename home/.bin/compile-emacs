@@ -86,7 +86,7 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 export BASE_CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
 
 # Stable
-export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
+# export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
 
 # Unstable, according to Emacs devs, but it works for me.
 # export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
@@ -281,7 +281,10 @@ export BASE_CFLAGS="$BASE_CFLAGS -fno-plt"
 # It has essentially zero impact on execution speed. The only minor overhead
 # occurs during the load time when the operating system changes the memory page
 # permissions to read-only.
-# export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
+#
+# NOTE: No, it actually speeds up and smooths out your runtime execution, at the
+# cost of a microscopic delay when you first launch the application.
+export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
 
 # -fgraphite-identity & -floop-nest-optimize
 #
@@ -377,55 +380,6 @@ export BASE_CFLAGS="$BASE_CFLAGS -fno-plt"
 # fit for native-comp generated code. This belongs in HPC workloads, not Emacs.
 if [[ "$ID" != "arch" || "$USE_CLANG" -eq 0 ]]; then
   export BASE_CFLAGS="$BASE_CFLAGS -fipa-pta"
-fi
-
-# Analysis of the -fuse-linker-plugin export flag
-#
-# For compiling Emacs C source code
-#
-# Benefits:
-# - Enables the linker plugin during Link Time Optimization (-flto).
-# - Allows the compiler and linker to cooperate, performing optimizations across
-# different C translation units.
-# - Can yield a slightly faster Emacs binary due to aggressive inlining and dead
-# code elimination across the entire C codebase.
-#
-# Tradeoffs:
-# - Increases both memory usage and overall compilation time during the linking
-# phase.
-# - Demands a compatible linker (such as ld.gold or lld) that is properly
-# configured to work with your GCC installation.
-# - It is mostly redundant. Modern versions of GCC automatically activate the
-# linker plugin when you pass the -flto flag, so specifying it manually adds no
-# extra value.
-#
-# 2. For compiling .el files to .eln files (Native Compilation)
-#
-# Benefits:
-# - Practically zero. Emacs native compilation uses libgccjit to compile Emacs
-# Lisp into independent shared libraries (.eln files) that are loaded
-# dynamically at runtime.
-# - Because there is no large-scale linking of multiple object files into a
-# single binary, whole-program optimization techniques do not apply here.
-#
-# Tradeoffs:
-# - Introduces a high probability of build failures. The libgccjit environment
-# is delicate and sensitive to injected compiler and linker flags.
-# - Forcing linker plugins into the async native compilation threads can cause
-# the generation of .eln files to crash or hang indefinitely.
-# - It wastes system resources by adding unnecessary steps to the compilation of
-# single-file shared objects.
-#
-# IMPORTANT: redundant if using -flto=auto (already implies plugin usage)
-#
-# The Historical Habit: Explicitly declaring -fuse-linker-plugin is a legacy
-# defensive programming habit. On older or highly fragmented toolchains, if the
-# linker failed to load the plugin, GCC would silently fall back to traditional
-# linking or fail in confusing ways. Explicitly declaring the flag forced a hard
-# error if the plugin was missing, rather than allowing a silent downgrade.
-if [[ "$ID" != "arch" || "$USE_CLANG" -eq 0 ]]; then
-  export BASE_CFLAGS="$BASE_CFLAGS -fuse-linker-plugin"
-  export BASE_LDFLAGS="$BASE_LDFLAGS -fuse-linker-plugin"
 fi
 
 # Using the Memory Pool System (MPS) in Emacs introduces several drawbacks. It
@@ -632,7 +586,14 @@ CONFIGURE_ARGS=(
   --without-ns
   --without-xaw3d
 
-  --without-cairo # Uses cairo and pango (instead of xft)
+  # Unlike older X11 drawing libraries, GTK 3 uses Cairo exclusively for its 2D
+  # rendering engine. There is no non-Cairo drawing path in GTK 3.
+  #
+  # Cairo is a "2D Graphics Renderer" (The Painter): Its job is to actually
+  # paint the pixels on your screen. Once HarfBuzz calculates the exact
+  # positions of the glyphs, it hands that data off to Cairo. Cairo is the
+  # engine that physically draws the text onto the window.
+  --with-cairo # Uses cairo and pango (instead of xft)
 
   # is the preferred option for modern systems due to its
   # performance benefits and alignment with current X11 development trends.
@@ -894,6 +855,55 @@ run_build() {
     current_ldflags="$current_ldflags -flto=full"
   fi
 
+  # Analysis of the -fuse-linker-plugin export flag
+  #
+  # For compiling Emacs C source code
+  #
+  # Benefits:
+  # - Enables the linker plugin during Link Time Optimization (-flto).
+  # - Allows the compiler and linker to cooperate, performing optimizations across
+  # different C translation units.
+  # - Can yield a slightly faster Emacs binary due to aggressive inlining and dead
+  # code elimination across the entire C codebase.
+  #
+  # Tradeoffs:
+  # - Increases both memory usage and overall compilation time during the linking
+  # phase.
+  # - Demands a compatible linker (such as ld.gold or lld) that is properly
+  # configured to work with your GCC installation.
+  # - It is mostly redundant. Modern versions of GCC automatically activate the
+  # linker plugin when you pass the -flto flag, so specifying it manually adds no
+  # extra value.
+  #
+  # 2. For compiling .el files to .eln files (Native Compilation)
+  #
+  # Benefits:
+  # - Practically zero. Emacs native compilation uses libgccjit to compile Emacs
+  # Lisp into independent shared libraries (.eln files) that are loaded
+  # dynamically at runtime.
+  # - Because there is no large-scale linking of multiple object files into a
+  # single binary, whole-program optimization techniques do not apply here.
+  #
+  # Tradeoffs:
+  # - Introduces a high probability of build failures. The libgccjit environment
+  # is delicate and sensitive to injected compiler and linker flags.
+  # - Forcing linker plugins into the async native compilation threads can cause
+  # the generation of .eln files to crash or hang indefinitely.
+  # - It wastes system resources by adding unnecessary steps to the compilation of
+  # single-file shared objects.
+  #
+  # IMPORTANT: redundant if using -flto=auto (already implies plugin usage)
+  #
+  # The Historical Habit: Explicitly declaring -fuse-linker-plugin is a legacy
+  # defensive programming habit. On older or highly fragmented toolchains, if the
+  # linker failed to load the plugin, GCC would silently fall back to traditional
+  # linking or fail in confusing ways. Explicitly declaring the flag forced a hard
+  # error if the plugin was missing, rather than allowing a silent downgrade.
+  if [[ "$ID" != "arch" || "$USE_CLANG" -eq 0 ]]; then
+    current_cflags="$current_cflags -fuse-linker-plugin"
+    current_ldflags="$current_ldflags -fuse-linker-plugin"
+  fi
+
   FPROFILE_BASE_DIR="$HOME/.flto/emacs"
   FPROFILE_DIR="$FPROFILE_BASE_DIR$EMACS_BRANCH"
   mkdir -p "$FPROFILE_BASE_DIR"
@@ -1144,6 +1154,10 @@ main() {
 
     if [[ $FPROFILE_GENERATE -ne 0 ]]; then
       run_build "fprofile-generate" 1
+      echo ""
+      echo ">>> ACTION REQUIRED: Emacs has been built with profiling enabled."
+      echo ">>> Open another terminal, run Emacs ($EMACS_INSTALL_PREFIX/bin/emacs), and perform typical tasks."
+      echo ">>> Close Emacs gracefully to dump the profile data, then return here."
       read -r -p "Proceed with fprofile-use? [y,n] " ANSWER
       if [[ "$ANSWER" != "y" ]]; then
         echo "Interrupted." >&2
