@@ -104,8 +104,8 @@ export BASE_CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
 #     # and not a functional defect in this build.
 #     BASE_CFLAGS="-Wno-deprecated-declarations $BASE_CFLAGS"
 #
-#     # Append BASE_CFLAGS to ignore implicit function declaration errors specifically
-#     # to bypass the treesit_load_language build failure.
+#     # Append BASE_CFLAGS to ignore implicit function declaration errors
+#     # specifically to bypass the treesit_load_language build failure.
 #     BASE_CFLAGS="$BASE_CFLAGS -Wno-implicit-function-declaration"
 #   fi
 # fi
@@ -251,10 +251,10 @@ export BASE_CFLAGS="$BASE_CFLAGS -fno-finite-math-only"
 # latency, you must apply both the compiler and linker flags together.
 export BASE_CFLAGS="$BASE_CFLAGS -fno-plt"
 
-# I am using -fno-plt in my BASE_CFLAGS, I must pair it with "bind now" semantics
-# in the linker flags. This forces the dynamic linker to resolve all symbols at
-# startup, fully bypassing lazy
-# binding and allowing the Global Offset Table to be marked read-only.
+# I am using -fno-plt in my BASE_CFLAGS, I must pair it with "bind now"
+# semantics in the linker flags. This forces the dynamic linker to resolve all
+# symbols at startup, fully bypassing lazy binding and allowing the Global
+# Offset Table to be marked read-only.
 #
 # These slightly slow down startup time, but subtly speed up and smooth out
 # runtime execution.
@@ -484,10 +484,10 @@ CONFIGURE_ARGS=(
   # library that supports precise and incremental collection, allowing Emacs to
   # manage memory more efficiently, especially in memory-intensive workloads.
   # Enabling this option requires that the MPS library and headers are installed
-  # and accessible during compilation. While primarily experimental, using MPS can
-  # improve performance and enable advanced memory management features, making it
-  # useful for custom Emacs builds such as those using the
-  # incremental garbage collection (IGC) framework.
+  # and accessible during compilation. While primarily experimental, using MPS
+  # can improve performance and enable advanced memory management features,
+  # making it useful for custom Emacs builds such as those using the incremental
+  # garbage collection (IGC) framework.
   # --with-mps=yes
 
   # Remove support for Access Control Lists and Extended Attributes for slightly
@@ -1057,7 +1057,7 @@ run_build() {
       # -Wno-error=coverage-mismatch
       # removed from cflags: -fprofile-correction -Wno-missing-profile -Wno-error=coverage-mismatch
       # removed from ldflags: -fprofile-correction
-      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_DIR"
+      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_DIR -Wno-missing-profile -Wno-error=coverage-mismatch"
       export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_DIR -O$CC_OPTIMIZE"
     fi
   else
@@ -1156,8 +1156,10 @@ main() {
       run_build "fprofile-generate" 1
       echo ""
       echo ">>> ACTION REQUIRED: Emacs has been built with profiling enabled."
-      echo ">>> Open another terminal, run Emacs ($EMACS_INSTALL_PREFIX/bin/emacs), and perform typical tasks."
-      echo ">>> Close Emacs gracefully to dump the profile data, then return here."
+      echo ">>> Open another terminal, run Emacs" \
+        "($EMACS_INSTALL_PREFIX/bin/emacs), and perform typical tasks."
+      echo ">>> Close Emacs gracefully to dump the profile data," \
+        "then return here."
       read -r -p "Proceed with fprofile-use? [y,n] " ANSWER
       if [[ "$ANSWER" != "y" ]]; then
         echo "Interrupted." >&2
