@@ -1316,7 +1316,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;;; emacs-data
 
 (defvar my-shared-user-emacs-directory (expand-file-name "~/.emacs-data/var"))
-(setq tmpedit-dir (expand-file-name "tmpedit" "~/.emacs-data"))
+(setq tmpedit-dir (expand-file-name "tmpedit" my-shared-user-emacs-directory))
 
 ;; Update paths
 (setq undo-fu-session-directory

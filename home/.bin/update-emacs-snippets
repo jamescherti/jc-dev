@@ -50,7 +50,7 @@ EMACS_MODES = {
     },
     "markdown": {
         "yasnippet-names": ["markdown-mode", "gfm-mode"],
-        # "convert-tabs-to": " " * 3,
+        "convert-tabs-to": " " * 3,
     },
     "lua": {
         "yasnippet-names": ["lua-mode"],
