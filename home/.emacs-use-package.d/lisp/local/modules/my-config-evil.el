@@ -1045,25 +1045,25 @@ guarantees that the new window is selected, as in Vim."
 (define-key evil-normal-state-map (kbd "<leader>m") 'consult-project-buffer)
 (define-key evil-normal-state-map (kbd "M-/") 'consult-line)
 
-(lightemacs-use-package fzf
-  :commands fzf
-  ;; :bind
-  :config
-  (setq
-   ;; fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
-   ;; fzf/executable "fzf"
-   ;; fzf/git-grep-args "-i --line-number %s"
-   ;; ;; command used for `fzf-grep-*` functions
-   ;; ;; example usage for ripgrep:
-   ;; ;; fzf/grep-command "rg --no-heading -nH"
-   ;; fzf/grep-command "grep -nrH"
-   ;; ;; If nil, the fzf buffer will appear at the top of the window
-   fzf/position-bottom t
-   fzf/window-height 25)
-  )
+;; (lightemacs-use-package fzf
+;;   :commands fzf
+;;   ;; :bind
+;;   :config
+;;   (setq
+;;    ;; fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
+;;    ;; fzf/executable "fzf"
+;;    ;; fzf/git-grep-args "-i --line-number %s"
+;;    ;; ;; command used for `fzf-grep-*` functions
+;;    ;; ;; example usage for ripgrep:
+;;    ;; ;; fzf/grep-command "rg --no-heading -nH"
+;;    ;; fzf/grep-command "grep -nrH"
+;;    ;; ;; If nil, the fzf buffer will appear at the top of the window
+;;    fzf/position-bottom t
+;;    fzf/window-height 15)
+;;   )
 
-(define-key evil-normal-state-map (kbd "C-p") 'fzf)
-;; (define-key evil-normal-state-map (kbd "C-p") 'my-consult-fd-project)
+;; (define-key evil-normal-state-map (kbd "C-p") 'fzf)
+(define-key evil-normal-state-map (kbd "C-p") 'my-consult-fd-project)
 
 ;; (define-key evil-normal-state-map (kbd "C-p") 'consult-fd)
 
@@ -1100,10 +1100,8 @@ DIR is the directory."
 ;; (evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-project)
 ;; (evil-define-key 'normal 'global (kbd "gr") 'my-consult-grep-dir)
 
-(evil-define-key 'normal 'global (kbd "<leader>gR") 'my-consult-grep-dir)
-;; (evil-define-key 'normal 'global (kbd "<leader>gr") 'my-consult-grep-project)
-
-(evil-define-key 'normal 'global (kbd "<leader>gr") 'wizard-grep)
+;; (evil-define-key 'normal 'global (kbd "<leader>gR") 'my-consult-grep-dir)
+(evil-define-key 'normal 'global (kbd "<leader>gr") 'my-consult-grep-project)
 
 ;;; evil org
 

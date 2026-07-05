@@ -851,9 +851,9 @@ subsequent GCC invocations."
 
                            le-apheleia
 
-                           ;; le-consult
-                           ;; le-embark-consult
-                           ;; le-embark
+                           le-consult
+                           le-embark-consult
+                           le-embark
                            le-vertico
                            le-orderless
                            le-marginalia
