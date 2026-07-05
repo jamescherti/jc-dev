@@ -1059,7 +1059,7 @@ guarantees that the new window is selected, as in Vim."
    ;; fzf/grep-command "grep -nrH"
    ;; ;; If nil, the fzf buffer will appear at the top of the window
    fzf/position-bottom t
-   fzf/window-height 15)
+   fzf/window-height 25)
   )
 
 (define-key evil-normal-state-map (kbd "C-p") 'fzf)
@@ -1099,8 +1099,11 @@ DIR is the directory."
 
 ;; (evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-project)
 ;; (evil-define-key 'normal 'global (kbd "gr") 'my-consult-grep-dir)
+
 (evil-define-key 'normal 'global (kbd "<leader>gR") 'my-consult-grep-dir)
-(evil-define-key 'normal 'global (kbd "<leader>gr") 'my-consult-grep-project)
+;; (evil-define-key 'normal 'global (kbd "<leader>gr") 'my-consult-grep-project)
+
+(evil-define-key 'normal 'global (kbd "<leader>gr") 'wizard-grep)
 
 ;;; evil org
 

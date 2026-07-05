@@ -851,19 +851,20 @@ subsequent GCC invocations."
 
                            le-apheleia
 
-                           le-consult
-                           le-embark-consult
-                           le-embark
+                           ;; le-consult
+                           ;; le-embark-consult
+                           ;; le-embark
                            le-vertico
                            le-orderless
                            le-marginalia
 
                            le-corfu
-                           le-corfu-prescient
                            le-cape
-                           le-prescient
-                           le-vertico-prescient
                            mod-corfu-cape
+
+                           ;; le-corfu-prescient
+                           ;; le-prescient
+                           ;; le-vertico-prescient
 
                            le-elisp-refs
                            le-easy-escape
