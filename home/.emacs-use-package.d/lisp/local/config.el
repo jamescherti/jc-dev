@@ -1379,6 +1379,10 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (setq recentf-save-file
       (expand-file-name "recentf" my-shared-user-emacs-directory))
 
+;;; dtrt-indent
+
+(setq lightemacs-dtrt-indent-global-target-hooks nil)
+
 ;;; Provide
 
 (provide 'config)
