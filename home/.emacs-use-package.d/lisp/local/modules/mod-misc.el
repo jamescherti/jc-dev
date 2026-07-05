@@ -4426,38 +4426,34 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; eldoc
 
-;; (defun my-setup-eldoc-mode ()
-;;   "Setup eldoc mode."
-;;   (unless (bound-and-true-p eldoc-mode)
-;;     (setq eldoc-idle-delay 0.4)
-;;     (eldoc-mode 1)))
-;;
-;; (lightemacs-use-package eldoc
-;;   :ensure nil
-;;   :commands (global-eldoc-mode
-;;              eldoc-mode)
-;;   :hook ((lisp-interaction-mode . my-setup-eldoc-mode)
-;;          (bash-ts-mode . my-setup-eldoc-mode)
-;;          (sh-mode . my-setup-eldoc-mode)
-;;          (emacs-lisp-mode . my-setup-eldoc-mode)
-;;          (python-mode . my-setup-eldoc-mode)
-;;          (python-ts-mode . my-setup-eldoc-mode))
-;;
-;;   :init
-;;   (setq eldoc-idle-delay most-positive-fixnum)
-;;   (global-eldoc-mode -1)
-;;
-;;   ;; (setq eldoc-message-commands-table-size 63)
-;;
-;;   ;; If non-nil, show 'help-at-pt-kbd-string' at point via Eldoc. This setting
-;;   ;; is an alternative to 'help-at-pt-display-when-idle'. If the value is
-;;   ;; non-nil, 'eldoc-show-help-at-pt' will show help-at-point via Eldoc.
-;;   ;; (setq eldoc-help-at-pt t)
-;;   )
+(defun my-setup-eldoc-mode ()
+  "Setup eldoc mode."
+  (setq-local eldoc-idle-delay 0.4)
+  (unless (bound-and-true-p eldoc-mode)
+    (eldoc-mode 1)))
 
-;;; dtrt-indent
+(lightemacs-use-package eldoc
+  :ensure nil
+  :commands (global-eldoc-mode
+             eldoc-mode)
+  :hook ((lisp-interaction-mode . my-setup-eldoc-mode)
+         (bash-ts-mode . my-setup-eldoc-mode)
+         (sh-mode . my-setup-eldoc-mode)
+         (emacs-lisp-mode . my-setup-eldoc-mode)
+         (python-mode . my-setup-eldoc-mode)
+         (python-ts-mode . my-setup-eldoc-mode))
 
-(add-hook-text-editing-modes 'dtrt-indent-mode)
+  :init
+  (setq eldoc-idle-delay most-positive-fixnum)
+  (global-eldoc-mode -1)
+
+  ;; (setq eldoc-message-commands-table-size 63)
+
+  ;; If non-nil, show 'help-at-pt-kbd-string' at point via Eldoc. This setting
+  ;; is an alternative to 'help-at-pt-display-when-idle'. If the value is
+  ;; non-nil, 'eldoc-show-help-at-pt' will show help-at-point via Eldoc.
+  ;; (setq eldoc-help-at-pt t)
+  )
 
 ;;; Provide
 

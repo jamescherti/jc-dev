@@ -1381,7 +1381,10 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 
 ;;; dtrt-indent
 
-(setq lightemacs-dtrt-indent-global-target-hooks nil)
+(setq lightemacs-dtrt-indent-global-target-hooks '())
+(setq lightemacs-dtrt-indent-local-target-hooks '(prog-mode-hook
+                                                  text-mode-hook
+                                                  conf-mode-hook))
 
 ;;; Provide
 
