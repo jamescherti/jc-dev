@@ -1855,6 +1855,7 @@ any new ones."
 (add-hook 'conf-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'ibuffer-mode-hook #'my-setup-display-line-numbers-mode)
 
+(add-hook 'grep-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'helpful-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'dired-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'org-agenda-mode-hook #'my-setup-display-line-numbers-mode)
