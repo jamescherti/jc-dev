@@ -43,7 +43,7 @@ unset IGNOREEOF
 # Ensure your TMOUT is set to your desired timeout in seconds (e.g., 1 hour)
 export TMOUT=3600
 
-if [[ $UID != 0 ]]; then
+if [[ $EUID != 0 ]]; then
   TMOUT=300
 else
   TMOUT=120
