@@ -183,6 +183,11 @@ fi
 # largely redundant for the Emacs codebase. Emacs does not rely heavily on
 # floating-point math, and it is not a shared library where semantic
 # interposition rules heavily apply.
+#
+# app-editors/emacs: Excellent use of semantic-interposition.conf. Since you use
+# Emacs, compile it with the jit USE flag (native compilation). The underlying
+# libgccjit code compiler benefits immensely from your optimized LLVM/Clang and
+# Python stacks.
 export BASE_CFLAGS="$BASE_CFLAGS -fno-semantic-interposition"
 
 # The -fno-finite-math-only flag prevents the compiler from assuming that

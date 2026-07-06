@@ -400,12 +400,29 @@ or within the active region before applying the comment."
         (when (fboundp 'kirigami-open-fold)
           (kirigami-open-fold))))))
 
+(defcustom my-kirigami-auto-close-min-lines 100
+  "Minimum number of lines required to trigger auto-closing of folds.
+If nil, this static line check is disabled."
+  :type '(choice (integer :tag "Minimum line count")
+                 (const :tag "Disable static line check" nil))
+  :group 'kirigami)
+
+(defcustom my-kirigami-auto-close-fit-window 1
+  "If non-nil, auto-close folds if the buffer lines exceed the window height."
+  :type 'boolean
+  :group 'kirigami)
+
 (defun my-kirigami-auto-close-all ()
   "Close all folds."
   (unless (bound-and-true-p easysession-load-in-progress)
     (save-excursion
       (ignore-errors
-        (when (and (require 'kirigami nil t)
+        (when (and (let ((total-lines (line-number-at-pos (point-max))))
+                     (or (and (integerp my-kirigami-auto-close-min-lines)
+                              (> total-lines my-kirigami-auto-close-min-lines))
+                         (and my-kirigami-auto-close-fit-window
+                              (> total-lines (window-body-height)))))
+                   (require 'kirigami nil t)
                    (fboundp 'kirigami-close-folds)
                    (let ((name (buffer-name)))
                      (and (not (string-prefix-p "*" name))
