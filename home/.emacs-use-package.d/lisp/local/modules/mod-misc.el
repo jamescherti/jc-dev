@@ -740,8 +740,8 @@ any new ones."
 
   ;; This fixes the skipping when scrolling long org documents
   ;; NOTE: MANAGED BY MINIMAL-EMACS
-  ;; (setq scroll-conservatively most-positive-fixnum)
-  (setq scroll-conservatively 20)
+  (setq scroll-conservatively most-positive-fixnum)
+  ;; (setq scroll-conservatively 20)
 
   (setq eldoc-idle-delay 0.5)
   (setq eldoc-echo-area-display-truncation-message nil)
@@ -3365,14 +3365,14 @@ Opens a split window showing the added and removed features."
                                    (when (fboundp 'vterm)
                                      (let* ((vterm-shell shell-pop-term-shell))
                                        (vterm))))))
-  ;; (shell-pop-shell-type '("eat" "*eat*"
+  ;; (setopt shell-pop-shell-type '("eat" "*eat*"
   ;;                         (lambda ()
   ;;                           (when (fboundp 'eat)
   ;;                             (eat shell-pop-term-shell)))))
-  ;; (shell-pop-shell-type '("ansi-term"
-  ;;                         "*ansi-term*"
-  ;;                         (lambda ()
-  ;;                           (ansi-term shell-pop-term-shell))))
+  ;; (setopt shell-pop-shell-type '("ansi-term"
+  ;;                                "*ansi-term*"
+  ;;                                (lambda ()
+  ;;                                  (ansi-term shell-pop-term-shell))))
 
   :init
   ;; (setq shell-pop-term-shell "/usr/bin/env bash")
@@ -3462,16 +3462,26 @@ Opens a split window showing the added and removed features."
   (when (fboundp 'my-project-name)
     (let* ((proj-name (or (my-project-name) "misc"))
            (buf-name (format "*vterm:%s*" proj-name)))
-      (setopt shell-pop-shell-type
-              (list "vterm"
-                    buf-name
-                    `(lambda ()
-                       (let* ((vterm-shell
-                               (format "tmux-session emacs-%s"
-                                       (replace-regexp-in-string
-                                        "[^a-z0-9]+" "-"
-                                        (shell-quote-argument ,proj-name))))
-                              (tmux-buffer (vterm ,buf-name))))))))))
+      ;; (setopt shell-pop-shell-type (list "ansi-term"
+      ;;                                    "*ansi-term*"
+      ;;                                    `(lambda ()
+      ;;                                       (let* ((shell-cmd
+      ;;                                               (format "tmux-session emacs-%s"
+      ;;                                                       (replace-regexp-in-string
+      ;;                                                        "[^a-z0-9]+" "-"
+      ;;                                                        (shell-quote-argument ,proj-name)))))
+      ;;                                         (ansi-term shell-cmd)))))
+      ;; (setopt shell-pop-shell-type
+      ;;         (list "vterm"
+      ;;               buf-name
+      ;;               `(lambda ()
+      ;;                  (let* ((vterm-shell
+      ;;                          (format "tmux-session emacs-%s"
+      ;;                                  (replace-regexp-in-string
+      ;;                                   "[^a-z0-9]+" "-"
+      ;;                                   (shell-quote-argument ,proj-name))))
+      ;;                         (tmux-buffer (vterm ,buf-name)))))))
+      )))
 
 (with-eval-after-load 'shell-pop
   ;; Apply the new global setting advice

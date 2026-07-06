@@ -75,7 +75,7 @@
                                      ;; through native-comp-compiler-options is
                                      ;; redundant and bypasses the native
                                      ;; compiler's built-in logic.
-                                     "-O2"
+                                     "-O3"
 
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which

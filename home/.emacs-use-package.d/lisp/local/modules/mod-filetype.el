@@ -283,21 +283,21 @@ only if they are not already available."
   ;; (mod-filetype-install 'java-ts-mode 'java)
   (mod-filetype-install 'php-ts-mode 'php 'php-ts-mode-install-parsers)
   (mod-filetype-install 'markdown-mode '(markdown markdown-inline)
-                       'markdown-ts-mode-install-parsers)
+                        'markdown-ts-mode-install-parsers)
   (mod-filetype-install 'mhtml-ts-mode 'html
-                       'mhtml-ts-mode-install-parsers)
+                        'mhtml-ts-mode-install-parsers)
 
   (mod-filetype-install nil '(python
-                             bash
-                             yaml
-                             json
-                             lua
-                             c
-                             cpp
-                             dockerfile
-                             go
-                             java
-                             javascript))
+                              bash
+                              yaml
+                              json
+                              lua
+                              c
+                              cpp
+                              dockerfile
+                              go
+                              java
+                              javascript))
 
   ;; (treesit-install-language-grammar 'python)
   ;; (treesit-install-language-grammar 'bash)
