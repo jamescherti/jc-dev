@@ -68,6 +68,11 @@
                                     spinner
                                     ;; git-gutter
                                     ;; git-gutter-fringe
+
+                                    avy
+                                    ace-window
+                                    expand-region
+
                                     posframe
                                     popper
                                     rainbow-mode

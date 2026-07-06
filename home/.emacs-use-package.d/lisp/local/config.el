@@ -802,10 +802,12 @@ subsequent GCC invocations."
 
 (setq lightemacs-modules '(mod-same-window
                            mod-dired
-                           mod-kirigami
                            mod-flymake
                            mod-gc
                            mod-yasnippet
+
+                           mod-kirigami
+                           ;; le-kirigami ; replaced with mod-kirigami
 
                            le-compile-angel
                            le-flymake
@@ -837,7 +839,6 @@ subsequent GCC invocations."
                            le-outline-indent
                            le-hideshow
                            le-treesit-fold
-                           ;; le-kirigami ; replaced with mod-kirigami
 
                            ;; xclip (Emacs handles the clipboard natively with
                            ;; your (setq select-enable-clipboard t) setting; you
@@ -902,8 +903,10 @@ subsequent GCC invocations."
 
                            le-maybe-yaml-ts
 
-                           le-avy
-                           le-ace-window
+                           ;; le-avy
+                           ;; le-ace-window
+                           ;; le-expand-region
+
                            le-bufferfile
 
                            ;; TODO This adds support for indirect buffers:
@@ -914,7 +917,6 @@ subsequent GCC invocations."
                            le-dtrt-indent
 
                            le-dumb-jump
-                           le-expand-region
                            le-git-modes
                            le-helpful
                            le-indent-bars
@@ -924,10 +926,6 @@ subsequent GCC invocations."
                            le-term
 
                            le-persist-text-scale
-
-                           le-easysession
-
-                           le-server
 
                            mod-misc
                            mod-ediff
@@ -942,6 +940,9 @@ subsequent GCC invocations."
                            smartindent
                            ;; point-manager
                            ;; battery-angel
+
+                           le-easysession
+                           le-server
                            ))
 
 ;;; Add my packages to load path
