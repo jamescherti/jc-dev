@@ -3471,17 +3471,16 @@ Opens a split window showing the added and removed features."
       ;;                                                        "[^a-z0-9]+" "-"
       ;;                                                        (shell-quote-argument ,proj-name)))))
       ;;                                         (ansi-term shell-cmd)))))
-      ;; (setopt shell-pop-shell-type
-      ;;         (list "vterm"
-      ;;               buf-name
-      ;;               `(lambda ()
-      ;;                  (let* ((vterm-shell
-      ;;                          (format "tmux-session emacs-%s"
-      ;;                                  (replace-regexp-in-string
-      ;;                                   "[^a-z0-9]+" "-"
-      ;;                                   (shell-quote-argument ,proj-name))))
-      ;;                         (tmux-buffer (vterm ,buf-name)))))))
-      )))
+      (setopt shell-pop-shell-type
+              (list "vterm"
+                    buf-name
+                    `(lambda ()
+                       (let* ((vterm-shell
+                               (format "tmux-session emacs-%s"
+                                       (replace-regexp-in-string
+                                        "[^a-z0-9]+" "-"
+                                        (shell-quote-argument ,proj-name))))
+                              (tmux-buffer (vterm ,buf-name))))))))))
 
 (with-eval-after-load 'shell-pop
   ;; Apply the new global setting advice
