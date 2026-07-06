@@ -810,64 +810,65 @@ check their base buffer's file name."
              (member (file-name-nondirectory base-file-name)
                      my-ephemeral-file-names)))))
 
-(defun my-jump-to-buffers-or-open (bufs fallback-file
-                                        &optional no-new-tab)
-  "Jump to a visible window displaying any buffer in BUFS.
-Searches the current frame first, then across all tabs and frames.
-If no buffer is found, open FALLBACK-FILE.  When NO-NEW-TAB is
-non-nil or the current buffer is ephemeral, the file opens in the
-current tab; otherwise, it opens in a new tab.  Pulses the cursor
-upon switching or opening."
-  (require 'pulse)
-  (let* ((buf-objs (delq nil (mapcar #'get-buffer bufs)))
-         (target-window (seq-find (lambda (w)
-                                    (memq (window-buffer w) buf-objs))
-                                  (window-list)))
-         found-tab-info
-         found-buf)
-    (if target-window
-        (progn
-          ;; If it is already in a window on the current frame, switch and pulse
-          (select-window target-window)
-          (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point)))
-      ;; Otherwise, check for it in a tab across all frames
-      (when (bound-and-true-p tab-bar-mode)
-        (catch 'found
-          (dolist (buf bufs)
-            (when-let* ((tab-info (tab-bar-get-buffer-tab buf t)))
-              (setq found-tab-info tab-info
-                    found-buf buf)
-              (throw 'found t)))))
-      (if found-tab-info
-          (let ((frame (alist-get 'frame found-tab-info))
-                (index (alist-get 'index found-tab-info)))
-            ;; Focus the target frame if it's not the currently active one
-            (when (and frame (frame-live-p frame))
-              (select-frame-set-input-focus frame))
-            ;; Switch to the tab using its internal index (1-based)
-            (unless (eq (car found-tab-info) 'current-tab)
-              (tab-bar-select-tab (1+ index)))
-            ;; Unconditionally search for the window in this tab, select it, and
-            ;; pulse
-            (if-let* ((target-tab-window
-                       (seq-find (lambda (w)
-                                   (memq (window-buffer w) buf-objs))
-                                 (window-list))))
-                (progn
-                  (select-window target-tab-window)
-                  (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point)))
-              ;; If the expected buffer is missing after the tab switch, force it
-              (switch-to-buffer found-buf)
-              (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point))))
-        ;; Fallback: Open a new tab, find the fallback file, and pulse
-        (when fallback-file
-          (let ((open-in-current-tab (or no-new-tab (my-ephemeral-buffer-p))))
-            (when (and (bound-and-true-p tab-bar-mode)
-                       (fboundp 'tab-bar-new-tab)
-                       (not open-in-current-tab))
-              (tab-bar-new-tab))
-            (find-file fallback-file)
-            (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point))))))))
+;; NOTE: Buggy
+;; (defun my-jump-to-buffers-or-open (bufs fallback-file
+;;                                         &optional no-new-tab)
+;;   "Jump to a visible window displaying any buffer in BUFS.
+;; Searches the current frame first, then across all tabs and frames.
+;; If no buffer is found, open FALLBACK-FILE.  When NO-NEW-TAB is
+;; non-nil or the current buffer is ephemeral, the file opens in the
+;; current tab; otherwise, it opens in a new tab.  Pulses the cursor
+;; upon switching or opening."
+;;   (require 'pulse)
+;;   (let* ((buf-objs (delq nil (mapcar #'get-buffer bufs)))
+;;          (target-window (seq-find (lambda (w)
+;;                                     (memq (window-buffer w) buf-objs))
+;;                                   (window-list)))
+;;          found-tab-info
+;;          found-buf)
+;;     (if target-window
+;;         (progn
+;;           ;; If it is already in a window on the current frame, switch and pulse
+;;           (select-window target-window)
+;;           (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point)))
+;;       ;; Otherwise, check for it in a tab across all frames
+;;       (when (bound-and-true-p tab-bar-mode)
+;;         (catch 'found
+;;           (dolist (buf bufs)
+;;             (when-let* ((tab-info (tab-bar-get-buffer-tab buf t)))
+;;               (setq found-tab-info tab-info
+;;                     found-buf buf)
+;;               (throw 'found t)))))
+;;       (if found-tab-info
+;;           (let ((frame (alist-get 'frame found-tab-info))
+;;                 (index (alist-get 'index found-tab-info)))
+;;             ;; Focus the target frame if it's not the currently active one
+;;             (when (and frame (frame-live-p frame))
+;;               (select-frame-set-input-focus frame))
+;;             ;; Switch to the tab using its internal index (1-based)
+;;             (unless (eq (car found-tab-info) 'current-tab)
+;;               (tab-bar-select-tab (1+ index)))
+;;             ;; Unconditionally search for the window in this tab, select it, and
+;;             ;; pulse
+;;             (if-let* ((target-tab-window
+;;                        (seq-find (lambda (w)
+;;                                    (memq (window-buffer w) buf-objs))
+;;                                  (window-list))))
+;;                 (progn
+;;                   (select-window target-tab-window)
+;;                   (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point)))
+;;               ;; If the expected buffer is missing after the tab switch, force it
+;;               (switch-to-buffer found-buf)
+;;               (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point))))
+;;         ;; Fallback: Open a new tab, find the fallback file, and pulse
+;;         (when fallback-file
+;;           (let ((open-in-current-tab (or no-new-tab (my-ephemeral-buffer-p))))
+;;             (when (and (bound-and-true-p tab-bar-mode)
+;;                        (fboundp 'tab-bar-new-tab)
+;;                        (not open-in-current-tab))
+;;               (tab-bar-new-tab))
+;;             (find-file fallback-file)
+;;             (run-with-timer 0.05 nil #'pulse-momentary-highlight-one-line (point))))))))
 
 ;;; Simple version: my-jump-to-buffers-or-open
 

@@ -53,6 +53,21 @@
 ;; Lisp). This driver prepares the command line for the compiler, applies
 ;; system-dependent settings, and runs the compilation in an isolated process.
 (setq native-comp-speed 2)
+
+(setq vterm-module-cmake-args
+      "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
+
+;; (setq vterm-module-cmake-args
+;;       "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
+;; (setq vterm-module-cmake-args
+;;       "-DCMAKE_C_FLAGS='-O3 -march=native -flto=auto' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed -O3 -march=native -flto=auto'")
+;; (setq vterm-module-cmake-args
+;;       "-DCMAKE_C_FLAGS='-O3 -march=native -flto=auto' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed -O3 -march=native -flto=auto'")
+
+;; (setq vterm-module-cmake-args "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
+
+;; (setq vterm-module-cmake-args
+;;       "-DCMAKE_C_FLAGS='-O2 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
 (setq native-comp-compiler-options '(;; Enables aggressive optimization passes
                                      ;; in GCC. Native compilation of Emacs Lisp
                                      ;; benefits from improved inlining and loop
@@ -263,16 +278,19 @@
                                    ;; relocation tables to reduce file size and
                                    ;; slightly improve load times.
                                    "-Wl,-z,pack-relative-relocs"
+
                                    ;; -Wl,-O2: Applies standard linker-level
                                    ;; optimizations (like string merging) to the
                                    ;; generated shared object.
                                    "-Wl,-O2"
+
                                    ;; -Wl,--as-needed: Prevents the linker from
                                    ;; recording dependencies on libraries that
                                    ;; are not actually used by the code.
                                    "-Wl,--as-needed"
 
-                                   "-O2"))
+                                   ;; "-O3"
+                                   ))
 
 ;; Auto detect the CPU architecture
 ;; Alternative: Just let

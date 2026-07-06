@@ -387,20 +387,20 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 ;;; Switch to the project
 
-(defun my-project-switch-project (dir)
-  "Prompt for a project, then switch to a window/tab containing it or edit it.
-DIR is the project directory."
-  (interactive (list (funcall project-prompter)))
-
-  (let* ((proj (project-current t dir))
-         (root (project-root proj))
-         (project-bufs (project-buffers proj))
-         ;; Set up the environment for the fallback find-file context
-         (default-directory root)
-         (project-current-directory-override dir))
-
-    ;; Pass the project buffers and the root fallback file to the jumper
-    (my-jump-to-buffers-or-open project-bufs root nil)))
+;; (defun my-project-switch-project (dir)
+;;   "Prompt for a project, then switch to a window/tab containing it or edit it.
+;; DIR is the project directory."
+;;   (interactive (list (funcall project-prompter)))
+;;
+;;   (let* ((proj (project-current t dir))
+;;          (root (project-root proj))
+;;          (project-bufs (project-buffers proj))
+;;          ;; Set up the environment for the fallback find-file context
+;;          (default-directory root)
+;;          (project-current-directory-override dir))
+;;
+;;     ;; Pass the project buffers and the root fallback file to the jumper
+;;     (my-jump-to-buffers-or-open project-bufs root nil)))
 
 ;;; Provide
 
