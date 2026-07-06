@@ -883,7 +883,7 @@ subsequent GCC invocations."
                            le-winner
                            le-elec-pair
 
-                           le-which-key
+                           ;; le-which-key
                            ;; le-paren
 
                            le-dired
