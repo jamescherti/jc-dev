@@ -4392,47 +4392,47 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; dir-config
 
-(lightemacs-use-package dir-config
-  :demand t
-  ;; :commands (dir-config-mode
-  ;;            dir-config-load
-  ;;            dir-config-get-dir
-  ;;            dir-config-get-file)
-  ;; :functions (dir-config-get-dir
-  ;;             dir-config-get-file)
-
-  :custom
-  (dir-config-allowed-directories '("~/src/wip"
-                                    "~/src/dotfiles/jc-dev"
-                                    "~/src/home-settings"))
-  (dir-config-file-names '(".dir-settings.el"))
-
-  :preface
-  (defun dir-config-edit-dir ()
-    "Open the directory from which the dir config was loaded, if available."
-    (interactive)
-    (let ((config-dir (dir-config-get-dir)))
-      (if config-dir
-          (find-file config-dir)
-        (message "[dir-config] The dir config directory was not found."))))
-
-  (defun dir-config-edit-file ()
-    "Open the dir config file that was loaded, if available."
-    (interactive)
-    (let ((dir-config-file (dir-config-get-file)))
-      (if dir-config-file
-          (find-file dir-config-file)
-        (message "[dir-config] The dir config file was not found."))))
-
-  (defun dir-config-name ()
-    "The dir-config.el directory name. Could be used as a project name."
-    (let ((config-dir (dir-config-get-dir)))
-      (if config-dir
-          (file-name-nondirectory config-dir)
-        "")))
-
-  :config
-  (dir-config-mode 1))
+;; (lightemacs-use-package dir-config
+;;   :demand t
+;;   ;; :commands (dir-config-mode
+;;   ;;            dir-config-load
+;;   ;;            dir-config-get-dir
+;;   ;;            dir-config-get-file)
+;;   ;; :functions (dir-config-get-dir
+;;   ;;             dir-config-get-file)
+;;
+;;   :custom
+;;   (dir-config-allowed-directories '("~/src/wip"
+;;                                     "~/src/dotfiles/jc-dev"
+;;                                     "~/src/home-settings"))
+;;   (dir-config-file-names '(".dir-settings.el"))
+;;
+;;   :preface
+;;   (defun dir-config-edit-dir ()
+;;     "Open the directory from which the dir config was loaded, if available."
+;;     (interactive)
+;;     (let ((config-dir (dir-config-get-dir)))
+;;       (if config-dir
+;;           (find-file config-dir)
+;;         (message "[dir-config] The dir config directory was not found."))))
+;;
+;;   (defun dir-config-edit-file ()
+;;     "Open the dir config file that was loaded, if available."
+;;     (interactive)
+;;     (let ((dir-config-file (dir-config-get-file)))
+;;       (if dir-config-file
+;;           (find-file dir-config-file)
+;;         (message "[dir-config] The dir config file was not found."))))
+;;
+;;   (defun dir-config-name ()
+;;     "The dir-config.el directory name. Could be used as a project name."
+;;     (let ((config-dir (dir-config-get-dir)))
+;;       (if config-dir
+;;           (file-name-nondirectory config-dir)
+;;         "")))
+;;
+;;   :config
+;;   (dir-config-mode 1))
 
 ;;; eldoc
 
