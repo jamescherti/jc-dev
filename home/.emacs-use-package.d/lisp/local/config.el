@@ -954,8 +954,8 @@ subsequent GCC invocations."
                            sub-project
                            mod-buffer-terminator
                            le-buffer-guardian
-                           ;; mod-eglot
-                           mod-lsp-mode
+                           mod-eglot
+                           ;; mod-lsp-mode
                            smartindent
                            ;; point-manager
                            ;; battery-angel

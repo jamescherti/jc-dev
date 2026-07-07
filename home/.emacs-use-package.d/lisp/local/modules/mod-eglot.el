@@ -30,18 +30,18 @@
 (eval-and-compile (require 'lightemacs-use-package))
 (require 'my-defun)
 
-(when (my-treesit-language-available-p 'python)
-  (progn
-    (with-eval-after-load 'python
-      ;; (setq auto-mode-alist (rassq-delete-all 'python-mode auto-mode-alist))
+;;; Eglot server programs
 
-      ;; TODO is this better than the remove-hook later?
-      ;; Remove python-flymake error: "Cannot find suitable checker" when a
-      ;; Python script is loaded before eglot and the checker isn't found
-      ;; (advice-add 'python-flymake :override #'ignore)
+(setq eglot-server-programs
+      ;; FIXME: Maybe this info should be distributed into the major modes
+      ;; themselves where they could set a buffer-local `eglot-server-program'
+      ;; which would allow deprecating this database.
+      ;; FIXME: With `derived-mode-add-parents' in Emacs≥30, some of
+      ;; those entries can be simplified, but we keep them for when
+      ;; `eglot.el' is installed via GNU ELPA in an older Emacs.
+      `(((python-mode python-ts-mode) . ("pylsp"))))
 
-      ))
-  (push '(python-mode . python-ts-mode) major-mode-remap-alist))
+;;; Python: remove flymake
 
 ;; Debugger entered--Lisp error: (error "Can't find state for python-flymake in 'flymake--state'")
 ;; error("Can't find state for %s in `flymake--state'" python-flymake)
@@ -57,25 +57,30 @@
 (add-hook 'python-mode-hook #'my-remove-python-flymake)
 (add-hook 'python-ts-mode-hook #'my-remove-python-flymake)
 
+(with-eval-after-load 'python
+  ;; Remove python-flymake error: "Cannot find suitable checker" when a Python
+  ;; script is loaded before eglot and the checker isn't found
+  (advice-add 'python-flymake :override #'ignore))
+
 ;;; fix ignore empty
 
-(defun my/jsonrpc--continue-ignore-empty (orig-fun conn id &optional cont result error)
-  "Ignore empty JSON-RPC results to prevent plistp errors in Eglot.
-
-ORIG-FUN is the original `jsonrpc--continue` function.
-CONN is the JSON-RPC connection.
-ID is the message ID.
-CONT is the continuation function.
-RESULT is the result from the server.
-ERROR is the error (if any)."
-  (if (and (vectorp result) (zerop (length result)))
-      ;; Pass nil instead of dropping the callback.
-      ;; This prevents ElDoc async requests from hanging.
-      (funcall orig-fun conn id cont nil error)
-    (funcall orig-fun conn id cont result error)))
-
-(with-eval-after-load 'jsonrpc
-  (advice-add 'jsonrpc--continue :around #'my/jsonrpc--continue-ignore-empty))
+;; (defun my/jsonrpc--continue-ignore-empty (orig-fun conn id &optional cont result error)
+;;   "Ignore empty JSON-RPC results to prevent plistp errors in Eglot.
+;;
+;; ORIG-FUN is the original `jsonrpc--continue` function.
+;; CONN is the JSON-RPC connection.
+;; ID is the message ID.
+;; CONT is the continuation function.
+;; RESULT is the result from the server.
+;; ERROR is the error (if any)."
+;;   (if (and (vectorp result) (zerop (length result)))
+;;       ;; Pass nil instead of dropping the callback.
+;;       ;; This prevents ElDoc async requests from hanging.
+;;       (funcall orig-fun conn id cont nil error)
+;;     (funcall orig-fun conn id cont result error)))
+;;
+;; (with-eval-after-load 'jsonrpc
+;;   (advice-add 'jsonrpc--continue :around #'my/jsonrpc--continue-ignore-empty))
 
 ;;; eglot
 
@@ -118,9 +123,9 @@ ERROR is the error (if any)."
 ;; post-filtered with Orderless. This feature works always, with or without
 ;; cape-wrap-buster. Note that this feature is Orderless-specific. See the next
 ;; section.
-(with-eval-after-load 'eglot
-  (with-eval-after-load 'cape
-    (advice-add 'eglot-completion-at-point :around 'cape-wrap-buster)))
+;; (with-eval-after-load 'eglot
+;;   (with-eval-after-load 'cape
+;;     (advice-add 'eglot-completion-at-point :around 'cape-wrap-buster)))
 
 (defun my-setup-eglot-mode ()
   "Setup `eglot-mode'."
@@ -143,10 +148,10 @@ ERROR is the error (if any)."
              eglot-rename
              eglot-format-buffer)
 
-  :config
-  ;; Remove eglot from the modeline
-  (setq mode-line-misc-info
-        (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
+  ;; :config
+  ;; ;; Remove eglot from the modeline
+  ;; (setq mode-line-misc-info
+  ;;       (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
 
   :init
   (add-hook 'python-ts-mode-hook #'my-setup-eglot-mode)
@@ -170,109 +175,126 @@ ERROR is the error (if any)."
   (setq eglot-connect-timeout 40)
   ;; (setq eglot-send-changes-idle-time 0.5)
 
-  (setq eglot-ignored-server-capabilities
-        '(;:hoverProvider  ; For showing the definition and documentation.
-          :completionProvider  ; Completion
-
-          ;; If you remove this, it will cause an error
-          ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
-          ;;   plist-member([] :signatures)
-          ;;   #f(compiled-function (jsonrpc-lambda-elem12) #<bytecode 0x14ea63506aea3ca5>)([])
-          ;;   jsonrpc--continue(#<eglot-lsp-server eglot-lsp-server-1323b2317330> 3 (3 :textDocument/signatureHelp #f(compiled-function (jsonrpc-lambda-elem12) #<bytecode 0x14ea63506aea3ca5>) #f(compiled-function (jsonrpc-lambda-elem3) #<bytecode 0x1ff00ae7cafeec70>) [nil 26700 21814 516821 nil #f(compiled-function () #<bytecode 0x1b6df269801a5fe1>) nil nil 28000 nil]) [] nil)
-          ;;   jsonrpc-connection-receive(#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result []))
-          ;;   #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>)(#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result []))
-          ;;   apply(#f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])))
-          ;;   timer-event-handler([t 26700 21804 803197 nil #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])) nil 238000 nil])
-          ;; :signatureHelpProvider  ; For showing the function signature/arguments.
-
-          ;; Disable "go to definition" feature
-          ;; :definitionProvider
-
-          ;; Disable support for "go to type definition"
-          ;; :typeDefinitionProvider
-
-          ;; Disable support for finding implementation locations This
-          ;; capability allows the LSP client (like Eglot) to query the server
-          ;; for the actual implementation(s) of an interface, abstract method,
-          ;; or symbol. For example, if the cursor is on a function declaration
-          ;; or interface, this enables jumping directly to the concrete
-          ;; implementation(s). Disabling it will prevent Eglot from offering
-          ;; this navigation feature.
-          ;; :implementationProvider
-
-          ;; Disables ability to jump to a symbol's declaration location (e.g.,
-          ;; jumping to where a variable was declared).
-          ;; :declarationProvider
-
-          ;; Disables showing all references to the symbol at point (e.g., all
-          ;; usages of a function or variable in the project).
-          ;; :referencesProvider
-
-          ;; Disables highlighting other instances of the symbol at point in the
-          ;; current buffer (e.g., all usages of a variable are no longer
-          ;; visually highlighted).
-          ;; Usage: This affects the automatic highlighting when the cursor is
-          ;; on a symbol. Normally, all occurrences of that symbol in the buffer
-          ;; are highlighted. Disabling this stops that behavior.
-          :documentHighlightProvider
-
-          ;; Disables the document-wide symbol tree view used for navigation or
-          ;; structural outline (e.g., class and function tree in sidebar).
-          ;; Usage: This impacts commands or UI elements that display a tree or
-          ;; list of all symbols (functions, classes, variables) in the current
-          ;; buffer. Disabling this removes that outline view.
-          :documentSymbolProvider
-
-          ;; Disables workspace-wide symbol search (e.g., `M-x
-          ;; xref-find-apropos` or project-wide function/class name search).
-          :workspaceSymbolProvider
-
-          ;; Usage: This prevents displaying available quick fixes or
-          ;; refactorings that normally appear as code actions or lightbulb
-          ;; hints in the editor. Disabling this means you won't get automatic
-          ;; fix suggestions from the server.
-          :codeActionProvider
-
-          ;; Disables inline annotations like test coverage, reference counts,
-          ;; or result indicators that appear above/below code lines.
-          :codeLensProvider
-
-          ;; Disables detection of URLs or other hyperlinks in documents
-          ;; (clickable links will not be rendered).
-          ;; :documentFormattingProvider
-
-          ;; :documentRangeFormattingProvider
-
-          ;; Disable formatting triggered by typing specific characters (like `}`)
-          ;; :documentOnTypeFormattingProvider
-
-          ;; Disable rename symbol functionality
-          ;; :renameProvider
-
-          ;; Disable detection and interaction with links in documents
-          :documentLinkProvider
-
-          ;; Disables rendering of inline color swatches next to color values in
-          ;; code (e.g., "#ff0000" showing a red box).
-          :colorProvider
-
-          ;; Disables visual fold range markers (e.g., foldable region
-          ;; indicators in the fringe or gutter).
-          ;; :foldingRangeProvider
-
-          ;; Disables execution of commands exposed by the server (e.g., special
-          ;; refactoring or custom commands via `M-x eglot-execute-command`).
-          :executeCommandProvider
-
-          ;; Disable inlay hints (e.g. inferred types, parameter names) Inlay
-          ;; hints are small, non-intrusive annotations inserted into the code
-          ;; by the LSP server. They provide helpful context such as inferred
-          ;; variable types, function return types, or parameter names in
-          ;; function calls, especially in languages like TypeScript or Rust.
-          ;; These hints do not change the actual source code but are visually
-          ;; rendered in the editor. Disabling this prevents the display of such
-          ;; annotations in the buffer.
-          :inlayHintProvider))
+  ;; (setq eglot-ignored-server-capabilities
+  ;;       '(;:hoverProvider  ; For showing the definition and documentation.
+  ;;         ;; :completionProvider  ; Completion. DO NOT DISABLE IT.
+  ;;
+  ;;         ;; If you remove this, it will cause an error
+  ;;         ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
+  ;;         ;;   plist-member([] :signatures)
+  ;;         ;;   #f(compiled-function (jsonrpc-lambda-elem12) #<bytecode 0x14ea63506aea3ca5>)([])
+  ;;         ;;   jsonrpc--continue(#<eglot-lsp-server eglot-lsp-server-1323b2317330> 3 (3 :textDocument/signatureHelp #f(compiled-function (jsonrpc-lambda-elem12) #<bytecode 0x14ea63506aea3ca5>) #f(compiled-function (jsonrpc-lambda-elem3) #<bytecode 0x1ff00ae7cafeec70>) [nil 26700 21814 516821 nil #f(compiled-function () #<bytecode 0x1b6df269801a5fe1>) nil nil 28000 nil]) [] nil)
+  ;;         ;;   jsonrpc-connection-receive(#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result []))
+  ;;         ;;   #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>)(#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result []))
+  ;;         ;;   apply(#f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])))
+  ;;         ;;   timer-event-handler([t 26700 21804 803197 nil #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])) nil 238000 nil])
+  ;;         ;; :signatureHelpProvider  ; For showing the function signature/arguments.
+  ;;
+  ;;         ;; Disable "go to definition" feature
+  ;;         ;; :definitionProvider
+  ;;
+  ;;         ;; Disable support for "go to type definition"
+  ;;         ;; :typeDefinitionProvider
+  ;;
+  ;;         ;; Disable support for finding implementation locations This
+  ;;         ;; capability allows the LSP client (like Eglot) to query the server
+  ;;         ;; for the actual implementation(s) of an interface, abstract method,
+  ;;         ;; or symbol. For example, if the cursor is on a function declaration
+  ;;         ;; or interface, this enables jumping directly to the concrete
+  ;;         ;; implementation(s). Disabling it will prevent Eglot from offering
+  ;;         ;; this navigation feature.
+  ;;         ;; :implementationProvider
+  ;;
+  ;;         ;; Disables ability to jump to a symbol's declaration location (e.g.,
+  ;;         ;; jumping to where a variable was declared).
+  ;;         ;; :declarationProvider
+  ;;
+  ;;         ;; Disables showing all references to the symbol at point (e.g., all
+  ;;         ;; usages of a function or variable in the project).
+  ;;         ;; :referencesProvider
+  ;;
+  ;;         ;; Disables highlighting other instances of the symbol at point in the
+  ;;         ;; current buffer (e.g., all usages of a variable are no longer
+  ;;         ;; visually highlighted).
+  ;;         ;; Usage: This affects the automatic highlighting when the cursor is
+  ;;         ;; on a symbol. Normally, all occurrences of that symbol in the buffer
+  ;;         ;; are highlighted. Disabling this stops that behavior.
+  ;;         :documentHighlightProvider
+  ;;
+  ;;         ;; Disables the document-wide symbol tree view used for navigation or
+  ;;         ;; structural outline (e.g., class and function tree in sidebar).
+  ;;         ;; Usage: This impacts commands or UI elements that display a tree or
+  ;;         ;; list of all symbols (functions, classes, variables) in the current
+  ;;         ;; buffer. Disabling this removes that outline view.
+  ;;         ;;
+  ;;         ;; TODO: :documentSymbolProvider: Enable this if you use imenu. It
+  ;;         ;; populates the buffer's index of classes, methods, and functions,
+  ;;         ;; allowing for rapid structural navigation.
+  ;;         ;; :documentSymbolProvider
+  ;;
+  ;;         ;; Disables workspace-wide symbol search (e.g., `M-x
+  ;;         ;; xref-find-apropos` or project-wide function/class name search).
+  ;;         ;;
+  ;;         ;; TODO: :workspaceSymbolProvider: Enable this if you want
+  ;;         ;; project-wide navigation. It feeds xref-find-apropos, letting you
+  ;;         ;; search for symbols across the entire repository.
+  ;;         ;; :workspaceSymbolProvider
+  ;;
+  ;;         ;; Usage: This prevents displaying available quick fixes or
+  ;;         ;; refactorings that normally appear as code actions or lightbulb
+  ;;         ;; hints in the editor. Disabling this means you won't get automatic
+  ;;         ;; fix suggestions from the server.
+  ;;         ;;
+  ;;         ;; TODO: :codeActionProvider: You should definitely enable this. It
+  ;;         ;; provides the quick fixes, such as organizing imports or fixing lint
+  ;;         ;; errors. Without it, you lose a significant portion of Ruff's
+  ;;         ;; utility.
+  ;;         ;; :codeActionProvider
+  ;;
+  ;;         ;; Disables inline annotations like test coverage, reference counts,
+  ;;         ;; or result indicators that appear above/below code lines.
+  ;;         :codeLensProvider
+  ;;
+  ;;         ;; Disables detection of URLs or other hyperlinks in documents
+  ;;         ;; (clickable links will not be rendered).
+  ;;         ;; :documentFormattingProvider
+  ;;
+  ;;         ;; :documentRangeFormattingProvider
+  ;;
+  ;;         ;; Disable formatting triggered by typing specific characters (like `}`)
+  ;;         ;; :documentOnTypeFormattingProvider
+  ;;
+  ;;         ;; Disable rename symbol functionality
+  ;;         ;; :renameProvider
+  ;;
+  ;;         ;; Disable detection and interaction with links in documents
+  ;;         :documentLinkProvider
+  ;;
+  ;;         ;; Disables rendering of inline color swatches next to color values in
+  ;;         ;; code (e.g., "#ff0000" showing a red box).
+  ;;         :colorProvider
+  ;;
+  ;;         ;; Disables visual fold range markers (e.g., foldable region
+  ;;         ;; indicators in the fringe or gutter).
+  ;;         ;; :foldingRangeProvider
+  ;;
+  ;;         ;; Disables execution of commands exposed by the server (e.g., special
+  ;;         ;; refactoring or custom commands via `M-x eglot-execute-command`).
+  ;;         ;;
+  ;;         ;; TODO: :executeCommandProvider: Enable this alongside code actions.
+  ;;         ;; Many LSP servers require command execution to apply the code
+  ;;         ;; actions they suggest.
+  ;;         ;; :executeCommandProvider
+  ;;
+  ;;         ;; Disable inlay hints (e.g. inferred types, parameter names) Inlay
+  ;;         ;; hints are small, non-intrusive annotations inserted into the code
+  ;;         ;; by the LSP server. They provide helpful context such as inferred
+  ;;         ;; variable types, function return types, or parameter names in
+  ;;         ;; function calls, especially in languages like TypeScript or Rust.
+  ;;         ;; These hints do not change the actual source code but are visually
+  ;;         ;; rendered in the editor. Disabling this prevents the display of such
+  ;;         ;; annotations in the buffer.
+  ;;         :inlayHintProvider))
 
   ;; (when (string= choice-code-formatter "eglot")
   ;;   (add-hook 'before-save-hook
@@ -282,144 +304,163 @@ ERROR is the error (if any)."
   ;;             99 t))
 
   (with-eval-after-load 'evil
-    (define-key evil-normal-state-map (kbd "<leader>ef") #'eglot-format-buffer))
-
-  ;; https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
-  (setq-default eglot-workspace-configuration
-                `(:pylsp (:plugins
-                          (; Improve syntax
-
-                           :ruff (;; Core
-                                  :enabled t
-                                  ;; :formatEnabled :json-false ; Use Apheleia
-                                  :lineLength 79
-
-                                  ;; Rule Selection
-                                  ;; By default, Ruff only checks 'E' and 'F'
-                                  ;; rules.
-                                  ;; Let's add 'I' (isort), 'W' (warnings), and
-                                  ;; 'UP' (pyupgrade)
-                                  :extendSelect ["I" "W" "UP"]
-
-                                  ;; Target your specific Python version
-                                  ;; :targetVersion "py310"
-
-                                  ;; File Management
-                                  ;; Exclude specific files from being linted
-                                  ;; :exclude ["__about__.py" "docs/"]
-
-                                  ;; Advanced: Per-file ignores (Dictionary/Plist translation)
-                                  ;; E.g., Ignore missing docstrings (D100) in __init__.py
-                                  ;; :perFileIgnores (:__init__.py ["D100"])
-
-                                  ;; Advanced: Custom Severities
-                                  ;; E.g., Make 'I' (isort) violations show as
-                                  ;; Info instead of Warning
-                                  ;; :severities (:I "I")
-
-                                  ;; Code Actions
-                                  ;; :unsafeFixes :json-false
-                                  ;; :unfixable ["F401"]
-                                  )
-
-                           ;; Syntax checkers
-                           :pylint (:enabled t)  ; TODO replace with ruff
-
-                           ;; Old, slow linters
-                           :mccabe (:enabled :json-false)
-                           :flake8 (:enabled :json-false)
-                           :pyflakes (:enabled :json-false :ignore ["W293"])
-                           :pycodestyle (;; This is also executed by flake8
-                                         :enabled :json-false
-                                         :match "(?!test_).*\\.py"
-                                         :maxLineLength 79
-                                         :convention "pep257"
-                                         :ignore ["W293"]
-                                         :hangClosing nil)
-                           :pydocstyle (:enabled :json-false
-                                                 ;; :ignore ["W293"]
-                                                 ;; ,(if eglot-code-checker
-                                                 ;;      t
-                                                 ;;    :json-false)
-                                                 ;; string (one of: 'pep257',
-                                                 ;; 'numpy', 'google', None)
-                                                 ;; :convention "google"
-
-                                                 ;; 213: Multi-line docstring
-                                                 ;; summary should start in the
-                                                 ;; second line.
-                                                 ;;
-                                                 ;; 202: no blank lines allowed
-                                                 ;; after function docstring.
-                                                 :ignore ["W213",
-                                                          "W202"])
-
-                           ;; Disable old formatters (Handled by Apheleia)
-                           :yapf (:enabled :json-false)
-                           :isort (:enabled :json-false)
-                           :autopep8 (:enabled :json-false)
-
-                           :jedi_completion
-                           (:enabled t
-                                     ;; Controls whether Jedi (the
-                                     ;; autocompletion engine used by pylsp)
-                                     ;; automatically imports certain
-                                     ;; modules to provide better
-                                     ;; autocompletion.
-                                     ;; NOTE: Removed just to test
-                                     ;; :auto_import_modules ["os"
-                                     ;;                       "re"
-                                     ;;                       "sys"
-                                     ;;                       "subprocess"
-                                     ;;                       "pathlib"
-                                     ;;                       "logging"
-                                     ;;                       "shlex"
-                                     ;;                       "typing"]
-
-                                     ;; Resolve documentation and detail
-                                     ;; eagerly.
-                                     :eager t
-
-                                     :include_class_objects :json-false
-                                     :include_function_objects :json-false
-                                     :include_params :json-false
-
-                                     ;; How many labels and snippets (at most)
-                                     ;; should be resolved?
-                                     ;; :resolve_at_most 40
-                                     )
-
-                           ;; NOTE: Removed because it causes on Arch:
-                           ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
-                           ;;
-                           ;; Enables or disables the preloading of
-                           ;; specified Python modules when the language
-                           ;; server starts. When enabled, the preload
-                           ;; plugin loads specified modules at the start of
-                           ;; the language server session, making them
-                           ;; readily available in memory. This is intended
-                           ;; to speed up language server operations, like
-                           ;; autocompletion or code analysis, by reducing
-                           ;; the need to load these modules on demand.
-                           ;; :preload ( :enabled t
-                           ;;            :modules ["os"
-                           ;;                      "re"
-                           ;;                      "sys"
-                           ;;                      "subprocess"
-                           ;;                      "pathlib"])
-
-                           :rope_autoimport (:enabled :json-false))))))
+    (define-key evil-normal-state-map (kbd "<leader>ef") #'eglot-format-buffer)))
 
 (advice-add 'eglot--message :around
-            #'(lambda(orig-fun format &rest args)
-                ;; This code provides an Emacs Lisp function to suppress specific Eglot
-                ;; messages from being shown in the minibuffer.
-                ;; "Suppress specific eglot messages from being shown in the minibuffer."
-                (let ((message-string (apply #'format format args)))
-                  (unless (or (string-prefix-p "Connected" message-string)
-                              (string-prefix-p "Waiting" message-string)
-                              (string-prefix-p "Reconnected" message-string))
-                    (apply orig-fun format args)))))
+            (lambda(orig-fun format &rest args)
+              ;; This code provides an Emacs Lisp function to suppress specific Eglot
+              ;; messages from being shown in the minibuffer.
+              ;; "Suppress specific eglot messages from being shown in the minibuffer."
+              (let ((message-string (apply #'format format args)))
+                (unless (or (string-prefix-p "Connected" message-string)
+                            (string-prefix-p "Waiting" message-string)
+                            (string-prefix-p "Reconnected" message-string))
+                  (apply orig-fun format args)))))
+
+;;; Cape
+
+(defun my-eglot-capf-cleanup ()
+  "Prioritize Eglot and remove conflicting Python completions."
+  (when (eglot-managed-p)
+    ;; Remove legacy python-completion-at-point from the local list
+    (remove-hook 'completion-at-point-functions #'python-completion-at-point t)
+
+    ;; Ensure Eglot is at the front and wrapped for cache-busting
+    (setq-local completion-at-point-functions
+                (list (cape-capf-buster #'eglot-completion-at-point)))))
+
+(add-hook 'eglot-managed-mode-hook #'my-eglot-capf-cleanup)
+
+;;; Eglot: Python
+
+(setq-default eglot-workspace-configuration
+              `(:pylsp (:plugins
+                        (; Improve syntax
+
+                         :ruff (;; Core
+                                :enabled t
+                                ;; :formatEnabled :json-false ; Use Apheleia
+                                :lineLength 79
+
+                                ;; Rule Selection
+                                ;; By default, Ruff only checks 'E' and 'F'
+                                ;; rules.
+                                ;; Let's add 'I' (isort), 'W' (warnings), and
+                                ;; 'UP' (pyupgrade)
+                                :extendSelect ["I" "W" "UP"]
+
+                                ;; Target your specific Python version
+                                ;; :targetVersion "py310"
+
+                                ;; File Management
+                                ;; Exclude specific files from being linted
+                                ;; :exclude ["__about__.py" "docs/"]
+
+                                ;; Advanced: Per-file ignores (Dictionary/Plist
+                                ;; translation) E.g., Ignore missing docstrings
+                                ;; (D100) in __init__.py
+                                ;; :perFileIgnores (:__init__.py ["D100"])
+
+                                ;; Advanced: Custom Severities
+                                ;; E.g., Make 'I' (isort) violations show as
+                                ;; Info instead of Warning
+                                ;; :severities (:I "I")
+
+                                ;; Code Actions
+                                ;; :unsafeFixes :json-false
+                                ;; :unfixable ["F401"]
+                                )
+
+                         ;; Syntax checkers
+                         :pylint (:enabled t)  ; TODO replace with ruff
+
+                         ;; Old, slow linters
+                         :mccabe (:enabled :json-false)
+                         :flake8 (:enabled :json-false)
+                         :pyflakes (:enabled :json-false :ignore ["W293"])
+                         :pycodestyle (;; This is also executed by flake8
+                                       :enabled :json-false
+                                       ;; :match "(?!test_).*\\.py"
+                                       ;; :maxLineLength 79
+                                       ;; :convention "pep257"
+                                       ;; :ignore ["W293"]
+                                       ;; :hangClosing :json-false
+                                       )
+                         :pydocstyle (:enabled :json-false
+                                               ;; :ignore ["W293"]
+                                               ;; ,(if eglot-code-checker
+                                               ;;      t
+                                               ;;    :json-false)
+                                               ;; string (one of: 'pep257',
+                                               ;; 'numpy', 'google', None)
+                                               ;; :convention "google"
+
+                                               ;; 213: Multi-line docstring
+                                               ;; summary should start in the
+                                               ;; second line.
+                                               ;;
+                                               ;; 202: no blank lines allowed
+                                               ;; after function docstring.
+                                               :ignore ["W213",
+                                                        "W202"])
+
+                         ;; Disable old formatters (Handled by Apheleia)
+                         :yapf (:enabled :json-false)
+                         :isort (:enabled :json-false)
+                         :autopep8 (:enabled :json-false)
+
+                         :jedi_completion
+                         (:enabled t
+                                   ;; Controls whether Jedi (the
+                                   ;; autocompletion engine used by pylsp)
+                                   ;; automatically imports certain
+                                   ;; modules to provide better
+                                   ;; autocompletion.
+                                   ;; NOTE: Removed just to test
+                                   ;; :auto_import_modules ["os"
+                                   ;;                       "re"
+                                   ;;                       "sys"
+                                   ;;                       "subprocess"
+                                   ;;                       "pathlib"
+                                   ;;                       "logging"
+                                   ;;                       "shlex"
+                                   ;;                       "typing"]
+
+                                   ;; Resolve documentation and detail
+                                   ;; eagerly.
+                                   :eager :json-false
+
+                                   :include_class_objects :json-false
+                                   :include_function_objects :json-false
+                                   :include_params :json-false
+
+                                   ;; How many labels and snippets (at most)
+                                   ;; should be resolved?
+                                   ;; :resolve_at_most 40
+                                   )
+
+                         ;; NOTE: Removed because it causes on Arch: Debugger
+                         ;; entered--Lisp error: (wrong-type-argument plistp [])
+                         ;;
+                         ;; Enables or disables the preloading of
+                         ;; specified Python modules when the language
+                         ;; server starts. When enabled, the preload
+                         ;; plugin loads specified modules at the start of
+                         ;; the language server session, making them
+                         ;; readily available in memory. This is intended
+                         ;; to speed up language server operations, like
+                         ;; autocompletion or code analysis, by reducing
+                         ;; the need to load these modules on demand.
+                         ;; :preload ( :enabled t
+                         ;;            :modules ["os"
+                         ;;                      "re"
+                         ;;                      "sys"
+                         ;;                      "subprocess"
+                         ;;                      "pathlib"])
+
+                         :rope_autoimport (:enabled :json-false)))))
+
+;;; Provide
 
 (provide 'mod-eglot)
 

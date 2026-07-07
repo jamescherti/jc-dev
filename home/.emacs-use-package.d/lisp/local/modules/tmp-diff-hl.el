@@ -26,8 +26,8 @@
 (lightemacs-use-package diff-hl
   ;; TODO This adds support for indirect buffers:
   ;;      https://github.com/dgutov/diff-hl/pull/276
-  :vc (:url "https://github.com/jamescherti/diff-hl"
-         :rev :newest)
+  ;; :vc (:url "https://github.com/jamescherti/diff-hl"
+  ;;        :rev :newest)
   :commands (diff-hl-mode
              global-diff-hl-mode)
   :init

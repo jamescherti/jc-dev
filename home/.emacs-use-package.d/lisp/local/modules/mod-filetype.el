@@ -598,6 +598,11 @@ only if they are not already available."
     (html-mode . sgml-name-8bit-mode)
     (mhtml-mode . sgml-name-8bit-mode)))
 
+;;; Python: major-mode remap alist
+
+(when (my-treesit-language-available-p 'python)
+  (push '(python-mode . python-ts-mode) major-mode-remap-alist))
+
 ;;; Python
 
 (defun setup-python-mode ()

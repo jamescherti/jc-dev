@@ -27,173 +27,13 @@
 
 ;;; Require
 
-(eval-and-compile (require 'lightemacs-use-package))
+(eval-and-compile
+  (require 'lightemacs-use-package))
 (require 'my-defun)
 (require 'le-corfu)
 (require 'le-cape)
 
-;;; Enable pylsp only
-
-;; Explicitly allow only pylsp for python environments
-(setq lsp-enabled-clients '(pylsp))
-
-;;; pylsp
-
-(setq
- ;; Improve syntax
-
- ;; Core
- lsp-pylsp-plugins-ruff-enabled t
- ;; lsp-pylsp-plugins-ruff-format-enabled nil ; Use Apheleia
- lsp-pylsp-plugins-ruff-line-length 79
-
- ;; Rule Selection
- ;; By default, Ruff only checks 'E' and 'F'
- ;; rules.
- ;; Let's add 'I' (isort), 'W' (warnings), and
- ;; 'UP' (pyupgrade)
- lsp-pylsp-plugins-ruff-extend-select ["I" "W" "UP"]
-
- ;; Target your specific Python version
- ;; lsp-pylsp-plugins-ruff-target-version "py310"
-
- ;; File Management
- ;; Exclude specific files from being linted
- ;; lsp-pylsp-plugins-ruff-exclude ["__about__.py" "docs/"]
-
- ;; Advanced: Per-file ignores (Dictionary/Plist translation)
- ;; E.g., Ignore missing docstrings (D100) in __init__.py
- ;; lsp-pylsp-plugins-ruff-per-file-ignores '(:__init__.py ["D100"])
-
- ;; Advanced: Custom Severities
- ;; E.g., Make 'I' (isort) violations show as
- ;; Info instead of Warning
- ;; lsp-pylsp-plugins-ruff-severities '(:I "I")
-
- ;; Code Actions
- ;; lsp-pylsp-plugins-ruff-unsafe-fixes nil
- ;; lsp-pylsp-plugins-ruff-unfixable ["F401"]
-
- ;; Disable Jedi fuzzy completion.
- ;; Benefit: reduces unwanted suggestions.
- ;;   Example: completing `os.p` only suggests `path` exactly, not `pardir` or
- ;;   unrelated matches.
- ;; Drawback: less flexible completion matching.
- lsp-pylsp-plugins-jedi-completion-fuzzy nil
-
- ;; Syntax checkers
- lsp-pylsp-plugins-pylint-enabled t  ; TODO replace with ruff
-
- lsp-pylsp-plugins-isort-enabled nil
-
- ;; Old, slow linters
- lsp-pylsp-plugins-mccabe-enabled nil
-
- ;; Flake8 for linting.
- ;; Benefit: highlights syntax and style issues.
- ;;   Example: writing `def foo():pass` triggers Flake8 warning for missing
- ;;   whitespace and docstring.
- ;; Drawback: may produce too many warnings in large projects.
- lsp-pylsp-plugins-flake8-enabled nil
-
- lsp-pylsp-plugins-pyflakes-enabled nil
- lsp-pylsp-plugins-pyflakes-ignore ["W293"]
-
- lsp-pylsp-plugins-pycodestyle-enabled nil
- ;; This is also executed by flake8
- lsp-pylsp-plugins-pycodestyle-match "(?!test_).*\\.py"
- lsp-pylsp-plugins-pycodestyle-max-line-length 79
- lsp-pylsp-plugins-pycodestyle-convention "pep257"
- lsp-pylsp-plugins-pycodestyle-ignore ["W293"]
- lsp-pylsp-plugins-pycodestyle-hang-closing nil
-
- lsp-pylsp-plugins-pydocstyle-enabled nil
- ;; lsp-pylsp-plugins-pydocstyle-ignore ["W293"]
- ;; ,(if eglot-code-checker
- ;;      t
- ;;    nil)
- ;; string (one of: 'pep257',
- ;; 'numpy', 'google', None)
- ;; lsp-pylsp-plugins-pydocstyle-convention "google"
-
- ;; 213: Multi-line docstring
- ;; summary should start in the
- ;; second line.
- ;;
- ;; 202: no blank lines allowed
- ;; after function docstring.
- ;; lsp-pylsp-plugins-pydocstyle-ignore ["W213",
- ;;          "W202"]
-
- ;; Disable old formatters (Handled by Apheleia)
- lsp-pylsp-plugins-yapf-enabled nil
- lsp-pylsp-plugins-autopep8-enabled nil
-
- lsp-pylsp-plugins-jedi-completion-enabled t
- ;; Controls whether Jedi (the
- ;; autocompletion engine used by pylsp)
- ;; automatically imports certain
- ;; modules to provide better
- ;; autocompletion.
- ;; NOTE: Removed just to test
- ;; lsp-pylsp-plugins-jedi-completion-auto-import-modules ["os"
- ;;                       "re"
- ;;                       "sys"
- ;;                       "subprocess"
- ;;                       "pathlib"
- ;;                       "logging"
- ;;                       "shlex"
- ;;                       "typing"]
-
- ;; Resolve documentation and detail eagerly.
- lsp-pylsp-plugins-jedi-completion-eager t
-
- lsp-pylsp-plugins-jedi-completion-include-class-objects nil
- lsp-pylsp-plugins-jedi-completion-include-function-objects nil
- lsp-pylsp-plugins-jedi-completion-include-params nil
-
- ;; How many labels and snippets (at most)
- ;; should be resolved?
- ;; lsp-pylsp-plugins-jedi-completion-resolve-at-most 40
-
- ;; NOTE: Removed because it causes on Arch:
- ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
- ;;
- ;; Enables or disables the preloading of
- ;; specified Python modules when the language
- ;; server starts. When enabled, the preload
- ;; plugin loads specified modules at the start of
- ;; the language server session, making them
- ;; readily available in memory. This is intended
- ;; to speed up language server operations, like
- ;; autocompletion or code analysis, by reducing
- ;; the need to load these modules on demand.
- ;; lsp-pylsp-plugins-preload-enabled t
- ;; lsp-pylsp-plugins-preload-modules ["os"
- ;;                      "re"
- ;;                      "sys"
- ;;                      "subprocess"
- ;;                      "pathlib"]
-
- lsp-pylsp-plugins-rope-autoimport-enabled nil)
-
 ;;; use-package lsp-mode
-
-(defun evil-lookup-lsp ()
-  "Display LSP documentation for the symbol at point."
-  (interactive)
-  (if (fboundp 'lsp-ui-doc-glance)
-      (lsp-ui-doc-glance)
-    (lsp-describe-thing-at-point)))
-
-(defun my-setup-lsp-mode ()
-  "Setup `lsp-mode'."
-  (when (and (fboundp 'lsp-deferred)
-             (my-code-checker-allowed-p))
-    (lsp-deferred))
-
-  (unless noninteractive
-    (setq-local evil-lookup-func #'evil-lookup-lsp)))
 
 (lightemacs-use-package lsp-mode
   :commands (lsp-mode
@@ -207,6 +47,24 @@
 
   :hook ((python-mode . my-setup-lsp-mode)
          (python-ts-mode . my-setup-lsp-mode))
+
+  :preface
+  (defun evil-lookup-lsp ()
+    "Display LSP documentation for the symbol at point."
+    (interactive)
+    (if (fboundp 'lsp-ui-doc-glance)
+        (lsp-ui-doc-glance)
+      (when (fboundp 'lsp-describe-thing-at-point)
+        (lsp-describe-thing-at-point)
+        (error "Undefined: lsp-describe-thing-at-point"))))
+
+  (defun my-setup-lsp-mode ()
+    "Setup `lsp-mode'."
+    (when (and (fboundp 'lsp-deferred)
+               (my-code-checker-allowed-p))
+      (lsp-deferred)
+      (unless noninteractive
+        (setq-local evil-lookup-func #'evil-lookup-lsp))))
 
   :custom
   ;; Prevents automatic download suggestions for LSP servers.
@@ -495,9 +353,155 @@
   :init
   (setq lsp--show-message nil)
 
-  (when (and (getenv "LSP_USE_PLISTS")
-             (string= (getenv "LSP_USE_PLISTS") "true"))
-    (setq lsp-use-plists t)))
+  ;; (when (and (getenv "LSP_USE_PLISTS")
+  ;;            (string= (getenv "LSP_USE_PLISTS") "true"))
+  ;;   (setq lsp-use-plists t))
+  )
+
+;;; Enable pylsp only
+
+;; Explicitly allow only pylsp for python environments
+(setq lsp-enabled-clients '(pylsp))
+
+;;; pylsp
+
+(setq
+ ;; Improve syntax
+
+ ;; Core
+ lsp-pylsp-plugins-ruff-enabled t
+ ;; lsp-pylsp-plugins-ruff-format-enabled nil ; Use Apheleia
+ lsp-pylsp-plugins-ruff-line-length 79
+
+ ;; Rule Selection
+ ;; By default, Ruff only checks 'E' and 'F'
+ ;; rules.
+ ;; Let's add 'I' (isort), 'W' (warnings), and
+ ;; 'UP' (pyupgrade)
+ lsp-pylsp-plugins-ruff-extend-select ["I" "W" "UP"]
+
+ ;; Target your specific Python version
+ ;; lsp-pylsp-plugins-ruff-target-version "py310"
+
+ ;; File Management
+ ;; Exclude specific files from being linted
+ ;; lsp-pylsp-plugins-ruff-exclude ["__about__.py" "docs/"]
+
+ ;; Advanced: Per-file ignores (Dictionary/Plist translation)
+ ;; E.g., Ignore missing docstrings (D100) in __init__.py
+ ;; lsp-pylsp-plugins-ruff-per-file-ignores '(:__init__.py ["D100"])
+
+ ;; Advanced: Custom Severities
+ ;; E.g., Make 'I' (isort) violations show as
+ ;; Info instead of Warning
+ ;; lsp-pylsp-plugins-ruff-severities '(:I "I")
+
+ ;; Code Actions
+ ;; lsp-pylsp-plugins-ruff-unsafe-fixes nil
+ ;; lsp-pylsp-plugins-ruff-unfixable ["F401"]
+
+ ;; Disable Jedi fuzzy completion.
+ ;; Benefit: reduces unwanted suggestions.
+ ;;   Example: completing `os.p` only suggests `path` exactly, not `pardir` or
+ ;;   unrelated matches.
+ ;; Drawback: less flexible completion matching.
+ lsp-pylsp-plugins-jedi-completion-fuzzy nil
+
+ ;; Syntax checkers
+ lsp-pylsp-plugins-pylint-enabled t  ; TODO replace with ruff
+
+ lsp-pylsp-plugins-isort-enabled nil
+
+ ;; Old, slow linters
+ lsp-pylsp-plugins-mccabe-enabled nil
+
+ ;; Flake8 for linting.
+ ;; Benefit: highlights syntax and style issues.
+ ;;   Example: writing `def foo():pass` triggers Flake8 warning for missing
+ ;;   whitespace and docstring.
+ ;; Drawback: may produce too many warnings in large projects.
+ lsp-pylsp-plugins-flake8-enabled nil
+
+ lsp-pylsp-plugins-pyflakes-enabled nil
+ lsp-pylsp-plugins-pyflakes-ignore ["W293"]
+
+ lsp-pylsp-plugins-pycodestyle-enabled nil
+ ;; This is also executed by flake8
+ lsp-pylsp-plugins-pycodestyle-match "(?!test_).*\\.py"
+ lsp-pylsp-plugins-pycodestyle-max-line-length 79
+ lsp-pylsp-plugins-pycodestyle-convention "pep257"
+ lsp-pylsp-plugins-pycodestyle-ignore ["W293"]
+ lsp-pylsp-plugins-pycodestyle-hang-closing nil
+
+ lsp-pylsp-plugins-pydocstyle-enabled nil
+ ;; lsp-pylsp-plugins-pydocstyle-ignore ["W293"]
+ ;; ,(if eglot-code-checker
+ ;;      t
+ ;;    nil)
+ ;; string (one of: 'pep257',
+ ;; 'numpy', 'google', None)
+ ;; lsp-pylsp-plugins-pydocstyle-convention "google"
+
+ ;; 213: Multi-line docstring
+ ;; summary should start in the
+ ;; second line.
+ ;;
+ ;; 202: no blank lines allowed
+ ;; after function docstring.
+ ;; lsp-pylsp-plugins-pydocstyle-ignore ["W213",
+ ;;          "W202"]
+
+ ;; Disable old formatters (Handled by Apheleia)
+ lsp-pylsp-plugins-yapf-enabled nil
+ lsp-pylsp-plugins-autopep8-enabled nil
+
+ lsp-pylsp-plugins-jedi-completion-enabled t
+ ;; Controls whether Jedi (the
+ ;; autocompletion engine used by pylsp)
+ ;; automatically imports certain
+ ;; modules to provide better
+ ;; autocompletion.
+ ;; NOTE: Removed just to test
+ ;; lsp-pylsp-plugins-jedi-completion-auto-import-modules ["os"
+ ;;                       "re"
+ ;;                       "sys"
+ ;;                       "subprocess"
+ ;;                       "pathlib"
+ ;;                       "logging"
+ ;;                       "shlex"
+ ;;                       "typing"]
+
+ ;; Resolve documentation and detail eagerly.
+ lsp-pylsp-plugins-jedi-completion-eager t
+
+ lsp-pylsp-plugins-jedi-completion-include-class-objects nil
+ lsp-pylsp-plugins-jedi-completion-include-function-objects nil
+ lsp-pylsp-plugins-jedi-completion-include-params nil
+
+ ;; How many labels and snippets (at most)
+ ;; should be resolved?
+ ;; lsp-pylsp-plugins-jedi-completion-resolve-at-most 40
+
+ ;; NOTE: Removed because it causes on Arch:
+ ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
+ ;;
+ ;; Enables or disables the preloading of
+ ;; specified Python modules when the language
+ ;; server starts. When enabled, the preload
+ ;; plugin loads specified modules at the start of
+ ;; the language server session, making them
+ ;; readily available in memory. This is intended
+ ;; to speed up language server operations, like
+ ;; autocompletion or code analysis, by reducing
+ ;; the need to load these modules on demand.
+ ;; lsp-pylsp-plugins-preload-enabled t
+ ;; lsp-pylsp-plugins-preload-modules ["os"
+ ;;                      "re"
+ ;;                      "sys"
+ ;;                      "subprocess"
+ ;;                      "pathlib"]
+
+ lsp-pylsp-plugins-rope-autoimport-enabled nil)
 
 ;;; cape
 
@@ -505,25 +509,26 @@
 ;;(require 'le-cape)
 
 ;; https://github.com/minad/corfu/wiki#advanced-example-configuration-with-orderless
-(setq lsp-completion-provider :none) ; We use Corfu
+(with-eval-after-load 'lsp-mode
+  (setq lsp-completion-provider :none) ; We use Corfu
 
-(defun my/orderless-dispatch-flex-first (_pattern index _total)
-  "Dispatch flex first. INDEX is the index."
-  (and (eq index 0) 'orderless-flex))
+  (defun my/orderless-dispatch-flex-first (_pattern index _total)
+    "Dispatch flex first. INDEX is the index."
+    (and (eq index 0) 'orderless-flex))
 
-(defun my/lsp-mode-setup-completion ()
-  "Setup `lsp-mode' completion."
-  (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-        '(orderless))
-  ;; Optionally configure the first word as flex filtered.
-  (setq-local orderless-style-dispatchers
-              (list #'my/orderless-dispatch-flex-first))
+  (defun my/lsp-mode-setup-completion ()
+    "Setup `lsp-mode' completion."
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless))
+    ;; Optionally configure the first word as flex filtered.
+    (setq-local orderless-style-dispatchers
+                (list #'my/orderless-dispatch-flex-first))
 
-  ;; Optionally configure the cape-capf-buster.
-  (setq-local completion-at-point-functions
-              (list (cape-capf-buster 'lsp-completion-at-point))))
+    ;; Optionally configure the cape-capf-buster.
+    (setq-local completion-at-point-functions
+                (list (cape-capf-buster 'lsp-completion-at-point))))
 
-(add-hook 'lsp-completion-mode-hook #'my/lsp-mode-setup-completion)
+  (add-hook 'lsp-completion-mode-hook #'my/lsp-mode-setup-completion))
 
 ;; (use-package lsp-ui
 ;;   ;; :after lsp-mode

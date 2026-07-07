@@ -27,13 +27,15 @@
 #
 
 # Installed only whe pip --user
-MY_PIP_PACKAGES=(pathaction git-rexec pdfcipher vim-client watch-xfce-xfconf
-  ultyas git-smartmv batchfetch types-PyYAML elispcomp git-commitflow)
+# Removed: types-PyYAML vim-client elispcomp
+MY_PIP_PACKAGES=(pathaction git-rexec pdfcipher watch-xfce-xfconf
+  ultyas git-smartmv batchfetch git-commitflow)
 
 # Installed in the virtualenv
 PIP_PACKAGES=()
 # PySocks trash-cli
-PIP_PACKAGES+=(types-PyYAML mypy ipython cookiecutter
+# Removed: types-PyYAML
+PIP_PACKAGES+=(mypy ipython cookiecutter
   yamllint ansible ansible-lint molecule coverage)
 PIP_PACKAGES+=(twine build wheel keyrings.cryptfile)
 PIP_PACKAGES+=(jedi pydantic prompt-toolkit Pygments Jinja2

@@ -66,8 +66,8 @@
 (defvar mod-cleanup-packages-list '(olivetti
                                     ws-butler
                                     spinner
-                                    ;; git-gutter
-                                    ;; git-gutter-fringe
+                                    git-gutter
+                                    git-gutter-fringe
 
                                     avy
                                     ace-window
@@ -77,7 +77,7 @@
                                     popper
                                     rainbow-mode
                                     with-editor
-                                    ;; lsp-mode
+                                    lsp-mode
                                     git-timemachine
                                     focus
                                     shut-up
