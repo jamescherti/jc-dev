@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euo pipefail
+
+main() {
+  # Verify the current directory is a Git repository
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Error: Not a Git repository." >&2
+    exit 1
+  fi
+
+  # Retrieve the origin URL; default to a placeholder if not set
+  local origin_url
+  if ! origin_url=$(git remote get-url origin 2>/dev/null); then
+    echo "Error: no origin." >&2
+    exit 1
+  fi
+
+  # Attempt to get the current branch name
+  local branch_or_ref
+  branch_or_ref=$(git branch --show-current 2>/dev/null || true)
+
+  # If no branch is found (detached HEAD state), get the short commit hash
+  if [[ -z "$branch_or_ref" ]]; then
+    if ! branch_or_ref=$(git rev-parse --short HEAD 2>/dev/null); then
+      echo "Error: No reference." >&2
+      exit 1
+    fi
+  fi
+
+  # Retrieve the date of the last commit (YYYY-MM-DD format)
+  local last_commit_date
+  if ! last_commit_date=$(git log -1 --format="%cd" \
+    --date=short 2>/dev/null); then
+    echo "Error: No commits." >&2
+  fi
+
+  # Output the gathered information in a single line
+  echo "${last_commit_date}: ${origin_url} (${branch_or_ref})"
+}
+
+main "$@"
