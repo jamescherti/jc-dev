@@ -77,7 +77,7 @@
                                     popper
                                     rainbow-mode
                                     with-editor
-                                    lsp-mode
+                                    ;; lsp-mode
                                     git-timemachine
                                     focus
                                     shut-up

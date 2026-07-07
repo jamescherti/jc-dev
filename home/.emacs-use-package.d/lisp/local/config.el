@@ -55,7 +55,7 @@
 (setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
-      "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
+      "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
 
 ;; (setq vterm-module-cmake-args
 ;;       "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
@@ -90,7 +90,7 @@
                                      ;; through native-comp-compiler-options is
                                      ;; redundant and bypasses the native
                                      ;; compiler's built-in logic.
-                                     "-O3"
+                                     "-O2"
 
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which
@@ -289,7 +289,7 @@
                                    ;; are not actually used by the code.
                                    "-Wl,--as-needed"
 
-                                   ;; "-O3"
+                                   ;; "-O2"
                                    ))
 
 ;; Auto detect the CPU architecture
@@ -954,7 +954,8 @@ subsequent GCC invocations."
                            sub-project
                            mod-buffer-terminator
                            le-buffer-guardian
-                           mod-eglot
+                           ;; mod-eglot
+                           mod-lsp-mode
                            smartindent
                            ;; point-manager
                            ;; battery-angel

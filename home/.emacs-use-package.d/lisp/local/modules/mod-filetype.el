@@ -672,6 +672,8 @@ only if they are not already available."
          ("\\.profile\\'" . conf-mode)  ; firejail profiles
          ("^/etc/[^/]+" . conf-unix-mode)
 
+         ("/known_hosts\\'" . conf-space-mode)
+
          ("/COMMIT_EDITMSG\\'" . diff-mode)
          ("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode)
 

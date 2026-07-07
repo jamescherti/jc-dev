@@ -25,10 +25,159 @@
 
 ;;; Code:
 
+;;; Require
+
 (eval-and-compile (require 'lightemacs-use-package))
 (require 'my-defun)
 (require 'le-corfu)
 (require 'le-cape)
+
+;;; Enable pylsp only
+
+;; Explicitly allow only pylsp for python environments
+(setq lsp-enabled-clients '(pylsp))
+
+;;; pylsp
+
+(setq
+ ;; Improve syntax
+
+ ;; Core
+ lsp-pylsp-plugins-ruff-enabled t
+ ;; lsp-pylsp-plugins-ruff-format-enabled nil ; Use Apheleia
+ lsp-pylsp-plugins-ruff-line-length 79
+
+ ;; Rule Selection
+ ;; By default, Ruff only checks 'E' and 'F'
+ ;; rules.
+ ;; Let's add 'I' (isort), 'W' (warnings), and
+ ;; 'UP' (pyupgrade)
+ lsp-pylsp-plugins-ruff-extend-select ["I" "W" "UP"]
+
+ ;; Target your specific Python version
+ ;; lsp-pylsp-plugins-ruff-target-version "py310"
+
+ ;; File Management
+ ;; Exclude specific files from being linted
+ ;; lsp-pylsp-plugins-ruff-exclude ["__about__.py" "docs/"]
+
+ ;; Advanced: Per-file ignores (Dictionary/Plist translation)
+ ;; E.g., Ignore missing docstrings (D100) in __init__.py
+ ;; lsp-pylsp-plugins-ruff-per-file-ignores '(:__init__.py ["D100"])
+
+ ;; Advanced: Custom Severities
+ ;; E.g., Make 'I' (isort) violations show as
+ ;; Info instead of Warning
+ ;; lsp-pylsp-plugins-ruff-severities '(:I "I")
+
+ ;; Code Actions
+ ;; lsp-pylsp-plugins-ruff-unsafe-fixes nil
+ ;; lsp-pylsp-plugins-ruff-unfixable ["F401"]
+
+ ;; Disable Jedi fuzzy completion.
+ ;; Benefit: reduces unwanted suggestions.
+ ;;   Example: completing `os.p` only suggests `path` exactly, not `pardir` or
+ ;;   unrelated matches.
+ ;; Drawback: less flexible completion matching.
+ lsp-pylsp-plugins-jedi-completion-fuzzy nil
+
+ ;; Syntax checkers
+ lsp-pylsp-plugins-pylint-enabled t  ; TODO replace with ruff
+
+ lsp-pylsp-plugins-isort-enabled nil
+
+ ;; Old, slow linters
+ lsp-pylsp-plugins-mccabe-enabled nil
+
+ ;; Flake8 for linting.
+ ;; Benefit: highlights syntax and style issues.
+ ;;   Example: writing `def foo():pass` triggers Flake8 warning for missing
+ ;;   whitespace and docstring.
+ ;; Drawback: may produce too many warnings in large projects.
+ lsp-pylsp-plugins-flake8-enabled nil
+
+ lsp-pylsp-plugins-pyflakes-enabled nil
+ lsp-pylsp-plugins-pyflakes-ignore ["W293"]
+
+ lsp-pylsp-plugins-pycodestyle-enabled nil
+ ;; This is also executed by flake8
+ lsp-pylsp-plugins-pycodestyle-match "(?!test_).*\\.py"
+ lsp-pylsp-plugins-pycodestyle-max-line-length 79
+ lsp-pylsp-plugins-pycodestyle-convention "pep257"
+ lsp-pylsp-plugins-pycodestyle-ignore ["W293"]
+ lsp-pylsp-plugins-pycodestyle-hang-closing nil
+
+ lsp-pylsp-plugins-pydocstyle-enabled nil
+ ;; lsp-pylsp-plugins-pydocstyle-ignore ["W293"]
+ ;; ,(if eglot-code-checker
+ ;;      t
+ ;;    nil)
+ ;; string (one of: 'pep257',
+ ;; 'numpy', 'google', None)
+ ;; lsp-pylsp-plugins-pydocstyle-convention "google"
+
+ ;; 213: Multi-line docstring
+ ;; summary should start in the
+ ;; second line.
+ ;;
+ ;; 202: no blank lines allowed
+ ;; after function docstring.
+ ;; lsp-pylsp-plugins-pydocstyle-ignore ["W213",
+ ;;          "W202"]
+
+ ;; Disable old formatters (Handled by Apheleia)
+ lsp-pylsp-plugins-yapf-enabled nil
+ lsp-pylsp-plugins-autopep8-enabled nil
+
+ lsp-pylsp-plugins-jedi-completion-enabled t
+ ;; Controls whether Jedi (the
+ ;; autocompletion engine used by pylsp)
+ ;; automatically imports certain
+ ;; modules to provide better
+ ;; autocompletion.
+ ;; NOTE: Removed just to test
+ ;; lsp-pylsp-plugins-jedi-completion-auto-import-modules ["os"
+ ;;                       "re"
+ ;;                       "sys"
+ ;;                       "subprocess"
+ ;;                       "pathlib"
+ ;;                       "logging"
+ ;;                       "shlex"
+ ;;                       "typing"]
+
+ ;; Resolve documentation and detail eagerly.
+ lsp-pylsp-plugins-jedi-completion-eager t
+
+ lsp-pylsp-plugins-jedi-completion-include-class-objects nil
+ lsp-pylsp-plugins-jedi-completion-include-function-objects nil
+ lsp-pylsp-plugins-jedi-completion-include-params nil
+
+ ;; How many labels and snippets (at most)
+ ;; should be resolved?
+ ;; lsp-pylsp-plugins-jedi-completion-resolve-at-most 40
+
+ ;; NOTE: Removed because it causes on Arch:
+ ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
+ ;;
+ ;; Enables or disables the preloading of
+ ;; specified Python modules when the language
+ ;; server starts. When enabled, the preload
+ ;; plugin loads specified modules at the start of
+ ;; the language server session, making them
+ ;; readily available in memory. This is intended
+ ;; to speed up language server operations, like
+ ;; autocompletion or code analysis, by reducing
+ ;; the need to load these modules on demand.
+ ;; lsp-pylsp-plugins-preload-enabled t
+ ;; lsp-pylsp-plugins-preload-modules ["os"
+ ;;                      "re"
+ ;;                      "sys"
+ ;;                      "subprocess"
+ ;;                      "pathlib"]
+
+ lsp-pylsp-plugins-rope-autoimport-enabled nil)
+
+;;; use-package lsp-mode
 
 (defun evil-lookup-lsp ()
   "Display LSP documentation for the symbol at point."
@@ -250,20 +399,6 @@
   (lsp-enable-file-watchers t)  ;; new
   (lsp-file-watch-threshold 1000)
 
-  ;; Enable Flake8 for linting.
-  ;; Benefit: highlights syntax and style issues.
-  ;;   Example: writing `def foo():pass` triggers Flake8 warning for missing
-  ;;   whitespace and docstring.
-  ;; Drawback: may produce too many warnings in large projects.
-  (lsp-pylsp-plugins-flake8-enabled t)
-
-  (lsp-pylsp-plugins-autopep8-enabled nil)
-  (lsp-pylsp-plugins-isort-enabled nil)
-  (lsp-pylsp-plugins-mccabe-enabled nil)
-  (lsp-pylsp-plugins-pycodestyle-enabled nil)
-  (lsp-pylsp-plugins-pydocstyle-enabled nil)
-  (lsp-pylsp-plugins-pyflakes-enabled nil)
-  (lsp-pylsp-plugins-pylint-enabled nil)
   (lsp-restart 'auto-restart)
 
   ;; Automatically guess project root.
@@ -288,28 +423,6 @@
   ;;   `now() -> datetime`.
   ;; Drawback: may slow down completion popup rendering.
   (lsp-completion-show-detail t)
-
-  ;; Enable Rope for refactoring (rename, extract, etc.).
-  ;; Benefit: safe and efficient variable/method renaming.
-  ;;   Example: renaming `foo` to `bar` updates all references across the Python
-  ;;   project.
-  ;; Drawback: depends on Rope support and may be slower in large projects.
-  (lsp-pylsp-plugins-rope-enabled t)
-
-  ;; Jedi
-  ;;
-  ;; Disable Jedi fuzzy completion.
-  ;; Benefit: reduces unwanted suggestions.
-  ;;   Example: completing `os.p` only suggests `path` exactly, not `pardir` or
-  ;;   unrelated matches.
-  ;; Drawback: less flexible completion matching.
-  (lsp-pylsp-plugins-jedi-completion-fuzzy nil)
-
-  ;; TODO
-  ;; (lsp-pylsp-plugins-jedi-completion-include-class-objects nil)
-  ;; (lsp-pylsp-plugins-jedi-completion-include-params nil)
-  ;; (lsp-pylsp-plugins-jedi-completion-eager t)
-  ;; (lsp-pylsp-plugins-jedi-completion-include-function-objects nil)
 
   ;; Shutdown server when last buffer closes.
   ;; Benefit: reduces resource usage.

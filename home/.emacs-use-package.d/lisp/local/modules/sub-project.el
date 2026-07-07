@@ -31,10 +31,13 @@
 (eval-and-compile (require 'lightemacs-use-package))
 
 (setq project-switch-commands #'project-dired)
-(setq project-vc-extra-root-markers '(;; ".projectile"
-                                      ;; ".dir-locals.el"
+
+;; This is also useful for eglot
+(setq project-vc-extra-root-markers '(;; ".dir-locals.el"
                                       ;; "requirements.txt"
                                       ;; "autogen.sh"
+                                      "setup.py"
+                                      "pyproject.toml"
                                       ".project"))
 
 (lightemacs-use-package project
