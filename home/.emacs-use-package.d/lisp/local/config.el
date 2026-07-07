@@ -55,7 +55,7 @@
 (setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
-      "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
+      "-DCMAKE_C_FLAGS='-O2 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
 
 ;; (setq vterm-module-cmake-args
 ;;       "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")

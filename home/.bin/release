@@ -50,6 +50,8 @@ class Release:
         self.env: dict[str, str] = os.environ.copy()
         self.env["LC_ALL"] = "C"
 
+        self.chdir_git_toplevel()
+
         # Ensure we are on a release branch
         self.ensure_branch_main_or_master()
 
