@@ -1381,6 +1381,9 @@ on text following the cursor."
 (defun my-shell-pop ()
   "Close the minibuffer if active, then launch `shell-pop'."
   (interactive)
+  ;; (let ((process-connection-type nil)) ; Use a pipe instead of a pty
+  ;;   (start-process "xdevenv-terminal" nil "xdevenv" "terminal"))
+
   (let ((inhibit-redisplay t))
     (if (active-minibuffer-window)
         (progn
@@ -1393,7 +1396,8 @@ on text following the cursor."
           (abort-recursive-edit))
       ;; If no minibuffer is active, just run shell-pop normally
       (when (fboundp 'shell-pop)
-        (call-interactively 'shell-pop)))))
+        (call-interactively 'shell-pop))))
+  )
 
 (unless noninteractive
   (global-set-key (kbd "M-RET") 'my-shell-pop)
