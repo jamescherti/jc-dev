@@ -430,9 +430,9 @@ CONFIGURE_ARGS=(
   # Use -fanalyzer and related options only if --enable-gcc-warnings,
   # as they slow GCC considerably.
   # nw="$nw -fanalyzer -Wno-analyzer-double-free -Wno-analyzer-malloc-leak"
-  # The -fanalyzer framework dramatically increases compiler computational
-  # complexity, blowing up compilation time and layout tracking memory overhead.
-  # Since you are looking for production speed, remove --enable-gcc-warnings and
+  # The -fanalyzer framework increases compiler computational complexity,
+  # blowing up compilation time and layout tracking memory overhead. Since you
+  # are looking for production speed, remove --enable-gcc-warnings and
   # explicitly pass:
   --disable-gcc-warnings
 
