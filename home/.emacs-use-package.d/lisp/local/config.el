@@ -78,7 +78,24 @@
 ;;   ;; (setq straight-disable-autoloads t)
 ;;   )
 
-(setq native-comp-speed 3)
+;; native-comp-speed controls the Emacs Lisp frontend. It dictates how
+;; aggressively the Emacs Lisp compiler optimizes your code at the semantic
+;; level before translating it into an intermediate representation.
+;;
+;; Setting native-comp-speed to 3 changes the behavior and assumptions of the
+;; Emacs Lisp compiler itself.
+;;
+;; Semantic Assumptions: At speed 3, Emacs makes aggressive assumptions about
+;; the Lisp environment. For instance, it assumes that functions and macros
+;; will not be redefined at runtime.
+;;
+;; Type Checking: It may omit certain runtime type checks to execute
+;; instructions faster.
+;;
+;; Risk Level: Because it actively alters Lisp semantics, speed 3 is considered
+;; "unsafe." Heavily dynamic code that relies on advising or redefining
+;; functions on the fly might break or behave unpredictably.
+(setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
       "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
@@ -87,6 +104,24 @@
 ;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
 ;; produced by the native compilation process. These flags affect code
 ;; generation, optimization, and debugging information.
+;;
+;; This is different from `native-comp-speed'. `native-comp-compiler-options'
+;; controls the GCC backend. It passes command-line flags directly to libgccjit,
+;; instructing the underlying C compiler how to optimize the generated machine
+;; code.
+;;
+;; Machine-Level Optimizations: This enables standard GCC optimizations like
+;; loop unrolling, vectorization, and aggressive inlining at the machine code
+;; level.
+;;
+;; Semantic Preservation: Unlike changing the `native-comp-speed', passing -O3
+;; here does not change the logic or the rules of your Emacs Lisp code. It
+;; simply asks the C compiler to produce the most highly optimized machine
+;; instructions for the abstract syntax tree it was given.
+;;
+;; Risk Level: It is generally safer for your Lisp code's behavior. However, it
+;; will significantly increase the CPU time required for Emacs to compile
+;; packages in the background.
 (setq native-comp-compiler-options '(;; Enables aggressive optimization passes
                                      ;; in GCC. Native compilation of Emacs Lisp
                                      ;; benefits from improved inlining and loop
