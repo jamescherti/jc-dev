@@ -959,7 +959,7 @@ This uses an around advice to trap errors and verify file timestamps."
   (when (fboundp 'straight-freeze-versions)
     (advice-add 'straight-freeze-versions :around #'my-copy-straight-profile-advice)))
 
-((when (eq lightemacs-package-manager 'straight)
+(when (eq lightemacs-package-manager 'straight)
   (setq straight-recipe-overrides nil)
 
   ;; Replace radian mirror
@@ -970,7 +970,7 @@ This uses an around advice to trap errors and verify file timestamps."
   (push '(ef-themes
           :type git :host github
           :repo "protesilaos/ef-themes")
-        straight-recipe-overrides)))
+        straight-recipe-overrides))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
