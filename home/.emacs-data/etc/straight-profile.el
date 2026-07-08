@@ -85,6 +85,8 @@
  ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
 
  ;; My packages
+ ("org-ibullets.el" . "933d5989124a57e83de3eadf82bb194f5e308b98")
+ ("wizard" . "ff0fe88f1143a47262ff3f632ad657e8a55f1d38")
  ("inhibit-mouse.el" . "affabbd3c07ea4b739cf9dc79633681588803e0a")
  ("kirigami.el" . "41e9a5378b7a6c9eba79fb660375a9db48fa0506")
  ("flymake-ansible-lint.el" . "bfb8148d9a1aece141d18eef484e7c0c8db79855")
