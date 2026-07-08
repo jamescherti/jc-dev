@@ -323,11 +323,13 @@
   "Prioritize Eglot and remove conflicting Python completions."
   (when (eglot-managed-p)
     ;; Remove legacy python-completion-at-point from the local list
-    (remove-hook 'completion-at-point-functions #'python-completion-at-point t)
+    (remove-hook 'completion-at-point-functions 'python-completion-at-point t)
 
     ;; Ensure Eglot is at the front and wrapped for cache-busting
-    (setq-local completion-at-point-functions
-                (list (cape-capf-buster #'eglot-completion-at-point)))))
+    (if (fboundp 'cape-capf-buster)
+        (setq-local completion-at-point-functions
+                    (list (cape-capf-buster 'eglot-completion-at-point)))
+      (error "Undefined: cape-capf-buster"))))
 
 (add-hook 'eglot-managed-mode-hook #'my-eglot-capf-cleanup)
 

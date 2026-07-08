@@ -19,6 +19,8 @@
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0
  ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8
  ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0
+ ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0
+ ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0
 
  ;; Repositories
  ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")
@@ -27,10 +29,8 @@
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
 
  ;; Mirror bot
- ("ef-themes" . "db36d53c090d7820643157f2e81ee37937fe4a0d")
  ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
  ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
- ("indent-bars" . "a8ff2fad8dde8f7712a6c869f6cd3358385b4548")
  ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00")
  ("compat" . "28cbe7979711ea0ee71a9cbeeadf8f886d36a404")
 
