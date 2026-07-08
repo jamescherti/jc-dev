@@ -196,15 +196,19 @@ at the same level."
 ;;; org-ibullets
 
 (lightemacs-use-package org-ibullets
-  :vc (:url "https://github.com/jamescherti/org-ibullets.el"
-            :rev :newest)
-  :ensure nil
+  :straight (org-ibullets
+             :type git
+             :host github
+             :repo "jamescherti/org-ibullets.el")
+  ;; :vc (:url "https://github.com/jamescherti/org-ibullets.el"
+  ;;           :rev :newest)
   :after org
   :commands org-ibullets-mode
-  :hook (org-mode . org-ibullets-mode)
-  ;; :custom
-  ;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
-  )
+  :hook (org-mode . org-ibullets-mode))
+
+;; :custom
+;; (org-ibullets-bullet-list '("●" "◉" "○" "♦" "▶" "♣" "♠"))
+
 
 ;;; org
 

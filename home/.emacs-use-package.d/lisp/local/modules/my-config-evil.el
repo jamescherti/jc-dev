@@ -2674,14 +2674,14 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 ;;   (with-eval-after-load 'evil
 ;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
 
+;; Elpaca and the built-in package
 (lightemacs-use-package wizard
-  ;; :ensure nil
-  :vc (:url "https://github.com/jamescherti/wizard.el"
-            :rev :newest)
-  ;; :straight (wizard
-  ;;            :type git
-  ;;            :host github
-  ;;            :repo "jamescherti/wizard.el")
+  ;; :vc (:url "https://github.com/jamescherti/wizard.el"
+  ;;           :rev :newest)
+  :straight (wizard
+             :type git
+             :host github
+             :repo "jamescherti/wizard.el")
   :commands (wizard-clone-and-switch-to-indirect-buffer
              wizard-unhighlight
              wizard-toggle-highlight-at-point
@@ -2691,48 +2691,47 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
              wizard-hl-todo-local-mode
              wizard-paste-indented
              wizard-grep
-             wizard-reload-current-buffer)
+             wizard-reload-current-buffer))
 
-  :init
-  (setq wizard-point-ignore-invisible t)
+(setq wizard-point-ignore-invisible t)
   ;;; Paste with current indentation
-  (global-set-key (kbd "C-v") 'wizard-paste-indented)
-  (evil-define-key 'insert 'global (kbd "C-v") #'wizard-paste-indented)
-  (evil-define-key 'normal 'global (kbd "<leader>gg") #'wizard-grep)
-  (evil-define-key 'normal 'global (kbd "<leader>ll") 'wizard-reload-current-buffer)
+(global-set-key (kbd "C-v") 'wizard-paste-indented)
+(evil-define-key 'insert 'global (kbd "C-v") #'wizard-paste-indented)
+(evil-define-key 'normal 'global (kbd "<leader>gg") #'wizard-grep)
+(evil-define-key 'normal 'global (kbd "<leader>ll") 'wizard-reload-current-buffer)
 
-  ;; (defun evil-clipboard-paste-adapter (text)
-  ;;   "Insert TEXT using Evil's paste mechanics.
-  ;; Temporarily uses register 'a' to perform `evil-paste-before`, restoring
-  ;; the register's original contents afterward."
-  ;;   (let ((original-register-contents (evil-get-register ?a t)))
-  ;;     (unwind-protect
-  ;;         (progn
-  ;;           (evil-set-register ?a text)
-  ;;           ;; The core function already deletes the active region,
-  ;;           ;; so we only need to call `evil-paste-before`.
-  ;;           (evil-paste-before 1 ?a)
-  ;;           (when (bound-and-true-p evil-move-cursor-back)
-  ;;             (forward-char 1)))
-  ;;       (when original-register-contents
-  ;;         (evil-set-register ?a original-register-contents)))))
-  ;;
-  ;; ;; Assign the adapter to the global paste variable
-  ;; (setq clipboard-paste-function #'evil-clipboard-paste-adapter)
+;; (defun evil-clipboard-paste-adapter (text)
+;;   "Insert TEXT using Evil's paste mechanics.
+;; Temporarily uses register 'a' to perform `evil-paste-before`, restoring
+;; the register's original contents afterward."
+;;   (let ((original-register-contents (evil-get-register ?a t)))
+;;     (unwind-protect
+;;         (progn
+;;           (evil-set-register ?a text)
+;;           ;; The core function already deletes the active region,
+;;           ;; so we only need to call `evil-paste-before`.
+;;           (evil-paste-before 1 ?a)
+;;           (when (bound-and-true-p evil-move-cursor-back)
+;;             (forward-char 1)))
+;;       (when original-register-contents
+;;         (evil-set-register ?a original-register-contents)))))
+;;
+;; ;; Assign the adapter to the global paste variable
+;; (setq clipboard-paste-function #'evil-clipboard-paste-adapter)
 
-  (add-hook-text-editing-modes #'wizard-hl-todo-local-mode)
+(add-hook-text-editing-modes #'wizard-hl-todo-local-mode)
 
-  ;; Indirect buffer
-  (evil-define-key 'normal 'global (kbd "<leader>ec") #'wizard-clone-and-switch-to-indirect-buffer)
-  (evil-define-key 'normal 'global (kbd "<leader>eC") #'wizard-switch-to-base-buffer)
+;; Indirect buffer
+(evil-define-key 'normal 'global (kbd "<leader>ec") #'wizard-clone-and-switch-to-indirect-buffer)
+(evil-define-key 'normal 'global (kbd "<leader>eC") #'wizard-switch-to-base-buffer)
 
-  ;; Rename
-  (evil-define-key 'normal 'global (kbd "<leader>R") #'wizard-replace-symbol-at-point)
+;; Rename
+(evil-define-key 'normal 'global (kbd "<leader>R") #'wizard-replace-symbol-at-point)
 
-  ;; Highlight
-  ;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eh") #'wizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eH") #'wizard-unhighlight))
+;; Highlight
+;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
+(evil-define-key 'normal 'global (kbd "<leader>eh") #'wizard-toggle-highlight-at-point)
+(evil-define-key 'normal 'global (kbd "<leader>eH") #'wizard-unhighlight)
 
 (when (fboundp 'wizard-hl-todo-local-mode)
   (add-hook-text-editing-modes #'wizard-hl-todo-local-mode)

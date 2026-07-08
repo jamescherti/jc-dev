@@ -959,18 +959,37 @@ This uses an around advice to trap errors and verify file timestamps."
   (when (fboundp 'straight-freeze-versions)
     (advice-add 'straight-freeze-versions :around #'my-copy-straight-profile-advice)))
 
-(when (eq lightemacs-package-manager 'straight)
-  (setq straight-recipe-overrides nil)
+(setq straight-recipes-gnu-elpa-use-mirror nil)
+(setq straight-recipes-emacsmirror-use-mirror nil)
 
-  ;; Replace radian mirror
-  (push '(indent-bars
-          :type git :host github
-          :repo "jdtsmith/indent-bars")
-        straight-recipe-overrides)
-  (push '(ef-themes
-          :type git :host github
-          :repo "protesilaos/ef-themes")
-        straight-recipe-overrides))
+(setq straight-recipes-org-url "https://github.com/jamescherti/org-mode")
+
+(when (eq lightemacs-package-manager 'straight)
+  (setq straight-recipe-overrides
+        '(; Replace radian mirror
+
+          ;; Disable straight mirror for the following packages
+          ;; (modus-themes . (use-package :type built-in))
+          ;; (transient . (use-package :type built-in))
+          (seq . (seq :type built-in))
+          (let-alist . (let-alist :type built-in))
+          (use-package . (use-package :type built-in))
+          (bind-key . (bind-key :type built-in))
+
+          ;; TODO fix
+          (compat . (compat
+                     :type git
+                     :host github
+                     :repo "emacs-compat/compat"))
+
+          (indent-bars . (indent-bars
+                          :type git :host github
+                          :repo "jdtsmith/indent-bars"))
+          (ef-themes . (ef-themes
+                        :type git :host github
+                        :repo "protesilaos/ef-themes"))
+
+          )))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))

@@ -1,5 +1,4 @@
-(("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7
- ("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7
+(("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7
  ("corfu" . "4a9c67da16eb64cadaa4bfcc16713188145c83da") ; 2.10
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6
  ("embark" . "27de48004242e98586b9c9661fdb6912f26fe70f") ; 1.2
@@ -8,7 +7,6 @@
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11
  ("vertico" . "6028bd3d32c99c28e2b938e5e5393ec3508d2424")  ; 2.10
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3
- ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5
  ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0
  ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0
  ("dtrt-indent" . "4b71bf995b12966bbc350a32796b9a5f11d67fa6") ; 1.27
@@ -21,18 +19,25 @@
  ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0
  ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0
  ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0
+ ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7
+ ("compat" . "b5b48183689b536f72b1214106afeabc465da9d4") ; Version 31.0.0.1
 
  ;; Repositories
  ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")
  ("gnu-elpa-mirror" . "1a75d552f3501e228e4390e71dc709d1b391dfdc")
  ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
+ ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
+ ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
 
  ;; Mirror bot
- ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
- ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
- ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00")
- ("compat" . "28cbe7979711ea0ee71a9cbeeadf8f886d36a404")
+ ;; ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00")
+ ;; ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
+ ;; ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
+ ;; ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
+
+ ;; TODO
+ ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5
 
  ;; Outdated tag
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
@@ -64,7 +69,6 @@
  ("org-appear" . "32ee50f8fdfa449bbc235617549c1bccb503cb09")
  ("paredit" . "af075775af91f2dbc63b915d762b4aec092946c4")
  ("f.el" . "931b6d0667fe03e7bf1c6c282d6d8d7006143c52")
- ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
  ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
  ("vimrc-mode" . "f594392a0834193a1fe1522d007e1c8ce5b68e43")
  ("helpful" . "03756fa6ad4dcca5e0920622b1ee3f70abfc4e39")

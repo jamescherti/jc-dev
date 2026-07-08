@@ -687,7 +687,7 @@ CONFIGURE_ARGS=(
   # Other packages that use it: Magit, Projectile, Company.
   #
   # (That should speed up things like Org Roam or Magit Forge)
-  --without-sqlite3
+  --with-sqlite3
 
   # Native JSON parsing via Jansson greatly increases performance for json-heavy
   # tasks (like LSP).
