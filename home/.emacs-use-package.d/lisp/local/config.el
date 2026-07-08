@@ -415,6 +415,17 @@
 ;;     (setq native-comp-deferred-compilation-deny-list deny-list)
 ;;     (setq comp-deferred-compilation-deny-list deny-list)))
 
+;;; Package manager
+
+(let ((user-dir (file-truename lightemacs-user-directory)))
+  (cond
+   ((string= user-dir
+             (file-truename "~/.emacs-elpaca.d/"))
+    (setq lightemacs-package-manager 'elpaca))
+   ((string= user-dir
+             (file-truename "~/.emacs-straight.d/"))
+    (setq lightemacs-package-manager 'straight))))
+
 ;;; Minimalist
 
 (when (boundp 'trusted-content)
@@ -656,15 +667,6 @@ subsequent GCC invocations."
 (setq minimal-emacs-frame-title-format "Lightemacs")
 
 (setq lightemacs-easysession-load-session-on-startup t)
-
-(let ((user-dir (file-truename lightemacs-user-directory)))
-  (cond
-   ((string= user-dir
-             (file-truename "~/.emacs-elpaca.d/"))
-    (setq lightemacs-package-manager 'elpaca))
-   ((string= user-dir
-             (file-truename "~/.emacs-straight.d/"))
-    (setq lightemacs-package-manager 'straight))))
 
 (setq lightemacs-dtrt-indent-excluded-modes '(emacs-lisp-mode
                                               python-mode
@@ -957,12 +959,25 @@ This uses an around advice to trap errors and verify file timestamps."
   (when (fboundp 'straight-freeze-versions)
     (advice-add 'straight-freeze-versions :around #'my-copy-straight-profile-advice)))
 
-;; (when (eq lightemacs-package-manager 'straight)
-;;   (setq straight-recipe-overrides nil)
-;;   (add-to-list 'straight-recipe-overrides
-;;                '(wizard
-;;                  :type git :host github
-;;                  :repo "jamescherti/wizard.el")))
+(when (eq lightemacs-package-manager 'straight)
+  (setq straight-recipe-overrides nil)
+
+  ;; Replace radian mirror
+  (push '(ef-themes
+          :type git :host github
+          :repo "protesilaos/ef-themes")
+        straight-recipe-overrides)
+
+  ;; (add-to-list 'straight-recipe-overrides
+  ;;              '(ef-themes
+  ;;                :type git :host github
+  ;;                :repo "protesilaos/ef-themes")
+  ;;
+  ;;              ;; '(wizard
+  ;;              ;;   :type git :host github
+  ;;              ;;   :repo "jamescherti/wizard.el")
+  ;;              )
+  )
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))

@@ -42,19 +42,22 @@ cleanup-emacs-files() {
         if [[ $1 != dry-run ]]; then
           fd_opts=("--exec-batch" "rm" "-f")
         fi
-        # The . character is passed to serve as a catch-all regular expression
-        # pattern. This ensures that fd correctly interprets the next argument,
-        # "$dir", as the target directory path rather than the search pattern.
+
+        # Explicitly exclude version control directories
         fd --type f --hidden --no-ignore --ignore-case \
+          --exclude '.git' --exclude '.hg' --exclude '.svn' \
           --extension elc --extension eln --color=never \
           . "$dir" "${fd_opts[@]}"
       else
-        local find_opts=()
+        local find_opts=("-print")
         if [[ $1 != dry-run ]]; then
           find_opts=("-delete")
         fi
-        find "$dir" -type f \( -iname '*.elc' -o -iname '*.eln' \) \
-          "${find_opts[@]}"
+
+        # Use -prune to prevent find from descending into version control directories
+        find "$dir" \
+          -type d \( -name '.git' -o -name '.hg' -o -name '.svn' \) -prune \
+          -o -type f \( -iname '*.elc' -o -iname '*.eln' \) "${find_opts[@]}"
       fi
     fi
   done < <(

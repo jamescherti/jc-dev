@@ -175,14 +175,14 @@
 
 ;;; Icons dired
 
-(lightemacs-use-package nerd-icons-dired
-  :if (display-graphic-p)
-  ;;:diminish nerd-icons-dired-mode
-  :commands nerd-icons-dired-mode
-  ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
-  ;; aligned properly)
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
+;; (lightemacs-use-package nerd-icons-dired
+;;   :if (display-graphic-p)
+;;   ;;:diminish nerd-icons-dired-mode
+;;   :commands nerd-icons-dired-mode
+;;   ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
+;;   ;; aligned properly)
+;;   :hook
+;;   (dired-mode . nerd-icons-dired-mode))
 
 (provide 'mod-dired)
 

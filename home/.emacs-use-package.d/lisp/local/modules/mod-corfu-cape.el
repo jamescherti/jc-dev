@@ -39,12 +39,12 @@
   (corfu-popupinfo-max-width 80)
   (corfu-popupinfo-max-height 15))
 
-(lightemacs-use-package nerd-icons-completion
-  :if (display-graphic-p)
-  :commands nerd-icons-completion-marginalia-setup
-  :config
-  (with-eval-after-load 'marginalia
-    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)))
+;; (lightemacs-use-package nerd-icons-completion
+;;   :if (display-graphic-p)
+;;   :commands nerd-icons-completion-marginalia-setup
+;;   :config
+;;   (with-eval-after-load 'marginalia
+;;     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)))
 
 (lightemacs-use-package nerd-icons-corfu
   :after corfu
