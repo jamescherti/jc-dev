@@ -24,6 +24,10 @@
 
 ;;; Code:
 
+;;; Debug on error
+
+(setq debug-on-error t)
+
 ;;; Profiling
 
 ;; (profiler-start 'cpu)
@@ -74,38 +78,15 @@
 ;;   ;; (setq straight-disable-autoloads t)
 ;;   )
 
-;; `native-comp-compiler-options' specifies flags passed directly to the C
-;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
-;; produced by the native compilation process. These flags affect code
-;; generation, optimization, and debugging information.
-;;
-;; `native-comp-driver-options' specifies additional flags passed to the native
-;; compilation driver process, which may invoke the compiler and linker with
-;; certain parameters. In most cases, these flags mirror the compiler options,
-;; but they can be configured separately when the driver needs different
-;; arguments (for example, link-time options or toolchain-specific parameters).
-;;
-;; In native-compilation mode, when a .el or .elc file is compiled to native
-;; code (.eln): Emacs itself does not call gcc directly. Instead, Emacs invokes
-;; the native compilation driver process (a small program written in C and
-;; Lisp). This driver prepares the command line for the compiler, applies
-;; system-dependent settings, and runs the compilation in an isolated process.
-(setq native-comp-speed 2)
+(setq native-comp-speed 3)
 
 (setq vterm-module-cmake-args
       "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
 
-;; (setq vterm-module-cmake-args
-;;       "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
-;; (setq vterm-module-cmake-args
-;;       "-DCMAKE_C_FLAGS='-O3 -march=native -flto=auto' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed -O3 -march=native -flto=auto'")
-;; (setq vterm-module-cmake-args
-;;       "-DCMAKE_C_FLAGS='-O3 -march=native -flto=auto' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed -O3 -march=native -flto=auto'")
-
-;; (setq vterm-module-cmake-args "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
-
-;; (setq vterm-module-cmake-args
-;;       "-DCMAKE_C_FLAGS='-O2 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed'")
+;; `native-comp-compiler-options' specifies flags passed directly to the C
+;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
+;; produced by the native compilation process. These flags affect code
+;; generation, optimization, and debugging information.
 (setq native-comp-compiler-options '(;; Enables aggressive optimization passes
                                      ;; in GCC. Native compilation of Emacs Lisp
                                      ;; benefits from improved inlining and loop
@@ -274,6 +255,18 @@
                                      ;; "-fuse-linker-plugin"
                                      ))
 
+;; `native-comp-driver-options' specifies additional flags passed to the native
+;; compilation driver process, which may invoke the compiler and linker with
+;; certain parameters. In most cases, these flags mirror the compiler options,
+;; but they can be configured separately when the driver needs different
+;; arguments (for example, link-time options or toolchain-specific parameters).
+;;
+;; In native-compilation mode, when a .el or .elc file is compiled to native
+;; code (.eln): Emacs itself does not call gcc directly. Instead, Emacs invokes
+;; the native compilation driver process (a small program written in C and
+;; Lisp). This driver prepares the command line for the compiler, applies
+;; system-dependent settings, and runs the compilation in an isolated process.
+;;
 ;; I did not add the following to `native-comp-driver-options':
 ;;
 ;; -Wl,--sort-common:
@@ -378,18 +371,60 @@
 ;;     (setq native-comp-deferred-compilation-deny-list deny-list)
 ;;     (setq comp-deferred-compilation-deny-list deny-list)))
 
+;;; Minimalist
+
+(when (boundp 'trusted-content)
+  (let ((dirs (list "~/src/dotfiles/jc-dev/"
+                    "~/src/emacs/")))
+    (dolist (dir dirs)
+      (when dir
+        ;; Ensure the path ends with a slash so it registers as a directory
+        (push dir trusted-content)))))
+
+;; Prevent Emacs from loading the system-wide 'default.el' initialization file.
+;;
+;; By default, after loading the user's own init file (e.g., ~/.emacs or
+;; ~/.emacs.d/init.el), Emacs may load a secondary initialization file named
+;; 'default.el' from its data-directory. This file is distributed by Emacs
+;; itself or the system package manager and may contain global default settings
+;; such as enabling toolbars, setting default keybindings, or altering the
+;; initial buffer state.
+;;
+;; Loading 'default.el' can introduce environment-dependent or
+;; distribution-specific behavior, which interferes with the user's attempt to
+;; fully control and isolate their Emacs configuration. It also makes
+;; configuration less reproducible and predictable, particularly in environments
+;; where Emacs is deployed across multiple systems or used programmatically.
+;;
+;; Setting 'inhibit-default-init' to non-nil disables the automatic loading of
+;; 'default.el', ensuring that the Emacs session starts only with the user's
+;; configuration.
+(setq inhibit-default-init t)
+
+;; Setting `site-run-file' to nil disables the loading of the site-run-file.el,
+;; which is a site-wide initialization script typically provided by the system
+;; or Emacs installation.
+;;
+;; Advantage:
+;; - Prevents execution of potentially unwanted or incompatible site-wide
+;;   customizations, leading to a cleaner and more predictable Emacs startup
+;;   environment, especially useful in controlled or minimal setups.
+;;
+;; Disadvantage:
+;; - May omit important default configurations or package initializations
+;;   expected by the system or administrators, possibly causing missing
+;;   functionality or inconsistent behavior in Emacs sessions.
+(setq site-run-file nil)
+
+;; Only support Git
+(setq vc-handled-backends '(Git))
+
 ;;; Load ~/config.el
 
 ;; (message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
-;;; Debug on error
-
-(setq debug-on-error t)
-
-;; Temporary dir
-
-;;---------------------------------------->TMP
+;;; Temporary dir
 
 (defvar my-session-temp-directory
   (file-name-as-directory (make-temp-file "emacs-session-" t))
@@ -411,7 +446,102 @@
 
 ;; Hook the cleanup function to Emacs exit
 (add-hook 'kill-emacs-hook #'my-cleanup-session-temp-directory 90)
-;;---------------------------------------->TMP
+
+;;; Byte-compile
+
+(defvar my-elc-cache--emacs-lisp-directory
+  ;; Directory where Emacs's own *.el and *.elc Lisp files are installed.
+  (if (bound-and-true-p lisp-directory)
+      ;; Always use `file-truename'
+      (file-truename lisp-directory)
+    (when-let* ((library-path (locate-library "simple")))
+      ;; Always use `file-truename'
+      (file-name-directory (file-truename library-path)))))
+
+;; TODO lightemacs?
+(defvar my-elc-cache-directory
+  ;; This has to be `file-truename'
+  (file-truename (expand-file-name "elc-cache/" user-emacs-directory))
+  "Directory to store byte-compiled .elc files.")
+
+(defun my-elc-cache-dest-file (filename)
+  "Determine the cache destination for the byte-compiled FILENAME."
+  (let* ((true-file (file-truename filename))
+         ;; FIX: Temporarily disable the hook variable to prevent infinite
+         ;; recursion
+         (byte-compile-dest-file-function nil)
+         ;; Use Emacs's native compiler functions to safely handle .gz and .elc
+         (default-dest (if (fboundp 'byte-compile-default-dest-file)
+                           (byte-compile-default-dest-file filename)
+                         ;; Fallback for older Emacs versions
+                         (byte-compile-dest-file filename))))
+    ;; Ignore Emacs's built-in files
+    (if (or
+         ;; (and my-elc-cache--emacs-lisp-directory
+         ;;      (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
+         ;; early-init has no way to guess the elc-cache path before it is
+         ;; loaded before config.el
+         ;; (string-suffix-p "/init.el" true-file)
+         ;; (string-suffix-p "/early-init.el" true-file)
+         ;; (string-suffix-p "/config.el" true-file)
+         (not (string-prefix-p (file-truename "~/src/") true-file))
+         ;; Ignore files already in the cache directory to prevent recursive
+         ;; paths
+         ;; (string-prefix-p my-elc-cache-directory true-file)
+         )
+        ;; Return the normal destination
+        default-dest
+      ;; Map the third-party file into the cache directory
+      (let* ((expanded-dest (expand-file-name default-dest))
+             ;; Strip the leading slash so it appends properly to the cache
+             ;; directory
+             (relative (replace-regexp-in-string "^/" "" expanded-dest))
+             (dest (expand-file-name relative my-elc-cache-directory)))
+        (make-directory (file-name-directory dest) t)
+        dest))))
+
+;; TODO
+;; The provided Emacs Lisp snippet successfully intercepts
+;; the byte-compiler and writes the .elc files to your
+;; custom elc-cache/ directory. However, Emacs is still
+;; loading the .el files because of a disconnect between the
+;; compiler and the loader. Setting
+;; byte-compile-dest-file-function only changes the output
+;; destination for the compilation process. It does not
+;; update the load-path or instruct the load function on
+;; where to find those newly relocated .elc files. When
+;; Emacs evaluates (require 'feature) or (load "library"),
+;; it searches the directories listed in your load-path
+;; variable. Because the nested directories inside your
+;; elc-cache/ are not in the load-path, Emacs cannot see the
+;; compiled files. It falls back to the original
+;; directories, finds the uncompiled .el files, and loads
+;; them instead. To make Emacs use your out-of-tree .elc
+;; files, you need to bridge this gap. You have two main
+;; approaches: Modify the Load Path: You can write a
+;; function that recursively finds all directories inside
+;; my-elc-cache-directory and prepends them to your
+;; load-path. This allows the default Emacs load function to
+;; find the cached .elc files before checking the original
+;; source directories. Advise the Load Function: You can use
+;; advice-add on the load function to intercept every load
+;; request. The advice would check if a matching .elc file
+;; exists in your cache directory and, if so, dynamically
+;; rewrite the file path before passing it to the original
+;; load function. As a side note regarding your
+;; configuration, since you have enabled native compilation
+;; ((setq native-comp-jit-compilation t)), Emacs
+;; automatically handles out-of-tree caching for natively
+;; compiled .eln files via native-comp-eln-load-path.
+;; Keeping .elc files alongside their .el sources is the
+;; standard design in Emacs, which is why out-of-tree
+;; byte-compilation requires extra configuration to work
+;; correctly.
+;;
+;; Redirect the byte compiler output
+;; TODO doesn't work for natively compiling my packages in src dir
+;; (push my-elc-cache-directory load-path)
+;; (setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
 
 ;;; Auto detect architecture
 
@@ -658,14 +788,13 @@ subsequent GCC invocations."
                            mod-buffer-terminator
                            le-buffer-guardian
                            mod-eglot
-                           ;; mod-lsp-mode
                            smartindent
+                           ;; mod-lsp-mode
                            ;; point-manager
                            ;; battery-angel
 
                            le-easysession
-                           le-server
-                           ))
+                           le-server))
 
 ;;; Frame, disable cus-edit and x-apply-session-resources
 
@@ -688,204 +817,6 @@ subsequent GCC invocations."
 (with-eval-after-load 'cus-edit
   ;; Prevent Emacs from writing custom settings to any file
   (advice-add 'custom-save-all :override #'ignore))
-
-;;; byte-compile
-
-(defvar my-elc-cache--emacs-lisp-directory
-  ;; Directory where Emacs's own *.el and *.elc Lisp files are installed.
-  (if (bound-and-true-p lisp-directory)
-      ;; Always use `file-truename'
-      (file-truename lisp-directory)
-    (when-let* ((library-path (locate-library "simple")))
-      ;; Always use `file-truename'
-      (file-name-directory (file-truename library-path)))))
-
-;; TODO lightemacs?
-(defvar my-elc-cache-directory
-  ;; This has to be `file-truename'
-  (file-truename (expand-file-name "elc-cache/" user-emacs-directory))
-  "Directory to store byte-compiled .elc files.")
-
-(defun my-elc-cache-dest-file (filename)
-  "Determine the cache destination for the byte-compiled FILENAME."
-  (let* ((true-file (file-truename filename))
-         ;; FIX: Temporarily disable the hook variable to prevent infinite
-         ;; recursion
-         (byte-compile-dest-file-function nil)
-         ;; Use Emacs's native compiler functions to safely handle .gz and .elc
-         (default-dest (if (fboundp 'byte-compile-default-dest-file)
-                           (byte-compile-default-dest-file filename)
-                         ;; Fallback for older Emacs versions
-                         (byte-compile-dest-file filename))))
-    ;; Ignore Emacs's built-in files
-    (if (or
-         ;; (and my-elc-cache--emacs-lisp-directory
-         ;;      (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
-         ;; early-init has no way to guess the elc-cache path before it is
-         ;; loaded before config.el
-         ;; (string-suffix-p "/init.el" true-file)
-         ;; (string-suffix-p "/early-init.el" true-file)
-         ;; (string-suffix-p "/config.el" true-file)
-         (not (string-prefix-p (file-truename "~/src/") true-file))
-         ;; Ignore files already in the cache directory to prevent recursive
-         ;; paths
-         ;; (string-prefix-p my-elc-cache-directory true-file)
-         )
-        ;; Return the normal destination
-        default-dest
-      ;; Map the third-party file into the cache directory
-      (let* ((expanded-dest (expand-file-name default-dest))
-             ;; Strip the leading slash so it appends properly to the cache
-             ;; directory
-             (relative (replace-regexp-in-string "^/" "" expanded-dest))
-             (dest (expand-file-name relative my-elc-cache-directory)))
-        (make-directory (file-name-directory dest) t)
-        dest))))
-
-;; TODO
-;; The provided Emacs Lisp snippet successfully intercepts
-;; the byte-compiler and writes the .elc files to your
-;; custom elc-cache/ directory. However, Emacs is still
-;; loading the .el files because of a disconnect between the
-;; compiler and the loader. Setting
-;; byte-compile-dest-file-function only changes the output
-;; destination for the compilation process. It does not
-;; update the load-path or instruct the load function on
-;; where to find those newly relocated .elc files. When
-;; Emacs evaluates (require 'feature) or (load "library"),
-;; it searches the directories listed in your load-path
-;; variable. Because the nested directories inside your
-;; elc-cache/ are not in the load-path, Emacs cannot see the
-;; compiled files. It falls back to the original
-;; directories, finds the uncompiled .el files, and loads
-;; them instead. To make Emacs use your out-of-tree .elc
-;; files, you need to bridge this gap. You have two main
-;; approaches: Modify the Load Path: You can write a
-;; function that recursively finds all directories inside
-;; my-elc-cache-directory and prepends them to your
-;; load-path. This allows the default Emacs load function to
-;; find the cached .elc files before checking the original
-;; source directories. Advise the Load Function: You can use
-;; advice-add on the load function to intercept every load
-;; request. The advice would check if a matching .elc file
-;; exists in your cache directory and, if so, dynamically
-;; rewrite the file path before passing it to the original
-;; load function. As a side note regarding your
-;; configuration, since you have enabled native compilation
-;; ((setq native-comp-jit-compilation t)), Emacs
-;; automatically handles out-of-tree caching for natively
-;; compiled .eln files via native-comp-eln-load-path.
-;; Keeping .elc files alongside their .el sources is the
-;; standard design in Emacs, which is why out-of-tree
-;; byte-compilation requires extra configuration to work
-;; correctly.
-;;
-;; Redirect the byte compiler output
-;; TODO doesn't work for natively compiling my packages in src dir
-;; (push my-elc-cache-directory load-path)
-;; (setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
-
-;;; Options
-
-(unless noninteractive
-  ;; Check if the font exists on the system before applying it
-  ;; NOTE doesn't work?
-  ;; (if (find-font (font-spec :name my-font-choice))
-  ;;   ;; TODO: Concat -13 to `my-font-choice'
-  ;;   (add-to-list 'default-frame-alist `(font . ,my-font-choice))
-  ;;  (message "Warning: Font '%s' not found. Using system default." my-font-choice))
-
-  ;; (add-to-list 'default-frame-alist '(font . "Iosevka Term-13"))
-  )
-
-;; On some window managers (fvwm 2.2.5 and KDE 2.1), Emacs can pause because Xt
-;; waits for a `ConfigureNotify` event that the WM does not send, timing out
-;; after about 5 seconds.
-;; (add-to-list 'default-frame-alist '(wait-for-wm . t))
-
-;; TODO: add to minimal emacs README.md
-
-;; Redired elc
-
-;; Redirect the ELN (Emacs Lisp Native) cache to a custom directory
-;; (when (featurep 'native-compile)
-;;   (let ((eln-cache-dir (convert-standard-filename
-;;                         (expand-file-name "eln-cache"
-;;                                           minimal-emacs-user-directory))))
-;;     ;; Modify the load path for existing native-compiled files
-;;     (when (boundp 'native-comp-eln-load-path)
-;;       (setcar native-comp-eln-load-path eln-cache-dir))
-;;
-;;     ;; Set the target directory for future native compilations
-;;     (setq native-compile-target-directory eln-cache-dir)
-;;
-;;     ;; Redirect the ELN cache used at startup (Emacs 29+)
-;;     ;; Set the directory where Emacs looks for native-compiled .eln files during
-;;     ;; early startup, before user configuration is fully loaded. This function
-;;     ;; ensures Emacs does not write .eln files to the default system path (e.g.,
-;;     ;; '$EMACS_LIBDIR/eln-cache/' which may be read-only or shared) and instead
-;;     ;; uses a user-defined writable location. It is a no-op in earlier Emacs
-;;     ;; versions where native compilation support was different.
-;;     ;; (when (fboundp 'startup-redirect-eln-cache)
-;;     ;;   (startup-redirect-eln-cache eln-cache-dir))
-;;
-;;     ))
-
-(when (boundp 'trusted-content)
-  (let ((dirs
-         (list
-          "~/src/dotfiles/jc-dev/"
-          "~/src/emacs/"
-          )))
-    (dolist (dir dirs)
-      (when dir
-        ;; Ensure the path ends with a slash so it registers as a directory
-        (push dir trusted-content)))))
-
-;; Prevent Emacs from loading the system-wide 'default.el' initialization file.
-;;
-;; By default, after loading the user's own init file (e.g., ~/.emacs or
-;; ~/.emacs.d/init.el), Emacs may load a secondary initialization file named
-;; 'default.el' from its data-directory. This file is distributed by Emacs
-;; itself or the system package manager and may contain global default settings
-;; such as enabling toolbars, setting default keybindings, or altering the
-;; initial buffer state.
-;;
-;; Loading 'default.el' can introduce environment-dependent or
-;; distribution-specific behavior, which interferes with the user's attempt to
-;; fully control and isolate their Emacs configuration. It also makes
-;; configuration less reproducible and predictable, particularly in environments
-;; where Emacs is deployed across multiple systems or used programmatically.
-;;
-;; Setting 'inhibit-default-init' to non-nil disables the automatic loading of
-;; 'default.el', ensuring that the Emacs session starts only with the user's
-;; configuration.
-(setq inhibit-default-init t)
-
-;; Setting `site-run-file' to nil disables the loading of the site-run-file.el,
-;; which is a site-wide initialization script typically provided by the system
-;; or Emacs installation.
-;;
-;; Advantage:
-;; - Prevents execution of potentially unwanted or incompatible site-wide
-;;   customizations, leading to a cleaner and more predictable Emacs startup
-;;   environment, especially useful in controlled or minimal setups.
-;;
-;; Disadvantage:
-;; - May omit important default configurations or package initializations
-;;   expected by the system or administrators, possibly causing missing
-;;   functionality or inconsistent behavior in Emacs sessions.
-(setq site-run-file nil)
-
-;;----------------------------------------------------------------------------
-;; Optimize
-;;----------------------------------------------------------------------------
-
-;; (setq vc-handled-backends nil)
-;; (defun my-restore-vc-handled-backends ()
-;;   "Restore VC backends."
-;;   (setq vc-handled-backends '(Git)))
-;; (add-hook 'lightemacs-emacs-startup-hook #'my-restore-vc-handled-backends 120)
 
 ;;; Package defaults
 

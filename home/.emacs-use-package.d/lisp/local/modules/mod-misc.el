@@ -857,7 +857,6 @@ any new ones."
   ;; while still showing the full contents of its buffer. WINDOW must be a live
   ;; window and defaults to the selected one.
   (setq vc-diff-finish-functions nil)
-  (setq vc-handled-backends '(Git))
   (setq vc-git-diff-switches '("--histogram"  ; Faster algorithm
                                "--textconv"
                                "--stat"
@@ -2251,10 +2250,12 @@ generally one of the lines that are folded."
 ;;; ansible-doc
 
 (lightemacs-use-package ansible-doc
-  :commands ansible-doc)
+  :commands ansible-doc
+  :init
+  (add-to-list 'display-buffer-alist '("\\*ansible-doc"
+                                       (display-buffer-same-window)))
+  )
 
-(add-to-list 'display-buffer-alist '("\\*ansible-doc"
-                                     (display-buffer-same-window)))
 
 (progn
   ;; Patch sent to ansible-doc. Merged, but not released yet.
@@ -2279,11 +2280,11 @@ generally one of the lines that are folded."
     (when (and symbol (fboundp 'ansible-doc))
       (ansible-doc symbol))))
 
-(defun ansible-doc-local-setup-buffer ()
+(defun my-ansible-doc-local-setup-buffer ()
   "Setup `ansible-doc'."
   (setq-local evil-lookup-func 'ansible-doc-symbol))
 
-(add-hook 'ansible-mode-hook 'ansible-doc-local-setup-buffer)
+(add-hook 'ansible-mode-hook 'my-ansible-doc-local-setup-buffer)
 
 ;;; Disable arrow in the fringe
 
