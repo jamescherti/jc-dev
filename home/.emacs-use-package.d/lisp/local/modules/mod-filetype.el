@@ -287,17 +287,22 @@ only if they are not already available."
   (mod-filetype-install 'mhtml-ts-mode 'html
                         'mhtml-ts-mode-install-parsers)
 
-  (mod-filetype-install nil '(python
-                              bash
-                              yaml
-                              json
-                              lua
-                              c
-                              cpp
-                              dockerfile
-                              go
-                              java
-                              javascript))
+  (mod-filetype-install 'python-ts-mode 'python)
+  (mod-filetype-install 'yaml-ts-mode 'yaml)
+  (mod-filetype-install 'bash-ts-mode 'bash)
+  (mod-filetype-install 'lua-ts-mode 'lua)
+  (mod-filetype-install 'json-ts-mode 'json)
+  (mod-filetype-install 'c-ts-mode 'c)
+  (mod-filetype-install 'c-ts-mode 'cpp)
+  (mod-filetype-install 'dockerfile-ts-mode 'dockerfile)
+
+  ;; (mod-filetype-install 'go-ts-mode 'go)
+  ;; (mod-filetype-install 'java-ts-mode 'java)
+
+  ;; TODO
+  ;; (mod-filetype-install 'java-ts-mode 'javascript)
+
+  (mod-filetype-install nil '(javascript))
 
   ;; (treesit-install-language-grammar 'python)
   ;; (treesit-install-language-grammar 'bash)

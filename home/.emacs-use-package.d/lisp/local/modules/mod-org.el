@@ -451,4 +451,22 @@ any minor mode associated with the current `major-mode'."
 
 ;; consult-org
 
+;;; Move subtree up and down while preserving the column position
+
+;; TODO org patch
+;; This implementation differs from the default Org mode behavior. Standard
+;; Org commands restore the cursor position upon successful execution, but
+;; they fail to retain the column state if the movement signals an error.
+(defun my/org-preserve-column-around-advice (orig-fun &rest args)
+  "Preserve the current column when moving Org subtrees.
+Executes ORIG-FUN with ARGS, ensuring the column is restored
+via `unwind-protect' even if the movement signals an error."
+  (let ((col (current-column)))
+    (unwind-protect
+        (apply orig-fun args)
+      (move-to-column col))))
+
+(advice-add 'org-move-subtree-up :around #'my/org-preserve-column-around-advice)
+(advice-add 'org-move-subtree-down :around #'my/org-preserve-column-around-advice)
+
 ;;; mod-org.el ends here
