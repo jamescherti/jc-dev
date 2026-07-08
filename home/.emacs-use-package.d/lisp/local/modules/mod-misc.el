@@ -3907,39 +3907,6 @@ The result is displayed in a pretty-printed temporary buffer."
 
 ;; (setq term-buffer-maximum-size 10000)
 
-;;; straight
-
-(defvar my-straight-default-profile (expand-file-name
-                                     "~/.emacs-data/etc/straight-profile.el")
-  "The default straight profile.")
-(setq straight-profiles
-      `((nil . ,my-straight-default-profile)))
-
-(defun my-copy-straight-profile-advice (orig-fun &rest args)
-  "Advise `straight-freeze-versions' to copy the profile.
-ORIG-FUN and ARGS is the advised function and its arguments.
-This uses an around advice to trap errors and verify file timestamps."
-  (condition-case err
-      (let ((result (apply orig-fun args))
-            (source (expand-file-name my-straight-default-profile))
-            (destination
-             (expand-file-name
-              "~/src/dotfiles/jc-dev/home/.emacs-data/etc/straight-profile.el")))
-        ;; (message "%s:%s"
-        ;;          (file-exists-p source)
-        ;;          (file-newer-than-file-p source destination))
-        (when (and (file-regular-p source)
-                   (file-newer-than-file-p source destination))
-          (copy-file source destination t)
-          (message "Copied %s to %s" source destination))
-        result)
-    (error
-     (message "straight-freeze-versions failed: %s" (error-message-string err))
-     (signal (car err) (cdr err)))))
-
-(when (fboundp 'straight-freeze-versions)
-  (advice-add 'straight-freeze-versions :around #'my-copy-straight-profile-advice))
-
 ;;; Lazily load buffers (TODO easysession)
 
 (defvar-local my-lazy-load-buffer--filename nil)
@@ -4478,6 +4445,27 @@ properly handles remote files over Tramp), applying the setting only if
 (with-eval-after-load 'corfu
   (require 'corfu-history)
   (corfu-history-mode 1))
+
+
+;;; pathaction
+
+;; (defun pathaction-vterm (command name)
+;;   "Run COMMAND in `vterm' named NAME."
+;;   (if (require 'vterm nil t)
+;;       (when (fboundp 'vterm)
+;;         (let* ((inhibit-redisplay t)
+;;                ;; Override the shell to run the command directly
+;;                (vterm-shell command)
+;;                (term-buffer (vterm name)))
+;;           (ignore vterm-shell)
+;;           (pop-to-buffer term-buffer)
+;;           term-buffer))
+;;     (error "vterm is not available")))
+
+(with-eval-after-load 'pathaction
+  (if (fboundp 'pathaction-vterm)
+      (setq pathaction-term-function #'pathaction-vterm)
+    (error "Undefined: pathaction-vterm")))
 
 ;;; Provide
 

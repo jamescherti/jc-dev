@@ -24,17 +24,55 @@
 
 ;;; Code:
 
+;;; Profiling
+
 ;; (profiler-start 'cpu)
 ;; (add-hook 'emacs-startup-hook #'(lambda() (when (fboundp 'profiler-stop)
 ;;                                             (profiler-stop)))
 ;;           300)
 
+;;; Native compilation settings
+
+(setq lightemacs-native-comp-excluded-cpus 2)
+
+(setq native-comp-jit-compilation nil)
+(setq compile-angel-enable-native-compile t)
+
+(setq lightemacs-load-compiled-init-files t)
+(setq lightemacs-recentf-track-switch-to-buffer t)
+
 ;; Experimental
 ;; TODO make them a default
-(setq compile-angel-cache-file-truename nil)
-(setq compile-angel-cache-locate-file t)
+(setq compile-angel-cache-file-truename t)
 
-;;; Native compilation
+(setq compile-angel-verbose t)
+(setq compile-angel-debug nil)
+
+(setq buffer-terminator-verbose nil)
+(setq buffer-terminator-debug nil)
+
+;; (setq compile-angel-enable-byte-compile nil)
+;; (setq compile-angel-enable-native-compile nil)
+(setq compile-angel-on-load-mode-compile-once nil)
+
+;; Experimental
+;; (setq compile-angel-reload-compiled-version t)
+;; (setq compile-angel-native-compile-load t)
+
+;; Which kind of warnings and errors to report from async native compilation.
+;; (setq native-comp-async-warnings-errors-kind 'important)
+(setq native-comp-async-warnings-errors-kind 'all)
+
+(setq native-comp-async-report-warnings-errors t)
+
+;; (when (eq lightemacs-package-manager 'straight)
+;;   ;; TODO compile angel readme?
+;;   (setq straight-disable-native-compile t)
+;;   (setq straight-disable-compile t)
+;;
+;;   ;; Causes issues
+;;   ;; (setq straight-disable-autoloads t)
+;;   )
 
 ;; `native-comp-compiler-options' specifies flags passed directly to the C
 ;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
@@ -312,14 +350,47 @@
 
 ;; (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
 
-;; Which kind of warnings and errors to report from async native compilation.
-;; (setq native-comp-async-warnings-errors-kind 'important)
-(setq native-comp-async-warnings-errors-kind 'all)
+;; (let ((deny-list '(
+;;                    ;; "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
+;;                    ;; "\\(?:[/\\\\]gc\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
+;;                    "\\(?:[/\\\\]bind-key\\.el\\(?:\\.gz\\)?$\\)"
+;;                    "\\(?:[/\\\\]cl-lib\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
+;;                    "\\(?:[/\\\\]bytecomp\\.el\\(?:\\.gz\\)?$\\)"
+;;                    ;; "\\(?:[/\\\\]use-package-ensure\\.el\\(?:\\.gz\\)?$\\)"
+;;                    ;; "\\(?:[/\\\\]use-package-delight\\.el\\(?:\\.gz\\)?$\\)"
+;;                    ;; "\\(?:[/\\\\]use-package-diminish\\.el\\(?:\\.gz\\)?$\\)"
+;;                    ;; "\\(?:[/\\\\]use-package-bind-key\\.el\\(?:\\.gz\\)?$\\)"
+;;                    "\\(?:[/\\\\]use-package-core\\.el\\(?:\\.gz\\)?$\\)"
+;;                    "\\(?:[/\\\\]easy-mmode\\.el\\(?:\\.gz\\)?$\\)"
+;;
+;;                    ;; Emacs 30.2
+;;                    "\\(?:[/\\\\]ansi-color\\.el\\(?:\\.gz\\)?$\\)"
+;;                    "\\(?:[/\\\\]comeint\\.el\\(?:\\.gz\\)?$\\)"
+;;                    "\\(?:[/\\\\]cl-macs\\.el\\(?:\\.gz\\)?$\\)"
+;;                    "\\(?:[/\\\\]cl-seq\\.el\\(?:\\.gz\\)?$\\)"
+;;                    "\\(?:[/\\\\]cl-extra\\.el\\(?:\\.gz\\)?$\\)"
+;;
+;;                    ;; Compiling:
+;;                    ;; /path/to/emacs/30.1/lisp/org/org-loaddefs.el.gz...
+;;                    ;; "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
+;;                    ;; "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
+;;                    )))
+;;   (setq native-comp-jit-compilation-deny-list deny-list)
+;;   ;; Deprecated
+;;   (with-no-warnings
+;;     (setq native-comp-deferred-compilation-deny-list deny-list)
+;;     (setq comp-deferred-compilation-deny-list deny-list)))
+
+;;; Load ~/config.el
 
 ;; (message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
+;;; Debug on error
+
 (setq debug-on-error t)
+
+;; Temporary dir
 
 ;;---------------------------------------->TMP
 
@@ -407,13 +478,13 @@ subsequent GCC invocations."
     (add-to-list 'native-comp-compiler-options
                  (format "-mtune=%s" cpu-architecture))))
 
-;;; Optimization
+;;; Lightemacs settings
 
 (setq minimal-emacs-inhibit-redisplay-during-startup t)
 (setq minimal-emacs-inhibit-message-during-startup nil)
-(setq lightemacs-easysession-load-session-on-startup t)
+(setq minimal-emacs-frame-title-format "Lightemacs")
 
-;;; Debug, native comp, and initial options
+(setq lightemacs-easysession-load-session-on-startup t)
 
 (let ((user-dir (file-truename lightemacs-user-directory)))
   (cond
@@ -424,381 +495,26 @@ subsequent GCC invocations."
              (file-truename "~/.emacs-straight.d/"))
     (setq lightemacs-package-manager 'straight))))
 
-
-;; TODO test this more. It does not seem stable.
-;; (when (eq lightemacs-package-manager 'builtin-package)
-;;   (setq package-quickstart t))
-
-(setq native-comp-jit-compilation nil)
-(setq compile-angel-enable-native-compile t)
-
-(defun lightemacs-user-post-early-init ()
-  "Post early init."
-  ;; TODO: Lightemacs?
-  (let ((no-border '(internal-border-width . 0)))
-    (add-to-list 'default-frame-alist no-border)
-    (add-to-list 'initial-frame-alist no-border))
-
-  (setq native-comp-async-report-warnings-errors t)
-
-  ;; Ignore X resources
-  (advice-add #'x-apply-session-resources :override #'ignore)
-  ;; (when (eq lightemacs-package-manager 'builtin-package)
-  ;;   (setq use-package-compute-statistics t))
-  )
-
-(add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
-
-;; (when (eq lightemacs-package-manager 'straight)
-;;   ;; TODO compile angel readme?
-;;   (setq straight-disable-native-compile t)
-;;   (setq straight-disable-compile t)
-;;
-;;   ;; Causes issues
-;;   ;; (setq straight-disable-autoloads t)
-;;   )
-
-;; TODO remove from devemacs and my emacs and add this to lightemacs
-(with-eval-after-load 'cus-edit
-  ;; Prevent Emacs from writing custom settings to any file
-  (advice-add 'custom-save-all :override #'ignore))
-
-;;; byte-compile
-
-(defvar my-elc-cache--emacs-lisp-directory
-  ;; Directory where Emacs's own *.el and *.elc Lisp files are installed.
-  (if (bound-and-true-p lisp-directory)
-      ;; Always use `file-truename'
-      (file-truename lisp-directory)
-    (when-let* ((library-path (locate-library "simple")))
-      ;; Always use `file-truename'
-      (file-name-directory (file-truename library-path)))))
-
-;; TODO lightemacs?
-(defvar my-elc-cache-directory
-  ;; This has to be `file-truename'
-  (file-truename (expand-file-name "elc-cache/" user-emacs-directory))
-  "Directory to store byte-compiled .elc files.")
-
-(defun my-elc-cache-dest-file (filename)
-  "Determine the cache destination for the byte-compiled FILENAME."
-  (let* ((true-file (file-truename filename))
-         ;; FIX: Temporarily disable the hook variable to prevent infinite
-         ;; recursion
-         (byte-compile-dest-file-function nil)
-         ;; Use Emacs's native compiler functions to safely handle .gz and .elc
-         (default-dest (if (fboundp 'byte-compile-default-dest-file)
-                           (byte-compile-default-dest-file filename)
-                         ;; Fallback for older Emacs versions
-                         (byte-compile-dest-file filename))))
-    ;; Ignore Emacs's built-in files
-    (if (or
-         ;; (and my-elc-cache--emacs-lisp-directory
-         ;;      (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
-         ;; early-init has no way to guess the elc-cache path before it is
-         ;; loaded before config.el
-         ;; (string-suffix-p "/init.el" true-file)
-         ;; (string-suffix-p "/early-init.el" true-file)
-         ;; (string-suffix-p "/config.el" true-file)
-         (not (string-prefix-p (file-truename "~/src/") true-file))
-         ;; Ignore files already in the cache directory to prevent recursive
-         ;; paths
-         ;; (string-prefix-p my-elc-cache-directory true-file)
-         )
-        ;; Return the normal destination
-        default-dest
-      ;; Map the third-party file into the cache directory
-      (let* ((expanded-dest (expand-file-name default-dest))
-             ;; Strip the leading slash so it appends properly to the cache
-             ;; directory
-             (relative (replace-regexp-in-string "^/" "" expanded-dest))
-             (dest (expand-file-name relative my-elc-cache-directory)))
-        (make-directory (file-name-directory dest) t)
-        dest))))
-
-;; TODO
-;; The provided Emacs Lisp snippet successfully intercepts
-;; the byte-compiler and writes the .elc files to your
-;; custom elc-cache/ directory. However, Emacs is still
-;; loading the .el files because of a disconnect between the
-;; compiler and the loader. Setting
-;; byte-compile-dest-file-function only changes the output
-;; destination for the compilation process. It does not
-;; update the load-path or instruct the load function on
-;; where to find those newly relocated .elc files. When
-;; Emacs evaluates (require 'feature) or (load "library"),
-;; it searches the directories listed in your load-path
-;; variable. Because the nested directories inside your
-;; elc-cache/ are not in the load-path, Emacs cannot see the
-;; compiled files. It falls back to the original
-;; directories, finds the uncompiled .el files, and loads
-;; them instead. To make Emacs use your out-of-tree .elc
-;; files, you need to bridge this gap. You have two main
-;; approaches: Modify the Load Path: You can write a
-;; function that recursively finds all directories inside
-;; my-elc-cache-directory and prepends them to your
-;; load-path. This allows the default Emacs load function to
-;; find the cached .elc files before checking the original
-;; source directories. Advise the Load Function: You can use
-;; advice-add on the load function to intercept every load
-;; request. The advice would check if a matching .elc file
-;; exists in your cache directory and, if so, dynamically
-;; rewrite the file path before passing it to the original
-;; load function. As a side note regarding your
-;; configuration, since you have enabled native compilation
-;; ((setq native-comp-jit-compilation t)), Emacs
-;; automatically handles out-of-tree caching for natively
-;; compiled .eln files via native-comp-eln-load-path.
-;; Keeping .elc files alongside their .el sources is the
-;; standard design in Emacs, which is why out-of-tree
-;; byte-compilation requires extra configuration to work
-;; correctly.
-;;
-;; Redirect the byte compiler output
-;; TODO doesn't work for natively compiling my packages in src dir
-;; (push my-elc-cache-directory load-path)
-;; (setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
-
-;;; Other settings
-
-;; Fix autoload modus-themes (straight)
-;; (autoload 'modus-themes-declare "modus-themes" nil nil 'macro)
-
-;; TODO lightemacs package manager variable to disable autoloads
-;; Buggy?
-;; (with-eval-after-load 'elpaca
-;;   (setq elpaca-build-steps (remove 'elpaca--generate-autoloads-async
-;;                                    elpaca-build-steps)))
-
-(setq compile-angel-verbose t)
-(setq compile-angel-debug nil)
-
-(setq buffer-terminator-verbose nil)
-(setq buffer-terminator-debug nil)
-
-;; (setq compile-angel-enable-byte-compile nil)
-;; (setq compile-angel-enable-native-compile nil)
-(setq compile-angel-on-load-mode-compile-once nil)
-
-;; Experimental
-;; (setq compile-angel-reload-compiled-version t)
-;; (setq compile-angel-native-compile-load t)
-
-(unless noninteractive
-  (setq minimal-emacs-frame-title-format "Lightemacs"))
-
-;; TODO find out why early-init and init is compiled when
-;; compile-angel-native-compile-load is t
-(setq lightemacs-load-compiled-init-files t)
-
-(setq lightemacs-recentf-track-switch-to-buffer t)
-
-(defvar my-src-dir-prefix (file-name-as-directory (expand-file-name "~/src/")))
-;; (defun my-compile-angel-predicate (el-file)
-;;   "Compile Angel predicate.
-;; EL-FILE is the *.el file."
-;;   (if (string-prefix-p my-src-dir-prefix (file-truename el-file))
-;;       (progn
-;;         :continue
-;;         ;; :native-comp
-;;         )
-;;     :continue))
-;; (setq compile-angel-predicate-function #'my-compile-angel-predicate)
-
-(with-eval-after-load 'compile-angel
-  ;; Exclusions
-  (push "/file-templates-auto/main.el" compile-angel-excluded-path-suffixes)
-  (push "/tmp-file.el" compile-angel-excluded-path-suffixes)
-  (push "/.dir-settings.el" compile-angel-excluded-path-suffixes)
-
-  ;; This is important because Emacs loads the early-init.elc, even if it is
-  ;; older than the early-init.el file
-  (push "/early-init.el" compile-angel-excluded-path-suffixes))
-
-;; I am using the predicate instead
-;; (with-eval-after-load 'compile-angel
-;;   (if (fboundp 'compile-angel-exclude-directory)
-;;       (compile-angel-exclude-directory "~/src/emacs/")
-;;     (error "Undefined: compile-angel-exclude-directory")))
-
-;; (setq compile-angel-exclude-core-emacs-directory
-;;       ;; Emacs was compiled with native-compile aot
-;;       (when (and (fboundp 'subr-native-elisp-p)
-;;                  (subr-native-elisp-p (symbol-function 'find-file)))
-;;         t))
-
 (setq lightemacs-dtrt-indent-excluded-modes '(emacs-lisp-mode
                                               python-mode
                                               python-ts-mode))
 
-;; To stop vterm from asking for confirmation and force it to compile the
-;; module automatically, you need to set the vterm-always-compile-module
-;; variable to t.
-(setq vterm-always-compile-module t)
+;; Define your preferred font name here
+;; (defvar my-font-choice "Iosevka Term")
+;; (defconst my-font-choice "Iosevka SS08")
+;; (defvar my-font-choice "Iosevka Term-13")
+;; (add-to-list 'default-frame-alist `(font . ,my-font-choice))
+;; (setq lightemacs-theme-default-font "Iosevka Term-13")
+;; (setq lightemacs-theme-default-font "DejaVu Sans Mono")
+;; (setq lightemacs-theme-default-font "Iosevka Term")
+(setq lightemacs-theme-default-font "Iosevka Term")
 
-;; Delayed native compilation
-;; (progn
-;;   (with-no-warnings  ; Obsolete
-;;     (setq native-comp-deferred-compilation native-comp-jit-compilation))
-;;
-;;   (defun my-delayed-native-compilation ()
-;;     "Enable native compilation ten seconds after Emacs startup."
-;;     (run-at-time 5 nil (lambda ()
-;;                          (require 'le-compile-angel))))
-;;
-;;   (add-hook 'lightemacs-emacs-startup-hook #'my-delayed-native-compilation))
+;;; Lightemacs settings: dtrt-indent
 
-;; Native compilation ignore
-;; (let ((deny-list '(
-;;                    ;; "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]gc\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
-;;                    "\\(?:[/\\\\]bind-key\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-lib\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
-;;                    "\\(?:[/\\\\]bytecomp\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-ensure\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-delight\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-diminish\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-bind-key\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]use-package-core\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]easy-mmode\\.el\\(?:\\.gz\\)?$\\)"
-;;
-;;                    ;; Emacs 30.2
-;;                    "\\(?:[/\\\\]ansi-color\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]comeint\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-macs\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-seq\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-extra\\.el\\(?:\\.gz\\)?$\\)"
-;;
-;;                    ;; Compiling:
-;;                    ;; /path/to/emacs/30.1/lisp/org/org-loaddefs.el.gz...
-;;                    ;; "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
-;;                    )))
-;;   (setq native-comp-jit-compilation-deny-list deny-list)
-;;   ;; Deprecated
-;;   (with-no-warnings
-;;     (setq native-comp-deferred-compilation-deny-list deny-list)
-;;     (setq comp-deferred-compilation-deny-list deny-list)))
-
-;;; Options
-
-(unless noninteractive
-  ;; Define your preferred font name here
-  ;; (defvar my-font-choice "Iosevka Term")
-  ;; (defconst my-font-choice "Iosevka SS08")
-  ;; (defvar my-font-choice "Iosevka Term-13")
-  ;; (add-to-list 'default-frame-alist `(font . ,my-font-choice))
-  ;; (setq lightemacs-theme-default-font "Iosevka Term-13")
-  ;; (setq lightemacs-theme-default-font "DejaVu Sans Mono")
-  ;; (setq lightemacs-theme-default-font "Iosevka Term")
-  (setq lightemacs-theme-default-font "Iosevka Term")
-
-  ;; Check if the font exists on the system before applying it
-  ;; NOTE doesn't work?
-  ;; (if (find-font (font-spec :name my-font-choice))
-  ;;   ;; TODO: Concat -13 to `my-font-choice'
-  ;;   (add-to-list 'default-frame-alist `(font . ,my-font-choice))
-  ;;  (message "Warning: Font '%s' not found. Using system default." my-font-choice))
-
-  ;; (add-to-list 'default-frame-alist '(font . "Iosevka Term-13"))
-  )
-
-;; On some window managers (fvwm 2.2.5 and KDE 2.1), Emacs can pause because Xt
-;; waits for a `ConfigureNotify` event that the WM does not send, timing out
-;; after about 5 seconds.
-;; (add-to-list 'default-frame-alist '(wait-for-wm . t))
-
-;; TODO: add to minimal emacs README.md
-
-;; Redired elc
-
-;; Redirect the ELN (Emacs Lisp Native) cache to a custom directory
-;; (when (featurep 'native-compile)
-;;   (let ((eln-cache-dir (convert-standard-filename
-;;                         (expand-file-name "eln-cache"
-;;                                           minimal-emacs-user-directory))))
-;;     ;; Modify the load path for existing native-compiled files
-;;     (when (boundp 'native-comp-eln-load-path)
-;;       (setcar native-comp-eln-load-path eln-cache-dir))
-;;
-;;     ;; Set the target directory for future native compilations
-;;     (setq native-compile-target-directory eln-cache-dir)
-;;
-;;     ;; Redirect the ELN cache used at startup (Emacs 29+)
-;;     ;; Set the directory where Emacs looks for native-compiled .eln files during
-;;     ;; early startup, before user configuration is fully loaded. This function
-;;     ;; ensures Emacs does not write .eln files to the default system path (e.g.,
-;;     ;; '$EMACS_LIBDIR/eln-cache/' which may be read-only or shared) and instead
-;;     ;; uses a user-defined writable location. It is a no-op in earlier Emacs
-;;     ;; versions where native compilation support was different.
-;;     ;; (when (fboundp 'startup-redirect-eln-cache)
-;;     ;;   (startup-redirect-eln-cache eln-cache-dir))
-;;
-;;     ))
-
-(when (boundp 'trusted-content)
-  (let ((dirs
-         (list
-          "~/src/dotfiles/jc-dev/"
-          "~/src/emacs/"
-          )))
-    (dolist (dir dirs)
-      (when dir
-        ;; Ensure the path ends with a slash so it registers as a directory
-        (push dir trusted-content)))))
-
-;; Prevent Emacs from loading the system-wide 'default.el' initialization file.
-;;
-;; By default, after loading the user's own init file (e.g., ~/.emacs or
-;; ~/.emacs.d/init.el), Emacs may load a secondary initialization file named
-;; 'default.el' from its data-directory. This file is distributed by Emacs
-;; itself or the system package manager and may contain global default settings
-;; such as enabling toolbars, setting default keybindings, or altering the
-;; initial buffer state.
-;;
-;; Loading 'default.el' can introduce environment-dependent or
-;; distribution-specific behavior, which interferes with the user's attempt to
-;; fully control and isolate their Emacs configuration. It also makes
-;; configuration less reproducible and predictable, particularly in environments
-;; where Emacs is deployed across multiple systems or used programmatically.
-;;
-;; Setting 'inhibit-default-init' to non-nil disables the automatic loading of
-;; 'default.el', ensuring that the Emacs session starts only with the user's
-;; configuration.
-(setq inhibit-default-init t)
-
-;; Setting `site-run-file' to nil disables the loading of the site-run-file.el,
-;; which is a site-wide initialization script typically provided by the system
-;; or Emacs installation.
-;;
-;; Advantage:
-;; - Prevents execution of potentially unwanted or incompatible site-wide
-;;   customizations, leading to a cleaner and more predictable Emacs startup
-;;   environment, especially useful in controlled or minimal setups.
-;;
-;; Disadvantage:
-;; - May omit important default configurations or package initializations
-;;   expected by the system or administrators, possibly causing missing
-;;   functionality or inconsistent behavior in Emacs sessions.
-(setq site-run-file nil)
-
-;;----------------------------------------------------------------------------
-;; Optimize
-;;----------------------------------------------------------------------------
-
-;; (setq vc-handled-backends nil)
-;; (defun my-restore-vc-handled-backends ()
-;;   "Restore VC backends."
-;;   (setq vc-handled-backends '(Git)))
-;; (add-hook 'lightemacs-emacs-startup-hook #'my-restore-vc-handled-backends 120)
-
-;;; Lightemacs modules and parameters
-
-(setq stripspace-verbose nil)
-(setq stripspace-normalize-indentation t)
-(setq stripspace-restore-column t)
-(setq stripspace-only-if-initially-clean t)
-
+(setq lightemacs-dtrt-indent-global-target-hooks '())
+(setq lightemacs-dtrt-indent-local-target-hooks '(prog-mode-hook
+                                                  text-mode-hook
+                                                  conf-mode-hook))
 (setq lightemacs-reduce-messages t)
 (setq lightemacs-saveplace-recenter-after-find-file t)
 
@@ -810,13 +526,12 @@ subsequent GCC invocations."
 
 (setq lightemacs-dired-omit-parent-directory t)
 (setq lightemacs-cycle nil)
-(setq lightemacs-native-comp-excluded-cpus 1)
 
 (unless noninteractive
   (setq lightemacs-theme-name 'tomorrow-night-deepblue)
   (setq lightemacs-theme-package 'tomorrow-night-deepblue-theme))
 
-;; Enable native-compilation and byte-compilation
+;;; Lightemacs modules
 
 (setq lightemacs-modules '(mod-same-window
                            mod-dired
@@ -964,20 +679,320 @@ subsequent GCC invocations."
                            le-server
                            ))
 
-;;; Add my packages to load path
+;;; Frame, disable cus-edit and x-apply-session-resources
 
-(defvar my-package-base-directory (expand-file-name "~/src/emacs")
-  "The base directory containing Emacs packages to add to `load-path\='.")
+(defun lightemacs-user-post-early-init ()
+  "Post early init."
+  ;; TODO: Lightemacs?
+  (let ((no-border '(internal-border-width . 0)))
+    (add-to-list 'default-frame-alist no-border)
+    (add-to-list 'initial-frame-alist no-border))
 
-(defvar my-excluded-package-directories
-  '("elispcomp"
-    "lightemacs"
-    "minimal-emacs.d"
-    "pre-commit-elisp")
-  "List of directory names to exclude from the dynamic `load-path\=' addition.")
+  ;; Ignore X resources
+  (advice-add #'x-apply-session-resources :override #'ignore)
+  ;; (when (eq lightemacs-package-manager 'builtin-package)
+  ;;   (setq use-package-compute-statistics t))
+  )
 
-(defvar my--package-load-path-cache nil
-  "Internal cache storing the list of discovered package directories.")
+(add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
+
+;; TODO remove from devemacs and my emacs and add this to lightemacs
+(with-eval-after-load 'cus-edit
+  ;; Prevent Emacs from writing custom settings to any file
+  (advice-add 'custom-save-all :override #'ignore))
+
+;;; byte-compile
+
+(defvar my-elc-cache--emacs-lisp-directory
+  ;; Directory where Emacs's own *.el and *.elc Lisp files are installed.
+  (if (bound-and-true-p lisp-directory)
+      ;; Always use `file-truename'
+      (file-truename lisp-directory)
+    (when-let* ((library-path (locate-library "simple")))
+      ;; Always use `file-truename'
+      (file-name-directory (file-truename library-path)))))
+
+;; TODO lightemacs?
+(defvar my-elc-cache-directory
+  ;; This has to be `file-truename'
+  (file-truename (expand-file-name "elc-cache/" user-emacs-directory))
+  "Directory to store byte-compiled .elc files.")
+
+(defun my-elc-cache-dest-file (filename)
+  "Determine the cache destination for the byte-compiled FILENAME."
+  (let* ((true-file (file-truename filename))
+         ;; FIX: Temporarily disable the hook variable to prevent infinite
+         ;; recursion
+         (byte-compile-dest-file-function nil)
+         ;; Use Emacs's native compiler functions to safely handle .gz and .elc
+         (default-dest (if (fboundp 'byte-compile-default-dest-file)
+                           (byte-compile-default-dest-file filename)
+                         ;; Fallback for older Emacs versions
+                         (byte-compile-dest-file filename))))
+    ;; Ignore Emacs's built-in files
+    (if (or
+         ;; (and my-elc-cache--emacs-lisp-directory
+         ;;      (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
+         ;; early-init has no way to guess the elc-cache path before it is
+         ;; loaded before config.el
+         ;; (string-suffix-p "/init.el" true-file)
+         ;; (string-suffix-p "/early-init.el" true-file)
+         ;; (string-suffix-p "/config.el" true-file)
+         (not (string-prefix-p (file-truename "~/src/") true-file))
+         ;; Ignore files already in the cache directory to prevent recursive
+         ;; paths
+         ;; (string-prefix-p my-elc-cache-directory true-file)
+         )
+        ;; Return the normal destination
+        default-dest
+      ;; Map the third-party file into the cache directory
+      (let* ((expanded-dest (expand-file-name default-dest))
+             ;; Strip the leading slash so it appends properly to the cache
+             ;; directory
+             (relative (replace-regexp-in-string "^/" "" expanded-dest))
+             (dest (expand-file-name relative my-elc-cache-directory)))
+        (make-directory (file-name-directory dest) t)
+        dest))))
+
+;; TODO
+;; The provided Emacs Lisp snippet successfully intercepts
+;; the byte-compiler and writes the .elc files to your
+;; custom elc-cache/ directory. However, Emacs is still
+;; loading the .el files because of a disconnect between the
+;; compiler and the loader. Setting
+;; byte-compile-dest-file-function only changes the output
+;; destination for the compilation process. It does not
+;; update the load-path or instruct the load function on
+;; where to find those newly relocated .elc files. When
+;; Emacs evaluates (require 'feature) or (load "library"),
+;; it searches the directories listed in your load-path
+;; variable. Because the nested directories inside your
+;; elc-cache/ are not in the load-path, Emacs cannot see the
+;; compiled files. It falls back to the original
+;; directories, finds the uncompiled .el files, and loads
+;; them instead. To make Emacs use your out-of-tree .elc
+;; files, you need to bridge this gap. You have two main
+;; approaches: Modify the Load Path: You can write a
+;; function that recursively finds all directories inside
+;; my-elc-cache-directory and prepends them to your
+;; load-path. This allows the default Emacs load function to
+;; find the cached .elc files before checking the original
+;; source directories. Advise the Load Function: You can use
+;; advice-add on the load function to intercept every load
+;; request. The advice would check if a matching .elc file
+;; exists in your cache directory and, if so, dynamically
+;; rewrite the file path before passing it to the original
+;; load function. As a side note regarding your
+;; configuration, since you have enabled native compilation
+;; ((setq native-comp-jit-compilation t)), Emacs
+;; automatically handles out-of-tree caching for natively
+;; compiled .eln files via native-comp-eln-load-path.
+;; Keeping .elc files alongside their .el sources is the
+;; standard design in Emacs, which is why out-of-tree
+;; byte-compilation requires extra configuration to work
+;; correctly.
+;;
+;; Redirect the byte compiler output
+;; TODO doesn't work for natively compiling my packages in src dir
+;; (push my-elc-cache-directory load-path)
+;; (setq byte-compile-dest-file-function #'my-elc-cache-dest-file)
+
+;;; Options
+
+(unless noninteractive
+  ;; Check if the font exists on the system before applying it
+  ;; NOTE doesn't work?
+  ;; (if (find-font (font-spec :name my-font-choice))
+  ;;   ;; TODO: Concat -13 to `my-font-choice'
+  ;;   (add-to-list 'default-frame-alist `(font . ,my-font-choice))
+  ;;  (message "Warning: Font '%s' not found. Using system default." my-font-choice))
+
+  ;; (add-to-list 'default-frame-alist '(font . "Iosevka Term-13"))
+  )
+
+;; On some window managers (fvwm 2.2.5 and KDE 2.1), Emacs can pause because Xt
+;; waits for a `ConfigureNotify` event that the WM does not send, timing out
+;; after about 5 seconds.
+;; (add-to-list 'default-frame-alist '(wait-for-wm . t))
+
+;; TODO: add to minimal emacs README.md
+
+;; Redired elc
+
+;; Redirect the ELN (Emacs Lisp Native) cache to a custom directory
+;; (when (featurep 'native-compile)
+;;   (let ((eln-cache-dir (convert-standard-filename
+;;                         (expand-file-name "eln-cache"
+;;                                           minimal-emacs-user-directory))))
+;;     ;; Modify the load path for existing native-compiled files
+;;     (when (boundp 'native-comp-eln-load-path)
+;;       (setcar native-comp-eln-load-path eln-cache-dir))
+;;
+;;     ;; Set the target directory for future native compilations
+;;     (setq native-compile-target-directory eln-cache-dir)
+;;
+;;     ;; Redirect the ELN cache used at startup (Emacs 29+)
+;;     ;; Set the directory where Emacs looks for native-compiled .eln files during
+;;     ;; early startup, before user configuration is fully loaded. This function
+;;     ;; ensures Emacs does not write .eln files to the default system path (e.g.,
+;;     ;; '$EMACS_LIBDIR/eln-cache/' which may be read-only or shared) and instead
+;;     ;; uses a user-defined writable location. It is a no-op in earlier Emacs
+;;     ;; versions where native compilation support was different.
+;;     ;; (when (fboundp 'startup-redirect-eln-cache)
+;;     ;;   (startup-redirect-eln-cache eln-cache-dir))
+;;
+;;     ))
+
+(when (boundp 'trusted-content)
+  (let ((dirs
+         (list
+          "~/src/dotfiles/jc-dev/"
+          "~/src/emacs/"
+          )))
+    (dolist (dir dirs)
+      (when dir
+        ;; Ensure the path ends with a slash so it registers as a directory
+        (push dir trusted-content)))))
+
+;; Prevent Emacs from loading the system-wide 'default.el' initialization file.
+;;
+;; By default, after loading the user's own init file (e.g., ~/.emacs or
+;; ~/.emacs.d/init.el), Emacs may load a secondary initialization file named
+;; 'default.el' from its data-directory. This file is distributed by Emacs
+;; itself or the system package manager and may contain global default settings
+;; such as enabling toolbars, setting default keybindings, or altering the
+;; initial buffer state.
+;;
+;; Loading 'default.el' can introduce environment-dependent or
+;; distribution-specific behavior, which interferes with the user's attempt to
+;; fully control and isolate their Emacs configuration. It also makes
+;; configuration less reproducible and predictable, particularly in environments
+;; where Emacs is deployed across multiple systems or used programmatically.
+;;
+;; Setting 'inhibit-default-init' to non-nil disables the automatic loading of
+;; 'default.el', ensuring that the Emacs session starts only with the user's
+;; configuration.
+(setq inhibit-default-init t)
+
+;; Setting `site-run-file' to nil disables the loading of the site-run-file.el,
+;; which is a site-wide initialization script typically provided by the system
+;; or Emacs installation.
+;;
+;; Advantage:
+;; - Prevents execution of potentially unwanted or incompatible site-wide
+;;   customizations, leading to a cleaner and more predictable Emacs startup
+;;   environment, especially useful in controlled or minimal setups.
+;;
+;; Disadvantage:
+;; - May omit important default configurations or package initializations
+;;   expected by the system or administrators, possibly causing missing
+;;   functionality or inconsistent behavior in Emacs sessions.
+(setq site-run-file nil)
+
+;;----------------------------------------------------------------------------
+;; Optimize
+;;----------------------------------------------------------------------------
+
+;; (setq vc-handled-backends nil)
+;; (defun my-restore-vc-handled-backends ()
+;;   "Restore VC backends."
+;;   (setq vc-handled-backends '(Git)))
+;; (add-hook 'lightemacs-emacs-startup-hook #'my-restore-vc-handled-backends 120)
+
+;;; Package defaults
+
+(setq gcmh-high-cons-threshold (* 600 1024 1024))
+
+;; To stop vterm from asking for confirmation and force it to compile the
+;; module automatically, you need to set the vterm-always-compile-module
+;; variable to t.
+(setq vterm-always-compile-module t)
+
+(setq stripspace-verbose nil)
+(setq stripspace-normalize-indentation t)
+(setq stripspace-restore-column t)
+(setq stripspace-only-if-initially-clean t)
+
+;; If you want the lowest possible latency and do not care about system-level
+;; Compose keys, or if you are willing to map them entirely within Emacs using
+;; iso-transl, you can tell Emacs to rip out the GTK input context completely.
+;;
+;; This prevents Emacs passing keystrokes through GtkIMContext. It handles the
+;; raw Wayland/X11 event symbols directly. This gives you terminal-level input
+;; latency in a GUI frame.
+;;
+;; Disabling pgtk-use-im-context-on-new-connection bypasses GTK input method
+;; handling in PGTK Emacs and can slightly reduce keyboard input latency. This
+;; may improve perceived responsiveness, but it can disable GTK-provided
+;; compose/dead-key and IME functionality. Compose behavior can be partially
+;; restored inside Emacs using iso-transl.
+;;
+;; If you want to change it after connection, use the pgtk-use-im-context
+;; function.
+;;
+;; If you go this route but still need Compose functionality, you can map the
+;; raw <Multi_key> inside Emacs:
+;; (require 'iso-transl)
+;; (define-key global-map (kbd "<Multi_key>") iso-transl-ctl-x-8-map)
+;; Completely disable GTK input method context overhead
+;;
+;; When an external IM module is active, the event flow for typing a standard
+;; English letter looks like this:
+;; - Wayland/X11 registers the key.
+;; - GTK intercepts the key.
+;; - GTK sends a D-Bus message to the IM daemon.
+;; - The daemon evaluates if the key is part of a complex sequence.
+;; - The daemon sends a D-Bus message back to GTK saying the key is unhandled.
+;; - GTK finally passes the key to Emacs.
+;;
+;; Forcing GTK_IM_MODULE=none removes the D-Bus overhead. Setting
+;; pgtk-use-im-context-on-new-connection to nil goes a step further by skipping
+;; GTK's internal input filtering entirely, handing the raw event straight to
+;; the Emacs event loop.
+(setq pgtk-use-im-context-on-new-connection nil)
+
+(setq buffer-guardian-override-save-some-buffers t)
+(setq buffer-guardian-verbose nil)
+(setq buffer-guardian-save-all-buffers-interval (* 60 30))
+(setq buffer-guardian-save-all-buffers-idle (* 4 60))
+
+;;; Other settings
+
+(defvar my-src-dir-prefix (file-name-as-directory (expand-file-name "~/src/")))
+
+;;; Straight
+
+(defvar my-straight-default-profile (expand-file-name
+                                     "~/.emacs-data/etc/straight-profile.el")
+  "The default straight profile.")
+(setq straight-profiles
+      `((nil . ,my-straight-default-profile)))
+
+(defun my-copy-straight-profile-advice (orig-fun &rest args)
+  "Advise `straight-freeze-versions' to copy the profile.
+ORIG-FUN and ARGS is the advised function and its arguments.
+This uses an around advice to trap errors and verify file timestamps."
+  (condition-case err
+      (let ((result (apply orig-fun args))
+            (source (expand-file-name my-straight-default-profile))
+            (destination
+             (expand-file-name
+              "~/src/dotfiles/jc-dev/home/.emacs-data/etc/straight-profile.el")))
+        ;; (message "%s:%s"
+        ;;          (file-exists-p source)
+        ;;          (file-newer-than-file-p source destination))
+        (when (and (file-regular-p source)
+                   (file-newer-than-file-p source destination))
+          (copy-file source destination t)
+          (message "Copied %s to %s" source destination))
+        result)
+    (error
+     (message "straight-freeze-versions failed: %s" (error-message-string err))
+     (signal (car err) (cdr err)))))
+
+(with-eval-after-load 'straight
+  (when (fboundp 'straight-freeze-versions)
+    (advice-add 'straight-freeze-versions :around #'my-copy-straight-profile-advice)))
 
 ;; (when (eq lightemacs-package-manager 'straight)
 ;;   (setq straight-recipe-overrides nil)
@@ -1021,6 +1036,21 @@ subsequent GCC invocations."
 ;;       (add-to-list 'straight-recipe-overrides
 ;;                    (list item :type 'built-in)))))
 
+;;; Add my packages to load path
+
+(defvar my-package-base-directory (expand-file-name "~/src/emacs")
+  "The base directory containing Emacs packages to add to `load-path\='.")
+
+(defvar my-excluded-package-directories
+  '("elispcomp"
+    "lightemacs"
+    "minimal-emacs.d"
+    "pre-commit-elisp")
+  "List of directory names to exclude from the dynamic `load-path\=' addition.")
+
+(defvar my--package-load-path-cache nil
+  "Internal cache storing the list of discovered package directories.")
+
 (defun my-add-packages-to-load-path ()
   "Add my packages to `load-path' dynamically.
 Iterates over `my-package-base-directory' and adds all subdirectories to
@@ -1062,54 +1092,6 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
     ;; (push path load-path)
     (push path load-path)))
 
-;; (defun my-add-packages-to-load-path ()
-;;   "Add my packages to `load-path' dynamically.
-;; Iterates over `my-package-base-directory' and adds all subdirectories to
-;; `load-path', skipping any directories listed in
-;; `my-excluded-package-directories'. Caches the result in
-;; `my--package-load-path-cache' to avoid redundant scanning."
-;;   ;; Build the cache if it is empty
-;;   (unless my--package-load-path-cache
-;;     (let ((items (condition-case nil
-;;                      (progn (directory-files my-package-base-directory
-;;                                              t
-;;                                              directory-files-no-dot-files-regexp))
-;;                    (error
-;;                     ;; TODO add debug message
-;;                     nil)))
-;;           (discovered-paths nil))
-;;       (when items
-;;         (dolist (dir items)
-;;           (let ((dir-name (file-name-nondirectory dir)))
-;;             (when (and (file-directory-p dir)
-;;                        (not (member dir-name my-excluded-package-directories)))
-;;               ;; Dynamically handle the "extensions" subdirectory if it exists
-;;               ;; TODO optimize this by providing a list?
-;;               (let ((ext-dir (expand-file-name "extensions" dir)))
-;;                 (when (file-directory-p ext-dir)
-;;                   (push ext-dir discovered-paths)))
-;;
-;;               ;; Add the base package directory
-;;               (push dir discovered-paths)))))
-;;
-;;       ;; Reverse the list to maintain the original alphabetical order
-;;       (setq my--package-load-path-cache (nreverse discovered-paths))))
-;;
-;;   ;; Apply the cached paths to load-path
-;;   (let ((local-path "~/src/fork/diff-hl"))
-;;     (when (file-exists-p local-path)
-;;       (push local-path load-path)))
-;;
-;;   (let ((local-path "~/src/fork/shell-pop-el"))
-;;     (when (file-exists-p local-path)
-;;       (push local-path load-path)))
-;;
-;;   (dolist (path my--package-load-path-cache)
-;;     ;; (push path load-path)
-;;     (push path load-path)))
-
-;;; pre/post modules
-
 (defun lightemacs-user-before-modules ()
   "Pre-modules."
   (my-add-packages-to-load-path))
@@ -1120,115 +1102,6 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 (add-hook 'lightemacs-before-modules-hook #'lightemacs-user-before-modules)
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-after-modules)
-
-;;; evil
-
-;; Fixes bug: https://github.com/emacs-evil/evil-collection/issues/905
-;; NOTE: obsolete
-;; config.el:1102:7: Warning: evil-collection-repl-submit-state is an obsolete
-;; variable (as of evil-collection 2.0.0); use
-;; evil-collection-binding-overrides: repl-submit, repl-newline.
-;; (setq evil-collection-repl-submit-state 'insert)
-;; (setq evil-collection-repl-submit-state 'normal)
-
-;;; pathaction
-
-;; (defun pathaction-vterm (command name)
-;;   "Run COMMAND in `vterm' named NAME."
-;;   (if (require 'vterm nil t)
-;;       (when (fboundp 'vterm)
-;;         (let* ((inhibit-redisplay t)
-;;                ;; Override the shell to run the command directly
-;;                (vterm-shell command)
-;;                (term-buffer (vterm name)))
-;;           (ignore vterm-shell)
-;;           (pop-to-buffer term-buffer)
-;;           term-buffer))
-;;     (error "vterm is not available")))
-
-(with-eval-after-load 'pathaction
-  (if (fboundp 'pathaction-vterm)
-      (setq pathaction-term-function #'pathaction-vterm)
-    (error "Undefined: pathaction-vterm")))
-
-;;; im
-
-;; If you want the lowest possible latency and do not care about system-level
-;; Compose keys, or if you are willing to map them entirely within Emacs using
-;; iso-transl, you can tell Emacs to rip out the GTK input context completely.
-;;
-;; This prevents Emacs passing keystrokes through GtkIMContext. It handles the
-;; raw Wayland/X11 event symbols directly. This gives you terminal-level input
-;; latency in a GUI frame.
-;;
-;; Disabling pgtk-use-im-context-on-new-connection bypasses GTK input method
-;; handling in PGTK Emacs and can slightly reduce keyboard input latency. This
-;; may improve perceived responsiveness, but it can disable GTK-provided
-;; compose/dead-key and IME functionality. Compose behavior can be partially
-;; restored inside Emacs using iso-transl.
-;;
-;; If you want to change it after connection, use the pgtk-use-im-context
-;; function.
-;;
-;; If you go this route but still need Compose functionality, you can map the
-;; raw <Multi_key> inside Emacs:
-;; (require 'iso-transl)
-;; (define-key global-map (kbd "<Multi_key>") iso-transl-ctl-x-8-map)
-;; Completely disable GTK input method context overhead
-;;
-;; When an external IM module is active, the event flow for typing a standard
-;; English letter looks like this:
-;; - Wayland/X11 registers the key.
-;; - GTK intercepts the key.
-;; - GTK sends a D-Bus message to the IM daemon.
-;; - The daemon evaluates if the key is part of a complex sequence.
-;; - The daemon sends a D-Bus message back to GTK saying the key is unhandled.
-;; - GTK finally passes the key to Emacs.
-;;
-;; Forcing GTK_IM_MODULE=none removes the D-Bus overhead. Setting
-;; pgtk-use-im-context-on-new-connection to nil goes a step further by skipping
-;; GTK's internal input filtering entirely, handing the raw event straight to
-;; the Emacs event loop.
-(setq pgtk-use-im-context-on-new-connection nil)
-
-;;; Settings
-
-(setq gcmh-high-cons-threshold (* 600 1024 1024))
-
-;;; buffer guardian
-
-(setq buffer-guardian-override-save-some-buffers t)
-(setq buffer-guardian-verbose nil)
-(setq buffer-guardian-save-all-buffers-interval (* 60 30))
-(setq buffer-guardian-save-all-buffers-idle (* 4 60))
-
-;; (defun buffer-guardian--save-some-buffers-hook (&rest _)
-;;   "Trigger `buffer-guardian' save logic during `save-some-buffers' safely."
-;;   (when (bound-and-true-p buffer-guardian-mode)
-;;     (buffer-guardian-save-all-buffers))
-;;   nil) ; Return nil so native save-some-buffers continues cleanly if needed
-;; (add-hook 'save-some-buffers-functions #'buffer-guardian--save-some-buffers-hook)
-
-;; Simpler alternative to bg
-;; (progn
-;;   (setq auto-save-visited-interval 30)
-;;   ;; (auto-save-visited-mode 1)
-;;
-;;   ;; Make (save-some-buffers 1) only save buffers when they exist in the disk
-;;
-;;   ;; Focus
-;;   ;; (defun my-save-on-focus-change ()
-;;   ;;   "Save all buffers when Emacs loses focus."
-;;   ;;   (when (not (frame-focus-state))
-;;   ;;     (my-save-all-buffers)))
-;;   ;; (add-function :after after-focus-change-function #'my-save-on-focus-change)
-;;
-;;   ;; Save some buffers
-;;   (setq save-some-buffers-default-predicate
-;;         (lambda ()
-;;           (and (buffer-file-name (buffer-base-buffer))
-;;                (file-exists-p buffer-file-name)))))
-
 
 ;;; Frame geometry
 
@@ -1334,7 +1207,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;;     (advice-add 'my-frame-geometry-save :around
 ;;                 #'my-around-my-frame-geometry-save)))
 
-;;; emacs-data
+;;; ~/.emacs-data directory
 
 (defvar my-shared-user-emacs-directory (expand-file-name "~/.emacs-data/var"))
 (setq tmpedit-dir (expand-file-name "tmpedit" my-shared-user-emacs-directory))
@@ -1351,11 +1224,6 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 
 (setq prescient-save-file (expand-file-name "prescient-save.el"
                                             my-shared-user-emacs-directory))
-(with-eval-after-load 'compile-angel
-  (when (fboundp 'compile-angel-exclude-file)
-    (compile-angel-exclude-file
-     (expand-file-name "prescient-save.el"
-                       my-shared-user-emacs-directory))))
 
 (setq backup-directory-alist
       `(("." . ,(expand-file-name "backup" my-shared-user-emacs-directory))))
@@ -1400,12 +1268,23 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (setq recentf-save-file
       (expand-file-name "recentf" my-shared-user-emacs-directory))
 
-;;; dtrt-indent
+;;; Compile angel
 
-(setq lightemacs-dtrt-indent-global-target-hooks '())
-(setq lightemacs-dtrt-indent-local-target-hooks '(prog-mode-hook
-                                                  text-mode-hook
-                                                  conf-mode-hook))
+(with-eval-after-load 'compile-angel
+  (when (fboundp 'compile-angel-exclude-file)
+    (compile-angel-exclude-file
+     (expand-file-name "prescient-save.el"
+                       my-shared-user-emacs-directory))))
+
+(with-eval-after-load 'compile-angel
+  ;; Exclusions
+  (push "/file-templates-auto/main.el" compile-angel-excluded-path-suffixes)
+  (push "/tmp-file.el" compile-angel-excluded-path-suffixes)
+  (push "/.dir-settings.el" compile-angel-excluded-path-suffixes)
+
+  ;; This is important because Emacs loads the early-init.elc, even if it is
+  ;; older than the early-init.el file
+  (push "/early-init.el" compile-angel-excluded-path-suffixes))
 
 ;;; Provide
 
