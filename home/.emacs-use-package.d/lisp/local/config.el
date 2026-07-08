@@ -969,11 +969,11 @@ This uses an around advice to trap errors and verify file timestamps."
         '(; Replace radian mirror
 
           ;; Disable straight mirror for the following packages
-          ;; (modus-themes . (use-package :type built-in))
+          ;; (modus-themes . (modus-themes :type built-in))
 
-          ;; TODO fix transient pulling seq
-          ;; (seq . (seq :type built-in))
-          ;; (transient . (transient :type built-in))  ; Remove this pulls seq
+          ;; TODO prevent transient from pulling seq
+          (seq . (seq :type built-in))
+          (transient . (transient :type built-in))  ; Remove this pulls seq
 
           (let-alist . (let-alist :type built-in))
           (use-package . (use-package :type built-in))
@@ -990,9 +990,7 @@ This uses an around advice to trap errors and verify file timestamps."
                           :repo "jdtsmith/indent-bars"))
           (ef-themes . (ef-themes
                         :type git :host github
-                        :repo "protesilaos/ef-themes"))
-
-          )))
+                        :repo "protesilaos/ef-themes")))))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
