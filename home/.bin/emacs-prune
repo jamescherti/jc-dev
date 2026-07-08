@@ -23,6 +23,13 @@
 set -u
 set -e
 
+# Cache the availability of fd to avoid redundant checks inside the loop
+if command -v fd >/dev/null 2>&1; then
+  HAS_FD=true
+else
+  HAS_FD=false
+fi
+
 cleanup-emacs-files() {
   while IFS= read -r dir; do
     if [[ -d "$dir" ]]; then
@@ -30,18 +37,36 @@ cleanup-emacs-files() {
         echo "[CLEANUP] Delete .elc and .eln files: $dir"
       fi
 
-      local opts=()
-      if [[ $1 != dry-run ]]; then
-        opts=("-delete")
+      if [[ "$HAS_FD" == true ]]; then
+        local fd_opts=()
+        if [[ $1 != dry-run ]]; then
+          fd_opts=("--exec-batch" "rm" "-f")
+        fi
+        # The . character is passed to serve as a catch-all regular expression
+        # pattern. This ensures that fd correctly interprets the next argument,
+        # "$dir", as the target directory path rather than the search pattern.
+        fd --type f --hidden --no-ignore --ignore-case \
+          --extension elc --extension eln --color=never \
+          . "$dir" "${fd_opts[@]}"
+      else
+        local find_opts=()
+        if [[ $1 != dry-run ]]; then
+          find_opts=("-delete")
+        fi
+        find "$dir" -type f \( -iname '*.elc' -o -iname '*.eln' \) \
+          "${find_opts[@]}"
       fi
-      find "$dir" \( -iname '*.elc' -o -iname '*.eln' \) "${opts[@]}"
     fi
   done < <(
     if [[ -d "$HOME/src" ]]; then
       echo "$HOME/src"
     fi
 
-    find ~ -maxdepth 1 -name '.*emacs*.d'
+    if [[ "$HAS_FD" == true ]]; then
+      fd --type d --hidden --no-ignore --max-depth 1 --glob '.*emacs*.d' "$HOME"
+    else
+      find "$HOME" -maxdepth 1 -type d -name '.*emacs*.d'
+    fi
   )
 }
 

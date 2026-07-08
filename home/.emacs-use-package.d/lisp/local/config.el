@@ -98,7 +98,7 @@
 (setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
-      "-DCMAKE_C_FLAGS='-O3 -march=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
+      "-DCMAKE_C_FLAGS='-O3 -march=native -mtune=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
 
 ;; `native-comp-compiler-options' specifies flags passed directly to the C
 ;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
@@ -173,7 +173,16 @@
                                      ;; These are .eln files, not Emacs C
                                      ;; source.
                                      ;; "-fomit-frame-pointer"
-                                     "-fno-omit-frame-pointer"
+                                     ;;
+                                     ;; NOTE: Removing this makes backtraces
+                                     ;; less reliable. More importantly, if you
+                                     ;; are compiling the highly experimental
+                                     ;; igc (MPS garbage collector) branch of
+                                     ;; Emacs, removing this flag will cause
+                                     ;; crashes. If you are on standard Emacs
+                                     ;; (version 29 or 30), removing it is safe
+                                     ;; and faster.
+                                     ;; "-fno-omit-frame-pointer"
 
                                      ;; The -fno-finite-math-only flag prevents
                                      ;; the compiler from assuming that
