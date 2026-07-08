@@ -970,8 +970,11 @@ This uses an around advice to trap errors and verify file timestamps."
 
           ;; Disable straight mirror for the following packages
           ;; (modus-themes . (use-package :type built-in))
-          ;; (transient . (use-package :type built-in))
-          (seq . (seq :type built-in))
+
+          ;; TODO fix transient pulling seq
+          ;; (seq . (seq :type built-in))
+          ;; (transient . (transient :type built-in))  ; Remove this pulls seq
+
           (let-alist . (let-alist :type built-in))
           (use-package . (use-package :type built-in))
           (bind-key . (bind-key :type built-in))

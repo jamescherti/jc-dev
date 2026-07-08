@@ -22,22 +22,14 @@
  ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7
  ("compat" . "b5b48183689b536f72b1214106afeabc465da9d4") ; Version 31.0.0.1
 
- ;; Repositories
- ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")
- ("gnu-elpa-mirror" . "1a75d552f3501e228e4390e71dc709d1b391dfdc")
- ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
- ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
- ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
- ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
-
  ;; Mirror bot
- ;; ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00")
+ ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00") ; 2.24
+ ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5
  ;; ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
  ;; ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
  ;; ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
 
  ;; TODO
- ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5
 
  ;; Outdated tag
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
@@ -107,5 +99,14 @@
  ("yaml-mode" . "96ef0201101a7cd591febd5886633154dae8834c")
  ("buffer-guardian.el" . "323eb562acf50ad117e614feadc0ee4b63eb817e")
  ("buffer-terminator.el" . "11bf6a6a77b340416eb07f40d0eb7858f1fa5d5b")
- ("bufferfile.el" . "3d39fc70dc644dbea438e3e653ba176a33019ba6"))
+ ("bufferfile.el" . "3d39fc70dc644dbea438e3e653ba176a33019ba6")
+
+ ;; Repositories
+ ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")
+ ("gnu-elpa-mirror" . "1a75d552f3501e228e4390e71dc709d1b391dfdc")
+ ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
+ ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
+ ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
+ ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
+ )
 :epsilon
