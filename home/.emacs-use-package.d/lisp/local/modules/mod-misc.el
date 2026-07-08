@@ -3353,8 +3353,6 @@ Opens a split window showing the added and removed features."
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
 (lightemacs-use-package shell-pop
-  :vc (:url "https://github.com/jamescherti/shell-pop-el"
-            :rev :newest)
   :commands shell-pop
   :bind (("C-c t" . shell-pop))
   :config
