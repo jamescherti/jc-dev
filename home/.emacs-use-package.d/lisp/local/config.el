@@ -128,7 +128,7 @@
                                      ;; through native-comp-compiler-options is
                                      ;; redundant and bypasses the native
                                      ;; compiler's built-in logic.
-                                     "-O2"
+                                     "-O3"
 
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which
@@ -325,10 +325,7 @@
                                    ;; -Wl,--as-needed: Prevents the linker from
                                    ;; recording dependencies on libraries that
                                    ;; are not actually used by the code.
-                                   "-Wl,--as-needed"
-
-                                   ;; "-O2"
-                                   ))
+                                   "-Wl,--as-needed"))
 
 ;; Auto detect the CPU architecture
 ;; Alternative: Just let
@@ -500,16 +497,7 @@ subsequent GCC invocations."
                                               python-ts-mode))
 
 ;; Define your preferred font name here
-;; (defvar my-font-choice "Iosevka Term")
-;; (defconst my-font-choice "Iosevka SS08")
-;; (defvar my-font-choice "Iosevka Term-13")
-;; (add-to-list 'default-frame-alist `(font . ,my-font-choice))
-;; (setq lightemacs-theme-default-font "Iosevka Term-13")
-;; (setq lightemacs-theme-default-font "DejaVu Sans Mono")
-;; (setq lightemacs-theme-default-font "Iosevka Term")
 (setq lightemacs-theme-default-font "Iosevka Term")
-
-;;; Lightemacs settings: dtrt-indent
 
 (setq lightemacs-dtrt-indent-global-target-hooks '())
 (setq lightemacs-dtrt-indent-local-target-hooks '(prog-mode-hook
