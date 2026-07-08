@@ -8,15 +8,21 @@
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11
  ("vertico" . "6028bd3d32c99c28e2b938e5e5393ec3508d2424")  ; 2.10
-
- ;; Tag too old
- ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37")
+ ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3
+ ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5
+ ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5
+ ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0
 
  ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")
  ("gnu-elpa-mirror" . "1a75d552f3501e228e4390e71dc709d1b391dfdc")
  ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
  ("straight.el" . "e40a5b7f8b0c1bb2cde0e7e477b5f81303e34b95")
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
+
+ ;; Tag outdated
+ ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37")
+ ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
+ ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
 
  ;; Unmaintained
  ;; TODO lua-mode
@@ -40,10 +46,11 @@
  ("evil-snipe" . "16317d7e54313490a0fe8642ed9a1a72498e7ad2")
  ("dired-hacks" . "de9336f4b47ef901799fe95315fa080fa6d77b48")
 
+ ;; No tag
+ ("compat" . "28cbe7979711ea0ee71a9cbeeadf8f886d36a404")
+
  ;; TODO
  ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
- ("compat" . "28cbe7979711ea0ee71a9cbeeadf8f886d36a404")
- ("cond-let" . "c48600dfab6372670225f046cace263700c78eab")
  ("dash.el" . "d3a84021dbe48dba63b52ef7665651e0cf02e915")
  ("diff-hl" . "2d7d0714d9637f54af672987c65b6973b31e56a2")
  ("dtrt-indent" . "4b71bf995b12966bbc350a32796b9a5f11d67fa6")
@@ -55,10 +62,7 @@
  ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
  ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188")
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9")
- ("gptel" . "ebf0f3d8e9932e0ac6de82542220864cc17f6784")
  ("indent-bars" . "a8ff2fad8dde8f7712a6c869f6cd3358385b4548")
- ("inhibit-mouse.el" . "affabbd3c07ea4b739cf9dc79633681588803e0a")
- ("kirigami.el" . "41e9a5378b7a6c9eba79fb660375a9db48fa0506")
  ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
  ("llama" . "4d4024048053b898a01521046e0f063ee47615b0")
  ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9")
@@ -68,17 +72,15 @@
  ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
  ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
- ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
- ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92")
- ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
 
  ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da")
  ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf")
- ("evil-matchit" . "dd03aacd8602ffd2cd9b67d0072092f8d57d5e01")
  ("evil-surround" . "e6548372e8359ee55e67d73ca418314086011f1a")
 
  ;; My packages
+ ("inhibit-mouse.el" . "affabbd3c07ea4b739cf9dc79633681588803e0a")
+ ("kirigami.el" . "41e9a5378b7a6c9eba79fb660375a9db48fa0506")
  ("flymake-ansible-lint.el" . "bfb8148d9a1aece141d18eef484e7c0c8db79855")
  ("flymake-bashate.el" . "3780a7ccc2ddb746f9affbb070b8da77eb3e28ec")
  ("enhanced-evil-paredit.el" . "9de30865fe4de578db12533b61f1ceffe8abd08d")
