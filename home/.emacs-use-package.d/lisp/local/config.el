@@ -921,6 +921,8 @@ subsequent GCC invocations."
 (setq buffer-guardian-save-all-buffers-interval (* 60 30))
 (setq buffer-guardian-save-all-buffers-idle (* 4 60))
 
+(setq server-client-instructions nil)
+
 ;;; Other settings
 
 (defvar my-src-dir-prefix (file-name-as-directory (expand-file-name "~/src/")))

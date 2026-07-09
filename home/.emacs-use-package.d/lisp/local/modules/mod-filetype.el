@@ -470,6 +470,45 @@ only if they are not already available."
 (add-hook 'yaml-mode-hook #'ansible-detect-and-enable-mode)
 (add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-mode)
 
+
+;;; Ansible: ansible-doc
+
+(lightemacs-use-package ansible-doc
+  :commands ansible-doc
+  :init
+  (add-to-list 'display-buffer-alist '("\\*ansible-doc"
+                                       (display-buffer-same-window))))
+
+
+(progn
+  ;; Patch sent to ansible-doc. Merged, but not released yet.
+  ;; commit c6ccdf8069e8a257501394fe6900b5cf5961e625
+  ;; Author: James Cherti
+  ;; Date:   2025-04-15 10:32:51 -0400
+  ;; Prevent ANSI color codes from being inserted into the buffer
+  (defun ansible-doc--with-nocolor (orig-fun &rest args)
+    "Advice around `ansible-doc-revert-module-buffer' to disable colors.
+  Temporarily set the environment variable ANSIBLE_NOCOLOR=1 when
+  invoking the original function ORIG-FUN with ARGS."
+    (let ((process-environment (cons "ANSIBLE_NOCOLOR=1" process-environment)))
+      (apply orig-fun args)))
+  (with-eval-after-load 'ansible-doc
+    (when (fboundp 'ansible-doc-revert-module-buffer)
+      (advice-add 'ansible-doc-revert-module-buffer :around #'ansible-doc--with-nocolor))))
+
+(defun ansible-doc-symbol ()
+  "Show ansible doc of the current symbol."
+  (let ((inhibit-message t)
+        (symbol (thing-at-point 'symbol t)))
+    (when (and symbol (fboundp 'ansible-doc))
+      (ansible-doc symbol))))
+
+(defun my-ansible-doc-local-setup-buffer ()
+  "Setup `ansible-doc'."
+  (setq-local evil-lookup-func 'ansible-doc-symbol))
+
+(add-hook 'ansible-mode-hook 'my-ansible-doc-local-setup-buffer)
+
 ;;; PHP
 
 (if (my-treesit-language-available-p 'php)

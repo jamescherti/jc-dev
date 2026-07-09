@@ -2247,45 +2247,6 @@ generally one of the lines that are folded."
 ;;; ansible
 
 
-;;; ansible-doc
-
-(lightemacs-use-package ansible-doc
-  :commands ansible-doc
-  :init
-  (add-to-list 'display-buffer-alist '("\\*ansible-doc"
-                                       (display-buffer-same-window)))
-  )
-
-
-(progn
-  ;; Patch sent to ansible-doc. Merged, but not released yet.
-  ;; commit c6ccdf8069e8a257501394fe6900b5cf5961e625
-  ;; Author: James Cherti
-  ;; Date:   2025-04-15 10:32:51 -0400
-  ;; Prevent ANSI color codes from being inserted into the buffer
-  (defun ansible-doc--with-nocolor (orig-fun &rest args)
-    "Advice around `ansible-doc-revert-module-buffer' to disable colors.
-  Temporarily set the environment variable ANSIBLE_NOCOLOR=1 when
-  invoking the original function ORIG-FUN with ARGS."
-    (let ((process-environment (cons "ANSIBLE_NOCOLOR=1" process-environment)))
-      (apply orig-fun args)))
-  (with-eval-after-load 'ansible-doc
-    (when (fboundp 'ansible-doc-revert-module-buffer)
-      (advice-add 'ansible-doc-revert-module-buffer :around #'ansible-doc--with-nocolor))))
-
-(defun ansible-doc-symbol ()
-  "Show ansible doc of the current symbol."
-  (let ((inhibit-message t)
-        (symbol (thing-at-point 'symbol t)))
-    (when (and symbol (fboundp 'ansible-doc))
-      (ansible-doc symbol))))
-
-(defun my-ansible-doc-local-setup-buffer ()
-  "Setup `ansible-doc'."
-  (setq-local evil-lookup-func 'ansible-doc-symbol))
-
-(add-hook 'ansible-mode-hook 'my-ansible-doc-local-setup-buffer)
-
 ;;; Disable arrow in the fringe
 
 (defun my-minibuffer-mode-setup ()
@@ -2320,8 +2281,6 @@ generally one of the lines that are folded."
     (fundamental-mode)
     (smerge-mode 1)))
 (add-hook 'smerge-mode-hook #'my-smerge-to-fundamental-mode)
-
-;;; Prune cache
 
 ;;; Prune native comp tmp files
 
@@ -2420,10 +2379,6 @@ ARGS - the arguments passed to the original function"
   (setq hs-set-up-overlay 'display-code-line-counts))
 
 ;;; server
-
-;; (custom-set-variables '(package-selected-packages nil))
-
-(setq server-client-instructions nil)
 
 ;;; quiet
 
@@ -3801,9 +3756,9 @@ The result is displayed in a pretty-printed temporary buffer."
 ;; 1. (setenv "COLORTERM" "truecolor")
 ;;    Modern command-line tools check this environment variable to determine
 ;;    color support. By explicitly setting it to "truecolor", you force external
-;;    programs to output raw 24-bit RGB ANSI escape sequences, entirely bypassing
-;;    the color limitations of the active terminfo profile. Emacs can natively
-;;    parse and render these 24-bit codes.
+;;    programs to output raw 24-bit RGB ANSI escape sequences, entirely
+;;    bypassing the color limitations of the active terminfo profile. Emacs can
+;;    natively parse and render these 24-bit codes.
 ;;
 ;; 2. (setq term-term-name "eterm-color")
 ;;    While COLORTERM handles the colors, the TERM variable dictates how
@@ -4277,7 +4232,7 @@ properly handles remote files over Tramp), applying the setting only if
 (setq diff-hl-bmp-max-width 16)
 (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
 
-;;; Emacs Consult / Vertico
+;;; Disabled: Emacs Consult / Vertico
 
 ;; (setq consult-imenu-config
 ;;       '((emacs-lisp-mode :toplevel "Functions"
@@ -4287,7 +4242,7 @@ properly handles remote files over Tramp), applying the setting only if
 ;;                                  (?t "Types"     font-lock-type-face)
 ;;                                  (?v "Variables" font-lock-variable-name-face)))))
 
-;;; consult flymake
+;;; Disabled: consult flymake
 
 ;; (with-eval-after-load 'consult
 ;;   (with-eval-after-load 'flymake
@@ -4334,18 +4289,6 @@ properly handles remote files over Tramp), applying the setting only if
 ;;   ;; Tidy shadowed file names
 ;;   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
-;;; Lazy auto revert (SIMPLE)
-
-;; (defun my-force-auto-revert (&rest _args)
-;;   "Check if the current buffer needs to be reverted immediately.
-;; This bypasses the `auto-revert-interval' timer."
-;;   (when (or auto-revert-mode global-auto-revert-mode)
-;;     (auto-revert-handler)))
-;;
-;; (add-hook 'window-selection-change-functions #'my-force-auto-revert)
-;; (add-hook 'window-buffer-change-functions #'my-force-auto-revert)
-;; (add-hook 'focus-in-hook #'my-force-auto-revert)
-
 ;;; Lazy autorevert
 
 (lightemacs-use-package lazy-autorevert
@@ -4354,51 +4297,6 @@ properly handles remote files over Tramp), applying the setting only if
   :hook (lightemacs-on-first-file . lazy-autorevert-mode)
   :init
   (setq lazy-autorevert-debug nil))
-
-
-;;; dir-config
-
-;; (lightemacs-use-package dir-config
-;;   :demand t
-;;   ;; :commands (dir-config-mode
-;;   ;;            dir-config-load
-;;   ;;            dir-config-get-dir
-;;   ;;            dir-config-get-file)
-;;   ;; :functions (dir-config-get-dir
-;;   ;;             dir-config-get-file)
-;;
-;;   :custom
-;;   (dir-config-allowed-directories '("~/src/wip"
-;;                                     "~/src/dotfiles/jc-dev"
-;;                                     "~/src/home-settings"))
-;;   (dir-config-file-names '(".dir-settings.el"))
-;;
-;;   :preface
-;;   (defun dir-config-edit-dir ()
-;;     "Open the directory from which the dir config was loaded, if available."
-;;     (interactive)
-;;     (let ((config-dir (dir-config-get-dir)))
-;;       (if config-dir
-;;           (find-file config-dir)
-;;         (message "[dir-config] The dir config directory was not found."))))
-;;
-;;   (defun dir-config-edit-file ()
-;;     "Open the dir config file that was loaded, if available."
-;;     (interactive)
-;;     (let ((dir-config-file (dir-config-get-file)))
-;;       (if dir-config-file
-;;           (find-file dir-config-file)
-;;         (message "[dir-config] The dir config file was not found."))))
-;;
-;;   (defun dir-config-name ()
-;;     "The dir-config.el directory name. Could be used as a project name."
-;;     (let ((config-dir (dir-config-get-dir)))
-;;       (if config-dir
-;;           (file-name-nondirectory config-dir)
-;;         "")))
-;;
-;;   :config
-;;   (dir-config-mode 1))
 
 ;;; eldoc
 
@@ -4446,7 +4344,6 @@ properly handles remote files over Tramp), applying the setting only if
 (with-eval-after-load 'corfu
   (require 'corfu-history)
   (corfu-history-mode 1))
-
 
 ;;; pathaction
 
