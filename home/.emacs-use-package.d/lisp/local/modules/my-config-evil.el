@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+;;; Require
+
 (require 'evil)
 (require 'evil-collection)
 (require 'my-defun)
@@ -33,59 +35,6 @@
 (eval-and-compile
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'sub-project)
-
-;;; Testing
-
-;; Allow moving cursor beyond end-of-line in visual block mode
-;; Good option to prevent the cursor going beyond the org ellipsis
-;; (setq evil-move-beyond-eol t)
-
-;; Default
-;; (setq evil-cross-lines nil)
-;; (setq evil-auto-indent t)
-;; (setq evil-regexp-search t)
-;; (setq evil-ex-search-case 'smart)
-;; (setq evil-ex-substitute-case nil)
-
-;; TODO
-;; (setq evil-visual-char 'exclusive)  ;; evil collection
-
-;;; cursor color
-
-;; (setq evil-normal-state-cursor '("#DD0000" box))
-;; (setq evil-insert-state-cursor '("#DD0000" bar))
-;; (setq evil-visual-state-cursor '("#DD0000" hbar))
-;; (evil-refresh-cursor)
-
-;; cursor global
-
-;; (defvar-local my-local-cursor-cookie nil
-;;   "Stores the cookie for buffer-local cursor face remapping.")
-
-;; (defun my-set-local-cursor (color shape)
-;;   "Set the cursor COLOR and SHAPE locally in the current buffer.
-;; Handles both standard Emacs built-in behavior and Evil mode."
-;;
-;;   ;; 1. Standard Emacs shape
-;;   ;; (setq-local cursor-type shape)
-;;
-;;   ;; 2. Standard Emacs color
-;;   (when my-local-cursor-cookie
-;;     (face-remap-remove-relative my-local-cursor-cookie))
-;;   (setq my-local-cursor-cookie
-;;         (face-remap-add-relative 'cursor :background color))
-;;
-;;   ;; 3. Evil mode color and shape
-;;   (when (bound-and-true-p evil-local-mode)
-;;     (let ((cursor-spec (list color shape)))
-;;       (setq-local evil-normal-state-cursor cursor-spec)
-;;       (setq-local evil-insert-state-cursor cursor-spec)
-;;       (setq-local evil-visual-state-cursor cursor-spec)
-;;       (setq-local evil-replace-state-cursor cursor-spec)
-;;       (setq-local evil-operator-state-cursor cursor-spec)
-;;       (setq-local evil-motion-state-cursor cursor-spec)
-;;       (setq-local evil-emacs-state-cursor cursor-spec)
-;;       (evil-refresh-cursor))))
 
 ;;; Spell checker: Jinx or Flyspell
 
@@ -1109,16 +1058,6 @@ DIR is the directory."
 
 ;;; evil org
 
-;; TODO put this back?
-;; (when (fboundp 'wizard-point-backward-to-empty-line)
-;;   (evil-define-key 'normal 'local (kbd "{") 'wizard-point-backward-to-empty-line))
-;; (when (fboundp 'indentnav-forward-to-empty-line)
-;;   (evil-define-key 'normal 'local (kbd "}") 'indentnav-forward-to-empty-line))
-
-;; Disable org cycle
-;; TODO put this back
-;; (evil-define-key 'normal 'local (kbd "<tab>") 'ignore)
-
 (defun my-evil-delete-to-heading-star ()
   "Delete everything before the cursor except the first '*' and space.
 
@@ -1267,12 +1206,7 @@ on text following the cursor."
   "Bind `C-p' and `C-n' to dabbrev completion in minibuffer using evil."
   (evil-define-key 'insert 'local
     (kbd "C-p") 'cape-dabbrev
-    (kbd "C-n") 'cape-dabbrev)
-
-  ;; (when (and (boundp 'completion-at-point-functions)
-  ;;            (listp completion-at-point-functions))
-  ;;   (add-hook 'completion-at-point-functions #'cape-dabbrev nil t))
-  )
+    (kbd "C-n") 'cape-dabbrev))
 
 ;; TODO lightemacs?
 (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-dabbrev-evil)
@@ -1308,21 +1242,7 @@ on text following the cursor."
     (evil-define-key 'insert 'global (kbd "C-SPC") 'completion-at-point)
 
     (unless (display-graphic-p)
-      (define-key key-translation-map (kbd "C-@") (kbd "C-SPC")))
-
-    ;; Setup auto complete
-    ;; (defun pkg-corfu-setup-auto-complete ()
-    ;;   "Setup Corfu auto complete."
-    ;;   ;; (corfu-mode)
-    ;;   (evil-define-key 'insert 'local (kbd "C-SPC")
-    ;;     (if (my-code-checker-allowed-p) #'completion-at-point #'ignore)))
-    ;; (add-hook-text-editing-modes #'pkg-corfu-setup-auto-complete)
-    ;; (dolist (hook '(inferior-python-mode-hook
-    ;;                 lisp-interaction-mode-hook))
-    ;;   (add-hook hook #'pkg-corfu-setup-auto-complete))
-    ;; (define-key minibuffer-mode-map (kbd "C-SPC") 'completion-at-point)
-
-    ))
+      (define-key key-translation-map (kbd "C-@") (kbd "C-SPC")))))
 
 ;;; evil inferior mode (Python)
 
@@ -1765,7 +1685,7 @@ search direction (default: \='forward)."
 (setq mode-line-position-column-line-format '("%l:%C"))
 (setq mode-line-percent-position nil)
 
-;;; flymake fixes
+;;; Flymake fixes
 
 (defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
   "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
@@ -2484,7 +2404,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (setq quick-fasd-auto-add-on-buffer-change t)
   (setq quick-fasd-enable-initial-prompt nil)
   (setq quick-fasd-command-args '("-d"))
-  (quick-fasd-mode))
+  (quick-fasd-mode 1))
 
 (with-eval-after-load 'evil
   (evil-define-key 'normal 'global (kbd "<leader>fd")
@@ -2909,49 +2829,6 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 
 (add-hook 'term-mode-hook #'my-term-setup t)
 
-;;; Only yank visible text
-
-;; TODO article
-;; (defun evilbuffer-buffer-substring-visible (beg end)
-;;   "Return the visible text between BEG and END, excluding invisible regions."
-;;   (let ((text ""))
-;;     (save-excursion
-;;       (goto-char beg)
-;;       (while (< (point) end)
-;;         (let* ((next (next-single-char-property-change (point) 'invisible nil end))
-;;                (invis (invisible-p (point))))
-;;           (unless invis
-;;             (setq text (concat text (buffer-substring-no-properties (point) next))))
-;;           (goto-char next))))
-;;     text))
-;;
-;; (defun evilbuffer-substring--filter-visible (beg end &optional delete)
-;;   "Filter for `filter-buffer-substring-function' that preserves visible text.
-;;
-;; BEG and END specify the region bounds. If DELETE is non-nil, the region is
-;; deleted and its text is returned. Otherwise, the function returns only the
-;; visible text between BEG and END, excluding regions with the invisible text
-;; property.
-;;
-;; This function also respects the obsolete wrapper hook
-;; `filter-buffer-substring-functions' via `with-wrapper-hook'. No filtering occurs
-;; unless a wrapper hook is active."
-;;   (subr--with-wrapper-hook-no-warnings
-;;    filter-buffer-substring-function (beg end delete)
-;;    (cond
-;;     (delete
-;;      (save-excursion
-;;        (goto-char beg)
-;;        (delete-and-extract-region beg end)))
-;;
-;;     (t
-;;      (evilbuffer-buffer-substring-visible beg end)))))
-
-;; Useful for yanking =text= in org mode. I do not want to include invisible
-;; text
-;; Disable
-;; (setq filter-buffer-substring-function 'evilbuffer-substring--filter-visible)
-
 ;;; evil outline
 
 (with-eval-after-load 'outline
@@ -2960,16 +2837,6 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 ;;; highlight search after paste
 
 ;; TODO: Send patch to evil?
-;; (defun my-evil-refresh-search-highlight (&rest _)
-;;   "Refresh Evil search overlays after pasting text."
-;;   (when (and (eq evil-search-module 'evil-search)
-;;              (evil-ex-hl-active-p 'evil-ex-search)
-;;              (boundp 'evil-ex-search-pattern)
-;;              evil-ex-search-pattern)
-;;     (evil-ex-search-activate-highlight evil-ex-search-pattern)))
-;;
-;; (advice-add 'evil-paste-after :after #'my-evil-refresh-search-highlight)
-;; (advice-add 'evil-paste-before :after #'my-evil-refresh-search-highlight)
 
 (defun my-evil-refresh-search-highlight (&rest _)
   "Refresh Evil search overlays after buffer changes.
@@ -3068,7 +2935,85 @@ Accepts any arguments so it can be used as advice or a hook."
 ;; (global-set-key (kbd "C-c b c") 'my-copy-whole-buffer-evil)
 (evil-define-key 'normal 'global (kbd "<leader>cb") #'my-copy-whole-buffer-evil)
 
-;;; Manual recenter and scroll margin
+;;; Paste and fill
+
+(defun my-evil-paste-and-fill ()
+  "Paste text after point and fill the pasted region."
+  (interactive)
+  (atomic-change-group
+    (call-interactively #'evil-paste-after)
+    (fill-region (evil-get-marker ?\[) (evil-get-marker ?\]))))
+
+(defun my-evil-paste-before-and-fill ()
+  "Paste text before point and fill the pasted region."
+  (interactive)
+  (atomic-change-group
+    (call-interactively #'evil-paste-before)
+    (fill-region (evil-get-marker ?\[) (evil-get-marker ?\]))))
+
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "<leader>fp") #'my-evil-paste-and-fill)
+  (define-key evil-normal-state-map (kbd "<leader>fP") #'my-evil-paste-before-and-fill))
+
+;;; Disable emacs state
+
+;; The key combination C-z (Control-z) is bound to toggle the editor into
+;; evil-emacs-state. Entering Emacs state temporarily suspends normal Vim
+;; bindings, causing standard Emacs keybindings to take over until C-z is
+;; pressed again.
+;;
+;; The following disables this behavior and prevent accidental state switching,
+;; unbind C-z in the relevant Evil maps. Add the following Emacs Lisp code to
+;; the configuration file (e.g., init.el or .emacs):
+(define-key evil-insert-state-map (kbd "C-z") #'ignore)
+(define-key evil-motion-state-map (kbd "C-z") #'ignore)
+
+(setq evil-toggle-key "")
+
+;;; DISABLED: Only yank visible text
+
+;; TODO article
+;; (defun evilbuffer-buffer-substring-visible (beg end)
+;;   "Return the visible text between BEG and END, excluding invisible regions."
+;;   (let ((text ""))
+;;     (save-excursion
+;;       (goto-char beg)
+;;       (while (< (point) end)
+;;         (let* ((next (next-single-char-property-change (point) 'invisible nil end))
+;;                (invis (invisible-p (point))))
+;;           (unless invis
+;;             (setq text (concat text (buffer-substring-no-properties (point) next))))
+;;           (goto-char next))))
+;;     text))
+;;
+;; (defun evilbuffer-substring--filter-visible (beg end &optional delete)
+;;   "Filter for `filter-buffer-substring-function' that preserves visible text.
+;;
+;; BEG and END specify the region bounds. If DELETE is non-nil, the region is
+;; deleted and its text is returned. Otherwise, the function returns only the
+;; visible text between BEG and END, excluding regions with the invisible text
+;; property.
+;;
+;; This function also respects the obsolete wrapper hook
+;; `filter-buffer-substring-functions' via `with-wrapper-hook'. No filtering occurs
+;; unless a wrapper hook is active."
+;;   (subr--with-wrapper-hook-no-warnings
+;;    filter-buffer-substring-function (beg end delete)
+;;    (cond
+;;     (delete
+;;      (save-excursion
+;;        (goto-char beg)
+;;        (delete-and-extract-region beg end)))
+;;
+;;     (t
+;;      (evilbuffer-buffer-substring-visible beg end)))))
+
+;; Useful for yanking =text= in org mode. I do not want to include invisible
+;; text
+;; Disable
+;; (setq filter-buffer-substring-function 'evilbuffer-substring--filter-visible)
+
+;;; DISABLED: Manual recenter and scroll margin
 
 ;; (defun my-ensure-scroll-context (&rest _)
 ;;   "Ensure at least 5 lines of context around point after a motion.
@@ -3125,40 +3070,42 @@ Accepts any arguments so it can be used as advice or a hook."
 ;; (advice-add 'evil-goto-first-line :after #'my-ensure-scroll-context)
 
 
-;;; Paste and fill
+;;; DISABLED: cursor color
 
-(defun my-evil-paste-and-fill ()
-  "Paste text after point and fill the pasted region."
-  (interactive)
-  (atomic-change-group
-    (call-interactively #'evil-paste-after)
-    (fill-region (evil-get-marker ?\[) (evil-get-marker ?\]))))
+;; (setq evil-normal-state-cursor '("#DD0000" box))
+;; (setq evil-insert-state-cursor '("#DD0000" bar))
+;; (setq evil-visual-state-cursor '("#DD0000" hbar))
+;; (evil-refresh-cursor)
 
-(defun my-evil-paste-before-and-fill ()
-  "Paste text before point and fill the pasted region."
-  (interactive)
-  (atomic-change-group
-    (call-interactively #'evil-paste-before)
-    (fill-region (evil-get-marker ?\[) (evil-get-marker ?\]))))
+;; cursor global
 
-(with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "<leader>fp") #'my-evil-paste-and-fill)
-  (define-key evil-normal-state-map (kbd "<leader>fP") #'my-evil-paste-before-and-fill))
+;; (defvar-local my-local-cursor-cookie nil
+;;   "Stores the cookie for buffer-local cursor face remapping.")
 
-;;; Disable emacs state
-
-;; The key combination C-z (Control-z) is bound to toggle the editor into
-;; evil-emacs-state. Entering Emacs state temporarily suspends normal Vim
-;; bindings, causing standard Emacs keybindings to take over until C-z is
-;; pressed again.
+;; (defun my-set-local-cursor (color shape)
+;;   "Set the cursor COLOR and SHAPE locally in the current buffer.
+;; Handles both standard Emacs built-in behavior and Evil mode."
 ;;
-;; The following disables this behavior and prevent accidental state switching,
-;; unbind C-z in the relevant Evil maps. Add the following Emacs Lisp code to
-;; the configuration file (e.g., init.el or .emacs):
-(define-key evil-insert-state-map (kbd "C-z") #'ignore)
-(define-key evil-motion-state-map (kbd "C-z") #'ignore)
-
-(setq evil-toggle-key "")
+;;   ;; 1. Standard Emacs shape
+;;   ;; (setq-local cursor-type shape)
+;;
+;;   ;; 2. Standard Emacs color
+;;   (when my-local-cursor-cookie
+;;     (face-remap-remove-relative my-local-cursor-cookie))
+;;   (setq my-local-cursor-cookie
+;;         (face-remap-add-relative 'cursor :background color))
+;;
+;;   ;; 3. Evil mode color and shape
+;;   (when (bound-and-true-p evil-local-mode)
+;;     (let ((cursor-spec (list color shape)))
+;;       (setq-local evil-normal-state-cursor cursor-spec)
+;;       (setq-local evil-insert-state-cursor cursor-spec)
+;;       (setq-local evil-visual-state-cursor cursor-spec)
+;;       (setq-local evil-replace-state-cursor cursor-spec)
+;;       (setq-local evil-operator-state-cursor cursor-spec)
+;;       (setq-local evil-motion-state-cursor cursor-spec)
+;;       (setq-local evil-emacs-state-cursor cursor-spec)
+;;       (evil-refresh-cursor))))
 
 ;;; Provide
 
