@@ -200,10 +200,6 @@ tasks:
     remote:
       upstream: https://github.com/whjvenyl/fasd
 
-  - git: git@github.com:jamescherti/gcmh
-    path: forks/gcmh
-    revision: master
-
   # https://emacsredux.com/blog/2021/08/11/submitting-a-package-to-nongnu-elpa/
   - git: git@github.com:jamescherti/run-or-raise.git
     path: forks/run-or-raise
@@ -222,12 +218,6 @@ tasks:
     revision: master
     remote:
       upstream: https://github.com/abo-abo/avy
-
-  - git: git@github.com:jamescherti/ansible-doc
-    path: forks/ansible-doc
-    revision: master
-    remote:
-      upstream: https://github.com/emacsorphanage/ansible-doc
 
   - git: git@github.com:jamescherti/yasnippet
     path: forks/yasnippet
@@ -262,11 +252,6 @@ tasks:
   - git: git@github.com:jamescherti/git-gutter
     path: forks/git-gutter
 
-  - git: git@github.com:jamescherti/lua-mode
-    path: forks/lua-mode
-    remote:
-      upstream: https://github.com/immerrr/lua-mode
-
   - git: git@github.com:jamescherti/jinja2-mode
     path: forks/jinja2-mode
     remote:
@@ -275,25 +260,12 @@ tasks:
   - git: git@github.com:jamescherti/vline
     path: forks/vline
 
-  - git: git@github.com:jamescherti/highlight-defined
-    path: forks/highlight-defined
-
-  - git: git@github.com:jamescherti/paredit
-    path: forks/paredit
-    remote:
-      upstream: https://paredit.org/cgit/paredit
-
   # - git: ssh://git@codeberg.org/jamescherti/emacs-eat.git
   # I have change it and the developer hasn't merged my changes yet.
   - git: git@github.com:jamescherti/emacs-eat
     path: forks/emacs-eat
     remote:
       upstream: https://codeberg.org/akib/emacs-eat
-
-  - git: git@github.com:jamescherti/goto-chg
-    path: forks/goto-chg
-    remote:
-      upstream: https://github.com/emacs-evil/goto-chg
 
   - git: git@codeberg.org:jamescherti/git-timemachine
     path: forks/git-timemachine
@@ -337,20 +309,10 @@ tasks:
     remote:
       upstream: https://github.com/emacs-evil/evil-collection
 
-  - git: git@github.com:jamescherti/evil-snipe
-    path: forks/evil-snipe
-    remote:
-      upstream: https://github.com/hlissner/evil-snipe
-
   - git: git@github.com:jamescherti/emacs-libvterm
     path: forks/emacs-libvterm
     remote:
       upstream: https://github.com/akermu/emacs-libvterm
-
-  - git: git@github.com:jamescherti/dired-hacks
-    path: forks/dired-hacks
-    remote:
-      upstream: https://github.com/Fuco1/dired-hacks
 
   - git: git@github.com:jamescherti/melpa
     path: forks/melpa
@@ -368,6 +330,112 @@ tasks:
     revision: develop
     remote:
       upstream: https://github.com/kyagi/shell-pop-el
+
+
+
+
+
+
+  # ----------------------------------------------------------------------------
+  # START: UNMAINTAINED PACKAGES THAT I FORKED
+  - git: git@github.com:jamescherti/Emacs-wgrep
+    path: forks/Emacs-wgrep
+    remote:
+      upstream: https://github.com/mhayashi1120/Emacs-wgrep
+
+  - git: git@github.com:jamescherti/aggressive-indent-mode
+    path: forks/aggressive-indent-mode
+    remote:
+      upstream: https://github.com/Malabarba/aggressive-indent-mode
+
+  - git: git@github.com:jamescherti/ansible-doc
+    path: forks/ansible-doc
+    revision: master
+    remote:
+      upstream: https://github.com/emacsorphanage/ansible-doc
+
+  - git: git@github.com:jamescherti/dired-hacks
+    path: forks/dired-hacks
+    remote:
+      upstream: https://github.com/Fuco1/dired-hacks
+
+  - git: git@github.com:jamescherti/easy-escape
+    path: forks/easy-escape
+    remote:
+      upstream: https://github.com/cpitclaudel/easy-escape
+
+  - git: git@github.com:jamescherti/edit-indirect
+    path: forks/edit-indirect
+    remote:
+      upstream: https://github.com/Fanael/edit-indirect
+
+  - git: git@github.com:jamescherti/elisp-refs
+    path: forks/elisp-refs
+    remote:
+      upstream: https://github.com/Wilfred/elisp-refs
+
+  - git: git@github.com:jamescherti/evil-snipe
+    path: forks/evil-snipe
+    remote:
+      upstream: https://github.com/hlissner/evil-snipe
+
+  - git: git@github.com:jamescherti/f.el
+    path: forks/f.el
+    remote:
+      upstream: https://github.com/rejeep/f.el
+
+  - git: git@github.com:jamescherti/flymake-quickdef
+    path: forks/flymake-quickdef
+    remote:
+      upstream: https://github.com/karlotness/flymake-quickdef
+
+  - git: git@github.com:jamescherti/gcmh
+    path: forks/gcmh
+    revision: master
+    remote:
+      upstream: https://gitlab.com/koral/gcmh
+
+  - git: git@github.com:jamescherti/goto-chg
+    path: forks/goto-chg
+    remote:
+      upstream: https://github.com/emacs-evil/goto-chg
+
+  - git: git@github.com:jamescherti/helpful
+    path: forks/helpful
+    remote:
+      upstream: https://github.com/Wilfred/helpful
+
+  - git: git@github.com:jamescherti/highlight-defined
+    path: forks/highlight-defined
+    remote:
+      upstream: https://github.com/Fanael/highlight-defined
+
+  - git: git@github.com:jamescherti/lua-mode
+    path: forks/lua-mode
+    remote:
+      upstream: https://github.com/immerrr/lua-mode
+
+  - git: git@github.com:jamescherti/org-appear
+    path: forks/org-appear
+    remote:
+      upstream: https://github.com/awth13/org-appear
+
+  - git: git@github.com:jamescherti/paredit
+    path: forks/paredit
+    remote:
+      upstream: https://paredit.org/paredit.git
+
+  - git: git@github.com:jamescherti/vimrc-mode
+    path: forks/vimrc-mode
+    remote:
+      upstream: https://github.com/mcandre/vimrc-mode
+
+  # END: UNMAINTAINED PACKAGES THAT I FORKED
+  # ----------------------------------------------------------------------------
+
+
+
+
 
   # ----------------------------------------------------------------------------
   # Vim

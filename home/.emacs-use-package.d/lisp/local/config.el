@@ -384,36 +384,99 @@
 
 ;; (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
 
-;; (let ((deny-list '(
-;;                    ;; "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]gc\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
-;;                    "\\(?:[/\\\\]bind-key\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-lib\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
-;;                    "\\(?:[/\\\\]bytecomp\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-ensure\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-delight\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-diminish\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\]use-package-bind-key\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]use-package-core\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]easy-mmode\\.el\\(?:\\.gz\\)?$\\)"
+;; TODO minimal-emacs
+
+;; Disable native compilation for dynamically generated files
 ;;
-;;                    ;; Emacs 30.2
-;;                    "\\(?:[/\\\\]ansi-color\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]comeint\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-macs\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-seq\\.el\\(?:\\.gz\\)?$\\)"
-;;                    "\\(?:[/\\\\]cl-extra\\.el\\(?:\\.gz\\)?$\\)"
+;; These files change frequently during package updates or are too small to
+;; benefit from native compilation.
 ;;
-;;                    ;; Compiling:
-;;                    ;; /path/to/emacs/30.1/lisp/org/org-loaddefs.el.gz...
-;;                    ;; "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
-;;                    ;; "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
-;;                    )))
-;;   (setq native-comp-jit-compilation-deny-list deny-list)
-;;   ;; Deprecated
-;;   (with-no-warnings
-;;     (setq native-comp-deferred-compilation-deny-list deny-list)
-;;     (setq comp-deferred-compilation-deny-list deny-list)))
+;; TODO custom.el If your configuration forces the Emacs customize interface to
+;; write to a separate file (e.g., (setq custom-file (expand-file-name
+;; "custom.el" user-emacs-directory))), you should exclude it. Emacs routinely
+;; overwrites this file with raw data (custom variables and face definitions).
+;; libgccjit cannot optimize data parsing.
+(let ((deny-list `(;; Native compilation translates Lisp into C code to optimize
+                   ;; logic paths, loops, and math. A .dir-locals.el file is not
+                   ;; an executable program; it is a static data structure (an
+                   ;; association list) used to apply project-specific
+                   ;; variables. Compiling static data provides zero benefit
+                   ;; because the Lisp reader still has to parse the data
+                   ;; structure regardless of whether it is compiled or not.
+                   "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
+
+                   ;; The *-autoloads.el and *-loaddefs.el files are
+                   ;; automatically generated indices. Every time a package is
+                   ;; installed or updated, these files are overwritten. If you
+                   ;; do not block them, Emacs will spawn background GCC
+                   ;; processes for every update. This wastes CPU cycles and
+                   ;; fills your eln-cache directory with obsolete shared
+                   ;; libraries (.eln files) that will simply be discarded on
+                   ;; the next package update.
+                   "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
+                   "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
+
+                   ;; Just like autoloads, package.el dynamically generates a
+                   ;; -pkg.el file for every package you install. These files
+                   ;; contain a single (define-package ...) form holding
+                   ;; metadata (version number, author, dependencies). Because
+                   ;; it is 100% static data, compiling it is a waste of CPU and
+                   ;; disk I/O.
+                   "\\(?:[/\\\\][^/\\\\]+-pkg\\.el\\(?:\\.gz\\)?$\\)"
+
+                   ;; TODO Useless?
+                   ;; "\\(?:[/\\\\][^/\\\\]+-tests?\\.el\\(?:\\.gz\\)?$\\)"
+                   ;; "\\(?:[/\\\\]\\.dir-settings\\.el\\(?:\\.gz\\)?$\\)"
+
+                   ;; emacs-data directory
+                   ,(concat "^"
+                            (regexp-quote (abbreviate-file-name
+                                           (expand-file-name "~/.emacs-data")))
+                            ".*\\.el\\(?:\\.gz\\)?$")
+
+                   ;; var directory
+                   ,(concat "^"
+                            (regexp-quote (expand-file-name "~/.emacs-data"))
+                            ".*\\.el\\(?:\\.gz\\)?$")
+
+                   ;; TODO this will exclude straight/elpa packages
+                   ;; ,(concat "^"
+                   ;;          (regexp-quote (abbreviate-file-name
+                   ;;                         (expand-file-name lightemacs-var-directory)))
+                   ;;          ".*\\.el\\(?:\\.gz\\)?$")
+                   ;; ,(concat "^"
+                   ;;          (regexp-quote (expand-file-name lightemacs-var-directory))
+                   ;;          ".*\\.el\\(?:\\.gz\\)?$")
+                   )))
+  (setq native-comp-jit-compilation-deny-list deny-list)
+  ;; Backwards compatibility for deprecated variable names that were replaced by
+  ;; `native-comp-jit-compilation-deny-list'.
+  (with-no-warnings
+    (if (boundp 'native-comp-deferred-compilation-deny-list)
+        (setq native-comp-deferred-compilation-deny-list deny-list)
+      (when (boundp 'comp-deferred-compilation-deny-list)
+        (setq comp-deferred-compilation-deny-list deny-list)))))
+
+;; Removed:
+;; --------
+;; "\\(?:[/\\\\]gc\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
+;; "\\(?:[/\\\\]bind-key\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]cl-lib\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
+;; "\\(?:[/\\\\]bytecomp\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]use-package-ensure\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]use-package-delight\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]use-package-diminish\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]use-package-bind-key\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]use-package-core\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]easy-mmode\\.el\\(?:\\.gz\\)?$\\)"
+
+;; Emacs 30.2
+;; "\\(?:[/\\\\]ansi-color\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]comeint\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]cl-macs\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]cl-seq\\.el\\(?:\\.gz\\)?$\\)"
+;; "\\(?:[/\\\\]cl-extra\\.el\\(?:\\.gz\\)?$\\)"
+
 
 ;;; Package manager
 
@@ -968,9 +1031,7 @@ This uses an around advice to trap errors and verify file timestamps."
 
 (when (eq lightemacs-package-manager 'straight)
   (setq straight-recipe-overrides
-        '(; Replace radian mirror
-
-          ;; Disable straight mirror for the following packages
+        '(;; Disable straight mirror for the following packages
           ;; (modus-themes . (modus-themes :type built-in))
 
           ;; TODO prevent transient from pulling seq
@@ -995,24 +1056,57 @@ This uses an around advice to trap errors and verify file timestamps."
                         :repo "protesilaos/ef-themes"))
 
           ;; Forks
-          (lua-mode . (lua-mode
-                       :type git :host github
-                       :repo "jamescherti/lua-mode"))
+          (wgrep . (wgrep
+                    :type git :host github
+                    :repo "jamescherti/Emacs-wgrep"))
+          (aggressive-indent-mode . (aggressive-indent-mode
+                                     :type git :host github
+                                     :repo "jamescherti/aggressive-indent-mode"))
           (ansible-doc . (ansible-doc
                           :type git :host github
                           :repo "jamescherti/ansible-doc"))
-          (goto-chg . (goto-chg
-                       :type git :host github
-                       :repo "jamescherti/goto-chg"))
-          (gcmh . (gcmh
-                   :type git :host github
-                   :repo "jamescherti/gcmh"))
           (dired-hacks . (dired-hacks
                           :type git :host github
                           :repo "jamescherti/dired-hacks"))
+          (easy-escape . (easy-escape
+                          :type git :host github
+                          :repo "jamescherti/easy-escape"))
+          (edit-indirect . (edit-indirect
+                            :type git :host github
+                            :repo "jamescherti/edit-indirect"))
+          (elisp-refs . (elisp-refs
+                         :type git :host github
+                         :repo "jamescherti/elisp-refs"))
           (evil-snipe . (evil-snipe
                          :type git :host github
-                         :repo "jamescherti/evil-snipe")))))
+                         :repo "jamescherti/evil-snipe"))
+          (f . (f
+                :type git :host github
+                :repo "jamescherti/f.el"))
+          (flymake-quickdef . (flymake-quickdef
+                               :type git :host github
+                               :repo "jamescherti/flymake-quickdef"))
+          (gcmh . (gcmh
+                   :type git :host github
+                   :repo "jamescherti/gcmh"))
+          (goto-chg . (goto-chg
+                       :type git :host github
+                       :repo "jamescherti/goto-chg"))
+          (helpful . (helpful
+                      :type git :host github
+                      :repo "jamescherti/helpful"))
+          (highlight-defined . (highlight-defined
+                                :type git :host github
+                                :repo "jamescherti/highlight-defined"))
+          (lua-mode . (lua-mode
+                       :type git :host github
+                       :repo "jamescherti/lua-mode"))
+          (org-appear . (org-appear
+                         :type git :host github
+                         :repo "jamescherti/org-appear"))
+          (vimrc-mode . (vimrc-mode
+                         :type git :host github
+                         :repo "jamescherti/vimrc-mode")))))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))

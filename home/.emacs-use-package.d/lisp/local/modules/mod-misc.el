@@ -4214,7 +4214,9 @@ properly handles remote files over Tramp), applying the setting only if
         ))))
 
 (with-eval-after-load 'diff-hl
-  (define-key diff-hl-mode-map (kbd "C-x v b") #'diff-hl-set-reference-rev)
+  (if (fboundp 'diff-hl-set-reference-rev)
+      (define-key diff-hl-mode-map (kbd "C-x v b") #'diff-hl-set-reference-rev)
+    (error "Undefined: diff-hl-set-reference-rev"))
   ;; (advice-add 'diff-hl-mode :before #'my-diff-hl-set-upstream-reference)
   )
 

@@ -41,27 +41,24 @@
  ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
 
  ;; Unmaintained
- ;; TODO Use my forks
- ("flymake-quickdef" . "150c5839768a3d32f988f9dc08052978a68f2ad7")
- ("highlight-defined" . "4420bdda419875dacb065468aafe273b2022580e")
- ("easy-escape" . "938497a21e65ba6b3ff8ec90e93a6d0ab18dc9b4")
+ ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
  ("aggressive-indent-mode" . "a437a45868f94b77362c6b913c5ee8e67b273c42")
+ ("ansible-doc" . "86083a7bb2ed0468ca64e52076b06441a2f8e9e0")
+ ("dired-hacks" . "6d1184ea48c2d1cb87fa5faf7712fb7755f279a6")
+ ("easy-escape" . "938497a21e65ba6b3ff8ec90e93a6d0ab18dc9b4")
  ("edit-indirect" . "82a28d8a85277cfe453af464603ea330eae41c05")
  ("elisp-refs" . "541a064c3ce27867872cf708354a65d83baf2a6d")
- ("org-appear" . "32ee50f8fdfa449bbc235617549c1bccb503cb09")
- ("f.el" . "931b6d0667fe03e7bf1c6c282d6d8d7006143c52")
- ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
- ("vimrc-mode" . "f594392a0834193a1fe1522d007e1c8ce5b68e43")
- ("helpful" . "03756fa6ad4dcca5e0920622b1ee3f70abfc4e39")
-
- ;; My forks
- ("lua-mode" . "2f6b8d7a6317e42c953c5119b0119ddb337e0a5f")
- ("ansible-doc" . "86083a7bb2ed0468ca64e52076b06441a2f8e9e0")
- ("goto-chg" . "72f556524b88e9d30dc7fc5b0dc32078c166fda7")
- ("gcmh" . "0089f9c3a6d4e9a310d0791cf6fa8f35642ecfd9")
- ("paredit" . "57c9f26c51e2e33ad70c45d2c393b1e458e95685")
- ("dired-hacks" . "6d1184ea48c2d1cb87fa5faf7712fb7755f279a6")
  ("evil-snipe" . "20567e1f900e77f5d8261370ee55e4ae69160bb0") ; RSS
+ ("f.el" . "931b6d0667fe03e7bf1c6c282d6d8d7006143c52")
+ ("flymake-quickdef" . "150c5839768a3d32f988f9dc08052978a68f2ad7")
+ ("gcmh" . "0089f9c3a6d4e9a310d0791cf6fa8f35642ecfd9")
+ ("goto-chg" . "72f556524b88e9d30dc7fc5b0dc32078c166fda7")
+ ("helpful" . "03756fa6ad4dcca5e0920622b1ee3f70abfc4e39")
+ ("highlight-defined" . "f9f4b22d70799965f4c0e5b002dbd4e111c78abc")
+ ("lua-mode" . "2f6b8d7a6317e42c953c5119b0119ddb337e0a5f")
+ ("org-appear" . "32ee50f8fdfa449bbc235617549c1bccb503cb09")
+ ("paredit" . "57c9f26c51e2e33ad70c45d2c393b1e458e95685")
+ ("vimrc-mode" . "42c23497381d5f8a3417aa592c74370a181b820c")
 
  ;; No tags
  ("straight.el" . "e40a5b7f8b0c1bb2cde0e7e477b5f81303e34b95")
