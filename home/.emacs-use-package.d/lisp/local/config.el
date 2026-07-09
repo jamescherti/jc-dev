@@ -1025,6 +1025,9 @@ This uses an around advice to trap errors and verify file timestamps."
     (advice-add 'straight-freeze-versions :around #'my-copy-straight-profile-advice)))
 
 (setq straight-recipes-gnu-elpa-use-mirror nil)
+
+;; Changing straight-recipes-emacsmirror-use-mirror to nil makes straight use
+;; epkgs
 (setq straight-recipes-emacsmirror-use-mirror nil)
 
 (setq lightemacs-straight-bootstrap-url "https://raw.githubusercontent.com/jamescherti/straight.el/main/install.el")
@@ -1061,7 +1064,32 @@ This uses an around advice to trap errors and verify file timestamps."
             ;;  :type git :host github
             ;;  :repo "protesilaos/ef-themes")
 
-            ;; Forks
+            ;; Forks of maintained packages
+            (diff-hl
+             :type git :host github
+             :repo "jamescherti/diff-hl")
+            (dtrt-indent
+             :type git :host github
+             :repo "jamescherti/dtrt-indent")
+            (evil
+             :type git :host github
+             :repo "jamescherti/evil")
+            (evil-collection
+             :type git :host github
+             :repo "jamescherti/evil-collection")
+            (yasnippet
+             :type git :host github
+             :repo "jamescherti/yasnippet")
+            (git-gutter
+             :type git :host github
+             :repo "jamescherti/git-gutter")
+
+            ;; No tags (forked)
+            (vterm
+             :type git :host github
+             :repo "emacs-libvterm")
+
+            ;; Forks of unmaintained packages
             (wgrep
              :type git :host github
              :repo "jamescherti/Emacs-wgrep")

@@ -251,6 +251,8 @@ tasks:
 
   - git: git@github.com:jamescherti/git-gutter
     path: forks/git-gutter
+    remote:
+      upstream: https://github.com/emacsorphanage/git-gutter/
 
   - git: git@github.com:jamescherti/jinja2-mode
     path: forks/jinja2-mode
