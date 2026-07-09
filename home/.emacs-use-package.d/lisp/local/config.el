@@ -1038,18 +1038,13 @@ This uses an around advice to trap errors and verify file timestamps."
   (setq straight-recipe-overrides
         '((nil
            .
-           (;; Disable straight mirror for the following packages
-            ;; (modus-themes :type built-in)
-
-            ;; TODO prevent transient from pulling seq
+           (;; Built-in
             (seq :type built-in)
-            (transient :type built-in)  ; Remove this pulls seq
-
+            (transient :type built-in)
             (let-alist :type built-in)
             (use-package :type built-in)
             (bind-key :type built-in)
 
-            ;; TODO fix
             (compat
              :type git
              :host github
@@ -1059,7 +1054,9 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jdtsmith/indent-bars")
 
-            ;; TODO fix thi
+            ;; (modus-themes :type built-in)
+
+            ;; TODO fix this
             ;; (ef-themes
             ;;  :type git :host github
             ;;  :repo "protesilaos/ef-themes")
