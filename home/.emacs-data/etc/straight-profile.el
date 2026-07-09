@@ -1,71 +1,67 @@
-(("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7
- ("corfu" . "4a9c67da16eb64cadaa4bfcc16713188145c83da") ; 2.10
- ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6
- ("embark" . "27de48004242e98586b9c9661fdb6912f26fe70f") ; 1.2
- ("apheleia" . "b5d120a419816f9d6b3d0e45f0951dd3d6a10b77") ; v4.5.0
- ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7
- ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11
- ("vertico" . "6028bd3d32c99c28e2b938e5e5393ec3508d2424")  ; 2.10
- ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3
- ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0
- ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0
- ("dtrt-indent" . "4b71bf995b12966bbc350a32796b9a5f11d67fa6") ; 1.27
- ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0
- ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5
- ("llama" . "d430d48e0b5afd2a34b5531f103dcb110c3539c4") ; v1.0.4
- ("el-get" . "ec3b0a052bf2f90f30c51042ddb06471b35c7ab6") ; 5.2
- ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0
- ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8
- ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0
- ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0
- ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0
- ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7
- ("compat" . "b5b48183689b536f72b1214106afeabc465da9d4") ; Version 31.0.0.1
+(("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7 | RSS RELEASE
+ ("corfu" . "4a9c67da16eb64cadaa4bfcc16713188145c83da") ; 2.10 | RSS RELEASE
+ ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
+ ("embark" . "27de48004242e98586b9c9661fdb6912f26fe70f") ; 1.2 | RSS RELEASE
+ ("apheleia" . "b5d120a419816f9d6b3d0e45f0951dd3d6a10b77") ; v4.5.0 | RSS RELEASE
+ ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
+ ("vertico" . "6028bd3d32c99c28e2b938e5e5393ec3508d2424")  ; 2.10 | RSS RELEASE
+ ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7 | RSS RELEASE
+ ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
+ ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
+ ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
+ ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE
+ ("dtrt-indent" . "4b71bf995b12966bbc350a32796b9a5f11d67fa6") ; 1.27 | RSS RELEASE
+ ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
+ ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
+ ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
+ ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
+ ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE
+ ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0 | RSS RELEASE
+ ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
+ ("compat" . "b5b48183689b536f72b1214106afeabc465da9d4") ; Version 31.0.0.1 | RSS RELEASE
+ ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
 
- ;; Mirror bot
- ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00") ; 2.24
- ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5
- ;; ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
- ;; ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
- ;; ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
+ ;; TODO OUTDATED
+ ("el-get" . "ec3b0a052bf2f90f30c51042ddb06471b35c7ab6") ; 5.2 | RSS RELEASE | TODO delete?
+ ("llama" . "d430d48e0b5afd2a34b5531f103dcb110c3539c4") ; v1.0.4 | RSS RELEASE | TODO delete?
 
- ;; TODO
-
- ;; Outdated tag
- ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
- ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188")
+ ;; Outdated tag | TODO Add to RSS
  ("diff-hl" . "2d7d0714d9637f54af672987c65b6973b31e56a2")
- ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37")
- ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
- ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da")
  ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf")
  ("evil-surround" . "e6548372e8359ee55e67d73ca418314086011f1a")
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
+ ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37")
+ ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
+ ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188")
+ ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
+ ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
  ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
  ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
 
  ;; Unmaintained
- ;; TODO: Use my repository
- ("lua-mode" . "2f6b8d7a6317e42c953c5119b0119ddb337e0a5f")
- ("ansible-doc" . "86083a7bb2ed0468ca64e52076b06441a2f8e9e0")
+ ;; TODO Use my forks
  ("flymake-quickdef" . "150c5839768a3d32f988f9dc08052978a68f2ad7")
- ("gcmh" . "0089f9c3a6d4e9a310d0791cf6fa8f35642ecfd9")
  ("highlight-defined" . "4420bdda419875dacb065468aafe273b2022580e")
  ("easy-escape" . "938497a21e65ba6b3ff8ec90e93a6d0ab18dc9b4")
  ("aggressive-indent-mode" . "a437a45868f94b77362c6b913c5ee8e67b273c42")
  ("edit-indirect" . "82a28d8a85277cfe453af464603ea330eae41c05")
- ("goto-chg" . "72f556524b88e9d30dc7fc5b0dc32078c166fda7")
  ("elisp-refs" . "541a064c3ce27867872cf708354a65d83baf2a6d")
  ("org-appear" . "32ee50f8fdfa449bbc235617549c1bccb503cb09")
- ("paredit" . "af075775af91f2dbc63b915d762b4aec092946c4")
  ("f.el" . "931b6d0667fe03e7bf1c6c282d6d8d7006143c52")
  ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
  ("vimrc-mode" . "f594392a0834193a1fe1522d007e1c8ce5b68e43")
  ("helpful" . "03756fa6ad4dcca5e0920622b1ee3f70abfc4e39")
- ("evil-snipe" . "16317d7e54313490a0fe8642ed9a1a72498e7ad2")
- ("dired-hacks" . "de9336f4b47ef901799fe95315fa080fa6d77b48")
+
+ ;; My forks
+ ("lua-mode" . "2f6b8d7a6317e42c953c5119b0119ddb337e0a5f")
+ ("ansible-doc" . "86083a7bb2ed0468ca64e52076b06441a2f8e9e0")
+ ("goto-chg" . "72f556524b88e9d30dc7fc5b0dc32078c166fda7")
+ ("gcmh" . "0089f9c3a6d4e9a310d0791cf6fa8f35642ecfd9")
+ ("paredit" . "57c9f26c51e2e33ad70c45d2c393b1e458e95685")
+ ("dired-hacks" . "6d1184ea48c2d1cb87fa5faf7712fb7755f279a6")
+ ("evil-snipe" . "20567e1f900e77f5d8261370ee55e4ae69160bb0") ; RSS
 
  ;; No tags
  ("straight.el" . "e40a5b7f8b0c1bb2cde0e7e477b5f81303e34b95")
@@ -108,5 +104,10 @@
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
  ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
- )
+
+ ;; Marked as built-in
+ ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00") ; 2.24
+ ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
+ ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
+ ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c"))
 :epsilon

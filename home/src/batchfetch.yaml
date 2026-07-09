@@ -339,6 +339,8 @@ tasks:
 
   - git: git@github.com:jamescherti/evil-snipe
     path: forks/evil-snipe
+    remote:
+      upstream: https://github.com/hlissner/evil-snipe
 
   - git: git@github.com:jamescherti/emacs-libvterm
     path: forks/emacs-libvterm

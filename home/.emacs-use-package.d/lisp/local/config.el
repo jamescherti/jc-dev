@@ -992,7 +992,27 @@ This uses an around advice to trap errors and verify file timestamps."
                           :repo "jdtsmith/indent-bars"))
           (ef-themes . (ef-themes
                         :type git :host github
-                        :repo "protesilaos/ef-themes")))))
+                        :repo "protesilaos/ef-themes"))
+
+          ;; Forks
+          (lua-mode . (lua-mode
+                       :type git :host github
+                       :repo "jamescherti/lua-mode"))
+          (ansible-doc . (ansible-doc
+                          :type git :host github
+                          :repo "jamescherti/ansible-doc"))
+          (goto-chg . (goto-chg
+                       :type git :host github
+                       :repo "jamescherti/emacs-goto-chg"))
+          (gcmh . (gcmh
+                   :type git :host github
+                   :repo "jamescherti/gcmh"))
+          (dired-hacks . (dired-hacks
+                          :type git :host github
+                          :repo "jamescherti/dired-hacks"))
+          (evil-snipe . (evil-snipe
+                         :type git :host github
+                         :repo "jamescherti/evil-snipe")))))
 
 ;; (add-to-list 'straight-recipe-overrides
 ;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
