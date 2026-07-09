@@ -1031,117 +1031,84 @@ This uses an around advice to trap errors and verify file timestamps."
 
 (when (eq lightemacs-package-manager 'straight)
   (setq straight-recipe-overrides
-        '(;; Disable straight mirror for the following packages
-          ;; (modus-themes . (modus-themes :type built-in))
+        '((nil
+           .
+           (;; Disable straight mirror for the following packages
+            ;; (modus-themes :type built-in)
 
-          ;; TODO prevent transient from pulling seq
-          (seq . (seq :type built-in))
-          (transient . (transient :type built-in))  ; Remove this pulls seq
+            ;; TODO prevent transient from pulling seq
+            (seq :type built-in)
+            (transient :type built-in)  ; Remove this pulls seq
 
-          (let-alist . (let-alist :type built-in))
-          (use-package . (use-package :type built-in))
-          (bind-key . (bind-key :type built-in))
+            (let-alist :type built-in)
+            (use-package :type built-in)
+            (bind-key :type built-in)
 
-          ;; TODO fix
-          (compat . (compat
-                     :type git
-                     :host github
-                     :repo "emacs-compat/compat"))
+            ;; TODO fix
+            (compat
+             :type git
+             :host github
+             :repo "emacs-compat/compat")
 
-          (indent-bars . (indent-bars
-                          :type git :host github
-                          :repo "jdtsmith/indent-bars"))
-          (ef-themes . (ef-themes
-                        :type git :host github
-                        :repo "protesilaos/ef-themes"))
+            (indent-bars
+             :type git :host github
+             :repo "jdtsmith/indent-bars")
+            (ef-themes
+             :type git :host github
+             :repo "protesilaos/ef-themes")
 
-          ;; Forks
-          (wgrep . (wgrep
-                    :type git :host github
-                    :repo "jamescherti/Emacs-wgrep"))
-          (aggressive-indent-mode . (aggressive-indent-mode
-                                     :type git :host github
-                                     :repo "jamescherti/aggressive-indent-mode"))
-          (ansible-doc . (ansible-doc
-                          :type git :host github
-                          :repo "jamescherti/ansible-doc"))
-          (dired-hacks . (dired-hacks
-                          :type git :host github
-                          :repo "jamescherti/dired-hacks"))
-          (easy-escape . (easy-escape
-                          :type git :host github
-                          :repo "jamescherti/easy-escape"))
-          (edit-indirect . (edit-indirect
-                            :type git :host github
-                            :repo "jamescherti/edit-indirect"))
-          (elisp-refs . (elisp-refs
-                         :type git :host github
-                         :repo "jamescherti/elisp-refs"))
-          (evil-snipe . (evil-snipe
-                         :type git :host github
-                         :repo "jamescherti/evil-snipe"))
-          (f . (f
-                :type git :host github
-                :repo "jamescherti/f.el"))
-          (flymake-quickdef . (flymake-quickdef
-                               :type git :host github
-                               :repo "jamescherti/flymake-quickdef"))
-          (gcmh . (gcmh
-                   :type git :host github
-                   :repo "jamescherti/gcmh"))
-          (goto-chg . (goto-chg
-                       :type git :host github
-                       :repo "jamescherti/goto-chg"))
-          (helpful . (helpful
-                      :type git :host github
-                      :repo "jamescherti/helpful"))
-          (highlight-defined . (highlight-defined
-                                :type git :host github
-                                :repo "jamescherti/highlight-defined"))
-          (lua-mode . (lua-mode
-                       :type git :host github
-                       :repo "jamescherti/lua-mode"))
-          (org-appear . (org-appear
-                         :type git :host github
-                         :repo "jamescherti/org-appear"))
-          (vimrc-mode . (vimrc-mode
-                         :type git :host github
-                         :repo "jamescherti/vimrc-mode")))))
-
-;; (add-to-list 'straight-recipe-overrides
-;;              '(compile-angel :local-repo "~/src/emacs/compile-angel.el"))
-;; Tell straight.el to treat it as a built-in Emacs package
-
-;; NOTE DISABLED to avoid .elc conflicts
-;; (dolist (item '(be-quiet
-;;                 bufferfile
-;;                 buffer-terminator
-;;                 wizard
-;;                 compile-angel
-;;                 cursorcolumn
-;;                 dir-config
-;;                 easysession
-;;                 enhanced-evil-paredit
-;;                 flymake-ansible-lint
-;;                 flymake-bashate
-;;                 inhibit-mouse
-;;                 kirigami
-;;                 org-ibullets
-;;                 outline-indent
-;;                 outline-yaml
-;;                 pathaction
-;;                 persist-text-scale
-;;                 quick-fasd
-;;                 quick-sdcv
-;;                 stripspace
-;;                 tomorrow-night-deepblue-theme
-;;                 ultisnips-mode
-;;                 vim-tab-bar))
-;;   (when (file-exists-p (expand-file-name (concat (symbol-name item) ".el")
-;;                                          "~/src/emacs"))
-;;     (when (eq lightemacs-package-manager 'straight)
-;;       (add-to-list 'straight-recipe-overrides
-;;                    (list item :type 'built-in)))))
+            ;; Forks
+            (wgrep
+             :type git :host github
+             :repo "jamescherti/Emacs-wgrep")
+            (aggressive-indent-mode
+             :type git :host github
+             :repo "jamescherti/aggressive-indent-mode")
+            (ansible-doc
+             :type git :host github
+             :repo "jamescherti/ansible-doc")
+            (dired-hacks
+             :type git :host github
+             :repo "jamescherti/dired-hacks")
+            (easy-escape
+             :type git :host github
+             :repo "jamescherti/easy-escape")
+            (edit-indirect
+             :type git :host github
+             :repo "jamescherti/edit-indirect")
+            (elisp-refs
+             :type git :host github
+             :repo "jamescherti/elisp-refs")
+            (evil-snipe
+             :type git :host github
+             :repo "jamescherti/evil-snipe")
+            (f
+             :type git :host github
+             :repo "jamescherti/f.el")
+            (flymake-quickdef
+             :type git :host github
+             :repo "jamescherti/flymake-quickdef")
+            (gcmh
+             :type git :host github
+             :repo "jamescherti/gcmh")
+            (goto-chg
+             :type git :host github
+             :repo "jamescherti/goto-chg")
+            (helpful
+             :type git :host github
+             :repo "jamescherti/helpful")
+            (highlight-defined
+             :type git :host github
+             :repo "jamescherti/highlight-defined")
+            (lua-mode
+             :type git :host github
+             :repo "jamescherti/lua-mode")
+            (org-appear
+             :type git :host github
+             :repo "jamescherti/org-appear")
+            (vimrc-mode
+             :type git :host github
+             :repo "jamescherti/vimrc-mode"))))))
 
 ;;; Add my packages to load path
 
