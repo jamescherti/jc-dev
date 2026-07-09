@@ -1027,6 +1027,8 @@ This uses an around advice to trap errors and verify file timestamps."
 (setq straight-recipes-gnu-elpa-use-mirror nil)
 (setq straight-recipes-emacsmirror-use-mirror nil)
 
+(setq lightemacs-straight-bootstrap-url "https://raw.githubusercontent.com/jamescherti/straight.el/main/install.el")
+
 (setq straight-recipes-org-url "https://github.com/jamescherti/org-mode")
 
 (when (eq lightemacs-package-manager 'straight)
@@ -1053,9 +1055,11 @@ This uses an around advice to trap errors and verify file timestamps."
             (indent-bars
              :type git :host github
              :repo "jdtsmith/indent-bars")
-            (ef-themes
-             :type git :host github
-             :repo "protesilaos/ef-themes")
+
+            ;; TODO fix thi
+            ;; (ef-themes
+            ;;  :type git :host github
+            ;;  :repo "protesilaos/ef-themes")
 
             ;; Forks
             (wgrep
@@ -1108,7 +1112,12 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/org-appear")
             (vimrc-mode
              :type git :host github
-             :repo "jamescherti/vimrc-mode"))))))
+             :repo "jamescherti/vimrc-mode")
+
+            ;; Straight
+            (straight
+             :type git :host github
+             :repo "jamescherti/straight.el"))))))
 
 ;;; Add my packages to load path
 

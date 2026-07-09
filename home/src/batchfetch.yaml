@@ -332,9 +332,13 @@ tasks:
       upstream: https://github.com/kyagi/shell-pop-el
 
 
-
-
-
+  # ----------------------------------------------------------------------------
+  # Straight
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/straight.el.git
+    path: forks/straight.el
+    remote:
+      upstream: https://github.com/radian-software/straight.el
 
   # ----------------------------------------------------------------------------
   # START: UNMAINTAINED PACKAGES THAT I FORKED
