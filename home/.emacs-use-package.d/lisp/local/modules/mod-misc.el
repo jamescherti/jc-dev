@@ -731,9 +731,6 @@ any new ones."
 
   ;; (add-hook 'web-mode-hook 'hs-minor-mode)
 
-  (progn
-    (add-hook 'markdown-ts-mode-hook 'outline-minor-mode))
-
   ;; (add-hook 'js-ts-mode-hook 'hs-minor-mode)
 
   ;; (add-hook 'lisp-interaction-mode-hook #'outline-minor-mode)

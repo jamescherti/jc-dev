@@ -1529,145 +1529,16 @@ If the parentheses are balanced, the function returns t."
                           nil t))
               (add-hook 'after-save-hook #'my-check-parens-no-jump -99 t)))
 
-;;; markdown mode
+;;; Markdown mode
 
-;; (when (>= emacs-major-version 31)
-;;   t
-;;   ;; (with-eval-after-load 'mod-cleanup
-;;   ;;   (when (my-treesit-language-available-p 'markdown)
-;;   ;;     (push 'markdown-mode mod-cleanup-packages-list)
-;;   ;;     (push 'markdown-toc mod-cleanup-packages-list)))
-;;   )
-
-(defun my-setup-markdown-mode ()
-  "Setup markdown modes."
-  ;; In gptel buffers we set `nobreak-char-display' to nil locally so that the
-  ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
-  ;; space. This suppresses the distinct glyph or face Emacs normally applies
-  ;; to NBSP, keeping the buffer free of distracting blue highlights while
-  ;; preserving the character's internal no-break semantics.
-  ;;
-  ;; Here is an example of what is highlighted: $5 billion-valued.
-  ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
-  ;; and the hyphen after n are rendered as highlighted glyphs.
-  (setq-local nobreak-char-display nil)
-
-  ;; visual-line-mode is slow?
-  ;; (visual-line-mode 1)
-
-  (let ((inhibit-message t))
-    (toggle-truncate-lines 0)))
-
-;; (add-hook 'gfm-mode-hook #'my-setup-markdown-mode)
-(when (fboundp 'my-setup-markdown-mode)
-  (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
-  (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
-
-(unless (my-treesit-language-available-p 'markdown)
-  (with-eval-after-load 'markdown-mode
-    (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
-
-    (unless noninteractive
-      (define-key markdown-mode-map (kbd "TAB") #'ignore))
-
-    ;; (define-key markdown-mode-map (kbd "TAB") #'ignore)
-
-    ;; (evil-define-key 'normal markdown-mode-map (kbd "TAB") #'ignore)
-    ;; (evil-define-key 'normal markdown-mode-map (kbd "<tab>") #'ignore)
-    (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block)
-
-    ;; Lock list indentation to 2 spaces. When you hit Tab to nest a list item
-    ;; under a dash, it aligns perfectly with a 2-space structure, matching
-    ;; standard configuration habits (like your YAML spacing).
-    (setq markdown-list-indent-width 2)
-
-    (setq markdown-disable-tooltip-prompt t)
-    (setq markdown-split-window-direction 'right)
-    ;; Automates your formatting standard. When you press M-RET
-    ;; (markdown-insert-list-item), Emacs will insert the dash automatically
-    ;; rather than the default asterisk.
-    ;; (setq markdown-unordered-list-item-prefix "  - ")
-    (setq markdown-unordered-list-item-prefix "-   ")
-
-    ;; (setq markdown-enable-wiki-links t)
-    ;; (setq markdown-use-pandoc-style-yaml-metadata t)
-    ;; (setq markdown-footnote-location 'immediately)
-    ;; (setq markdown-enable-math nil)
-    ;; (setq markdown-display-remote-images nil)
-    ;; (setq markdown-italic-underscore t)
-    ;; (setq markdown-blockquote-display-char '("┃" ">"))
-    ;; (setq markdown-list-item-bullets '("⏺" "▪" "◆" "►" "•" "◇"))
-    ;; (setq markdown-asymmetric-header t)
-    ;; (setq markdown-make-gfm-checkboxes-buttons t)
-    ;; (setq markdown-open-command "~/.bin/run-markdown.sh")
-    ;; Contain bugs when make-window-start-visible is set to t
-    ;; (setq markdown-hide-markup t)
-    ;; (setq markdown-nested-imenu-heading-index t)
-
-    ;; Enables Previewing: Without configuring markdown-command, features like
-    ;; markdown-preview (C-c C-c p) or markdown-export will fail if Emacs cannot
-    ;; find a default compiler on your system path.
-    ;;
-    ;; Advanced Syntax: multimarkdown supports robust extensions that standard
-    ;; Markdown lacks, such as native tables, footnotes, and metadata blocks.
-    ;; (setq markdown-command "multimarkdown")
-
-    (setq markdown-fontify-whole-heading-line t)
-
-    ;; (custom-set-faces
-    ;;  '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.5 :weight bold))))
-    ;;  '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4 :weight bold))))
-    ;;  '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.3 :weight bold))))
-    ;;  '(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2 :weight bold)))))
-    (setq markdown-gfm-use-electric-backquote nil)
-    (setq markdown-heading-scaling t)
-
-    ;; (with-eval-after-load 'markdown-mode
-    ;;   (evil-define-key 'normal markdown-mode (kbd "RET") nil)
-    ;;   (evil-define-key 'normal markdown-mode (kbd "{") wizard-point-backward-to-empty-line)
-    ;;   (evil-define-key 'normal markdown-mode (kbd "}") indentnav-forward-to-empty-line))
-
-    (with-eval-after-load 'markdown-mode
-      (evil-collection-define-key 'normal 'markdown-mode-map
-        ;; Intercept
-        ;; "{" 'wizard-point-backward-to-empty-line
-        ;; "}" 'wizard-point-forward-to-empty-line
-        ;; RET can sometimes check and uncheck boxes. This is not
-        ;; something I want.
-        "RET" nil
-        [tab] nil
-        [S-tab] nil
-        ;; `evil-markdown' doesn't bind but spacemacs does.
-        (kbd "RET") 'markdown-do))
-
-    ;; Already merged to upstream
-    ;; (with-eval-after-load 'markdown-mode
-    ;;   ;; Modify the shared syntax table globally for all markdown buffers
-    ;;   (modify-syntax-entry ?' "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?* "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?> "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
-
-    )
-
-  (defun my-markdown-toc-gen-if-present ()
-    "Gen table of contents if present."
-    (when (and (fboundp 'markdown-toc--toc-already-present-p)
-               (fboundp 'markdown-toc-generate-toc)
-               (markdown-toc--toc-already-present-p))
-      (markdown-toc-generate-toc)))
-
-  (defun my-setup-markdown-toc ()
-    "Setup the markdown-toc package."
-    (when (fboundp 'my-markdown-toc-gen-if-present)
-      (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
-
-  (when (fboundp 'my-setup-markdown-toc)
-    (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
-
-  (setq markdown-toc-mode-map nil)
-  (setq markdown-toc-header-toc-title "## Table of Contents"))
+(with-eval-after-load 'markdown-mode
+  (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block)
+  (evil-collection-define-key 'normal 'markdown-mode-map
+    "RET" nil
+    [tab] nil
+    [S-tab] nil
+    ;; `evil-markdown' doesn't bind but spacemacs does.
+    (kbd "RET") 'markdown-do))
 
 ;;; Code that replaces evil visualstar
 
@@ -3196,11 +3067,6 @@ Accepts any arguments so it can be used as advice or a hook."
 ;; Example binding to C-c b c
 ;; (global-set-key (kbd "C-c b c") 'my-copy-whole-buffer-evil)
 (evil-define-key 'normal 'global (kbd "<leader>cb") #'my-copy-whole-buffer-evil)
-
-;;; markdown-ts-mode
-
-;; (with-eval-after-load 'markdown-ts-mode
-;;   (define-key markdown-ts-mode-map (kbd "TAB") nil))
 
 ;;; Manual recenter and scroll margin
 

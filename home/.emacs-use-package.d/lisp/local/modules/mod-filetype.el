@@ -752,6 +752,110 @@ only if they are not already available."
 (add-to-list 'auto-mode-alist '("/\\.gitignore\\.local\\'" . gitignore-mode))
 (add-to-list 'auto-mode-alist '("/\\.gitattributes\\.local\\'" . gitattributes-mode))
 
+;;; Markdown
+
+(defun my-setup-markdown-mode ()
+  "Setup markdown modes."
+  ;; In gptel buffers we set `nobreak-char-display' to nil locally so that the
+  ;; Unicode no-break space (U+00A0) is rendered just like a regular ASCII
+  ;; space. This suppresses the distinct glyph or face Emacs normally applies
+  ;; to NBSP, keeping the buffer free of distracting blue highlights while
+  ;; preserving the character's internal no-break semantics.
+  ;;
+  ;; Here is an example of what is highlighted: $5 billion-valued.
+  ;; When `nobreak-char-display' is non-nil, the non-breaking space after `5`
+  ;; and the hyphen after n are rendered as highlighted glyphs.
+  (setq-local nobreak-char-display nil)
+
+  (let ((inhibit-message t))
+    (toggle-truncate-lines 0)))
+
+(if (and (>= emacs-major-version 32)
+         (my-treesit-language-available-p 'markdown))
+    (progn
+      (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
+      (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
+  (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
+  (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
+  (with-eval-after-load 'markdown-mode
+    (define-key markdown-mode-map (kbd "TAB") #'ignore)
+
+    ;; Lock list indentation to 2 spaces. When you hit Tab to nest a list item
+    ;; under a dash, it aligns perfectly with a 2-space structure, matching
+    ;; standard configuration habits (like your YAML spacing).
+    (setq markdown-list-indent-width 2)
+
+    (setq markdown-disable-tooltip-prompt t)
+    (setq markdown-split-window-direction 'right)
+
+    ;; Automates your formatting standard. When you press M-RET
+    ;; (markdown-insert-list-item), Emacs will insert the dash automatically
+    ;; rather than the default asterisk.
+    (setq markdown-unordered-list-item-prefix "- ")
+
+    ;; (setq markdown-unordered-list-item-prefix "  - ")
+    ;; (setq markdown-enable-wiki-links t)
+    ;; (setq markdown-use-pandoc-style-yaml-metadata t)
+    ;; (setq markdown-footnote-location 'immediately)
+    ;; (setq markdown-enable-math nil)
+    ;; (setq markdown-display-remote-images nil)
+    ;; (setq markdown-italic-underscore t)
+    ;; (setq markdown-blockquote-display-char '("┃" ">"))
+    ;; (setq markdown-list-item-bullets '("⏺" "▪" "◆" "►" "•" "◇"))
+    ;; (setq markdown-asymmetric-header t)
+    ;; (setq markdown-make-gfm-checkboxes-buttons t)
+    ;; (setq markdown-open-command "~/.bin/run-markdown.sh")
+    ;; Contain bugs when make-window-start-visible is set to t
+    ;; (setq markdown-hide-markup t)
+    ;; (setq markdown-nested-imenu-heading-index t)
+
+    ;; Enables Previewing: Without configuring markdown-command, features like
+    ;; markdown-preview (C-c C-c p) or markdown-export will fail if Emacs cannot
+    ;; find a default compiler on your system path.
+    ;;
+    ;; Advanced Syntax: multimarkdown supports robust extensions that standard
+    ;; Markdown lacks, such as native tables, footnotes, and metadata blocks.
+    ;; (setq markdown-command "multimarkdown")
+
+    (setq markdown-fontify-whole-heading-line t)
+
+    ;; (custom-set-faces
+    ;;  '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.5 :weight bold))))
+    ;;  '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4 :weight bold))))
+    ;;  '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.3 :weight bold))))
+    ;;  '(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2 :weight bold)))))
+    (setq markdown-gfm-use-electric-backquote nil)
+    (setq markdown-heading-scaling t)
+
+    ;; Already merged to upstream
+    ;; (with-eval-after-load 'markdown-mode
+    ;;   ;; Modify the shared syntax table globally for all markdown buffers
+    ;;   (modify-syntax-entry ?' "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?* "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?> "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
+    ;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
+
+    )
+
+  (defun my-markdown-toc-gen-if-present ()
+    "Gen table of contents if present."
+    (when (and (fboundp 'markdown-toc--toc-already-present-p)
+               (fboundp 'markdown-toc-generate-toc)
+               (markdown-toc--toc-already-present-p))
+      (markdown-toc-generate-toc)))
+
+  (defun my-setup-markdown-toc ()
+    "Setup the markdown-toc package."
+    (when (fboundp 'my-markdown-toc-gen-if-present)
+      (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
+
+  (when (fboundp 'my-setup-markdown-toc)
+    (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
+
+  (setq markdown-toc-mode-map nil)
+  (setq markdown-toc-header-toc-title "## Table of Contents"))
+
 ;;; Provide
 
 (provide 'mod-filetype)
