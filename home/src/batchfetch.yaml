@@ -290,8 +290,8 @@ tasks:
     remote:
       upstream: https://codeberg.org/akib/emacs-eat
 
-  - git: git@github.com:jamescherti/emacs-goto-chg
-    path: forks/emacs-goto-chg
+  - git: git@github.com:jamescherti/goto-chg
+    path: forks/goto-chg
     remote:
       upstream: https://github.com/emacs-evil/goto-chg
 

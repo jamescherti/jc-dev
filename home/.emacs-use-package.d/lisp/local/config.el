@@ -1003,7 +1003,7 @@ This uses an around advice to trap errors and verify file timestamps."
                           :repo "jamescherti/ansible-doc"))
           (goto-chg . (goto-chg
                        :type git :host github
-                       :repo "jamescherti/emacs-goto-chg"))
+                       :repo "jamescherti/goto-chg"))
           (gcmh . (gcmh
                    :type git :host github
                    :repo "jamescherti/gcmh"))
