@@ -84,35 +84,31 @@
 ;;; smartindent-relative: Default indentation (relative)
 
 (defun smartindent-relative ()
-  "Indent based on the previous non-blank line with lookahead for blocks.
-This function wraps `indent-relative' with two enhancements:
-1. Strict Tab Fallback: It suppresses the default `tab-to-tab-stop' fallback
-   behavior of `indent-relative' unless the command was triggered by an explicit
-   TAB key press. This prevents unwanted tab stops from being inserted when
-   simply pressing Return.
-2. Lookahead Alignment: After calculating the relative indentation from the
-   previous line, it checks the indentation of the immediately following line.
-   If the next line has a deeper indentation than the current line, it aligns
-   the current line to match the next line. This is particularly useful in
-   formats like YAML when inserting a new line above an indented block."
-  ;; (indent-relative :first-only :unindented-ok)
-  ;; (when indent-line-ignored-functions
-  ;;   (setq-local indent-line-ignored-functions '()))
+  "Indent based on the previous non-blank line with lookahead for block structures.
+
+This function wraps `indent-relative' with the following enhancements:
+
+1. Strict First-Column Alignment: It hardcodes the `:first-only' flag, meaning
+   it will only ever align to the first text column of the previous line,
+   ignoring subsequent words (unlike the default `indent-relative' behavior).
+
+2. Strict Tab Fallback: It suppresses the `tab-to-tab-stop' fallback unless
+   the command was triggered by an explicit Tab key press. This prevents
+   unwanted tab stops when pressing Return.
+
+3. Lookahead Alignment: If inserting a blank line above an indented block
+   (e.g., in YAML), it checks the indentation of the next line. If the next
+   line is indented deeper than the current line, it aligns the current line
+   to match the next line."
 
   (let ((orig-point (point)))
     (unwind-protect
-        ;; first-only: Indent the current line like the previous nonblank line.
-        ;; Indent to the first indentation position in the previous nonblank
-        ;; line if that position is greater than the current column.
-        ;;
-        ;; unindented-ok: controls whether indent-relative is allowed to do
-        ;; nothing when it cannot find a sensible indentation target.
         (indent-relative :first-only :unindented-ok)
 
       (when (= orig-point (point))
         (cond
-         ;; Indent when the user presses tab
-         ((eq last-command-event ?\t)
+         ;; Indent when the user presses tab (handles both terminal and GUI Emacs)
+         ((memq last-command-event '(?\t tab))
           (tab-to-tab-stop))))
 
       ;; This is useful for Yaml
@@ -131,6 +127,55 @@ This function wraps `indent-relative' with two enhancements:
                    next-indentation
                    (> next-indentation cur-indentation))
           (indent-line-to next-indentation))))))
+
+;; (defun smartindent-relative ()
+;;   "Indent based on the previous non-blank line with lookahead for blocks.
+;; This function wraps `indent-relative' with two enhancements:
+;; 1. Strict Tab Fallback: It suppresses the default `tab-to-tab-stop' fallback
+;;    behavior of `indent-relative' unless the command was triggered by an explicit
+;;    TAB key press. This prevents unwanted tab stops from being inserted when
+;;    simply pressing Return.
+;; 2. Lookahead Alignment: After calculating the relative indentation from the
+;;    previous line, it checks the indentation of the immediately following line.
+;;    If the next line has a deeper indentation than the current line, it aligns
+;;    the current line to match the next line. This is particularly useful in
+;;    formats like YAML when inserting a new line above an indented block."
+;;   ;; (indent-relative :first-only :unindented-ok)
+;;   ;; (when indent-line-ignored-functions
+;;   ;;   (setq-local indent-line-ignored-functions '()))
+;;
+;;   (let ((orig-point (point)))
+;;     (unwind-protect
+;;         ;; first-only: Indent the current line like the previous nonblank line.
+;;         ;; Indent to the first indentation position in the previous nonblank
+;;         ;; line if that position is greater than the current column.
+;;         ;;
+;;         ;; unindented-ok: controls whether indent-relative is allowed to do
+;;         ;; nothing when it cannot find a sensible indentation target.
+;;         (indent-relative :first-only :unindented-ok)
+;;
+;;       (when (= orig-point (point))
+;;         (cond
+;;          ;; Indent when the user presses tab
+;;          ((eq last-command-event ?\t)
+;;           (tab-to-tab-stop))))
+;;
+;;       ;; This is useful for Yaml
+;;       ;; - name: Create file /etc/profile.d/mozilla-custom-wayland.sh
+;;       ;;   ansible.builtin.copy: |     <-------------- Press enter here
+;;       ;;     |     <------- Same indentation as next line
+;;       ;;     dest: /etc/profile.d/mozilla-custom-wayland.sh
+;;       (let ((previous-indentation (save-excursion
+;;                                     (when (= 0 (forward-line -1))
+;;                                       (current-indentation))))
+;;             (cur-indentation (current-indentation))
+;;             (next-indentation (save-excursion
+;;                                 (when (= 0 (forward-line 1))
+;;                                   (current-indentation)))))
+;;         (when (and previous-indentation
+;;                    next-indentation
+;;                    (> next-indentation cur-indentation))
+;;           (indent-line-to next-indentation))))))
 
 (setq-default indent-line-function #'smartindent-relative)
 

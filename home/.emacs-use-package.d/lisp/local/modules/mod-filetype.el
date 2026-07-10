@@ -361,10 +361,9 @@ only if they are not already available."
 
 (defun my-setup-yaml-mode ()
   "Config Yaml mode."
-  ;; TODO put it back
-  ;; (setq-local indent-line-function 'smartindent-indent-relative-to-visible)
-  t
-  )
+  ;; this patch has been merged in Emacs 32
+  (when (< emacs-major-version 32)
+    (setq-local tab-width 2)))
 
 (with-suppressed-warnings ((free-vars flymake-yamllint-arguments)
                            (free-vars yaml-ts-mode-yamllint-options))
