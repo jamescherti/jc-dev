@@ -229,7 +229,7 @@ alias git='_git_wrapper git'
 alias lrgit='_git_wrapper git-finder-exec git'
 
 _git_find_repos_wrapper() {
-  so git-rexec --exclude ~/src/forks/ -C . "$@"
+  so git-rexec --exclude ~/src/forks/ --exclude ~/src/local/ -C . "$@"
 }
 
 _gm_wrapper() {
