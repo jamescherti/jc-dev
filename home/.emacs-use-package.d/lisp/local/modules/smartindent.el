@@ -44,7 +44,19 @@
 
 (with-eval-after-load 'electric
   (when (bound-and-true-p electric-indent-mode)
-    (electric-indent-mode -1)))
+    (electric-indent-mode -1))
+  (setq-default electric-indent-mode nil))
+
+;; electric-indent-mode is enabled by default in Emacs (starting from version
+;; 24.4) because it is intended to provide a more modern, "out-of-the-box"
+;; experience for users who expect pressing RET to automatically position the
+;; cursor at the correct indentation level based on the context of the code.
+;;
+;; I am using `aggressive-indent-mode'.
+(defun my-disable-electric-indent-local-mode ()
+  "Disable `electric-indent-local-mode'."
+  (electric-indent-local-mode -1))
+(add-hook 'emacs-lisp-mode-hook #'my-disable-electric-indent-local-mode)
 
 ;; (defun my-disable-electric-indent-mode ()
 ;;   "Disable electric indent mode."

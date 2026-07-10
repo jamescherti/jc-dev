@@ -746,13 +746,13 @@ any new ones."
   (setq smerge-refine-shadow-cursor nil)
 
   (unless noninteractive
+    (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
+    (global-set-key (kbd "M-i") 'my-next-interesting-buffer)
+    ;; (global-set-key (kbd "M-=") 'global-text-scale-adjust)
     ;; (global-set-key (kbd "M-RET") 'toggle-term-tmux)
     ;; (global-set-key (kbd "M-<enter>") 'toggle-term-tmux)
     ;; (global-set-key (kbd "M-<return>") 'toggle-term-tmux)
 
-    (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
-    (global-set-key (kbd "M-i") 'my-next-interesting-buffer)
-    ;; (global-set-key (kbd "M-=") 'global-text-scale-adjust)
     (global-set-key (kbd "C--") 'text-scale-decrease)
     (global-set-key (kbd "C-+") 'text-scale-increase)
     (global-set-key (kbd "C-S-k") 'my-tab-bar-move-tab-backward)
