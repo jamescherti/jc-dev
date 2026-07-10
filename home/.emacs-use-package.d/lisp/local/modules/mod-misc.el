@@ -357,6 +357,10 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(when (bound-and-true-p gpm-mouse-mode)
+  (gpm-mouse-mode -1))
+(setq-default gpm-mouse-mode nil)
+
 ;; In standard (vanilla) Emacs, you do not select text by shifting into a visual
 ;; mode. Instead, you drop an anchor called the "mark" by pressing C-SPC, and
 ;; then move your cursor. The text between the mark and your cursor becomes your
