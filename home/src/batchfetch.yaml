@@ -285,6 +285,8 @@ tasks:
 
   - git: git@github.com:jamescherti/dtrt-indent
     path: forks/dtrt-indent
+    remote:
+      upstream: https://github.com/jscheid/dtrt-indent/
 
   - git: git@github.com:jamescherti/markdown-toc
     path: forks/markdown-toc

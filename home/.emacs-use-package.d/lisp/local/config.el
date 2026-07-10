@@ -1048,11 +1048,13 @@ This uses an around advice to trap errors and verify file timestamps."
             (compat
              :type git
              :host github
-             :repo "emacs-compat/compat")
+             :repo "emacs-compat/compat"
+             :branch "main")
 
             (indent-bars
              :type git :host github
-             :repo "jdtsmith/indent-bars")
+             :repo "jdtsmith/indent-bars"
+             :branch "main")
 
             ;; (modus-themes :type built-in)
 
@@ -1084,7 +1086,7 @@ This uses an around advice to trap errors and verify file timestamps."
             ;; No tags (forked)
             (vterm
              :type git :host github
-             :repo "emacs-libvterm")
+             :repo "jamescherti/emacs-libvterm")
 
             ;; Forks of unmaintained packages
             (wgrep
@@ -1096,7 +1098,13 @@ This uses an around advice to trap errors and verify file timestamps."
             (ansible-doc
              :type git :host github
              :repo "jamescherti/ansible-doc")
-            (dired-hacks
+            ;; (dired-subtree
+            ;;  :type git :host github
+            ;;  :repo "jamescherti/dired-hacks")
+            ;; (dired-narrow
+            ;;  :type git :host github
+            ;;  :repo "jamescherti/dired-hacks")
+            (dired-filter
              :type git :host github
              :repo "jamescherti/dired-hacks")
             (easy-escape
@@ -1135,6 +1143,9 @@ This uses an around advice to trap errors and verify file timestamps."
             (org-appear
              :type git :host github
              :repo "jamescherti/org-appear")
+            (paredit
+             :type git :host github
+             :repo "jamescherti/paredit")
             (vimrc-mode
              :type git :host github
              :repo "jamescherti/vimrc-mode")

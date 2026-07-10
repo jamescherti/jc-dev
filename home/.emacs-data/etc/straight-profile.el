@@ -3,7 +3,7 @@
  ;;-----------------------------------------------------------------------------
  ;; @jamescherti forks of maintained packages
  ("straight.el" . "c3faa4b8a4640e5b8bb61a63cc6561204ffb2c40")
- ("dtrt-indent" . "5c2c57cf9831a8ccd17812bc50fdd84134b726af") ; 1.27 | RSS RELEASE
+ ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
  ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO too ad RSS
  ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO too ad RSS
  ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf") ; TODO too ad RSS
@@ -107,7 +107,7 @@
  ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE
  ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0 | RSS RELEASE
  ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
- ("compat" . "b5b48183689b536f72b1214106afeabc465da9d4") ; Version 31.0.0.1 | RSS RELEASE
+ ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
  ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
 
  ;; No longer necessary
