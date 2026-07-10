@@ -30,6 +30,12 @@
 
 
 actions:
+  - path_match:
+      - "*/straight-profile.el"
+    tags: install
+    shell: true
+    command: "cp {{ file | quote }} ~/.emacs-data/etc/straight-profile.el"
+
   # This is not enough
   - path_match: "{{ cwd }}/home/*"
     shell: true

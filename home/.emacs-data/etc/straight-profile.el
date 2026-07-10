@@ -2,7 +2,7 @@
  ;; Forks
  ;;-----------------------------------------------------------------------------
  ;; @jamescherti forks of maintained packages
- ("straight.el" . "c3faa4b8a4640e5b8bb61a63cc6561204ffb2c40")
+ ("straight.el" . "77d59d395269b9a8d6854ea8b9eb0d9e43e97b37")
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
  ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO too ad RSS
  ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO too ad RSS
@@ -96,6 +96,7 @@
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
  ("vertico" . "6028bd3d32c99c28e2b938e5e5393ec3508d2424")  ; 2.10 | RSS RELEASE
  ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7 | RSS RELEASE
+ ;; ("org" . "5ce6801d3fc127102f8a7a9b2c28e923211b3acb") ; Unstable
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
  ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
