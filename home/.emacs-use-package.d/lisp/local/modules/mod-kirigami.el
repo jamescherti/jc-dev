@@ -184,6 +184,8 @@
   (when (bound-and-true-p evil-normal-state-map)
     (define-key evil-normal-state-map (kbd "SPC") 'my-reveal-kirigami-fold)))
 
+(eldoc-add-command-completions "my-reveal-kirigami-fold")
+
 ;;; DISABLED: Adjust window to ensure heading is visible
 
 ;; TODO Find a way to add this fix to kirigami??

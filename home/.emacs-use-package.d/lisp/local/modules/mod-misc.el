@@ -4323,8 +4323,8 @@ properly handles remote files over Tramp), applying the setting only if
 
 (defun my-setup-eldoc-mode ()
   "Setup eldoc mode."
-  (setq-local eldoc-idle-delay 0.4)
   (unless (bound-and-true-p eldoc-mode)
+    (setq-local eldoc-idle-delay 0.4)
     (eldoc-mode 1)))
 
 (lightemacs-use-package eldoc
