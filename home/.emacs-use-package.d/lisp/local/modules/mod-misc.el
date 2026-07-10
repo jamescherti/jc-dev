@@ -357,8 +357,19 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-(with-eval-after-load 'simple
-  (transient-mark-mode -1))
+;; Disabling `transient-mark-mode' globally returns Emacs's default mark to its
+;; classic behavior: creating an invisible breadcrumb (via `C-SPC') rather than
+;; actively highlighting text selections as you move.
+;;
+;; For Evil users, this is the preferred setup because it prevents Emacs's
+;; native region mechanics from conflicting with modal editing. Evil relies on
+;; its own Visual states (`v', `V', `C-v') to explicitly control region
+;; highlighting, meaning you lose no visual selection functionality while
+;; freeing Normal state from accidental, intrusive visual highlights.
+;;
+;; Alternative:
+;; (with-eval-after-load 'simple
+;;   (transient-mark-mode -1))
 (setq-default transient-mark-mode nil)
 
 (setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
