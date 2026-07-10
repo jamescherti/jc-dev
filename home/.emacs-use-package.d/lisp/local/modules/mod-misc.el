@@ -357,9 +357,20 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-(when (bound-and-true-p gpm-mouse-mode)
-  (gpm-mouse-mode -1))
-(setq-default gpm-mouse-mode nil)
+;; GPM mouse support is strictly for TTY consoles.
+(with-eval-after-load 't-mouse
+  (when (bound-and-true-p gpm-mouse-mode)
+    (gpm-mouse-mode -1))
+  (setq-default gpm-mouse-mode nil))
+
+;; Useless for Evil users: This mode modifies minibuffer syntax tables for regex
+;; navigation. Since Evil provides its own regex tools and operators that
+;; operate independently of these minibuffer-specific highlighting side-effects,
+;; this mode is redundant and can interfere with custom Evil keybindings.
+(with-eval-after-load 'minibuffer
+  (when (bound-and-true-p minibuffer-regexp-mode)
+    (minibuffer-regexp-mode -1))
+  (setq-default minibuffer-regexp-mode nil))
 
 ;; In standard (vanilla) Emacs, you do not select text by shifting into a visual
 ;; mode. Instead, you drop an anchor called the "mark" by pressing C-SPC, and
@@ -1460,7 +1471,8 @@ any new ones."
     (xterm-mouse-mode 1))
 
   (unless noninteractive
-    (windmove-default-keybindings)
+    ;; (windmove-default-keybindings)
+
     ;; Conflict with XFCE C-m-h
     (global-unset-key (kbd "C-M-h"))
     (global-unset-key (kbd "C-M-l"))

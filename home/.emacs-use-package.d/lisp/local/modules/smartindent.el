@@ -40,8 +40,11 @@
 ;; facilitating more consistent formatting of multi-line comments.
 (unless noninteractive
   (global-set-key (kbd "C-<return>") #'newline-and-indent)
-  (global-set-key (kbd "RET") #'comment-indent-new-line)
-  (electric-indent-mode -1))
+  (global-set-key (kbd "RET") #'comment-indent-new-line))
+
+(with-eval-after-load 'electric
+  (when (bound-and-true-p electric-indent-mode)
+    (electric-indent-mode -1)))
 
 ;; (defun my-disable-electric-indent-mode ()
 ;;   "Disable electric indent mode."
