@@ -844,7 +844,7 @@ subsequent GCC invocations."
                            le-elec-pair
 
                            ;; le-which-key
-                           ;; le-paren
+                           le-paren
 
                            le-dired
                            le-dired-filter
