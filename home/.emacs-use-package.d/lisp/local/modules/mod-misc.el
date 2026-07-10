@@ -357,6 +357,10 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(with-eval-after-load 'simple
+  (transient-mark-mode -1))
+(setq-default transient-mark-mode nil)
+
 (setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
 
 ;; TODO is eager better?

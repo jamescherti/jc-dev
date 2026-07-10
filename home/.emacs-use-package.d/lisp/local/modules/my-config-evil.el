@@ -2306,6 +2306,9 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
                   bash-ts-mode-hook))
     (add-hook hook #'evil-matchit-mode))
 
+  (with-eval-after-load 'evil
+    (require 'evil-matchit-evil-setup))
+
   :config
   (when (fboundp 'evilmi-load-plugin-rules)
     (evilmi-load-plugin-rules '(cmake-ts-mode) '(cmake))
@@ -2343,9 +2346,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   ;;         (evil-jump-item)
   ;;       (apply orig-fn args))))
   ;; (advice-add 'evilmi-jump-items :around #'my/evilmi-jump-items-around)
-
-  (with-eval-after-load 'evil
-    (require 'evil-matchit-evil-setup)))
+  )
 
 ;;; Package: quick-sdcv
 
@@ -2400,7 +2401,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
          :map minibuffer-local-completion-map
          ("C-x C-d" . quick-fasd-find-path))
 
-  :config
+  :init
   (setq quick-fasd-auto-add-on-buffer-change t)
   (setq quick-fasd-enable-initial-prompt nil)
   (setq quick-fasd-command-args '("-d"))

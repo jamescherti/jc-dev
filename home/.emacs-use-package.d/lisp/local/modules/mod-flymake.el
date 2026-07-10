@@ -119,7 +119,7 @@ ORIG-FUN is the advised function.  DESC is the package description struct."
 ;;; Flymake bashate
 (lightemacs-use-package flymake-bashate
   :commands flymake-bashate-setup
-  :config
+  :init
   (setq flymake-bashate-max-line-length 80)
   ;; To make bashate ignore specific Bashate rules, such as E003 (ensure all
   ;; indents are a multiple of 4 spaces) and E006 (check for lines longer than
@@ -129,7 +129,6 @@ ORIG-FUN is the advised function.  DESC is the package description struct."
   ;; E001: trailing whitespace
   (setq flymake-bashate-ignore "E003,E001")
 
-  :init
   (defun my-setup-flymake-bashate ()
     (when (my-code-checker-allowed-p)
       (flymake-bashate-setup)))
