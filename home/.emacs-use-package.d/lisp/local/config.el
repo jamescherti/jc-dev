@@ -28,8 +28,6 @@
 
 (setq debug-on-error t)
 
-(setq byte-compile-warnings '(not lexical free-vars obsolete))
-
 ;;; Profiling
 
 ;; (profiler-start 'cpu)
