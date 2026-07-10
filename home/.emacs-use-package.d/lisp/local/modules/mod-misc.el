@@ -357,20 +357,27 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; Disabling `transient-mark-mode' globally returns Emacs's default mark to its
-;; classic behavior: creating an invisible breadcrumb (via `C-SPC') rather than
-;; actively highlighting text selections as you move.
+;; In standard (vanilla) Emacs, you do not select text by shifting into a visual
+;; mode. Instead, you drop an anchor called the "mark" by pressing C-SPC, and
+;; then move your cursor. The text between the mark and your cursor becomes your
+;; active selection.
 ;;
-;; For Evil users, this is the preferred setup because it prevents Emacs's
-;; native region mechanics from conflicting with modal editing. Evil relies on
-;; its own Visual states (`v', `V', `C-v') to explicitly control region
-;; highlighting, meaning you lose no visual selection functionality while
-;; freeing Normal state from accidental, intrusive visual highlights.
+;; By default, Emacs uses `transient-mark-mode' to highlight this selection
+;; visually, making it look like a standard modern text editor.
 ;;
-;; Alternative:
-;; (with-eval-after-load 'simple
-;;   (transient-mark-mode -1))
+;; If you use Evil (Vim bindings), this native highlighting gets in the way.
+;; Evil handles text selection through its own Visual states (v, V, C-v). If
+;; Emacs is also trying to highlight text in the background based on where your
+;; last mark was dropped, the two systems create conflicting visual noise.
+;;
+;; Disabling `transient-mark-mode' stops Emacs from painting the screen with
+;; highlights. Pressing C-SPC goes back to being a silent utility: it just drops
+;; an invisible location bookmark that you can jump back to later, while you
+;; leave all the actual visual text selection to Evil.
 (setq-default transient-mark-mode nil)
+;; (with-eval-after-load 'simple
+;;   (when (bound-and-true-p transient-mark-mode)
+;;     (transient-mark-mode -1)))
 
 (setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
 
@@ -4333,15 +4340,11 @@ properly handles remote files over Tramp), applying the setting only if
 
   :init
   (setq eldoc-idle-delay most-positive-fixnum)
-  (global-eldoc-mode -1)
 
   ;; (setq eldoc-message-commands-table-size 63)
 
-  ;; If non-nil, show 'help-at-pt-kbd-string' at point via Eldoc. This setting
-  ;; is an alternative to 'help-at-pt-display-when-idle'. If the value is
-  ;; non-nil, 'eldoc-show-help-at-pt' will show help-at-point via Eldoc.
-  ;; (setq eldoc-help-at-pt t)
-  )
+  (when (bound-and-true-p global-eldoc-mode)
+    (global-eldoc-mode -1)))
 
 ;;; corfu history
 
