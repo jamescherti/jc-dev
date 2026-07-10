@@ -28,79 +28,76 @@
 
 ;;; Indent style
 
-;; (setq indent-tabs-mode nil)
-;; (defun my-disable-indent-tabs-mode ()
-;;   "Disable `indent-tabs-mode'."
-;;   (setq-local indent-tabs-mode nil))
-;; (add-hook 'emacs-lisp-mode-hook #'my-disable-indent-tabs-mode)
-
-;; Bind the `RET` (Return) key to `comment-indent-new-line`.
-;; This ensures that pressing Enter within a comment context will both insert a
-;; new line and correctly indent it to match the comment's indentation level,
-;; facilitating more consistent formatting of multi-line comments.
+;; Bind the RET key to `comment-indent-new-line'. This ensures that pressing
+;; Enter within a comment context will both insert a new line and correctly
+;; indent it to match the comment's indentation level, facilitating more
+;; consistent formatting of multi-line comments.
 (unless noninteractive
-  (global-set-key (kbd "C-<return>") #'newline-and-indent)
-  (global-set-key (kbd "RET") #'comment-indent-new-line))
+  ;; RET: Rebound to 'comment-indent-new-line'. This ensures that pressing Enter
+  ;; inside or after a comment block correctly continues the comment structure
+  ;; with proper indentation, a standard practice for maintaining clean source
+  ;; code documentation.
+  (global-set-key (kbd "RET") #'comment-indent-new-line)
 
+  ;; C-<return>: Explicitly mapped to 'newline-and-indent'. This gives the user
+  ;; a dedicated shortcut to create a new line with proper indentation on
+  ;; demand, rather than relying on automatic triggers.
+  (global-set-key (kbd "C-<return>") #'newline-and-indent))
+
+;; Disable 'electric-indent-mode' globally. This mode is the root cause of
+;; unexpected cursor jumps and re-indentation triggered by character insertion.
+;; By setting it to -1 and ensuring the default value is nil, we guarantee that
+;; typing or pressing Enter never triggers automatic reformatting, providing a
+;; consistent experience across all buffers.
 (with-eval-after-load 'electric
   (when (bound-and-true-p electric-indent-mode)
     (electric-indent-mode -1))
-  (setq-default electric-indent-mode nil))
+  (setq-default electric-indent-mode nil)
+  (advice-add 'electric-indent-mode :override #'ignore)
+  (advice-add 'electric-indent-local-mode :override #'ignore))
 
-;; electric-indent-mode is enabled by default in Emacs (starting from version
-;; 24.4) because it is intended to provide a more modern, "out-of-the-box"
-;; experience for users who expect pressing RET to automatically position the
-;; cursor at the correct indentation level based on the context of the code.
+;; In certain modes (like `text-mode'), pressing Return multiple times causes
+;; Emacs to lose your current indentation. The cursor drops to column 0 on
+;; consecutive blank lines instead of maintaining the indent level.
 ;;
-;; I am using `aggressive-indent-mode'.
-(defun my-disable-electric-indent-local-mode ()
-  "Disable `electric-indent-local-mode'."
-  (electric-indent-local-mode -1))
-(add-hook 'emacs-lisp-mode-hook #'my-disable-electric-indent-local-mode)
-
-;; (defun my-disable-electric-indent-mode ()
-;;   "Disable electric indent mode."
-;;   (electric-indent-mode -1))
+;; The Cause:
 ;;
-;; (add-hook 'lightemacs-after-init-hook #'my-disable-electric-indent-mode)
-
-;; TODO: Contribute to Emacs?
-;; Values that are ignored by indent-according-to-mode.
+;; When you create a new indented line, Emacs runs `indent-according-to-mode'.
+;; If the mode's specific indentation function (such as `indent-relative') is
+;; listed in `indent-line-ignored-functions', Emacs intercepts the call. Instead
+;; of running the proper function, Emacs applies a basic fallback that only
+;; checks the immediately preceding line. If that preceding line is blank, the
+;; fallback fails and sets the indentation to zero.
 ;;
-;; Indent line in proper way for current major mode. Normally, this is done by
-;; calling the function specified by the variable indent-line-function. However,
-;; if the value of that variable is present in the indent-line-ignored-functions
-;; variable, handle it specially (since those functions are used for tabbing);
-;; in that case, indent by aligning to the previous non-blank line.
+;; The Solution:
 ;;
-;; In modes such as `text-mode', calling `newline-and-indent' multiple times
-;; removes the indentation. This issue is caused by
-;; `indent-line-ignored-functions'. The following code fixes the problem and
-;; ensures that text is properly indented using `indent-relative' or
-;; `indent-relative-first-indent-point'.
+;; By setting `indent-line-ignored-functions' to nil globally, we disable this
+;; interception mechanism completely. This forces Emacs to always execute the
+;; assigned `indent-line-function'. These underlying functions already have the
+;; proper logic to scan backward over multiple blank lines until they find actual
+;; text to copy the indentation from. Clearing the ignore list ensures these
+;; functions are permitted to run and do their job.
+;;
+;; TODO send an issue to Emacs?
+(setq-default indent-line-ignored-functions nil)
 
-;; (defun my-indent-line-dont-ignore-functions ()
-;;   "Dont ignore function in `indent-line-ignored-functions'."
-;;   (setq-local indent-line-ignored-functions '()))
-
-;; (add-hook 'ansible-mode-hook #'my-indent-line-dont-ignore-functions)
-;; (add-hook 'ansible-mode-hook #'my-indent-line-dont-ignore-functions)
-
-;; This loses indentation
-;; (push #'smartindent-relative indent-line-ignored-functions)
-;; (push #'smartindent-indent-relative-to-visible indent-line-ignored-functions)
-
-;;; Default indentation (relative)
+;;; smartindent-relative: Default indentation (relative)
 
 (defun smartindent-relative ()
-  "Indent based on the indentation of the previous non-blank line.
-If the first indentation position of the previous non-blank line is greater than
-the current column, indent the current line to match that position. If no
-previous non-blank line exists or the current line is already indented properly,
-align the line to the nearest tab stop."
+  "Indent based on the previous non-blank line with lookahead for blocks.
+This function wraps `indent-relative' with two enhancements:
+1. Strict Tab Fallback: It suppresses the default `tab-to-tab-stop' fallback
+   behavior of `indent-relative' unless the command was triggered by an explicit
+   TAB key press. This prevents unwanted tab stops from being inserted when
+   simply pressing Return.
+2. Lookahead Alignment: After calculating the relative indentation from the
+   previous line, it checks the indentation of the immediately following line.
+   If the next line has a deeper indentation than the current line, it aligns
+   the current line to match the next line. This is particularly useful in
+   formats like YAML when inserting a new line above an indented block."
   ;; (indent-relative :first-only :unindented-ok)
-  (when indent-line-ignored-functions
-    (setq-local indent-line-ignored-functions '()))
+  ;; (when indent-line-ignored-functions
+  ;;   (setq-local indent-line-ignored-functions '()))
 
   (let ((orig-point (point)))
     (unwind-protect
@@ -136,6 +133,8 @@ align the line to the nearest tab stop."
           (indent-line-to next-indentation))))))
 
 (setq-default indent-line-function #'smartindent-relative)
+
+;;; smartindent-indent-relative-to-visible
 
 ;; (defun my-set-indent-line-relative ()
 ;;   "Indent-line relative."
@@ -173,8 +172,8 @@ If no suitable indent point is found and UNINDENTED-OK is nil, fall back to
                             (goto-char (line-beginning-position))
                             (looking-at-p "^[ \t]*$"))))))
         (cond
-         ((and (derived-mode-p 'yaml-mode)
-               (derived-mode-p 'yaml-ts-mode)
+         ((and (or (derived-mode-p 'yaml-mode)
+                   (derived-mode-p 'yaml-ts-mode))
                (looking-at "^[ \t]*-"))
           (save-excursion
             (goto-char (line-beginning-position))
