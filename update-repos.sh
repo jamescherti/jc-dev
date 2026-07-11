@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # Author: James Cherti
 # URL: https://github.com/jamescherti/jc-dev
@@ -26,6 +26,8 @@
 # SOFTWARE.
 #
 
+set -euo pipefail
+
 MAX_WORKERS=6
 
 # Go to script dir
@@ -37,7 +39,7 @@ cd "$SCRIPT_DIR"
 SRC_DIR="$HOME/src"
 GIT_PULL_MY_REPO="$PWD/.bin/git-pull-my-repo"
 
-if ! [[ -f $GIT_PULL_MY_REPO ]]; then
+if ! [[ -f "$GIT_PULL_MY_REPO" ]]; then
   echo "Error: The script doesn't exist: $GIT_PULL_MY_REPO" >&2
   exit 1
 fi
@@ -55,16 +57,16 @@ if [[ -d "$SRC_DIR" ]]; then
 
   echo "[INFO] git pull repos"
   git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR" \
-    --exclude ~/src/forks \
-    --exclude ~/src/local \
+    --exclude "$HOME/src/forks" \
+    --exclude "$HOME/src/local" \
     --parallel \
     --if-exec git-is-clean \
     -- \
-    "$BASE_DIR/jc-dev/.bin/$GIT_PULL_MY_REPO"
+    "$GIT_PULL_MY_REPO"
 
   git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/emacs" \
-    --exclude ~/src/forks \
-    --exclude ~/src/local \
+    --exclude "$HOME/src/forks" \
+    --exclude "$HOME/src/local" \
     --parallel \
     --if-exec git-is-clean \
     -- \
