@@ -10,7 +10,12 @@
  ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37") ; TODO too ad RSS
  ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO too ad RSS
 
+ ;; Outdated tag
+ ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
+
  ;; Unmaintained (Forked: jamescherti)
+ ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
+ ("evil-surround" . "e6548372e8359ee55e67d73ca418314086011f1a")
  ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
  ("aggressive-indent-mode" . "a437a45868f94b77362c6b913c5ee8e67b273c42")
  ("ansible-doc" . "86083a7bb2ed0468ca64e52076b06441a2f8e9e0")
@@ -32,6 +37,8 @@
 
  ;; No tags (Forked: jamescherti)
  ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
+ ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
+ ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
 
  ;; My packages
  ("org-ibullets.el" . "933d5989124a57e83de3eadf82bb194f5e308b98")
@@ -64,20 +71,15 @@
  ;;-----------------------------------------------------------------------------
  ;; Outdated tag
  ;; TODO Add to RSS
- ("evil-surround" . "e6548372e8359ee55e67d73ca418314086011f1a")
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
- ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
- ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
  ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
  ("apheleia" . "14a0bb4454fb2cc3b5b377619288b742ce117da5") ; RSS RELEASE
 
  ;; No tags
  ("emacs-elisp-autofmt" . "fdae9054c55804def507cf7045c8460573d876a9")
- ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
- ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
  ("nerd-icons-completion" . "45b585d972192a3eaeb239e15e55de7f46f8920a")
  ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
 
@@ -89,14 +91,13 @@
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
  ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
 
+ ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE | TODO fork
  ("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7 | RSS RELEASE
  ("corfu" . "4a9c67da16eb64cadaa4bfcc16713188145c83da") ; 2.10 | RSS RELEASE
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
  ("embark" . "27de48004242e98586b9c9661fdb6912f26fe70f") ; 1.2 | RSS RELEASE
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
  ("vertico" . "6028bd3d32c99c28e2b938e5e5393ec3508d2424")  ; 2.10 | RSS RELEASE
- ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7 | RSS RELEASE
- ;; ("org" . "5ce6801d3fc127102f8a7a9b2c28e923211b3acb") ; Unstable
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
  ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
@@ -105,11 +106,12 @@
  ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
  ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
- ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE
  ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0 | RSS RELEASE
  ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
  ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
+ ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7 | RSS RELEASE
+ ;; ("org" . "5ce6801d3fc127102f8a7a9b2c28e923211b3acb") ; Unstable
 
  ;; No longer necessary
  ;; ("el-get" . "ec3b0a052bf2f90f30c51042ddb06471b35c7ab6") ; 5.2 | RSS RELEASE

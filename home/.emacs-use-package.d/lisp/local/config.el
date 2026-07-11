@@ -1089,6 +1089,21 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/emacs-libvterm")
 
             ;; Forks of unmaintained packages
+            (s
+             :type git :host github
+             :repo "jamescherti/s.el")
+            (undo-fu
+             :type git :host github
+             :repo "jamescherti/emacs-undo-fu")
+            (undo-fu-session
+             :type git :host github
+             :repo "jamescherti/emacs-undo-fu-session")
+            (flymake-yamllint
+             :type git :host github
+             :repo "jamescherti/flymake-yamllint")
+            (evil-surround
+             :type git :host github
+             :repo "jamescherti/evil-surround")
             (wgrep
              :type git :host github
              :repo "jamescherti/Emacs-wgrep")

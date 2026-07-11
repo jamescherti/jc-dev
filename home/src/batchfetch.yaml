@@ -346,6 +346,31 @@ tasks:
 
   # ----------------------------------------------------------------------------
   # START: UNMAINTAINED PACKAGES THAT I FORKED
+  - git: git@github.com:jamescherti/s.el
+    path: forks/s.el
+    remote:
+      upstream: https://github.com/magnars/s.el
+
+  - git: git@github.com:jamescherti/emacs-undo-fu-session
+    path: forks/emacs-undo-fu-session
+    remote:
+      upstream: https://codeberg.org/ideasman42/emacs-undo-fu-session/
+
+  - git: git@github.com:jamescherti/emacs-undo-fu
+    path: forks/emacs-undo-fu
+    remote:
+      upstream: https://codeberg.org/ideasman42/emacs-undo-fu/
+
+  - git: git@github.com:jamescherti/flymake-yamllint
+    path: forks/flymake-yamllint
+    remote:
+      upstream: https://codeberg.org/shaohme/flymake-yamllint
+
+  - git: git@github.com:jamescherti/evil-surround
+    path: forks/evil-surround
+    remote:
+      upstream: https://github.com/emacs-evil/evil-surround
+
   - git: git@github.com:jamescherti/Emacs-wgrep
     path: forks/Emacs-wgrep
     remote:
