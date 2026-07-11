@@ -31,8 +31,8 @@ set -euf -o pipefail
 PROCNAME='copycat-browser'
 
 notify_user() {
+  echo "$*"
   if type -P notify-send >/dev/null 2>&1; then
-    echo "$*"
     notify-send "[$PROCNAME] $*"
   fi
 }
@@ -45,15 +45,15 @@ main() {
   fi
 
   if [[ $url = '' ]]; then
-    notify_user "Hello!"
     exit 0
   fi
 
   if type -P cbcopy >/dev/null 2>&1; then
     notify_user "$url"
-    echo "$url" | cbcopy -selection clipboard
+    echo "$url" | cbcopy
   else
-    notify_user "Error: 'cbcopy' was not found."
+    notify_user "Error: 'cbcopy' was not found." >&2
+    exit 1
   fi
 
   exit 0
