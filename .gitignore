@@ -4,14 +4,14 @@ __pycache__/
 flycheck_*
 flymake_*
 
-*.elc
-*.eln
-*.o
-*.a
-*.so
-*.exe
-*.dll
-*.obj
+# *.elc
+# *.eln
+# *.o
+# *.a
+# *.so
+# *.exe
+# *.dll
+# *.obj
 
 # .coverage
 # *.log
