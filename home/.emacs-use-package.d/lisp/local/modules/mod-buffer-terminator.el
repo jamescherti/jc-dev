@@ -430,28 +430,29 @@ When KILL-BUFFER is t, file-visiting buffers are saved before being killed.
 If the window is the last one in its tab-bar tab, the tab will also be closed.
 By default, closing the last window in a tab does not close the tab."
   (interactive)
-  (if mod-buffer-terminator--protected-from-close
-      (user-error "You cannot close: %s" (buffer-name))
-    (let* ((buffer (or (buffer-base-buffer) (current-buffer)))
-           (number-of-splits (length (mod-buffer-terminator---non-minibuffer-windows))))
-      ;; (with-current-buffer buffer
-      ;;   (buffer-guardian-save-buffer))
+  (let ((inhibit-redisplay t))
+    (if mod-buffer-terminator--protected-from-close
+        (user-error "You cannot close: %s" (buffer-name))
+      (let* ((buffer (or (buffer-base-buffer) (current-buffer)))
+             (number-of-splits (length (mod-buffer-terminator---non-minibuffer-windows))))
+        ;; (with-current-buffer buffer
+        ;;   (buffer-guardian-save-buffer))
 
-      ;; Close the window/tab
-      (if (and (boundp 'tab-bar-mode) tab-bar-mode)
-          (let ((amount-open-tabs (length (funcall tab-bar-tabs-function))))
-            (cond ((and (= 1 number-of-splits)
-                        (> amount-open-tabs 1))
-                   (tab-close))
-                  ((> number-of-splits 1)
-                   (delete-window))
-                  (t
-                   (scratch-buffer))))
-        (delete-window))
+        ;; Close the window/tab
+        (if (and (boundp 'tab-bar-mode) tab-bar-mode)
+            (let ((amount-open-tabs (length (funcall tab-bar-tabs-function))))
+              (cond ((and (= 1 number-of-splits)
+                          (> amount-open-tabs 1))
+                     (tab-close))
+                    ((> number-of-splits 1)
+                     (delete-window))
+                    (t
+                     (scratch-buffer))))
+          (delete-window))
 
-      ;; Save and close the buffer
-      (when kill-buffer
-        (mod-buffer-terminator-kill-non-visible-buffers buffer)))))
+        ;; Save and close the buffer
+        (when kill-buffer
+          (mod-buffer-terminator-kill-non-visible-buffers buffer))))))
 
 (defun mod-buffer-terminator-close-window-kill-buffer ()
   "Save and kill the current buffer and close the current window.

@@ -320,23 +320,24 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; Preserve point when switching to a buffer that is already displayed in
-;; another window. This enables operating on the same buffer from multiple
-;; windows, each maintaining its own point.
+;; Enforce a "One File, One Global Cursor" model.
 ;;
-;; Benefits:
-;; - Allows concurrent viewing/editing of different parts of the same buffer in
-;; multiple windows.
-;; - Prevents cursor jumps when switching between windows showing the same
-;; buffer.
-;; - Enhances usability in workflows involving window splits (e.g., side-by-side
-;; editing or diffing).
+;; Setting `switch-to-buffer-preserve-window-point' to nil ensures that
+;; whenever you switch to a buffer, your cursor is placed exactly where you
+;; last edited it globally, ignoring any outdated history tied to the window.
 ;;
-;; Drawbacks:
-;; - Can interfere with bookmark behavior, as bookmarks may not restore point
-;; consistently across windows.
-;; - May cause confusion if one expects a global point for a buffer rather than
-;; a window-local one.
+;; Why keep it disabled (nil):
+;; - Consistent Resumption: If you edit a file on line 500, hide it, and
+;;   reopen it later in a completely different window, you will resume at
+;;   line 500.
+;; - Reliable Code Navigation: It prevents a window's historical memory
+;;   from fighting against automated jumps. When LSP, xref, or a bookmark
+;;   moves your point to a new definition, the window will strictly respect
+;;   the new location.
+;;
+;; Note: Only set this to t if your workflow heavily relies on viewing
+;; multiple different sections of the exact same file simultaneously across
+;; split windows.
 (setq switch-to-buffer-preserve-window-point nil)
 
 ;; Warns about undefined commands in the prompt (Emacs 29.1)
@@ -369,6 +370,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
       completions-detailed t
       completions-group t
       completions-group-sort 'alphabetical)
+;; (setq icomplete-vertical-in-buffer-adjust-list t)
+;; (setq icomplete-vertical-prospects-height (/ (frame-height) 5))
+;; (setq icomplete-vertical-render-prefix-indicator t)
+;; (setq icomplete-vertical-selected-prefix-indicator   " @ ")
+;; (setq icomplete-vertical-unselected-prefix-indicator "   ")
 
 ;; Text properties inflate the size of recentf's files, and there is no purpose
 ;; in persisting them.
