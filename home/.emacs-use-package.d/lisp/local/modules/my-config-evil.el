@@ -1110,72 +1110,6 @@ word after the space that contains at least two uppercase characters."
 
 ;;; cape: complete before point
 
-;;------------------------------------------------------------------------------
-;; CAPE COMPLETE BEFORE POINT
-;;------------------------------------------------------------------------------
-;; TODO lightemacs?
-
-;; This has been changed
-(defun my-cape--dabbrev-bounds ()
-  "Return bounds of abbreviation using only text before point.
-
-This variant restricts the abbreviation bounds to the symbol
-fragment preceding point.  It identifies the start of the current
-word (a sequence of characters matching `dabbrev-abbrev-char-regexp`)
-and uses point as the end boundary.  This ensures that dabbrev
-completions are based solely on the fragment already typed, not
-on text following the cursor."
-  (unless (boundp 'dabbrev-abbrev-char-regexp)
-    (require 'dabbrev))
-  (let ((re (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))
-        (limit (minibuffer-prompt-end)))
-    (when (or (looking-at re)
-              (and (> (point) limit)
-                   (save-excursion (forward-char -1) (looking-at re))))
-      (cons (save-excursion
-              (while (and (> (point) limit)
-                          (save-excursion (forward-char -1) (looking-at re)))
-                (forward-char -1))
-              (when dabbrev-abbrev-skip-leading-regexp
-                (while (looking-at dabbrev-abbrev-skip-leading-regexp)
-                  (forward-char 1)))
-              (point))
-            ;; This is the part that I modified
-            (point)
-
-            ;; TODO contrib to cape?
-            ;;
-            ;; This is the part that I removed
-            ;;
-            ;; The following code scans forward from point over all characters
-            ;; matching re (typically word or symbol characters) to determine
-            ;; the end of the current abbreviation, returning it as a point
-            ;; value while leaving the cursor in place due to save-excursion;
-            ;; in the original cape-dabbrev, this ensures that the completion
-            ;; can replace the entire symbol under the cursor, including any
-            ;; text after point, whereas fixing END to (point) restricts
-            ;; completions to only the fragment typed before the cursor.
-            ;;
-            ;; It is not useless. it is useful because it allows cape-dabbrev
-            ;; (and dabbrev-like completions) to identify the full extent of the
-            ;; symbol at point, so that when a completion is chosen, it can
-            ;; replace the entire word under the cursor rather than just the
-            ;; part typed so far; this behavior is important in typical Emacs
-            ;; completion, where completing a symbol mid-word should overwrite
-            ;; the rest of the word, but if the goal is to restrict completions
-            ;; to only the text before the cursor, scanning forward becomes
-            ;; unnecessary and can be replaced by simply using (point) as the
-            ;; end.
-            ;;
-            ;; (save-excursion
-            ;;   (while (looking-at re)
-            ;;     (forward-char 1))
-            ;;   (point))
-            ))))
-
-(with-eval-after-load 'cape
-  (advice-add 'cape--dabbrev-bounds :override #'my-cape--dabbrev-bounds))
-
 ;; (defun my-cape-dabbrev-backwards ()
 ;;   "Cape-dabbrev backwards."
 ;;   (interactive)
@@ -1681,13 +1615,6 @@ search direction (default: \='forward)."
   (evil-define-key 'insert vterm-mode-map (kbd "C-c <escape>") 'evil-normal-state)
   (evil-define-key 'insert vterm-mode-map (kbd "C-c [") 'evil-normal-state))
 
-
-;;; mode line
-
-(setq line-number-mode t)
-(setq column-number-mode t)
-(setq mode-line-position-column-line-format '("%l:%C"))
-(setq mode-line-percent-position nil)
 
 ;;; Silence C-f
 

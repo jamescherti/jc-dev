@@ -37,6 +37,11 @@
 
 ;;; Modeline
 
+(setq line-number-mode t)
+(setq column-number-mode t)
+(setq mode-line-position-column-line-format '("%l:%C"))
+(setq mode-line-percent-position nil)
+
 (add-hook 'lightemacs-after-init-hook #'display-time-mode)
 (setq display-time-mail-function #'ignore)
 (setq display-time-mail-string "")
@@ -319,26 +324,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                      (if (< count 2) "was" "were")))))))))
 
 ;;; testing
-
-;; Enforce a "One File, One Global Cursor" model.
-;;
-;; Setting `switch-to-buffer-preserve-window-point' to nil ensures that
-;; whenever you switch to a buffer, your cursor is placed exactly where you
-;; last edited it globally, ignoring any outdated history tied to the window.
-;;
-;; Why keep it disabled (nil):
-;; - Consistent Resumption: If you edit a file on line 500, hide it, and
-;;   reopen it later in a completely different window, you will resume at
-;;   line 500.
-;; - Reliable Code Navigation: It prevents a window's historical memory
-;;   from fighting against automated jumps. When LSP, xref, or a bookmark
-;;   moves your point to a new definition, the window will strictly respect
-;;   the new location.
-;;
-;; Note: Only set this to t if your workflow heavily relies on viewing
-;; multiple different sections of the exact same file simultaneously across
-;; split windows.
-(setq switch-to-buffer-preserve-window-point nil)
 
 ;; Warns about undefined commands in the prompt (Emacs 29.1)
 (setq shell-highlight-undef-enable t)
@@ -1351,27 +1336,6 @@ any new ones."
             #'(lambda()
                 (setq-local dabbrev-case-fold-search t)
                 (setq-local case-fold-search t)))
-
-  ;; Control whether dabbrev searches should ignore case.
-  ;; Any other non-nil version means case is not significant.
-  ;; nil means case is significant.
-  (setq dabbrev-case-fold-search nil)
-
-  ;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
-  ;; A value of nil means preserve the expansion's case pattern.
-  (setq dabbrev-case-replace nil)
-
-  (setq dabbrev-check-all-buffers nil)
-
-  ;; It configures dabbrev (dynamic abbreviation expansion) to search only in the
-  ;; current buffer when expanding abbreviations, instead of searching in other
-  ;; buffers as well.
-  ;; (setq dabbrev-check-other-buffers t)  ;; Default t
-
-  ;; (dabbrev-abbrev-char-regexp "\\\\sw\\\\|\\\\s_")
-  ;; (dabbrev-ignored-buffer-names '("*Messages*" "*Ibuffer*"))
-  ;; (dabbrev-limit 1000)
-  (setq dabbrev-case-distinction nil)
 
   (setq epg-gpg-program "gpg2")
   ;; (setq epa-pinentry-mode 'loopback)  ;; Obsolete
@@ -5600,6 +5564,145 @@ function or if an invalid choice is made."
 ;;         (apply orig-fn args)))))
 ;;
 ;; (advice-add 'dired-do-rename :around 'my-dired-do-rename-advice)
+
+;;; dabbrev
+
+;; Control whether dabbrev searches should ignore case.
+;; Any other non-nil version means case is not significant.
+;; nil means case is significant.
+(setq dabbrev-case-fold-search nil)
+
+;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
+;; A value of nil means preserve the expansion's case pattern.
+(setq dabbrev-case-replace nil)
+
+(setq dabbrev-check-all-buffers nil)
+
+;; It configures dabbrev (dynamic abbreviation expansion) to search only in the
+;; current buffer when expanding abbreviations, instead of searching in other
+;; buffers as well.
+;; (setq dabbrev-check-other-buffers t)  ;; Default t
+
+;; Set this variable to "\\sw" if you want ordinary words or "\\sw\\|\\s_" if
+;; you want symbols (including characters whose syntax is "symbol" as well as
+;; those whose syntax is "word"). The abbreviation is from point to the start
+;; of the previous sequence of characters matching this variable.
+;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
+
+;; (dabbrev-ignored-buffer-names '("*Messages*" "*Ibuffer*"))
+;; (dabbrev-limit 1000)
+(setq dabbrev-case-distinction nil)
+
+;; This configuration sets `dabbrev-abbrev-skip-leading-regexp` to a regular
+;; expression matching any of the characters `$`, `*`, `/`, `=`, `~`, or `'` at
+;; the beginning of a word. When dabbrev expands abbreviations, it uses this
+;; regexp to ignore such leading characters, preventing them from being included
+;; in the expanded text. This behavior is useful in programming contexts—such as
+;; Bash, Python, and YAML—where these characters often prefix identifiers or
+;; tokens, ensuring that dabbrev completes only the meaningful part of the word
+;; without unwanted special characters.
+;; (setq dabbrev-abbrev-skip-leading-regexp "[$*/=~']")
+
+;; (setq dabbrev-abbrev-skip-leading-regexp "\\$\\|\\*\\|/\\|=")
+
+;; (setq dabbrev-case-fold-search nil)
+;; (setq dabbrev-case-replace 'case-replace)
+;; (setq dabbrev-check-other-buffers t)
+;; (setq dabbrev-eliminate-newlines t)
+;; (setq dabbrev-upcase-means-case-search t)
+
+;; :init
+;; (defun my-setup-dabbrev ()
+;;   ;; Skip $ (variables)
+;;   (setq-local dabbrev-abbrev-skip-leading-regexp  "\\\\$"))
+;;
+;; (when (fboundp 'my-setup-dabbrev)
+;;   (add-hook 'bash-ts-mode-hook #'my-setup-dabbrev)
+;;   (add-hook 'sh-mode-hook #'my-setup-dabbrev)
+;;   (add-hook 'php-mode-hook #'my-setup-dabbrev))
+
+;;; dabbrev boundaries 1
+
+;; dabbrev-abbrev-char-regexp: Defines WHAT you are completing. By setting this
+;; to "\\sw\\|\\s_", you tell Emacs which characters belong to the string (e.g.,
+;; allowing underscores and hyphens).
+;;
+;; By default, dabbrev frequently stops at standard word boundaries. If you have
+;; a variable named get_user_data elsewhere in your file, and you type get_u and
+;; press M-/, vanilla Emacs might only look at the u as the target word. It will
+;; complete it to user, leaving you with the broken string get_user.
+;;
+;; By explicitly adding \\s_ to the regex, you instruct Emacs to treat the
+;; entire programming symbol (including underscores and hyphens) as a single,
+;; unbroken block. Typing get_u and pressing M-/ will correctly grab the full
+;; context and expand the string to get_user_data.
+(setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
+
+;;; DISABLED: dabbrev boundaries 2
+
+;; my-cape--dabbrev-bounds: Defines WHERE the completion applies relative to
+;; your cursor. By overriding this, you dictate that the completion engine must
+;; never overwrite text to the right of your cursor.
+
+(defun my-cape--dabbrev-bounds ()
+  "Return bounds of abbreviation using only text before point.
+
+This variant restricts the abbreviation bounds to the symbol
+fragment preceding point.  It identifies the start of the current
+word (a sequence of characters matching `dabbrev-abbrev-char-regexp`)
+and uses point as the end boundary.  This ensures that dabbrev
+completions are based solely on the fragment already typed, not
+on text following the cursor."
+  (unless (boundp 'dabbrev-abbrev-char-regexp)
+    (require 'dabbrev))
+  (let ((re (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))
+        (limit (minibuffer-prompt-end)))
+    (when (or (looking-at re)
+              (and (> (point) limit)
+                   (save-excursion (forward-char -1) (looking-at re))))
+      (cons (save-excursion
+              (while (and (> (point) limit)
+                          (save-excursion (forward-char -1) (looking-at re)))
+                (forward-char -1))
+              (when dabbrev-abbrev-skip-leading-regexp
+                (while (looking-at dabbrev-abbrev-skip-leading-regexp)
+                  (forward-char 1)))
+              (point))
+            ;; This is the part that I modified
+            (point)
+
+            ;; TODO contrib to cape?
+            ;;
+            ;; This is the part that I removed
+            ;;
+            ;; The following code scans forward from point over all characters
+            ;; matching re (typically word or symbol characters) to determine
+            ;; the end of the current abbreviation, returning it as a point
+            ;; value while leaving the cursor in place due to save-excursion;
+            ;; in the original cape-dabbrev, this ensures that the completion
+            ;; can replace the entire symbol under the cursor, including any
+            ;; text after point, whereas fixing END to (point) restricts
+            ;; completions to only the fragment typed before the cursor.
+            ;;
+            ;; It is not useless. it is useful because it allows cape-dabbrev
+            ;; (and dabbrev-like completions) to identify the full extent of the
+            ;; symbol at point, so that when a completion is chosen, it can
+            ;; replace the entire word under the cursor rather than just the
+            ;; part typed so far; this behavior is important in typical Emacs
+            ;; completion, where completing a symbol mid-word should overwrite
+            ;; the rest of the word, but if the goal is to restrict completions
+            ;; to only the text before the cursor, scanning forward becomes
+            ;; unnecessary and can be replaced by simply using (point) as the
+            ;; end.
+            ;;
+            ;; (save-excursion
+            ;;   (while (looking-at re)
+            ;;     (forward-char 1))
+            ;;   (point))
+            ))))
+
+(with-eval-after-load 'cape
+  (advice-add 'cape--dabbrev-bounds :override #'my-cape--dabbrev-bounds))
 
 ;;; DISABLED: PDF tools
 
