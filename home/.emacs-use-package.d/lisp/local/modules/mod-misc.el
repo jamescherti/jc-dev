@@ -256,6 +256,21 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (advice-add 'package-vc-upgrade :around #'my-inhibit-vc-async-window-around-advice)
   (advice-add 'package-vc-upgrade-all :around #'my-inhibit-vc-async-window-around-advice))
 
+;;; delete outdated early-init.elc
+
+(with-eval-after-load 'compile-angel
+  ;; TODO Remove this from the compile-angel defaults
+  (setq compile-angel-excluded-path-suffixes
+        (delete "/early-init.el" compile-angel-excluded-path-suffixes)))
+
+(let ((early-init-el (expand-file-name "early-init.el" lightemacs-user-directory))
+      (early-init-elc (expand-file-name "early-init.elc" lightemacs-user-directory)))
+  (when (and (file-exists-p early-init-elc)
+             ;; (file-exists-p early-init-el) ; Not necessary
+             (file-newer-than-file-p early-init-el early-init-elc))
+    (message "[AUTO DELETE] %s" early-init-elc)
+    (delete-file early-init-elc)))
+
 ;;; compile-angel timer (test)
 
 ;; (defun my-disable-compile-angel-after-delay ()
@@ -883,58 +898,6 @@ any new ones."
   (setq modus-themes-italic-constructs t)
   (setq modus-themes-bold-constructs t)
   (setq modus-themes-mixed-fonts nil)
-
-  ;; The function that is called by default is `vc-shrink-buffer-window',
-  ;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
-  ;; This function shrinks height of WINDOW if its buffer doesn't need so many
-  ;; lines. More precisely, shrink WINDOW vertically to be as small as possible,
-  ;; while still showing the full contents of its buffer. WINDOW must be a live
-  ;; window and defaults to the selected one.
-  (setq vc-diff-finish-functions nil)
-  (setq vc-git-diff-switches '("--histogram"  ; Faster algorithm
-                               "--textconv"
-                               "--stat"
-
-                               ;; "--ignore-cr-at-eol"
-
-                               ;; Ignore changes in amount of white space.
-                               ;; For example these would be considered the same:
-                               ;; -foo    bar
-                               ;; +foo bar
-                               ;; "--ignore-space-change"
-
-                               ;; Ignore all white space.
-                               ;; "--ignore-all-space"
-                               "-w"
-
-                               ;; Ignore changes whose lines are all blank.
-                               ;; "--ignore-blank-lines"
-                               ))
-  ;; Allow completing Git revisions from all refs, not only branches.
-  (setq vc-git-revision-complete-only-branches nil)
-
-  ;; Keep related changes together when generating changelogs.
-  ;;
-  ;; When you run `add-change-log-entry' or generate a changelog,
-  ;; Emacs groups changes that belong to the same logical change together,
-  ;; rather than scattering them across separate entries.
-  ;;
-  ;; This results in cleaner, more coherent changelog entries,
-  ;; especially useful when editing multiple related files or making
-  ;; several small fixes that belong to a single change.
-  (setq add-log-keep-changes-together t)
-
-  ;; Hide "up-to-date" messages in vc-dir buffers when reverting, reducing noise
-  ;; (available since Emacs 31).
-  (setq vc-dir-hide-up-to-date-on-revert t)
-
-  ;; Ignore large, commonly untracked directories (like node_modules) in VC
-  ;; operations to improve performance.
-  (with-eval-after-load 'tramp
-    (setq vc-ignore-dir-regexp (format "%s\\|%s\\|%s"
-                                       vc-ignore-dir-regexp
-                                       tramp-file-name-regexp
-                                       "[/\\\\]node_modules")))
 
   (setq kirigami-enhance-outline-open t)
   (setq kirigami-enhance-outline-close-all t)
@@ -2540,6 +2503,26 @@ visibility when navigation commands are executed."
     (when (and (eq (current-buffer) (window-buffer))
                (not (pos-visible-in-window-p (point))))
       (recenter))))
+
+;; (with-eval-after-load 'saveplace  ; TODO test more
+;;   (add-hook 'save-place-after-find-file-hook
+;;             #'lightemacs-default-settings--recenter-maybe 70))
+;;
+;; (with-eval-after-load 'imenu  ; TODO test more
+;;   (add-hook 'imenu-after-jump-hook
+;;             #'lightemacs-default-settings--recenter-maybe 70))
+;;
+;; (with-eval-after-load 'consult  ; TODO test more
+;;   (add-hook 'consult-after-jump-hook
+;;             #'lightemacs-default-settings--recenter-maybe 70))
+;;
+;; (with-eval-after-load 'org-agenda  ; TODO test more
+;;   (add-hook 'org-agenda-after-show-hook
+;;             #'lightemacs-default-settings--recenter-maybe 70))
+;;
+;; (with-eval-after-load 'bookmark  ; TODO test more
+;;   (add-hook 'bookmark-after-jump-hook
+;;             #'lightemacs-default-settings--recenter-maybe 70))
 
 (with-eval-after-load 'evil-commands
   (advice-add 'evil-goto-last-change-reverse :around
@@ -4398,6 +4381,237 @@ properly handles remote files over Tramp), applying the setting only if
   (if (fboundp 'pathaction-vterm)
       (setq pathaction-term-function #'pathaction-vterm)
     (error "Undefined: pathaction-vterm")))
+
+;;; VC
+
+;; The function that is called by default is `vc-shrink-buffer-window',
+;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
+;; This function shrinks height of WINDOW if its buffer doesn't need so many
+;; lines. More precisely, shrink WINDOW vertically to be as small as possible,
+;; while still showing the full contents of its buffer. WINDOW must be a live
+;; window and defaults to the selected one.
+(setq vc-diff-finish-functions nil)
+(setq vc-git-diff-switches '("--histogram"  ; Faster algorithm
+                             "--stat"
+                             "--textconv"
+
+                             ;; "--ignore-cr-at-eol"
+
+                             ;; Ignore changes in amount of white space.
+                             ;; For example these would be considered the same:
+                             ;; -foo    bar
+                             ;; +foo bar
+                             ;; "--ignore-space-change"
+
+                             ;; Ignore all white space.
+                             ;; "--ignore-all-space"
+                             ;; "-w"
+
+                             ;; Ignore changes whose lines are all blank.
+                             ;; "--ignore-blank-lines"
+                             ))
+;; Allow completing Git revisions from all refs, not only branches.
+(setq vc-git-revision-complete-only-branches nil)
+
+;; Keep related changes together when generating changelogs.
+;;
+;; When you run `add-change-log-entry' or generate a changelog,
+;; Emacs groups changes that belong to the same logical change together,
+;; rather than scattering them across separate entries.
+;;
+;; This results in cleaner, more coherent changelog entries,
+;; especially useful when editing multiple related files or making
+;; several small fixes that belong to a single change.
+(setq add-log-keep-changes-together t)
+
+;; Hide "up-to-date" messages in vc-dir buffers when reverting, reducing noise
+;; (available since Emacs 31).
+(setq vc-dir-hide-up-to-date-on-revert t)
+
+;; Ignore large, commonly untracked directories (like node_modules) in VC
+;; operations to improve performance.
+(with-eval-after-load 'tramp
+  (setq vc-ignore-dir-regexp (format "%s\\|%s\\|%s"
+                                     vc-ignore-dir-regexp
+                                     tramp-file-name-regexp
+                                     "[/\\\\]node_modules")))
+
+;;; VC: Support git-crypt repositories
+
+;; TODO use a .dir-locals.el variable fo this
+
+;; (defun mod-better-vc-git-crypt-support ()
+;;   "Make git use --textconv if the current buffer is in a git-crypt repository.
+;; This function checks whether the current buffer is under Git version control and
+;; whether the repository contains a .git/git-crypt directory, which indicates
+;; that git-crypt is being used. If both conditions are met and --textconv is
+;; not already present in `vc-git-diff-switches', it appends --textconv
+;; buffer-locally. This ensures that custom diff drivers defined in
+;; .gitattributes (e.g., for decrypting files) are correctly invoked during diff
+;; operations."
+;;   (let ((file-name (buffer-file-name (buffer-base-buffer))))
+;;     (when (and (memq 'Git vc-handled-backends)
+;;                (not (file-remote-p file-name))
+;;                (eq (vc-backend file-name) 'Git))
+;;       (let* ((top-level-dir (vc-call-backend 'Git 'root file-name)))
+;;         (when (and top-level-dir
+;;                    (file-directory-p (expand-file-name ".git/git-crypt"
+;;                                                        top-level-dir)))
+;;           (unless (member "--textconv" vc-git-diff-switches)
+;;             (setq-local vc-git-diff-switches
+;;                         (append vc-git-diff-switches '("--textconv")))))))))
+;;
+;; (add-hook 'find-file-hook #'mod-better-vc-git-crypt-support 90)
+
+;;; highlight-numbers
+
+;; (lightemacs-use-package highlight-numbers
+;;   :commands highlight-numbers-mode
+;;   :hook (emacs-lisp-mode . highlight-numbers-mode))
+
+
+;;; Org: Font Lock Deferral
+
+(defun my-setup-defer-font-lock ()
+  "Set jit-lock defer and stealth parameters when buffer is large.
+Especially useful for large Org files with complex structure."
+  (if (> (buffer-size) 100000) ;; Increased threshold to 100KB
+      (setq-local jit-lock-defer-time 0.1
+                  jit-lock-stealth-time 2
+                  ;; Process fewer chars during idle time
+                  jit-lock-stealth-load 200
+                  ;; Process in larger chunks
+                  jit-lock-chunk-size 10000
+                  ;; Lower CPU usage during stealth fontification
+                  jit-lock-stealth-nice 0.5)
+    ;; Text is sometimes not highlighted. Ensure it is highlighted.
+    ;; (font-lock-ensure)
+    t))
+
+(add-hook 'org-mode-hook #'my-setup-defer-font-lock)
+
+;;; Font lock deferral
+
+;; JIT Lock Defer Time
+;; -------------------
+;; (setq fast-but-imprecise-scrolling nil)
+
+;; NOTE: This adds timers, for some reason...
+;; In addition to that, it causes issues with dired
+;; (setq jit-lock-defer-time 0)  ; 0 = Fontification deferred while there is input
+
+;; (setq jit-lock-defer-time 0.04)
+;; (setq jit-lock-defer-time 0.1)
+;; (setq jit-lock-defer-time 0)
+;; (setq jit-lock-defer-time 0.25)
+
+;; Override the value in dired since deleting in dired requires immediate font
+;; lock update
+;; (add-hook 'dired-mode-hook #'(lambda()
+;;                                (setq-local jit-lock-defer-time nil)
+;;                                (when (bound-and-true-p font-lock-mode)
+;;                                  (font-lock-ensure))))
+
+;; The number of lines to try scrolling a window by when point moves out.
+;; If that fails to bring point back on frame, point is centered instead.
+;; If this is zero, point is always centered after it moves off frame.
+;; If you want scrolling to always be a line at a time, you should set
+;; 'scroll-conservatively' to a large value rather than set this to 1.
+;; (setq scroll-step 0)
+
+;; Scroll Aggressively
+;; - scroll-up-aggressively: Controls how far Emacs lets the point get from the
+;;   bottom of the window before it scrolls.
+;; - scroll-down-aggressively: Controls how far the point can get from the top
+;;   of the window before scrolling.
+;;
+;; 0.01 means “scroll as soon as the point starts moving away from the edge.”.
+;; 1 would mean “wait until the point is almost off the screen.”
+;;
+;; What happens with 0.01: When you scroll down (e.g., pressing C-n or C-v),
+;; Emacs will try to keep the point near the top of the screen. When you scroll
+;; up, Emacs will keep the point near the bottom.
+;;
+;; In Emacs, when you move the cursor (called the point) up or down, sometimes
+;; the screen scrolls to keep the point visible. The variables
+;; scroll-up-aggressively and scroll-down-aggressively control how soon that
+;; scrolling happens.
+;;
+;; Benefits:
+;; - Provides a more "stick-to-edge" scrolling experience, which many users find
+;;   helpful when reading or editing code sequentially from top to bottom (e.g.,
+;;   in programming).
+;; - Avoids excessive recentring, giving a more predictable and less jumpy scroll.
+;;
+;; Also emacs by default will jump around a lot when scrolling a buffer with
+;; images. Set the following variables to prevent that:
+;; (setq scroll-up-aggressively 0.0
+;;       scroll-down-aggressively 0.0)
+;; (setq scroll-up-aggressively 0.01
+;;       scroll-down-aggressively 0.01)
+
+;; To speed up Emacs when working with large files, increasing
+;; jit-lock-chunk-size to a larger value, such as 2000, will generally improve
+;; performance by processing larger chunks of text at once, thereby reducing the
+;; number of context-switching operations. However, be mindful of the tradeoff
+;; between responsiveness and performance.
+;; (setq jit-lock-chunk-size 1700)
+
+;; The benefit of stealth fontification in Emacs, controlled by variables like
+;; jit-lock-stealth-time, is that it optimizes the responsiveness of syntax
+;; highlighting in large buffers by deferring font-lock updates until they are
+;; absolutely necessary. This approach minimizes the impact of frequent syntax
+;; re-evaluations on system performance, particularly when typing or scrolling
+;; through large files. By reducing the frequency of font-lock recalculations,
+;; stealth fontification ensures smoother user interactions, such as faster
+;; scrolling and more immediate cursor movements, without sacrificing the
+;; overall accuracy of syntax highlighting. This makes it especially beneficial
+;; in large, complex files where real-time updates might otherwise cause
+;; noticeable lag or slowdowns.
+
+;; This controls the amount of time (in milliseconds) that jit-lock-mode will
+;; wait before triggering a re-scan of the buffer for syntax highlighting. A
+;; lower value like 16 means Emacs will update more quickly, while a higher
+;; value would result in less frequent updates, possibly improving performance
+;; but at the cost of delayed highlighting. jit-lock-stealth-time 16
+;; (setq jit-lock-stealth-time 1)
+;; jit-lock-stealth-time 0.2
+;; jit-lock-stealth-time 1.0
+;; jit-lock-stealth-time 2
+
+;; This controls the priority given to jit-lock-mode when deciding whether to
+;; perform syntax highlighting. Lower values (like 0.5) make jit-lock-mode more
+;; "stealthy," meaning it will try to avoid interrupting the user's workflow
+;; unless absolutely necessary, especially when performing other tasks.
+;; (setq jit-lock-stealth-nice 0.2)
+
+;; This enables or disables the contextual re-evaluation of font-locking. When
+;; set to t, Emacs will try to do context-aware font-locking, adjusting the
+;; syntax highlighting based on the context of the text, which can improve
+;; highlighting accuracy for some languages.
+;; (setq jit-lock-contextually t)
+
+;; (with-no-warnings
+;;   ;; Deprecated
+;;   (setq jit-lock-defer-contextually jit-lock-contextually))
+
+;; jit-lock-stealth-nice 0.1
+;; jit-lock-stealth-nice 0.5
+
+;; jit-lock-stealth-verbose nil
+
+;; (setq jit-lock-stealth-load 10)
+;; (setq jit-lock-stealth-verbose t)
+;; (setq jit-lock-context-time 0.5)
+
+;;; Warnings
+
+;; (unless (fboundp 'json-serialize)
+;;   (warn "Native JSON is *not* available"))
+
+(unless (and (fboundp 'native-comp-available-p)
+             (native-comp-available-p))
+  (warn "Native compilation is *not* available"))
 
 ;;; Provide
 

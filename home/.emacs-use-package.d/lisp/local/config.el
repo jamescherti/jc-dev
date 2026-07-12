@@ -1414,11 +1414,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
   ;; Exclusions
   (push "/file-templates-auto/main.el" compile-angel-excluded-path-suffixes)
   (push "/tmp-file.el" compile-angel-excluded-path-suffixes)
-  (push "/.dir-settings.el" compile-angel-excluded-path-suffixes)
-
-  ;; This is important because Emacs loads the early-init.elc, even if it is
-  ;; older than the early-init.el file
-  (push "/early-init.el" compile-angel-excluded-path-suffixes))
+  (push "/.dir-settings.el" compile-angel-excluded-path-suffixes))
 
 ;;; Provide
 
