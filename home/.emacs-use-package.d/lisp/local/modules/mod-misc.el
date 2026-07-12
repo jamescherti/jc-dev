@@ -1313,9 +1313,6 @@ any new ones."
 
   (setq persist-text-scale-handle-file-renames t)
 
-  (setq vterm-timer-delay 0.001)  ;; Only works when added after :config
-  (setq vterm-max-scrollback 1)
-
   (setq eat-enable-yank-to-terminal t
         eat-enable-directory-tracking t
         eat-enable-shell-command-history t
@@ -5604,6 +5601,35 @@ function or if an invalid choice is made."
 ;; unbroken block. Typing get_u and pressing M-/ will correctly grab the full
 ;; context and expand the string to get_user_data.
 ;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
+
+;;; vterm
+
+;; To stop vterm from asking for confirmation and force it to compile the
+;; module automatically, you need to set the vterm-always-compile-module
+;; variable to t.
+(setq vterm-always-compile-module t)
+
+(setq vterm-timer-delay 0.001)  ;; Only works when added after :config
+(setq vterm-max-scrollback 1)
+(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
+(setq vterm-disable-inverse-video t)
+
+;; TODO lightemacs?
+(defun my-setup-vterm ()
+  "Better evil integration with `vterm'."
+  (my-disable-fringe-truncation-arrow)
+
+  (setq-local line-number-mode nil)
+  (setq-local column-number-mode nil)
+
+  ;; Define cursor shapes and colors for Evil states
+  (setq-local evil-normal-state-cursor 'box
+              evil-visual-state-cursor 'box
+              evil-insert-state-cursor 'bar)
+
+  (setq-local cursor-type 'bar))
+
+(add-hook 'vterm-mode-hook 'my-setup-vterm)
 
 ;;; DISABLED: dabbrev boundaries 2
 

@@ -1563,40 +1563,15 @@ search direction (default: \='forward)."
 
 ;;; vterm settings
 
-;; TODO lightemacs?
-(defun my-setup-vterm ()
-  "Better evil integration with `vterm'."
-  (my-disable-fringe-truncation-arrow)
-
-  ;; https://www.reddit.com/r/emacs/comments/xyo2fo/orgmode_vterm_tmux/
-  ;; With the first line, you can use a binding like M-SPC ESC (M-SPC
-  ;; being the default alt-leader key) to switch the vterm buffer to evil
-  ;; normal state. Most of the time I don't use it, and simply interact with
-  ;; the vterm the same exact way I do with any other terminal.
-  (with-eval-after-load 'evil-collection
-    (when (and (not (bound-and-true-p evil-collection-vterm-send-escape-to-vterm-p))
-               (fboundp 'evil-collection-vterm-toggle-send-escape))
-      (let ((inhibit-message t))
-        ;; TODO add shut-up back?
-        (evil-collection-vterm-toggle-send-escape))))
-
-  (setq-local line-number-mode nil)
-  (setq-local column-number-mode nil)
-
-  ;; Define cursor shapes and colors for Evil states
-  (setq-local evil-normal-state-cursor 'box
-              evil-visual-state-cursor 'box
-              evil-insert-state-cursor 'bar)
-
-  (setq-local cursor-type 'bar))
-
-
-;; (add-to-list 'evil-emacs-state-modes 'vterm-mode)
-
-(add-hook 'vterm-mode-hook 'my-setup-vterm)
-
-(setq vterm-clear-scrollback-when-clearing t)
-(setq vterm-max-scrollback 1500)
+;; With the first line, you can use a binding like M-SPC ESC (M-SPC being the
+;; default alt-leader key) to switch the vterm buffer to evil normal state. Most
+;; of the time I don't use it, and simply interact with the vterm the same exact
+;; way I do with any other terminal.
+(with-eval-after-load 'evil-collection
+  (when (and (not (bound-and-true-p evil-collection-vterm-send-escape-to-vterm-p))
+             (fboundp 'evil-collection-vterm-toggle-send-escape))
+    (let ((inhibit-message t))
+      (evil-collection-vterm-toggle-send-escape))))
 
 ;; (setq vterm-set-bold-hightbright t)
 ;; (setq vterm-disable-bold t)
@@ -1604,11 +1579,6 @@ search direction (default: \='forward)."
 ;; "C-x" "C-c" "C-g"
 
 ;; C-w to change the window in vim
-
-(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
-(setq vterm-disable-inverse-video t)
-
-(setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=yes")
 
 ;; Disables inverse video rendering in vterm.
 ;; This fixes the issue where the underlying shell visually highlights
@@ -1665,7 +1635,6 @@ search direction (default: \='forward)."
   ;; Escape to normal state using C-c <escape> or C-c [
   (evil-define-key 'insert vterm-mode-map (kbd "C-c <escape>") 'evil-normal-state)
   (evil-define-key 'insert vterm-mode-map (kbd "C-c [") 'evil-normal-state))
-
 
 ;;; Silence C-f
 

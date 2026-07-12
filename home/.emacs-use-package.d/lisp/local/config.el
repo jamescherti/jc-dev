@@ -933,11 +933,6 @@ subsequent GCC invocations."
 (with-eval-after-load 'le-gcmh
   (setq gcmh-high-cons-threshold (* 600 1024 1024)))
 
-;; To stop vterm from asking for confirmation and force it to compile the
-;; module automatically, you need to set the vterm-always-compile-module
-;; variable to t.
-(setq vterm-always-compile-module t)
-
 (setq stripspace-verbose nil)
 (setq stripspace-normalize-indentation t)
 (setq stripspace-restore-column t)
