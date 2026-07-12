@@ -4856,8 +4856,6 @@ properly handles remote files over Tramp), applying the setting only if
 ;; (add-hook 'org-capture-after-finalize-hook #'my-org-capture-switch-insert)
 ;; (add-hook 'org-capture-before-finalize-hook #'my-org-capture-switch-insert)
 
-
-
 ;; (setq org-appear-delay 0.4)
 ;; (setq org-appear-autoemphasis  t)
 ;; (setq org-appear-autosubmarkers t)
@@ -5058,7 +5056,6 @@ properly handles remote files over Tramp), applying the setting only if
 ;;   ;; (org-agenda-bulk-custom-functions nil)
 ;;
 ;;   ;; Old options
-;;
 ;;
 ;;   ;; (define-key org-agenda-keymap (kbd "C-w c") 'buffer-terminator-close-window)
 ;;   ;; (define-key org-agenda-keymap (kbd "C-w C-c") 'buffer-terminator-close-window)
