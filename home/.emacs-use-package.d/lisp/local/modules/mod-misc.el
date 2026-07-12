@@ -112,34 +112,7 @@
 ;; Automatically resizes all windows proportionally when splitting or deleting a
 ;; window. This prevents new windows from taking all the space from the current
 ;; window, maintaining a balanced layout across your frame.
-;; TODO
 (setq window-combination-resize t)
-
-;; Comment: This setting integrates the operating system clipboard more securely
-;; with the Emacs kill ring, functioning as a safeguard for your copied data.
-;;
-;; Benefit:
-;; - Prevents accidental data loss. If you copy text from an external
-;; application and then execute a kill command inside Emacs before pasting, the
-;; external clipboard content is automatically preserved in the kill ring first.
-;; You can safely retrieve it later using `yank-pop'.
-;;
-;; Drawback:
-;; - Clutters the kill ring history. If you frequently copy items in your
-;; operating system for use in other external applications, Emacs will pull
-;; those items into the kill ring upon your next kill command, creating
-;; unnecessary entries that you did not intend to use in Emacs.
-;;
-;; Evil: For an Evil mode user, "executing a kill" translates to performing a
-;; delete or change operation that places text into a Vim register.
-;; Specific actions that execute a kill for an Evil user include: d, c, x, s...
-;; Emacs will check the system clipboard right before you execute a command like
-;; dw or dd. If there is new text on your system clipboard that you copied from
-;; a web browser, Emacs saves that web browser text into the kill ring history
-;; first, and then it processes your dd command. This ensures your external
-;; clipboard data is preserved and remains accessible via the yank-pop command
-;; or Evil registers.
-(setq save-interprogram-paste-before-kill t)
 
 ;; Disable displaying a bookmark icon on the fringe. Removing this icon reduces
 ;; visual clutter in the margins, especially if you use bookmarks frequently and
@@ -158,34 +131,28 @@
 
 ;; (setq lazy-count-prefix-format "(%s/%s) ")
 
+;; When stepping through search results, pressing the up or down arrow normally
+;; interrupts the search. This setting allows directional keys to automatically
+;; reverse or advance the search direction.
+(setq isearch-motion-changes-direction t)
+
 ;; TODO minimal-emacs
 ;; Adds an explicit count of matches (e.g., [3/12]) directly into your
 ;; minibuffer search line, exactly like modern text editors or web browsers.
 (setq isearch-lazy-count t
       lazy-count-suffix-format " (%s/%s)")
 
+;; (setq isearch-allow-motion t)
+
+;; Prevents isearch from stubbornly freezing at the end of a buffer match before
+;; wrapping. It keeps navigation continuous and allows you to use standard
+;; scrolling actions while remaining inside a search block.
+(setq isearch-wrap-pause 'no
+      isearch-allow-scroll 'unlimited)
+
 (setq resize-mini-windows t)
 
 ;; (setq switch-to-buffer-obey-display-actions t)
-
-;; Preserve point when switching to a buffer that is already displayed in
-;; another window. This enables operating on the same buffer from multiple
-;; windows, each maintaining its own point.
-;;
-;; Benefits:
-;; - Allows concurrent viewing/editing of different parts of the same buffer in
-;; multiple windows.
-;; - Prevents cursor jumps when switching between windows showing the same
-;; buffer.
-;; - Enhances usability in workflows involving window splits (e.g., side-by-side
-;; editing or diffing).
-;;
-;; Drawbacks:
-;; - Can interfere with bookmark behavior, as bookmarks may not restore point
-;; consistently across windows.
-;; - May cause confusion if one expects a global point for a buffer rather than
-;; a window-local one.
-;; (setq switch-to-buffer-preserve-window-point t)
 
 ;; Setting this to nil prevents Emacs from "snapping" the viewport to fit the
 ;; entire line when point moves to a partially visible line.
@@ -207,26 +174,9 @@
 ;; TODO minimal emacs?
 (setq make-cursor-line-fully-visible nil)
 
-;; t: This setting is the most common and means that the screen position is
-;; preserved while scrolling. The cursor will stay in place relative to the
-;; visible part of the buffer, and it won't jump to the top or bottom of the
-;; screen.
-;;
-;; 'always: This is a more aggressive setting, ensuring the point is preserved
-;; no matter what, including in edge cases. This can be especially useful if
-;; you're using smooth scrolling or if the Emacs window is resized.
-;;
-;; nil: Disables preserving the screen position, meaning the cursor might move
-;; when scrolling.
-;; (setq scroll-preserve-screen-position nil)
-;; If you choose always, it will change the cursor position
-;; (setq scroll-preserve-screen-position 'always)
-;; (setq scroll-preserve-screen-position t)
-
 ;; also useful for org
 (setq imenu-max-items 30)
 
-;; (setq isearch-allow-motion t)
 ;; (setq lazy-highlight-initial-delay 0.5)
 
 ;; (ls-lisp-use-insert-directory-program nil)
@@ -370,6 +320,31 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; Preserve point when switching to a buffer that is already displayed in
+;; another window. This enables operating on the same buffer from multiple
+;; windows, each maintaining its own point.
+;;
+;; Benefits:
+;; - Allows concurrent viewing/editing of different parts of the same buffer in
+;; multiple windows.
+;; - Prevents cursor jumps when switching between windows showing the same
+;; buffer.
+;; - Enhances usability in workflows involving window splits (e.g., side-by-side
+;; editing or diffing).
+;;
+;; Drawbacks:
+;; - Can interfere with bookmark behavior, as bookmarks may not restore point
+;; consistently across windows.
+;; - May cause confusion if one expects a global point for a buffer rather than
+;; a window-local one.
+(setq switch-to-buffer-preserve-window-point nil)
+
+;; Warns about undefined commands in the prompt (Emacs 29.1)
+(setq shell-highlight-undef-enable t)
+
+;; Automatically cleans up dead shell buffers (Emacs 29.1)
+(setq shell-kill-buffer-on-exit t)
+
 (setq ;; completion-styles '(partial-completion flex initials)
  completion-ignore-case t
  read-buffer-completion-ignore-case t
@@ -394,13 +369,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
       completions-detailed t
       completions-group t
       completions-group-sort 'alphabetical)
-
-
-;; Prevents isearch from stubbornly freezing at the end of a buffer match before
-;; wrapping. It keeps navigation continuous and allows you to use standard
-;; scrolling actions while remaining inside a search block.
-(setq isearch-wrap-pause 'no
-      isearch-allow-scroll 'unlimited)
 
 ;; Text properties inflate the size of recentf's files, and there is no purpose
 ;; in persisting them.
@@ -457,7 +425,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Automatically enable ANSI color support in compilation buffers
 ;; by parsing and applying ANSI escape sequences during output filtering.
-;; (setq ansi-color-for-compilation-mode t)
+(setq ansi-color-for-compilation-mode t)
 
 ;; Alternatively, explicitly add the ANSI color filter to the compilation filter hook
 ;; to apply colors immediately during compilation output processing.
@@ -593,14 +561,19 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq font-lock-maximum-decoration t)
 
 ;; Auto-scroll to bottom only when you type, not when output arrives
+
+;; Expands history commands like !! or !$ before execution
+(setq-default comint-input-autoexpand 'input)
+
 (setq-default comint-scroll-to-bottom-on-input t)
 ;; (setq-default comint-scroll-to-bottom-on-output nil)
 
 ;; Prevent duplicates in your shell history
 (setq comint-input-ignoredups t)
 
-;; (setq duplicate-line-final-position -1 ; both are Emacs 29
-;;       duplicate-region-final-position -1)
+;; Leaves the cursor at the end of the newly duplicated text block.
+(setq duplicate-line-final-position -1 ; both are Emacs 29
+      duplicate-region-final-position -1)
 
 ;; NOTE disabled recently
 ;;
@@ -647,16 +620,19 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Emacs can balance window sizes automatically, but you can turn this behavior
 ;; off by setting even-window-sizes to nil: This prevents Emacs from resizing
 ;; existing windows to match the size of a new split window.
-;; (setq even-window-sizes nil)
-;; (setq even-window-sizes 'height-only)
+(setq even-window-sizes nil)
+(setq even-window-sizes 'height-only)
 
 ;; Kills the entire line plus the newline character
 ;; kills the entire line plus the newline
 ;; (setq kill-whole-line t)
 
+;; Deletes all contiguous whitespace characters at once, preventing repeated
+;; backspace presses.
+;;
 ;; 'hungry' deletes all consecutive whitespace characters at once
 ;; Alternatives is: 'all (remove all consecutive whitespace characters, even newlines).
-;; (setq backward-delete-char-untabify-method 'hungry)
+(setq backward-delete-char-untabify-method 'hungry)
 
 ;; Prevent prompting for identifier when running xref-find-* commands, including
 ;; xref-find-references, which enables faster navigation to all usages of the
@@ -722,8 +698,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; (setq comint-completion-autolist t)
 ;; (setq comint-input-ignoredups t)
-;; (setq-default comint-input-autoexpand 'input)
 
+;; When you initiate a compilation or a Git commit, Emacs prompts you to save
+;; every modified buffer across all active directories. This restricts the save
+;; prompt strictly to files belonging to the current project root.
+;; TODO
 ;; (setq save-some-buffers-default-predicate #'save-some-buffers-root)
 
 ;; Show unprettified symbol under cursor (when in `prettify-symbols-mode')
@@ -739,8 +718,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (setq lazy-highlight-max-at-a-time nil)
 ;; (setq lazy-highlight-no-delay-length 2)
 ;; (setq lazy-highlight-interval 0.0625)
-
-;; (setq isearch-motion-changes-direction t)
 
 ;; (setq
 ;;  search-whitespace-regexp ".*?"
@@ -819,16 +796,13 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;         ("^[^ \t\n]+:.*" . font-lock-string-face)
 ;;         ("^\\[[1-9][0-9]*\\]" . font-lock-constant-face)))
 ;; (setq shell-command-prompt-show-cwd t) ; Emacs 27.1
-;; (setq ansi-color-for-comint-mode t)
 ;; (setq shell-input-autoexpand 'input)
-;; (setq shell-highlight-undef-enable t) ; Emacs 29.1
+
 ;; (setq shell-has-auto-cd nil) ; Emacs 29.1
 ;; (setq shell-get-old-input-include-continuation-lines t) ; Emacs 30.1
-;; (setq shell-kill-buffer-on-exit t) ; Emacs 29.1
 ;; (setq shell-completion-fignore '("~" "#" "%"))
 ;; (setq-default comint-scroll-to-bottom-on-input t)
 ;; (setq-default comint-scroll-to-bottom-on-output nil)
-;; (setq-default comint-input-autoexpand 'input)
 
 ;; Removed from minimal-emacs.d
 
@@ -915,7 +889,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Configure Emacs to ask for confirmation before exiting
 
-;; (customize-set-variable 'switch-to-buffer-in-dedicated-window 'pop)
+;; (setq switch-to-buffer-in-dedicated-window 'pop)
 
 ;; (customize-set-variable 'completion-cycle-threshold 3)
 ;; (customize-set-variable 'completion-category-overrides
@@ -1791,7 +1765,6 @@ any new ones."
   (setq enhanced-evil-paredit-handle-paste t)
   (setq confirm-kill-emacs 'y-or-n-p)
   (setq history-delete-duplicates t)
-  (setq shell-kill-buffer-on-exit t)
   (setq widget-image-enable nil)
   (setq mode-line-collapse-minor-modes t)  ;; Emacs 31
   (setq abbrev-suggest t)
