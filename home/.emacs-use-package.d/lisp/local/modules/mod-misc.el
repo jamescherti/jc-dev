@@ -1615,38 +1615,6 @@ any new ones."
 
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-post-init)
 
-;;; easysession
-
-;; just open easysession.el dir 5 times in 5 tabs,
-;; then open the easysession.el file
-;; do not switch to other tabs
-;; quit emacs, launch it, then the other tabs bufers will not be loaded
-(setq easysession-buffer-list-function 'easysession-visible-buffer-list)
-
-;; (setq easysession-save-pretty-print t)
-
-;; (setq easysession-switch-to-save-session nil)
-;; (setq easysession-mode-line-misc-info t)
-;; (setq easysession-setup-load-session nil)
-
-;; Change default to this
-(setq easysession-fontify t)
-(setq easysession-quiet t)
-
-(setq easysession-switch-to-exclude-current t)
-(setq easysession-save-interval (* 14 60))
-(add-hook 'easysession-before-reset-hook
-          #'(lambda()
-              ;; Save all with no questions
-              (my-save-all-buffers)))
-;; (defun my-easysession-only-main-saved ()
-;;   "Only save the main session."
-;;   (when (and (fboundp 'easysession-get-session-name)
-;;              (string= "main" (funcall 'easysession-get-session-name)))
-;;     t))
-;; (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
-(add-hook 'easysession-new-session-hook 'easysession-reset)
-
 ;;; Useful functions
 
 ;;; Startup time
