@@ -855,6 +855,26 @@ only if they are not already available."
   (setq markdown-toc-mode-map nil)
   (setq markdown-toc-header-toc-title "## Table of Contents"))
 
+;;; custom-modes: Simple conf mode
+
+(defvar simple-conf-mode-syntax-table
+  (let ((table (make-syntax-table)))
+    ;; The # character starts a comment (< is the comment start syntax class).
+    (modify-syntax-entry ?# "<" table)
+    ;; A newline (\n) ends the comment (> is the syntax class for comment end).
+    (modify-syntax-entry ?\n ">" table)
+    table)
+  "Syntax table for `simple-conf-mode'.")
+
+(defvar simple-conf-mode-font-lock-keywords
+  '(("#.*$" . font-lock-comment-face))
+  "Font lock keywords for `simple-conf-mode'.")
+
+(define-derived-mode simple-conf-mode nil "SimpeConfMode"
+  "Major mode to highlight only # comments."
+  (setq font-lock-defaults '(simple-conf-mode-font-lock-keywords))
+  (set-syntax-table simple-conf-mode-syntax-table))
+
 ;;; Provide
 
 (provide 'mod-filetype)
