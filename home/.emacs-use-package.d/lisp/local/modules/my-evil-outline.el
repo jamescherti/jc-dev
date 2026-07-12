@@ -177,28 +177,6 @@ ORIG-FUN is the function ARGS are the arguments."
 
 ;;; Restore column: next/previous heading
 
-(with-eval-after-load 'evil-commands
-  (evil-define-motion evil-backward-section-begin (count)
-    "Move the cursor to the beginning of the COUNT-th previous section."
-    :jump t
-    :type exclusive
-    (let ((col (current-column)))
-      (evil-signal-at-bob-or-eob (- (or count 1)))
-      (evil-backward-beginning 'evil-defun count)
-      (move-to-column col)))
-
-  (evil-define-motion evil-backward-section-end (count)
-    "Move the cursor to the end of the COUNT-th previous section."
-    :jump t
-    :type inclusive
-    (let ((col (current-column)))
-      (evil-signal-at-bob-or-eob (- (or count 1)))
-      (end-of-line -1)
-      (evil-backward-end 'evil-defun count)
-      (unless (eobp) (forward-line))
-      (move-to-column col)))
-  )
-
 ;; (evil-define-key 'normal 'global (kbd "[[") #'evil-backward-section-begin)
 ;; (evil-define-key 'normal 'global (kbd "]]") #'evil-backward-section-end)
 
