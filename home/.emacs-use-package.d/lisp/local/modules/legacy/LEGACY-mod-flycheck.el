@@ -22,6 +22,9 @@
 
 ;;; Commentary:
 
+;;; DEPRECATED: Legacy unmaintained code. Safe to remove if it causes
+;;; regressions.
+
 ;;; Code:
 
 (lightemacs-use-package flycheck

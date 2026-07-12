@@ -23,6 +23,9 @@
 ;;; Commentary:
 
 ;;  Invoke fasd functionality right from `evil-ex'
+;;
+;;; DEPRECATED: Legacy unmaintained code. Safe to remove if it causes
+;;; regressions.
 
 ;;; Code:
 

@@ -21,6 +21,10 @@
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
+;;; DEPRECATED: Legacy unmaintained code. Safe to remove if it causes
+;;; regressions.
+
 ;; Auto indent elisp on save mode
 
 ;;; Code:
