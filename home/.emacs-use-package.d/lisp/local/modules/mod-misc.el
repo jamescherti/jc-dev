@@ -372,6 +372,28 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(when (display-graphic-p)
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+(setq next-error-message-highlight 'keep)
+
+;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+;; TODO: add it to minimal-emacs.d
+;; (when (display-graphic-p)
+;;   (setq x-select-request-type
+;; (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+
+;; This variable specifies a function for splitting a window, in order
+;; to make a new window for displaying a buffer. It is used by the
+;; display-buffer-pop-up-window action function to actually split the
+;; window.  The value must be a function that takes one argument, a
+;; window, and returns either a new window (which will be used to
+;; display the desired buffer) or nil (which means the splitting
+;; failed). The default value is split-window-sensibly, which is
+;; documented next.
+(setq split-window-preferred-function nil)
+
+;; (setq read-minibuffer-restore-windows t) ; Emacs 28
+
 ;; GPM mouse support is strictly for TTY consoles.
 (with-eval-after-load 't-mouse
   (when (bound-and-true-p gpm-mouse-mode)
@@ -561,6 +583,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (add-hook 'after-init-hook #'my-enable-package-review-policy)
 
 (setq-default search-invisible nil)
+
+;; Enable automatic buffer refresh when VC-controlled files change externally.
+;; (setq auto-revert-check-vc-info t)
 
 ;;; Misc (previously part of mod-same-window, but not useful for it)
 
@@ -1031,8 +1056,6 @@ any new ones."
             (when (fboundp 'evil-collection-eat-toggle-send-escape)
               (evil-collection-eat-toggle-send-escape)))))
       (add-hook 'eat-mode-hook 'evil-collection-enable-eat-toggle-send-escape)))
-
-  (setq show-paren-mode nil)
 
   (add-hook 'emacs-lisp-mode-hook
             #'(lambda()
@@ -1529,7 +1552,6 @@ any new ones."
         ;; kill-whole-line t
         ;; list-matching-lines-jump-to-current-line t
         ;; mouse-prefer-closest-glyph t
-        ;; next-error-message-highlight 'keep
         ;; read-char-by-name-sort 'code
         ;; revert-buffer-quick-short-answers t
         ;; shift-select-mode 'permanent
@@ -4397,6 +4419,8 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; VC
 
+(setq vc-git-log-switches '("--stat"))
+
 ;; The function that is called by default is `vc-shrink-buffer-window',
 ;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
 ;; This function shrinks height of WINDOW if its buffer doesn't need so many
@@ -4476,30 +4500,77 @@ properly handles remote files over Tramp), applying the setting only if
 ;;
 ;; (add-hook 'find-file-hook #'mod-better-vc-git-crypt-support 90)
 
+;; Prevent Emacs from closing or shrinking the *vc-diff* window after showing a
+;; diff.
+;;
+;; By default, when you run a version control diff (e.g., with `C-x v =`), Emacs
+;; will try to clean up the *vc-diff* window after the diff is done. This means
+;; it might close the window or make it smaller, depending on how the diff was
+;; opened.
+;;
+;; That behavior can be annoying if you want to keep the diff visible to review
+;; it longer or if you rely on a custom window layout.
+;;
+;; Setting `vc-diff-finish-functions' to nil disables that automatic cleanup, so
+;; the *vc-diff* window stays open and its size is left unchanged.
+
+;; Use a concise log format that shows only the file being logged, not the full
+;; repository history.
+;;
+;; By default, when you run `vc-print-log` (e.g., with `C-x v l`), Emacs may
+;; show the full Git commit history for the entire repository, even if you're
+;; only interested in changes to a specific file.
+;;
+;; Setting `vc-log-short-style` to '(file) tells Emacs to restrict the log to
+;; just the file associated with the current buffer. This results in a much
+;; shorter and more relevant log output, especially in large repositories where
+;; global history is overwhelming or unnecessary.
+;; (setq vc-log-short-style '(file))  ; Default: '(directory)
+
+;; Display `vc-annotate` output using a color scale.
+;; (setq vc-annotate-display-mode 'scale)
+
+;; Limit the summary line length in Git commit messages to encourage concise
+;; messages.
+;; (setq vc-git-log-edit-summary-target-len 50)
+;; (setq vc-git-log-edit-summary-max-len 70)
+
+;; Configure how Emacs formats and parses Git commit logs in the VC root log
+;; view. Specifies the Git log output format and a regex pattern to extract
+;; commit hash, author, date, refs, and message from each line, including
+;; support for --graph decorations. This enables proper display and interaction
+;; with commit entries.
+
+;; Other
+;; (setq vc-git-resolve-conflicts nil)
+
+;; Silence the vc-resolve-conflicts issue when opening a file containing
+;; conflicts. Why?
+;; (setq vc-resolve-conflicts nil)
+
 ;;; highlight-numbers
 
 ;; (lightemacs-use-package highlight-numbers
 ;;   :commands highlight-numbers-mode
 ;;   :hook (emacs-lisp-mode . highlight-numbers-mode))
 
-
 ;;; Org: Font Lock Deferral
 
 (defun my-setup-defer-font-lock ()
   "Set jit-lock defer and stealth parameters when buffer is large.
 Especially useful for large Org files with complex structure."
-  (if (> (buffer-size) 100000) ;; Increased threshold to 100KB
-      (setq-local jit-lock-defer-time 0.1
-                  jit-lock-stealth-time 2
-                  ;; Process fewer chars during idle time
-                  jit-lock-stealth-load 200
-                  ;; Process in larger chunks
-                  jit-lock-chunk-size 10000
-                  ;; Lower CPU usage during stealth fontification
-                  jit-lock-stealth-nice 0.5)
+  (when (> (buffer-size) 100000) ;; Increased threshold to 100KB
+    (setq-local jit-lock-defer-time 0.1
+                jit-lock-stealth-time 2
+                ;; Process fewer chars during idle time
+                jit-lock-stealth-load 200
+                ;; Process in larger chunks
+                jit-lock-chunk-size 10000
+                ;; Lower CPU usage during stealth fontification
+                jit-lock-stealth-nice 0.5)
     ;; Text is sometimes not highlighted. Ensure it is highlighted.
     ;; (font-lock-ensure)
-    t))
+    ))
 
 (add-hook 'org-mode-hook #'my-setup-defer-font-lock)
 
@@ -4625,6 +4696,43 @@ Especially useful for large Org files with complex structure."
 (unless (and (fboundp 'native-comp-available-p)
              (native-comp-available-p))
   (warn "Native compilation is *not* available"))
+
+;;; showparen
+
+(setq show-paren-mode nil)
+
+;; BUG never turn this variable on. it will break lispy AND smartparens
+;; (setq show-paren-context-when-offscreen nil)
+
+;; (setq show-paren-ring-bell-on-mismatch nil)
+
+;; (setq show-paren-data-function #'show-paren--default)
+
+;; :init
+;; (add-hook 'minibuffer-setup-hook #'show-paren-local-mode)
+;; (add-hook 'after-init-hook #'(lambda()
+;;                                (when (bound-and-true-p show-paren-mode)
+;;                                  (show-paren-mode -1))))
+
+;;; hippie expand
+
+;; (setq hippie-expand-try-functions-list '(try-expand-dabbrev
+;;                                          try-expand-dabbrev-from-kill
+;;                                          try-expand-dabbrev-all-buffers
+;;                                          try-complete-file-name-partially
+;;                                          try-complete-file-name
+;;                                          try-expand-all-abbrevs
+;;                                          try-expand-list
+;;                                          try-expand-line
+;;                                          try-complete-lisp-symbol-partially
+;;                                          try-complete-lisp-symbol))
+
+;; (setq hippie-expand-try-functions-list
+;;       '(try-complete-file-name-partially
+;;         try-complete-file-name
+;;         try-expand-dabbrev
+;;         try-expand-dabbrev-all-buffers
+;;         try-expand-dabbrev-from-kill))
 
 ;;; DISABLED: PDF tools
 
