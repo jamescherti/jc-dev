@@ -28,6 +28,19 @@
 
 (require 'cl-lib)
 
+;;; Defaults
+
+;; Old params
+;; (setq ediff-highlight-all-diffs t)
+;; (setq-default ediff-forward-word-function 'forward-char)
+
+;; When non-nil, only differing (conflicting) regions are shown in Ediff,
+;; and common (identical) regions are hidden. This reduces visual noise
+;; and helps focus on actual differences during comparison or merge.
+;;
+;; NOTE: I don't like it.
+;; (setq ediff-show-clashes-only t)
+
 ;;; ediff: next/previous diff `rencenter'
 
 (defun my-ediff-recenter ()

@@ -156,14 +156,13 @@
 ;; consistent reading experience.
 (setq shr-use-fonts nil)
 
-(setq isearch-lazy-count nil)
-
-;; Disable the highlighting of all visible matches during an incremental search
-;; to improve focus on the current match and mitigate performance degradation
-(setq isearch-lazy-highlight t)
-
 ;; (setq lazy-count-prefix-format "(%s/%s) ")
-;; (setq lazy-count-suffix-format nil)
+
+;; TODO minimal-emacs
+;; Adds an explicit count of matches (e.g., [3/12]) directly into your
+;; minibuffer search line, exactly like modern text editors or web browsers.
+(setq isearch-lazy-count t
+      lazy-count-suffix-format " (%s/%s)")
 
 (setq resize-mini-windows t)
 
@@ -228,7 +227,6 @@
 (setq imenu-max-items 30)
 
 ;; (setq isearch-allow-motion t)
-;;  isearch-allow-scroll t
 ;; (setq lazy-highlight-initial-delay 0.5)
 
 ;; (ls-lisp-use-insert-directory-program nil)
@@ -371,6 +369,112 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                      (if (< count 2) "was" "were")))))))))
 
 ;;; testing
+
+(setq ;; completion-styles '(partial-completion flex initials)
+ completion-ignore-case t
+ read-buffer-completion-ignore-case t
+ ;; Ignore case in file and buffer completions
+ read-file-name-completion-ignore-case t
+ completions-format 'one-column
+ completions-max-height 20
+ completion-show-help nil
+ completion-show-inline-help nil)
+(setq icomplete-separator "\n")
+(setq icomplete-delay-completions-threshold 0)
+(setq icomplete-compute-delay 0)
+(setq icomplete-prospects-height 10)
+(setq icomplete-hide-common-prefix nil)
+(setq icomplete-with-completion-tables t)
+(setq icomplete-show-matches-on-no-input t)
+(setq icomplete-max-delay-chars 0)
+(setq icomplete-tidy-shadowed-file-names t)
+(setq icomplete-scroll t)
+(setq icomplete-in-buffer t)
+(setq completion-auto-select nil  ; Alternative: 'second-tab
+      completions-detailed t
+      completions-group t
+      completions-group-sort 'alphabetical)
+
+
+;; Prevents isearch from stubbornly freezing at the end of a buffer match before
+;; wrapping. It keeps navigation continuous and allows you to use standard
+;; scrolling actions while remaining inside a search block.
+(setq isearch-wrap-pause 'no
+      isearch-allow-scroll 'unlimited)
+
+;; Text properties inflate the size of recentf's files, and there is no purpose
+;; in persisting them.
+(with-eval-after-load 'recentf
+  (add-to-list 'recentf-filename-handlers #'substring-no-properties -80))
+
+;; If you spend any time on a Windows machine, the default file I/O layer is
+;; punishing. Turning off true file attributes and boosting the pipe buffer size
+;; dramatically increases responsiveness for sub-processes like Git, compilers,
+;; and LSPs.
+(when IS-WINDOWS
+  (setq w32-get-true-file-attributes nil
+        w32-pipe-read-delay 0
+        w32-pipe-buffer-size (* 64 1024)))
+
+;; The benefit of visual-order-cursor-movement t is that when editing text
+;; containing both left-to-right and right-to-left scripts, cursor
+;; movement aligns with how the text is visually presented on the screen.
+;; This means pressing C-f moves the cursor to the character visually to
+;; the right, and C-b moves it to the character visually to the left,
+;; regardless of the underlying logical (buffer) order. It provides a
+;; navigation model that matches human reading habits in mixed-script
+;; documents, reducing cognitive load and making cursor movement
+;; predictable in visually complex bidirectional contexts.
+;;
+;; NOTE: Setting visual-order-cursor-movement to t forces Emacs to do extra
+;; computational work every time you move the cursor.
+;; (setq visual-order-cursor-movement nil)
+
+;; C-x =
+;; What it does: When you press C-x = (what-cursor-position), Emacs displays
+;; technical details about the character under the point in the echo area.
+;; Setting this to t appends the official, full Unicode name of the character to
+;; that string. Verdict: Nice to have, but unnecessary. If you are tracking down
+;; weird invisible spacing bugs or non-ASCII quotes (like ’ vs '), it helps.
+;; Otherwise, it just adds verbosity to the echo line.
+(setq what-cursor-show-names t)
+
+(setq help-clean-buttons t)
+(setq help-enable-variable-value-editing t)
+
+;; Allow drag and drop out of dired into other apps (e.g. browser)
+(setq dired-mouse-drag-files t)
+
+;; Tell dired-x to not bind "I" key to `dired-info' or "N" to `dired-man'
+(setq dired-bind-info nil)
+(setq dired-bind-man nil)
+
+(when (display-graphic-p)
+  (set-display-table-slot standard-display-table 'vertical-border ?\u2502)
+  (set-display-table-slot standard-display-table 'truncation ?\u2192))
+
+(setq save-silently t)
+
+;; Automatically enable ANSI color support in compilation buffers
+;; by parsing and applying ANSI escape sequences during output filtering.
+;; (setq ansi-color-for-compilation-mode t)
+
+;; Alternatively, explicitly add the ANSI color filter to the compilation filter hook
+;; to apply colors immediately during compilation output processing.
+;; This is equivalent to the above `setq`, but does not depend on `compilation-mode` being loaded.
+;; (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
+
+;; (setq compilation-context-lines 10)  ; not good
+;; (setq compilation-skip-threshold 2)
+;; (setq compilation-window-height 100)
+;; (setq compilation-scroll-output nil)
+
+;; (setq read-process-output-max ; Increase single chunk bytes to read from subprocess (def. 4096)
+;;       (condition-case nil
+;;           (with-temp-buffer ; On GNU/Linux systems, the value should not exceed `pipe-max-size'
+;;             (insert-file-contents "/proc/sys/fs/pipe-max-size")
+;;             (string-to-number (buffer-string)))
+;;         (error (* 1024 1024))))
 
 ;; TODO minimal-emacs?
 ;; (setq bookmark-watch-bookmark-file 'silent)
@@ -579,11 +683,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             ;; identifier under the cursor, making code navigation immediate.
             xref-find-references))
 
-;; Ignore case in file and buffer completions
-;; (setq completion-ignore-case t)
-;; (setq read-file-name-completion-ignore-case t)
-;; (setq read-buffer-completion-ignore-case t)
-
 ;; Decrease verbosity and use faster connection methods
 ;; (setq tramp-verbose 2)
 ;; (setq tramp-use-connection-share t)
@@ -605,6 +704,222 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Enable automatic buffer refresh when VC-controlled files change externally.
 ;; (setq auto-revert-check-vc-info t)
+
+;;; Default modes that I disabled
+
+;; Disable Remote File Checks if Not Needed
+(when (bound-and-true-p tramp-mode)
+  (tramp-mode -1))
+(setq-default tramp-mode nil)
+
+;;; Disabled defaults
+
+;; Truncate the compilation buffer to avoid excessive memory use by limiting its
+;; size. It removes lines from the beginning of the buffer when it exceeds
+;; `comint-buffer-maximum-size'.
+(autoload 'comint-truncate-buffer "comint" nil t)
+(add-hook 'compilation-filter-hook #'comint-truncate-buffer)
+
+;; (setq comint-completion-autolist t)
+;; (setq comint-input-ignoredups t)
+;; (setq-default comint-input-autoexpand 'input)
+
+;; (setq save-some-buffers-default-predicate #'save-some-buffers-root)
+
+;; Show unprettified symbol under cursor (when in `prettify-symbols-mode')
+(setq prettify-symbols-unprettify-at-point 'right-edge)
+
+;; (setq completions-sort (if (>= emacs-major-version 30) 'historical 'alphabetical))
+;; (setq completions-sort nil)
+
+;; (tramp-show-ad-hoc-proxies t)
+;; (remote-file-name-access-timeout 10 "Timeout when restoring session with remote file. In seconds")
+
+;; (setq lazy-highlight-cleanup nil)
+;; (setq lazy-highlight-max-at-a-time nil)
+;; (setq lazy-highlight-no-delay-length 2)
+;; (setq lazy-highlight-interval 0.0625)
+
+;; (setq isearch-motion-changes-direction t)
+
+;; (setq
+;;  search-whitespace-regexp ".*?"
+;;  isearch-yank-on-move 'shift
+;;  isearch-repeat-on-direction-change t
+;;  )
+
+;; (setq tab-bar-auto-width-min '(10 4))
+;; (setq tab-bar-auto-width-max '(50 5))
+
+;; (setq tramp-connection-timeout (* 60 10)) ; seconds
+
+;; It causes scrolling issues in Magit and potentially other modes. Activate it
+;; only in specific Emacs modes to avoid these problems.
+
+;; When word-or-paren-or-punct, complete unless the next character is part of a
+;; word, parenthesis, or punctuation.
+
+;; (use-package minibuffer
+;;   :ensure nil
+;;   :demand t
+;;   :config
+;;   (setq
+;;    completion-auto-help 'always
+;;    completion-flex-nospace nil
+;;    completions-header-format nil
+;;    completions-highlight-face 'completions-highlight
+;;    enable-recursive-minibuffers t
+;;    completions-sort 'historical
+;;    )
+;;   :bind (:map minibuffer-local-map
+;;               ("C-p" . minibuffer-previous-completion)
+;;               ("C-n" . minibuffer-next-completion))
+;;   :bind (:map completion-in-region-mode-map
+;;               ("C-p" . minibuffer-previous-completion)
+;;               ("C-n" . minibuffer-next-completion)
+;;               ("RET" . minibuffer-choose-completion)))
+
+;; Info-fontify-maximum-menu-size t
+;; grep-use-headings t
+;; next-error-message-highlight 'keep
+;; smiley-style t
+;; tar-mode-show-date t
+;; tramp-allow-unsafe-temporary-files t
+;; visual-order-cursor-movement t
+;; view-read-only t
+
+;; TODO: minimal emacs?
+
+
+;; (setq completion-auto-help t)
+;; (setq completion-cycle-threshold nil)
+
+;; (setq
+;;  ;; Non-nil means automatically provide help for invalid completion input.
+;;  completion-auto-help nil
+;;  ;; Non-nil means show help message in *Completions* buffer.
+;;  ;; completion-cycle-threshold t
+;;  ;; completion-pcm-complete-word-inserts-delimiters t
+;;  ;; completion-category-defaults nil
+;;  ;; completion-flex-nospace nil
+;;  )
+;;
+
+;; (setq completions-header-format (propertize "%s candidates:\n" 'face 'bold-italic))
+;; (setq completions-highlight-face 'completions-highlight)
+;; (setq minibuffer-completion-auto-choose t)
+;; (setq completions-sort 'historical)
+
+
+;; browse-url-firefox-new-window-is-tab t
+;; comint-history-isearch 'dwim
+
+;; (setq shell-font-lock-keywords
+;;       '(("[ \t]\\([+-][^ \t\n]+\\)" 1 font-lock-builtin-face)
+;;         ("^[^ \t\n]+:.*" . font-lock-string-face)
+;;         ("^\\[[1-9][0-9]*\\]" . font-lock-constant-face)))
+;; (setq shell-command-prompt-show-cwd t) ; Emacs 27.1
+;; (setq ansi-color-for-comint-mode t)
+;; (setq shell-input-autoexpand 'input)
+;; (setq shell-highlight-undef-enable t) ; Emacs 29.1
+;; (setq shell-has-auto-cd nil) ; Emacs 29.1
+;; (setq shell-get-old-input-include-continuation-lines t) ; Emacs 30.1
+;; (setq shell-kill-buffer-on-exit t) ; Emacs 29.1
+;; (setq shell-completion-fignore '("~" "#" "%"))
+;; (setq-default comint-scroll-to-bottom-on-input t)
+;; (setq-default comint-scroll-to-bottom-on-output nil)
+;; (setq-default comint-input-autoexpand 'input)
+
+;; Removed from minimal-emacs.d
+
+;; ripgrep
+
+;; (defun my-jump-to-first-compilation-info ()
+;;   "Jump to the first occurrence of compilation-info face in the current buffer."
+;;   (interactive)
+;;   (let ((found nil)
+;;         (pos (point-min)))
+;;     (save-excursion
+;;       (goto-char pos)
+;;       (while (and (not found) (< pos (point-max)))
+;;         (let ((face-prop (get-text-property pos 'face)))
+;;           (when (or (eq face-prop 'compilation-info)
+;;                     (and (listp face-prop)
+;;                          (memq 'compilation-info face-prop)))
+;;             (setq found pos)))
+;;         (unless found
+;;           (setq pos (next-property-change pos (current-buffer) (point-max))))))
+;;     (if found
+;;         (progn
+;;           (goto-char found)
+;;           (message "Jumped to first compilation-info face"))
+;;       (message "No compilation-info face found in buffer"))))
+;;
+;; (add-hook 'grep-mode-hook #'my-jump-to-first-compilation-info)
+
+;; (defun my-next-error-recenter (&rest _args)
+;;   "Call `next-error' and recenter the buffer."
+;;   (recenter))
+;;
+;; (advice-add 'next-error :after #'my-next-error-recenter)
+
+;; wgrep/embark export and `compile-goto-error'
+;; (setq next-error-recenter nil)
+
+;; TODO: should it be moved to evilcursor?
+;; (add-hook 'next-error-hook #'my-next-error-show-all-recenter)
+
+;; New code
+
+;; (setq normal-erase-is-backspace t)
+
+;; (setq org-persist--refresh-gc-lock-timer t) ;; Disable it
+
+;; Why this is the best default:
+;; 🧹 Strips clutter: Removes properties that are rarely useful when yanked
+;; (e.g., read-only, highlighting, clickable behavior).
+;;
+;; 🧠 Preserves semantics: Keeps properties like face, display, and composition
+;; that affect how the text looks or behaves in modes where that's important
+;; (e.g., org-mode, markdown-mode, emacs-lisp-mode).
+;;
+;; 🛠️ Safe and predictable: Avoids unintended side effects of setting it to t,
+;; which may silently break display or behavior in some buffers.
+;;
+;; Others:
+;; - category: Classification tag; not useful when pasted.
+;; - field: Used for structured editing; can disrupt input fields.
+;; - follow-link: Makes text clickable; unnecessary when yanked.
+;; - fontified: Marks text as syntax-highlighted; irrelevant after copy.
+;; - font-lock-face: Defines syntax styles; usually cosmetic.
+;; - help-echo: Tooltip text; not shown when pasted.
+;; - intangible: Prevents cursor entry; breaks editing if preserved.
+;; - invisible: Hides text; causes missing content on paste.
+;; - keymap: Binds keys to region; not portable.
+;; - local-map: Buffer-local keymap; not useful elsewhere.
+;; - mouse-face: Mouse hover effect; purely visual.
+;; - read-only: Prevents editing; undesirable in pasted text.
+;; - yank-handler: Custom paste behavior; not reusable.
+;; - face: Font style (bold, color); strip for plain text.
+;; - display: Visual replacement (e.g., icons); obscures raw content.
+;; - composition: Ligature rendering; not needed in plain copy.
+;; - line-prefix: Visual indentation; rarely useful in paste.
+;; - wrap-prefix: Line-wrap decoration; cosmetic only.
+;; - cursor-sensor-functions: Cursor-triggered actions; irrelevant when yanked.
+;; - syntax-table: Syntax hints; unnecessary unless parsing the text.
+
+;; Apply the following settings if you also want scrolling with an ordinary
+;; mouse to be almost as smooth as scrolling with a touchpad, on systems other
+;; than X:
+;; (setq pixel-scroll-precision-large-scroll-height 40.0)
+
+;; Configure Emacs to ask for confirmation before exiting
+
+;; (customize-set-variable 'switch-to-buffer-in-dedicated-window 'pop)
+
+;; (customize-set-variable 'completion-cycle-threshold 3)
+;; (customize-set-variable 'completion-category-overrides
+;;                         '((file (styles . (partial-completion)))))
 
 ;;; Misc (previously part of mod-same-window, but not useful for it)
 
@@ -1542,53 +1857,7 @@ any new ones."
   ;; tramp-use-scp-direct-remote-copying t
   ;; tramp-completion-reread-directory-timeout 60
 
-  (setq remote-file-name-inhibit-auto-save t
-        ;; yank-pop-change-selection t
-        ;; kill-whole-line t
-        ;; list-matching-lines-jump-to-current-line t
-        ;; mouse-prefer-closest-glyph t
-        ;; read-char-by-name-sort 'code
-        ;; revert-buffer-quick-short-answers t
-        ;; shift-select-mode 'permanent
-
-        ;; The benefit of visual-order-cursor-movement t is that when editing text
-        ;; containing both left-to-right and right-to-left scripts, cursor
-        ;; movement aligns with how the text is visually presented on the screen.
-        ;; This means pressing C-f moves the cursor to the character visually to
-        ;; the right, and C-b moves it to the character visually to the left,
-        ;; regardless of the underlying logical (buffer) order. It provides a
-        ;; navigation model that matches human reading habits in mixed-script
-        ;; documents, reducing cognitive load and making cursor movement
-        ;; predictable in visually complex bidirectional contexts.
-        ;; visual-order-cursor-movement t
-
-        ;; what-cursor-show-names t
-        ;; help-enable-symbol-autoload t
-        ;; help-enable-completion-autoload t
-        ;; help-enable-symbol-autoload t
-        ;; help-window-select t
-        ;; help-clean-buttons t
-        ;; help-enable-variable-value-editing t
-        )
-
-
-  (setq icomplete-separator "\n")
-  (setq icomplete-delay-completions-threshold 0)
-  (setq icomplete-compute-delay 0)
-  (setq icomplete-prospects-height 10)
-  (setq icomplete-hide-common-prefix nil)
-  (setq icomplete-with-completion-tables t)
-  (setq icomplete-show-matches-on-no-input t)
-  (setq icomplete-max-delay-chars 0)
-  (setq icomplete-tidy-shadowed-file-names t)
-  (setq icomplete-scroll t)
-  (setq icomplete-in-buffer t)
-  (setq completion-auto-select nil  ; Alternative: 'second-tab
-        completions-detailed t
-        completions-format 'vertical
-        ;; completions-format 'one-column
-        completions-group t
-        completions-group-sort 'alphabetical)
+  (setq remote-file-name-inhibit-auto-save t)
 
   ;; TODO: minimal emacs?
   (setq debugger-bury-or-kill 'kill)
@@ -5334,6 +5603,24 @@ function or if an invalid choice is made."
 ;;                                byte-compile-warnings)))
 ;;          file-local-variables-alist)))
 ;; (add-hook 'before-hack-local-variables-hook #'my-hack-local-variables-apply)
+
+;;; TODO bufferfile delete
+
+;; (defun my-dired-do-delete-advice (orig-fn &rest args)
+;;   "Delete current file or all marked files.
+;; ORIG-FN is the advised function. ARGS are the function arguments."
+;;   (interactive "P" dired-mode)
+;;   (let ((marked-files (dired-get-marked-files nil (car args))))
+;;     (let ((buffer (when (and marked-files
+;;                              (> (length marked-files) 0))
+;;                     (get-file-buffer (car marked-files)))))
+;;       (if (buffer-live-p buffer)
+;;           (progn
+;;             (bufferfile-delete buffer)
+;;             (dired-post-do-command))
+;;         (apply orig-fn args)))))
+;;
+;; (advice-add 'dired-do-rename :around 'my-dired-do-rename-advice)
 
 ;;; DISABLED: PDF tools
 
