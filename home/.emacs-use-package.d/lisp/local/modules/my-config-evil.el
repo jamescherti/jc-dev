@@ -36,6 +36,15 @@
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'sub-project)
 
+;;; undo
+
+;; Replaces undo-fu
+(if (< emacs-major-version 28)
+    (progn
+      (setq evil-undo-system 'undo-redo)
+      (evil-set-undo-system 'undo-redo))
+  (require 'le-undo-fu))
+
 ;;; Stop Visual Paste from Overwriting Your Register
 
 ;; By default, when you highlight text in Visual mode and press p to paste, Evil

@@ -783,7 +783,7 @@ subsequent GCC invocations."
                            le-enhanced-evil-paredit  ;; using local pkg
                            le-evil-surround
                            le-goto-chg
-                           le-undo-fu
+                           ;; le-undo-fu ; replaced with undo-redo
                            le-undo-fu-session
                            le-vim-tab-bar
                            ;; le-evil-commentary  ; I am using my own module
