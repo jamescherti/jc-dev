@@ -227,6 +227,45 @@ ignored and logged as a warning. All other errors are re-raised."
   (advice-add 'flymake-proc-legacy-flymake :around
               #'my-flymake-proc-legacy-safe-advice))
 
+
+;;; DISABLED: Sideline flymake
+
+;; (setq sideline-backends-left nil)
+;; (setq sideline-backends-right '(
+;;                                 ;; sideline-lsp       ; `lsp-ui-sideline.el'
+;;                                 ;; sideline-flycheck  ; `lsp-mode' uses `flycheck' by default
+;;                                 ;; sideline-eglot     ; `eglot'
+;;
+;;                                 ;; 'line to show errors on the current line
+;;                                 sideline-flymake   ; `eglot' uses `flymake' by default
+;;
+;;                                 ;; sideline-blame     ; For `blamer'
+;;                                 ;; sideline-eros
+;;                                 ))
+;; ;; (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
+;; ;;       sideline-backends-right-skip-current-line t  ; don't display on current line (right)
+;; ;;       sideline-order-left 'down                    ; or 'up
+;; ;;       sideline-order-right 'up                     ; or 'down
+;; ;;       sideline-format-left "%s   "                 ; format for left aligment
+;; ;;       sideline-format-right "   %s"                ; format for right aligment
+;; ;;       sideline-priority 100                        ; overlays' priority
+;; ;;       sideline-display-backend-name t)
+;; (lightemacs-use-package sideline
+;;   :commands sideline-mode)
+;;
+;; (lightemacs-use-package sideline-flymake
+;;   :commands sideline-flymake)
+;; (setq sideline-flymake-display-mode 'point)
+;; (defun my-setup-sideline-flymake ()
+;;   "Setup sideline Flymake."
+;;   (sideline-mode 1))
+;;
+;; (add-hook 'flymake-mode-hook #'my-setup-sideline-flymake)
+;; (add-hook
+;;  'flymake-mode-hook
+;;  (lambda ()
+;;    (remove-hook 'eldoc-documentation-functions #'flymake-eldoc-function t)))
+
 ;;; Provide
 
 (provide 'mod-flymake)
