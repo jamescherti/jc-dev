@@ -4663,9 +4663,6 @@ properly handles remote files over Tramp), applying the setting only if
 ;; (org-link-set-parameters "img"   :image-data-fun #'+org-inline-image-data-fn)
 
 ;; (+org-define-basic-link "org" 'org-directory)
-;; (+org-define-basic-link "doom" 'doom-emacs-dir)
-;; (+org-define-basic-link "doom-docs" 'doom-docs-dir)
-;; (+org-define-basic-link "doom-modules" 'doom-modules-dir)
 
 ;; (org-link-set-parameters
 ;;  "file" :face (lambda (path)
@@ -4691,9 +4688,8 @@ properly handles remote files over Tramp), applying the setting only if
 ;;           '("duckduckgo"  . "https://duckduckgo.com/?q=%s")
 ;;           '("wikipedia"   . "https://en.wikipedia.org/wiki/%s")
 ;;           '("wolfram"     . "https://wolframalpha.com/input/?i=%s")
-;;           '("doom-repo"   . "https://github.com/doomemacs/doomemacs/%s")
 ;;           `("emacsdir"    . ,(doom-path doom-emacs-dir "%s"))
-;;           `("doomdir"     . ,(doom-path doom-user-dir "%s")))
+;;           )
 
 
 ;; Allow creating new parent nodes when refiling, but ask for confirmation;
