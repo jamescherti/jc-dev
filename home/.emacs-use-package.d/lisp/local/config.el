@@ -878,7 +878,7 @@ subsequent GCC invocations."
 
                            le-dumb-jump
                            le-git-modes
-                           le-helpful
+                           ;; le-helpful
                            le-indent-bars
                            le-stripspace
 

@@ -3975,6 +3975,67 @@ explicitly trigger file loading only when desired."
 ;;     ;; (vertico-posframe-mode 1)
 ;;     ))
 
+;;; embark / vertico
+
+;; (require 'vertico-multiform)
+;; (vertico-multiform-mode 1)
+;; ;; Force all Vertico sessions to use the 'buffer' display style
+;; (setq vertico-multiform-commands
+;;       '((t buffer)))
+
+;; Lightemacs?
+;; (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+
+;; is this good?
+;; (setq display-buffer-alist
+;;       '(("\\*vertico\\*"
+;;          (display-buffer-reuse-window
+;;           display-buffer-at-bottom)
+;;          (window-height . 0.5)
+;;          (preserved-parameters . (window-height)))))
+
+;; (use-package vertico-buffer
+;;   :ensure nil
+;;   :defer t
+;;   :commands (vertico-buffer-mode
+;;              vertico-buffer--redisplay)
+;;   :hook (vertico-mode . vertico-buffer-mode)
+;;
+;;   ;; causes issues, maybe also because of stillness-mode
+;;   ;; :preface
+;;   ;; (defun my-fit-minibuffer-to-content (win)
+;;   ;;   "Try to fit the minibuffer window height to its content before redisplay."
+;;   ;;   (ignore-errors
+;;   ;;     (fit-window-to-buffer win)))
+;;   ;;
+;;   ;; :config
+;;   ;; ;; TODO: Make it grow only
+;;   ;; (advice-add #'vertico-buffer--redisplay
+;;   ;;             :after #'my-fit-minibuffer-to-content)
+;;
+;;   :init
+;;   (setq vertico-buffer-display-action '((display-buffer-at-bottom)
+;;                                         (window-height . 0.38))))
+
+;;   ;; (defun my-update-consult-async-settings (&rest _)
+;;   ;;   (if (string= (battery-angel-get-charging-state) "AC")
+;;   ;;       (setq consult-async-input-debounce 0.02
+;;   ;;             consult-async-input-throttle 0.05
+;;   ;;             consult-async-refresh-delay 0.02)
+;;   ;;     (setq consult-async-input-debounce 0.2
+;;   ;;           consult-async-input-throttle 0.5
+;;   ;;           consult-async-refresh-delay 0.2)))
+;;
+;;   ;; (my-update-consult-async-settings)
+;;
+;;   ;; (advice-add 'consult-ripgrep :before #'my-update-consult-async-settings)
+;;   ;; (advice-add 'consult-fd :before #'my-update-consult-async-settings)
+;;   ;; (advice-add 'consult-recent-file :before #'my-update-consult-async-settings)
+;;
+;;   ;; (with-eval-after-load 'evil
+;;   ;;   (evil-define-key '(insert normal) consult-async-map (kbd "M-s") 'consult-history))
+;;   )
+
 ;;; tab-bar: only display file visiting buffers
 
 (defun custom-tab-valid-buffer-p (buf)
@@ -4730,6 +4791,79 @@ properly handles remote files over Tramp), applying the setting only if
 ;;         try-expand-dabbrev
 ;;         try-expand-dabbrev-all-buffers
 ;;         try-expand-dabbrev-from-kill))
+
+;;; Papyrus Help
+
+(defvar papyrus-help-hook nil
+  "Hook run after describing an Elisp symbol at point.
+This hook is executed after the function
+`papyrus-help-elisp-symbol-at-point' describes the symbol at point as a
+variable or function. It can be used to perform additional actions, such as
+updating the display, highlighting defined functions and variables...")
+
+(defun papyrus-help-elisp-symbol-at-point ()
+  "Describe the symbol at point as either a variable or a function.
+
+This function determines whether the symbol at point is a variable or a
+function. If the symbol is identified as a function or a variable exclusively,
+it will automatically describe it. If both types are detected or neither is
+detected, the user is prompted to choose whether to describe it as a variable or
+a function.
+
+After describing the symbol, if a help buffer is active, it will rename the help
+buffer to include the name of the symbol.
+
+The function displays messages if the symbol at point is not a variable or
+function or if an invalid choice is made."
+  (interactive)
+
+  (let* ((symbol (symbol-at-point))
+         (is-function (and symbol (fboundp symbol)))
+         (is-variable (and symbol (boundp symbol)))
+         (choice nil))
+
+    ;; Automatically select function or variable if only one is at point,
+    ;; otherwise ask the user.
+    (cond
+     (is-function
+      (setq choice ?f))
+     (is-variable
+      (setq choice ?v))
+     (t
+      (setq choice (read-char "Describe (v)ariable or (f)unction? "))))
+
+    ;; Handle the chosen option for describing a function or variable.
+    (cond
+     ((eq choice ?v)
+      (describe-variable symbol))
+     ((eq choice ?f)
+      (describe-function symbol))
+     ((not choice)
+      (message "No function or variable at point."))
+     (t
+      (message
+       "Invalid choice, press 'v' for variable or 'f' for function.")))
+
+    (when (or (eq choice ?v)
+              (eq choice ?f))
+      (let ((help-buffer (get-buffer "*Help*")))
+        (when help-buffer
+          (with-current-buffer help-buffer
+            (rename-buffer
+             (format "*Help:%s*" (symbol-name symbol)) t)
+            (run-hooks 'papyrus-help-hook)))))))
+
+(defun my-setup-evil-papyrus-help ()
+  "Setup papyrus help."
+  (setq-local evil-lookup-func #'papyrus-help-elisp-symbol-at-point))
+
+(add-hook 'emacs-lisp-mode-hook #'my-setup-evil-papyrus-help)
+
+(add-hook 'papyrus-help-hook #'(lambda()
+                                 (when (fboundp 'highlight-defined-mode)
+                                   (highlight-defined-mode))
+                                 (when (bound-and-true-p font-lock-mode)
+                                   (font-lock-ensure))))
 
 ;;; DISABLED: PDF tools
 
