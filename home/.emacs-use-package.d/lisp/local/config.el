@@ -887,6 +887,7 @@ subsequent GCC invocations."
 
                            le-persist-text-scale
 
+                           mod-toggle-term
                            mod-misc
                            mod-ediff
                            tmpedit

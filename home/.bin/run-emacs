@@ -19,8 +19,6 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-export EMACSLOADPREFERNEWER=1
-
 # Safely assign default values
 RUN_EMACS_FORCE="${RUN_EMACS_FORCE:-0}"
 
@@ -61,7 +59,7 @@ set -euf -o pipefail
 # Emacs: lsp-mode can be compiled in 2 modes plist and hash-table based
 # lsp-use-plists flag. plists provide better performance in deserialization and
 # also put less presure than hash-tables.
-export LSP_USE_PLISTS=true
+# export LSP_USE_PLISTS=true
 
 run-emacsclient-nowait() {
   emacsclient --no-wait "--timeout=$EMACS_EDIT_TIMEOUT" "$@" 2>/dev/null \
@@ -85,14 +83,21 @@ main() {
   fi
   EMACS_ARGS_DICT+=("$EMACS_D")
 
-  if [[ $RUN_EMACS_BIN == "" ]]; then
-    echo "Error: \$RUN_EMACS_BIN is not set or empty." >&2
+  # Unset variables
+  local emacs_bin="$RUN_EMACS_BIN"
+  local emacs_force="$RUN_EMACS_FORCE"
+  unset EMACS_D
+  unset RUN_EMACS_FORCE
+  unset RUN_EMACS_BIN
+
+  if [[ $emacs_bin == "" ]]; then
+    echo "Error: \$emacs_bin is not set or empty." >&2
     exit 1
   fi
 
   # Correctly check if the binary exists in the system PATH
-  if ! RUN_EMACS_BIN=$(type -P "$RUN_EMACS_BIN" 2>/dev/null); then
-    echo "Error: Command not found in PATH: '$RUN_EMACS_BIN'" >&2
+  if ! emacs_bin=$(type -P "$emacs_bin" 2>/dev/null); then
+    echo "Error: Command not found in PATH: '$emacs_bin'" >&2
     exit 1
   fi
 
@@ -125,14 +130,14 @@ main() {
   fi
 
   local emacs_dir
-  emacs_dir=$(dirname "$RUN_EMACS_BIN")
+  emacs_dir=$(dirname "$emacs_bin")
   export PATH="$emacs_dir:$PATH"
 
-  if [[ -d "$PWD" ]]; then
-    EMACS_ARGS_DICT+=(--chdir "$PWD")
+  if [[ -d "${PWD}" ]]; then
+    EMACS_ARGS_DICT+=(--chdir "${PWD}")
   fi
 
-  if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
+  if [[ "$emacs_force" -eq 0 ]] && is-emacs-server-running; then
     EMACS_DAEMON=$(run-emacsclient-nowait -e '(daemonp)' || :)
 
     if [[ $EMACS_DAEMON == "t" ]]; then
@@ -141,8 +146,8 @@ main() {
 
     exit 0
   else
-    echo "[RUN]" "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
-    exec "$RUN_EMACS_BIN" "${EMACS_ARGS_DICT[@]}" "$@"
+    echo "[RUN]" "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
+    exec "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
     # exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
   fi
 }

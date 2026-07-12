@@ -1319,16 +1319,18 @@ word after the space that contains at least two uppercase characters."
   "}" 'evil-forward-paragraph)
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
-  ;; (kbd "M-RET") 'toggle-term-tmux
-  ;; (kbd "M-<enter>") 'toggle-term-tmux
-  ;; (kbd "M-<return>") 'toggle-term-tmux
+  (kbd "M-RET") 'toggle-term-tmux
+  (kbd "M-<enter>") 'toggle-term-tmux
+  (kbd "M-<return>") 'toggle-term-tmux
+
+  ;; (kbd "M-RET") 'my-shell-pop
+  ;; (kbd "M-<enter>") 'my-shell-pop
+  ;; (kbd "M-<return>") 'my-shell-pop
+
   (kbd "M-x") 'execute-extended-command
 
-  (kbd "M-RET") 'my-shell-pop
-  (kbd "M-<enter>") 'my-shell-pop
   ;; (kbd "M-RET") 'vterm-toggle
   ;; (kbd "M-<enter>") 'vterm-toggle
-  (kbd "M-<return>") 'my-shell-pop
   (kbd "M-o") 'my-previous-interesting-buffer
   (kbd "M-i") 'my-next-interesting-buffer
   ;; (kbd "M-=") 'global-text-scale-adjust

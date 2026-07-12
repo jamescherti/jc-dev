@@ -119,8 +119,7 @@ COMMAND is the same arguments as `toggle-term'."
 COMMAND is the command to execute.
 FN-CREATE is the function that creates the terminal and switches to it.
 FN-SWITCH is a function called to switch to the buffer."
-  (let ((inhibit-redisplay t)
-        (term-buf (get-buffer toggle-term-tmux-buffer-name)))
+  (let ((term-buf (get-buffer toggle-term-tmux-buffer-name)))
     (cond
      ;; Switch to the previous buffer because this is a terminal
      ((and term-buf
@@ -297,15 +296,15 @@ user to press a key before finishing execution."
   (toggle-term-tmux-default-bash
    (toggle-term-tmux-default-bash "gpl" :wait-for-key)))
 
-;; (unless noninteractive
-;;   (with-eval-after-load 'evil
-;;     ;; (define-key evil-normal-state-map (kbd "<leader>et")
-;;     ;;             #'toggle-term-tmux-default-bash)
-;;
-;;     (define-key evil-normal-state-map (kbd "<leader>e t")
-;;                 'shell-pop)
-;;
-;;     ))
+(unless noninteractive
+  (with-eval-after-load 'evil
+    ;; (define-key evil-normal-state-map (kbd "<leader>et")
+    ;;             #'toggle-term-tmux-default-bash)
+
+    (define-key evil-normal-state-map (kbd "<leader>e t")
+                'shell-pop)
+
+    ))
 
 (provide 'mod-toggle-term)
 

@@ -3574,35 +3574,35 @@ Opens a split window showing the added and removed features."
 ;;                       (t '("terminal" "*terminal*"
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
-(lightemacs-use-package shell-pop
-  :commands shell-pop
-  :bind (("C-c t" . shell-pop))
-  :config
-  ;; The key sequence used to toggle the shell window.
-  (setopt shell-pop-universal-key "C-c t")
-  (setopt shell-pop-shell-type '("vterm" "*vterm*"
-                                 (lambda ()
-                                   (when (fboundp 'vterm)
-                                     (let* ((vterm-shell shell-pop-term-shell))
-                                       (vterm))))))
-  ;; (setopt shell-pop-shell-type '("eat" "*eat*"
-  ;;                         (lambda ()
-  ;;                           (when (fboundp 'eat)
-  ;;                             (eat shell-pop-term-shell)))))
-  ;; (setopt shell-pop-shell-type '("ansi-term"
-  ;;                                "*ansi-term*"
-  ;;                                (lambda ()
-  ;;                                  (ansi-term shell-pop-term-shell))))
-
-  :init
-  ;; (setq shell-pop-term-shell "/usr/bin/env bash")
-  ;; (setq shell-pop-window-position "full")
-  (setq shell-pop-window-position "bottom")
-  (setq shell-pop-full-span nil)
-  (setq shell-pop-autocd-to-working-dir nil)
-  (setq shell-pop-term-shell "tmux-session emacs")
-  (setq shell-pop-window-size 80)
-  (setq shell-pop-restore-window-configuration t))
+;; (lightemacs-use-package shell-pop
+;;   :commands shell-pop
+;;   :bind (("C-c t" . shell-pop))
+;;   :config
+;;   ;; The key sequence used to toggle the shell window.
+;;   (setopt shell-pop-universal-key "C-c t")
+;;   (setopt shell-pop-shell-type '("vterm" "*vterm*"
+;;                                  (lambda ()
+;;                                    (when (fboundp 'vterm)
+;;                                      (let* ((vterm-shell shell-pop-term-shell))
+;;                                        (vterm))))))
+;;   ;; (setopt shell-pop-shell-type '("eat" "*eat*"
+;;   ;;                         (lambda ()
+;;   ;;                           (when (fboundp 'eat)
+;;   ;;                             (eat shell-pop-term-shell)))))
+;;   ;; (setopt shell-pop-shell-type '("ansi-term"
+;;   ;;                                "*ansi-term*"
+;;   ;;                                (lambda ()
+;;   ;;                                  (ansi-term shell-pop-term-shell))))
+;;
+;;   :init
+;;   ;; (setq shell-pop-term-shell "/usr/bin/env bash")
+;;   ;; (setq shell-pop-window-position "full")
+;;   (setq shell-pop-window-position "bottom")
+;;   (setq shell-pop-full-span nil)
+;;   (setq shell-pop-autocd-to-working-dir nil)
+;;   (setq shell-pop-term-shell "tmux-session emacs")
+;;   (setq shell-pop-window-size 80)
+;;   (setq shell-pop-restore-window-configuration t))
 
 ;; shell-pop: Change the default directory
 ;; NOTE replaced
@@ -5982,6 +5982,142 @@ on text following the cursor."
 ;;   (with-eval-after-load 'evil
 ;;     (evil-define-key 'normal 'global (kbd "<leader>co") #'combobulate)))
 ;; (eldoc-add-command-completions "combobulate-")
+
+;;; DISABLED: desktop
+
+;; (lightemacs-use-package desktop
+;;   :ensure nil
+;;   :demand t
+;;   :commands (desktop-save-mode desktop-read)
+;;
+;;   :preface
+;;   (eval-and-compile (defvar emacs-base-dir))
+;;
+;;   :custom
+;;   (desktop-save t)
+;;   (desktop-lazy-idle-delay 1)
+;;   (desktop-lazy-verbose nil)
+;;   (desktop-dirname emacs-var-dir)  ;; The directory in which the desktop file should be saved.
+;;   (desktop-auto-save-timeout 120)
+;;   (desktop-base-lock-name ".emacs.desktop.lock")
+;;   (desktop-base-file-name "emacs-desktop")
+;;   (desktop-load-locked-desktop t)
+;;   (desktop-missing-file-warning nil)
+;;   (desktop-restore-eager t)
+;;   (desktop-restore-frames t)
+;;   (desktop-restore-in-current-display t)
+;;   (desktop-restore-reuses-frames t)  ;; If t, restoring frames reuses existing frames.
+;;   (desktop-restore-in-current-display t)  ;; NEW: is set to nil to exclude settings related to the current display
+;;   (desktop-path (list (file-name-as-directory emacs-var-dir)))
+;;   (desktop-files-not-to-save (concat "\\(" "\\`/[^/:]*:"
+;;                                      "\\|(ftp)\\'"
+;;                                      "\\|\\.asc"
+;;                                      "\\|\\.gpg"
+;;                                      "\\)$"))
+;;
+;;   :init
+;;   (setf (alist-get 'background-color frameset-filter-alist) :never)
+;;   (setf (alist-get 'foreground-color frameset-filter-alist) :never)
+;;   (setf (alist-get 'cursor-color frameset-filter-alist) :never)
+;;   (setf (alist-get 'GUI:font frameset-filter-alist) :never)
+;;   (setf (alist-get 'font frameset-filter-alist) :never)
+;;   (setf (alist-get 'background-mode frameset-filter-alist) :never)
+;;   (setf (alist-get 'ns-appearance frameset-filter-alist) :never)
+;;
+;;   :config
+;;   (add-to-list 'desktop-modes-not-to-save 'fundamental-mode)
+;;   (add-hook 'emacs-startup-hook #'desktop-save-mode)
+;;   (add-hook 'emacs-startup-hook #'desktop-read))
+
+;;; DISABLED: projectile
+
+;; (use-package projectile
+;;   :defer t
+;;   :commands (projectile-mode projectile-mode-map project-switch-project)
+;;
+;;   :hook
+;;   (after-init . projectile-mode)
+;;
+;;   :preface
+;;   (eval-and-compile (defvar emacs-base-dir))
+;;
+;;   :custom
+;;   (projectile-known-projects-file (concat emacs-var-dir "projectile-auto.eld"))
+;;   (projectile-auto-discover t)
+;;   (projectile-enable-caching nil)
+;;   ;; (projectile-enable-caching (not noninteractive))
+;;   ;; (projectile-file-exists-local-cache-expire (* 5 60))
+;;   ;; (projectile-file-exists-remote-cache-expire (* 10 60))
+;;   (projectile-globally-ignored-file-suffixes '(".elc" ".pyc" ".o"))
+;;   (projectile-globally-ignored-files '(".DS_Store" "TAGS"))
+;;   (projectile-kill-buffers-filter 'kill-only-files)
+;;   (projectile-project-search-path '("~/src"))
+;;   (projectile-require-project-root nil)
+;;   (projectile-switch-project-action #'projectile-dired)
+;;   (projectile-track-known-projects-automatically t)
+;;   (projectile-verbose nil)
+;;   (projectile-project-root-files '(".project"
+;;                                    "LICENSE"
+;;                                    "COPYING"
+;;                                    "README.md"
+;;                                    "requirements.txt"
+;;                                    "setup.py"))
+;;
+;;   ;; For Personal Workflow Enhancement: If your workflow benefits from seeing
+;;   ;; the projects you've actively interacted with recently,
+;;   ;; (projectile-sort-order 'recentf) is likely more useful. It aligns well
+;;   ;; with workflows where engagement with specific files dictates project
+;;   ;; relevance.
+;;   ;;
+;;   ;; For Active Development Focus: If you're more interested in seeing which
+;;   ;; projects have changed recently, regardless of whether those changes were
+;;   ;; made by you or by others (e.g., in a collaborative environment where
+;;   ;; files might be updated by colleagues), then (projectile-sort-order
+;;   ;; 'modification-time) might be more beneficial.
+;;   ;; (projectile-sort-order 'modification-time)
+;;   (projectile-sort-order 'recentf)
+;;
+;;   (projectile-project-root-functions
+;;    '(
+;;      ;; The buffer-local variable projectile-project-root.
+;;      ;; Typically you'd set this variable via .dir-locals.el
+;;      projectile-root-local
+;;
+;;      ;; Look for .projectile (projectile-dirconfig-file).
+;;      projectile-root-marked
+;;
+;;      ;; This searches for project markers (like .git, .hg, etc.) defined in
+;;      ;; projectile-project-root-files. Return the top-most (farthest from the
+;;      ;; current directory) match.
+;;      ;; (It's configurable via projectile-project-root-files)
+;;      projectile-root-top-down
+;;
+;;      ;; This also searches for project markers, but it starts from your
+;;      ;; current location and goes up the directory tree (think climbing the
+;;      ;; tree from the top). It returns the first matching directory it finds,
+;;      ;; assuming the project marker only appears once at the project's root.
+;;      projectile-root-bottom-up
+;;
+;;      ;; Look for project markers that can appear at every level of a project
+;;      ;; (e.g. Makefile or .svn) and will return the top-most match for those.
+;;      projectile-root-top-down-recurring))
+;;
+;;   :config
+;;   (add-to-list 'projectile-globally-ignored-directories emacs-base-dir)
+;;
+;;   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+;;
+;;   (with-eval-after-load 'evil
+;;     ;; (evil-define-key 'normal 'global (kbd "<leader>epf") 'projectile-find-dir)
+;;     ;; (evil-define-key 'normal 'global (kbd "<leader>ef") 'projectile-find-file) ;; conflict with treemacs
+;;     ;; (evil-define-key 'normal 'global (kbd "<leader>ep") 'projectile-switch-project)
+;;     (evil-define-key '(normal insert visual) 'global (kbd "M-p") 'projectile-switch-project))
+;;
+;;   (when (string= choice-minibuffer "ivy-counsel")
+;;     (setq projectile-completion-system 'ivy))
+;;
+;;   (when my-rg-exists
+;;     (setq-default projectile-generic-command my-projectile-rg-command)))
 
 ;;; Provide
 
