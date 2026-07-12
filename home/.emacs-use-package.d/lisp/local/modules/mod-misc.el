@@ -2260,7 +2260,8 @@ generally one of the lines that are folded."
 (with-eval-after-load 'consult
   (add-hook 'consult-preview-allowed-hooks #'my-disable-fringe-truncation-arrow))
 
-;; Enable smerge
+;;; Enable `smerge'
+
 (defun my-enable-smerge-maybe ()
   "Enable `smerge'."
   (when (and buffer-file-name
@@ -2279,6 +2280,18 @@ generally one of the lines that are folded."
     (fundamental-mode)
     (smerge-mode 1)))
 (add-hook 'smerge-mode-hook #'my-smerge-to-fundamental-mode)
+
+;;; DISABLED: Disable `smerge' mode paredit
+
+;; (defun my-disable-modes-on-smerge ()
+;;   "Disable `paredit-mode' when a git conflict happens."
+;;   (when (bound-and-true-p smerge-mode)
+;;     (when (and (derived-mode-p 'emacs-lisp-mode)
+;;                (bound-and-true-p paredit-mode)
+;;                (fboundp 'paredit-mode))
+;;       (message "The `paredit-mode' has been disabled")
+;;       (paredit-mode -1))))
+;; (add-hook 'smerge-mode-hook #'my-disable-modes-on-smerge)
 
 ;;; Prune native comp tmp files
 
@@ -4612,6 +4625,107 @@ Especially useful for large Org files with complex structure."
 (unless (and (fboundp 'native-comp-available-p)
              (native-comp-available-p))
   (warn "Native compilation is *not* available"))
+
+;;; DISABLED: PDF tools
+
+;; (use-package pdf-tools
+;;   :defer t
+;;   :commands (pdf-view-themed-minor-mode
+;;              pdf-isearch-minor-mode
+;;              pdf-tools-install
+;;              pdf-view-mode)
+;;   :functions (pdf-view-refresh-themed-buffer)
+;;   :magic ("%PDF" . pdf-view-mode)
+;;   :custom
+;;   (pdf-view-use-scaling t)
+;;   :config
+;;   (pdf-tools-install :no-query)
+;;   :hook
+;;   ((pdf-view-mode . pdf-view-themed-minor-mode)
+;;    (pdf-view-mode . pdf-isearch-minor-mode)))
+
+;;; DISABLED: tempel
+
+;; (lightemacs-use-package tempel
+;;   :commands (tempel-complete
+;;              tempel-insert)
+;;   :bind (("S-SPC" . tempel-complete) ;; expand or insert template
+;;          ("M-SPC" . tempel-insert))  ;; prompt for template
+;;   ;; :init
+;;   ;; Add Tempel to completion-at-point
+;;   ;; (add-to-list 'completion-at-point-functions #'tempel-complete)
+;;
+;;   ;; Set the template file location
+;;   ;; (setq tempel-path (expand-file-name "templates.eld"
+;;   ;;                                     (file-name-directory load-file-name)))
+;;   )
+;;
+;; (lightemacs-use-package tempel-collection
+;;   :after tempel)
+
+;;; DISABLED: vundo
+
+;; (lightemacs-use-package vundo
+;;   :commands vundo
+;;   :bind (("C-x u" . my-vundo-open))
+;;   :init
+;;   (setq vundo-glyph-alist vundo-unicode-symbols
+;;         vundo-compact-display t)
+;;   :config
+;;   (defun my-vundo-open ()
+;;     "Open vundo in a non-dedicated window."
+;;     (interactive)
+;;     (let ((display-buffer-alist
+;;            '(("\\*vundo-tree\\*"
+;;               (display-buffer-in-side-window)
+;;               (side . right)
+;;               (window-width . 0.3)
+;;               (dedicated . nil)))))
+;;       (vundo))))
+
+;;; DISABLED: Flyspell lazy
+
+;; (lightemacs-use-package flyspell-lazy
+;;   :commands flyspell-lazy-mode
+;;   :config
+;;   :hook ((after-init . flyspell-lazy-mode))
+;;   :init
+;;   (setq flyspell-lazy-idle-seconds 1
+;;         flyspell-lazy-window-idle-seconds 3)
+;;   (flyspell-lazy-mode +1))
+
+;;; DISABLED: disproject
+
+;; (lightemacs-use-package disproject
+;;   :bind ( :map ctl-x-map
+;;           ("p" . disproject-dispatch)
+;;           :map global-map
+;;           ("C-c p" . disproject-dispatch)))
+
+;;; DISABLED: erefactor
+
+;; (lightemacs-use-package erefactor
+;;   :commands (erefactor-highlight-current-symbol
+;;              erefactor-eval-current-defun
+;;              erefactor-add-current-defun
+;;              erefactor-change-prefix-in-buffer
+;;              erefactor-rename-symbol-in-buffer
+;;              erefactor-rename-symbol-in-package
+;;              erefactor-lint-by-emacsen
+;;              erefactor-lint
+;;              erefactor-check-eval-mode
+;;              erefactor-lazy-highlight-turn-on)
+;;   :no-require t)
+
+;; (with-eval-after-load 'erefactor
+;;   (remove-hook 'emacs-lisp-mode-hook 'erefactor-lazy-highlight-turn-on)
+;;   (remove-hook 'lisp-interaction-mode-hook 'erefactor-lazy-highlight-turn-on))
+
+;;; DISABLED: dirvish
+
+;; (use-package dirvish
+;;   :ensure nil
+;;   :commands dirvish-override-dired-mode)
 
 ;;; Provide
 
