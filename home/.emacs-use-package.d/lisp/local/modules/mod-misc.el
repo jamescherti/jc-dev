@@ -372,6 +372,13 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO minimal-emacs?
+;; (setq bookmark-watch-bookmark-file 'silent)
+;; (setq bookmark-use-annotations nil)
+;; (setq bookmark-automatically-show-annotations nil)
+
+;; (setq rainbow-delimiters-max-face-count 5)
+
 ;; TODO are these useful?
 ;; (unless *sys/win32*
 ;;   (set-selection-coding-system 'utf-8)
@@ -4864,6 +4871,31 @@ function or if an invalid choice is made."
                                    (highlight-defined-mode))
                                  (when (bound-and-true-p font-lock-mode)
                                    (font-lock-ensure))))
+
+;;; Load specific local variables
+
+;; (when (bound-and-true-p lightemacs-package-manager)
+;;   (put 'lightemacs-package-manager 'safe-local-variable
+;;        (lambda (val) (memq val '(use-package straight elpaca)))))
+
+;; TODO article
+;; (defun my-hack-local-variables-apply ()
+;;   "Remove all file-local variables except `no-byte-compile' and `lexical-binding'.
+;; They are removed from `file-local-variables-alist'. This ensures that only these
+;; variables are retained, preventing unwanted local variable settings."
+;;   (unless (boundp 'file-local-variables-alist)
+;;     (error (concat "`file-local-variables-alist` is not bound. "
+;;                    "This may indicate that file-local variables are not "
+;;                    "initialized.")))
+;;   (setq file-local-variables-alist
+;;         (cl-remove-if-not
+;;          (lambda (entry)
+;;            (memq (car entry) '(no-byte-compile
+;;                                lexical-binding
+;;                                package-lint-batch-fail-on-warnings
+;;                                byte-compile-warnings)))
+;;          file-local-variables-alist)))
+;; (add-hook 'before-hack-local-variables-hook #'my-hack-local-variables-apply)
 
 ;;; DISABLED: PDF tools
 

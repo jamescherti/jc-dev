@@ -1689,37 +1689,6 @@ search direction (default: \='forward)."
 (setq mode-line-position-column-line-format '("%l:%C"))
 (setq mode-line-percent-position nil)
 
-;;; Flymake fixes
-
-(defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
-  "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
-
-ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
-ARGS are the arguments passed to ORIG-FUN.
-
-If the error message contains \"find a suitable init function\", it is
-ignored and logged as a warning. All other errors are re-raised."
-  (condition-case err
-      (apply orig-fun args)
-    ((error)
-     (let ((error-message (error-message-string err))
-           (inhibit-message t))
-       (message "[WARNING] Flymake: %s: %s"
-                (buffer-file-name (buffer-base-buffer))
-                error-message))
-     ;; (if (string-match-p "find a suitable init function"
-     ;;                     error-message)
-     ;;     (let ((inhibit-message t))
-     ;;       (message "[WARNING] Flymake: %s: %s"
-     ;;                buffer-file-name
-     ;;                error-message))
-     ;;   (signal (car err) (cdr err)))
-     )))
-
-(with-eval-after-load 'flymake-proc
-  (advice-add 'flymake-proc-legacy-flymake :around
-              #'my-flymake-proc-legacy-safe-advice))
-
 ;;; Silence C-f
 
 (evil-define-command evilcursor-scroll-page-down (count)

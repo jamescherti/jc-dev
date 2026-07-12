@@ -154,6 +154,79 @@ environment for accurate linting."
 (add-hook 'lightemacs-emacs-startup-hook
           #'lightemacs-flymake-initialize-elisp-path 99)
 
+;;; Flymake
+
+;; (progn
+;;   (defun my/flymake-error-no-exit (_orig-fun text &rest args)
+;;     "Override `flymake-error' to log the message without signaling an error.
+;; ORIG-FUN, TEXT, ARGS as the same arguments as `flymake-error'."
+;;     ;; Format the message like the original
+;;     (let ((msg (apply #'format-message text args)))
+;;       (flymake-log :error "%s" msg)
+;;       ;; Instead of (error ...), just return the message
+;;       msg))
+;;
+;;   (with-eval-after-load 'flymake
+;;     (advice-add 'flymake-error :around #'my/flymake-error-no-exit)))
+
+;; (setq flymake-fringe-indicator-position 'left-fringe)
+;; (setq flymake-mode-line-format
+;;       '("" flymake-mode-line-exception flymake-mode-line-counters))
+;; (setq flymake-mode-line-counter-format
+;;       '("" flymake-mode-line-error-counter
+;;         flymake-mode-line-warning-counter
+;;         flymake-mode-line-note-counter ""))
+;; (setq flymake-show-diagnostics-at-end-of-line nil)
+;; (setq flymake-indicator-type 'margins)
+
+;; (setq flymake-margin-indicators-string
+;;       ;; (flymake-show-diagnostics-at-end-of-line 'short)
+;;       ;; Alternatives: », E, W, i, !, ?, ⚠️)
+;;       `((error "!" compilation-error)
+;;         (warning "?" compilation-warning)
+;;         (note "i" compilation-info)))
+
+;; TODO removed recently
+;; (setq flymake-proc-compilation-prevents-syntax-check t)
+
+;; (use-package flymake-markdownlint
+;;   :commands flymake-markdownlint-setup
+;;   ;; :hook
+;;   ;; (markdown-mode . #'flymake-markdownlint-setup)
+;;   :init
+;;   (add-hook 'markdown-mode-hook #'flymake-markdownlint-setup))
+
+;;; Flymake fixes
+
+(defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
+  "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
+
+ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
+ARGS are the arguments passed to ORIG-FUN.
+
+If the error message contains \"find a suitable init function\", it is
+ignored and logged as a warning. All other errors are re-raised."
+  (condition-case err
+      (apply orig-fun args)
+    ((error)
+     (let ((error-message (error-message-string err))
+           (inhibit-message t))
+       (message "[WARNING] Flymake: %s: %s"
+                (buffer-file-name (buffer-base-buffer))
+                error-message))
+     ;; (if (string-match-p "find a suitable init function"
+     ;;                     error-message)
+     ;;     (let ((inhibit-message t))
+     ;;       (message "[WARNING] Flymake: %s: %s"
+     ;;                buffer-file-name
+     ;;                error-message))
+     ;;   (signal (car err) (cdr err)))
+     )))
+
+(with-eval-after-load 'flymake-proc
+  (advice-add 'flymake-proc-legacy-flymake :around
+              #'my-flymake-proc-legacy-safe-advice))
+
 ;;; Provide
 
 (provide 'mod-flymake)
