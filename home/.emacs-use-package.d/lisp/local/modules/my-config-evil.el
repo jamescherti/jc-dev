@@ -36,6 +36,15 @@
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'sub-project)
 
+;;; Stop Visual Paste from Overwriting Your Register
+
+;; By default, when you highlight text in Visual mode and press p to paste, Evil
+;; deletes the highlighted text and pushes it into your primary clipboard
+;; register. If you try to paste that same text again, you end up pasting the
+;; garbage you just deleted. Setting this variable to nil prevents visual
+;; replacements from touching your yank history.
+(setq evil-kill-on-visual-paste nil)
+
 ;;; Spell checker: Jinx or Flyspell
 
 (defvar my-spell-checker 'ispell)
@@ -527,8 +536,6 @@ ORIG-FUN is the function and ARGS the arguments."
   (define-key evil-normal-state-map (kbd "gp") 'evilclipboard-select-pasted)
   (define-key evil-normal-state-map (kbd "<leader>gp") 'evilclipboard-select-pasted))
 
-(setopt evil-want-Y-yank-to-eol t)
-
 (evil-set-leader 'normal (kbd ","))
 (evil-set-leader 'visual (kbd ","))
 (with-eval-after-load 'ibuffer
@@ -791,6 +798,39 @@ This enhancement prevents the cursor from moving."
   (define-key vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L))
 
 ;;; evil jump
+
+;; I changed the order from (imenu, xref, search) to (xref, imenu, search).
+;; evil-goto-definition-xref (Priority 1): This should always be at the absolute
+;; top. xref is the modern standard Emacs API for code navigation. When you run
+;; eglot, lsp-mode, or dumb-jump, they all plug directly into xref. By putting
+;; this first, Evil will immediately hand the jump request over to your language
+;; server, which has actual compiler-level awareness of your project.
+(setq evil-goto-definition-functions
+      '(;; Delegates the jump to the Emacs 'xref' API. This is the modern
+        ;; standard, capable of crossing file boundaries and hooking directly
+        ;; into Language Server Protocols (eglot/lsp-mode) or dumb-jump.
+        evil-goto-definition-xref
+
+        ;; Uses the standard Emacs 'imenu' index. It relies on regular
+        ;; expressions defined by the current major mode to find definitions
+        ;; within the active buffer.
+        evil-goto-definition-imenu
+
+        ;; Hooks into the CEDET/Semantic framework. This is an older
+        ;; parsing engine that attempts to understand code syntax trees.
+        ;;
+        ;; Disabled. This belongs to a legacy era of Emacs (the CEDET/Semantic
+        ;; project) which attempted to parse C/C++ and other languages entirely
+        ;; in Elisp. In the modern landscape of Language Server Protocols (LSP)
+        ;; and Tree-sitter, CEDET is obsolete, slow, and largely abandoned.
+        ;; Keeping it in your lookup chain only adds unnecessary cycles.
+        ;;
+        ;; evil-goto-definition-semantic
+
+        ;; The fallback mechanism. If all else fails, it executes a primitive
+        ;; text search inside the current buffer for the exact string matching
+        ;; the symbol under your cursor.
+        evil-goto-definition-search))
 
 (defun eviljump-goto-definition-try-imenu-first (imenu-only)
   "Improved `evil-goto-definition` to open folds correctly in outline mode.

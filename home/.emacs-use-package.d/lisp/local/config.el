@@ -844,7 +844,7 @@ subsequent GCC invocations."
                            le-elec-pair
 
                            ;; le-which-key
-                           le-paren
+                           ;; le-paren
 
                            le-dired
                            le-dired-filter
@@ -929,7 +929,8 @@ subsequent GCC invocations."
 
 ;;; Package defaults
 
-(setq gcmh-high-cons-threshold (* 600 1024 1024))
+(with-eval-after-load 'le-gcmh
+  (setq gcmh-high-cons-threshold (* 600 1024 1024)))
 
 ;; To stop vterm from asking for confirmation and force it to compile the
 ;; module automatically, you need to set the vterm-always-compile-module

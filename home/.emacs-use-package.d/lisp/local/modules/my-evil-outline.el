@@ -153,5 +153,77 @@ heading."
 (add-hook 'outline-indent-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
 (add-hook 'outline-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
 
+;;; outline: Restore column: move subtree up/down
+
+(defun my-advice-outline-move-subtree-up-down (orig-fun &rest args)
+  "Move the current subtree up/down past ARGS headlines of the same level.
+This function ensures the last blank line is included, even when
+`outline-blank-line' is set to t. It also restores the cursor position,
+addressing the issue where the cursor might be reset after the operation.
+ORIG-FUN is the function ARGS are the arguments."
+  (interactive "p")
+  (if (bound-and-true-p outline-minor-mode)
+      (apply orig-fun (or args 1))
+    (let ((column (current-column)))
+      (unwind-protect
+          (apply orig-fun (or args 1))
+        (move-to-column column)))))
+
+(with-eval-after-load 'outline
+  (advice-add 'outline-move-subtree-up
+              :around #'my-advice-outline-move-subtree-up-down)
+  (advice-add 'outline-move-subtree-down
+              :around #'my-advice-outline-move-subtree-up-down))
+
+;;; Restore column: next/previous heading
+
+(with-eval-after-load 'evil-commands
+  (evil-define-motion evil-backward-section-begin (count)
+    "Move the cursor to the beginning of the COUNT-th previous section."
+    :jump t
+    :type exclusive
+    (let ((col (current-column)))
+      (evil-signal-at-bob-or-eob (- (or count 1)))
+      (evil-backward-beginning 'evil-defun count)
+      (move-to-column col)))
+
+  (evil-define-motion evil-backward-section-end (count)
+    "Move the cursor to the end of the COUNT-th previous section."
+    :jump t
+    :type inclusive
+    (let ((col (current-column)))
+      (evil-signal-at-bob-or-eob (- (or count 1)))
+      (end-of-line -1)
+      (evil-backward-end 'evil-defun count)
+      (unless (eobp) (forward-line))
+      (move-to-column col)))
+  )
+
+;; (evil-define-key 'normal 'global (kbd "[[") #'evil-backward-section-begin)
+;; (evil-define-key 'normal 'global (kbd "]]") #'evil-backward-section-end)
+
+;; Replace with
+
+;; TODO fix this
+;; (defun my-advice-outline-restore-column (orig-fun &rest args)
+;;   "Advice to restore the column.
+;; ORIG-FUN is the function ARGS are the arguments."
+;;   (interactive "p")
+;;   (if (bound-and-true-p outline-minor-mode)
+;;       (apply orig-fun args)
+;;     (let ((column (current-column)))
+;;       (unwind-protect
+;;           (apply orig-fun (or args 1))
+;;         (move-to-column column)))))
+;;
+;; (with-eval-after-load 'outline
+;;   (advice-add 'outline-next-visible-heading
+;;               :around #'my-advice-outline-restore-column)
+;;   (advice-add 'outline-previous-visible-heading
+;;               :around #'my-advice-outline-restore-column))
+
+;;; Provide
+
 (provide 'my-evil-outline)
+
 ;;; my-evil-outline.el ends here

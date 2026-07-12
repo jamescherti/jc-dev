@@ -674,9 +674,15 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; Default modes that I disabled
 
+(when (bound-and-true-p global-eldoc-mode)
+  (global-eldoc-mode -1))
+(setq-default global-eldoc-mode nil)
+
+(when (bound-and-true-p show-paren-mode)
+  (show-paren-mode -1))
+(setq-default show-paren-mode nil)
+
 ;; Disable Remote File Checks if Not Needed
-(when (bound-and-true-p tramp-mode)
-  (tramp-mode -1))
 (setq-default tramp-mode nil)
 
 ;;; Disabled defaults
@@ -3596,43 +3602,7 @@ Opens a split window showing the added and removed features."
   (setq shell-pop-autocd-to-working-dir nil)
   (setq shell-pop-term-shell "tmux-session emacs")
   (setq shell-pop-window-size 80)
-  (setq shell-pop-restore-window-configuration t)
-
-  ;; (setq shell-pop-shell-type
-  ;;       '("eshell"
-  ;;         ("eshell" "*eshell*" (lambda () (eshell)))))
-
-  ;; :preface
-  ;; `shell-pop' layout
-  ;; (progn
-  ;;   (defvar my-shell-pop-saved-window-config nil
-  ;;     "Stores the absolute window state prior to shell-pop-up.")
-  ;;
-  ;;   (defun my-shell-pop-save-layout (&rest _args)
-  ;;     "Capture the exact layout before shell-pop opens."
-  ;;     (setq my-shell-pop-saved-window-config (current-window-configuration)))
-  ;;
-  ;;   (defun my-shell-pop-restore-layout (orig-fun &rest args)
-  ;;     "Restore the layout without relying on linear winner history.
-  ;; Only restores if the original working window is still alive."
-  ;;     (if (and my-shell-pop-saved-window-config
-  ;;              shell-pop-last-window
-  ;;              shell-pop-last-buffer
-  ;;              (window-live-p shell-pop-last-window)
-  ;;              (eq (window-buffer shell-pop-last-window) shell-pop-last-buffer))
-  ;;         (progn
-  ;;           (run-hooks 'shell-pop-out-hook)
-  ;;           (bury-buffer)
-  ;;           (set-window-configuration my-shell-pop-saved-window-config)
-  ;;           (setq my-shell-pop-saved-window-config nil))
-  ;;       ;; Clean up the saved config and fall back to native behavior
-  ;;       ;; if the original window was destroyed.
-  ;;       (setq my-shell-pop-saved-window-config nil)
-  ;;       (apply orig-fun args)))
-  ;;
-  ;;   (advice-add 'shell-pop-up :before #'my-shell-pop-save-layout)
-  ;;   (advice-add 'shell-pop-out :around #'my-shell-pop-restore-layout))
-  )
+  (setq shell-pop-restore-window-configuration t))
 
 ;; shell-pop: Change the default directory
 ;; NOTE replaced
@@ -3665,6 +3635,32 @@ Opens a split window showing the added and removed features."
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-evil-insert-state)
 
 ;;; Auto update lastdir
+
+(defun my-update-bash-lastdir (&rest _)
+  "Update Bash lastdir."
+  (let* ((directory (buffer-cwd))
+         (file "~/.bash_lastdir")
+         (file-lastdir (when (file-exists-p file)
+                         (let ((line (let ((coding-system-for-read 'utf-8-emacs)
+                                           (file-coding-system-alist nil))
+                                       (with-temp-buffer
+                                         (insert-file-contents file)
+                                         (thing-at-point 'line)))))
+                           (when line
+                             line)))))
+    (when (or (not file-lastdir)
+              (not (string= directory file-lastdir)))
+      (with-temp-buffer
+        (insert (expand-file-name default-directory))
+        ;; Force Emacs to read and write the exact internal byte representation
+        ;; of the text without attempting any implicit encoding or decoding
+        ;; conversions.
+        (let ((coding-system-for-write 'utf-8-emacs)
+              (write-region-annotate-functions nil)
+              (write-region-post-annotation-function nil))
+          (let ((inhibit-quit t))
+            (write-region (point-min) (point-max) file
+                          nil 'silent)))))))
 
 ;; (add-hook 'find-file-hook #'my-update-bash-lastdir)
 (add-hook 'window-buffer-change-functions #'my-update-bash-lastdir)
@@ -4641,12 +4637,8 @@ properly handles remote files over Tramp), applying the setting only if
          (python-ts-mode . my-setup-eldoc-mode))
 
   :init
-  (setq eldoc-idle-delay most-positive-fixnum)
-
   ;; (setq eldoc-message-commands-table-size 63)
-
-  (when (bound-and-true-p global-eldoc-mode)
-    (global-eldoc-mode -1)))
+  (setq eldoc-idle-delay most-positive-fixnum))
 
 ;;; corfu history
 
@@ -5414,20 +5406,10 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; showparen
 
-(setq show-paren-mode nil)
-
 ;; BUG never turn this variable on. it will break lispy AND smartparens
 ;; (setq show-paren-context-when-offscreen nil)
-
 ;; (setq show-paren-ring-bell-on-mismatch nil)
-
 ;; (setq show-paren-data-function #'show-paren--default)
-
-;; :init
-;; (add-hook 'minibuffer-setup-hook #'show-paren-local-mode)
-;; (add-hook 'after-init-hook #'(lambda()
-;;                                (when (bound-and-true-p show-paren-mode)
-;;                                  (show-paren-mode -1))))
 
 ;;; hippie expand
 
@@ -5593,18 +5575,6 @@ function or if an invalid choice is made."
 ;; (dabbrev-limit 1000)
 (setq dabbrev-case-distinction nil)
 
-;; This configuration sets `dabbrev-abbrev-skip-leading-regexp` to a regular
-;; expression matching any of the characters `$`, `*`, `/`, `=`, `~`, or `'` at
-;; the beginning of a word. When dabbrev expands abbreviations, it uses this
-;; regexp to ignore such leading characters, preventing them from being included
-;; in the expanded text. This behavior is useful in programming contexts—such as
-;; Bash, Python, and YAML—where these characters often prefix identifiers or
-;; tokens, ensuring that dabbrev completes only the meaningful part of the word
-;; without unwanted special characters.
-;; (setq dabbrev-abbrev-skip-leading-regexp "[$*/=~']")
-
-;; (setq dabbrev-abbrev-skip-leading-regexp "\\$\\|\\*\\|/\\|=")
-
 ;; (setq dabbrev-case-fold-search nil)
 ;; (setq dabbrev-case-replace 'case-replace)
 ;; (setq dabbrev-check-other-buffers t)
@@ -5612,9 +5582,6 @@ function or if an invalid choice is made."
 ;; (setq dabbrev-upcase-means-case-search t)
 
 ;; :init
-;; (defun my-setup-dabbrev ()
-;;   ;; Skip $ (variables)
-;;   (setq-local dabbrev-abbrev-skip-leading-regexp  "\\\\$"))
 ;;
 ;; (when (fboundp 'my-setup-dabbrev)
 ;;   (add-hook 'bash-ts-mode-hook #'my-setup-dabbrev)
@@ -5636,13 +5603,31 @@ function or if an invalid choice is made."
 ;; entire programming symbol (including underscores and hyphens) as a single,
 ;; unbroken block. Typing get_u and pressing M-/ will correctly grab the full
 ;; context and expand the string to get_user_data.
-(setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
+;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
 
 ;;; DISABLED: dabbrev boundaries 2
 
 ;; my-cape--dabbrev-bounds: Defines WHERE the completion applies relative to
 ;; your cursor. By overriding this, you dictate that the completion engine must
 ;; never overwrite text to the right of your cursor.
+
+;; (defun my-setup-dabbrev ()
+;;   ;; Skip $ (variables)
+;;   (setq-local dabbrev-abbrev-skip-leading-regexp  "\\\\$"))
+
+;; (setq-default dabbrev-abbrev-skip-leading-regexp  "\\\\$")
+
+;; This configuration sets `dabbrev-abbrev-skip-leading-regexp` to a regular
+;; expression matching any of the characters `$`, `*`, `/`, `=`, `~`, or `'` at
+;; the beginning of a word. When dabbrev expands abbreviations, it uses this
+;; regexp to ignore such leading characters, preventing them from being included
+;; in the expanded text. This behavior is useful in programming contexts—such as
+;; Bash, Python, and YAML—where these characters often prefix identifiers or
+;; tokens, ensuring that dabbrev completes only the meaningful part of the word
+;; without unwanted special characters.
+;; (setq dabbrev-abbrev-skip-leading-regexp "[$*/=~']")
+
+;; (setq dabbrev-abbrev-skip-leading-regexp "\\$\\|\\*\\|/\\|=")
 
 (defun my-cape--dabbrev-bounds ()
   "Return bounds of abbreviation using only text before point.
@@ -5664,7 +5649,7 @@ on text following the cursor."
               (while (and (> (point) limit)
                           (save-excursion (forward-char -1) (looking-at re)))
                 (forward-char -1))
-              (when dabbrev-abbrev-skip-leading-regexp
+              (when (bound-and-true-p dabbrev-abbrev-skip-leading-regexp)
                 (while (looking-at dabbrev-abbrev-skip-leading-regexp)
                   (forward-char 1)))
               (point))
@@ -5948,6 +5933,55 @@ on text following the cursor."
 
 ;; This breaks Org Exports; e.g.,
 ;; C-c C-e h o  ⇒  Match data clobbered by buffer modification hooks
+
+;;; DISABLED: cov / underdover
+
+;; (lightemacs-use-package cov
+;;   :defer t
+;;   :commands (cov-mode
+;;              cov-clear-overlays
+;;              cov-visit-coverage-file
+;;              cov-set-overlays
+;;              cov-update)
+;;   :custom
+;;   (cov-coverage-mode t)
+;;   :config
+;;   ;; (custom-set-faces
+;;   ;;  '(cov-none-face  ((((class color)) :foreground "red")))
+;;   ;;  '(cov-light-face ((((class color)) :foreground "orange")))
+;;   ;;  '(cov-med-face   ((((class color)) :foreground "yellow")))
+;;   ;;  '(cov-heavy-face ((((class color)) :foreground "green"))))
+;;
+;;   ;; (face-spec-set 'cov-none-face
+;;   ;;                '((((class color)) :foreground "red")))
+;;   ;;
+;;   ;; (face-spec-set 'cov-light-face
+;;   ;;                '((((class color)) :foreground "orange")))
+;;   ;;
+;;   ;; (face-spec-set 'cov-med-face
+;;   ;;                '((((class color)) :foreground "yellow")))
+;;   ;;
+;;   ;; (face-spec-set 'cov-heavy-face
+;;   ;;                '((((class color)) :foreground "green")))
+;;
+;;   (set-face-attribute 'cov-none-face nil :foreground "red")
+;;   (set-face-attribute 'cov-light-face nil :foreground "orange")
+;;   (set-face-attribute 'cov-med-face nil :foreground "yellow")
+;;   (set-face-attribute 'cov-heavy-face nil :foreground "green"))
+
+;; (lightemacs-use-package undercover
+;;   :defer t
+;;   :commands undercover)
+
+;;; DISABLED: combobulate
+
+;; (use-package combobulate
+;;   :defer t
+;;   :commands combobulate
+;;   :init
+;;   (with-eval-after-load 'evil
+;;     (evil-define-key 'normal 'global (kbd "<leader>co") #'combobulate)))
+;; (eldoc-add-command-completions "combobulate-")
 
 ;;; Provide
 

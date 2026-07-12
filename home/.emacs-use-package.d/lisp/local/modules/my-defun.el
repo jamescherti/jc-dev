@@ -674,34 +674,6 @@ such as `next-buffer' or `previous-buffer'."
   ;; (my-smart-next-interesting-buffer)
   (next-buffer))
 
-;; Lastdir
-
-(defun my-update-bash-lastdir (&rest _)
-  "Update Bash lastdir."
-  (let* ((directory (buffer-cwd))
-         (file "~/.bash_lastdir")
-         (file-lastdir (when (file-exists-p file)
-                         (let ((line (let ((coding-system-for-read 'utf-8-emacs)
-                                           (file-coding-system-alist nil))
-                                       (with-temp-buffer
-                                         (insert-file-contents file)
-                                         (thing-at-point 'line)))))
-                           (when line
-                             line)))))
-    (when (or (not file-lastdir)
-              (not (string= directory file-lastdir)))
-      (with-temp-buffer
-        (insert (expand-file-name default-directory))
-        ;; Force Emacs to read and write the exact internal byte representation
-        ;; of the text without attempting any implicit encoding or decoding
-        ;; conversions.
-        (let ((coding-system-for-write 'utf-8-emacs)
-              (write-region-annotate-functions nil)
-              (write-region-post-annotation-function nil))
-          (let ((inhibit-quit t))
-            (write-region (point-min) (point-max) file
-                          nil 'silent)))))))
-
 ;;; check parens
 
 ;; TODO buffer wizard
@@ -966,6 +938,48 @@ WIDTH is the tab width."
                     ((member "master" branches) "origin/master")
                     (t (error "Neither origin/main nor origin/master found")))))
       (vc-diff-internal t (vc-deduce-fileset t) "HEAD" target))))
+
+;;; Commands
+
+;; (defun my-shell-command-first-line-to-string (command)
+;;   "Return the first line of output from executing COMMAND."
+;;   (let ((output (shell-command-to-string command)))
+;;     (string-trim-right (car (split-string output "\n" t)) "\n")))
+
+;;; Processes output
+
+;; (defun my-get-command-output (args)
+;;   "Execute a command with ARGS and return stdout.
+;; ARGS should be a list of strings, where the first element is the command to
+;; execute, and the remaining elements are the arguments for the command."
+;;   (with-temp-buffer
+;;     (let ((exit-status (apply 'call-process (car args) nil
+;;                               (list (current-buffer) nil) nil (cdr args))))
+;;       (when (zerop exit-status)
+;;         (buffer-string)))))
+;;
+;; (defun my-get-number-from-command (args)
+;;   "Execute a command with ARGS and return the first line if it is a number.
+;; Return nil if the command fails or the output is not a number.
+;; ARGS should be a list of strings, where the first element is the command to
+;; execute, and the remaining elements are the arguments for the command."
+;;   (let* ((output (my-get-command-output args))
+;;          (first-line (if output (car (split-string output "\n" t)) "")))
+;;     (when (and output (string-match "^[0-9]+$" first-line))
+;;       (string-to-number first-line))))
+
+;;; Linux distribution
+
+;; (defun detect-linux-distribution ()
+;;   "Detect the Linux distribution Emacs is running on."
+;;   (with-temp-buffer
+;;     (condition-case nil
+;;         (progn
+;;           (insert-file-contents "/etc/os-release")
+;;           (cond ((search-forward "ID=debian" nil t) 'debian)
+;;                 ((search-forward "ID=gentoo" nil t) 'gentoo)
+;;                 (t 'unknown)))
+;;       (file-error 'unknown))))
 
 ;;; Provide
 (provide 'my-defun)
