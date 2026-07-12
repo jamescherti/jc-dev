@@ -792,22 +792,6 @@ only if they are not already available."
     ;; rather than the default asterisk.
     (setq markdown-unordered-list-item-prefix "- ")
 
-    ;; (setq markdown-unordered-list-item-prefix "  - ")
-    ;; (setq markdown-enable-wiki-links t)
-    ;; (setq markdown-use-pandoc-style-yaml-metadata t)
-    ;; (setq markdown-footnote-location 'immediately)
-    ;; (setq markdown-enable-math nil)
-    ;; (setq markdown-display-remote-images nil)
-    ;; (setq markdown-italic-underscore t)
-    ;; (setq markdown-blockquote-display-char '("┃" ">"))
-    ;; (setq markdown-list-item-bullets '("⏺" "▪" "◆" "►" "•" "◇"))
-    ;; (setq markdown-asymmetric-header t)
-    ;; (setq markdown-make-gfm-checkboxes-buttons t)
-    ;; (setq markdown-open-command "~/.bin/run-markdown.sh")
-    ;; Contain bugs when make-window-start-visible is set to t
-    ;; (setq markdown-hide-markup t)
-    ;; (setq markdown-nested-imenu-heading-index t)
-
     ;; Enables Previewing: Without configuring markdown-command, features like
     ;; markdown-preview (C-c C-c p) or markdown-export will fail if Emacs cannot
     ;; find a default compiler on your system path.
@@ -834,6 +818,25 @@ only if they are not already available."
     ;;   (modify-syntax-entry ?> "." markdown-mode-syntax-table)
     ;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
     ;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
+
+    ;; TODO reenable this
+    ;; (setq markdown-enable-wiki-links t)
+    ;; (setq markdown-use-pandoc-style-yaml-metadata t)
+
+    ;; (setq markdown-footnote-location 'immediately)
+    ;; (setq markdown-fontify-whole-heading-line t)
+    ;; (setq markdown-italic-underscore t)
+    ;; (setq markdown-blockquote-display-char '("┃" ">"))
+    ;; (setq markdown-list-item-bullets '("⏺" "▪" "◆" "►" "•" "◇"))
+    ;; (setq markdown-asymmetric-header t)
+    ;; (setq markdown-make-gfm-checkboxes-buttons t)
+    ;; (setq markdown-open-command "~/bin/mark.sh")
+
+    ;; (setq markdown-enable-math nil)
+    ;; (setq markdown-display-remote-images nil)
+    ;; Contain bugs when make-window-start-visible is set to t
+    ;; (setq markdown-hide-markup t)
+    ;; (setq markdown-nested-imenu-heading-index t)
 
     )
 
