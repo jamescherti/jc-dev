@@ -952,6 +952,20 @@ WIDTH is the tab width."
 ;;       `(lightemacs-shield-macros
 ;;          (progn ,@body)))))
 
+;;; Diff against main
+
+(defun mod-better-vc-version-diff-main ()
+  "Diff HEAD against origin/main if it exists, otherwise against origin/master."
+  (interactive)
+  (when (and (fboundp 'vc-git-branches)
+             (fboundp 'vc-diff-internal)
+             (fboundp 'vc-deduce-fileset))
+    (let* ((branches (vc-git-branches))  ;; Get list of remote branches
+           (target (cond
+                    ((member "main" branches) "origin/main")
+                    ((member "master" branches) "origin/master")
+                    (t (error "Neither origin/main nor origin/master found")))))
+      (vc-diff-internal t (vc-deduce-fileset t) "HEAD" target))))
 
 ;;; Provide
 (provide 'my-defun)

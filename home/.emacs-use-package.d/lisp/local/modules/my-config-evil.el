@@ -1327,9 +1327,13 @@ on text following the cursor."
   ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
   )
 
+;; (evil-define-key '(normal visual) my-intercept-mode-map
+;;   "{" 'wizard-point-backward-to-empty-line
+;;   "}" 'wizard-point-forward-to-empty-line)
+
 (evil-define-key '(normal visual) my-intercept-mode-map
-  "{" 'wizard-point-backward-to-empty-line
-  "}" 'wizard-point-forward-to-empty-line)
+  "{" 'evil-backward-paragraph
+  "}" 'evil-forward-paragraph)
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
   ;; (kbd "M-RET") 'toggle-term-tmux

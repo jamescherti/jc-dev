@@ -372,8 +372,20 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO are these useful?
+;; (unless *sys/win32*
+;;   (set-selection-coding-system 'utf-8)
+;;   (prefer-coding-system 'utf-8)
+;;   (set-language-environment "UTF-8")
+;;   (set-default-coding-systems 'utf-8)
+;;   (set-terminal-coding-system 'utf-8)
+;;   (set-keyboard-coding-system 'utf-8)
+;;   (setq locale-coding-system 'utf-8))
+
+;; Treat clipboard input as UTF-8 string first, compound text next
 (when (display-graphic-p)
   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+
 (setq next-error-message-highlight 'keep)
 
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
@@ -992,30 +1004,6 @@ any new ones."
                   (when (fboundp 'lightemacs-load-default-theme)
                     (lightemacs-load-default-theme)))))
 
-  ;; (setq easysession-save-pretty-print t)
-
-  ;; (setq easysession-switch-to-save-session nil)
-  ;; (setq easysession-mode-line-misc-info t)
-  ;; (setq easysession-setup-load-session nil)
-
-  ;; Change default to this
-  (setq easysession-fontify t)
-  (setq easysession-quiet t)
-
-  (setq easysession-switch-to-exclude-current t)
-  (setq easysession-save-interval (* 14 60))
-  (add-hook 'easysession-before-reset-hook
-            #'(lambda()
-                ;; Save all with no questions
-                (my-save-all-buffers)))
-  ;; (defun my-easysession-only-main-saved ()
-  ;;   "Only save the main session."
-  ;;   (when (and (fboundp 'easysession-get-session-name)
-  ;;              (string= "main" (funcall 'easysession-get-session-name)))
-  ;;     t))
-  ;; (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
-  (add-hook 'easysession-new-session-hook 'easysession-reset)
-
   (unless noninteractive
     (with-eval-after-load 'icomplete
       (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit)))
@@ -1626,6 +1614,38 @@ any new ones."
   )
 
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-post-init)
+
+;;; easysession
+
+;; just open easysession.el dir 5 times in 5 tabs,
+;; then open the easysession.el file
+;; do not switch to other tabs
+;; quit emacs, launch it, then the other tabs bufers will not be loaded
+(setq easysession-buffer-list-function 'easysession-visible-buffer-list)
+
+;; (setq easysession-save-pretty-print t)
+
+;; (setq easysession-switch-to-save-session nil)
+;; (setq easysession-mode-line-misc-info t)
+;; (setq easysession-setup-load-session nil)
+
+;; Change default to this
+(setq easysession-fontify t)
+(setq easysession-quiet t)
+
+(setq easysession-switch-to-exclude-current t)
+(setq easysession-save-interval (* 14 60))
+(add-hook 'easysession-before-reset-hook
+          #'(lambda()
+              ;; Save all with no questions
+              (my-save-all-buffers)))
+;; (defun my-easysession-only-main-saved ()
+;;   "Only save the main session."
+;;   (when (and (fboundp 'easysession-get-session-name)
+;;              (string= "main" (funcall 'easysession-get-session-name)))
+;;     t))
+;; (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
+(add-hook 'easysession-new-session-hook 'easysession-reset)
 
 ;;; Useful functions
 
@@ -4556,23 +4576,25 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; Org: Font Lock Deferral
 
-(defun my-setup-defer-font-lock ()
-  "Set jit-lock defer and stealth parameters when buffer is large.
-Especially useful for large Org files with complex structure."
-  (when (> (buffer-size) 100000) ;; Increased threshold to 100KB
-    (setq-local jit-lock-defer-time 0.1
-                jit-lock-stealth-time 2
-                ;; Process fewer chars during idle time
-                jit-lock-stealth-load 200
-                ;; Process in larger chunks
-                jit-lock-chunk-size 10000
-                ;; Lower CPU usage during stealth fontification
-                jit-lock-stealth-nice 0.5)
-    ;; Text is sometimes not highlighted. Ensure it is highlighted.
-    ;; (font-lock-ensure)
-    ))
+;; TODO: Bug emacs? This causes other buffers to have a slow jit lock.
 
-(add-hook 'org-mode-hook #'my-setup-defer-font-lock)
+;; (defun my-setup-defer-font-lock ()
+;;   "Set jit-lock defer and stealth parameters when buffer is large.
+;; Especially useful for large Org files with complex structure."
+;;   (when (> (buffer-size) 100000) ;; Increased threshold to 100KB
+;;     (setq-local jit-lock-defer-time 0.1
+;;                 jit-lock-stealth-time 2
+;;                 ;; Process fewer chars during idle time
+;;                 jit-lock-stealth-load 200
+;;                 ;; Process in larger chunks
+;;                 jit-lock-chunk-size 10000
+;;                 ;; Lower CPU usage during stealth fontification
+;;                 jit-lock-stealth-nice 0.5)
+;;     ;; Text is sometimes not highlighted. Ensure it is highlighted.
+;;     ;; (font-lock-ensure)
+;;     ))
+;;
+;; (add-hook 'org-mode-hook #'my-setup-defer-font-lock)
 
 ;;; Font lock deferral
 
@@ -4686,7 +4708,14 @@ Especially useful for large Org files with complex structure."
 
 ;; (setq jit-lock-stealth-load 10)
 ;; (setq jit-lock-stealth-verbose t)
-;; (setq jit-lock-context-time 0.5)
+
+;; Decrease the idle delay before context fontification happens. Setting this to
+;; 0.05 (50ms) makes it nearly instantaneous without hitting performance.
+;; (setq-default jit-lock-context-time 0.05)
+
+;; Alternatively, you can completely disable deferred context fontification
+;; if your machine handles syntax highlighting easily.
+;; (setq jit-lock-contextually nil)
 
 ;;; Warnings
 
@@ -4834,6 +4863,54 @@ Especially useful for large Org files with complex structure."
 ;; (use-package dirvish
 ;;   :ensure nil
 ;;   :commands dirvish-override-dired-mode)
+
+;;; DISABLED: org-modern
+
+;; (use-package org-modern
+;;   :defer t
+;;   :commands org-modern-mode
+;;   ;; :hook
+;;   ;; (org-mode . org-modern-mode)
+;;   ;; :config
+;;   ;; (setq
+;;   ;;  ;; Agenda styling
+;;   ;;  org-agenda-tags-column 0
+;;   ;;  org-agenda-block-separator ?─
+;;   ;;  org-agenda-time-grid
+;;   ;;  '((daily today require-timed)
+;;   ;;    (800 1000 1200 1400 1600 1800 2000)
+;;   ;;    " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+;;   ;;  org-agenda-current-time-string
+;;   ;;  "◀── now ─────────────────────────────────────────────────")
+;;
+;;   ;; (setq org-modern-block-name '("" . "")
+;;   ;;       ;; org-modern-list '((43 . "•")
+;;   ;;       ;;                   (45 . "-")
+;;   ;;       ;;                   (42 . "↪"))
+;;   ;;       ;; org-modern-radio-target    '("❰" t "❱")
+;;   ;;       ;; org-catch-invisible-edits 'show-and-error
+;;   ;;       ;; org-modern-internal-target '("↪ " t "")
+;;   ;;       ;; org-modern-todo t
+;;   ;;       ;; org-modern-tag t
+;;   ;;       ;; org-modern-timestamp t
+;;   ;;       ;; org-modern-statistics nil
+;;   ;;       ;; org-modern-progress nil
+;;   ;;       ;; org-modern-priority t
+;;   ;;       ;; org-modern-horizontal-rule "──────────"
+;;   ;;       ;; org-modern-hide-stars "·"
+;;   ;;       ;; org-modern-star ["⁖"]
+;;   ;;       ;; org-modern-keyword "‣"
+;;   ;;       ;; org-modern-todo-faces
+;;   ;;       ;; '(("[-]"  . +org-todo-active)
+;;   ;;       ;;   ("NEXT" . +org-todo-active)
+;;   ;;       ;;   ("STARTED" . +org-todo-active)
+;;   ;;       ;;   ("WAITING" . +org-todo-onhold)
+;;   ;;       ;;   ("CANCELED" . +org-archived)
+;;   ;;       ;;   ("PROJ" . +org-todo-project)
+;;   ;;       ;;   ("DONE"   . +org-todo-cancel))
+;;   ;;       )
+;;
+;;   )
 
 ;;; Provide
 
