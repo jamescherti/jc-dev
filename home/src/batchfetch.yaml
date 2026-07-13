@@ -345,7 +345,12 @@ tasks:
       upstream: https://github.com/radian-software/straight.el
 
   # ----------------------------------------------------------------------------
-  # START: UNMAINTAINED PACKAGES THAT I FORKED
+  # START: Forks
+  - git: https://github.com/jamescherti/doom-themes
+    path: forks/doom-themes
+    remote:
+      upstream: https://github.com/doomemacs/themes
+
   - git: git@github.com:jamescherti/s.el
     path: forks/s.el
     remote:

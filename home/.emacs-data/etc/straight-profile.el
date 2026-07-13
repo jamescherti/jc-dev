@@ -89,7 +89,6 @@
  ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
- ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
 
  ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE | TODO fork
  ("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7 | RSS RELEASE
@@ -113,14 +112,16 @@
  ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7 | RSS RELEASE
  ;; ("org" . "5ce6801d3fc127102f8a7a9b2c28e923211b3acb") ; Unstable
 
+ ;; TODO remove
+ ("el-get" . "ec3b0a052bf2f90f30c51042ddb06471b35c7ab6") ; 5.2 | RSS RELEASE
+ ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
+
  ;; No longer necessary
- ;; ("el-get" . "ec3b0a052bf2f90f30c51042ddb06471b35c7ab6") ; 5.2 | RSS RELEASE
- ;; ("llama" . "d430d48e0b5afd2a34b5531f103dcb110c3539c4") ; v1.0.4 | RSS RELEASE
+ ("llama" . "d430d48e0b5afd2a34b5531f103dcb110c3539c4") ; v1.0.4 | RSS RELEASE
 
  ;; Marked as built-in
- ;; ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00") ; 2.24
- ;; ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
- ;; ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
- ;; ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
- )
+ ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
+ ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00") ; 2.24
+ ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
+ ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c"))
 :epsilon

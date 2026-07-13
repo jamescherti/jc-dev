@@ -1034,6 +1034,95 @@ This uses an around advice to trap errors and verify file timestamps."
 
 (setq straight-recipes-org-url "https://github.com/jamescherti/org-mode")
 
+;; (choice
+;;           (const :tag "GNU repository"
+;;                  "https://git.savannah.gnu.org/git/emacs/nongnu.git")
+;;           (const :tag "GitHub mirror (HTTPS)"
+;;                  "https://github.com/emacsmirror/nongnu_elpa.git")
+;;           (const :tag "GitHub mirror (SSH)"
+;;                  "git@github.com:emacsmirror/nongnu_elpa.git")
+;;           (string :tag "Custom value"))
+(setq straight-recipes-nongnu-elpa-url "https://github.com/emacsmirror/nongnu_elpa.git")
+
+;; (defcustom straight-recipes-gnu-elpa-url
+;;   (if (eq straight-vc-git-default-protocol 'ssh)
+;;       "git@github.com:emacsmirror/gnu_elpa.git"
+;;     "https://github.com/emacsmirror/gnu_elpa.git")
+;;   "URL of the Git repository for the GNU ELPA package repository."
+;;   :type '(choice
+;;           (const :tag "GNU repository"
+;;                  "https://git.savannah.gnu.org/git/emacs/elpa.git")
+;;           (const :tag "GitHub mirror (HTTPS)"
+;;                  "https://github.com/emacsmirror/gnu_elpa.git")
+;;           (const :tag "GitHub mirror (SSH)"
+;;                  "git@github.com:emacsmirror/gnu_elpa.git")
+;;           (string :tag "Custom value"))
+;;   :set (straight--set "
+;; Must be set before bootstrap."))
+(setq straight-recipes-gnu-elpa-url "https://github.com/emacsmirror/gnu_elpa.git")
+
+(setq straight-initial-recipe-repositories
+      (list
+       '(org-elpa :local-repo nil)
+       '(melpa :type git :host github
+               :repo "melpa/melpa"
+               :build nil)
+       (if straight-recipes-gnu-elpa-use-mirror
+           '(gnu-elpa-mirror :type git :host github
+                             :repo "emacs-straight/gnu-elpa-mirror"
+                             :build nil)
+         `(gnu-elpa :type git
+                    :repo ,straight-recipes-gnu-elpa-url
+                    :depth (full single-branch)
+                    :local-repo "elpa"
+                    :build nil))
+       `(nongnu-elpa :type git
+                     :repo ,straight-recipes-nongnu-elpa-url
+                     :depth (full single-branch)
+                     :local-repo "nongnu-elpa"
+                     :build nil)
+
+       ;; el-get is included purely as a legacy fallback mechanism. Because
+       ;; el-get was one of the earliest package managers to rely on a massive
+       ;; crowd-sourced repository of recipes, straight.el included it so users
+       ;; could install obscure, older packages that were never ported to modern
+       ;; repositories like MELPA or GNU ELPA.
+       ;;
+       ;; If you remove el-get from straight-initial-recipe-repositories, the
+       ;; only operational differences are:
+       ;; - straight.el will look up un-reciped packages across your remaining
+       ;;   repositories (MELPA, GNU ELPA, NonGNU ELPA, and Emacsmirror). This
+       ;;   covers well over 99% of modern Emacs packages.
+       ;; - If you ever happen to request a package that only exists in the old
+       ;; el-get database, straight.el will fail to find a recipe and throw an
+       ;; error.
+       ;;
+       ;; '(el-get :type git :host github
+       ;;          :repo "dimitri/el-get"
+       ;;          :build nil)
+
+       ;; Emacsmirror was created to provide a comprehensive track of every
+       ;; Emacs Lisp package ever hosted on GitHub or elsewhere, regardless of
+       ;; whether the authors officially packaged them for a package manager.
+       ;; However, in modern Emacs workflows:
+       ;; - MELPA already indexes almost every actively maintained package.
+       ;; - GNU ELPA and NonGNU ELPA handle core and officially curated
+       ;;   community packages.
+       ;; - If an obscure package only exists on Emacsmirror, it is far cleaner
+       ;; and more performant to point directly to its upstream Git repo using
+       ;; an explicit recipe plist in your config rather than cloning the
+       ;; massive Emacsmirror metadata repository.
+       ;;
+       ;; (if straight-recipes-emacsmirror-use-mirror
+       ;;     '(emacsmirror-mirror :type git :host github
+       ;;                          :repo "emacs-straight/emacsmirror-mirror"
+       ;;                          :build nil)
+       ;;   '(emacsmirror :type git :host github
+       ;;                 :repo "emacsmirror/epkgs"
+       ;;                 :nonrecursive t
+       ;;                 :build nil))
+       ))
+
 (when (eq lightemacs-package-manager 'straight)
   (setq straight-recipe-overrides
         '((nil
@@ -1064,6 +1153,9 @@ This uses an around advice to trap errors and verify file timestamps."
             ;;  :repo "protesilaos/ef-themes")
 
             ;; Forks of maintained packages
+            (doom-themes
+             :type git :host github
+             :repo "jamescherti/doom-themes")
             (diff-hl
              :type git :host github
              :repo "jamescherti/diff-hl")
