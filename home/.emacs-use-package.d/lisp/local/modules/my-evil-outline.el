@@ -31,9 +31,9 @@
 
 ;;; Outline Keybindings
 
-(with-eval-after-load "outline-indent"
-  (evil-define-key 'normal outline-mode-map (kbd "]]") nil)
-  (evil-define-key 'normal outline-mode-map (kbd "[[") nil))
+;; (with-eval-after-load "outline-indent"
+;;   (evil-define-key 'normal outline-mode-map (kbd "]]") nil)
+;;   (evil-define-key 'normal outline-mode-map (kbd "[[") nil))
 
 (defun my-evil-define-key-outline-indent-minor-mode ()
   "Set `M-h' and `M-l' to decrease/increase the indentation level of blocks."
