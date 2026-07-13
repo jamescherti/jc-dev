@@ -1563,15 +1563,28 @@ search direction (default: \='forward)."
 
 ;;; vterm settings
 
-;; With the first line, you can use a binding like M-SPC ESC (M-SPC being the
-;; default alt-leader key) to switch the vterm buffer to evil normal state. Most
-;; of the time I don't use it, and simply interact with the vterm the same exact
-;; way I do with any other terminal.
-(with-eval-after-load 'evil-collection
+;; VTERM ESCAPE TO EVIL-NORMAL STATE
+;;
+;; By default, vterm intercepts the Escape (ESC) key and sends it straight to
+;; the underlying terminal shell.
+;;
+;; This code changes that behavior: pressing ESC inside a vterm buffer will now
+;; instantly exit Evil "Insert State" and put you into Evil "Normal State" (Vim
+;; command mode). This allows you to easily scroll back through terminal
+;; history, search, and copy text using standard Vim motions.
+(defun my-evil-collection-vterm-toggle-send-escape ()
+  "Enable vterm toggle send escape."
+  ;; With the first line, you can use a binding like M-SPC ESC (M-SPC being the
+  ;; default alt-leader key) to switch the vterm buffer to evil normal state.
+  ;; Most of the time I don't use it, and simply interact with the vterm the
+  ;; same exact way I do with any other terminal.
   (when (and (not (bound-and-true-p evil-collection-vterm-send-escape-to-vterm-p))
              (fboundp 'evil-collection-vterm-toggle-send-escape))
     (let ((inhibit-message t))
       (evil-collection-vterm-toggle-send-escape))))
+
+(with-eval-after-load 'evil-collection
+  (add-hook 'vterm-mode-hook #'my-evil-collection-vterm-toggle-send-escape))
 
 ;; (setq vterm-set-bold-hightbright t)
 ;; (setq vterm-disable-bold t)
@@ -1635,6 +1648,7 @@ search direction (default: \='forward)."
   ;; Escape to normal state using C-c <escape> or C-c [
   (evil-define-key 'insert vterm-mode-map (kbd "C-c <escape>") 'evil-normal-state)
   (evil-define-key 'insert vterm-mode-map (kbd "C-c [") 'evil-normal-state))
+
 
 ;;; Silence C-f
 
