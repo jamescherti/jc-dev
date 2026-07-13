@@ -31,7 +31,8 @@
 # shellcheck disable=SC2269
 set -euf -o pipefail
 
-GIT_CLONE_DIR="$HOME/.jc-dev"
+# TODO remove
+# GIT_CLONE_DIR="$HOME/.jc-dev"
 
 # shellcheck disable=SC2317
 error_handler() {
@@ -61,7 +62,7 @@ init() {
   done
 
   SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-  mkdir -p "$GIT_CLONE_DIR"
+  # mkdir -p "$GIT_CLONE_DIR"
 
   # Check if terminal supports color
   if [ -t 1 ] && [ "$(tput colors)" -ge 8 ]; then
@@ -145,31 +146,36 @@ confirm() {
 
 config-jc-dotfiles() {
   # JC-DOTFILES
-  git_clone \
-    https://github.com/jamescherti/jc-dotfiles \
-    "$GIT_CLONE_DIR/jc-dotfiles"
-  cd
-  JC_DOTFILES_UNATTENDED=1 "$GIT_CLONE_DIR/jc-dotfiles/install.sh"
+  # git_clone \
+  #   https://github.com/jamescherti/jc-dotfiles \
+  #   "$GIT_CLONE_DIR/jc-dotfiles"
+  # cd
+  # JC_DOTFILES_UNATTENDED=1 "$GIT_CLONE_DIR/jc-dotfiles/install.sh"
+  JC_DOTFILES_UNATTENDED=1 "$HOME/src/dotfiles/jc-dotfiles//install.sh"
 }
 
 config-lightvim() {
+  cd ~/src/dotfiles/lightvim
   # LIGHTVIM
-  git_clone \
-    https://github.com/jamescherti/lightvim \
-    "$GIT_CLONE_DIR/lightvim"
+  # git_clone \
+  #   https://github.com/jamescherti/lightvim \
+  #   "$GIT_CLONE_DIR/lightvim"
   mkdir -p ~/.config/nvim
   rm -f ~/.vimrc
   rm -f ~/.config/nvim/init.vim
-  cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.vimrc
-  cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.config/nvim/init.vim
+  cp "$HOME/src/dotfiles/lightvim/lightvim.vim" ~/.vimrc
+  cp "$HOME/src/dotfiles/lightvim/lightvim.vim" ~/.config/nvim/init.vim
+  # cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.vimrc
+  # cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.config/nvim/init.vim
 }
 
 config-bash-stdops() {
   # BASH-STDOPS
-  git_clone \
-    https://github.com/jamescherti/bash-stdops \
-    "$GIT_CLONE_DIR/bash-stdops"
-  cd "$GIT_CLONE_DIR/bash-stdops"
+  # git_clone \
+  #   https://github.com/jamescherti/bash-stdops \
+  #   "$GIT_CLONE_DIR/bash-stdops"
+  # cd "$GIT_CLONE_DIR/bash-stdops"
+  cd ~/src/dotfiles/bash-stdops/
   PREFIX="$HOME/.local" ./install.sh
 }
 
@@ -179,19 +185,19 @@ config-project-list() {
   fi
 }
 
-config-lightemacs() {
-  if [[ -d ~/src/emacs/lightemacs/ ]]; then
-    if git-is-clean ~/src/emacs/lightemacs/; then
-      git -C ~/src/emacs/lightemacs/ checkout develop
-      git -C ~/src/emacs/lightemacs/ pull --rebase
-    fi
-  else
-    git_clone \
-      https://github.com/jamescherti/lightemacs \
-      "$GIT_CLONE_DIR/lightemacs"
-    git -C "$GIT_CLONE_DIR/lightemacs" checkout develop
-  fi
-}
+# config-lightemacs() {
+#   if [[ -d ~/src/emacs/lightemacs/ ]]; then
+#     if git-is-clean ~/src/emacs/lightemacs/; then
+#       git -C ~/src/emacs/lightemacs/ checkout develop
+#       git -C ~/src/emacs/lightemacs/ pull --rebase
+#     fi
+#   else
+#     git_clone \
+#       https://github.com/jamescherti/lightemacs \
+#       "$GIT_CLONE_DIR/lightemacs"
+#     git -C "$GIT_CLONE_DIR/lightemacs" checkout develop
+#   fi
+# }
 
 config-files() {
   # Secure dirs
@@ -289,7 +295,7 @@ main() {
 
   config-project-list
 
-  config-lightemacs
+  # config-lightemacs
   config-files
 
   "$SCRIPT_DIR/home/.bin/update-emacs-config"
