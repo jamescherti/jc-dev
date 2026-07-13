@@ -325,6 +325,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; Disable macro set definition
+(global-set-key (kbd "C-x e") 'ignore)
+
 ;; Warns about undefined commands in the prompt (Emacs 29.1)
 (setq shell-highlight-undef-enable t)
 
@@ -3571,37 +3574,39 @@ Opens a split window showing the added and removed features."
 ;;                       (t '("terminal" "*terminal*"
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
-;; (lightemacs-use-package shell-pop
-;;   :commands shell-pop
-;;   :bind (("C-c t" . shell-pop))
-;;   :config
-;;   ;; The key sequence used to toggle the shell window.
-;;   (setopt shell-pop-universal-key "C-c t")
-;;   (setopt shell-pop-shell-type '("vterm" "*vterm*"
-;;                                  (lambda ()
-;;                                    (when (fboundp 'vterm)
-;;                                      (let* ((vterm-shell shell-pop-term-shell))
-;;                                        (vterm))))))
-;;   ;; (setopt shell-pop-shell-type '("eat" "*eat*"
-;;   ;;                         (lambda ()
-;;   ;;                           (when (fboundp 'eat)
-;;   ;;                             (eat shell-pop-term-shell)))))
-;;   ;; (setopt shell-pop-shell-type '("ansi-term"
-;;   ;;                                "*ansi-term*"
-;;   ;;                                (lambda ()
-;;   ;;                                  (ansi-term shell-pop-term-shell))))
-;;
-;;   :init
-;;   ;; (setq shell-pop-term-shell "/usr/bin/env bash")
-;;   ;; (setq shell-pop-window-position "full")
-;;   (setq shell-pop-window-position "bottom")
-;;   (setq shell-pop-full-span nil)
-;;   (setq shell-pop-autocd-to-working-dir nil)
-;;   (setq shell-pop-term-shell "tmux-session emacs")
-;;   (setq shell-pop-window-size 80)
-;;   (setq shell-pop-restore-window-configuration t))
+(lightemacs-use-package shell-pop
+  :commands shell-pop
+  :bind (("C-c t" . shell-pop))
+  :config
+  ;; The key sequence used to toggle the shell window.
+  (setopt shell-pop-universal-key "C-c t")
+  (setopt shell-pop-shell-type '("vterm" "*vterm*"
+                                 (lambda ()
+                                   (when (fboundp 'vterm)
+                                     (let* ((vterm-shell shell-pop-term-shell))
+                                       (vterm))))))
 
-;; shell-pop: Change the default directory
+  ;; (setopt shell-pop-shell-type '("eat" "*eat*"
+  ;;                         (lambda ()
+  ;;                           (when (fboundp 'eat)
+  ;;                             (eat shell-pop-term-shell)))))
+  ;; (setopt shell-pop-shell-type '("ansi-term"
+  ;;                                "*ansi-term*"
+  ;;                                (lambda ()
+  ;;                                  (ansi-term shell-pop-term-shell))))
+
+  :init
+  ;; (setq shell-pop-term-shell "/usr/bin/env bash")
+  ;; (setq shell-pop-window-position "full")
+  (setq shell-pop-window-position "bottom")
+  (setq shell-pop-full-span nil)
+  (setq shell-pop-autocd-to-working-dir nil)
+  (setq shell-pop-term-shell "tmux-session emacs")
+  (setq shell-pop-window-size 80)
+  (setq shell-pop-restore-window-configuration t))
+
+;;; shell-pop: last dir
+
 ;; NOTE replaced
 (defun my-around-shell-pop (fn &rest args)
   "FN is the advised function. ARGS are the function arguments."
@@ -3609,6 +3614,8 @@ Opens a split window showing the added and removed features."
   (apply fn args))
 (with-eval-after-load 'shell-pop
   (advice-add 'shell-pop :around #'my-around-shell-pop))
+
+;;; shell-pop: Change the default directory to project directory
 
 ;; Ensure switching to insert mode
 (defun my-shell-pop-evil-insert-state ()
@@ -3620,14 +3627,14 @@ Opens a split window showing the added and removed features."
 
   ;; (my-save-all-buffers)
 
-  ;; Force Evil into insert state
-  (when (fboundp 'evil-insert-state)
-    (evil-insert-state))
-
   ;; Fix issue that causes the cursor to move to the top-left of the screen
   (when (and (derived-mode-p 'vterm-mode)
              (fboundp 'vterm-reset-cursor-point))
-    (vterm-reset-cursor-point)))
+    (vterm-reset-cursor-point))
+
+  ;; Force Evil into insert state
+  (when (fboundp 'evil-insert-state)
+    (evil-insert-state)))
 
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-evil-insert-state)
 

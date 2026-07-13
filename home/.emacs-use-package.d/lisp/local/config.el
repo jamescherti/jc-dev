@@ -887,7 +887,9 @@ subsequent GCC invocations."
 
                            le-persist-text-scale
 
-                           mod-toggle-term
+                           ;; TODO support project dirs like shell-pop
+                           ;; mod-toggle-term
+
                            mod-misc
                            mod-ediff
                            tmpedit
