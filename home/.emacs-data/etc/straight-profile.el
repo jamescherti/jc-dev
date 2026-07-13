@@ -39,10 +39,11 @@
  ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
  ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
  ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
+ ("doom-themes" . "cc7686783e5e6e4174a345c768047d524f0dd54f")
 
  ;; My packages
  ("org-ibullets.el" . "933d5989124a57e83de3eadf82bb194f5e308b98")
- ("wizard" . "9dad97b55a97e702adeeab9825dab7e6bcd147b1")
+ ("wizard.el" . "9dad97b55a97e702adeeab9825dab7e6bcd147b1")
  ("inhibit-mouse.el" . "affabbd3c07ea4b739cf9dc79633681588803e0a")
  ("kirigami.el" . "41e9a5378b7a6c9eba79fb660375a9db48fa0506")
  ("flymake-ansible-lint.el" . "bfb8148d9a1aece141d18eef484e7c0c8db79855")

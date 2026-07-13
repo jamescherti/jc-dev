@@ -1067,6 +1067,7 @@ This uses an around advice to trap errors and verify file timestamps."
        '(melpa :type git :host github
                :repo "melpa/melpa"
                :build nil)
+
        (if straight-recipes-gnu-elpa-use-mirror
            '(gnu-elpa-mirror :type git :host github
                              :repo "emacs-straight/gnu-elpa-mirror"
@@ -1122,6 +1123,14 @@ This uses an around advice to trap errors and verify file timestamps."
        ;;                 :nonrecursive t
        ;;                 :build nil))
        ))
+
+;; Prevent straight.el from marking themes as unused when running garbage
+;; collection operations like M-x straight-remove-unused-repos, you need to
+;; register them with straight.el during your initialization sequence.
+(with-eval-after-load 'straight
+  (when (fboundp 'straight-register-package)
+    (dolist (theme '(doom-themes ef-themes tomorrow-night-deepblue-theme))
+      (straight-register-package theme))))
 
 (when (eq lightemacs-package-manager 'straight)
   (setq straight-recipe-overrides
@@ -1261,6 +1270,26 @@ This uses an around advice to trap errors and verify file timestamps."
             (straight
              :type git :host github
              :repo "jamescherti/straight.el"))))))
+
+(defun my-straight-list-unpinned-packages ()
+  "Find and display packages not present in straight's profile lockfiles."
+  (interactive)
+  (require 'subr-x)
+  (when (and (fboundp 'straight--lockfile-read-all)
+             (fboundp 'hash-table-keys))
+    (let* ((lockfile-repos (mapcar #'car (straight--lockfile-read-all)))
+           (active-packages (hash-table-keys straight--recipe-cache))
+           (unpinned-packages nil))
+      (dolist (package active-packages)
+        (let* ((recipe (gethash package straight--recipe-cache))
+               (local-repo (plist-get recipe :local-repo)))
+          (when (and local-repo
+                     (not (member local-repo lockfile-repos)))
+            (push package unpinned-packages))))
+      (if unpinned-packages
+          (message "Unpinned packages: %s"
+                   (mapconcat #'identity (sort unpinned-packages #'string-lessp) ", "))
+        (message "All local packages are accounted for in the profile lockfiles.")))))
 
 ;;; Add my packages to load path
 
