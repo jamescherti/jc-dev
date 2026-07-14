@@ -29,6 +29,7 @@
 set -euo pipefail
 
 MAX_WORKERS=6
+SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 update-repos() {
   # Go to script dir
