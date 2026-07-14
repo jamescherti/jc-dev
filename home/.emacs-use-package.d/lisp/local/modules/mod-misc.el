@@ -4283,35 +4283,35 @@ are editing by falling back to another visible file buffer."
 
 ;;; git gutter
 
-(lightemacs-use-package git-gutter
-  :commands (git-gutter-mode)
-
-  :init
-  (setq git-gutter:modified-sign " "
-        git-gutter:added-sign "+"
-        git-gutter:deleted-sign "-"
-        git-gutter:ask-p nil
-        git-gutter:diff-option "-w"
-        git-gutter:handled-backends '(git)
-        git-gutter:disabled-modes '(image-mode fundamental-mode pdf-view-mode)
-        git-gutter:hide-gutter nil
-        ;; git-gutter:visual-line t        ; Better for wrapped lines
-        git-gutter:update-interval 2
-        git-gutter:verbosity 0)
-
-  :config
-  (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
-  (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
-  (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
-
-
-  (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
-  (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
-
-(lightemacs-use-package git-gutter-fringe
-  :after git-gutter
-  :init
-  (setq git-gutter-fr:side 'left-fringe))
+;; (lightemacs-use-package git-gutter
+;;   :commands (git-gutter-mode)
+;;
+;;   :init
+;;   (setq git-gutter:modified-sign " "
+;;         git-gutter:added-sign "+"
+;;         git-gutter:deleted-sign "-"
+;;         git-gutter:ask-p nil
+;;         git-gutter:diff-option "-w"
+;;         git-gutter:handled-backends '(git)
+;;         git-gutter:disabled-modes '(image-mode fundamental-mode pdf-view-mode)
+;;         git-gutter:hide-gutter nil
+;;         ;; git-gutter:visual-line t        ; Better for wrapped lines
+;;         git-gutter:update-interval 2
+;;         git-gutter:verbosity 0)
+;;
+;;   :config
+;;   (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
+;;   (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
+;;   (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
+;;
+;;
+;;   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
+;;   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
+;;
+;; (lightemacs-use-package git-gutter-fringe
+;;   :after git-gutter
+;;   :init
+;;   (setq git-gutter-fr:side 'left-fringe))
 
 ;;; le-undo-fu
 
