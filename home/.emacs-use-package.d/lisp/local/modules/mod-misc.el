@@ -472,6 +472,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (when (display-graphic-p)
 ;;   (setq x-select-request-type
 ;; (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
 ;; This variable specifies a function for splitting a window, in order
 ;; to make a new window for displaying a buffer. It is used by the
@@ -4537,8 +4538,8 @@ properly handles remote files over Tramp), applying the setting only if
                  (not (and (bound-and-true-p diff-hl-disable-on-remote)
                            (file-remote-p expanded-file)))
                  (vc-backend expanded-file))
-        (git-gutter-mode 1)
-        ;; (diff-hl-mode 1)
+        ;; (git-gutter-mode 1)
+        (diff-hl-mode 1)
         ;; (diff-hl-flydiff-mode 1)
         ))))
 
