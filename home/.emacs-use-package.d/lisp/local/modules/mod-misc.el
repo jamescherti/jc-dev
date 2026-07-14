@@ -463,16 +463,10 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;   (setq locale-coding-system 'utf-8))
 
 ;; Treat clipboard input as UTF-8 string first, compound text next
+;; TODO: add it to minimal-emacs.d
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
 (setq next-error-message-highlight 'keep)
-
-;; Treat clipboard input as UTF-8 string first; compound text next, etc.
-;; TODO: add it to minimal-emacs.d
-;; (when (display-graphic-p)
-;;   (setq x-select-request-type
-;; (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
-(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
 ;; This variable specifies a function for splitting a window, in order
 ;; to make a new window for displaying a buffer. It is used by the
