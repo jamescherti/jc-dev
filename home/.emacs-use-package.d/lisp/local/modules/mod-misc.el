@@ -3252,15 +3252,13 @@ Opens a split window showing the added and removed features."
 (lightemacs-use-package ef-themes
   :no-require t)
 (lightemacs-use-package doom-themes
-  :no-require t)
+  :no-require t
+  :config
+  (doom-themes-org-config))
 (lightemacs-use-package tomorrow-night-deepblue-theme
   :no-require t)
 
 (when (fboundp 'lightemacs-theme-create-loader)
-
-  ;; (lightemacs-theme-create-loader "nano-light" 'nano-theme)
-  ;; (lightemacs-theme-create-loader "nano-dark" 'nano-theme)
-
   (lightemacs-theme-create-loader "modus-operandi" 'modus-themes)
   (lightemacs-theme-create-loader "modus-operandi-tinted" 'modus-themes)
   (lightemacs-theme-create-loader "modus-operandi-tritanopia" 'modus-themes)
@@ -3275,17 +3273,10 @@ Opens a split window showing the added and removed features."
   (lightemacs-theme-create-loader "tomorrow-night-deepblue"
                                   'tomorrow-night-deepblue-theme)
 
-  ;;(use-package tomorrow-night-deepblue-theme
-  ;;  :config
-  ;;  (lightemacs-theme-create-loader "tomorrow-night-deepblue"))
-
-  ;; Not as good as doom themes
   ;; (lightemacs-theme-create-loader "gruvbox-light-soft" 'gruvbox)
   ;; (lightemacs-theme-create-loader "gruvbox-light-medium" 'gruvbox)
   ;; (lightemacs-theme-create-loader "gruvbox-light-hard" 'gruvbox)
 
-  ;; (with-eval-after-load 'doom-themes
-  ;;   (doom-themes-org-config))
   (lightemacs-theme-create-loader "doom-gruvbox-light" 'doom-themes)
   (lightemacs-theme-create-loader "doom-one" 'doom-themes)
   (lightemacs-theme-create-loader "doom-1337" 'doom-themes)
@@ -3298,21 +3289,19 @@ Opens a split window showing the added and removed features."
   (lightemacs-theme-create-loader "doom-ayu-dark" 'doom-themes)
   (lightemacs-theme-create-loader "doom-acario-light" 'doom-themes)
 
-  ;;(require 'ef-themes)
   ;; Dark
-  ;;(lightemacs-theme-create-loader "ef-dark" "ef-themes")
   (lightemacs-theme-create-loader "ef-melissa-dark" 'ef-themes)
   (lightemacs-theme-create-loader "ef-symbiosis" 'ef-themes)
-  ;; ;; Yellow
+  ;; Yellow
   (lightemacs-theme-create-loader "ef-melissa-light" 'ef-themes)
   (lightemacs-theme-create-loader "ef-duo-light" 'ef-themes)
-  ;; ;; Blue
+  ;; Blue
   (lightemacs-theme-create-loader "ef-frost" 'ef-themes)
   (lightemacs-theme-create-loader "ef-light" 'ef-themes)
   (lightemacs-theme-create-loader "ef-maris-light" 'ef-themes)
-  ;; ;; Orange
+  ;; Orange
   (lightemacs-theme-create-loader "ef-day" 'ef-themes)
-  ;; ;; Green
+  ;; Green
   (lightemacs-theme-create-loader "ef-spring" 'ef-themes)
   (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
   (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes))
@@ -3329,7 +3318,6 @@ Opens a split window showing the added and removed features."
 ;;   ;; :hook
 ;;   ;; (add-hook 'lightemacs-after-init-hook #'golden-ratio-mode)
 ;;   )
-
 
 ;;; Focus
 
