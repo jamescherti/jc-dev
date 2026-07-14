@@ -44,7 +44,10 @@ main() {
 
   local should_run=0
 
-  if [[ -f "$lock_file" ]]; then
+  if ! [[ -f "$lock_file" ]]; then
+    # First time running: execute and create the file
+    should_run=1
+  else
     local current_time
     current_time=$(date +%s)
 
@@ -65,9 +68,6 @@ main() {
     else
       echo "[IGNORED] ${command[*]}"
     fi
-  else
-    # First time running: execute and create the file
-    should_run=1
   fi
 
   if [[ $should_run -ne 0 ]]; then
