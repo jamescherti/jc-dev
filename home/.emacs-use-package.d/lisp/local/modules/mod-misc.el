@@ -411,11 +411,17 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq dired-bind-info nil)
 (setq dired-bind-man nil)
 
+;; Execute the enclosed code only if Emacs is running in a graphical user
+;; interface.
 (when (display-graphic-p)
-  (set-display-table-slot standard-display-table 'vertical-border ?\u2502)
-  (set-display-table-slot standard-display-table 'truncation ?\u2192))
+  ;; Ensure the standard display table is initialized to prevent type errors.
+  (setq standard-display-table (or standard-display-table (make-display-table)))
 
-(setq save-silently t)
+  ;; Set the window divider to a solid Unicode vertical bar (│).
+  (set-display-table-slot standard-display-table 'vertical-border ?\u2502)
+
+  ;; Set the truncated line indicator to a Unicode rightwards arrow (→).
+  (set-display-table-slot standard-display-table 'truncation ?\u2192))
 
 ;; Automatically enable ANSI color support in compilation buffers
 ;; by parsing and applying ANSI escape sequences during output filtering.

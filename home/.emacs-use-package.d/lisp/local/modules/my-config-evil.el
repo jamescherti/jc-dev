@@ -530,10 +530,8 @@ ORIG-FUN is the function and ARGS the arguments."
   (advice-add 'evil-paste-after :around #'ignore-empty-ring-errors)
   (advice-add 'evil-paste-before :around #'ignore-empty-ring-errors))
 
-(if (fboundp 'buffer-guardian-save-buffer)
-    (evil-define-key '(normal insert visual) 'global (kbd "C-s")
-      'buffer-guardian-save-buffer)
-  (error "Undefined: buffer-guardian-save-buffer"))
+(evil-define-key '(normal insert visual) 'global (kbd "C-s")
+  'buffer-guardian-save-buffer)
 
 (defun evilclipboard-select-pasted ()
   "Visually select last pasted text."
