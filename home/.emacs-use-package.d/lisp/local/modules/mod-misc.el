@@ -411,6 +411,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq dired-bind-info nil)
 (setq dired-bind-man nil)
 
+;; TODO minimal-emacs.d README
 ;; Execute the enclosed code only if Emacs is running in a graphical user
 ;; interface.
 (when (display-graphic-p)
