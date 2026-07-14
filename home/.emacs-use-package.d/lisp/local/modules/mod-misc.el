@@ -3252,7 +3252,6 @@ Opens a split window showing the added and removed features."
 (lightemacs-use-package ef-themes
   :no-require t)
 (lightemacs-use-package doom-themes
-  :commands doom-themes-org-config
   :no-require t)
 (lightemacs-use-package tomorrow-night-deepblue-theme
   :no-require t)
