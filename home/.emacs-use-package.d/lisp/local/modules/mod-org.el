@@ -232,14 +232,13 @@ at the same level."
              (fboundp 'org-indent-mode))
     (org-indent-mode 1))
 
-  ;; (when (derived-mode-p 'org-mode)
-  ;;   ;; It makes o not auto indent after a bullet list like * or -
-  ;;   (setq-local evil-auto-indent nil)
-  ;;   ;; (setq-local indent-line-function nil)
-  ;;   ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
-  ;;   ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
-  ;;   ;; (custom-set-faces `(org-block-end-line ((t (:height 0.6 :extend t)))))
-  ;;   )
+  ;; It makes o not auto indent after a bullet list like * or -
+  (setq-local evil-auto-indent nil)
+
+  ;; (setq-local indent-line-function nil)
+  ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
+  ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
+  ;; (custom-set-faces `(org-block-end-line ((t (:height 0.6 :extend t)))))
   )
 
 (add-hook 'org-mode-hook #'my-org-mode-setup)

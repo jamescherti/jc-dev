@@ -33,13 +33,11 @@ SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 update-repos() {
   # Go to script dir
-  SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-  # shellcheck disable=SC2164
   cd "$SCRIPT_DIR"
 
   # Variables
   SRC_DIR="$HOME/src"
-  GIT_PULL_MY_REPO="$PWD/.bin/git-pull-my-repo"
+  GIT_PULL_MY_REPO="$SCRIPT_DIR/.bin/git-pull-my-repo"
 
   if ! [[ -f "$GIT_PULL_MY_REPO" ]]; then
     echo "Error: The script doesn't exist: $GIT_PULL_MY_REPO" >&2
@@ -281,27 +279,27 @@ config-startup-apps() {
 }
 
 main() {
-  install_python_deps
+  # install_python_deps
 
   update-repos
 
-  config-firefox
-  config-gnome
-  config-xfce
+  # config-firefox
+  # config-gnome
+  # config-xfce
 
-  config-startup-apps
+  # config-startup-apps
 
-  config-mimetypes
-  config-fonts
+  # config-mimetypes
+  # config-fonts
 
-  # TODO merge with install_python_deps?
-  config-pip-packages
+  # # TODO merge with install_python_deps?
+  # config-pip-packages
 
-  # Vim packages
-  (
-    cd ~/.vim_bundle/packpath/pack/git-plugins/start
-    batchfetch
-  )
+  # # Vim packages
+  # (
+  #   cd ~/.vim_bundle/packpath/pack/git-plugins/start
+  #   batchfetch
+  # )
 }
 
 main "$@"
