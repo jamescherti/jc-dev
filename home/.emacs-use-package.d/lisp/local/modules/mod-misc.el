@@ -3247,6 +3247,15 @@ Opens a split window showing the added and removed features."
 
 ;;; Themes config
 
+(lightemacs-use-package modus-themes
+  :no-require t)
+(lightemacs-use-package ef-themes
+  :no-require t)
+(lightemacs-use-package doom-themes
+  :no-require t)
+(lightemacs-use-package tomorrow-night-deepblue-theme
+  :no-require t)
+
 (when (fboundp 'lightemacs-theme-create-loader)
 
   ;; (lightemacs-theme-create-loader "nano-light" 'nano-theme)
