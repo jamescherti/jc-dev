@@ -73,9 +73,6 @@
 ;;   ;; TODO compile angel readme?
 ;;   (setq straight-disable-native-compile t)
 ;;   (setq straight-disable-compile t)
-;;
-;;   ;; Causes issues
-;;   ;; (setq straight-disable-autoloads t)
 ;;   )
 
 ;; native-comp-speed controls the Emacs Lisp frontend. It dictates how
@@ -364,26 +361,6 @@
                                    ;; are not actually used by the code.
                                    "-Wl,--as-needed"))
 
-;; Auto detect the CPU architecture
-;; Alternative: Just let
-;; (let ((cpu-architecture
-;;        (when (executable-find "gcc")
-;;          (with-temp-buffer
-;;            (let ((exit-code (call-process "gcc" nil t nil "-march=native"
-;;                                           "-Q" "--help=target")))
-;;              (when (zerop exit-code)
-;;                (goto-char (point-min))
-;;                (when (re-search-forward
-;;                       "^[[:space:]]*-march=[[:space:]]+\\([^[:space:]]+\\)" nil t)
-;;                  (match-string 1))))))))
-;;   (when cpu-architecture
-;;     (add-to-list 'native-comp-compiler-options
-;;                  (format "-march=%s" cpu-architecture))
-;;     (add-to-list 'native-comp-compiler-options
-;;                  (format "-mtune=%s" cpu-architecture))))
-
-;; (setq native-comp-driver-options (copy-sequence native-comp-compiler-options))
-
 ;; TODO minimal-emacs
 
 ;; Disable native compilation for dynamically generated files
@@ -456,27 +433,6 @@
         (setq native-comp-deferred-compilation-deny-list deny-list)
       (when (boundp 'comp-deferred-compilation-deny-list)
         (setq comp-deferred-compilation-deny-list deny-list)))))
-
-;; Removed:
-;; --------
-;; "\\(?:[/\\\\]gc\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
-;; "\\(?:[/\\\\]bind-key\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]cl-lib\\.el\\(?:\\.gz\\)?$\\)"  ; devemacs
-;; "\\(?:[/\\\\]bytecomp\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]use-package-ensure\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]use-package-delight\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]use-package-diminish\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]use-package-bind-key\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]use-package-core\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]easy-mmode\\.el\\(?:\\.gz\\)?$\\)"
-
-;; Emacs 30.2
-;; "\\(?:[/\\\\]ansi-color\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]comeint\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]cl-macs\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]cl-seq\\.el\\(?:\\.gz\\)?$\\)"
-;; "\\(?:[/\\\\]cl-extra\\.el\\(?:\\.gz\\)?$\\)"
-
 
 ;;; Package manager
 
@@ -1123,14 +1079,6 @@ This uses an around advice to trap errors and verify file timestamps."
        ;;                 :nonrecursive t
        ;;                 :build nil))
        ))
-
-;; Prevent straight.el from marking themes as unused when running garbage
-;; collection operations like M-x straight-remove-unused-repos, you need to
-;; register them with straight.el during your initialization sequence.
-(with-eval-after-load 'straight
-  (when (fboundp 'straight-register-package)
-    (dolist (theme '(doom-themes ef-themes tomorrow-night-deepblue-theme))
-      (straight-register-package theme))))
 
 (when (eq lightemacs-package-manager 'straight)
   (setq straight-recipe-overrides
