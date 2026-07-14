@@ -4,11 +4,14 @@
  ;; @jamescherti forks of maintained packages
  ("straight.el" . "77d59d395269b9a8d6854ea8b9eb0d9e43e97b37")
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
- ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO too ad RSS
- ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO too ad RSS
- ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf") ; TODO too ad RSS
- ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37") ; TODO too ad RSS
- ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO too ad RSS
+ ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO add to RSS
+ ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO add to RSS
+ ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf") ; TODO add to RSS
+ ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37") ; TODO add to RSS
+ ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO add to RSS
+
+ ;; TODO fork
+ ("git-gutter-fringe" . "648cb5b57faec55711803cdc9434e55a733c3eba") ; TODO add to RSS
 
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")

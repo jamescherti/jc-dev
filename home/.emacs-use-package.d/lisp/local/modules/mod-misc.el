@@ -4293,27 +4293,31 @@ are editing by falling back to another visible file buffer."
   :commands (git-gutter-mode)
 
   :init
-  (setq git-gutter:added-sign "|"
+  (setq git-gutter:modified-sign " "
+        git-gutter:added-sign "+"
         git-gutter:deleted-sign "-"
         git-gutter:ask-p nil
         git-gutter:diff-option "-w"
         git-gutter:handled-backends '(git)
-        git-gutter:disabled-modes '(image-mode fundamental-mode)
+        git-gutter:disabled-modes '(image-mode fundamental-mode pdf-view-mode)
         git-gutter:hide-gutter nil
-        git-gutter:modified-sign "="
         ;; git-gutter:visual-line t        ; Better for wrapped lines
-        git-gutter:update-interval 0
+        git-gutter:update-interval 2
         git-gutter:verbosity 0)
 
   :config
   (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
   (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
   (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
+
+
   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
 
-;; (lightemacs-use-package git-gutter-fringe
-;;   :after git-gutter)
+(lightemacs-use-package git-gutter-fringe
+  :after git-gutter
+  :init
+  (setq git-gutter-fr:side 'left-fringe))
 
 ;;; le-undo-fu
 
@@ -4534,8 +4538,8 @@ properly handles remote files over Tramp), applying the setting only if
                  (not (and (bound-and-true-p diff-hl-disable-on-remote)
                            (file-remote-p expanded-file)))
                  (vc-backend expanded-file))
-        ;; (git-gutter-mode 1)
-        (diff-hl-mode 1)
+        (git-gutter-mode 1)
+        ;; (diff-hl-mode 1)
         ;; (diff-hl-flydiff-mode 1)
         ))))
 

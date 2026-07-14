@@ -24,7 +24,7 @@ set -euo pipefail
 main() {
   # Ensure we have at least 3 arguments
   if [[ $# -lt 3 ]]; then
-    echo "Usage: run_every <seconds> <reference_file> <command...>" >&2
+    echo "Usage: run-every <seconds> <reference_file> <command...>" >&2
     return 1
   fi
 
@@ -42,7 +42,7 @@ main() {
   # Ensure the directory exists
   mkdir -p "$(dirname "$lock_file")"
 
-  local should_run=1
+  local should_run=0
 
   if [[ -f "$lock_file" ]]; then
     local current_time
@@ -50,8 +50,12 @@ main() {
 
     local last_run
 
-    # Support both GNU stat (-c) and BSD/macOS stat (-f) for better portability
-    last_run=$(stat -c %Y "$lock_file" 2>/dev/null || stat -f %m "$lock_file" 2>/dev/null)
+    # Detect if 'stat' is the GNU version or BSD/macOS version
+    if stat --version >/dev/null 2>&1; then
+      last_run=$(stat -c %Y "$lock_file")
+    else
+      last_run=$(stat -f %m "$lock_file")
+    fi
 
     local elapsed
     elapsed=$((current_time - last_run))
