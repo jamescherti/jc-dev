@@ -19,6 +19,8 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
+set -euo pipefail
+
 main() {
   # Ensure we have at least 3 arguments
   if [[ $# -lt 3 ]]; then
@@ -31,29 +33,44 @@ main() {
   shift 2
   local command=("$@")
 
+  # Validate that the interval is a positive integer
+  if ! [[ "$interval" =~ ^[0-9]+$ ]]; then
+    echo "Error: <seconds> must be a positive integer." >&2
+    return 1
+  fi
+
   # Ensure the directory exists
   mkdir -p "$(dirname "$lock_file")"
+
+  local should_run=false
 
   if [[ -f "$lock_file" ]]; then
     local current_time
     current_time=$(date +%s)
+
     local last_run
-    last_run=$(stat -c %Y "$lock_file")
+    # Support both GNU stat (-c) and BSD/macOS stat (-f) for better portability
+    last_run=$(stat -c %Y "$lock_file" 2>/dev/null || stat -f %m "$lock_file" 2>/dev/null)
+
     local elapsed
     elapsed=$((current_time - last_run))
 
     if [[ $elapsed -ge $interval ]]; then
-      "${command[@]}"
-      touch "$lock_file"
+      should_run=true
     else
-      echo "[IGNORED] $*"
+      echo "[IGNORED] ${command[*]}"
     fi
   else
     # First time running: execute and create the file
-    "${command[@]}"
-    touch "$lock_file"
+    should_run=true
   fi
 
+  if [[ "$should_run" == true ]]; then
+    # Touch the lock file before execution to prevent concurrent processes
+    # from initiating the same long-running command.
+    touch "$lock_file"
+    "${command[@]}"
+  fi
 }
 
 main "$@"

@@ -141,29 +141,30 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
         (setq-local my-buffer-enable-apheleia nil)
         (setq-local my-buffer-enable-flymake nil)
 
-        (cond
-         ((or (string= base-name "/make.conf") ; Gentoo
-              (string-suffix-p "/PKGBUILD" file-name)
-              (string-suffix-p ".ebuild" file-name))
-          nil)
+        (when file-name
+          (cond
+           ((and base-name
+                 (or (string= base-name "/make.conf") ; Gentoo
+                     (string-suffix-p "/PKGBUILD" file-name)
+                     (string-suffix-p ".ebuild" file-name)))
+            nil)
 
-         ((file-in-directory-p file-name "~/src/forks")
-          (setq-local my-buffer-enable-flymake t)
-          (setq-local config-buffer-enable-syntax-checkers t)
-          t)
+           ((file-in-directory-p file-name "~/src/forks")
+            (setq-local my-buffer-enable-flymake t)
+            (setq-local config-buffer-enable-syntax-checkers t)
+            t)
 
-         ((or (and file-name
-                   base-name
-                   ;; (not (string-match-p "cookiecutter" file-name))
-                   (file-in-directory-p file-name "~/src")
-                   (not (file-in-directory-p file-name "~/src/forks"))
-                   (not (file-in-directory-p file-name "~/src/local/emacs-worktrees"))
-                   (not (file-in-directory-p file-name "~/src/other"))
-                   (not (file-in-directory-p file-name tmpedit-dir))))
-          (setq-local my-buffer-enable-apheleia t)
-          (setq-local my-buffer-enable-flymake t)
-          (setq-local config-buffer-enable-syntax-checkers t)
-          t)))
+           ((or (and
+                 ;; (not (string-match-p "cookiecutter" file-name))
+                 (file-in-directory-p file-name "~/src")
+                 (not (file-in-directory-p file-name "~/src/forks"))
+                 (not (file-in-directory-p file-name "~/src/local/emacs-worktrees"))
+                 (not (file-in-directory-p file-name "~/src/other"))
+                 (not (file-in-directory-p file-name tmpedit-dir))))
+            (setq-local my-buffer-enable-apheleia t)
+            (setq-local my-buffer-enable-flymake t)
+            (setq-local config-buffer-enable-syntax-checkers t)
+            t))))
     (when (boundp 'config-buffer-enable-syntax-checkers)
       config-buffer-enable-syntax-checkers)))
 
