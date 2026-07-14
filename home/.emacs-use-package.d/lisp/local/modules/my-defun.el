@@ -138,25 +138,32 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
                           (buffer-file-name buffer)))
              (base-name (when file-name
                           (file-name-nondirectory file-name))))
-        (when (or (and file-name
-                       base-name
-                       ;; (not (string-match-p "cookiecutter" file-name))
-                       (file-in-directory-p file-name "~/src")
-                       (not (file-in-directory-p file-name "~/src/forks"))
-                       (not (file-in-directory-p file-name "~/src/local/emacs-worktrees"))
-                       (not (file-in-directory-p file-name "~/src/other"))
-                       (not (file-in-directory-p file-name tmpedit-dir))))
-          (setq-local config-buffer-enable-syntax-checkers t)
+        (setq-local my-buffer-enable-apheleia nil)
+        (setq-local my-buffer-enable-flymake nil)
 
-          (if (and (not (string= base-name "/make.conf")) ; Gentoo
-                   (not (string-suffix-p "/PKGBUILD" file-name))
-                   (not (string-suffix-p ".ebuild" file-name)))
-              (progn
-                (setq-local my-buffer-enable-apheleia t)
-                (setq-local my-buffer-enable-flymake t))
-            (setq-local my-buffer-enable-apheleia nil)
-            (setq-local my-buffer-enable-flymake nil))
-          t))
+        (cond
+         ((or (string= base-name "/make.conf") ; Gentoo
+              (string-suffix-p "/PKGBUILD" file-name)
+              (string-suffix-p ".ebuild" file-name))
+          nil)
+
+         ((file-in-directory-p file-name "~/src/forks")
+          (setq-local my-buffer-enable-flymake t)
+          (setq-local config-buffer-enable-syntax-checkers t)
+          t)
+
+         ((or (and file-name
+                   base-name
+                   ;; (not (string-match-p "cookiecutter" file-name))
+                   (file-in-directory-p file-name "~/src")
+                   (not (file-in-directory-p file-name "~/src/forks"))
+                   (not (file-in-directory-p file-name "~/src/local/emacs-worktrees"))
+                   (not (file-in-directory-p file-name "~/src/other"))
+                   (not (file-in-directory-p file-name tmpedit-dir))))
+          (setq-local my-buffer-enable-apheleia t)
+          (setq-local my-buffer-enable-flymake t)
+          (setq-local config-buffer-enable-syntax-checkers t)
+          t)))
     (when (boundp 'config-buffer-enable-syntax-checkers)
       config-buffer-enable-syntax-checkers)))
 

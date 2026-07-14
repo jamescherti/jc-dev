@@ -222,49 +222,6 @@ config-files() {
   fi
 }
 
-UPGRADE_PIP_PACKAGES=0
-
-enable-upgrade-pip-packages() {
-  # shellcheck disable=SC2317
-  UPGRADE_PIP_PACKAGES=1
-}
-
-run_every() {
-  # Ensure we have at least 3 arguments
-  if [[ $# -lt 3 ]]; then
-    echo "Usage: run_every <seconds> <reference_file> <command...>" >&2
-    return 1
-  fi
-
-  local interval="$1"
-  local lock_file="$2"
-  shift 2
-  local command=("$@")
-
-  # Ensure the directory exists
-  mkdir -p "$(dirname "$lock_file")"
-
-  if [[ -f "$lock_file" ]]; then
-    local current_time
-    current_time=$(date +%s)
-    local last_run
-    last_run=$(stat -c %Y "$lock_file")
-    local elapsed
-    elapsed=$((current_time - last_run))
-
-    if [[ $elapsed -ge $interval ]]; then
-      "${command[@]}"
-      touch "$lock_file"
-    else
-      echo "[IGNORED] $*"
-    fi
-  else
-    # First time running: execute and create the file
-    "${command[@]}"
-    touch "$lock_file"
-  fi
-}
-
 config_gpg() {
   chmod 700 "$HOME/.gnupg/"
   mkdir -p "$HOME/.ssh"

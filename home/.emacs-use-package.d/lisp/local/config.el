@@ -449,7 +449,8 @@
 
 (when (boundp 'trusted-content)
   (let ((dirs (list "~/src/dotfiles/jc-dev/"
-                    "~/src/emacs/")))
+                    "~/src/emacs/"
+                    "~/src/forks/")))
     (dolist (dir dirs)
       (when dir
         ;; Ensure the path ends with a slash so it registers as a directory

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# Describe: Install the jc-dev development environment
+#
 # Author: James Cherti
 # URL: https://github.com/jamescherti/jc-dev
 #
@@ -26,56 +28,38 @@
 # SOFTWARE.
 #
 
-set -euo pipefail
-
-MAX_WORKERS=6
-SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-
-update-repos() {
-  # Go to script dir
-  cd "$SCRIPT_DIR"
-
-  # Variables
-  SRC_DIR="$HOME/src"
-  GIT_PULL_MY_REPO="$SCRIPT_DIR/.bin/git-pull-my-repo"
-
-  if ! [[ -f "$GIT_PULL_MY_REPO" ]]; then
-    echo "Error: The script doesn't exist: $GIT_PULL_MY_REPO" >&2
-    exit 1
+run_every() {
+  # Ensure we have at least 3 arguments
+  if [[ $# -lt 3 ]]; then
+    echo "Usage: run_every <seconds> <reference_file> <command...>" >&2
+    return 1
   fi
 
-  if [[ -d "$SRC_DIR" ]]; then
-    # other than emacs projects
-    # git-rexec -C "$SRC_DIR" \
-    # --exclude ~/src/forks \
-    # --exclude ~/src/local \
-    #   --if-exec git-is-clean \
-    #   --parallel 'sh -c "git checkout-default && git pull --ff-only"'
+  local interval="$1"
+  local lock_file="$2"
+  shift 2
+  local command=("$@")
 
-    # cd "$SRC_DIR"
-    # batchfetch
+  # Ensure the directory exists
+  mkdir -p "$(dirname "$lock_file")"
 
-    echo "[INFO] git pull repos"
-    git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR" \
-      --exclude "$HOME/src/forks" \
-      --exclude "$HOME/src/local" \
-      --parallel \
-      --if-exec git-is-clean \
-      -- \
-      "$GIT_PULL_MY_REPO"
+  if [[ -f "$lock_file" ]]; then
+    local current_time
+    current_time=$(date +%s)
+    local last_run
+    last_run=$(stat -c %Y "$lock_file")
+    local elapsed
+    elapsed=$((current_time - last_run))
 
-    git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/emacs" \
-      --exclude "$HOME/src/forks" \
-      --exclude "$HOME/src/local" \
-      --parallel \
-      --if-exec git-is-clean \
-      -- \
-      sh -c "git checkout develop && git pull --rebase && git push"
+    if [[ $elapsed -ge $interval ]]; then
+      "${command[@]}"
+      touch "$lock_file"
+    else
+      echo "[IGNORED] $*"
+    fi
+  else
+    # First time running: execute and create the file
+    "${command[@]}"
+    touch "$lock_file"
   fi
 }
-
-main() {
-  update-repos
-}
-
-main "$@"

@@ -1129,8 +1129,8 @@ any new ones."
 
   ;; This fixes the skipping when scrolling long org documents
   ;; NOTE: MANAGED BY MINIMAL-EMACS
-  (setq scroll-conservatively most-positive-fixnum)
-  ;; (setq scroll-conservatively 20)
+  ;; (setq scroll-conservatively most-positive-fixnum)
+  (setq scroll-conservatively 20)
 
   (setq eldoc-idle-delay 0.5)
   (setq eldoc-echo-area-display-truncation-message nil)
@@ -2859,9 +2859,9 @@ This function is intended for use as :around advice."
   "Execute ORIG-FUN with ARGS only if it is allowed.
 This function is intended for use as :around advice."
   (when (and (fboundp 'my-code-checker-allowed-p)
-             (my-code-checker-allowed-p))
-    (when (bound-and-true-p my-buffer-enable-flymake)
-      (apply orig-fun args))))
+             (or (bound-and-true-p my-buffer-enable-flymake)
+                 (my-code-checker-allowed-p)))
+    (apply orig-fun args)))
 
 (defun my-apheleia-execution-only-when-code-checker-allowed (orig-fun &rest args)
   "Execute ORIG-FUN with ARGS only if it is allowed.
