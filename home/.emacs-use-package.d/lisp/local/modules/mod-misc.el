@@ -463,8 +463,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;   (setq locale-coding-system 'utf-8))
 
 ;; Treat clipboard input as UTF-8 string first, compound text next
-(when (display-graphic-p)
-  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
 (setq next-error-message-highlight 'keep)
 
