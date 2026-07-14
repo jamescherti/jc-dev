@@ -859,7 +859,7 @@ subsequent GCC invocations."
                            mod-eglot
                            smartindent
                            ;; mod-lsp-mode
-                           ;; point-manager
+                           point-manager
                            ;; battery-angel
 
                            le-easysession
