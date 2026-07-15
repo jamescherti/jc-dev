@@ -193,11 +193,12 @@
 ;; up new windows when upgrading Emacs packages. This works by temporarily
 ;; setting the internal vc-dispatcher variable 'vc--inhibit-async-window' to t
 ;; strictly during the execution of package upgrade commands.
+
+(defvar vc--inhibit-async-window)
 (defun my-inhibit-vc-async-window-around-advice (orig-fun &rest args)
   "Inhibit VC async windows during package upgrades.
 ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (let ((vc--inhibit-async-window t))
-    (ignore vc--inhibit-async-window)
     (apply orig-fun args)))
 
 ;; Apply the advice to the built-in package and package-vc upgrade commands.
@@ -3949,7 +3950,6 @@ The result is displayed in a pretty-printed temporary buffer."
 ;; TODO find a better way
 ;; (defvar-local auto-recover-prompted nil
 ;;   "Flag to prevent infinite recovery loops.")
-;;
 ;; (defun auto-recover-prompt-on-visit ()
 ;;   "Prompt to recover the auto-save file if it is newer."
 ;;   (remove-hook 'find-file-hook #'auto-recover-prompt-on-visit)
@@ -3968,7 +3968,6 @@ The result is displayed in a pretty-printed temporary buffer."
 ;;                (not revert-buffer-in-progress-p)
 ;;                (file-exists-p auto-save-file)
 ;;                (file-newer-than-file-p auto-save-file buffer-file-name))
-;;       (ignore find-file-hook)
 ;;       ;; Set the flag to true immediately so it cannot fire again for this
 ;;       ;; buffer
 ;;       (setq auto-recover-prompted t)
@@ -4663,18 +4662,18 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; pathaction
 
-;; (defun pathaction-vterm (command name)
-;;   "Run COMMAND in `vterm' named NAME."
-;;   (if (require 'vterm nil t)
-;;       (when (fboundp 'vterm)
-;;         (let* ((inhibit-redisplay t)
-;;                ;; Override the shell to run the command directly
-;;                (vterm-shell command)
-;;                (term-buffer (vterm name)))
-;;           (ignore vterm-shell)
-;;           (pop-to-buffer term-buffer)
-;;           term-buffer))
-;;     (error "vterm is not available")))
+(defvar vterm-shell)
+(defun pathaction-vterm (command name)
+  "Run COMMAND in `vterm' named NAME."
+  (if (require 'vterm nil t)
+      (when (fboundp 'vterm)
+        (let* ((inhibit-redisplay t)
+               ;; Override the shell to run the command directly
+               (vterm-shell command)
+               (term-buffer (vterm name)))
+          (pop-to-buffer term-buffer)
+          term-buffer))
+    (error "vterm is not available")))
 
 (with-eval-after-load 'pathaction
   (if (fboundp 'pathaction-vterm)

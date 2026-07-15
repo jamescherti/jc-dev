@@ -36,6 +36,8 @@
   (interactive)
   (message "%s" (frame-parameter nil 'font)))
 
+(defvar inhibit-interaction)
+
 (defun save-all-new-file-buffers ()
   "Save all file-visiting buffers whose files do not exist on disk.
 Prompts the operator for confirmation before creating directories and saving
@@ -60,7 +62,6 @@ each buffer."
                   (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
                         (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
                         (inhibit-interaction t))
-                    (ignore inhibit-interaction)
                     (condition-case err
                         (save-buffer)
                       (inhibited-interaction

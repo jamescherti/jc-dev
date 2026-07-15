@@ -22,11 +22,11 @@
  ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
  ("aggressive-indent-mode" . "a437a45868f94b77362c6b913c5ee8e67b273c42")
  ("ansible-doc" . "86083a7bb2ed0468ca64e52076b06441a2f8e9e0")
- ("dired-hacks" . "7f0aa2a0026cf9ebe57b198fe2b3b891e8e71e1f")
+ ("dired-hacks" . "ed656cfb8cc2cfccbcb7308bf2fcceb6dcb59252")
  ("easy-escape" . "938497a21e65ba6b3ff8ec90e93a6d0ab18dc9b4")
  ("edit-indirect" . "82a28d8a85277cfe453af464603ea330eae41c05")
- ("elisp-refs" . "af96e77545e0271b742a501ac75094059bbe55b6")
- ("evil-snipe" . "20567e1f900e77f5d8261370ee55e4ae69160bb0") ; RSS
+ ("elisp-refs" . "ad13c1253bde37f28230a9fd626043f5cd503e8c")
+ ("evil-snipe" . "0b5c99aa68c86e1478aa8d27e012a3231b903020") ; RSS
  ("f.el" . "931b6d0667fe03e7bf1c6c282d6d8d7006143c52")
  ("flymake-quickdef" . "ede37eeff72833202977dfb12b132960f6588cf0")
  ("gcmh" . "0089f9c3a6d4e9a310d0791cf6fa8f35642ecfd9")
@@ -34,7 +34,7 @@
  ("helpful" . "03756fa6ad4dcca5e0920622b1ee3f70abfc4e39")
  ("highlight-defined" . "f9f4b22d70799965f4c0e5b002dbd4e111c78abc")
  ("lua-mode" . "2f6b8d7a6317e42c953c5119b0119ddb337e0a5f")
- ("org-appear" . "32ee50f8fdfa449bbc235617549c1bccb503cb09")
+ ("org-appear" . "f5c1d9de986cbcd61fb46e8a84b47c6f6ec2936d")
  ("paredit" . "57c9f26c51e2e33ad70c45d2c393b1e458e95685")
  ("vimrc-mode" . "42c23497381d5f8a3417aa592c74370a181b820c")
 

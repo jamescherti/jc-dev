@@ -119,6 +119,9 @@
   :type '(repeat symbol)
   :group 'ediff)
 
+(defvar ediff-diff-options)
+(defvar ediff-ignore-similar-regions)
+
 (defun my-ediff-setup-whitespace-options (orig-fn &rest args)
   "Apply whitespace-ignoring Ediff settings for specific major modes.
 ORIG-FN is the original function, and ARGS are its arguments.
@@ -140,8 +143,6 @@ This wraps `ediff-setup' to configure the control buffer dynamically."
          cbuf)
     (let ((ediff-diff-options new-diff-opts)
           (ediff-ignore-similar-regions new-ignore-sim))
-      (ignore ediff-diff-options)
-      (ignore ediff-ignore-similar-regions)
       ;; Execute ediff-setup and capture the resulting control buffer
       (setq cbuf (apply orig-fn args)))
     (when (and is-safe-mode (bufferp cbuf) (buffer-live-p cbuf))
@@ -313,6 +314,8 @@ session ends."
   (with-no-warnings
     (add-hook 'text-scale-mode-hook #'mod-ediff--ediff-auto-text-scale 99 t)))
 
+(defvar text-scale-mode-hook)
+
 (defun mod-ediff--ediff-auto-text-scale (&rest _)
   "Synchronize text scale across all Ediff buffers based on the current buffer."
   (when (and (boundp 'text-scale-mode-hook)
@@ -330,7 +333,6 @@ session ends."
                 (let ((text-scale-mode-hook
                        (remove 'mod-ediff--ediff-auto-text-scale
                                text-scale-mode-hook)))
-                  (ignore text-scale-mode-hook)
                   (text-scale-set original-buf-text-scale-amount)))))
         ;; Session is dead or buffer detached: teardown hook
         (with-no-warnings
@@ -525,7 +527,6 @@ and suppresses all interactive confirmation prompts during teardown."
 ;;                   (let ((text-scale-mode-hook
 ;;                          (remove 'mod-ediff--ediff-auto-text-scale
 ;;                                  text-scale-mode-hook)))
-;;                     (ignore text-scale-mode-hook)
 ;;                     (text-scale-set original-buf-text-scale-amount))))))
 ;;         ;; Remove
 ;;         (with-no-warnings
