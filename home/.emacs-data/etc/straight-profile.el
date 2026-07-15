@@ -22,7 +22,7 @@
  ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
  ("aggressive-indent-mode" . "a437a45868f94b77362c6b913c5ee8e67b273c42")
  ("ansible-doc" . "86083a7bb2ed0468ca64e52076b06441a2f8e9e0")
- ("dired-hacks" . "6d1184ea48c2d1cb87fa5faf7712fb7755f279a6")
+ ("dired-hacks" . "7f0aa2a0026cf9ebe57b198fe2b3b891e8e71e1f")
  ("easy-escape" . "938497a21e65ba6b3ff8ec90e93a6d0ab18dc9b4")
  ("edit-indirect" . "82a28d8a85277cfe453af464603ea330eae41c05")
  ("elisp-refs" . "af96e77545e0271b742a501ac75094059bbe55b6")
