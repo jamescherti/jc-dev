@@ -25,7 +25,7 @@
  ("dired-hacks" . "6d1184ea48c2d1cb87fa5faf7712fb7755f279a6")
  ("easy-escape" . "938497a21e65ba6b3ff8ec90e93a6d0ab18dc9b4")
  ("edit-indirect" . "82a28d8a85277cfe453af464603ea330eae41c05")
- ("elisp-refs" . "541a064c3ce27867872cf708354a65d83baf2a6d")
+ ("elisp-refs" . "af96e77545e0271b742a501ac75094059bbe55b6")
  ("evil-snipe" . "20567e1f900e77f5d8261370ee55e4ae69160bb0") ; RSS
  ("f.el" . "931b6d0667fe03e7bf1c6c282d6d8d7006143c52")
  ("flymake-quickdef" . "ede37eeff72833202977dfb12b132960f6588cf0")
