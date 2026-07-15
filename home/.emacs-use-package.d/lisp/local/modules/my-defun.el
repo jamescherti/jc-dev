@@ -145,9 +145,10 @@ Returns: boolean: t if code checking is allowed, nil otherwise."
         (when file-name
           (cond
            ((and base-name
-                 (or (string= base-name "/make.conf") ; Gentoo
+                 (or (string= base-name "make.conf") ; Gentoo
                      (string-suffix-p "/PKGBUILD" file-name)
-                     (string-suffix-p ".ebuild" file-name)))
+                     (string-suffix-p ".ebuild" file-name)
+                     (string= base-name "straight-profile.el")))
             nil)
 
            ((file-in-directory-p file-name "~/src/forks")

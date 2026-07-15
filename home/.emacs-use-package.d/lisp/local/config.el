@@ -896,7 +896,7 @@ subsequent GCC invocations."
 (setq stripspace-normalize-indentation t)
 (setq stripspace-restore-column t)
 (setq stripspace-only-if-initially-clean t)
-(setq stripspace-use-virtual-overlay t)
+(setq stripspace-use-virtual-overlay nil)
 
 ;; If you want the lowest possible latency and do not care about system-level
 ;; Compose keys, or if you are willing to map them entirely within Emacs using
