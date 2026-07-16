@@ -80,6 +80,16 @@
 ;; Force the unimpaired mode off globally
 (setq lightemacs-evil-collection-inhibit-unimpaired-mode t)
 
+;; Minibuffer-nonselected-mode: This mode highlights the minibuffer contents
+;; using the minibuffer-nonselected face when an active minibuffer (such as a
+;; recursive prompt or a background process) remains active after focus has
+;; shifted to a different window.
+;;
+;; Utility: This feature is primarily intended for users who frequently utilize
+;; recursive minibuffers. If your workflow seldom involves recursive editing,
+;; the mode may offer limited benefit. If the visual feedback triggered by
+;; window switching causes distractions or conflicts with your chosen theme, it
+;; can be disabled safely without impacting core functionality.
 (when (bound-and-true-p minibuffer-nonselected-mode)
   (minibuffer-nonselected-mode -1))
 (setq-default minibuffer-nonselected-mode nil)
