@@ -722,6 +722,7 @@ subsequent GCC invocations."
 (setq lightemacs-aggressive-indent-target-hooks nil)
 (setq lightemacs-apheleia-target-hooks nil)
 (setq lightemacs-flymake-target-hooks nil)
+(setq lightemacs-package-lint-flymake-target-hooks nil)
 
 ;; (setq lightemacs-stripspace-target-hooks '(prog-mode-hook))
 ;; (setq lightemacs-aggressive-indent-target-hooks '(emacs-lisp-mode-hook))

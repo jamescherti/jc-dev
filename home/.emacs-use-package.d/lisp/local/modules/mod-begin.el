@@ -449,4 +449,8 @@ Opens a split window showing the added and removed features."
 
 (provide 'mod-begin)
 
+;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
+;; End:
+
 ;;; mod-begin.el ends here

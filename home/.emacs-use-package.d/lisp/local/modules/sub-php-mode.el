@@ -22,6 +22,8 @@
 
 ;;; Commentary:
 
+;; php-mode.
+
 ;;; Code:
 
 (eval-when-compile

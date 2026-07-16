@@ -312,4 +312,9 @@ Emacs session to prevent unnecessary disk I/O."
 ;;; Provide
 
 (provide 'mod-cleanup)
+
+;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
+;; End:
+
 ;;; mod-cleanup.el ends here

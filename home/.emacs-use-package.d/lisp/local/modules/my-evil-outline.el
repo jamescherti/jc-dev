@@ -204,4 +204,8 @@ ORIG-FUN is the function ARGS are the arguments."
 
 (provide 'my-evil-outline)
 
+;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
+;; End:
+
 ;;; my-evil-outline.el ends here

@@ -219,6 +219,7 @@ modes such as `jump-indent-mode' and `org-mode'."
 (provide 'kirigami-jump)
 
 ;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 

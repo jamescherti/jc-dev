@@ -3047,6 +3047,7 @@ Accepts any arguments so it can be used as advice or a hook."
 
 ;; Local variables:
 ;; byte-compile-warnings: (not lexical free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; my-config-evil.el ends here

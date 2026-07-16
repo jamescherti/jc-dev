@@ -941,6 +941,7 @@ WIDTH is the tab width."
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; my-defun.el ends here

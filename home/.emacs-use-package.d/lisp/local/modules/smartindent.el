@@ -256,6 +256,7 @@ If no suitable indent point is found and UNINDENTED-OK is nil, fall back to
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; smartindent.el ends here

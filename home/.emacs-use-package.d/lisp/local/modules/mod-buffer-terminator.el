@@ -503,6 +503,7 @@ By default, closing the last window in a tab does not close the tab."
 (provide 'mod-buffer-terminator)
 
 ;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
 ;; byte-compile-warnings: (not lexical free-vars)
 ;; End:
 

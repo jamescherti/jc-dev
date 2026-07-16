@@ -171,6 +171,7 @@ Calling it a second time takes you to history index 1 (the collect buffer)."
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; mod-same-window.el ends here

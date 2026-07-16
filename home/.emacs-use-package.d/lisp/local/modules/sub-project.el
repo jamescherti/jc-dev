@@ -411,6 +411,7 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 ;; Local variables:
 ;; byte-compile-warnings: (not lexical free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; sub-project.el ends here

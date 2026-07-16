@@ -509,25 +509,24 @@
 ;;(require 'le-cape)
 
 ;; https://github.com/minad/corfu/wiki#advanced-example-configuration-with-orderless
+(defun my/orderless-dispatch-flex-first (_pattern index _total)
+  "Dispatch flex first. INDEX is the index."
+  (and (eq index 0) 'orderless-flex))
+
+(defun my/lsp-mode-setup-completion ()
+  "Setup `lsp-mode' completion."
+  (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+        '(orderless))
+  ;; Optionally configure the first word as flex filtered.
+  (setq-local orderless-style-dispatchers
+              (list #'my/orderless-dispatch-flex-first))
+
+  ;; Optionally configure the cape-capf-buster.
+  (setq-local completion-at-point-functions
+              (list (cape-capf-buster 'lsp-completion-at-point))))
+
 (with-eval-after-load 'lsp-mode
   (setq lsp-completion-provider :none) ; We use Corfu
-
-  (defun my/orderless-dispatch-flex-first (_pattern index _total)
-    "Dispatch flex first. INDEX is the index."
-    (and (eq index 0) 'orderless-flex))
-
-  (defun my/lsp-mode-setup-completion ()
-    "Setup `lsp-mode' completion."
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))
-    ;; Optionally configure the first word as flex filtered.
-    (setq-local orderless-style-dispatchers
-                (list #'my/orderless-dispatch-flex-first))
-
-    ;; Optionally configure the cape-capf-buster.
-    (setq-local completion-at-point-functions
-                (list (cape-capf-buster 'lsp-completion-at-point))))
-
   (add-hook 'lsp-completion-mode-hook #'my/lsp-mode-setup-completion))
 
 ;; (use-package lsp-ui
@@ -560,6 +559,7 @@
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; mod-lsp-mode.el ends here

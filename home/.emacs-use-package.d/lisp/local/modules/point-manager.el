@@ -22,6 +22,7 @@
 
 ;;; Commentary:
 
+;; Point manager.
 
 ;;; Code:
 

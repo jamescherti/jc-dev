@@ -22,6 +22,8 @@
 
 ;;; Commentary:
 
+;; Lua mode.
+
 ;;; Code:
 
 (eval-when-compile

@@ -537,6 +537,7 @@ and suppresses all interactive confirmation prompts during teardown."
 (provide 'mod-ediff)
 
 ;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 

@@ -309,6 +309,7 @@ user to press a key before finishing execution."
 (provide 'mod-toggle-term)
 
 ;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 

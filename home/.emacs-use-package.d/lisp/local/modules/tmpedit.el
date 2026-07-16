@@ -145,4 +145,8 @@ The temporary file is placed in `tmpedit-dir' using `tmpedit-file-name'."
 
 (provide 'tmpedit)
 
+;; Local variables:
+;; env-allow-syntax-checker-package-lint: nil
+;; End:
+
 ;;; tmpedit.el ends here

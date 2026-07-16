@@ -468,6 +468,7 @@
 
 ;; Local variables:
 ;; byte-compile-warnings: (not lexical free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; mod-eglot.el ends here

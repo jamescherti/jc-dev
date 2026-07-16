@@ -5,6 +5,32 @@
 
 ;;; Code:
 
+;;; .my-dir-locals.el
+
+(require 'my-dir-locals)
+(my-dir-locals-mode 1)
+
+(require 'dir-locals-trigger)
+(dir-locals-trigger-mode 1)
+
+(dir-locals-trigger-defvar env-deny-all nil
+  "Deny all the allowed modes.")
+
+(dir-locals-trigger-defvar env-allow-syntax-checker-package-lint nil
+  "Allow the `package-lint' syntax checker.")
+
+(dir-locals-trigger-defvar env-allow-syntax-checkers nil
+  "Allow syntax checkers such as Flymake.")
+
+(dir-locals-trigger-defvar env-allow-language-servers nil
+  "Allow language server via dir-locals.")
+
+(dir-locals-trigger-defvar env-allow-whitespace-cleanup nil
+  "Allow deleting whitespace via dir-locals.")
+
+(dir-locals-trigger-defvar env-allow-reformatters nil
+  "Non-nil allows directory-local configuration of code reformatters.")
+
 ;;; Conditional code checker/reformatter
 
 (defun my-code-checker-get-buffer ()
@@ -70,28 +96,7 @@ This function is intended for use as :around advice."
 ;;   (setq dir-config-allowed-directories '("~/src"))
 ;;   (dir-config-mode 1))
 
-;;; .my-dir-locals.el
-
-(require 'my-dir-locals)
-(my-dir-locals-mode 1)
-
-(require 'dir-locals-trigger)
-(dir-locals-trigger-mode 1)
-
-(dir-locals-trigger-defvar env-deny-all nil
-  "Deny all the allowed modes.")
-
-(dir-locals-trigger-defvar env-allow-syntax-checkers nil
-  "Allow syntax checkers such as Flymake.")
-
-(dir-locals-trigger-defvar env-allow-language-servers nil
-  "Allow language server via dir-locals.")
-
-(dir-locals-trigger-defvar env-allow-whitespace-cleanup nil
-  "Allow deleting whitespace via dir-locals.")
-
-(dir-locals-trigger-defvar env-allow-reformatters nil
-  "Non-nil allows directory-local configuration of code reformatters.")
+;; Evaluate .my-dir-locals.el
 
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
@@ -109,6 +114,9 @@ This function is intended for use as :around advice."
 
     (let ((code-checker-ignore-p (my-code-checker-and-reformatter-ignore-p)))
       (unless code-checker-ignore-p
+        (when env-allow-syntax-checker-package-lint
+          (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
+
         (when (fboundp 'flymake-mode)
           (flymake-mode (bound-and-true-p env-allow-syntax-checkers))
           ;; (when (/= (bound-and-true-p flymake-mode)

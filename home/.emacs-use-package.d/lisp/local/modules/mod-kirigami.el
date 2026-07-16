@@ -444,6 +444,7 @@ If nil, this static line check is disabled."
 
 ;; Local variables:
 ;; byte-compile-warnings: (not free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; mod-kirigami.el ends here
