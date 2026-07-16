@@ -32,6 +32,107 @@
   (require 'lightemacs-use-package))
 (require 'my-defun)
 
+;;; Local modes instead of global ones
+
+(setq lightemacs-electric-pair-local-target-hooks nil)
+(setq lightemacs-electric-pair-global-target-hooks nil)
+(add-hook-text-editing-modes #'electric-pair-local-mode)
+
+(setq lightemacs-evil-snipe-local-target-hooks nil)
+(setq lightemacs-evil-snipe-global-target-hooks nil)
+(add-hook-text-editing-modes 'evil-snipe-local-mode)
+
+(setq lightemacs-evil-surround-local-target-hooks nil)
+(setq lightemacs-evil-surround-global-target-hooks nil)
+(add-hook-text-editing-modes 'evil-surround-mode)
+
+(setq lightemacs-corfu-local-target-hooks nil)
+(setq lightemacs-corfu-global-target-hooks nil)
+(add-hook-text-editing-modes 'corfu-mode)
+(add-hook 'minibuffer-setup-hook 'corfu-mode)
+
+(setq lightemacs-saveplace-target-hooks nil)
+(add-hook-text-editing-modes 'save-place-mode)
+
+;; Yasnippet
+(progn
+  (setq lightemacs-yasnippet-global-target-hooks nil)
+  (setq lightemacs-yasnippet-local-target-hooks nil)
+  (add-hook-text-editing-modes 'yas-minor-mode)
+
+  ;; TODO maybe change mode is better?
+  ;; This excludes for example ibuffer, terminal...
+  ;; (setq lightemacs-persist-text-scale-target-hooks nil)
+  ;; (add-hook-text-editing-modes 'persist-text-scale-mode)
+
+  (defun le-yasnippet-reload-if-empty ()
+    "Reload all YASnippet snippets only if they are not already loaded."
+    (when (and (fboundp 'yas-reload-all)
+               (not (and (boundp 'yas--tables)
+                         (hash-table-p yas--tables)
+                         (> (hash-table-count yas--tables) 0))))
+      (yas-reload-all)))
+
+  (add-hook 'lightemacs-after-init-hook 'le-yasnippet-reload-if-empty))
+
+;;; Default modes that I disabled
+
+;; Force the unimpaired mode off globally
+(setq lightemacs-evil-collection-inhibit-unimpaired-mode t)
+
+(when (bound-and-true-p minibuffer-nonselected-mode)
+  (minibuffer-nonselected-mode -1))
+(setq-default minibuffer-nonselected-mode nil)
+
+(when (bound-and-true-p global-eldoc-mode)
+  (global-eldoc-mode -1))
+(setq-default global-eldoc-mode nil)
+
+(when (bound-and-true-p show-paren-mode)
+  (show-paren-mode -1))
+(setq-default show-paren-mode nil)
+
+;; Disable Remote File Checks if Not Needed
+(setq-default tramp-mode nil)
+(when (bound-and-true-p windmove-mode)
+  (windmove-mode -1))
+(setq-default windmove-mode nil)
+
+;; GPM mouse support is strictly for TTY consoles.
+(when (bound-and-true-p gpm-mouse-mode)
+  (gpm-mouse-mode -1))
+(setq-default gpm-mouse-mode nil)
+
+;; Useless for Evil users: This mode modifies minibuffer syntax tables for regex
+;; navigation. Since Evil provides its own regex tools and operators that
+;; operate independently of these minibuffer-specific highlighting side-effects,
+;; this mode is redundant and can interfere with custom Evil keybindings.
+(when (bound-and-true-p minibuffer-regexp-mode)
+  (minibuffer-regexp-mode -1))
+(setq-default minibuffer-regexp-mode nil)
+
+;; In standard (vanilla) Emacs, you do not select text by shifting into a visual
+;; mode. Instead, you drop an anchor called the "mark" by pressing C-SPC, and
+;; then move your cursor. The text between the mark and your cursor becomes your
+;; active selection.
+;;
+;; By default, Emacs uses `transient-mark-mode' to highlight this selection
+;; visually, making it look like a standard modern text editor.
+;;
+;; If you use Evil (Vim bindings), this native highlighting gets in the way.
+;; Evil handles text selection through its own Visual states (v, V, C-v). If
+;; Emacs is also trying to highlight text in the background based on where your
+;; last mark was dropped, the two systems create conflicting visual noise.
+;;
+;; Disabling `transient-mark-mode' stops Emacs from painting the screen with
+;; highlights. Pressing C-SPC goes back to being a silent utility: it just drops
+;; an invisible location bookmark that you can jump back to later, while you
+;; leave all the actual visual text selection to Evil.
+(with-eval-after-load 'simple
+  (when (bound-and-true-p transient-mark-mode)
+    (transient-mark-mode -1))
+  (setq-default transient-mark-mode nil))
+
 ;;; Lazy loader
 
 (lightemacs-use-package lazy-loader
@@ -444,41 +545,6 @@ Opens a split window showing the added and removed features."
   (lightemacs-theme-create-loader "ef-spring" 'ef-themes)
   (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
   (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes))
-
-;;; Local modes instead of global ones
-
-(setq lightemacs-electric-pair-local-target-hooks nil)
-(setq lightemacs-electric-pair-global-target-hooks nil)
-(add-hook-text-editing-modes #'electric-pair-local-mode)
-
-(setq lightemacs-evil-snipe-local-target-hooks nil)
-(setq lightemacs-evil-snipe-global-target-hooks nil)
-(add-hook-text-editing-modes 'evil-snipe-local-mode)
-
-(setq lightemacs-evil-surround-local-target-hooks nil)
-(setq lightemacs-evil-surround-global-target-hooks nil)
-(add-hook-text-editing-modes 'evil-surround-mode)
-
-(setq lightemacs-corfu-local-target-hooks nil)
-(setq lightemacs-corfu-global-target-hooks nil)
-(add-hook-text-editing-modes 'corfu-mode)
-(add-hook 'minibuffer-setup-hook 'corfu-mode)
-
-;;; Default modes that I disabled
-
-;; (with-eval-after-load 'flymake
-;;   (remove-hook 'find-file-hook (function flymake-find-file-hook) t))
-
-(when (bound-and-true-p global-eldoc-mode)
-  (global-eldoc-mode -1))
-(setq-default global-eldoc-mode nil)
-
-(when (bound-and-true-p show-paren-mode)
-  (show-paren-mode -1))
-(setq-default show-paren-mode nil)
-
-;; Disable Remote File Checks if Not Needed
-(setq-default tramp-mode nil)
 
 ;;; Provide
 

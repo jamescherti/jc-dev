@@ -480,43 +480,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; (setq read-minibuffer-restore-windows t) ; Emacs 28
 
-;; GPM mouse support is strictly for TTY consoles.
-(with-eval-after-load 't-mouse
-  (when (bound-and-true-p gpm-mouse-mode)
-    (gpm-mouse-mode -1))
-  (setq-default gpm-mouse-mode nil))
-
-;; Useless for Evil users: This mode modifies minibuffer syntax tables for regex
-;; navigation. Since Evil provides its own regex tools and operators that
-;; operate independently of these minibuffer-specific highlighting side-effects,
-;; this mode is redundant and can interfere with custom Evil keybindings.
-(with-eval-after-load 'minibuffer
-  (when (bound-and-true-p minibuffer-regexp-mode)
-    (minibuffer-regexp-mode -1))
-  (setq-default minibuffer-regexp-mode nil))
-
-;; In standard (vanilla) Emacs, you do not select text by shifting into a visual
-;; mode. Instead, you drop an anchor called the "mark" by pressing C-SPC, and
-;; then move your cursor. The text between the mark and your cursor becomes your
-;; active selection.
-;;
-;; By default, Emacs uses `transient-mark-mode' to highlight this selection
-;; visually, making it look like a standard modern text editor.
-;;
-;; If you use Evil (Vim bindings), this native highlighting gets in the way.
-;; Evil handles text selection through its own Visual states (v, V, C-v). If
-;; Emacs is also trying to highlight text in the background based on where your
-;; last mark was dropped, the two systems create conflicting visual noise.
-;;
-;; Disabling `transient-mark-mode' stops Emacs from painting the screen with
-;; highlights. Pressing C-SPC goes back to being a silent utility: it just drops
-;; an invisible location bookmark that you can jump back to later, while you
-;; leave all the actual visual text selection to Evil.
-(setq-default transient-mark-mode nil)
-;; (with-eval-after-load 'simple
-;;   (when (bound-and-true-p transient-mark-mode)
-;;     (transient-mark-mode -1)))
-
 (setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
 
 ;; TODO is eager better?

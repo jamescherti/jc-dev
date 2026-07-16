@@ -835,7 +835,7 @@ subsequent GCC invocations."
                            le-recentf
                            le-savehist
                            le-saveplace
-                           le-winner
+                           ;; le-winner
                            le-elec-pair
 
                            ;; le-which-key

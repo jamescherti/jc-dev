@@ -479,10 +479,12 @@ CWD is the current working directory."
   (dolist (current-mode modes)
     (let ((hook (intern (concat (symbol-name current-mode) "-hook"))))
       (dolist (func functions)
-        (if (functionp func)  ; Check if func is a valid function
-            (add-hook hook func)
-          (message "Warning: `%s' is not a valid function, skipping..."
-                   (symbol-name func)))))))
+        (add-hook hook func)
+        ;; (if (functionp func)  ; Check if func is a valid function
+        ;;     (add-hook hook func)
+        ;;   (message "Warning: `%s' is not a valid function, skipping..."
+        ;;            (symbol-name func)))
+        ))))
 
 (defun add-hook-text-editing-modes (functions)
   "Add FUNCTIONS to hooks corresponding to `text-editing-modes`.
