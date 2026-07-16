@@ -717,7 +717,8 @@ subsequent GCC invocations."
 
 ;;; Lightemacs modules
 
-(setq lightemacs-modules '(mod-same-window
+(setq lightemacs-modules '(mod-begin
+                           mod-same-window
                            mod-dired
                            mod-flymake
                            mod-gc
