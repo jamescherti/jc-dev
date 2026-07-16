@@ -31,6 +31,7 @@
 (require 'lightemacs-module)
 (eval-and-compile
   (require 'lightemacs-use-package))
+(require 'my-defun)
 
 ;;; Code folding settings
 
@@ -143,7 +144,7 @@
              kirigami-close-folds-except-current
              kirigami-close-folds
              kirigami-global-mode)
-  :hook (lightemacs-after-init . kirigami-global-mode)
+  ;; :hook (lightemacs-after-init . kirigami-global-mode)
   :init
   (lightemacs-module-bind kirigami
     (global-set-key (kbd "C-c z o") 'kirigami-open-fold)
@@ -152,6 +153,8 @@
     (global-set-key (kbd "C-c z r") 'kirigami-open-folds)
     (global-set-key (kbd "C-c z O") 'kirigami-open-fold-rec)
     (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold))
+
+  (add-hook-text-editing-modes 'kirigami-mode)
 
   :config
   (require 'kirigami-jump)
