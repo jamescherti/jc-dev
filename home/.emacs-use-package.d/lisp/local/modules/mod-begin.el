@@ -459,6 +459,11 @@ Opens a split window showing the added and removed features."
 (setq lightemacs-evil-surround-global-target-hooks nil)
 (add-hook-text-editing-modes 'evil-surround-mode)
 
+(setq lightemacs-corfu-local-target-hooks nil)
+(setq lightemacs-corfu-global-target-hooks nil)
+(add-hook-text-editing-modes 'corfu-mode)
+(add-hook 'minibuffer-setup-hook 'corfu-mode)
+
 ;;; Default modes that I disabled
 
 ;; (with-eval-after-load 'flymake
