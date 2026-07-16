@@ -465,7 +465,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Treat clipboard input as UTF-8 string first, compound text next
 ;; TODO: add it to minimal-emacs.d
-(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
 (setq next-error-message-highlight 'keep)
 
