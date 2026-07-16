@@ -129,7 +129,7 @@
 
 (defun my-setup-eglot-mode ()
   "Setup `eglot-mode'."
-  (when (my-code-checker-allowed-p)
+  (when (bound-and-true-p env-allow-language-server)
     (eglot-ensure)
 
     ;; Apheleia takes care of this

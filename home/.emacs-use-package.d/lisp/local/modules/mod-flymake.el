@@ -25,54 +25,29 @@
 ;; Suppress the display of Flymake error counters when there are no errors.
 (setq flymake-suppress-zero-counters t)
 
-;;; Flymake
-
-(defun mod-flymake--limit-package-lint-flymake-setup-a (orig-fn &rest args)
-  "Limit package lint flymake setup.
-ORIG-FN and ARGS is the functions and its arguments."
-  ;;(setq-local package-lint-main-file
-  ;;            (file-name-nondirectory
-  ;;             (buffer-file-name (buffer-base-buffer))))
-  (when (my-code-checker-allowed-p)
-    (let* ((filename (buffer-file-name (buffer-base-buffer)))
-           (basename (if filename (file-name-nondirectory filename) "")))
-      (when (and filename
-                 (not (string-match-p "/lisp/local/" filename))
-                 (not (string= basename ".dir-locals.el"))
-                 (not (string= basename ".dir-config.el"))
-                 (not (string= basename ".dir-settings.el"))
-                 (not (string= basename "init.el"))
-                 (not (string= basename "early-init.el"))
-                 (not (string-prefix-p "le-" basename)))
-        (apply orig-fn args)))))
-
-(with-eval-after-load 'le-package-lint-flymake
-  (advice-add 'package-lint-flymake-setup :around
-              #'mod-flymake--limit-package-lint-flymake-setup-a))
-
 ;; ignore pckage lint: The word "emacs" is redundant in Emacs package names.
 
-(defun mod-flymake--package-lint-ignore (orig-fun desc)
-  "Bypass the \"emacs\" name check for files in a specific directory.
-ORIG-FUN is the advised function.  DESC is the package description struct."
-  (let ((target-dir (expand-file-name "~/src/emacs/lightemacs"))
-        (file-name (buffer-file-name (buffer-base-buffer))))
-    (when file-name
-      (if (and (buffer-file-name (buffer-base-buffer))
-               (buffer-file-name (buffer-base-buffer))
-               (file-in-directory-p file-name target-dir))
-          ;; Condition met: return nil to skip the original function
-          nil
-        ;; Condition not met: execute the original function
-        (funcall orig-fun desc)))))
-
-(with-eval-after-load 'package-lint
-  ;; Apply the :around advice to the specific package-lint function
-  (advice-add 'package-lint--check-package-summary :around
-              #'mod-flymake--package-lint-ignore)
-
-  (advice-add 'package-lint--check-no-emacs-in-package-name :around
-              #'mod-flymake--package-lint-ignore))
+;; (defun mod-flymake--package-lint-ignore (orig-fun desc)
+;;   "Bypass the \"emacs\" name check for files in a specific directory.
+;; ORIG-FUN is the advised function.  DESC is the package description struct."
+;;   (let ((target-dir (expand-file-name "~/src/emacs/lightemacs"))
+;;         (file-name (buffer-file-name (buffer-base-buffer))))
+;;     (when file-name
+;;       (if (and (buffer-file-name (buffer-base-buffer))
+;;                (buffer-file-name (buffer-base-buffer))
+;;                (file-in-directory-p file-name target-dir))
+;;           ;; Condition met: return nil to skip the original function
+;;           nil
+;;         ;; Condition not met: execute the original function
+;;         (funcall orig-fun desc)))))
+;;
+;; (with-eval-after-load 'package-lint
+;;   ;; Apply the :around advice to the specific package-lint function
+;;   (advice-add 'package-lint--check-package-summary :around
+;;               #'mod-flymake--package-lint-ignore)
+;;
+;;   (advice-add 'package-lint--check-no-emacs-in-package-name :around
+;;               #'mod-flymake--package-lint-ignore))
 
 ;;; Flymake ansible-lint
 
@@ -130,7 +105,7 @@ ORIG-FUN is the advised function.  DESC is the package description struct."
   (setq flymake-bashate-ignore "E003,E001")
 
   (defun my-setup-flymake-bashate ()
-    (when (my-code-checker-allowed-p)
+    (when (bound-and-true-p env-allow-syntax-checker)
       (flymake-bashate-setup)))
 
   (add-hook 'bash-ts-mode-hook 'my-setup-flymake-bashate)

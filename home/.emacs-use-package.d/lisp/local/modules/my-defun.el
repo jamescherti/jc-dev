@@ -115,61 +115,6 @@ directory is not open yet, open it in the current window."
       (when (and buffer (not (my-tab-bar-switch-to-buffer buffer)))
         (set-window-buffer nil buffer)))))
 
-(defun my-code-checker-allowed-p (&optional file-name)
-  "Return t if code checking is allowed for current buffer or specified file.
-
-If FILE-NAME is provided and non-nil, use it as the filename. Otherwise, use the
-buffer's associated file name.
-
-Returns: boolean: t if code checking is allowed, nil otherwise."
-  (if (not (boundp 'config-buffer-enable-syntax-checkers))
-      (let* ((buffer (or (and (fboundp 'org-src-edit-buffer-p)
-                              (fboundp 'org-src-source-buffer)
-                              (org-src-edit-buffer-p)
-                              (when-let* ((new-buffer (org-src-source-buffer)))
-                                (when (buffer-live-p new-buffer)
-                                  (with-current-buffer new-buffer
-                                    (current-buffer)))))
-                         ;; TODO
-                         ;; (bound-and-true-p edit-indirect--overlay)
-                         (buffer-base-buffer)
-                         (current-buffer)))
-             (file-name (if file-name
-                            file-name
-                          (buffer-file-name buffer)))
-             (base-name (when file-name
-                          (file-name-nondirectory file-name))))
-        (setq-local my-buffer-enable-apheleia nil)
-        (setq-local my-buffer-enable-flymake nil)
-
-        (when file-name
-          (cond
-           ((and base-name
-                 (or (string= base-name "make.conf") ; Gentoo
-                     (string-suffix-p "/PKGBUILD" file-name)
-                     (string-suffix-p ".ebuild" file-name)
-                     (string= base-name "straight-profile.el")))
-            nil)
-
-           ((file-in-directory-p file-name "~/src/forks")
-            (setq-local my-buffer-enable-flymake t)
-            (setq-local config-buffer-enable-syntax-checkers t)
-            t)
-
-           ((or (and
-                 ;; (not (string-match-p "cookiecutter" file-name))
-                 (file-in-directory-p file-name "~/src")
-                 (not (file-in-directory-p file-name "~/src/forks"))
-                 (not (file-in-directory-p file-name "~/src/local/emacs-worktrees"))
-                 (not (file-in-directory-p file-name "~/src/other"))
-                 (not (file-in-directory-p file-name tmpedit-dir))))
-            (setq-local my-buffer-enable-apheleia t)
-            (setq-local my-buffer-enable-flymake t)
-            (setq-local config-buffer-enable-syntax-checkers t)
-            t))))
-    (when (boundp 'config-buffer-enable-syntax-checkers)
-      config-buffer-enable-syntax-checkers)))
-
 (defun my-disable-fringe-truncation-arrow ()
   "Disable the truncation arrow."
   (unless (boundp 'fringe-indicator-alist)

@@ -61,7 +61,7 @@
   (defun my-setup-lsp-mode ()
     "Setup `lsp-mode'."
     (when (and (fboundp 'lsp-deferred)
-               (my-code-checker-allowed-p))
+               (bound-and-true-p env-allow-language-server))
       (lsp-deferred)
       (unless noninteractive
         (setq-local evil-lookup-func #'evil-lookup-lsp))))

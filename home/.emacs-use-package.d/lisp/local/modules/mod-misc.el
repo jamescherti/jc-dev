@@ -676,19 +676,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Enable automatic buffer refresh when VC-controlled files change externally.
 ;; (setq auto-revert-check-vc-info t)
 
-;;; Default modes that I disabled
-
-(when (bound-and-true-p global-eldoc-mode)
-  (global-eldoc-mode -1))
-(setq-default global-eldoc-mode nil)
-
-(when (bound-and-true-p show-paren-mode)
-  (show-paren-mode -1))
-(setq-default show-paren-mode nil)
-
-;; Disable Remote File Checks if Not Needed
-(setq-default tramp-mode nil)
-
 ;;; Disabled defaults
 
 ;; Truncate the compilation buffer to avoid excessive memory use by limiting its
@@ -2804,51 +2791,6 @@ visibility when navigation commands are executed."
               'lightemacs-default-settings--recenter-maybe 70)
     (when xref-pulse-originally-present
       (add-hook 'xref-after-jump-hook 'xref-pulse-momentarily 71))))
-
-;;; Target hooks
-
-;; (defun my-prevent-execution-only-when-code-checker-allowed (orig-fun &rest args)
-;;   "Execute ORIG-FUN with ARGS only if it is allowed.
-;; This function is intended for use as :around advice."
-;;   (when (and (fboundp 'my-code-checker-allowed-p)
-;;              (my-code-checker-allowed-p))
-;;     (apply orig-fun args)))
-;;
-;; (defun my-flymake-execution-only-when-code-checker-allowed (orig-fun &rest args)
-;;   "Execute ORIG-FUN with ARGS only if it is allowed.
-;; This function is intended for use as :around advice."
-;;   (when (and (fboundp 'my-code-checker-allowed-p)
-;;              (or (bound-and-true-p my-buffer-enable-flymake)
-;;                  (my-code-checker-allowed-p)))
-;;     (apply orig-fun args)))
-;;
-;; (defun my-apheleia-execution-only-when-code-checker-allowed (orig-fun &rest args)
-;;   "Execute ORIG-FUN with ARGS only if it is allowed.
-;; This function is intended for use as :around advice."
-;;   (when (and (fboundp 'my-code-checker-allowed-p)
-;;              (my-code-checker-allowed-p))
-;;     (when (bound-and-true-p my-buffer-enable-apheleia)
-;;       (apply orig-fun args))))
-;;
-;; (with-eval-after-load 'le-aggressive-indent
-;;   (advice-add 'aggressive-indent-mode :around
-;;               #'my-prevent-execution-only-when-code-checker-allowed))
-;;
-;; (with-eval-after-load 'le-stripspace
-;;   (advice-add 'stripspace-local-mode :around
-;;               #'my-prevent-execution-only-when-code-checker-allowed))
-;;
-;; (with-eval-after-load 'le-flymake-ansible-lint
-;;   (advice-add 'flymake-ansible-lint-setup :around
-;;               #'my-prevent-execution-only-when-code-checker-allowed))
-;;
-;; (with-eval-after-load 'le-apheleia
-;;   (advice-add 'apheleia-mode :around
-;;               #'my-apheleia-execution-only-when-code-checker-allowed))
-;;
-;; (with-eval-after-load 'le-flymake
-;;   (advice-add 'flymake-mode :around
-;;               #'my-flymake-execution-only-when-code-checker-allowed))
 
 ;;; Golden-ratio
 
