@@ -445,13 +445,35 @@ Opens a split window showing the added and removed features."
   (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
   (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes))
 
-
 ;;; Local modes instead of global ones
 
 (setq lightemacs-electric-pair-local-target-hooks nil)
 (setq lightemacs-electric-pair-global-target-hooks nil)
-
 (add-hook-text-editing-modes #'electric-pair-local-mode)
+
+(setq lightemacs-evil-snipe-local-target-hooks nil)
+(setq lightemacs-evil-snipe-global-target-hooks nil)
+(add-hook-text-editing-modes 'evil-snipe-local-mode)
+
+(setq lightemacs-evil-surround-local-target-hooks nil)
+(setq lightemacs-evil-surround-global-target-hooks nil)
+(add-hook-text-editing-modes 'evil-surround-mode)
+
+;;; Default modes that I disabled
+
+;; (with-eval-after-load 'flymake
+;;   (remove-hook 'find-file-hook (function flymake-find-file-hook) t))
+
+(when (bound-and-true-p global-eldoc-mode)
+  (global-eldoc-mode -1))
+(setq-default global-eldoc-mode nil)
+
+(when (bound-and-true-p show-paren-mode)
+  (show-paren-mode -1))
+(setq-default show-paren-mode nil)
+
+;; Disable Remote File Checks if Not Needed
+(setq-default tramp-mode nil)
 
 ;;; Provide
 

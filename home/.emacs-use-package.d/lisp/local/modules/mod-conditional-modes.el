@@ -131,22 +131,6 @@ This function is intended for use as :around advice."
 ;; Attach your logic to the trigger hook
 (add-hook 'dir-locals-trigger-hook #'my-evaluate-dir-locals)
 
-;;; Default modes that I disabled
-
-;; (with-eval-after-load 'flymake
-;;   (remove-hook 'find-file-hook (function flymake-find-file-hook) t))
-
-(when (bound-and-true-p global-eldoc-mode)
-  (global-eldoc-mode -1))
-(setq-default global-eldoc-mode nil)
-
-(when (bound-and-true-p show-paren-mode)
-  (show-paren-mode -1))
-(setq-default show-paren-mode nil)
-
-;; Disable Remote File Checks if Not Needed
-(setq-default tramp-mode nil)
-
 ;;; Provide
 
 (provide 'mod-conditional-modes)

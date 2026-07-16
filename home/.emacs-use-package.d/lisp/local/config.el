@@ -751,8 +751,6 @@ subsequent GCC invocations."
 ;;         ;; markdown-mode-hook
 ;;         ))
 
-
-
 ;;; Lightemacs modules
 
 (setq lightemacs-modules '(mod-conditional-modes
