@@ -445,11 +445,20 @@ Opens a split window showing the added and removed features."
   (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
   (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes))
 
+
+;;; Local modes instead of global ones
+
+(setq lightemacs-electric-pair-local-target-hooks nil)
+(setq lightemacs-electric-pair-global-target-hooks nil)
+
+(add-hook-text-editing-modes #'electric-pair-local-mode)
+
 ;;; Provide
 
 (provide 'mod-begin)
 
 ;; Local variables:
+;; byte-compile-warnings: (not free-vars)
 ;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
