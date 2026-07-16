@@ -32,9 +32,9 @@
   :ensure nil
   :commands reformatter-indent-on-save-mode
   :init
-  (defun my-setup-reformatter-indent ()
-    (when (my-code-checker-allowed-p)
-      (reformatter-indent-on-save-mode)))
+  ;; (defun my-setup-reformatter-indent ()
+  ;;   (when (my-code-checker-allowed-p)
+  ;;     (reformatter-indent-on-save-mode)))
 
   (when (fboundp 'my-setup-reformatter-indent)
     (add-hook 'emacs-lisp-mode-hook #'my-setup-reformatter-indent)))
@@ -45,16 +45,17 @@
   :commands shfmt-on-save-mode
 
   :preface
-  (defun my-setup-shfmt ()
-    (when (my-code-checker-allowed-p)
-      (shfmt-on-save-mode)))
+  ;; (defun my-setup-shfmt ()
+  ;;   (when (my-code-checker-allowed-p)
+  ;;     (shfmt-on-save-mode)))
 
-  :init
+  :custom
   (setq shfmt-arguments "--binary-next-line")
   (setq shfmt-respect-sh-basic-offset t)
 
-  (add-hook 'sh-mode-hook #'my-setup-shfmt)
-  (add-hook 'bash-ts-mode-hook #'my-setup-shfmt))
+  ;; (add-hook 'sh-mode-hook #'my-setup-shfmt)
+  ;; (add-hook 'bash-ts-mode-hook #'my-setup-shfmt)
+  )
 
 ;; (use-package reformatter-shfmt
 ;;   :ensure nil
@@ -70,4 +71,5 @@
 ;;     (add-hook 'bash-ts-mode-hook #'my-setup-reformatter-shfmt)))
 
 (provide 'pkg-reformatter)
+
 ;;; pkg-reformatter.el ends here

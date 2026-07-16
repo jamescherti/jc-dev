@@ -941,39 +941,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq lightemacs-buffer-terminator-target-hooks '())
 
-;; Managed dynamically
-(setq lightemacs-stripspace-target-hooks nil)
-(setq lightemacs-aggressive-indent-target-hooks nil)
-(setq lightemacs-apheleia-target-hooks nil)
-(setq lightemacs-flymake-target-hooks nil)
-
-;; (setq lightemacs-stripspace-target-hooks '(prog-mode-hook))
-;; (setq lightemacs-aggressive-indent-target-hooks '(emacs-lisp-mode-hook))
-;; (setq lightemacs-apheleia-target-hooks '(python-mode-hook
-;;                                          python-ts-mode-hook
-;;
-;;                                          sh-mode-hook
-;;                                          bash-ts-mode-hook
-;;
-;;                                          emacs-lisp-mode-hook))
-;; (setq lightemacs-flymake-target-hooks
-;;       '(;; text-mode: Exceptions Configuration and Markup)
-;;         python-mode-hook
-;;         python-ts-mode-hook
-;;
-;;         sh-mode-hook
-;;         bash-ts-mode-hook
-;;
-;;         emacs-lisp-mode-hook
-;;
-;;         ansible-mode-hook
-;;         yaml-ts-mode-hook
-;;         yaml-mode-hook
-;;         ;; toml-ts-mode-hook
-;;         ;; conf-toml-mode-hook
-;;         ;; markdown-mode-hook
-;;         ))
-
 ;;; Packages: use-package
 
 ;; (defun my-package-pin (package repository)

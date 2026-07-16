@@ -22,11 +22,14 @@
 
 ;;; Commentary:
 
+;; mod-begin
 
 ;;; Code:
 
 ;;; Require
 
+(eval-and-compile
+  (require 'lightemacs-use-package))
 (require 'my-defun)
 
 ;;; dir-config
@@ -37,7 +40,34 @@
 ;;   (setq dir-config-allowed-directories '("~/src"))
 ;;   (dir-config-mode 1))
 
-;;; dir-locals-trigger
+;;; Conditional code checker/reformatter
+
+(defun my-code-checker-get-buffer ()
+  "Docstring."
+  (or (and (fboundp 'org-src-edit-buffer-p)
+           (fboundp 'org-src-source-buffer)
+           (org-src-edit-buffer-p)
+           (when-let* ((new-buffer (org-src-source-buffer)))
+             (when (buffer-live-p new-buffer)
+               (with-current-buffer new-buffer
+                 (current-buffer)))))
+      ;; TODO
+      ;; (bound-and-true-p edit-indirect--overlay)
+      (buffer-base-buffer)
+      (current-buffer)))
+
+(defun my-code-checker-and-reformatter-ignore-p ()
+  "Files where modes like Flymake and Apheleia are disabled."
+  (let* ((buffer (my-code-checker-get-buffer))
+         (file-name (buffer-file-name buffer))
+         (base-name (when file-name
+                      (file-name-nondirectory file-name))))
+    (or (string= base-name "make.conf") ; Gentoo
+        (string-suffix-p "/PKGBUILD" file-name)
+        (string-suffix-p ".ebuild" file-name)
+        (string= base-name "straight-profile.el"))))
+
+;;; .my-dir-locals.el
 
 (require 'my-dir-locals)
 (my-dir-locals-mode 1)
@@ -46,20 +76,25 @@
 (dir-locals-trigger-mode 1)
 
 ;; Mark your variables as safe so Emacs does not prompt you
-(defvar enable-syntax-checker nil)
-(dir-locals-trigger-mark-safe 'enable-syntax-checker)
+(defvar env-allow-syntax-checker nil)
+(dir-locals-trigger-mark-safe 'env-allow-syntax-checker)
 
-(defvar enable-deleting-whitespace nil)
-(dir-locals-trigger-mark-safe 'enable-deleting-whitespace)
+(defvar env-allow-deleting-whitespace nil)
+(dir-locals-trigger-mark-safe 'env-allow-deleting-whitespace)
 
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
   "Manually check variables and enable modes."
-  (when (and (bound-and-true-p enable-syntax-checker)
-             (fboundp 'flymake-mode))
-    (flymake-mode 1))
+  (let ((code-checker-ignore-p (my-code-checker-and-reformatter-ignore-p)))
+    (unless code-checker-ignore-p
+      (when (fboundp 'flymake-mode)
+        (flymake-mode (bound-and-true-p env-allow-syntax-checker))
+        ;; (when (/= (bound-and-true-p flymake-mode)
+        ;;           (bound-and-true-p env-allow-syntax-checker))
+        ;;   (flymake-mode (bound-and-true-p env-allow-syntax-checker)))
+        )))
 
-  (when (and (bound-and-true-p enable-deleting-whitespace)
+  (when (and (bound-and-true-p env-allow-deleting-whitespace)
              (fboundp 'stripspace-local-mode))
     (stripspace-local-mode 1)))
 

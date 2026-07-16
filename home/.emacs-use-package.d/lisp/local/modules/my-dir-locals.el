@@ -34,48 +34,40 @@ Files later in the list take precedence when merging variables."
 
 (defun my-dir-locals-get-variables ()
   "Read custom dir-locals and return them.
-This function hooks into `hack-dir-local-get-variables-functions'.
-It reads the custom files, merges them using native collection functions,
-and returns the variables applicable to the current buffer."
+This function hooks into `hack-dir-local-get-variables-functions'. It reads the
+custom files, merges them using native collection functions, and returns the
+variables applicable to the current buffer."
   (when-let* ((dir (my-dir-locals--find-root))
-              (dir-name (file-name-as-directory (expand-file-name dir)))
-              (variables nil))
-
-    ;; Iterate through the list of custom files
-    (dolist (file my-dir-locals-files)
-      (let ((full-path (expand-file-name file dir-name)))
-        (when (file-readable-p full-path)
-          (with-temp-buffer
-            (insert-file-contents full-path)
-            (let* ((parsed (condition-case nil
-                               ;; Read-circle is nil to prevent circular data
-                               ;; issues
-                               (let ((read-circle nil))
-                                 (read (current-buffer)))
-                             (error nil)))
-                   (class-alist (if (listp parsed) parsed nil)))
-
-              ;; dir-locals-collect-variables handles the major-mode
-              ;; inheritance. Passing variables iteratively merges the new
-              ;; definitions with the existing ones, giving later files
-              ;; precedence.
-              (setq variables (dir-locals-collect-variables
-                               class-alist dir-name variables)))))))
-
-    ;; Return the cons cell expected by hack-dir-local-get-variables-functions
-    (when variables
-      (cons dir-name variables))))
+              (dir-name (file-name-as-directory (expand-file-name dir))))
+    (let ((variables nil)
+          (original-buffer (current-buffer)))
+      (dolist (file my-dir-locals-files)
+        (let ((full-path (expand-file-name file dir-name)))
+          (when (file-readable-p full-path)
+            (let ((class-alist
+                   (with-temp-buffer
+                     (insert-file-contents full-path)
+                     (condition-case nil
+                         (let ((read-circle nil))
+                           (read (current-buffer)))
+                       (error nil)))))
+              (when (listp class-alist)
+                ;; dir-locals-collect-variables handles the major-mode inheritance.
+                ;; It must be executed in the original buffer so derived-mode-p works.
+                (with-current-buffer original-buffer
+                  (setq variables (dir-locals-collect-variables
+                                   class-alist dir-name variables))))))))
+      ;; Return the cons cell expected by hack-dir-local-get-variables-functions
+      (when variables
+        (cons dir-name variables)))))
 
 ;;;###autoload
 (define-minor-mode my-dir-locals-mode
   "Global minor mode to enable loading of custom dir-locals files."
   :global t
-  :group 'my-dir-locals-mode
   (if my-dir-locals-mode
       (add-hook 'hack-dir-local-get-variables-functions #'my-dir-locals-get-variables)
     (remove-hook 'hack-dir-local-get-variables-functions #'my-dir-locals-get-variables)))
-
-;;; Provide
 
 (provide 'my-dir-locals)
 
