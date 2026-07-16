@@ -38,27 +38,31 @@
 (setq lightemacs-electric-pair-global-target-hooks nil)
 (add-hook-text-editing-modes #'electric-pair-local-mode)
 
-(setq lightemacs-evil-snipe-local-target-hooks nil)
-(setq lightemacs-evil-snipe-global-target-hooks nil)
-(add-hook-text-editing-modes 'evil-snipe-local-mode)
+(with-eval-after-load 'le-evil-snipe
+  (setq lightemacs-evil-snipe-local-target-hooks nil)
+  (setq lightemacs-evil-snipe-global-target-hooks nil)
+  (add-hook-text-editing-modes 'evil-snipe-local-mode))
 
-(setq lightemacs-evil-surround-local-target-hooks nil)
-(setq lightemacs-evil-surround-global-target-hooks nil)
-(add-hook-text-editing-modes 'evil-surround-mode)
+(with-eval-after-load 'le-evil-surround
+  (setq lightemacs-evil-surround-local-target-hooks nil)
+  (setq lightemacs-evil-surround-global-target-hooks nil)
+  (add-hook-text-editing-modes 'evil-surround-mode))
 
 (setq lightemacs-corfu-local-target-hooks nil)
 (setq lightemacs-corfu-global-target-hooks nil)
-(add-hook-text-editing-modes 'corfu-mode)
-(add-hook 'minibuffer-setup-hook 'corfu-mode)
+(with-eval-after-load 'le-corfu-mode
+  (add-hook-text-editing-modes 'corfu-mode)
+  (add-hook 'minibuffer-setup-hook 'corfu-mode))
 
 (setq lightemacs-saveplace-target-hooks nil)
-(add-hook-text-editing-modes 'save-place-mode)
+(add-hook-text-editing-modes 'save-place-local-mode)
 
 ;; Yasnippet
 (progn
   (setq lightemacs-yasnippet-global-target-hooks nil)
   (setq lightemacs-yasnippet-local-target-hooks nil)
-  (add-hook-text-editing-modes 'yas-minor-mode)
+  (with-eval-after-load 'yasnippet
+    (add-hook-text-editing-modes 'yas-minor-mode))
 
   ;; TODO maybe change mode is better?
   ;; This excludes for example ibuffer, terminal...
