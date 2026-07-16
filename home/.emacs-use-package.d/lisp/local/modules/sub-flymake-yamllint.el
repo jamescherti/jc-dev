@@ -15,7 +15,7 @@
   :preface
   (defun my-flymake-yamllint-setup ()
     "Setup Flymake yamllint."
-    (when (bound-and-true-p env-allow-syntax-checker)
+    (when (bound-and-true-p env-allow-syntax-checkers)
       (flymake-yamllint-setup)))
 
   :init

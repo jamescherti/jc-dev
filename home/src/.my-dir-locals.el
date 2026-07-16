@@ -1,3 +1,4 @@
-((nil . ((env-allow-syntax-checker . t)
-         (env-allow-deleting-whitespace . t)
-         (env-allow-language-server . t))))
+((nil . ((env-allow-syntax-checkers . t)
+         (env-allow-whitespace-cleanup . t)
+         (env-allow-language-servers . t)
+         (env-allow-reformatters . t))))

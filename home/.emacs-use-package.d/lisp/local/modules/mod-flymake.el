@@ -105,7 +105,7 @@
   (setq flymake-bashate-ignore "E003,E001")
 
   (defun my-setup-flymake-bashate ()
-    (when (bound-and-true-p env-allow-syntax-checker)
+    (when (bound-and-true-p env-allow-syntax-checkers)
       (flymake-bashate-setup)))
 
   (add-hook 'bash-ts-mode-hook 'my-setup-flymake-bashate)
