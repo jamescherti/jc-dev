@@ -512,53 +512,54 @@ Opens a split window showing the added and removed features."
 (lightemacs-use-package tomorrow-night-deepblue-theme
   :no-require t)
 
-(when (fboundp 'lightemacs-theme-create-loader)
-  (lightemacs-theme-create-loader "modus-operandi" 'modus-themes)
-  (lightemacs-theme-create-loader "modus-operandi-tinted" 'modus-themes)
-  (lightemacs-theme-create-loader "modus-operandi-tritanopia" 'modus-themes)
-  (lightemacs-theme-create-loader "modus-operandi-deuteranopia" 'modus-themes)
-  (lightemacs-theme-create-loader "modus-vivendi" 'modus-themes)
-  (lightemacs-theme-create-loader "modus-vivendi-tinted" 'modus-themes)
-  (lightemacs-theme-create-loader "modus-vivendi-tritanopia" 'modus-themes)
-  (lightemacs-theme-create-loader "tango-dark" 'modus-themes)
-  (lightemacs-theme-create-loader "tango" 'modus-themes)
-  (lightemacs-theme-create-loader "tsdh-light" 'modus-themes)
+(with-eval-after-load 'le-theme
+  (when (fboundp 'lightemacs-theme-create-loader)
+    (lightemacs-theme-create-loader "modus-operandi" 'modus-themes)
+    (lightemacs-theme-create-loader "modus-operandi-tinted" 'modus-themes)
+    (lightemacs-theme-create-loader "modus-operandi-tritanopia" 'modus-themes)
+    (lightemacs-theme-create-loader "modus-operandi-deuteranopia" 'modus-themes)
+    (lightemacs-theme-create-loader "modus-vivendi" 'modus-themes)
+    (lightemacs-theme-create-loader "modus-vivendi-tinted" 'modus-themes)
+    (lightemacs-theme-create-loader "modus-vivendi-tritanopia" 'modus-themes)
+    (lightemacs-theme-create-loader "tango-dark" 'modus-themes)
+    (lightemacs-theme-create-loader "tango" 'modus-themes)
+    (lightemacs-theme-create-loader "tsdh-light" 'modus-themes)
 
-  (lightemacs-theme-create-loader "tomorrow-night-deepblue"
-                                  'tomorrow-night-deepblue-theme)
+    (lightemacs-theme-create-loader "tomorrow-night-deepblue"
+                                    'tomorrow-night-deepblue-theme)
 
-  ;; (lightemacs-theme-create-loader "gruvbox-light-soft" 'gruvbox)
-  ;; (lightemacs-theme-create-loader "gruvbox-light-medium" 'gruvbox)
-  ;; (lightemacs-theme-create-loader "gruvbox-light-hard" 'gruvbox)
+    ;; (lightemacs-theme-create-loader "gruvbox-light-soft" 'gruvbox)
+    ;; (lightemacs-theme-create-loader "gruvbox-light-medium" 'gruvbox)
+    ;; (lightemacs-theme-create-loader "gruvbox-light-hard" 'gruvbox)
 
-  (lightemacs-theme-create-loader "doom-gruvbox-light" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-one" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-1337" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-gruvbox" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-solarized-light" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-tomorrow-night" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-tomorrow-day" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-snazzy" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-ir-black" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-ayu-dark" 'doom-themes)
-  (lightemacs-theme-create-loader "doom-acario-light" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-gruvbox-light" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-one" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-1337" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-gruvbox" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-solarized-light" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-tomorrow-night" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-tomorrow-day" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-snazzy" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-ir-black" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-ayu-dark" 'doom-themes)
+    (lightemacs-theme-create-loader "doom-acario-light" 'doom-themes)
 
-  ;; Dark
-  (lightemacs-theme-create-loader "ef-melissa-dark" 'ef-themes)
-  (lightemacs-theme-create-loader "ef-symbiosis" 'ef-themes)
-  ;; Yellow
-  (lightemacs-theme-create-loader "ef-melissa-light" 'ef-themes)
-  (lightemacs-theme-create-loader "ef-duo-light" 'ef-themes)
-  ;; Blue
-  (lightemacs-theme-create-loader "ef-frost" 'ef-themes)
-  (lightemacs-theme-create-loader "ef-light" 'ef-themes)
-  (lightemacs-theme-create-loader "ef-maris-light" 'ef-themes)
-  ;; Orange
-  (lightemacs-theme-create-loader "ef-day" 'ef-themes)
-  ;; Green
-  (lightemacs-theme-create-loader "ef-spring" 'ef-themes)
-  (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
-  (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes))
+    ;; Dark
+    (lightemacs-theme-create-loader "ef-melissa-dark" 'ef-themes)
+    (lightemacs-theme-create-loader "ef-symbiosis" 'ef-themes)
+    ;; Yellow
+    (lightemacs-theme-create-loader "ef-melissa-light" 'ef-themes)
+    (lightemacs-theme-create-loader "ef-duo-light" 'ef-themes)
+    ;; Blue
+    (lightemacs-theme-create-loader "ef-frost" 'ef-themes)
+    (lightemacs-theme-create-loader "ef-light" 'ef-themes)
+    (lightemacs-theme-create-loader "ef-maris-light" 'ef-themes)
+    ;; Orange
+    (lightemacs-theme-create-loader "ef-day" 'ef-themes)
+    ;; Green
+    (lightemacs-theme-create-loader "ef-spring" 'ef-themes)
+    (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
+    (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes)))
 
 ;;; Provide
 

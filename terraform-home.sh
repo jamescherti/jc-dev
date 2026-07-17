@@ -48,24 +48,6 @@ config-firefox() {
   done
 }
 
-config-gnome() {
-  # JC-GNOME-SETTINGS
-  if [[ "${XDG_CURRENT_DESKTOP:-}" = GNOME ]]; then
-    # JC-GNOME-SETTINGS
-    # git_clone \
-    #   https://github.com/jamescherti/jc-gnome-settings \
-    #   "$GIT_CLONE_DIR/jc-gnome-settings"
-    # "$GIT_CLONE_DIR/jc-gnome-settings/jc-gnome-settings.sh"
-
-    cd ~/src/dotfiles/jc-gnome-settings
-
-    # LOCAL GNOME SETTINGS
-    local gnome_scripts_path="$SCRIPT_DIR/data/settings/settings-gnome"
-    "$gnome_scripts_path/settings-gnome-keyboard-shortcuts.sh"
-    "$gnome_scripts_path/settings-gnome.sh"
-  fi
-}
-
 config-xfce() {
   # JC-XFCE-SETTINGS
   if [[ "${XDG_CURRENT_DESKTOP:-}" = XFCE ]]; then
@@ -245,6 +227,97 @@ config-startup-apps() {
       echo "Type=Application"
       echo "StartupNotify=false"
     } >"$HOME/.config/autostart/x-startup-apps.desktop"
+  fi
+}
+
+install_gnome_extension() {
+  local name="$1"
+  local uuid="$2"
+  local src_path="$3"
+  # local pre_cmd="${4:-}"
+  # local post_cmd="${5:-}"
+  local dest_dir="${HOME}/.local/share/gnome-shell/extensions/${uuid}/"
+
+  if [[ -z "${name}" || -z "${uuid}" || -z "${src_path}" ]]; then
+    echo "[ERROR] Usage: install_gnome_extension <name> <uuid> <source_path>" \
+      "[pre_command] [post_command]"
+    return 1
+  fi
+
+  echo "[INSTALL] ${name}"
+
+  # if [[ -n "${pre_cmd}" ]]; then
+  #   eval "${pre_cmd}"
+  # fi
+
+  if [[ ! -d "${src_path}" ]]; then
+    echo "[ERROR] Source path ${src_path} is invalid or not a directory."
+    return 1
+  fi
+
+  rm -rf "${dest_dir}"
+  mkdir -p "${dest_dir}"
+
+  local rsync_src="${src_path%/}/"
+  rsync -ar --delete --delete-excluded --exclude '.git' \
+    "${rsync_src}" "${dest_dir}"
+
+  # if [[ -n "${post_cmd}" ]]; then
+  #   eval "${post_cmd}"
+  # fi
+
+  if gnome-extensions list | grep -q "^${uuid}$"; then
+    gnome-extensions enable "${uuid}"
+    echo "[INFO] Enabled ${uuid}"
+  else
+    echo "[WARNING] ${uuid} is not recognized by GNOME Shell. Restart GNOME."
+  fi
+}
+
+config-gnome() {
+  # JC-GNOME-SETTINGS
+  if [[ "${XDG_CURRENT_DESKTOP:-}" = GNOME ]]; then
+    # JC-GNOME-SETTINGS
+    # git_clone \
+    #   https://github.com/jamescherti/jc-gnome-settings \
+    #   "$GIT_CLONE_DIR/jc-gnome-settings"
+    # "$GIT_CLONE_DIR/jc-gnome-settings/jc-gnome-settings.sh"
+
+    cd ~/src/dotfiles/jc-gnome-settings
+
+    # LOCAL GNOME SETTINGS
+    local gnome_scripts_path="$SCRIPT_DIR/data/settings/settings-gnome"
+    "$gnome_scripts_path/settings-gnome-keyboard-shortcuts.sh"
+    "$gnome_scripts_path/settings-gnome.sh"
+
+    # echo "[INSTALL] run-or-raise"
+    # cd ~/src/forks/run-or-raise
+    # make compile >/dev/null
+    # make build >/dev/null
+    # rm -fr ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
+    # mkdir -p ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
+    # unzip "build/run-or-raise@edvard.cz.shell-extension.zip" -d ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
+    # cp schemas/gschemas.compiled ~/.local/share/gnome-shell/extensions/run-or-raise\@edvard.cz/schemas/
+
+    # run-or-raise
+    install_gnome_extension \
+      "run-or-raise" \
+      "run-or-raise@edvard.cz" \
+      "${HOME}/src/forks/run-or-raise"
+    cd ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz \
+      && glib-compile-schemas schemas
+
+    # HideActivities
+    install_gnome_extension \
+      "HideActivities" \
+      "Hide_Activities@shay.shayel.org" \
+      "${HOME}/src/forks/HideActivities"
+
+    # Caffeine
+    install_gnome_extension \
+      "Caffeine" \
+      "caffeine@patapon.info" \
+      "${HOME}/src/forks/gnome-shell-extension-caffeine/caffeine@patapon.info"
   fi
 }
 

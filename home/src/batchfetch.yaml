@@ -45,6 +45,8 @@ options:
     - bell/
     - .fileaction.yaml
     - batchfetch-local.yaml
+    - .my-dir-locals.el
+    - forks/.my-dir-locals.el
 
 tasks:
   # ----------------------------------------------------------------------------
@@ -189,10 +191,23 @@ tasks:
     remote:
       upstream: https://github.com/danigm/hide-minimized
 
+  - git: git@github.com:jamescherti/HideActivities
+    path: forks/HideActivities
+    revision: main
+    remote:
+      upstream: https://github.com/zeten30/HideActivities
+
   - git: git@github.com:jamescherti/run-or-raise
     path: forks/run-or-raise
+    revision: main
     remote:
       upstream: https://github.com/CZ-NIC/run-or-raise
+
+  - git: git@github.com:jamescherti/gnome-shell-extension-caffeine
+    path: forks/gnome-shell-extension-caffeine
+    revision: master
+    remote:
+      upstream: https://github.com/eonpatapon/gnome-shell-extension-caffeine
 
   # ----------------------------------------------------------------------------
   # Forks
@@ -212,13 +227,6 @@ tasks:
     revision: master
     remote:
       upstream: https://github.com/whjvenyl/fasd
-
-  # https://emacsredux.com/blog/2021/08/11/submitting-a-package-to-nongnu-elpa/
-  - git: git@github.com:jamescherti/run-or-raise.git
-    path: forks/run-or-raise
-    revision: main
-    remote:
-      upstream: https://github.com/CZ-NIC/run-or-raise
 
   - git: git@github.com:jamescherti/org-mode
     path: forks/org-mode
