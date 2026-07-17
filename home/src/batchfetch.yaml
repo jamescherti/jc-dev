@@ -212,6 +212,11 @@ tasks:
   # ----------------------------------------------------------------------------
   # Forks
   # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/ztree
+    path: forks/ztree
+    remote:
+      upstream: https://codeberg.org/fourier/ztree
+
   - git: git@github.com:jamescherti/diff-hl
     path: forks/diff-hl
     remote:
