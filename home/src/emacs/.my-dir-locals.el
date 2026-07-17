@@ -1,5 +1,5 @@
 ((nil . ((env-allow-syntax-checkers . t)
-         (env-allow-syntax-checker-package-lint . nil)
+         (env-allow-syntax-checker-package-lint . t)
          (env-allow-whitespace-cleanup . t)
          (env-allow-language-servers . t)
          (env-allow-reformatters . t))))

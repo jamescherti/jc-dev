@@ -71,6 +71,7 @@
 (setq lightemacs-apheleia-local-target-hooks nil)
 (setq lightemacs-apheleia-global-target-hooks nil)
 (setq lightemacs-flymake-target-hooks nil)
+
 (setq lightemacs-package-lint-flymake-target-hooks nil)
 
 ;; Yasnippet
