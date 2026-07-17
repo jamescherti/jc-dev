@@ -1439,13 +1439,20 @@ If the parentheses are balanced, the function returns t."
 ;;; Markdown mode
 
 (with-eval-after-load 'markdown-mode
+  ;; Disable markdown-do, which checks/unchecks list items: - [x]
+  (evil-define-key 'normal markdown-mode-map (kbd "<return>") nil)
+  (evil-define-key 'normal markdown-mode-map (kbd "RET") nil)
+
   (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block)
-  (evil-collection-define-key 'normal 'markdown-mode-map
-    "RET" nil
-    [tab] nil
-    [S-tab] nil
-    ;; `evil-markdown' doesn't bind but spacemacs does.
-    (kbd "RET") 'markdown-do))
+  ;; (evil-collection-define-key 'normal 'markdown-mode-map
+  ;;   "<return>" nil
+  ;;   "RET" nil
+  ;;   [tab] nil
+  ;;   [S-tab] nil
+  ;;   ;; `evil-markdown' doesn't bind but spacemacs does.
+  ;;   ;; (kbd "RET") 'markdown-do
+  ;;   )
+  )
 
 ;;; Code that replaces evil visualstar
 
