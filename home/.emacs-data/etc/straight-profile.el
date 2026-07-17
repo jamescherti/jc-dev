@@ -35,7 +35,7 @@
  ("helpful" . "03756fa6ad4dcca5e0920622b1ee3f70abfc4e39")
  ("highlight-defined" . "f9f4b22d70799965f4c0e5b002dbd4e111c78abc")
  ("lua-mode" . "2f6b8d7a6317e42c953c5119b0119ddb337e0a5f")
- ("org-appear" . "f5c1d9de986cbcd61fb46e8a84b47c6f6ec2936d")
+ ("org-appear" . "77d23efec5f5c25fc0798364d2b51a3ce3d8d518")
  ("paredit" . "57c9f26c51e2e33ad70c45d2c393b1e458e95685")
  ("vimrc-mode" . "42c23497381d5f8a3417aa592c74370a181b820c")
 
