@@ -52,11 +52,11 @@
 (setq lightemacs-corfu-global-target-hooks nil)
 ;; This is enabled by `mod-conditional-modes'
 (with-eval-after-load 'le-corfu
-  (add-hook-text-editing-modes 'corfu-mode)
+  (add-hook-text-editing-modes-if-file 'corfu-mode)
   (add-hook 'minibuffer-setup-hook 'corfu-mode))
 
 (setq lightemacs-saveplace-target-hooks nil)
-(add-hook-text-editing-modes 'save-place-local-mode)
+(add-hook-text-editing-modes-if-file 'save-place-local-mode)
 
 ;; Yasnippet
 (progn

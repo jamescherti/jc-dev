@@ -466,8 +466,9 @@ CWD is the current working directory."
 (defvar text-editing-modes '(conf-mode prog-mode text-mode)
   "List of text editing modes.")
 
-(defun add-functions-to-mode-hooks (modes functions)
-  "Add FUNCTIONS to MODES."
+(defun add-functions-to-mode-hooks (modes functions &optional only-if-file)
+  "Add FUNCTIONS to MODES.
+If ONLY-IF-FILE is non-nil, the function is only executed when visiting a file."
   ;; If modes is not a list, make it a list
   (unless (listp modes)
     (setq modes (list modes)))
@@ -479,18 +480,22 @@ CWD is the current working directory."
   (dolist (current-mode modes)
     (let ((hook (intern (concat (symbol-name current-mode) "-hook"))))
       (dolist (func functions)
-        (add-hook hook func)
-        ;; (if (functionp func)  ; Check if func is a valid function
-        ;;     (add-hook hook func)
-        ;;   (message "Warning: `%s' is not a valid function, skipping..."
-        ;;            (symbol-name func)))
-        ))))
+        (if only-if-file
+            (add-hook hook
+                      (lambda ()
+                        (when (buffer-file-name (buffer-base-buffer))
+                          (funcall func))))
+          (add-hook hook func))))))
 
 (defun add-hook-text-editing-modes (functions)
   "Add FUNCTIONS to hooks corresponding to `text-editing-modes`.
 FUNCTIONS can be a single function or a list of functions."
   (add-functions-to-mode-hooks text-editing-modes functions))
 
+(defun add-hook-text-editing-modes-if-file (functions)
+  "Add FUNCTIONS to `text-editing-modes' only if visiting a file.
+FUNCTIONS can be a single function or a list of functions."
+  (add-functions-to-mode-hooks text-editing-modes functions t))
 ;;; ignore-errors advice
 
 (defun my--ignore-error-advice (orig-fn &rest args)
