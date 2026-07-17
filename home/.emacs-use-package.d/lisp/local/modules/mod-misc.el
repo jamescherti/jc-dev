@@ -2803,8 +2803,10 @@ visibility when navigation commands are executed."
 ;;              quickrun-compile-only-select
 ;;              quickrun-compile-only))
 
-;; (lightemacs-use-package ztree
-;;   :commands ztree-diff)
+;; ztree
+
+(lightemacs-use-package ztree
+  :commands ztree-diff)
 
 ;;; auto revert
 

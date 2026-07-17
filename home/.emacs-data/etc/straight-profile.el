@@ -15,6 +15,7 @@
 
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
+ ("ztree" . "9905f1be006fe02417fc6598be4990746053bbec")
 
  ;; Unmaintained (Forked: jamescherti)
  ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")

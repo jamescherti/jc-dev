@@ -1150,6 +1150,9 @@ This uses an around advice to trap errors and verify file timestamps."
              :branch "main")
 
             ;; Forks of maintained packages
+            (ztree
+             :type git :host github
+             :repo "jamescherti/ztree")
             (doom-themes
              :type git :host github
              :repo "jamescherti/doom-themes")
@@ -1566,6 +1569,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 
 ;; Local variables:
 ;; byte-compile-warnings: (not lexical free-vars)
+;; env-allow-syntax-checker-package-lint: nil
 ;; End:
 
 ;;; config.el ends here
