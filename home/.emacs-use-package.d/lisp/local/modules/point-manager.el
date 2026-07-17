@@ -1,4 +1,4 @@
-;;; point-manager.el --- point-manager -*- lexical-binding: t -*-
+;;; point-manager.el --- Manage cursor movement and restrictions -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -22,7 +22,18 @@
 
 ;;; Commentary:
 
-;; Point manager.
+;; The `point-manager' package provides a global minor mode that enforces cursor
+;; constraints and manages point movement to improve the editing experience.
+;;
+;; Key features include:
+;; - Restoring the previous column position when navigating at the end of a
+;;   buffer or around empty lines.
+;; - Preventing the cursor from moving into invalid areas in `dired-mode', such
+;;   as the directory header or the first two columns.
+;; - Automatically disabling itself in unsupported or excluded buffers
+;;   (e.g., hidden buffers, special buffers, or the minibuffer).
+;; - Integration with Evil mode, restricting cursor management to the normal
+;;   state.
 
 ;;; Code:
 
@@ -74,11 +85,16 @@ This excludes buffers whose names begin with an asterisk (*)."
 
 ;;; Internal variables
 
-(defvar-local point-manager--previous-column nil)
-(defvar-local point-manager--previous-point nil)
-(defvar-local point-manager--buffer-type nil)
-(defvar-local point-manager--inhibit t)
-(defvar-local point-manager--initialized nil)
+(defvar-local point-manager--previous-column nil
+  "Column position before the current command.")
+(defvar-local point-manager--previous-point nil
+  "Point position before the current command.")
+(defvar-local point-manager--buffer-type nil
+  "Type of the current buffer (e.g., `file' or `dired').")
+(defvar-local point-manager--inhibit t
+  "Non-nil means inhibit point-manager in the current buffer.")
+(defvar-local point-manager--initialized nil
+  "Non-nil if point-manager has been initialized in this buffer.")
 ;; (defvar-local point-manager--region-active-p nil)
 ;; (defvar-local point-manager--pre-command nil)
 
@@ -87,15 +103,16 @@ This excludes buffers whose names begin with an asterisk (*)."
 (defun point-manager--initialize-buffer ()
   "Determine if point-manager should be active in the current buffer."
   (setq point-manager--initialized t)
-  (let ((buffer-name (buffer-name)))
-    (setq point-manager--inhibit
-          (or (and point-manager-exclude-minibuffer
-                   (or (minibufferp) (window-minibuffer-p)))
-              (and point-manager-exclude-hidden-buffers
-                   (string-prefix-p " " buffer-name))
-              (and point-manager-exclude-special-buffers
-                   (string-prefix-p "*" buffer-name))
-              (apply #'derived-mode-p point-manager-excluded-modes))))
+  (setq point-manager--inhibit
+        (or (and point-manager-exclude-minibuffer
+                 (or (minibufferp) (window-minibuffer-p)))
+            (let ((buffer-name (buffer-name)))
+              (or
+               (and point-manager-exclude-hidden-buffers
+                    (string-prefix-p " " buffer-name))
+               (and point-manager-exclude-special-buffers
+                    (string-prefix-p "*" buffer-name))))
+            (apply #'derived-mode-p point-manager-excluded-modes)))
 
   (unless point-manager--inhibit
     (cond
@@ -120,8 +137,8 @@ This excludes buffers whose names begin with an asterisk (*)."
 
   ;; (setq point-manager--pre-command this-command)
   (unless point-manager--inhibit
-    (setq point-manager--previous-point (point))
-    (setq point-manager--previous-column (current-column))))
+    (setq point-manager--previous-point (point)
+          point-manager--previous-column (current-column))))
 
 (defun point-manager--move-to-column (column)
   "Move to COLUMN and update the temporary goal column."
@@ -132,11 +149,10 @@ This excludes buffers whose names begin with an asterisk (*)."
   "Maintain cursor constraints in normal state.
 COMMAND is the previous command."
   (when (and (not point-manager--inhibit)
-             (or (not (boundp 'evil-state))
-                 (eq evil-state 'normal))
-             ;; POINT has been changed
              point-manager--previous-point
              (/= (point) point-manager--previous-point)
+             (or (not (boundp 'evil-state))
+                 (eq evil-state 'normal))
              (not (minibufferp))
              (not (region-active-p)))
     ;; DELETE: Restore the column after deleting
