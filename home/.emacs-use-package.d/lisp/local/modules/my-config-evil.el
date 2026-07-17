@@ -1991,13 +1991,18 @@ truncated."
   (let ((inhibit-message t))
     (evilcursor-forward-line (* count -1))))
 
-(evil-define-key 'insert 'global (kbd "M-k") #'evilcursor-smart-previous-line)
-(evil-define-key 'insert 'global (kbd "M-j") #'evilcursor-smart-next-line)
+;; (evil-define-key 'insert 'global (kbd "M-k") #'evilcursor-smart-previous-line)
+;; (evil-define-key 'insert 'global (kbd "M-j") #'evilcursor-smart-next-line)
+;;
+;; (evil-define-key 'normal 'global (kbd "k") #'evilcursor-smart-previous-line)
+;; (evil-define-key 'normal 'global (kbd "j") #'evilcursor-smart-next-line)
+;; (evil-define-key 'motion 'global (kbd "k") nil)
+;; (evil-define-key 'motion 'global (kbd "j") nil)
 
-(evil-define-key 'normal 'global (kbd "k") #'evilcursor-smart-previous-line)
-(evil-define-key 'normal 'global (kbd "j") #'evilcursor-smart-next-line)
-(evil-define-key 'motion 'global (kbd "k") nil)
-(evil-define-key 'motion 'global (kbd "j") nil)
+(evil-define-key 'motion 'global (kbd "k") #'evil-previous-visual-line)
+(evil-define-key 'motion 'global (kbd "j") #'evil-next-visual-line)
+(evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
+(evil-define-key 'insert 'global (kbd "M-j") #'evil-next-visual-line)
 
 ;;; O: Evil Open Above
 
