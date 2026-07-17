@@ -50,7 +50,7 @@
 
 (setq lightemacs-corfu-local-target-hooks nil)
 (setq lightemacs-corfu-global-target-hooks nil)
-(with-eval-after-load 'le-corfu-mode
+(with-eval-after-load 'le-corfu
   (add-hook-text-editing-modes 'corfu-mode)
   (add-hook 'minibuffer-setup-hook 'corfu-mode))
 
