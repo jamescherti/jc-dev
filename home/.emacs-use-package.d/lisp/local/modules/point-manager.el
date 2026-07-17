@@ -50,6 +50,7 @@ This excludes buffers whose names begin with an asterisk (*)."
 
 (defcustom point-manager-excluded-modes
   '(special-mode
+    minibuffer-mode
     comint-mode
     term-mode
     vterm-mode
@@ -77,51 +78,47 @@ This excludes buffers whose names begin with an asterisk (*)."
 (defvar-local point-manager--previous-point nil)
 (defvar-local point-manager--buffer-type nil)
 (defvar-local point-manager--inhibit t)
-(defvar-local point-manager--last-major-mode nil)
+(defvar-local point-manager--initialized nil)
 ;; (defvar-local point-manager--region-active-p nil)
 ;; (defvar-local point-manager--pre-command nil)
 
 ;;; Functions
 
-(defun point-manager--pre-command-hook (&rest _)
-  "Save point and column position."
-  (setq point-manager--inhibit
-        (let ((buffer-name (buffer-name)))
+(defun point-manager--initialize-buffer ()
+  "Determine if point-manager should be active in the current buffer."
+  (setq point-manager--initialized t)
+  (let ((buffer-name (buffer-name)))
+    (setq point-manager--inhibit
           (or (and point-manager-exclude-minibuffer
                    (or (minibufferp) (window-minibuffer-p)))
               (and point-manager-exclude-hidden-buffers
                    (string-prefix-p " " buffer-name))
               (and point-manager-exclude-special-buffers
                    (string-prefix-p "*" buffer-name))
-              (catch 'excluded
-                (dolist (mode point-manager-excluded-modes)
-                  (when (derived-mode-p mode)
-                    (throw 'excluded t)))
-                nil))))
+              (apply #'derived-mode-p point-manager-excluded-modes))))
 
-  ;; (setq point-manager--pre-command this-command)
-  (when (and
-         ;; Not inhibited
-         (not point-manager--inhibit)
-         (or
-          ;; The buffer type has never been set
-          (not point-manager--buffer-type)
-          ;; The major mode has been changed
-          (not (eq point-manager--last-major-mode major-mode))))
+  (unless point-manager--inhibit
     (cond
      (buffer-file-name
-      (setq point-manager--last-major-mode major-mode)
       (setq point-manager--buffer-type 'file))
 
-     ((or (eq major-mode 'dired-mode)
-          (derived-mode-p 'dired-mode))
-      (setq point-manager--last-major-mode major-mode)
+     ((derived-mode-p 'dired-mode)
       (setq point-manager--buffer-type 'dired))
 
      (t
       (setq point-manager--buffer-type :unsupported)
-      (setq point-manager--inhibit t))))
+      (setq point-manager--inhibit t)))))
 
+(defun point-manager--reset-initialization ()
+  "Reset initialization status so it is re-evaluated."
+  (setq point-manager--initialized nil))
+
+(defun point-manager--pre-command-hook (&rest _)
+  "Save point and column position."
+  (unless point-manager--initialized
+    (point-manager--initialize-buffer))
+
+  ;; (setq point-manager--pre-command this-command)
   (unless point-manager--inhibit
     (setq point-manager--previous-point (point))
     (setq point-manager--previous-column (current-column))))
@@ -138,8 +135,8 @@ COMMAND is the previous command."
              (or (not (boundp 'evil-state))
                  (eq evil-state 'normal))
              ;; POINT has been changed
-             (and point-manager--previous-point
-                  (/= (point) point-manager--previous-point))
+             point-manager--previous-point
+             (/= (point) point-manager--previous-point)
              (not (minibufferp))
              (not (region-active-p)))
     ;; DELETE: Restore the column after deleting
@@ -154,8 +151,7 @@ COMMAND is the previous command."
     ;; END OF FILE
     (when (and (eobp)
                (not (bobp)))
-      (ignore-errors
-        (backward-char 1))
+      (forward-char -1)
 
       (if point-manager-ignore-invisible
           (vertical-motion 0)
@@ -172,10 +168,7 @@ COMMAND is the previous command."
         ;; dired-movement-style 'bounded-files). However, this does not
         ;; accommodate navigation using gg or G in Evil mode (moving to the top
         ;; and bottom of the buffer).
-        (when (save-excursion
-                ;; First line?
-                (forward-line 0)
-                (bobp))
+        (when (= (line-beginning-position) (point-min))
           (forward-line 1)
           (point-manager--move-to-column point-manager--previous-column)
           ;; This is used by the next check (2 columns)
@@ -196,10 +189,12 @@ COMMAND is the previous command."
       (progn
         ;; (add-hook
         ;;  'after-change-major-mode-hook #'point-manager--post-command-hook 95)
+        (add-hook 'after-change-major-mode-hook #'point-manager--reset-initialization)
         (add-hook 'pre-command-hook #'point-manager--pre-command-hook -95)
         (add-hook 'post-command-hook #'point-manager--post-command-hook 95))
     ;; (remove-hook
     ;;  'after-change-major-mode-hook #'point-manager--post-command-hook)
+    (remove-hook 'after-change-major-mode-hook #'point-manager--reset-initialization)
     (remove-hook 'pre-command-hook #'point-manager--pre-command-hook)
     (remove-hook 'post-command-hook #'point-manager--post-command-hook)))
 
