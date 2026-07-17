@@ -31,6 +31,37 @@
   :group 'point-manager
   :prefix "point-manager-")
 
+(defcustom point-manager-exclude-minibuffer t
+  "If non-nil, inhibit point-manager in the minibuffer."
+  :type 'boolean
+  :group 'point-manager)
+
+(defcustom point-manager-exclude-hidden-buffers t
+  "If non-nil, inhibit point-manager in hidden buffers.
+This excludes buffers whose names begin with a space."
+  :type 'boolean
+  :group 'point-manager)
+
+(defcustom point-manager-exclude-special-buffers t
+  "If non-nil, inhibit point-manager in special buffers.
+This excludes buffers whose names begin with an asterisk (*)."
+  :type 'boolean
+  :group 'point-manager)
+
+(defcustom point-manager-excluded-modes
+  '(special-mode
+    comint-mode
+    term-mode
+    vterm-mode
+    eshell-mode
+    shell-mode
+    help-mode
+    compilation-mode
+    magit-mode)
+  "List of major modes where point-manager is inhibited."
+  :type '(repeat symbol)
+  :group 'point-manager)
+
 ;; (defvar point-manager-restore-column-after-commands
 ;;   '(evil-delete
 ;;     enhanced-evil-paredit-delete))
@@ -54,7 +85,19 @@
 
 (defun point-manager--pre-command-hook (&rest _)
   "Save point and column position."
-  (setq point-manager--inhibit (minibufferp))
+  (setq point-manager--inhibit
+        (let ((buffer-name (buffer-name)))
+          (or (and point-manager-exclude-minibuffer
+                   (or (minibufferp) (window-minibuffer-p)))
+              (and point-manager-exclude-hidden-buffers
+                   (string-prefix-p " " buffer-name))
+              (and point-manager-exclude-special-buffers
+                   (string-prefix-p "*" buffer-name))
+              (catch 'excluded
+                (dolist (mode point-manager-excluded-modes)
+                  (when (derived-mode-p mode)
+                    (throw 'excluded t)))
+                nil))))
 
   ;; (setq point-manager--pre-command this-command)
   (when (and
