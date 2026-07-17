@@ -187,13 +187,9 @@ COMMAND is the previous command."
   :group 'point-manager
   (if point-manager-mode
       (progn
-        ;; (add-hook
-        ;;  'after-change-major-mode-hook #'point-manager--post-command-hook 95)
         (add-hook 'after-change-major-mode-hook #'point-manager--reset-initialization)
         (add-hook 'pre-command-hook #'point-manager--pre-command-hook -95)
         (add-hook 'post-command-hook #'point-manager--post-command-hook 95))
-    ;; (remove-hook
-    ;;  'after-change-major-mode-hook #'point-manager--post-command-hook)
     (remove-hook 'after-change-major-mode-hook #'point-manager--reset-initialization)
     (remove-hook 'pre-command-hook #'point-manager--pre-command-hook)
     (remove-hook 'post-command-hook #'point-manager--post-command-hook)))
