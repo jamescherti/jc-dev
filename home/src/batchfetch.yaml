@@ -182,6 +182,19 @@ tasks:
     path: dotfiles/lightvim
 
   # ----------------------------------------------------------------------------
+  # Forks: GNOME
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/hide-minimized
+    path: forks/hide-minimized
+    remote:
+      upstream: https://github.com/danigm/hide-minimized
+
+  - git: git@github.com:jamescherti/run-or-raise
+    path: forks/run-or-raise
+    remote:
+      upstream: https://github.com/CZ-NIC/run-or-raise
+
+  # ----------------------------------------------------------------------------
   # Forks
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/diff-hl
