@@ -2255,13 +2255,14 @@ generally one of the lines that are folded."
   (let ((buffer-name (buffer-name)))
     (cond
      ;; Temporary / Popup Buffers to Ignore
-     ((or (string= buffer-name " *transient*")
-          (string= buffer-name " *which-key*")  ; TODO add to official package
-          (string= buffer-name " *lv*")                  ; Hydra/LV popups
-          (string= buffer-name "*Ediff Control Panel*")
-          (string-match-p "\\` \\*posframe" buffer-name)   ; Posframe popups
-          (string-match-p "\\` \\*company" buffer-name))   ; Company popups
-      :ignore)
+     ;; ((or
+     ;;   (string= buffer-name " *transient*")
+     ;;   (string= buffer-name " *which-key*")  ; TODO add to official package
+     ;;   (string= buffer-name " *lv*")                  ; Hydra/LV popups
+     ;;   (string= buffer-name "*Ediff Control Panel*")
+     ;;   (string-match-p "\\` \\*posframe" buffer-name)   ; Posframe popups
+     ;;   (string-match-p "\\` \\*company" buffer-name))   ; Company popups
+     ;;  :ignore)
 
      ;;((string-prefix-p ))
 
@@ -2269,17 +2270,18 @@ generally one of the lines that are folded."
      ((string-prefix-p "*Embark Export:" buffer-name)
       "c:embark-export")
 
-     ((string-prefix-p "*Org Src" buffer-name)
-      "c:org-src")
+     ;; ((string-prefix-p "*Org Src" buffer-name)
+     ;;  "c:org-src")
+     ;;
+     ;; ((string-prefix-p "*magit" buffer-name)
+     ;;  "c:magit")
 
-     ((string-prefix-p "*magit" buffer-name)
-      "c:magit")
+     ;; ((string-prefix-p "*sdcv:" buffer-name)
+     ;;  "c:sdcv")
+     ;; ((string-prefix-p "*helpful" buffer-name)
+     ;;  "c:helpful")
 
-     ((string-prefix-p "*helpful" buffer-name)
-      "c:helpful")
-
-     ((string-prefix-p "*sdcv:" buffer-name)
-      "c:sdcv"))))
+     )))
 
 (with-eval-after-load 'persist-text-scale
   (setq persist-text-scale-buffer-category-function

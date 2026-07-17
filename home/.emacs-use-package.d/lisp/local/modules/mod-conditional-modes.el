@@ -101,32 +101,40 @@ This function is intended for use as :around advice."
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
   "Manually check variables and enable modes."
-  (unless env-deny-all
-    (when env-allow-reformatters
-      ;; All modes
-      (when (fboundp 'apheleia-mode)
-        (apheleia-mode env-allow-reformatters))
+  (let ((buffer-name (buffer-name)))
+    (when (and (not env-deny-all)
+               (not (or (string-prefix-p " " buffer-name)
+                        (string-prefix-p "*" buffer-name))))
+      (when-let* ((file-name (buffer-file-name (buffer-base-buffer))))
+        (when env-allow-reformatters
+          ;; All modes
+          (when (and (fboundp 'apheleia-mode)
+                     (or (derived-mode-p 'python-mode)
+                         (derived-mode-p 'python-ts-mode)
+                         (derived-mode-p 'yaml-mode)
+                         (derived-mode-p 'yaml-ts-mode)))
+            (apheleia-mode env-allow-reformatters))
 
-      ;; Elisp
-      (when (and (derived-mode-p 'emacs-lisp-mode)
-                 (fboundp 'aggressive-indent-mode))
-        (aggressive-indent-mode env-allow-reformatters)))
+          ;; Elisp
+          (when (and (derived-mode-p 'emacs-lisp-mode)
+                     (fboundp 'aggressive-indent-mode))
+            (aggressive-indent-mode env-allow-reformatters)))
 
-    (let ((code-checker-ignore-p (my-code-checker-and-reformatter-ignore-p)))
-      (unless code-checker-ignore-p
-        (when env-allow-syntax-checker-package-lint
-          (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
+        (let ((code-checker-ignore-p (my-code-checker-and-reformatter-ignore-p)))
+          (unless code-checker-ignore-p
+            (when env-allow-syntax-checker-package-lint
+              (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
 
-        (when (fboundp 'flymake-mode)
-          (flymake-mode (bound-and-true-p env-allow-syntax-checkers))
-          ;; (when (/= (bound-and-true-p flymake-mode)
-          ;;           (bound-and-true-p env-allow-syntax-checkers))
-          ;;   (flymake-mode (bound-and-true-p env-allow-syntax-checkers)))
-          )))
+            (when (fboundp 'flymake-mode)
+              (flymake-mode (bound-and-true-p env-allow-syntax-checkers))
+              ;; (when (/= (bound-and-true-p flymake-mode)
+              ;;           (bound-and-true-p env-allow-syntax-checkers))
+              ;;   (flymake-mode (bound-and-true-p env-allow-syntax-checkers)))
+              )))
 
-    (when (and (bound-and-true-p env-allow-whitespace-cleanup)
-               (fboundp 'stripspace-local-mode))
-      (stripspace-local-mode 1))))
+        (when (and (bound-and-true-p env-allow-whitespace-cleanup)
+                   (fboundp 'stripspace-local-mode))
+          (stripspace-local-mode 1))))))
 
 ;; Attach your logic to the trigger hook
 (add-hook 'dir-locals-trigger-hook #'my-evaluate-dir-locals)

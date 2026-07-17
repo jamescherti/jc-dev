@@ -50,6 +50,7 @@
 
 (setq lightemacs-corfu-local-target-hooks nil)
 (setq lightemacs-corfu-global-target-hooks nil)
+;; This is enabled by `mod-conditional-modes'
 (with-eval-after-load 'le-corfu
   (add-hook-text-editing-modes 'corfu-mode)
   (add-hook 'minibuffer-setup-hook 'corfu-mode))
@@ -63,11 +64,6 @@
   (setq lightemacs-yasnippet-local-target-hooks nil)
   (with-eval-after-load 'yasnippet
     (add-hook-text-editing-modes 'yas-minor-mode))
-
-  ;; TODO maybe change mode is better?
-  ;; This excludes for example ibuffer, terminal...
-  ;; (setq lightemacs-persist-text-scale-target-hooks nil)
-  ;; (add-hook-text-editing-modes 'persist-text-scale-mode)
 
   (defun le-yasnippet-reload-if-empty ()
     "Reload all YASnippet snippets only if they are not already loaded."
