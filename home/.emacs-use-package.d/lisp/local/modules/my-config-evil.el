@@ -36,6 +36,23 @@
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'sub-project)
 
+;;; Experiments
+
+;; Disable the Evil jump handler for buffer crossings. By overriding this
+;; function with `ignore', we prevent Evil from executing its frame and window
+;; iteration loops during buffer changes. As a result, native Emacs commands
+;; that switch buffers will no longer save your previous position, disabling
+;; cross-buffer navigation via the jump list (C-o and C-i).
+;;
+;; Practical example:
+;; - You are editing 'main.py' and jump to a definition in 'utils.py'.
+;; - Default behavior: Pressing 'C-o' returns you directly to 'main.py'.
+;; - With this override: 'C-o' remains confined to the jump history
+;;   within 'utils.py'. You must manually switch back using 'C-x b'.
+(if (fboundp 'evil--jump-handle-buffer-crossing)
+    (advice-add 'evil--jump-handle-buffer-crossing :override #'ignore)
+  (message "WARNING: evil--jump-handle-buffer-crossing is undefined."))
+
 ;;; undo
 
 ;; Replaces undo-fu

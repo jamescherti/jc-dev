@@ -837,7 +837,11 @@ subsequent GCC invocations."
 
                            le-dumb-jump
                            le-git-modes
-                           ;; le-helpful
+
+                           ;; I am using helpful because it allows having
+                           ;; separate buffers for every variable or function
+                           le-helpful
+
                            le-indent-bars
                            le-stripspace
 
