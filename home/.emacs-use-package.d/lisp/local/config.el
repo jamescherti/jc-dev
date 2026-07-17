@@ -809,7 +809,7 @@ subsequent GCC invocations."
                            le-dired-filter
 
                            le-org
-                           le-org-appear
+                           ;; le-org-appear
                            mod-org
 
                            le-edit-indirect

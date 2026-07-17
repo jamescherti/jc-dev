@@ -105,7 +105,9 @@ This function is intended for use as :around advice."
     (when (and (not env-deny-all)
                (not (or (string-prefix-p " " buffer-name)
                         (string-prefix-p "*" buffer-name))))
-      (when-let* ((file-name (buffer-file-name (buffer-base-buffer))))
+      (when-let* ((file-name (buffer-file-name (buffer-base-buffer)))
+                  (base-name (when file-name
+                               (file-name-nondirectory file-name))))
         (when env-allow-reformatters
           ;; All modes
           (when (and (fboundp 'apheleia-mode)
@@ -122,7 +124,12 @@ This function is intended for use as :around advice."
 
         (let ((code-checker-ignore-p (my-code-checker-and-reformatter-ignore-p)))
           (unless code-checker-ignore-p
-            (when env-allow-syntax-checker-package-lint
+            (when (and env-allow-syntax-checker-package-lint
+                       ;; TODO add exceptions like these to the .my-dir-locals.el
+                       (not (or (file-in-directory-p file-name "~/src/emacs/lightemacs")
+                                (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
+                                (string= base-name "init.el")
+                                (string= base-name "early-init.el"))))
               (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
 
             (when (fboundp 'flymake-mode)
