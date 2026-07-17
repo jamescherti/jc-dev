@@ -290,15 +290,6 @@ config-gnome() {
     "$gnome_scripts_path/settings-gnome-keyboard-shortcuts.sh"
     "$gnome_scripts_path/settings-gnome.sh"
 
-    # echo "[INSTALL] run-or-raise"
-    # cd ~/src/forks/run-or-raise
-    # make compile >/dev/null
-    # make build >/dev/null
-    # rm -fr ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
-    # mkdir -p ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
-    # unzip "build/run-or-raise@edvard.cz.shell-extension.zip" -d ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
-    # cp schemas/gschemas.compiled ~/.local/share/gnome-shell/extensions/run-or-raise\@edvard.cz/schemas/
-
     # run-or-raise
     install_gnome_extension \
       "run-or-raise" \
