@@ -61,6 +61,18 @@
 (setq lightemacs-saveplace-target-hooks nil)
 (add-hook-text-editing-modes 'save-place-local-mode)
 
+(setq lightemacs-undo-fu-session-local-target-hooks nil)
+(setq lightemacs-undo-fu-session-global-target-hooks nil)
+(add-hook-text-editing-modes 'undo-fu-session-mode)
+
+;; Started from mod-conditional-modes.el
+(setq lightemacs-stripspace-target-hooks nil)
+(setq lightemacs-aggressive-indent-target-hooks nil)
+(setq lightemacs-apheleia-local-target-hooks nil)
+(setq lightemacs-apheleia-global-target-hooks nil)
+(setq lightemacs-flymake-target-hooks nil)
+(setq lightemacs-package-lint-flymake-target-hooks nil)
+
 ;; Yasnippet
 (progn
   (setq lightemacs-yasnippet-global-target-hooks nil)
