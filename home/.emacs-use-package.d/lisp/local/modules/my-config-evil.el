@@ -1778,23 +1778,20 @@ of the line or the buffer; just return nil."
 More accurate than `evil-next-line' and `evil-previous-line' when lines are not
 truncated."
   (interactive)
-  (unless n
-    (setq n 1))
+  (setq n (or n 1))
   (cond
    ((minibufferp)
     ;; ignore-errors fixes issues with icomplete
-    (if (> (or n 1) 0)
-        (ignore-errors
-          (next-line-or-history-element))
-      (ignore-errors
+    (ignore-errors
+      (if (> n 0)
+          (next-line-or-history-element)
         (previous-line-or-history-element))))
 
    ;; Not Minibuffer
    (t
     (let* ((count (abs n))
-           (forwardp (> (or n 1) 0))
-           (line-number-type (when (bound-and-true-p display-line-numbers-type)
-                               display-line-numbers-type))
+           (forwardp (> n 0))
+           (line-number-type (bound-and-true-p display-line-numbers-type))
 
            ;; (evil-respect-visual-line-mode nil)
 
@@ -1813,24 +1810,20 @@ truncated."
        ;; TODO patch embark
        ((eq major-mode 'embark-collect-mode)
         (let ((previous-cat (evilcursor--get-category-at-point))
-              (start-point (point))
-              (current-cat nil)
-              (next-cat nil))
+              (start-point (point)))
           (funcall func-change-line count)
-          (setq current-cat (evilcursor--get-category-at-point))
-
-          (unless (= start-point (point))
-            (setq next-cat (save-excursion
-                             (funcall func-change-line count)
-                             (evilcursor--get-category-at-point)))
-
-            (when (and previous-cat
+          (let ((current-cat (evilcursor--get-category-at-point)))
+            (when (and (not (= start-point (point)))
+                       previous-cat
                        current-cat
-                       next-cat
                        (string= current-cat "embark-collect-group-button")
-                       (not (string= previous-cat "embark-collect-group-button"))
-                       (not (string= next-cat "embark-collect-group-button")))
-              (funcall func-change-line count)))))
+                       (not (string= previous-cat "embark-collect-group-button")))
+              (let ((next-cat (save-excursion
+                                (funcall func-change-line count)
+                                (evilcursor--get-category-at-point))))
+                (when (and next-cat
+                           (not (string= next-cat "embark-collect-group-button")))
+                  (funcall func-change-line count)))))))
 
        ;; ((and (or (eq major-mode 'org-mode)
        ;;           (derived-mode-p 'org-mode))
