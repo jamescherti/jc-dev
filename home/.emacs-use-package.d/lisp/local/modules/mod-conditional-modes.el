@@ -113,6 +113,8 @@ This function is intended for use as :around advice."
           (when (and (fboundp 'apheleia-mode)
                      (or (derived-mode-p 'python-mode)
                          (derived-mode-p 'python-ts-mode)
+                         (derived-mode-p 'bash-ts-mode)
+                         (derived-mode-p 'sh-mode)
                          (derived-mode-p 'yaml-mode)
                          (derived-mode-p 'yaml-ts-mode)))
             (apheleia-mode env-allow-reformatters))

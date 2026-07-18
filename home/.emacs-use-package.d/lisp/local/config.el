@@ -810,7 +810,6 @@ subsequent GCC invocations."
 
                            le-org
                            ;; le-org-appear
-                           mod-org
 
                            le-edit-indirect
 

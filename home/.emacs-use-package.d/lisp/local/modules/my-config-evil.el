@@ -1999,8 +1999,13 @@ truncated."
 ;; (evil-define-key 'motion 'global (kbd "k") nil)
 ;; (evil-define-key 'motion 'global (kbd "j") nil)
 
-(evil-define-key 'motion 'global (kbd "k") #'evil-previous-visual-line)
-(evil-define-key 'motion 'global (kbd "j") #'evil-next-visual-line)
+;; (evil-define-key 'motion 'global (kbd "k") #'evil-previous-visual-line)
+;; (evil-define-key 'motion 'global (kbd "j") #'evil-next-visual-line)
+;; (evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
+;; (evil-define-key 'insert 'global (kbd "M-j") #'evil-next-visual-line)
+
+(evil-define-key 'motion 'global (kbd "k") #'evil-previous-line)
+(evil-define-key 'motion 'global (kbd "j") #'evil-next-line)
 (evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
 (evil-define-key 'insert 'global (kbd "M-j") #'evil-next-visual-line)
 
