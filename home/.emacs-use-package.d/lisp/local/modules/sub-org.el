@@ -1,4 +1,24 @@
-;;; mod-org.el --- mod-org -*- lexical-binding: t -*-
+;;; sub-org.el --- sub-org -*- lexical-binding: t -*-
+
+;; Author: James Cherti
+;; URL: https://github.com/jamescherti/jc-dev
+;; Package-Requires: ((emacs "29.1"))
+;; Keywords: maint
+;; Version: 0.0.9
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -114,38 +134,39 @@
         (?B . warning)
         (?C . shadow)))
 
-(setq org-todo-keywords
-      '((sequence
-         "TODO(t)"
-         "PROJ(p)"  ; A project
-         "LOOP(r)"  ; A recurring task
-         "STRT(s)"  ; A task that is in progress
-         "WAIT(w)"  ; Something external is holding up this task
-         "HOLD(h)"  ; This task is paused/on hold because of me
-         "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-         "|"
-         "DONE(d)"  ; Task successfully completed
-         "KILL(k)") ; Task was cancelled, aborted, or is no longer applicable
-        (sequence
-         "[ ](T)"   ; A task that needs doing
-         "[-](S)"   ; Task is in progress
-         "[?](W)"   ; Task is being held up or paused
-         "|"
-         "[X](D)")  ; Task was completed
-        (sequence
-         "|"
-         "OKAY(o)"
-         "YES(y)"
-         "NO(n)"))
-      org-todo-keyword-faces
-      '(("[-]"  . +org-todo-active)
-        ("STRT" . +org-todo-active)
-        ("[?]"  . +org-todo-onhold)
-        ("WAIT" . +org-todo-onhold)
-        ("HOLD" . +org-todo-onhold)
-        ("PROJ" . +org-todo-project)
-        ("NO"   . +org-todo-cancel)
-        ("KILL" . +org-todo-cancel)))
+(setq org-todo-keywords '((sequence "TODO" "DONE")))
+;; (setq org-todo-keywords
+;;       '((sequence
+;;          "TODO(t)"
+;;          "PROJ(p)"  ; A project
+;;          "LOOP(r)"  ; A recurring task
+;;          "STRT(s)"  ; A task that is in progress
+;;          "WAIT(w)"  ; Something external is holding up this task
+;;          "HOLD(h)"  ; This task is paused/on hold because of me
+;;          "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+;;          "|"
+;;          "DONE(d)"  ; Task successfully completed
+;;          "KILL(k)") ; Task was cancelled, aborted, or is no longer applicable
+;;         (sequence
+;;          "TBOX(T)"  ; A task that needs doing
+;;          "WBOX(S)"  ; Task is in progress
+;;          "QBOX(W)"  ; Task is being held up or paused
+;;          "|"
+;;          "XBOX(D)") ; Task was completed
+;;         (sequence
+;;          "|"
+;;          "OKAY(o)"
+;;          "YES(y)"
+;;          "NO(n)"))
+;;       org-todo-keyword-faces
+;;       '(("WBOX" . +org-todo-active)
+;;         ("STRT" . +org-todo-active)
+;;         ("QBOX" . +org-todo-onhold)
+;;         ("WAIT" . +org-todo-onhold)
+;;         ("HOLD" . +org-todo-onhold)
+;;         ("PROJ" . +org-todo-project)
+;;         ("NO"   . +org-todo-cancel)
+;;         ("KILL" . +org-todo-cancel)))
 
 ;;; org
 
@@ -1154,6 +1175,6 @@ via `unwind-protect' even if the movement signals an error."
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 
-(provide 'mod-org)
+(provide 'sub-org)
 
-;;; mod-org.el ends here
+;;; sub-org.el ends here

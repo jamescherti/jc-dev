@@ -324,7 +324,19 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                      (if (< count 2) "" "s")
                      (if (< count 2) "was" "were")))))))))
 
+;;; testing: consult
+
+;; TODO lightemacs?
+;; Disable the column limit for consult search commands to prevent
+;; the truncation of long file paths and text in the embark-collect buffer.
+(setq consult-grep-max-columns nil)
+
+;; (add-hook 'embark-collect-mode-hook
+;;           (lambda () (setq truncate-lines nil)))
+
 ;;; testing
+
+(setq save-silently t)
 
 ;; Disable macro set definition
 (global-set-key (kbd "C-x e") 'ignore)
@@ -4280,7 +4292,7 @@ properly handles remote files over Tramp), applying the setting only if
 ;;; sub-org
 
 (with-eval-after-load 'org
-  (require 'mod-org))
+  (require 'sub-org))
 
 
 ;;; Font lock deferral

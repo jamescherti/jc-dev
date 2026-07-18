@@ -24,6 +24,49 @@
 
 ;;; Code:
 
+;;; Fix compilation buffer
+
+;; When an action is triggered from an Embark Collect buffer, Embark does not
+;; execute the command directly within that buffer. Instead, it temporarily
+;; restores the window to the original source buffer to establish the correct
+;; execution context. Because this context switch happens before Emacs
+;; evaluates `display-buffer-alist', a standard major mode check will fail to
+;; detect that the action actually originated from Embark Collect.
+;;
+;; To ensure the destination buffer consistently opens in the same window,
+;; this function inspects the window history stack. When Embark switches back
+;; to the source buffer, Emacs immediately pushes the Collect buffer to the
+;; top of the `window-prev-buffers' list. By checking if the most recent
+;; previous buffer was running `embark-collect-mode', we can accurately
+;; identify the source of the action and enforce the same window display rule.
+
+(defun mod-same-window---display-buffer-from-compilation-p (_buffer-name _action)
+  "Display buffer from compilation or Embark Collect."
+  (unless current-prefix-arg
+    (or
+     (derived-mode-p 'compilation-mode)
+     (derived-mode-p 'embark-collect-mode)
+     ;; When you select a candidate in the Embark Collect buffer, Embark
+     ;; temporarily switches back to the original buffer to run the command.
+     ;; Because of this context switch, standard window rules fail to see that
+     ;; the action originated from the collect buffer.
+     ;;
+     ;; This code looks at the window history to solve the issue. When Embark
+     ;; switches back to the original buffer, Emacs places the collect buffer at
+     ;; the top of the 'previous buffers' list. By checking this history, we can
+     ;; detect when an action comes from Embark Collect and force the
+     ;; destination to open in the same window.
+     (let ((prev (car (window-prev-buffers))))
+       (and prev
+            (buffer-live-p (car prev))
+            (with-current-buffer (car prev)
+              (derived-mode-p 'embark-collect-mode)))))))
+
+(push '(mod-same-window---display-buffer-from-compilation-p
+        display-buffer-same-window
+        (inhibit-same-window . nil))
+      display-buffer-alist)
+
 ;;; Fix embark
 
 ;; (defun mod-same-window--fix-embark-collect-window-history (&rest _)
@@ -40,9 +83,9 @@
 ;;   where you initially invoked the search or command.
 ;; - It executes the action from that original context.
 ;;
-;; The action runs and opens the target buffer. Because your `display-buffer-alist'
-;; forces `display-buffer-same-window', the target buffer replaces the original
-;; buffer in the same window.
+;; The action runs and opens the target buffer. Because your
+;; `display-buffer-alist' forces `display-buffer-same-window', the target buffer
+;; replaces the original buffer in the same window.
 ;;
 ;; Every time a buffer replaces another in the same window, Emacs records the
 ;; previous buffer in the window history (window-prev-buffers). Because of the
@@ -66,14 +109,6 @@
 
 ;;; Always current window
 
-;; (defun mod-same-window---display-buffer-from-compilation-p (_buffer-name _action)
-;;   "Display buffer from compilation."
-;;   (unless current-prefix-arg
-;;     (with-current-buffer (window-buffer)
-;;       (or
-;;        (derived-mode-p 'embark-collect-mode)
-;;        (derived-mode-p 'compilation-mode)))))
-
 (defun mod-same-window--current-window-only-setup ()
   "Make Emacs only use the current window."
   ;; org-mode
@@ -89,18 +124,14 @@
   ;; Open links in help windows (like links to files) in the current window
   (setq help-window-keep-selected t)
 
-  ;; Compilation buffers. Also used by wgrep buffers / Embark export.
-  ;; (push '(mod-same-window---display-buffer-from-compilation-p
-  ;;         display-buffer-same-window
-  ;;         (inhibit-same-window . nil))
-  ;;       display-buffer-alist)
-
   ;; Setup display buffer alist using push for performance.
   (dolist (regexp '("\\*Man"
                     "\\*eat"
                     "\\*Memory-Report\\*"
                     "\\*Backtrace\\*"
                     "\\*eldoc\\*"
+                    "\\*tmux"
+                    ;; "\\*grep\\*"
                     "\\*edit-indirect "))
     (push `(,regexp (display-buffer-same-window)) display-buffer-alist)))
 
@@ -113,8 +144,6 @@
   (add-to-list 'display-buffer-alist
                '((or (derived-mode . occur-mode)
                      (derived-mode . Buffer-menu-mode)
-                     (derived-mode . embark-collect-mode)
-                     (derived-mode . compilation-mode)
                      (derived-mode . grep-mode)
                      (derived-mode . proced-mode)
                      (derived-mode . quick-sdcv-mode)
@@ -134,9 +163,7 @@
               (window-height . 0.33))
              ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
              ("\\*Memory-Profiler-Report" (display-buffer-at-bottom))
-             ("\\*Calendar\\*" (display-buffer-at-bottom))
-             ("\\*tmux" (display-buffer-same-window))
-             ("\\*grep\\*" (display-buffer-same-window))))
+             ("\\*Calendar\\*" (display-buffer-at-bottom))))
     (push entry display-buffer-alist))
 
   ;; Force Org selection menus and capture buffers into a dedicated bottom side
@@ -167,40 +194,14 @@
      ;; Apply window parameters to hide the mode line
      (window-parameters . ((mode-line-format . none)))))
 
-  ;; (add-to-list 'display-buffer-alist
-  ;;              '("\\`\\*\\(Org \\(Select\\|Note\\)\\|CAPTURE\\|Agenda Commands\\)\\*\\'"
-  ;;                (display-buffer-in-side-window)
-  ;;                (dedicated . t)
-  ;;                (side . bottom)
-  ;;                (slot . 0)
-  ;;                (window-parameters . ((mode-line-format . none)))))
-
-  ;; (add-to-list 'display-buffer-alist
-  ;;              '((derived-mode . calendar-mode)
-  ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
-  ;;                (mode . (calendar-mode bookmark-edit-annotation-mode ert-results-mode))
-  ;;                (inhibit-switch-frame . t)
-  ;;                (dedicated . t)
-  ;;                (window-height . fit-window-to-buffer)))
-  ;;
-  ;; (add-to-list 'display-buffer-alist
-  ;;              '((derived-mode . reb-mode) ; M-x re-builder
-  ;;                (display-buffer-reuse-mode-window display-buffer-below-selected)
-  ;;                (inhibit-switch-frame . t)
-  ;;                (window-height . 4) ; note this is literal lines, not relative
-  ;;                (dedicated . t)
-  ;;                (preserve-size . (t . t))))
-
-  ;; Handle the complex Org entry separately or add it to the list above
-  ;; (push `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
-  ;;         display-buffer-in-side-window
-  ;;         (side . right)
-  ;;         (slot . 0)
-  ;;         (window-parameters . ((no-delete-other-windows . t)))
-  ;;         (window-width . 100)
-  ;;         (dedicated . t))
-  ;;       display-buffer-alist)
-  )
+  (push `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
+          display-buffer-in-side-window
+          (side . right)
+          (slot . 0)
+          (window-parameters . ((no-delete-other-windows . t)))
+          (window-width . 100)
+          (dedicated . t))
+        display-buffer-alist))
 
 ;;; Provide
 

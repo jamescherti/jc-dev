@@ -808,9 +808,6 @@ subsequent GCC invocations."
                            le-dired
                            le-dired-filter
 
-                           le-org
-                           ;; le-org-appear
-
                            le-edit-indirect
 
                            le-yasnippet
@@ -867,8 +864,14 @@ subsequent GCC invocations."
                            point-manager
                            ;; battery-angel
 
+                           le-server
+
+                           ;; mod-misc includes sub-org
+                           le-org
+                           ;; le-org-appear
+
                            le-easysession
-                           le-server))
+                           ))
 
 ;;; Frame, disable cus-edit and x-apply-session-resources
 
