@@ -174,8 +174,6 @@
                                         file-path-todo))))
   (setq lazy-loader-modules '(org
                               vterm
-                              org-appear
-                              vterm
                               aggressive-indent
                               yasnippet
                               apheleia
