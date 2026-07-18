@@ -32,6 +32,14 @@
 
 (require 'org)
 
+;;; Testing
+
+;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
+;; editing emphasis.
+;; TODO add again
+;; Setting org-hide-emphasis-markers to t causes jumping issues in org-mode
+(setq org-hide-emphasis-markers nil)
+
 ;;; Defaults
 
 ;; Enable modules on an opt-in basis to reduce initial Org load latency.
@@ -77,7 +85,7 @@
 (setq org-fontify-quote-and-verse-blocks t)
 
 ;; Disable sub/superscript interpretation (_ and ^)
-(setq org-use-sub-superscripts nil)
+(setq org-use-sub-superscripts '{})
 
 ;; Indentation per heading level; controls visual hierarchy but tight spacing
 ;; may feel cramped.
@@ -112,7 +120,7 @@
 (setq org-M-RET-may-split-line nil)
 
 ;; No need to ask. Just exercise caution.
-(setq org-confirm-babel-evaluate nil
+(setq org-confirm-babel-evaluate t  ; Security
       ;; Do not ask for confirmation before executing Emacs Lisp links.
       org-link-elisp-confirm-function nil)
 
@@ -120,7 +128,7 @@
 ;; layout but may make long headings with tags harder to read.
 ;;
 ;; Setting this to t will fold  stuff
-(setq org-hide-block-startup nil)
+;; (setq org-hide-block-startup nil) ; default nil
 (setq org-startup-folded nil)
 
 (setq org-hide-leading-stars t
@@ -413,18 +421,12 @@ at the same level."
         ;; other sibling and child trees completely folded.
         (default . canonical)))
 
-;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
-;; editing emphasis.
-;; TODO add again
-(setq org-hide-emphasis-markers t)
-
 ;; Fast todo selection without popup; efficient for experts but hides guidance
 ;; for beginners.
 (setq org-use-fast-todo-selection 'expert)
 
 ;; Source block settings
 (setq org-edit-src-persistent-message nil)
-(setq org-modules '())
 (setq org-export-backends '(html texinfo md))
 
 ;; Lists
@@ -498,7 +500,6 @@ at the same level."
 (setq org-agenda-inhibit-startup t)
 
 (setq org-agenda-skip-unavailable-files t
-      org-agenda-start-on-weekday nil
       org-agenda-start-day "-3d"
       org-agenda-span 10)
 
@@ -534,9 +535,6 @@ at the same level."
 ;; (with-eval-after-load 'org-src
 ;;   (add-to-list 'org-src-lang-modes '("md" . markdown)))
 
-;; Use native major-mode indentation
-(setq org-src-preserve-indentation t)
-
 ;; Make TAB behave according to the language mode inside source blocks;
 ;; consistent editing experience
 (setq org-src-tab-acts-natively t)
@@ -546,10 +544,14 @@ at the same level."
 ;;                            ("bash" . sh)
 ;;                            ("elisp" . emacs-lisp)))
 
+;; Use native major-mode indentation
+(setq org-src-preserve-indentation t)
+
 ;; Enforce zero indentation for code within Org source blocks. This prevents Org
 ;; mode from adding artificial leading spaces, ensuring that code copied
 ;; directly from the file remains correctly aligned and syntactically valid.
 (setq org-src-content-indentation 0)
+
 (with-no-warnings
   ;; The `with-no-warnings' macro maintains compatibility with older Org
   ;; versions where the variable was named `org-edit-src-content-indentation'.
@@ -829,8 +831,6 @@ via `unwind-protect' even if the movement signals an error."
 ;;
 
 ;; (org-startup-indented nil)     ;; No auto-indentation
-
-;; Setting org-hide-emphasis-markers to t causes jumping issues in org-mode
 
 ;; Speed
 

@@ -61,9 +61,10 @@
 (setq lightemacs-saveplace-target-hooks nil)
 (add-hook-text-editing-modes 'save-place-local-mode)
 
-(setq lightemacs-undo-fu-session-local-target-hooks nil)
-(setq lightemacs-undo-fu-session-global-target-hooks nil)
-(add-hook-text-editing-modes 'undo-fu-session-mode)
+(with-eval-after-load 'le-undo-fu-session
+  (setq lightemacs-undo-fu-session-local-target-hooks nil)
+  (setq lightemacs-undo-fu-session-global-target-hooks nil)
+  (add-hook-text-editing-modes 'undo-fu-session-mode))
 
 ;; Started from mod-conditional-modes.el
 (setq lightemacs-stripspace-target-hooks nil)
