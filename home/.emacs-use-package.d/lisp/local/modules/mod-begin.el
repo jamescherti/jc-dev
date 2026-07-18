@@ -162,11 +162,13 @@
 
 ;;; Lazy loader
 
+;; For file-path-todo
+(require 'mod-defun nil t)
+
 (lightemacs-use-package lazy-loader
   :ensure nil
   :commands lazy-loader-mode
-  :hook
-  (lightemacs-after-init . lazy-loader-mode)
+  :hook (lightemacs-after-init . lazy-loader-mode)
   :init
   (setq lazy-loader-verbose t)
   (setq lazy-loader-files (delq nil
@@ -179,272 +181,282 @@
                               apheleia
                               dired
 
-                              ;; advice
-                              ;; annalist
-                              ;; ansi-color
-                              ;; ansi-osc
-                              ;; apheleia-dp
-                              ;; apheleia-formatter-context
-                              ;; apheleia-formatters
-                              ;; apheleia-log
-                              ;; apheleia-rcs
-                              ;; apheleia-utils
-                              ;; autorevert
-                              ;; avl-tree
-                              ;; bibtex
-                              ;; bookmark
-                              ;; buffer-terminator
-                              ;; wizard
-                              ;; byte-opt
-                              ;; c++-ts-mode
-                              ;; c-ts-common
-                              ;; c-ts-mode
-                              ;; cal-loaddefs
-                              ;; cal-menu
-                              ;; calendar
-                              ;; char-fold
-                              ;; color
-                              ;; comint
-                              ;; comp
-                              ;; comp-common
-                              ;; comp-cstr
-                              ;; comp-run
-                              ;; compile
-                              ;; compile-angel
-                              ;; corfu
-                              ;; corfu-prescient
-                              ;; cursor-sensor
-                              ;; derived
-                              ;; diff-mode
-                              ;; dig
-                              ;; dired-loaddefs
-                              ;; disp-table
-                              ;; display-fill-column-indicator
-                              ;; display-line-numbers
-                              ;; doc-view
-                              ;; dom
-                              ;; dtrt-indent
-                              ;; easy-escape
-                              ;; edit-indirect
-                              ;; edmacro
-                              ;; ef-melissa-dark-theme
-                              ;; ef-themes
-                              ;; ehelp
-                              ;; elec-pair
-                              ;; enhanced-evil-paredit
-                              ;; epa
-                              ;; epg
-                              ;; epg-config
-                              ;; evil
-                              ;; evil-collection
-                              ;; evil-collection-bookmark
-                              ;; evil-collection-buff-menu
-                              ;; evil-collection-calendar
-                              ;; evil-collection-comint
-                              ;; evil-collection-compile
-                              ;; evil-collection-corfu
-                              ;; evil-collection-custom
-                              ;; evil-collection-diff-mode
-                              ;; evil-collection-dired
-                              ;; evil-collection-doc-view
-                              ;; evil-collection-eldoc
-                              ;; evil-collection-elisp-mode
-                              ;; evil-collection-epa
-                              ;; evil-collection-eww
-                              ;; evil-collection-finder
-                              ;; evil-collection-flymake
-                              ;; evil-collection-gnus
-                              ;; evil-collection-help
-                              ;; evil-collection-hideshow
-                              ;; evil-collection-image
-                              ;; evil-collection-imenu
-                              ;; evil-collection-indent
-                              ;; evil-collection-kmacro
-                              ;; evil-collection-markdown-mode
-                              ;; evil-collection-message
-                              ;; evil-collection-minibuffer
-                              ;; evil-collection-outline
-                              ;; evil-collection-package-menu
-                              ;; evil-collection-process-menu
-                              ;; evil-collection-python
-                              ;; evil-collection-replace
-                              ;; evil-collection-sh-script
-                              ;; evil-collection-simple
-                              ;; evil-collection-tab-bar
-                              ;; evil-collection-tabulated-list
-                              ;; evil-collection-term
-                              ;; evil-collection-unimpaired
-                              ;; evil-collection-vc-git
-                              ;; evil-collection-vertico
-                              ;; evil-collection-vterm
-                              ;; evil-command-window
-                              ;; evil-commands
-                              ;; evil-common
-                              ;; evil-core
-                              ;; evil-ex
-                              ;; evil-integration
-                              ;; evil-jumps
-                              ;; evil-macros
-                              ;; evil-maps
-                              ;; evil-matchit-evil-setup
-                              ;; evil-repeat
-                              ;; evil-search
-                              ;; evil-snipe
-                              ;; evil-states
-                              ;; evil-surround
-                              ;; evil-types
-                              ;; evil-vars
-                              ;; eww
-                              ;; executable
-                              ;; exif
-                              ;; face-remap
-                              ;; filenotify
-                              ;; files-x
-                              ;; find-func
-                              ;; finder
-                              ;; flymake
-                              ;; format-spec
-                              ;; gcmh
-                              ;; gcsentinel
-                              ;; generator
-                              ;; gmm-utils
-                              ;; gnus
-                              ;; gnus-art
-                              ;; gnus-cloud
-                              ;; gnus-group
-                              ;; gnus-int
-                              ;; gnus-range
-                              ;; gnus-spec
-                              ;; gnus-start
-                              ;; gnus-sum
-                              ;; gnus-undo
-                              ;; gnus-util
-                              ;; gnus-win
-                              ;; gnutls
-                              ;; help-fns
-                              ;; highlight-defined
-                              ;; hl-line
-                              ;; ibuf-macs
-                              ;; ietf-drums
-                              ;; image-mode
-                              ;; imenu
-                              ;; inhibit-mouse
-                              ;; inline
-                              ;; iso8601
-                              ;; jinx
-                              ;; jka-compr
-                              ;; kinsoku
-                              ;; kirigami-evil
-                              ;; kmacro
-                              ;; lazy-loader
-                              ;; let-alist
-                              ;; lisp-mnt
-                              ;; mail-parse
-                              ;; mail-prsvr
-                              ;; mail-source
-                              ;; mail-utils
-                              ;; mailabbrev
-                              ;; mailheader
-                              ;; marginalia
-                              ;; markdown-mode
-                              ;; mb-depth
-                              ;; message
-                              ;; mm-bodies
-                              ;; mm-decode
-                              ;; mm-encode
-                              ;; mm-url
-                              ;; mm-util
-                              ;; mm-uu
-                              ;; mm-view
-                              ;; mml
-                              ;; mml-sec
-                              ;; mml-smime
-                              ;; mml2015
-                              ;; modus-themes
-                              ;; my-config-evil
-                              ;; my-evil-outline
-                              ;; nnheader
-                              ;; nnimap
-                              ;; nnmail
-                              ;; nnoo
-                              ;; nnselect
-                              ;; outline-indent
-                              ;; package-lint
-                              ;; package-lint-flymake
-                              ;; paredit
-                              ;; parse-time
-                              ;; pcase
-                              ;; pcomplete
-                              ;; persist-text-scale
-                              ;; pixel-fill
-                              ;; prescient
-                              ;; project
-                              ;; pulse
-                              ;; puny
-                              ;; python
-                              ;; radix-tree
-                              ;; range
-                              ;; recentf
-                              ;; rect
-                              ;; reveal
-                              ;; rfc2045
-                              ;; rfc2047
-                              ;; rfc2231
-                              ;; rfc6068
-                              ;; rfc822
-                              ;; ring
-                              ;; rx
-                              ;; savehist
-                              ;; saveplace
-                              ;; sendmail
-                              ;; server
-                              ;; sh-script
-                              ;; shell
-                              ;; shell-pop
-                              ;; shr
-                              ;; smie
-                              ;; smime
-                              ;; stripspace
-                              ;; sub-better-evil
-                              ;; svg
-                              ;; tabify
-                              ;; term
-                              ;; term/xterm
-                              ;; terminal-themes
-                              ;; terminal-themes-frame-color
-                              ;; terminal-themes-vterm
-                              ;; text-property-search
-                              ;; thingatpt
-                              ;; time
-                              ;; time-date
-                              ;; time-stamp
-                              ;; track-changes
-                              ;; tramp
-                              ;; tramp-cache
-                              ;; tramp-cmds
-                              ;; tramp-compat
-                              ;; tramp-integration
-                              ;; tramp-loaddefs
-                              ;; tramp-message
-                              ;; trampver
-                              ;; tree-widget
-                              ;; undo-fu-session
-                              ;; url-file
-                              ;; url-queue
-                              ;; utf7
-                              ;; vc-dispatcher
-                              ;; vc-git
-                              ;; vertico
-                              ;; vertico-prescient
-                              ;; vtable
-                              ;; vterm-module
-                              ;; warnings
-                              ;; winner
-                              ;; xml
-                              ;; xterm
-                              ;; yaml-ts-mode
-                              ;; yank-media
-                              ))
+                              add-log
+                              advice
+                              apheleia-dp
+                              apheleia-formatter-context
+                              apheleia-formatters
+                              apheleia-log
+                              apheleia-rcs
+                              apheleia-utils
+                              auth-source
+                              autorevert
+                              avl-tree
+                              backtrace
+                              bibtex
+                              bookmark
+                              buffer-terminator
+                              byte-opt
+                              c++-ts-mode
+                              c-ts-common
+                              c-ts-mode
+                              cal-loaddefs
+                              cal-menu
+                              calendar
+                              checkdoc
+                              cl-print
+                              color
+                              compile-angel
+                              consult
+                              consult-imenu
+                              consult-info
+                              consult-xref
+                              corfu
+                              corfu-history
+                              corfu-popupinfo
+                              cursor-sensor
+                              dash
+                              debug
+                              diff-hl
+                              diff-mode
+                              dired-aux
+                              dired-filter
+                              dired-hacks-utils
+                              dired-loaddefs
+                              dired-x
+                              disp-table
+                              display-fill-column-indicator
+                              display-line-numbers
+                              dtrt-indent
+                              easy-escape
+                              edit-indirect
+                              edmacro
+                              ef-melissa-dark-theme
+                              ef-themes
+                              ehelp
+                              eieio
+                              eieio-core
+                              elec-pair
+                              embark
+                              embark-consult
+                              embark-org
+                              enhanced-evil-paredit
+                              evil
+                              evil-collection
+                              evil-collection-bookmark
+                              evil-collection-buff-menu
+                              evil-collection-calendar
+                              evil-collection-comint
+                              evil-collection-compile
+                              evil-collection-consult
+                              evil-collection-corfu
+                              evil-collection-custom
+                              evil-collection-debug
+                              evil-collection-diff-hl
+                              evil-collection-diff-mode
+                              evil-collection-dired
+                              evil-collection-eldoc
+                              evil-collection-elisp-mode
+                              evil-collection-embark
+                              evil-collection-flymake
+                              evil-collection-help
+                              evil-collection-imenu
+                              evil-collection-indent
+                              evil-collection-info
+                              evil-collection-kmacro
+                              evil-collection-log-edit
+                              evil-collection-log-view
+                              evil-collection-markdown-mode
+                              evil-collection-minibuffer
+                              evil-collection-org
+                              evil-collection-outline
+                              evil-collection-process-menu
+                              evil-collection-python
+                              evil-collection-replace
+                              evil-collection-sh-script
+                              evil-collection-simple
+                              evil-collection-tab-bar
+                              evil-collection-tabulated-list
+                              evil-collection-term
+                              evil-collection-unimpaired
+                              evil-collection-vc-dir
+                              evil-collection-vc-git
+                              evil-collection-vertico
+                              evil-collection-vterm
+                              evil-collection-xref
+                              evil-collection-yaml-mode
+                              evil-command-window
+                              evil-commands
+                              evil-common
+                              evil-core
+                              evil-ex
+                              evil-integration
+                              evil-jumps
+                              evil-macros
+                              evil-maps
+                              evil-matchit
+                              evil-matchit-autoloads
+                              evil-matchit-evil-setup
+                              evil-matchit-sdk
+                              evil-repeat
+                              evil-search
+                              evil-snipe
+                              evil-states
+                              evil-surround
+                              evil-types
+                              evil-vars
+                              ewoc
+                              executable
+                              f
+                              face-remap
+                              ffap
+                              filenotify
+                              files-x
+                              find-func
+                              flymake
+                              flyspell
+                              format-spec
+                              gcmh
+                              gcsentinel
+                              generator
+                              gptel-autoloads
+                              help-fns
+                              highlight-defined
+                              imenu
+                              inhibit-mouse
+                              inline
+                              iso8601
+                              ispell
+                              jka-compr
+                              json
+                              kirigami
+                              kirigami-evil
+                              kirigami-jump
+                              kmacro
+                              lazy-autorevert
+                              lazy-loader
+                              le-undo-fu
+                              le-wgrep
+                              log-edit
+                              log-view
+                              map
+                              marginalia
+                              markdown-mode
+                              mb-depth
+                              mode-local
+                              modus-themes
+                              my-config-evil
+                              my-evil-outline
+                              noutline
+                              ob
+                              ob-comint
+                              ob-core
+                              ob-emacs-lisp
+                              ob-eval
+                              ob-exp
+                              ob-lob
+                              ob-ref
+                              ob-table
+                              ob-tangle
+                              oc
+                              oc-basic
+                              ol
+                              org-capture
+                              org-compat
+                              org-cycle
+                              org-element
+                              org-element-ast
+                              org-entities
+                              org-faces
+                              org-fold
+                              org-fold-core
+                              org-footnote
+                              org-ibullets
+                              org-ibullets-autoloads
+                              org-id
+                              org-indent
+                              org-keys
+                              org-list
+                              org-loaddefs
+                              org-macro
+                              org-macs
+                              org-pcomplete
+                              org-persist
+                              org-refile
+                              org-src
+                              org-table
+                              org-version
+                              outline
+                              outline-indent
+                              paredit
+                              parse-time
+                              password-cache
+                              pcase
+                              pcomplete
+                              pcvs-util
+                              persist-text-scale
+                              project
+                              pulse
+                              python
+                              quick-fasd
+                              quick-fasd-autoloads
+                              recentf
+                              rect
+                              reveal
+                              s
+                              savehist
+                              saveplace
+                              semantic/fw
+                              semantic/lex
+                              server
+                              sh-script
+                              shell
+                              smie
+                              stripspace
+                              sub-better-evil
+                              sub-evil-gptel
+                              sub-org
+                              tabify
+                              term
+                              term/xterm
+                              thingatpt
+                              time
+                              time-date
+                              time-stamp
+                              track-changes
+                              tramp
+                              tramp-cache
+                              tramp-cmds
+                              tramp-compat
+                              tramp-integration
+                              tramp-loaddefs
+                              tramp-message
+                              trampver
+                              tree-widget
+                              treesit-fold
+                              treesit-fold-parsers
+                              treesit-fold-summary
+                              treesit-fold-util
+                              undo-fu-autoloads
+                              undo-fu-session
+                              url-parse
+                              url-util
+                              url-vars
+                              vc
+                              vc-dir
+                              vc-dispatcher
+                              vc-git
+                              vertico
+                              vertico-sort
+                              vterm-module
+                              wgrep-autoloads
+                              wizard
+                              wizard-autoloads
+                              xdg
+                              xref
+                              xterm
+                              yaml-mode
+                              yank-media))
   ;; (lazy-loader-buffers
   ;;  '(("*tmux*" .
   ;;     (lambda ()

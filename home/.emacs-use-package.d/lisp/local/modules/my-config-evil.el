@@ -1142,11 +1142,6 @@ word after the space that contains at least two uppercase characters."
   (evil-set-initial-state 'org-agenda-mode 'motion)
   (evil-set-initial-state 'org-agenda-mode 'normal)
 
-  (evil-define-key 'normal 'global (kbd "<leader>oa") 'org-agenda)
-  (evil-define-key 'normal 'global (kbd "<leader>oc") 'org-capture)
-  (evil-define-key 'normal 'global (kbd "<leader>os") 'org-schedule)
-  (evil-define-key 'normal 'global (kbd "<leader>Z") 'my-org-agenda-switch-to-todos)
-
   (evil-define-key 'motion org-agenda-keymap (kbd "/") 'org-agenda-filter)
   (evil-define-key '(normal motion) org-agenda-keymap (kbd "RET")
     'my-org-agenda-goto-in-same-window)
@@ -1164,13 +1159,16 @@ word after the space that contains at least two uppercase characters."
 
   (evil-define-key 'insert org-mode-map (kbd "C-u") 'my-evil-delete-to-heading-star)
 
-  ;; Equivalent to C-c C-q
-  (evil-define-key 'normal org-mode-map (kbd "<leader>oo") 'org-set-tags-command)
-  (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-babel-execute-maybe)
-  (evil-define-key 'normal org-mode-map (kbd "<leader>cd") 'my-org-todo-and-toggle)
   ;; (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-edit-src-code)
   ;; (evil-define-key 'normal org-src-mode-map (kbd "<leader>xx") 'org-edit-src-exit)
-  )
+  (evil-define-key 'normal org-mode-map (kbd "<leader>oo") 'org-set-tags-command)
+  (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-babel-execute-maybe)
+  (evil-define-key 'normal org-mode-map (kbd "<leader>cd") 'my-org-todo-and-toggle))
+
+(evil-define-key 'normal 'global (kbd "<leader>oa") 'org-agenda)
+(evil-define-key 'normal 'global (kbd "<leader>oc") 'org-capture)
+(evil-define-key 'normal 'global (kbd "<leader>os") 'org-schedule)
+(evil-define-key 'normal 'global (kbd "<leader>Z") 'my-org-agenda-switch-to-todos)
 
 ;;; cape: complete before point
 
