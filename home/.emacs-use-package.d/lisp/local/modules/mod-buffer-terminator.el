@@ -273,18 +273,33 @@
 
 ;;; Functions
 
+;; (defun mod-buffer-terminator-only ()
+;;   "Kill all the other buffers."
+;;   (interactive)
+;;   (buffer-guardian-save-all-buffers)
+;;   (when (and (bound-and-true-p tab-bar-mode)
+;;              (fboundp 'tab-bar-close-other-tabs))
+;;     (tab-bar-close-other-tabs))
+;;   (delete-other-windows)
+;;   (mod-buffer-terminator-kill-all-buffers))
+
 (defun mod-buffer-terminator-empty ()
   "Kill all buffers."
   (interactive)
-  ;; (when (fboundp 'eglot-shutdown-all)
-  ;;   (let ((inhibit-message t))
-  ;;     (eglot-shutdown-all)))
+  (when (fboundp 'eglot-shutdown-all)
+    (let ((inhibit-message t))
+      (eglot-shutdown-all)))
 
   (when (fboundp 'easysession-reset)
     (easysession-reset))
+
+  (mod-buffer-terminator-kill-all-buffers)
+
   ;; (mod-buffer-terminator-only)
-  ;; (scratch-buffer)
-  )
+  (with-current-buffer (get-scratch-buffer-create)
+    (erase-buffer))
+
+  (scratch-buffer))
 
 (defun mod-buffer-terminator-toggle-keep ()
   "Docstring."
@@ -324,18 +339,18 @@
 
 ;;; buffer terminator II
 
-(defun mod-buffer-terminator--file-buffer ()
-  "Return :keep the non file-visiting buffers whose name start with a space."
-  (let ((file-name (buffer-file-name (buffer-base-buffer))))
-    (when (and file-name
-               (buffer-modified-p)
-               (not (file-exists-p file-name)))
-      ;; TODO add to buffer-terminator?
-      (unwind-protect
-          (when (and (not buffer-terminator-protect-unsaved-file-buffers)
-                     (buffer-modified-p))
-            (set-buffer-modified-p nil))
-        :kill))))
+;; (defun mod-buffer-terminator--file-buffer ()
+;;   "Kill file buffers that do not exist."
+;;   (let ((file-name (buffer-file-name (buffer-base-buffer))))
+;;     (when (and file-name
+;;                (buffer-modified-p)
+;;                (not (file-exists-p file-name)))
+;;       ;; TODO add to buffer-terminator?
+;;       (unwind-protect
+;;           (when (and (not buffer-terminator-protect-unsaved-file-buffers)
+;;                      (buffer-modified-p))
+;;             (set-buffer-modified-p nil))
+;;         :kill))))
 
 (defun mod-buffer-terminator--non-file-buffer-name-starts-with-space ()
   "Return :keep the non file-visiting buffers whose name start with a space."
@@ -350,7 +365,7 @@
 BUFFERS is a buffer or a list of alive buffers."
   (let* ((buffer-terminator-protect-unsaved-file-buffers nil)
          (rules `((call-function . mod-buffer-terminator-predicate)
-                  (call-function . mod-buffer-terminator--file-buffer)
+                  ;; (call-function . mod-buffer-terminator--file-buffer)
                   (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
                   ;; (keep-buffer-property . process)
                   ;; (keep-buffer-property . special)
@@ -373,9 +388,9 @@ BUFFERS is a buffer or a list of alive buffers."
 (defun mod-buffer-terminator-kill-all-buffers (&optional buffers)
   "Kill all visible buffers.
 BUFFERS is a buffer or a list of alive buffers."
-  (let ((rules '((call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
-                 ;; TODO How to remove special without causing an issue
-                 (keep-buffer-property . process)
+  (let ((rules '((call-function . mod-buffer-terminator-predicate)
+                 (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
+                 ;; (keep-buffer-property . process)
                  ;; (keep-buffer-property . special)
                  (return . :kill))))
     (if (fboundp 'buffer-terminator-apply-rules)
@@ -466,16 +481,6 @@ By default, closing the last window in a tab does not close the tab."
   (interactive)
   (let ((kill-buffer t))
     (mod-buffer-terminator-close-window kill-buffer)))
-
-(defun mod-buffer-terminator-only ()
-  "Kill all the other buffers."
-  (interactive)
-  (buffer-guardian-save-all-buffers)
-  (when (and (bound-and-true-p tab-bar-mode)
-             (fboundp 'tab-bar-close-other-tabs))
-    (tab-bar-close-other-tabs))
-  (delete-other-windows)
-  (mod-buffer-terminator-kill-all-buffers))
 
 (defun mod-buffer-terminator-only-visible ()
   "Kill all the buffers that are not currently displayed in a window or tab."
