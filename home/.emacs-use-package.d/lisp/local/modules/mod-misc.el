@@ -1614,14 +1614,11 @@ any new ones."
                                          "\\`/[^/|:]+:" "\\.gpg\\'"))
   (add-hook 'embark-collect-mode-hook
             #'(lambda()
+                ;; Disable auto-hscroll in embark-collect buffers.
+                (setq-local auto-hscroll-mode nil)
                 ;; TODO: What sets this to t?
-                (setq make-window-start-visible nil)
+                ;; (setq make-window-start-visible nil)
                 (my-disable-fringe-truncation-arrow)))
-
-  (add-hook 'embark-collect-mode-hook
-            (lambda ()
-              "Disable auto-hscroll in embark-collect buffers."
-              (setq-local auto-hscroll-mode nil)))
 
   (with-eval-after-load 'consult
     (setq consult-fd-args
