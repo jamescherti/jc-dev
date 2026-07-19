@@ -831,7 +831,7 @@ subsequent GCC invocations."
 
                            le-dtrt-indent
 
-                           le-dumb-jump
+                           ;; le-dumb-jump
                            le-git-modes
 
                            ;; I am using helpful because it allows having
