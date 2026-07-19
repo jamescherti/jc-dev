@@ -1525,6 +1525,9 @@ any new ones."
     (dolist (err '("\\`rx ['']\\*\\*[''] range error"
                    search-failed
 
+                   ;; find-file-noselect-1: File is not readable: /etc/shadow
+                   file-error
+
                    ;; Wrong syntax (PDF)
                    invalid-read-syntax
 

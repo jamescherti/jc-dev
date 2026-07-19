@@ -68,7 +68,8 @@
 
 ;; Started from mod-conditional-modes.el
 (setq lightemacs-stripspace-target-hooks nil)
-(setq lightemacs-aggressive-indent-target-hooks nil)
+(setq lightemacs-aggressive-indent-local-target-hooks nil)
+(setq lightemacs-aggressive-indent-global-target-hooks nil)
 (setq lightemacs-apheleia-local-target-hooks nil)
 (setq lightemacs-apheleia-global-target-hooks nil)
 (setq lightemacs-flymake-target-hooks nil)

@@ -31,6 +31,8 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 
+(require 'treesit nil)
+
 ;;; Filetype defaults
 
 (setq sgml-basic-offset 2)  ;; HTML
@@ -701,32 +703,27 @@ only if they are not already available."
 
 ;;; auto-mode-alist
 
-;; TODO minimal-emacs readme?
-(add-to-list 'auto-mode-alist '("/LICENSE\\'" . text-mode))
-(add-to-list 'auto-mode-alist '("rc\\'" . conf-mode) 'append)
-
+;; magic mode alist replaces this
+;;
 ;; This regular expression matches the full file path for any .conf file
 ;; residing within either /etc/fonts/ or .config/fontconfig/ and maps them
 ;; directly to xml-mode.
-(add-to-list 'auto-mode-alist '("/etc/fonts/.*\\.conf\\'" . xml-mode))
-(add-to-list 'auto-mode-alist
-             (cons (concat
-                    (regexp-quote (expand-file-name "~/.config/fontconfig/"))
-                    ".*\\.conf\\'")
-                   'xml-mode))
+;; (push '("/etc/fonts/.*\\.conf\\'" . nxml-mode) auto-mode-alist)
+;; (push (cons (concat
+;;              (regexp-quote (expand-file-name "~/.config/fontconfig/"))
+;;              ".*\\.conf\\'")
+;;             'nxml-mode)
+;;       auto-mode-alist)
 
 (nconc auto-mode-alist
        '(;; conf-mode
-         ("\\.profile\\'" . conf-mode)  ; firejail profiles
-         ("^/etc/[^/]+" . conf-unix-mode)
+         ;; ("\\.profile\\'" . conf-mode)  ; firejail profiles
+         ("^/etc/[^/]+" . simple-conf-mode)
 
          ("/known_hosts\\'" . conf-space-mode)
 
          ("/COMMIT_EDITMSG\\'" . diff-mode)
          ("\\.[Oo][Rr][Gg]\\.[aA][sS][cC]\\'" . org-mode)
-
-         ;; Gentoo
-         ("/make\\.conf\\'" . sh-mode)
 
          ;; Gentoo (/etc/portage files)
          ("package\\.\\(?:license\\|mask\\|use\\|accept_keywords\\)/.+\\'" . conf-unix-mode)
@@ -734,22 +731,25 @@ only if they are not already available."
 
          ;; /etc/hosts and ansible /hosts
 
-         ;; Replace with git-modes
-         ;; ("/\\.gitignore" . conf-unix-mode)
-         ;; ("/\\.gitattributes" . conf-space-mode)
-
          ;; Git
 
          ;; hexl-mode
          ;; ("\\.\\(?:hex\\|nes\\)\\'" . hexl-mode)
 
          ;; txt-file-mode
-         ;; ("\\.log\\'" . txt-file-mode)
-         ))
+         ("\\.log\\'" . txt-file-mode)))
 
-(add-to-list 'auto-mode-alist '("/\\.gitconfig\\.local\\'" . gitconfig-mode))
-(add-to-list 'auto-mode-alist '("/\\.gitignore\\.local\\'" . gitignore-mode))
-(add-to-list 'auto-mode-alist '("/\\.gitattributes\\.local\\'" . gitattributes-mode))
+;; Gentoo
+(if (treesit-ready-p 'bash)
+    (push '("/make\\.conf\\'" . bash-ts-mode) auto-mode-alist)
+  (push '("/make\\.conf\\'" . sh-mode) auto-mode-alist))
+
+(push '("/\\.gitconfig\\.local\\'" . gitconfig-mode) auto-mode-alist)
+(push '("/\\.gitattributes\\.local\\'" . gitattributes-mode) auto-mode-alist)
+
+(if (treesit-ready-p 'json)
+    (push '("/\\.ipynb\\'" . json-ts-mode) auto-mode-alist)
+  (push '("/\\.ipynb\\'" . js-json-mode) auto-mode-alist))
 
 ;;; Markdown
 

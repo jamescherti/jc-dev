@@ -109,7 +109,8 @@
  ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
  ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
- ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
+ ;; ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
+ ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8
  ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0 | RSS RELEASE
  ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
