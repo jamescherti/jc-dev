@@ -144,13 +144,14 @@
   (add-to-list 'display-buffer-alist
                '((or (derived-mode . occur-mode)
                      (derived-mode . Buffer-menu-mode)
-                     (derived-mode . grep-mode)
                      (derived-mode . proced-mode)
                      (derived-mode . quick-sdcv-mode)
                      (derived-mode . log-view-mode)
                      (derived-mode . woman-mode)
                      (derived-mode . helpful-mode)
-                     (derived-mode . help-mode))
+                     (derived-mode . help-mode)
+                     (derived-mode . grep-mode)
+                     (derived-mode . embark-collect-mode))
                  ;; Display buffer in the currently selected window
                  (display-buffer-same-window)
                  ;; Allow the buffer to be displayed in the same window even if

@@ -143,9 +143,13 @@
 (defun mod-buffer-terminator-predicate ()
   "Return :kill, :keep, or nil."
   (let* ((file-name (buffer-file-name (buffer-base-buffer)))
-         ;; (buffer (current-buffer))
-         )
+         (base-name (when file-name
+                      (file-name-nondirectory file-name))))
     (cond
+     ((and base-name
+           (string= base-name "todo.org"))
+      :keep)
+
      (mod-buffer-terminator--keep
       :keep)
 
@@ -190,7 +194,7 @@
 
 (setq buffer-terminator-rules-alist
       `(
-        ;; (call-function . mod-buffer-terminator-predicate)
+        (call-function . mod-buffer-terminator-predicate)
 
         ;; Keep active buffers.
         ;; (This can be customized with `buffer-terminator-inactivity-timeout'
@@ -345,7 +349,8 @@
   "Terminate all non visible buffers.
 BUFFERS is a buffer or a list of alive buffers."
   (let* ((buffer-terminator-protect-unsaved-file-buffers nil)
-         (rules `((call-function . mod-buffer-terminator--file-buffer)
+         (rules `((call-function . mod-buffer-terminator-predicate)
+                  (call-function . mod-buffer-terminator--file-buffer)
                   (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
                   ;; (keep-buffer-property . process)
                   ;; (keep-buffer-property . special)
