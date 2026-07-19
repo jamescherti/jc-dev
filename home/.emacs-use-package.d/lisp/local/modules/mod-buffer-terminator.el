@@ -290,26 +290,18 @@
   ;;   (let ((inhibit-message t))
   ;;     (eglot-shutdown-all)))
 
-  (let ((inhibit-redisplay t))
-    ;; Delete frames
-    (delete-other-frames)
+  (if (fboundp 'easysession-reset)
+      (easysession-reset))
 
-    ;; Close tabs
-    (when (and (bound-and-true-p tab-bar-mode)
-               (fboundp 'tab-bar-close-other-tabs))
-      (tab-bar-close-other-tabs))
+  ;; (mod-buffer-terminator-only)
+  (when-let* ((scratch-buffer (get-scratch-buffer-create)))
+    (with-current-buffer scratch-buffer
+      (erase-buffer))
 
-    ;; Close windows
-    (delete-other-windows)
+    (set-window-buffer nil scratch-buffer))
 
-    ;; (mod-buffer-terminator-only)
-    (when-let* ((scratch-buffer (get-scratch-buffer-create)))
-      (with-current-buffer scratch-buffer
-        (erase-buffer))
-
-      (set-window-buffer nil scratch-buffer))
-
-    (mod-buffer-terminator-kill-all-buffers)))
+  ;; Kill hidden buffers too
+  (mod-buffer-terminator-kill-all-buffers))
 
 (defun mod-buffer-terminator-toggle-keep ()
   "Docstring."
