@@ -286,20 +286,30 @@
 (defun mod-buffer-terminator-empty ()
   "Kill all buffers."
   (interactive)
-  (when (fboundp 'eglot-shutdown-all)
-    (let ((inhibit-message t))
-      (eglot-shutdown-all)))
+  ;; (when (fboundp 'eglot-shutdown-all)
+  ;;   (let ((inhibit-message t))
+  ;;     (eglot-shutdown-all)))
 
-  (when (fboundp 'easysession-reset)
-    (easysession-reset))
+  (let ((inhibit-redisplay t))
+    ;; Delete frames
+    (delete-other-frames)
 
-  (mod-buffer-terminator-kill-all-buffers)
+    ;; Close tabs
+    (when (and (bound-and-true-p tab-bar-mode)
+               (fboundp 'tab-bar-close-other-tabs))
+      (tab-bar-close-other-tabs))
 
-  ;; (mod-buffer-terminator-only)
-  (with-current-buffer (get-scratch-buffer-create)
-    (erase-buffer))
+    ;; Close windows
+    (delete-other-windows)
 
-  (scratch-buffer))
+    ;; (mod-buffer-terminator-only)
+    (when-let* ((scratch-buffer (get-scratch-buffer-create)))
+      (with-current-buffer scratch-buffer
+        (erase-buffer))
+
+      (set-window-buffer nil scratch-buffer))
+
+    (mod-buffer-terminator-kill-all-buffers)))
 
 (defun mod-buffer-terminator-toggle-keep ()
   "Docstring."
