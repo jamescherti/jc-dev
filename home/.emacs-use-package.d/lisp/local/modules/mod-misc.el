@@ -1616,8 +1616,6 @@ any new ones."
             #'(lambda()
                 ;; Disable auto-hscroll in embark-collect buffers.
                 (setq-local auto-hscroll-mode nil)
-                ;; TODO: What sets this to t?
-                ;; (setq make-window-start-visible nil)
                 (my-disable-fringe-truncation-arrow)))
 
   (with-eval-after-load 'consult

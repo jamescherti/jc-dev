@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-;;; Fix compilation buffer
+;;; Fix Embark and compilation buffer
 
 ;; When an action is triggered from an Embark Collect buffer, Embark does not
 ;; execute the command directly within that buffer. Instead, it temporarily
@@ -66,6 +66,46 @@
         display-buffer-same-window
         (inhibit-same-window . nil))
       display-buffer-alist)
+
+;;; Fix Embark previous-buffer
+
+(defun mod-same-window--fix-embark-collect-window-history (&rest _)
+  "Remove intermediate buffer from history.
+This ensures `previous-buffer' returns to Embark Collect.
+
+The issue that this function fixes is due to how Embark establishes context
+before executing an action.
+
+When you trigger an action in an *Embark Collect* buffer (for example, by
+clicking or pressing RET), Embark does not jump directly from the collect buffer
+to the target. Instead, it follows this sequence:
+- Embark temporarily switches the current window back to the original buffer
+  where you initially invoked the search or command.
+- It executes the action from that original context.
+
+The action runs and opens the target buffer. Because your
+`display-buffer-alist' forces `display-buffer-same-window', the target buffer
+replaces the original buffer in the same window.
+
+Every time a buffer replaces another in the same window, Emacs records the
+previous buffer in the window history (window-prev-buffers). Because of the
+intermediate context switch, your window history stack looks like this:
+
+- Current buffer: The destination target.
+- History index 0: The original buffer (the intermediate step).
+- History index 1: The *Embark Collect* buffer.
+
+When you call `previous-buffer' the first time, you land on history index 0.
+Calling it a second time takes you to history index 1 (the collect buffer)."
+  (let* ((win (selected-window))
+         (prev (window-prev-buffers win)))
+    (when (and (>= (length prev) 2)
+               (string-match-p "Embark Collect" (buffer-name (car (nth 1 prev)))))
+      (set-window-prev-buffers win (cdr prev)))))
+
+(with-eval-after-load 'embark
+  (advice-add 'embark-collect-choose :after
+              #'mod-same-window--fix-embark-collect-window-history))
 
 ;;; Always current window
 
