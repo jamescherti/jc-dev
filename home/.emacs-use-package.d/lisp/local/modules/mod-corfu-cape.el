@@ -30,14 +30,14 @@
 ;;; Icons corfu
 
 (lightemacs-use-package corfu-popupinfo
-  :ensure nil
+  :ensure nil ; This is part of corfu
   :commands corfu-popupinfo-mode
   :hook
   (corfu-mode . corfu-popupinfo-mode)
-  :custom
-  (corfu-popupinfo-delay '(1.0 . 0.6))
-  (corfu-popupinfo-max-width 80)
-  (corfu-popupinfo-max-height 15))
+  :init
+  (setq corfu-popupinfo-delay '(1.25 . 0.5))
+  (setq corfu-popupinfo-max-width 80)
+  (setq corfu-popupinfo-max-height 15))
 
 ;; (lightemacs-use-package nerd-icons-completion
 ;;   :if (display-graphic-p)

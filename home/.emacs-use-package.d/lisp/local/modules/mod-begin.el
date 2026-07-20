@@ -58,6 +58,11 @@
   (add-hook-text-editing-modes 'corfu-mode)
   (add-hook 'minibuffer-setup-hook 'corfu-mode))
 
+(with-eval-after-load 'le-company
+  (add-hook-text-editing-modes 'company-mode)
+  ;; (add-hook 'minibuffer-setup-hook 'company-mode)
+  )
+
 (setq lightemacs-saveplace-target-hooks nil)
 (add-hook-text-editing-modes 'save-place-local-mode)
 

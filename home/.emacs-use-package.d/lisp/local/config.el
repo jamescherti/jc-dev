@@ -779,6 +779,8 @@ subsequent GCC invocations."
                            le-marginalia
 
                            le-corfu
+                           ;; mod-company
+
                            le-cape
                            mod-corfu-cape
 

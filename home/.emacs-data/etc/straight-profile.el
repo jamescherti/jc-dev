@@ -82,6 +82,7 @@
  ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
  ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
  ("apheleia" . "14a0bb4454fb2cc3b5b377619288b742ce117da5") ; RSS RELEASE
+ ("company-mode" . "24a4a6b129546a1ce2fcb3e3c5948259dff00685")
 
  ;; No tags
  ("emacs-elisp-autofmt" . "fdae9054c55804def507cf7045c8460573d876a9")

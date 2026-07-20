@@ -651,6 +651,22 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Enable automatic buffer refresh when VC-controlled files change externally.
 ;; (setq auto-revert-check-vc-info t)
 
+;;; completion preview
+
+;; Completion preview displays only one suggestion at a time.
+
+;; (setq completion-preview-commands '(self-insert-command
+;;                                     insert-char
+;;                                     analyze-text-conversion
+;;                                     completion-preview-insert-word))
+;; (setq completion-preview-exact-match-only nil)
+;; (setq completion-preview-idle-delay 0.3)
+;; (setq completion-preview-ignore-case t)
+;; (setq completion-preview-minimum-symbol-length 2)
+;; (setq completion-preview-sort-function #'identity)
+;;
+;; (global-completion-preview-mode 1)
+
 ;;; Disabled defaults
 
 ;; Truncate the compilation buffer to avoid excessive memory use by limiting its
