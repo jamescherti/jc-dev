@@ -26,7 +26,9 @@
 ;; Reuses a single buffer for Dired navigation instead of opening a new buffer
 ;; for every directory. This keeps your buffer list clean and prevents Dired
 ;; buffer proliferation.
-(setq dired-kill-when-opening-new-dired-buffer t)
+;;
+;; NOTE: Disabled because too buffers in other tabs are killed.
+;; (setq dired-kill-when-opening-new-dired-buffer t)
 
 ;; Allows wdired to automatically create missing parent directories when you
 ;; rename files to paths that do not exist yet. This makes bulk project
