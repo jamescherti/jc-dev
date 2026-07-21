@@ -76,6 +76,9 @@
  ;;-----------------------------------------------------------------------------
  ;; Outdated tag
  ;; TODO Add to RSS
+ ("groovy-emacs-modes" . "7b8520b2e2d3ab1d62b35c426e17ac25ed0120bb")
+ ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
+ ("jinja2-mode". "03e5430a7efe1d163a16beaf3c82c5fd2c2caee1")
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")

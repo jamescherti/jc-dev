@@ -664,9 +664,9 @@ only if they are not already available."
 
 ;;; jinja2-mode and csv-mode
 
-;; (lightemacs-use-package jinja2-mode
-;;   :commands jinja2-mode
-;;   :mode ("\\.j2\\'" . jinja2-mode))
+(lightemacs-use-package jinja2-mode
+  :commands jinja2-mode
+  :mode ("\\.j2\\'" . jinja2-mode))
 
 ;;; ultisnips-mode
 
@@ -675,16 +675,17 @@ only if they are not already available."
   :mode ("\\.snippets\\'" . ultisnips-mode))
 
 ;;; Jenkinsfile
-;; (lightemacs-use-package jenkinsfile-mode
-;;   :commands jenkinsfile-mode
-;;   :mode
-;;   (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
-;;    ("/Jenkinsfile\\'" . jenkinsfile-mode))
-;;   :init
-;;   ;; (add-to-list 'auto-mode-alist '("/Jenkinsfile.*\\'" . jenkinsfile-mode))
-;;   ;; (add-to-list 'auto-mode-alist '("Jenkinsfile[^/]*\\'" . jenkinsfile-mode))
-;;   ;; (add-to-list 'auto-mode-alist '("Jenkinsfile\\'" . jenkinsfile-mode))
-;;   )
+
+(lightemacs-use-package jenkinsfile-mode
+  :commands jenkinsfile-mode
+  :mode
+  (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
+   ("/Jenkinsfile\\'" . jenkinsfile-mode))
+  ;; :init
+  ;; (add-to-list 'auto-mode-alist '("/Jenkinsfile.*\\'" . jenkinsfile-mode))
+  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile[^/]*\\'" . jenkinsfile-mode))
+  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile\\'" . jenkinsfile-mode))
+  )
 
 ;;; BASIC
 ;; (lightemacs-use-package basic-mode
