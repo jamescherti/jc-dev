@@ -504,6 +504,21 @@ tasks:
     remote:
       upstream: https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes
 
+  - git: git@github.com:jamescherti/yaml-mode
+    path: forks/yaml-mode
+    remote:
+      upstream: https://github.com/yoshiki/yaml-mode
+
+  - git: git@github.com:jamescherti/dash.el
+    path: forks/dash.el
+    remote:
+      upstream: https://github.com/magnars/dash.el
+
+  - git: git@github.com:jamescherti/emacs-elisp-autofmt
+    path: forks/emacs-elisp-autofmt
+    remote:
+      upstream: https://codeberg.org/ideasman42/emacs-elisp-autofmt
+
   # END: UNMAINTAINED PACKAGES THAT I FORKED
   # ----------------------------------------------------------------------------
 

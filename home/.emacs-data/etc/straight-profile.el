@@ -16,6 +16,7 @@
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
  ("ztree" . "b99966d37e3197ac48454780f02278ba4ed5ed51")
+ ("yaml-mode" . "96ef0201101a7cd591febd5886633154dae8834c")
 
  ;; Unmaintained (Forked: jamescherti)
  ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
@@ -38,6 +39,9 @@
  ("org-appear" . "77d23efec5f5c25fc0798364d2b51a3ce3d8d518")
  ("paredit" . "57c9f26c51e2e33ad70c45d2c393b1e458e95685")
  ("vimrc-mode" . "42c23497381d5f8a3417aa592c74370a181b820c")
+
+ ;; Maintained
+ ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE
 
  ;; No tags (Forked: jamescherti)
  ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
@@ -65,7 +69,6 @@
  ("outline-indent.el" . "7d264eb9107f9f0967f3f79deebd75c977c99d94")
  ("ultisnips-mode.el" . "fa759a97109d215e71c17b063250070b843c54ce")
  ("vim-tab-bar.el" . "38ceb1d9a1fb3f67acaa11422f49c7ab5e744b52")
- ("yaml-mode" . "96ef0201101a7cd591febd5886633154dae8834c")
  ("buffer-guardian.el" . "323eb562acf50ad117e614feadc0ee4b63eb817e")
  ("buffer-terminator.el" . "11bf6a6a77b340416eb07f40d0eb7858f1fa5d5b")
  ("bufferfile.el" . "3d39fc70dc644dbea438e3e653ba176a33019ba6")
@@ -95,7 +98,8 @@
  ;; Repositories
  ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")
  ("gnu-elpa-mirror" . "1a75d552f3501e228e4390e71dc709d1b391dfdc")
- ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
+ ;; ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
+ ("melpa" . "6a860645041c1ca63437f4ce06ad73bfdd3ff356")
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
 
@@ -109,7 +113,6 @@
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
  ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
- ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE
  ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
  ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE

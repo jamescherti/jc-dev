@@ -1236,6 +1236,24 @@ This uses an around advice to trap errors and verify file timestamps."
             (groovy-mode
              :type git :host github
              :repo "jamescherti/groovy-emacs-modes")
+            (shell-pop
+             :type git :host github
+             :repo "jamescherti/shell-pop-el")
+            (yaml-mode
+             :type git :host github
+             :repo "jamescherti/yaml-mode")
+            (markdown-mode
+             :type git :host github
+             :repo "jamescherti/markdown-mode")
+            (dash
+             :type git :host github
+             :repo "jamescherti/dash.el")
+            (elisp-autofmt
+             :type git :host github
+             :repo "jamescherti/emacs-elisp-autofmt")
+            (melpa
+             :type git :host github
+             :repo "jamescherti/melpa")
 
             ;; Straight
             (straight
