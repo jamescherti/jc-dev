@@ -238,6 +238,12 @@ install_gnome_extension() {
   rsync -ar --delete --delete-excluded --exclude '.git' \
     "${rsync_src}" "${dest_dir}"
 
+  if [[ -d "${dest_dir}/schemas" ]]; then
+    (
+      cd "${dest_dir}"
+      glib-compile-schemas schemas
+    )
+  fi
   # if [[ -n "${post_cmd}" ]]; then
   #   eval "${post_cmd}"
   # fi
