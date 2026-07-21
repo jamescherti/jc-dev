@@ -49,9 +49,9 @@
 ;; - Default behavior: Pressing 'C-o' returns you directly to 'main.py'.
 ;; - With this override: 'C-o' remains confined to the jump history
 ;;   within 'utils.py'. You must manually switch back using 'C-x b'.
-(if (fboundp 'evil--jump-handle-buffer-crossing)
-    (advice-add 'evil--jump-handle-buffer-crossing :override #'ignore)
-  (message "WARNING: evil--jump-handle-buffer-crossing is undefined."))
+;; (if (fboundp 'evil--jump-handle-buffer-crossing)
+;;     (advice-add 'evil--jump-handle-buffer-crossing :override #'ignore)
+;;   (message "WARNING: evil--jump-handle-buffer-crossing is undefined."))
 
 ;;; undo
 

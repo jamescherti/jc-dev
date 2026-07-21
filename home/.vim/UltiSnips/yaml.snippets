@@ -569,6 +569,7 @@ endsnippet
 
 snippet emerge
 - name: Emerge install $1
+  when: ansible_facts.os_family == "Gentoo"
   community.general.portage:
     state: present
     package: ${1:package_name}
