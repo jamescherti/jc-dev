@@ -34,35 +34,17 @@ MAX_WORKERS=6
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 config-firefox() {
-  # JC-FIREFOX-SETTINGS
-  LIST_FIREFOX_DIRS=("$HOME/.mozilla/firefox"
-    "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox")
-  for firefox_dir in "${LIST_FIREFOX_DIRS[@]}"; do
-    if [[ -d "$firefox_dir" ]]; then
-      # git_clone https://github.com/jamescherti/jc-firefox-settings \
-      #   "$GIT_CLONE_DIR/jc-firefox-settings"
-      # "$GIT_CLONE_DIR/jc-firefox-settings/install.sh"
-      ~/src/dotfiles/jc-firefox-settings/install.sh
-      break
-    fi
-  done
+  ~/src/dotfiles/jc-firefox-settings/install.sh
 }
 
 config-xfce() {
   # JC-XFCE-SETTINGS
   if [[ "${XDG_CURRENT_DESKTOP:-}" = XFCE ]]; then
-    # JC-XFCE-SETTINGS
-    # git_clone \
-    #   https://github.com/jamescherti/jc-xfce-settings \
-    #   "$GIT_CLONE_DIR/jc-xfce-settings"
-    # cd "$GIT_CLONE_DIR/jc-xfce-settings"
-
     cd ~/src/dotfiles/jc-xfce-settings
     ./jc-xfce-settings.sh
 
     # Local XFCE settings
-    cd "$SCRIPT_DIR/data/settings/settings-xfce4/"
-    ./settings-xfce4.sh
+    "$SCRIPT_DIR/data/settings/settings-xfce4/settings-xfce4.sh"
   fi
 }
 
@@ -214,13 +196,8 @@ install_gnome_extension() {
 config-gnome() {
   # JC-GNOME-SETTINGS
   if [[ "${XDG_CURRENT_DESKTOP:-}" = GNOME ]]; then
-    # JC-GNOME-SETTINGS
-    # git_clone \
-    #   https://github.com/jamescherti/jc-gnome-settings \
-    #   "$GIT_CLONE_DIR/jc-gnome-settings"
-    # "$GIT_CLONE_DIR/jc-gnome-settings/jc-gnome-settings.sh"
-
-    cd ~/src/dotfiles/jc-gnome-settings
+    ~/src/dotfiles/jc-gnome-settings/jc-gnome-settings.sh
+    ~/src/dotfiles/jc-gnome-settings/misc/jc-gnome-shortcuts.sh
 
     # LOCAL GNOME SETTINGS
     local gnome_scripts_path="$SCRIPT_DIR/data/settings/settings-gnome"
