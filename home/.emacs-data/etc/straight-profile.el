@@ -61,7 +61,7 @@
  ("compile-angel.el" . "cb87bda462cdfdd39817148a3896b304865f668f")
  ("persist-text-scale.el" . "c741d0a21a06b6878518dd75983eb7ca65ddc385")
  ("quick-fasd.el" . "40ac0f067b8c24ab4ac8283a9bf79655e586304f")
- ("quick-sdcv.el" . "cd4e39f2b71b5789c629c822d099044fadc32b74")
+ ("quicK-sdcv.el" . "cd4e39f2b71b5789c629c822d099044fadc32b74")
  ("outline-indent.el" . "7d264eb9107f9f0967f3f79deebd75c977c99d94")
  ("ultisnips-mode.el" . "fa759a97109d215e71c17b063250070b843c54ce")
  ("vim-tab-bar.el" . "38ceb1d9a1fb3f67acaa11422f49c7ab5e744b52")

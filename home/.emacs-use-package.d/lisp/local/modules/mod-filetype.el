@@ -676,6 +676,9 @@ only if they are not already available."
 
 ;;; Jenkinsfile
 
+(lightemacs-use-package groovy-mode
+  :commands groovy-mode)
+
 (lightemacs-use-package jenkinsfile-mode
   :commands jenkinsfile-mode
   :mode

@@ -280,11 +280,6 @@ tasks:
     remote:
       upstream: https://github.com/emacsorphanage/git-gutter/
 
-  - git: git@github.com:jamescherti/jinja2-mode
-    path: forks/jinja2-mode
-    remote:
-      upstream: https://github.com/paradoxxxzero/jinja2-mode
-
   - git: git@github.com:jamescherti/vline
     path: forks/vline
 
@@ -493,6 +488,21 @@ tasks:
     path: forks/vimrc-mode
     remote:
       upstream: https://github.com/mcandre/vimrc-mode
+
+  - git: git@github.com:jamescherti/jinja2-mode
+    path: forks/jinja2-mode
+    remote:
+      upstream: https://github.com/paradoxxxzero/jinja2-mode/
+
+  - git: git@github.com:jamescherti/jenkinsfile-mode
+    path: forks/jenkinsfile-mode
+    remote:
+      upstream: https://github.com/john2x/jenkinsfile-mode
+
+  - git: git@github.com:jamescherti/groovy-emacs-modes
+    path: forks/groovy-emacs-modes
+    remote:
+      upstream: https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes
 
   # END: UNMAINTAINED PACKAGES THAT I FORKED
   # ----------------------------------------------------------------------------

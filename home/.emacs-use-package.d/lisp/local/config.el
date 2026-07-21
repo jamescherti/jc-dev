@@ -1227,6 +1227,15 @@ This uses an around advice to trap errors and verify file timestamps."
             (vimrc-mode
              :type git :host github
              :repo "jamescherti/vimrc-mode")
+            (jinja2-mode
+             :type git :host github
+             :repo "jamescherti/jinja2-mode")
+            (jenkinsfile-mode
+             :type git :host github
+             :repo "jamescherti/jenkinsfile-mode")
+            (groovy-mode
+             :type git :host github
+             :repo "jamescherti/groovy-emacs-modes")
 
             ;; Straight
             (straight
