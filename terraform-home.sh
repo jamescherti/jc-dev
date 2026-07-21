@@ -284,6 +284,12 @@ config-gnome() {
       "Caffeine" \
       "caffeine@patapon.info" \
       "${HOME}/src/forks/gnome-shell-extension-caffeine/caffeine@patapon.info"
+
+    # Hide minimized
+    install_gnome_extension \
+      "hide-minimized" \
+      "hide-minimized@danigm.net" \
+      "${HOME}/src/forks/hide-minimized"
   fi
 }
 
