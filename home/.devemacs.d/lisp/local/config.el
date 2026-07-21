@@ -100,7 +100,9 @@
 (setq native-comp-deferred-compilation nil)
 (setq package-native-compile nil)
 
-(setq lightemacs-theme-default-font "Iosevka Term-13")
+;; (setq lightemacs-theme-default-font "Iosevka Medium")
+;; (setq lightemacs-theme-default-font "Iosevka SemiBold")
+(setq lightemacs-theme-default-font "Iosevka Term SemiBold")
 (setq lightemacs-saveplace-recenter-after-find-file t)
 
 ;;; Lightemacs

@@ -1115,7 +1115,7 @@ DIR is the directory."
     (my-consult-grep-dir (or project-root (buffer-cwd)))))
 
 ;; (evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-project)
-;; (evil-define-key 'normal 'global (kbd "gr") 'my-consult-grep-dir)
+(evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-dir)
 
 ;; (evil-define-key 'normal 'global (kbd "<leader>gR") 'my-consult-grep-dir)
 (evil-define-key 'normal 'global (kbd "<leader>gr") 'my-consult-grep-project)

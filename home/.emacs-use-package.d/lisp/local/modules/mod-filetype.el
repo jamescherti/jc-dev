@@ -412,7 +412,7 @@ only if they are not already available."
 ;;; Ansible: Setup
 
 (defun my-setup-ansible-mode ()
-  "Setup `ansible-mode'."
+  "Set up `ansible-mode'."
   (set-syntax-table (copy-syntax-table))
 
   ;; For pip_pkg==1.0.0
@@ -431,7 +431,10 @@ only if they are not already available."
   ;; Also treat $ as punctuation, as it is commonly used for embedding
   ;; languages like Bash in Ansible files and for GitHub Actions
   ;; variables.
-  ;; (modify-syntax-entry ?$ ".")
+  (modify-syntax-entry ?$ ".")
+
+  ;; Fixes symbols in comments (e.g. "This is xyz, a variable...")
+  (modify-syntax-entry ?, ".")
 
   ;; Ensures that (.), (,) and (!) are treated as part of symbols or words
   ;; within YAML documents. In YAML, these characters may be used as part
@@ -439,7 +442,6 @@ only if they are not already available."
   ;;
   ;; (.) is for symbols such as: ansible.builtin.command
   (modify-syntax-entry ?. "_")
-  (modify-syntax-entry ?, "_")
   (modify-syntax-entry ?! "_"))
 
 (add-hook 'ansible-mode-hook #'my-setup-ansible-mode)

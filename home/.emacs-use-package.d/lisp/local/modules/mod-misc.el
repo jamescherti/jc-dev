@@ -1375,6 +1375,13 @@ any new ones."
   (setq ispell-program-name "aspell")
   (setq ispell-local-dictionary "en_US")
 
+  ;; TODO use this to ignore emacs symbols
+  ;; (defun my-flyspell-ignore-short-words (beg end _info)
+  ;;   "Instruct Flyspell to ignore words with 3 or fewer characters."
+  ;;   (<= (- end beg) 3))
+  ;;
+  ;; (add-hook 'flyspell-incorrect-hook #'my-flyspell-ignore-short-words)
+
   ;; Configures Aspell's suggestion mode to "ultra", which provides more
   ;; aggressive and detailed suggestions for misspelled words.
   ;;
@@ -1404,7 +1411,7 @@ any new ones."
                             ;; appear in the generated suggestion list.
                             "--sug-mode=ultra"
                             ;; Ignore 1 and 2 characters words
-                            "--ignore=2"
+                            "--ignore=3"
                             ;; "--ignore-case"
                             ;; This flag instructs Aspell to accept words formed
                             ;; by combining two or more valid dictionary words

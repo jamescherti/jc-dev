@@ -78,6 +78,8 @@
 (setq lightemacs-apheleia-local-target-hooks nil)
 (setq lightemacs-apheleia-global-target-hooks nil)
 (setq lightemacs-flymake-target-hooks nil)
+(setq lightemacs-dtrt-indent-global-target-hooks nil)
+(setq lightemacs-dtrt-indent-local-target-hooks nil)
 
 (setq lightemacs-package-lint-flymake-target-hooks nil)
 
@@ -176,7 +178,7 @@
   :commands lazy-loader-mode
   :hook (lightemacs-after-init . lazy-loader-mode)
   :init
-  (setq lazy-loader-verbose t)
+  (setq lazy-loader-verbose 'inhibit-message)
   (setq lazy-loader-files (delq nil
                                 (list (when (bound-and-true-p file-path-todo)
                                         file-path-todo))))

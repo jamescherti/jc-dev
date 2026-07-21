@@ -62,7 +62,9 @@ called to initialize the buffer."
   :group 'lazy-loader)
 
 (defcustom lazy-loader-verbose nil
-  "Enable displaying verbose messages."
+  "Enable displaying verbose messages.
+Set this to \='inhibit-message to display messages in the *Messages* buffer,
+but not in the echo area."
   :type 'boolean
   :group 'lazy-loader)
 
@@ -73,7 +75,10 @@ called to initialize the buffer."
   (declare (indent 0) (debug t))
   `(progn
      (when lazy-loader-verbose
-       (message (concat "[lazy-loader] " ,(car args)) ,@(cdr args)))))
+       (let ((inhibit-message (if (eq lazy-loader-verbose 'inhibit-message)
+                                  t
+                                inhibit-message)))
+         (message (concat "[lazy-loader] " ,(car args)) ,@(cdr args))))))
 
 (defvar lazy-loader--done nil)
 (defun lazy-loader--load ()

@@ -693,12 +693,11 @@ subsequent GCC invocations."
                                               python-ts-mode))
 
 ;; Define your preferred font name here
-(setq lightemacs-theme-default-font "Iosevka Term")
+;; (setq lightemacs-theme-default-font "Iosevka Term")
+;; (setq lightemacs-theme-default-font "Iosevka Medium")
+;; (setq lightemacs-theme-default-font "Iosevka SemiBold")
+(setq lightemacs-theme-default-font "Iosevka Term SemiBold")
 
-(setq lightemacs-dtrt-indent-global-target-hooks '())
-(setq lightemacs-dtrt-indent-local-target-hooks '(prog-mode-hook
-                                                  text-mode-hook
-                                                  conf-mode-hook))
 (setq lightemacs-reduce-messages t)
 (setq lightemacs-saveplace-recenter-after-find-file t)
 
@@ -801,7 +800,7 @@ subsequent GCC invocations."
                            le-recentf
                            le-savehist
                            le-saveplace
-                           ;; le-winner
+                           le-winner ; used by ediff
                            le-elec-pair
 
                            ;; le-which-key

@@ -108,6 +108,10 @@ This function is intended for use as :around advice."
       (when-let* ((file-name (buffer-file-name (buffer-base-buffer)))
                   (base-name (when file-name
                                (file-name-nondirectory file-name))))
+        (when (and (fboundp 'dtrt-indent-mode)
+                   (file-in-directory-p file-name "~/src/forks"))
+          (dtrt-indent-mode 1))
+
         (when env-allow-reformatters
           ;; All modes
           (when (and (fboundp 'apheleia-mode)
