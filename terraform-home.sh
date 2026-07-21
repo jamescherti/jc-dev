@@ -272,8 +272,6 @@ config-gnome() {
       "run-or-raise" \
       "run-or-raise@edvard.cz" \
       "${HOME}/src/forks/run-or-raise"
-    cd ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz \
-      && glib-compile-schemas schemas
 
     # HideActivities
     install_gnome_extension \
