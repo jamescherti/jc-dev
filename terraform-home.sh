@@ -280,8 +280,6 @@ config-gnome() {
       "${HOME}/src/forks/HideActivities"
 
     # Caffeine
-    git -C "${HOME}/src/forks/gnome-shell-extension-caffeine" \
-      checkout be31208d8ab74cfae215354f242d8703ec3792a4
     install_gnome_extension \
       "Caffeine" \
       "caffeine@patapon.info" \
