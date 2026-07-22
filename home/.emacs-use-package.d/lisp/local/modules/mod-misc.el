@@ -212,10 +212,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; delete outdated early-init.elc
 
-(with-eval-after-load 'compile-angel
-  ;; TODO Remove this from the compile-angel defaults
-  (setq compile-angel-excluded-path-suffixes
-        (delete "/early-init.el" compile-angel-excluded-path-suffixes)))
+;;; TODO Interesting for lightemacs?
 
 (let ((early-init-el (expand-file-name "early-init.el" lightemacs-user-directory))
       (early-init-elc (expand-file-name "early-init.elc" lightemacs-user-directory)))
@@ -1557,6 +1554,9 @@ any new ones."
                    "This function supports only emacs-lisp-mode"
 
                    "Cannot find a suitable checker"
+
+                   ;; ibuffer when the user presses enter on [ section ]
+                   "No buffer on this line"
 
                    ;; "Attempt to delete the sole visible or iconified frame"
                    ;; (push "Attempt to delete the sole visible or iconified frame" debug-ignored-errors)

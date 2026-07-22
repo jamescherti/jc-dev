@@ -142,10 +142,15 @@
 
 (defun mod-buffer-terminator-predicate ()
   "Return :kill, :keep, or nil."
-  (let* ((file-name (buffer-file-name (buffer-base-buffer)))
+  (let* ((buffer-name (buffer-name))
+         (file-name (buffer-file-name (buffer-base-buffer)))
          (base-name (when file-name
                       (file-name-nondirectory file-name))))
     (cond
+     ;; ((and buffer-name
+     ;;       (string-prefix-p " " buffer-name))
+     ;;  :keep)
+
      ((and base-name
            (string= base-name "todo.org"))
       :keep)
@@ -385,7 +390,9 @@ BUFFERS is a buffer or a list of alive buffers."
                (file-name (cdr (assq 'file-name buffer-info))))
           (message "[MOD-BUFFER-TERMINATOR] Killed non visible: %s (%s)"
                    buffer-name (if file-name file-name major-mode)))))
-    (message "[MOD-BUFFER-TERMINATOR] Terminated %s buffers" (length result))))
+    (if (= (length result) 0)
+        (message "Nothing to do.")
+      (message "Terminated %s buffers." (length result)))))
 
 (defun mod-buffer-terminator-kill-all-buffers (&optional buffers)
   "Kill all visible buffers.

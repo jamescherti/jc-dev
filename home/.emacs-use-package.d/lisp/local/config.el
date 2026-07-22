@@ -50,7 +50,7 @@
 (setq compile-angel-cache-file-truename t)
 
 (setq compile-angel-verbose t)
-(setq compile-angel-debug nil)
+(setq compile-angel-debug t)
 
 (setq buffer-terminator-verbose nil)
 (setq buffer-terminator-debug nil)

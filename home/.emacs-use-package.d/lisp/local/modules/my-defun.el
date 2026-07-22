@@ -48,9 +48,9 @@ each buffer."
       (let ((file-path buffer-file-name))
         ;; Check if the buffer is visiting a file and that file does not exist
         (when (and file-path
-                   (not (file-exists-p file-path))
-                   (not (bound-and-true-p archive-subfile-mode))
-                   (not (bound-and-true-p tar-subfile-mode)))
+                   (and (not (bound-and-true-p archive-subfile-mode))
+                        (not (bound-and-true-p tar-subfile-mode))
+                        (not (file-exists-p file-path))))
           (if (y-or-n-p (format "File '%s' does not exist on disk. Save it? "
                                 file-path))
               (let ((parent-dir (file-name-directory file-path))
