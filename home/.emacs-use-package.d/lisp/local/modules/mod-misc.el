@@ -4036,7 +4036,7 @@ properly handles remote files over Tramp), applying the setting only if
   ;; (advice-add 'diff-hl-mode :before #'my-diff-hl-set-upstream-reference)
   )
 
-(add-hook-text-editing-modes 'my-setup-diff-hl-mode)
+;; (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
 ;; (setq-default diff-hl-reference-revision "origin/main")
 (setq diff-hl-ask-before-revert-hunk t)

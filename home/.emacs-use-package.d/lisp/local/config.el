@@ -382,6 +382,9 @@
                    ;; structure regardless of whether it is compiled or not.
                    "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
 
+                   ;; Yasnippet
+                   "\\(?:[/\\\\]\\.yas-setup\\.el\\(?:\\.gz\\)?$\\)"
+
                    ;; The *-autoloads.el and *-loaddefs.el files are
                    ;; automatically generated indices. Every time a package is
                    ;; installed or updated, these files are overwritten. If you

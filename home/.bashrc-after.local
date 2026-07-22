@@ -514,7 +514,6 @@ alias gs="git show" # avoid typo
 # alias memacs=minimal-emacs
 # alias real-emacs='command emacs'
 # alias emacs=emacs-edit
-# alias e=devemacs
 
 # Aliases
 alias git-sync-upstream='so git-sync-upstream'
@@ -562,9 +561,12 @@ if type -P git-smartmv >/dev/null 2>&1; then
 fi
 
 alias minimal-emacs='command emacs --init-directory=~/.minimal-emacs.d'
-alias me=minimal-emacs
 
-alias e=emacs-edit
+# alias e=emacs-edit
+alias e='devemacs -nw'
+alias me='devemacs -nw'
+alias vim='devemacs -nw'
+alias emacs=smart-editor
 
 is-emacs-server-running() {
   local result
@@ -584,7 +586,7 @@ smart-editor() {
   fi
 }
 
-alias vim=smart-editor
+# alias vim=smart-editor
 
 alias bf="batchfetch"
 

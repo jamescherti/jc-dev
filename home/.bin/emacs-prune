@@ -66,9 +66,9 @@ cleanup-emacs-files() {
     fi
 
     if [[ "$HAS_FD" == true ]]; then
-      fd --type d --hidden --no-ignore --max-depth 1 --glob '.*emacs*.d' "$HOME"
+      fd --type d --hidden --no-ignore --max-depth 1 --glob '.*emacs*.d' --exclude '.devemacs.d' "$HOME"
     else
-      find "$HOME" -maxdepth 1 -type d -name '.*emacs*.d'
+      find "$HOME" -maxdepth 1 -type d -name '.*emacs*.d' ! -name '.devemacs.d'
     fi
   )
 }

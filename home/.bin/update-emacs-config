@@ -133,7 +133,7 @@ custom-emacs() {
   if [[ $# -gt 0 ]]; then
     printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
   fi
-  run-rsync "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
+  rsync "$EMACS_BASE/lisp/local/config.el" "$dest_dir/lisp/local/config.el"
 }
 
 # ------------------------------------------------------------------------------
