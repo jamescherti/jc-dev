@@ -607,32 +607,33 @@ only if they are not already available."
     (progn
       (push '(html-mode . html-ts-mode) major-mode-remap-alist)
       (add-to-list 'auto-mode-alist '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode)))
-  ;; (use-package web-mode
+  ;; (lightemacs-use-package web-mode
   ;;   :commands web-mode
-  ;;   :mode "\\.html?\\'"
-  ;;   :mode "\\.css\\'"
-  ;;   :mode "\\.phtml\\'"
-  ;;   :mode "\\.tpl\\.php\\'"
-  ;;   :mode "\\.[agj]sp\\'"
-  ;;   :mode "\\.as[cp]x\\'"
-  ;;   :mode "\\.erb\\'"
-  ;;   :mode "\\.mustache\\'"
-  ;;   :mode "\\.djhtml\\'"
-  ;;   :mode "\\.php3\\'"
-  ;;   :mode "\\.php\\'"
-  ;;   :custom
-  ;;   (web-mode-enable-auto-pairing t)
-  ;;   ;; Code folding
-  ;;   (web-mode-enable-current-element-highlight t)
-  ;;   ;; (web-mode-enable-current-column-highlight t)
-  ;;   ;; (web-mode-enable-css-colorization t)
-  ;;   ;; (web-mode-enable-block-face t)
-  ;;   ;; (web-mode-enable-part-face t)
-  ;;   ;; (web-mode-enable-comment-interpolation t)
-  ;;   ;; (web-mode-enable-heredoc-fontification t)
-  ;;   (web-mode-markup-indent-offset 2)
-  ;;   (web-mode-css-indent-offset 2)
-  ;;   (web-mode-code-indent-offset 2))
+  ;;   ;; :mode "\\.html?\\'"
+  ;;   ;; :mode "\\.css\\'"
+  ;;   ;; :mode "\\.phtml\\'"
+  ;;   ;; :mode "\\.tpl\\.php\\'"
+  ;;   ;; :mode "\\.[agj]sp\\'"
+  ;;   ;; :mode "\\.as[cp]x\\'"
+  ;;   ;; :mode "\\.erb\\'"
+  ;;   ;; :mode "\\.mustache\\'"
+  ;;   ;; :mode "\\.djhtml\\'"
+  ;;   ;; :mode "\\.php3\\'"
+  ;;   ;; :mode "\\.php\\'"
+  ;;   ;; :custom
+  ;;   ;; (web-mode-enable-auto-pairing t)
+  ;;   ;; ;; Code folding
+  ;;   ;; (web-mode-enable-current-element-highlight t)
+  ;;   ;; ;; (web-mode-enable-current-column-highlight t)
+  ;;   ;; ;; (web-mode-enable-css-colorization t)
+  ;;   ;; ;; (web-mode-enable-block-face t)
+  ;;   ;; ;; (web-mode-enable-part-face t)
+  ;;   ;; ;; (web-mode-enable-comment-interpolation t)
+  ;;   ;; ;; (web-mode-enable-heredoc-fontification t)
+  ;;   ;; (web-mode-markup-indent-offset 2)
+  ;;   ;; (web-mode-css-indent-offset 2)
+  ;;   ;; (web-mode-code-indent-offset 2)
+  ;;   )
 
   (use-package sgml-mode
     :ensure nil
@@ -664,9 +665,9 @@ only if they are not already available."
 
 ;;; jinja2-mode and csv-mode
 
-(lightemacs-use-package jinja2-mode
-  :commands jinja2-mode
-  :mode ("\\.j2\\'" . jinja2-mode))
+;; (lightemacs-use-package jinja2-mode
+;;   :commands jinja2-mode
+;;   :mode ("\\.j2\\'" . jinja2-mode))
 
 ;;; ultisnips-mode
 
