@@ -243,6 +243,8 @@ main() {
   init
   confirm
 
+  rm -f ~/.gitignore_global
+
   copy_dotfiles
   config-jc-dotfiles
   config_gpg

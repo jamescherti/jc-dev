@@ -350,6 +350,36 @@ only if they are not already available."
 ;; (when (my-treesit-language-available-p 'go)
 ;;   (add-to-list 'auto-mode-alist '("\.[gG][oO]\\'" . go-ts-mode)))
 
+;;; jinja2
+
+;; TODO make a plugin
+
+(defvar jinja2-highlight-font-lock-keywords
+  '(("{%\\(?:.\\|\n\\)*?%}" 0 'font-lock-preprocessor-face t)
+    ("{{\\(?:.\\|\n\\)*?}}" 0 'font-lock-preprocessor-face t))
+  "Font-lock keywords for Jinja2 highlighting.")
+
+(define-minor-mode jinja2-highlight-mode
+  "A minor mode to highlight Jinja2 template tags."
+  :lighter nil
+  (if jinja2-highlight-mode
+      (font-lock-add-keywords nil jinja2-highlight-font-lock-keywords)
+    (font-lock-remove-keywords nil jinja2-highlight-font-lock-keywords))
+
+  (if (fboundp 'font-lock-flush)
+      (font-lock-flush)
+    (font-lock-ensure)))
+
+(defun jinja2-autodetect-mode ()
+  "Determine the major mode for a .j2 file and enable `jinja2-highlight-mode'."
+  (interactive)
+  (when buffer-file-name
+    (let ((buffer-file-name (file-name-sans-extension buffer-file-name)))
+      (set-auto-mode)))
+  (jinja2-highlight-mode 1))
+
+(add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-autodetect-mode))
+
 ;;; Yaml and Ansible
 
 (defvar treesit-yaml-available (my-treesit-language-available-p 'yaml))
@@ -374,14 +404,36 @@ only if they are not already available."
   (setq yaml-ts-mode-yamllint-options
         (copy-sequence flymake-yamllint-arguments)))
 
+;;; Ansible
+
+;; (lightemacs-use-package ansible
+;;   :commands ansible-mode
+;;   :config
+;;   (setq ansible-playbook-font-lock
+;;         `(;;(,ansible-section-keywords-regex    (1 ansible-section-face t))
+;;           (,ansible-task-keywords-regex       (1 font-lock-keyword-face t))
+;;           (,ansible-keywords-regex            (1 font-lock-keyword-face t))
+;;           ("^ *- \\(name\\):\\([^#\n]*\\)"
+;;            (1 font-lock-keyword-face t)
+;;            (2 font-lock-string-face t))
+;;           ("\\({{\\)\\([^}]+\\)\\(}}\\)"
+;;            (1 font-lock-builtin-face t)
+;;            (2 font-lock-function-name-face t)
+;;            (3 font-lock-builtin-face t))
+;;           ("\\({%\\)\\([^}]+\\)\\(%}\\)"
+;;            (1 font-lock-builtin-face t)
+;;            (2 font-lock-function-name-face t)
+;;            (3 font-lock-builtin-face t))
+;;           ("\\({#\\)\\([^}]+\\)\\(#}\\)"
+;;            (1 font-lock-comment-delimiter-face t)
+;;            (2 font-lock-comment-face t)
+;;            (3 font-lock-comment-delimiter-face t)))))
+
 (if treesit-yaml-available
     (progn
       ;; (with-eval-after-load 'mod-cleanup
       ;;   (push 'flymake-yamllint mod-cleanup-packages-list)
       ;;   (push 'yaml-mode mod-cleanup-packages-list))
-
-      (define-derived-mode ansible-mode yaml-ts-mode "Ansible"
-        "Major mode for editing Ansible files.")
 
       ;; Remove the auto-mode-alist entry (Useful to prevent yaml-ts-mode from
       ;; activating on ansible-mode)
@@ -392,14 +444,9 @@ only if they are not already available."
         (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))
       (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode))
   ;; non tree sitter
-  (require 'sub-flymake-yamllint)
+  (require 'sub-flymake-yamllint))
 
-  (when (fboundp 'yaml-mode)
-    (define-derived-mode ansible-mode yaml-mode "Ansible"
-      "Major mode for editing Ansible files.")))
-
-;;; Ansible `ansible-mode'
-
+;; NOTE: My Ansible
 (if treesit-yaml-available
     ;; Non tree-sitter
     (define-derived-mode ansible-mode yaml-ts-mode "Ansible"
@@ -408,8 +455,6 @@ only if they are not already available."
   (when (fboundp 'yaml-mode)
     (define-derived-mode ansible-mode yaml-mode "Ansible"
       "Major mode for editing Ansible files.")))
-
-;;; Ansible: Setup
 
 (defun my-setup-ansible-mode ()
   "Set up `ansible-mode'."
@@ -460,19 +505,34 @@ only if they are not already available."
                                    string-end))
 
 ;; When auto-mode-alist is bypassed, use a hook function
-(defun ansible-detect-and-enable-mode ()
+(defun ansible-detect-and-enable-ansible-mode ()
   "Enable `ansible-mode' for YAML files in Ansible-related directories."
-  ;; This works better than auto-mode-alist
+  (cond
+   ((and treesit-yaml-available
+         (fboundp 'yaml-ts-mode)
+         (not (derived-mode-p 'yaml-ts-mode)))
+    (yaml-ts-mode))
+
+   ((and (not treesit-yaml-available)
+         (fboundp 'yaml-mode)
+         (not (derived-mode-p 'yaml-mode)))
+    (yaml-mode))
+
+   ;; (t
+   ;;  (error "Undefined: yaml-mode"))
+   )
+
   (when (and (not (derived-mode-p 'ansible-mode))
              (buffer-file-name (buffer-base-buffer))
              (string-match my-ansible-file-regexp buffer-file-name)
              (fboundp 'ansible-mode))
-    (ansible-mode)))
+    (ansible-mode)
+    (jinja2-highlight-mode)))
 
-(add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-mode))
-(add-hook 'yaml-mode-hook #'ansible-detect-and-enable-mode)
-(add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-mode)
-
+;; (add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-mode))
+;; (add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-detect-and-enable-ansible-mode))
+(add-hook 'yaml-mode-hook #'ansible-detect-and-enable-ansible-mode)
+(add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-ansible-mode)
 
 ;;; Ansible: ansible-doc
 
@@ -603,38 +663,39 @@ only if they are not already available."
 
 ;;; HTML
 
+;; (lightemacs-use-package web-mode
+;;   :commands web-mode
+;;   ;; :mode "\\.html?\\'"
+;;   ;; :mode "\\.css\\'"
+;;   ;; :mode "\\.phtml\\'"
+;;   ;; :mode "\\.tpl\\.php\\'"
+;;   ;; :mode "\\.[agj]sp\\'"
+;;   ;; :mode "\\.as[cp]x\\'"
+;;   ;; :mode "\\.erb\\'"
+;;   ;; :mode "\\.mustache\\'"
+;;   ;; :mode "\\.djhtml\\'"
+;;   ;; :mode "\\.php3\\'"
+;;   ;; :mode "\\.php\\'"
+;;   ;; :custom
+;;   ;; (web-mode-enable-auto-pairing t)
+;;   ;; ;; Code folding
+;;   ;; (web-mode-enable-current-element-highlight t)
+;;   ;; ;; (web-mode-enable-current-column-highlight t)
+;;   ;; ;; (web-mode-enable-css-colorization t)
+;;   ;; ;; (web-mode-enable-block-face t)
+;;   ;; ;; (web-mode-enable-part-face t)
+;;   ;; ;; (web-mode-enable-comment-interpolation t)
+;;   ;; ;; (web-mode-enable-heredoc-fontification t)
+;;   ;; (web-mode-markup-indent-offset 2)
+;;   ;; (web-mode-css-indent-offset 2)
+;;   ;; (web-mode-code-indent-offset 2)
+;;   )
+
+
 (if (my-treesit-language-available-p 'html)
     (progn
       (push '(html-mode . html-ts-mode) major-mode-remap-alist)
       (add-to-list 'auto-mode-alist '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode)))
-  ;; (lightemacs-use-package web-mode
-  ;;   :commands web-mode
-  ;;   ;; :mode "\\.html?\\'"
-  ;;   ;; :mode "\\.css\\'"
-  ;;   ;; :mode "\\.phtml\\'"
-  ;;   ;; :mode "\\.tpl\\.php\\'"
-  ;;   ;; :mode "\\.[agj]sp\\'"
-  ;;   ;; :mode "\\.as[cp]x\\'"
-  ;;   ;; :mode "\\.erb\\'"
-  ;;   ;; :mode "\\.mustache\\'"
-  ;;   ;; :mode "\\.djhtml\\'"
-  ;;   ;; :mode "\\.php3\\'"
-  ;;   ;; :mode "\\.php\\'"
-  ;;   ;; :custom
-  ;;   ;; (web-mode-enable-auto-pairing t)
-  ;;   ;; ;; Code folding
-  ;;   ;; (web-mode-enable-current-element-highlight t)
-  ;;   ;; ;; (web-mode-enable-current-column-highlight t)
-  ;;   ;; ;; (web-mode-enable-css-colorization t)
-  ;;   ;; ;; (web-mode-enable-block-face t)
-  ;;   ;; ;; (web-mode-enable-part-face t)
-  ;;   ;; ;; (web-mode-enable-comment-interpolation t)
-  ;;   ;; ;; (web-mode-enable-heredoc-fontification t)
-  ;;   ;; (web-mode-markup-indent-offset 2)
-  ;;   ;; (web-mode-css-indent-offset 2)
-  ;;   ;; (web-mode-code-indent-offset 2)
-  ;;   )
-
   (use-package sgml-mode
     :ensure nil
     :commands (sgml-mode
@@ -884,6 +945,25 @@ only if they are not already available."
   "Major mode to highlight only # comments."
   (setq font-lock-defaults '(simple-conf-mode-font-lock-keywords))
   (set-syntax-table simple-conf-mode-syntax-table))
+
+;;; DISABLED: polymode
+
+;; (lightemacs-use-package polymode
+;;   :init
+;;   (setq polymode-prefix-key (kbd "C-c n"))
+;;   ;; :config
+;;   ;; (setq polymode-display-output-buffer nil)
+;;   ;; (add-hook 'polymode-init-inner-hook
+;;   ;;           (lambda ()
+;;   ;;             (display-line-numbers-mode -1)
+;;   ;;             (flyspell-mode -1)))
+;;   )
+;;
+;; (lightemacs-use-package poly-markdown
+;;   :mode ("\\.md\\'" . poly-markdown-mode))
+
+;; (lightemacs-use-package poly-ansible
+;;   :mode ("\\.ya?ml\\'" . poly-ansible-mode))
 
 ;;; Provide
 

@@ -47,6 +47,7 @@ options:
     - batchfetch-local.yaml
     - .my-dir-locals.el
     - forks/.my-dir-locals.el
+    - emacs/.my-dir-locals.el
 
 tasks:
   # ----------------------------------------------------------------------------
@@ -212,6 +213,11 @@ tasks:
   # ----------------------------------------------------------------------------
   # Forks
   # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/emacs-ansible
+    path: forks/emacs-ansible
+    remote:
+      upstream: https://gitlab.com/emacs-ansible/emacs-ansible/
+
   - git: git@github.com:jamescherti/ztree
     path: forks/ztree
     remote:

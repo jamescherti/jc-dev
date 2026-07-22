@@ -4819,6 +4819,8 @@ on text following the cursor."
 
 ;;; DISABLED: Flyspell lazy
 
+;; Unmaintained and unnecessary.
+
 ;; (lightemacs-use-package flyspell-lazy
 ;;   :commands flyspell-lazy-mode
 ;;   :config

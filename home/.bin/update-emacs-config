@@ -28,6 +28,30 @@
 
 set -euf -o pipefail
 
+INSTALL_DEVEMACS=false
+if ! PARSED_OPTS=$(getopt -n "$0" -o f -- "$@"); then
+  echo "Usage: $0 [-f]" >&2
+  exit 1
+fi
+eval set -- "$PARSED_OPTS"
+
+while true; do
+  case "$1" in
+  -f)
+    INSTALL_DEVEMACS=true
+    shift
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *)
+    echo "Unexpected error parsing arguments" >&2
+    exit 1
+    ;;
+  esac
+done
+
 # shellcheck disable=SC2317
 error_handler() {
   local errno="$?"
@@ -109,7 +133,7 @@ custom-emacs() {
   if [[ $# -gt 0 ]]; then
     printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
   fi
-  cat "$EMACS_BASE/lisp/local/config.el" >>"$dest_dir/lisp/local/config.el"
+  rsync "$EMACS_BASE/lisp/local/config.el" "$dest_dir/lisp/local/config.el"
 }
 
 # ------------------------------------------------------------------------------
@@ -131,10 +155,12 @@ custom-emacs "emacs-straight"
 # ------------------------------------------------------------------------------
 lightemacs-init-files "$DEST_DIR/.lightemacs.d"
 
-# if ! [[ -d "$DEST_DIR/.devemacs.d" ]]; then
-# Only when it does not exist. This is supposed to always be stable.
-lightemacs-init-files "$DEST_DIR/.devemacs.d"
-# fi
+if [[ "$INSTALL_DEVEMACS" == true ]] || [[ -d "$DEST_DIR/.devemacs.d" ]]; then
+  # Only when it does not exist. This is supposed to always be stable.
+  lightemacs-init-files "$DEST_DIR/.devemacs.d"
+  rsync ~/src/dotfiles/jc-dev/home/.devemacs.d/lisp/local/config.el \
+    "$DEST_DIR/.devemacs.d/lisp/local/config.el"
+fi
 
 lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d"
 lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
