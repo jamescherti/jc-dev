@@ -1251,6 +1251,9 @@ This uses an around advice to trap errors and verify file timestamps."
             (elisp-autofmt
              :type git :host github
              :repo "jamescherti/emacs-elisp-autofmt")
+            (nerd-icons-corfu
+             :type git :host github
+             :repo "jamescherti/nerd-icons-corfu")
             (melpa
              :type git :host github
              :repo "jamescherti/melpa")

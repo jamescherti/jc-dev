@@ -519,6 +519,11 @@ tasks:
     remote:
       upstream: https://codeberg.org/ideasman42/emacs-elisp-autofmt
 
+  - git: git@github.com:jamescherti/nerd-icons-corfu
+    path: forks/nerd-icons-corfu
+    remote:
+      upstream: https://github.com/LuigiPiucco/nerd-icons-corfu
+
   # END: UNMAINTAINED PACKAGES THAT I FORKED
   # ----------------------------------------------------------------------------
 

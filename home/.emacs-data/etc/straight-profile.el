@@ -17,6 +17,7 @@
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
  ("ztree" . "b99966d37e3197ac48454780f02278ba4ed5ed51")
  ("yaml-mode" . "96ef0201101a7cd591febd5886633154dae8834c")
+ ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE | TODO fork
 
  ;; Unmaintained (Forked: jamescherti)
  ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
@@ -81,7 +82,7 @@
  ;; TODO Add to RSS
  ("groovy-emacs-modes" . "7b8520b2e2d3ab1d62b35c426e17ac25ed0120bb")
  ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
- ("jinja2-mode". "03e5430a7efe1d163a16beaf3c82c5fd2c2caee1")
+ ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
@@ -103,7 +104,6 @@
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
 
- ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE | TODO fork
  ("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7 | RSS RELEASE
  ("corfu" . "4a9c67da16eb64cadaa4bfcc16713188145c83da") ; 2.10 | RSS RELEASE
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
