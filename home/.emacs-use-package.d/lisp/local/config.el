@@ -700,6 +700,7 @@ subsequent GCC invocations."
 ;; (setq lightemacs-theme-default-font "Iosevka Medium")
 ;; (setq lightemacs-theme-default-font "Iosevka SemiBold")
 (setq lightemacs-theme-default-font "Iosevka Term SemiBold")
+(setq lightemacs-theme-variable-font "Iosevka")
 
 (setq lightemacs-reduce-messages t)
 (setq lightemacs-saveplace-recenter-after-find-file t)
