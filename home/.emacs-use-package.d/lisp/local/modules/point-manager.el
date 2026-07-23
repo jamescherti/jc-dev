@@ -85,6 +85,11 @@ This excludes buffers whose names begin with an asterisk (*)."
 
 ;;; Internal variables
 
+(defvar point-manager--pre-command-window nil
+  "The window selected before the current command.")
+(defvar point-manager--pre-command-buffer nil
+  "The buffer current before the current command.")
+
 (defvar-local point-manager--previous-column nil
   "Column position before the current command.")
 (defvar-local point-manager--previous-point nil
@@ -137,7 +142,9 @@ This excludes buffers whose names begin with an asterisk (*)."
 
   ;; (setq point-manager--pre-command this-command)
   (unless point-manager--inhibit
-    (setq point-manager--previous-point (point)
+    (setq point-manager--pre-command-window (selected-window)
+          point-manager--pre-command-buffer (current-buffer)
+          point-manager--previous-point (point)
           point-manager--previous-column (current-column))))
 
 (defun point-manager--move-to-column (column)
@@ -149,6 +156,8 @@ This excludes buffers whose names begin with an asterisk (*)."
   "Maintain cursor constraints in normal state.
 COMMAND is the previous command."
   (when (and (not point-manager--inhibit)
+             (eq (selected-window) point-manager--pre-command-window)
+             (eq (current-buffer) point-manager--pre-command-buffer)
              point-manager--previous-point
              (/= (point) point-manager--previous-point)
              (or (not (boundp 'evil-state))
