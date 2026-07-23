@@ -563,9 +563,11 @@ fi
 alias minimal-emacs='command emacs --init-directory=~/.minimal-emacs.d'
 
 # alias e=emacs-edit
-alias e='devemacs -nw'
 alias me='devemacs -nw'
-alias vim='devemacs -nw'
+
+alias e=smart-editor
+alias v=smart-editor
+alias vim=smart-editor
 alias emacs=smart-editor
 
 is-emacs-server-running() {
