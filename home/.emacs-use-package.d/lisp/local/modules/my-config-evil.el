@@ -524,7 +524,7 @@ ORIG-FUN is the function and ARGS the arguments."
   ;; two characters to trigger your function, leaving the remaining coordinate
   ;; or paste data orphaned and uninterpreted. Consequently, the terminal's
   ;; attempt to say "the mouse clicked at these coordinates" is chopped up, and
-  ;; the tail end of that technical string—the "gibberish" you see—is dumped
+  ;; the tail end of that technical string-the "gibberish" you see-is dumped
   ;; directly into your buffer as literal text. Would you like me to provide a
   ;; snippet to identify exactly which command is currently "stealing" that M-[
   ;; prefix?

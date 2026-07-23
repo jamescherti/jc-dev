@@ -944,7 +944,7 @@ via `unwind-protect' even if the movement signals an error."
 ;; Makes agenda blocks visually more compact; helps readability.
 ;; (setq org-agenda-compact-blocks t)
 
-;; (setq org-agenda-block-separator ?—)
+;; (setq org-agenda-block-separator ?-)
 ;; (setq org-agenda-current-time-string
 ;;       "◀── now ─────────────────────────────────────────────────")
 ;;
