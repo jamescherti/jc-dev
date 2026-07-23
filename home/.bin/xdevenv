@@ -23,47 +23,47 @@ set -e
 set -u
 
 SCRIPT_NAME=xdevenv
-XDEVENV_BIN="$0"
+# XDEVENV_BIN="$0"
 
-load_bashrc() {
-  set +e
-  set +u
-  # shellcheck disable=SC1090
-  source ~/.bashrc
-  set -e
-  set -u
-}
+# load_bashrc() {
+#   set +e
+#   set +u
+#   # shellcheck disable=SC1090
+#   source ~/.bashrc
+#   set -e
+#   set -u
+# }
 
-pulseaudio_set_volume() {
-  local new_volume="$1"
-
-  local current_volume
-  current_volume=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '\d+(?=%)' | head -n 1)
-
-  if [[ $((current_volume + new_volume)) -gt 100 ]]; then
-    pactl set-sink-volume @DEFAULT_SINK@ '100%'
-  else
-    pactl set-sink-volume @DEFAULT_SINK@ "${new_volume}%"
-  fi
-}
-
-pulseaudio_mute() {
-  pactl set-sink-mute @DEFAULT_SINK@ toggle
-
-  local msg
-  msg=$(pactl get-sink-mute @DEFAULT_SINK@)
-  notify "$msg"
-}
-
-pulseaudio_raise_volume() {
-  # Increase the volume by 2%
-  pulseaudio_set_volume '+2'
-}
-
-pulseaudio_lower_volume() {
-  # Decrease the volume by 2%
-  pulseaudio_set_volume '-2'
-}
+# pulseaudio_set_volume() {
+#   local new_volume="$1"
+#
+#   local current_volume
+#   current_volume=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '\d+(?=%)' | head -n 1)
+#
+#   if [[ $((current_volume + new_volume)) -gt 100 ]]; then
+#     pactl set-sink-volume @DEFAULT_SINK@ '100%'
+#   else
+#     pactl set-sink-volume @DEFAULT_SINK@ "${new_volume}%"
+#   fi
+# }
+#
+# pulseaudio_mute() {
+#   pactl set-sink-mute @DEFAULT_SINK@ toggle
+#
+#   local msg
+#   msg=$(pactl get-sink-mute @DEFAULT_SINK@)
+#   notify "$msg"
+# }
+#
+# pulseaudio_raise_volume() {
+#   # Increase the volume by 2%
+#   pulseaudio_set_volume '+2'
+# }
+#
+# pulseaudio_lower_volume() {
+#   # Decrease the volume by 2%
+#   pulseaudio_set_volume '-2'
+# }
 
 notify() {
   local msg
@@ -81,14 +81,14 @@ has_run_or_raise() {
   test -d ~/.local/share/gnome-shell/extensions/run-or-raise@edvard.cz
 }
 
-run-renice-all() {
-  # Conflict with ananicy
-  if [[ -f /usr/local/bin/renice-all ]] && type -P sudo &>/dev/null; then
-    (sleep 5 && sudo /usr/local/bin/renice-all) &
-    disown
-    # export GTK_THEME_VARIANT="dark"
-  fi
-}
+# run-renice-all() {
+#   # Conflict with ananicy
+#   if [[ -f /usr/local/bin/renice-all ]] && type -P sudo &>/dev/null; then
+#     (sleep 5 && sudo /usr/local/bin/renice-all) &
+#     disown
+#     # export GTK_THEME_VARIANT="dark"
+#   fi
+# }
 
 # legacy_xdotool_activate_window() {
 #   local win_class="$1"
@@ -246,15 +246,15 @@ show_window_maximized() {
   return 0
 }
 
-show_window_maximized_devilspie() {
-  if pgrep -x devilspie2 &>/dev/null; then
-    show_window "$@" || return 1
-    return 0
-  fi
-
-  show_window_maximized "$@" || return 1
-  return 0
-}
+# show_window_maximized_devilspie() {
+#   if pgrep -x devilspie2 &>/dev/null; then
+#     show_window "$@" || return 1
+#     return 0
+#   fi
+#
+#   show_window_maximized "$@" || return 1
+#   return 0
+# }
 
 # show_window_fullscreen() {
 #   local win_name="$1"
@@ -325,16 +325,16 @@ xdevenv-terminal() {
   PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin
   TERMINAL_CMD=()
   if is_gnome && is_wayland && has_run_or_raise; then
-    if type -P kgx &>/dev/null; then
-      gdbus call --session --dest org.gnome.Shell \
-        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-        ",kgx -e '$TMUX_CMD',org.gnome.Console,"
-    elif type -P ghostty; then
+    if type -P ghostty; then
       gdbus call --session --dest org.gnome.Shell \
         --object-path /org/gnome/Shell/Extensions/RunOrRaise \
         --method org.gnome.Shell.Extensions.RunOrRaise.Call \
         ",ghostty -e bash -c '$TMUX_CMD',com.mitchellh.ghostty,"
+    elif type -P kgx &>/dev/null; then
+      gdbus call --session --dest org.gnome.Shell \
+        --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+        --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+        ",kgx -e '$TMUX_CMD',org.gnome.Console,"
     elif type -P gnome-terminal; then
       # OSID=$(~/.local/bin/osid)
       # if [[ $OSID = arch ]]; then
@@ -356,13 +356,13 @@ xdevenv-terminal() {
     if type -P ghostty; then
       local win_name="com.mitchellh.ghostty"
       TERMINAL_CMD=(show_window_maximized_devilspie ghostty "$win_name"
-                    ghostty -e "${TMUX_CMD_LIST[@]}")
+        ghostty -e "${TMUX_CMD_LIST[@]}")
     elif type -P terminator; then
       # TERMINAL_OPTS=(--maximize --borderless)
       local win_name="terminator.Terminator"
       TERMINAL_CMD=(show_window_maximized_devilspie terminator "$win_name"
-                    terminator "${TERMINATOR_OPTS[@]}"
-                    --title=tmux --execute "${TMUX_CMD_LIST[@]}")
+        terminator "${TERMINATOR_OPTS[@]}"
+        --title=tmux --execute "${TMUX_CMD_LIST[@]}")
     elif type -P gnome-terminal >/dev/null 2>&1; then
       local win_name="gnome-terminal-server.Gnome-terminal"
       # show_window_maximized_devilspie "$win_name" gnome-terminal --hide-menubar --title=tmux -e 'sh -c "tmux -2 attach || TERM=xterm-256color tmux -2"'
@@ -390,6 +390,8 @@ xdevenv-terminal() {
     if [[ "${#TERMINAL_CMD[@]}" -gt 0 ]]; then
       "${TERMINAL_CMD[@]}" || ERRNO="$?"
     fi
+
+    return "$ERRNO"
   fi
 }
 
@@ -603,6 +605,7 @@ init() {
   fi
 
   local cmd_name
+  # shellcheck disable=SC2043
   for cmd_name in tmux; do
     if ! type -P "$cmd_name" >/dev/null 2>&1; then
       notify "The command '$cmd_name' does not exist."
@@ -685,52 +688,52 @@ main() {
     xdevenv-keepassxc
     ;;
 
-  # chromium)
-  #   # If running this inside a function or script
-  #   if flatpak info com.google.Chrome >/dev/null 2>&1; then
-  #     flatpak run com.google.Chrome \
+    # chromium)
+    #   # If running this inside a function or script
+    #   if flatpak info com.google.Chrome >/dev/null 2>&1; then
+    #     flatpak run com.google.Chrome \
     #       --enable-features=VaapiVideoDecoder \
     #       --start-maximized \
     #       --password-store=basic \
     #       "$@"
-  #   else
-  #     echo "Error: com.google.Chrome Flatpak is not installed." >&2
-  #   fi
-  #
-  #   # local name
-  #   # for name in chromium chromium-bin; do
-  #   #   firejail --profile=chromium "$name" \
+    #   else
+    #     echo "Error: com.google.Chrome Flatpak is not installed." >&2
+    #   fi
+    #
+    #   # local name
+    #   # for name in chromium chromium-bin; do
+    #   #   firejail --profile=chromium "$name" \
     #   #     --enable-features=VaapiVideoDecoder \
     #   #     --start-maximized --password-store=basic
-  #   #   break
-  #   # done
-  #   ;;
+    #   #   break
+    #   # done
+    #   ;;
 
-  # web-browser-profiles)
-  #   # show_window firefox Firefox.firefox firejail firefox -P
-  #   bg_run firejail firefox -P
-  #   # run-renice-all
-  #   ;;
+    # web-browser-profiles)
+    #   # show_window firefox Firefox.firefox firejail firefox -P
+    #   bg_run firejail firefox -P
+    #   # run-renice-all
+    #   ;;
 
-  # mpv)
-  #   show_window mpv "gl.mpv" mpv --player-operation-mode=pseudo-gui
-  #   ;;
+    # mpv)
+    #   show_window mpv "gl.mpv" mpv --player-operation-mode=pseudo-gui
+    #   ;;
 
-  # emacs-terminal)
-  #   if pgrep -x emacs &>/dev/null; then
-  #     "$0" emacs
-  #     emacsclient --no-wait -e '(best-tmux-run)'
-  #     exit 0
-  #   fi
-  #   ;;
+    # emacs-terminal)
+    #   if pgrep -x emacs &>/dev/null; then
+    #     "$0" emacs
+    #     emacsclient --no-wait -e '(best-tmux-run)'
+    #     exit 0
+    #   fi
+    #   ;;
 
-  # picom)
-  #   if type -P xfconf-query &>/dev/null; then
-  #     USE_COMPOSING=(xfconf-query -c 'xfwm4' -p '/general/use_compositing'
-  #       --type 'bool')
-  #
-  #     if [[ $USE_COMPOSING = true ]]; then
-  #       xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' \
+    # picom)
+    #   if type -P xfconf-query &>/dev/null; then
+    #     USE_COMPOSING=(xfconf-query -c 'xfwm4' -p '/general/use_compositing'
+    #       --type 'bool')
+    #
+    #     if [[ $USE_COMPOSING = true ]]; then
+    #       xfconf-query --create -c 'xfwm4' -p '/general/use_compositing' \
     #         --type 'bool' --set 'false'
   #       sleep 1
   #     fi
@@ -834,9 +837,9 @@ main() {
   #   pulseaudio_mute
   #   ;;
   *)
-  echo "Error: '$1' is not supported." >&2
-  exit 1
-  ;;
+    echo "Error: '$1' is not supported." >&2
+    exit 1
+    ;;
   esac
 
   exit 0
