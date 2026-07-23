@@ -181,12 +181,6 @@ config-bash-stdops() {
   PREFIX="$HOME/.local" ./install.sh
 }
 
-config-project-list() {
-  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
-    "$SCRIPT_DIR/home/.bin/update-project-list"
-  fi
-}
-
 # config-lightemacs() {
 #   if [[ -d ~/src/emacs/lightemacs/ ]]; then
 #     if git-is-clean ~/src/emacs/lightemacs/; then
@@ -253,8 +247,6 @@ main() {
   config-bash-stdops
 
   config-lightvim
-
-  config-project-list
 
   # config-lightemacs
   config-files

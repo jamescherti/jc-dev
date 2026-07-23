@@ -74,6 +74,12 @@ update-repos() {
   fi
 }
 
+config-project-list() {
+  if [[ "${XDG_CURRENT_DESKTOP:-}" != "" ]]; then
+    "$SCRIPT_DIR/home/.bin/update-project-list"
+  fi
+}
+
 main() {
   update-repos
 
@@ -84,6 +90,8 @@ main() {
     --exclude-dir ~/src/local/ \
     --exclude-dir ~/src/forks/ \
     -- git check-gpg
+
+  config-project-list
 }
 
 main "$@"
