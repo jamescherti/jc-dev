@@ -210,6 +210,12 @@ tasks:
     remote:
       upstream: https://github.com/eonpatapon/gnome-shell-extension-caffeine
 
+  - git: git@github.com:jamescherti/gse-sound-output-device-chooser
+    path: forks/gse-sound-output-device-chooser
+    revision: master
+    remote:
+      upstream: https://github.com/kgshank/gse-sound-output-device-chooser
+
   # ----------------------------------------------------------------------------
   # Forks
   # ----------------------------------------------------------------------------

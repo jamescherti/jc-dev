@@ -76,6 +76,14 @@ update-repos() {
 
 main() {
   update-repos
+
+  cd ~/src
+  batchfetch
+
+  git rexec --parallel -C ~/src/ \
+    --exclude-dir ~/src/local/ \
+    --exclude-dir ~/src/forks/ \
+    -- git check-gpg
 }
 
 main "$@"
