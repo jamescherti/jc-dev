@@ -166,6 +166,12 @@ fi
 lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d"
 lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
 
+if [[ -d ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
+  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
+  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-straight.d/lisp/local/
+  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-elpaca.d/lisp/local/
+fi
+
 # rm -fr "$DEST_DIR/.emacs-27.d"
 # rm -fr "$DEST_DIR/.emacs-sandbox-28/.emacs.d"
 
@@ -183,10 +189,6 @@ lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
 # After everything, ensure jc-dev is sync
 if [[ -d ~/src/dotfiles/jc-dev ]]; then
   cd ~/src/dotfiles/jc-dev
-
-  if [[ -d ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
-    rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
-  fi
 
   run-rsync ~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
 fi

@@ -805,6 +805,10 @@ only if they are not already available."
          ;; ("\\.\\(?:hex\\|nes\\)\\'" . hexl-mode)
 
          ;; txt-file-mode
+         ("\\.ignore\\'" . conf-unix-mode)
+         ("\\.fdignore\\'" . conf-unix-mode)
+         ("\\.rgignore\\'" . conf-unix-mode)
+
          ("\\.log\\'" . txt-file-mode)))
 
 ;; Gentoo
