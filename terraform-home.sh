@@ -28,9 +28,10 @@
 
 set -euo pipefail
 
+# shellcheck disable=SC1091
 source .lib.inc.sh
 
-MAX_WORKERS=6
+# MAX_WORKERS=6
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 config-firefox() {
@@ -294,6 +295,7 @@ config-gnome() {
 }
 
 main() {
+  # shellcheck disable=SC1091
   source /etc/os-release
 
   install_python_deps
