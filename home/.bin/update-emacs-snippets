@@ -180,7 +180,8 @@ def ultisnips_to_yasnippet():
                 ultisnips_snippet.convert_to_yasnippet(
                     yasnippet_dir,
                     yas_indent_line=yas_indent_line,
-                    convert_tabs_to=convert_tabs_to)
+                    convert_tabs_to=convert_tabs_to,
+                    update_only_if_newer=True,)
             else:
                 # For the next ones, use the .yas-parents file
                 os.makedirs(yasnippet_dir, exist_ok=True)

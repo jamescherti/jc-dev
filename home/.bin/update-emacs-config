@@ -64,8 +64,8 @@ run-rsync() {
   echo "[RSYNC]" "$@"
   rsync -a --delete \
     --times --atimes --exclude '*.elc' --exclude '*.eln' \
-    --exclude config.el \
-    "$@"
+    --exclude config.el --exclude legacy \
+    "$@" &
   return 0
 }
 
@@ -106,7 +106,7 @@ lightemacs-init-files() {
     exit 1
   fi
 
-  run-rsync "$lightemacs_path/early-init.el" \
+  rsync "$lightemacs_path/early-init.el" \
     "$lightemacs_path/init.el" \
     "$dir/"
 
@@ -122,17 +122,18 @@ custom-emacs() {
   echo "[CUSTOM-EMACS] ${custom_emacs_name}"
   lightemacs-init-files "$dest_dir"
 
-  echo "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
+  # echo "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
   run-rsync \
-    "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
+    "$EMACS_BASE/lisp/local/" \
+    "$dest_dir/lisp/local/"
 
   shift
 
   # shellcheck disable=SC2188
-  >"$dest_dir/lisp/local/config.el"
-  if [[ $# -gt 0 ]]; then
-    printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
-  fi
+  # >"$dest_dir/lisp/local/config.el"
+  # if [[ $# -gt 0 ]]; then
+  #   printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
+  # fi
   rsync "$EMACS_BASE/lisp/local/config.el" "$dest_dir/lisp/local/config.el"
 }
 
@@ -145,7 +146,7 @@ init
 # My Emacs: EMACS MASTER
 # ------------------------------------------------------------------------------
 custom-emacs "emacs-master"
-custom-emacs "emacs-29.1"
+# custom-emacs "emacs-29.1"
 
 custom-emacs "emacs-elpaca"
 custom-emacs "emacs-straight"
@@ -153,7 +154,7 @@ custom-emacs "emacs-straight"
 # ------------------------------------------------------------------------------
 # OTHER LIGHTEMACS
 # ------------------------------------------------------------------------------
-lightemacs-init-files "$DEST_DIR/.lightemacs.d"
+# lightemacs-init-files "$DEST_DIR/.lightemacs.d"
 
 if [[ "$INSTALL_DEVEMACS" == true ]] || [[ -d "$DEST_DIR/.devemacs.d" ]]; then
   # Only when it does not exist. This is supposed to always be stable.
@@ -165,34 +166,29 @@ fi
 lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d"
 lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
 
-#echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)" \
-#  "(setq lightemacs-modules '(le-flavor-micro le-compile-angel le-group-evil))" \
-#  >"$DEST_DIR/.lightemacs.d/lisp/local/config.el"
+# rm -fr "$DEST_DIR/.emacs-27.d"
+# rm -fr "$DEST_DIR/.emacs-sandbox-28/.emacs.d"
 
-rm -fr "$DEST_DIR/.emacs-27.d"
-rm -fr "$DEST_DIR/.emacs-sandbox-28/.emacs.d"
-# lightemacs-init-files "$DEST_DIR/.emacs-27.d"
-# lightemacs-init-files "$DEST_DIR/.emacs-sandbox-28/.emacs.d"
-
-echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)" \
-  >"$DEST_DIR/.lightemacs.d/lisp/local/config.el"
-
-echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
-      (setq lightemacs-package-manager 'straight)" \
-  >"$DEST_DIR/.lightemacs-straight.d/lisp/local/config.el"
-
-echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
-      (setq lightemacs-package-manager 'elpaca)" \
-  >"$DEST_DIR/.lightemacs-elpaca.d/lisp/local/config.el"
+# echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)" \
+#   >"$DEST_DIR/.lightemacs.d/lisp/local/config.el"
+#
+# echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
+#       (setq lightemacs-package-manager 'straight)" \
+#   >"$DEST_DIR/.lightemacs-straight.d/lisp/local/config.el"
+#
+# echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
+#       (setq lightemacs-package-manager 'elpaca)" \
+#   >"$DEST_DIR/.lightemacs-elpaca.d/lisp/local/config.el"
 
 # After everything, ensure jc-dev is sync
 if [[ -d ~/src/dotfiles/jc-dev ]]; then
   cd ~/src/dotfiles/jc-dev
-  if git-is-clean; then
-    git pull --rebase
+
+  if [[ -d ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
+    rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
   fi
 
-  rsync -a ~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
+  run-rsync ~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
 fi
 
 wait

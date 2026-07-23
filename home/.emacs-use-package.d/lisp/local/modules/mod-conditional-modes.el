@@ -31,6 +31,9 @@
 (dir-locals-trigger-defvar env-allow-reformatters nil
   "Non-nil allows directory-local configuration of code reformatters.")
 
+(dir-locals-trigger-defvar env-allow-lsp nil
+  "Non-nil allows directory-local configuration of code reformatters.")
+
 ;;; Conditional code checker/reformatter
 
 (defun my-code-checker-get-buffer ()
@@ -111,6 +114,17 @@ This function is intended for use as :around advice."
         (when (and (fboundp 'dtrt-indent-mode)
                    (file-in-directory-p file-name "~/src/forks"))
           (dtrt-indent-mode 1))
+        (when env-allow-lsp
+          ;; All modes
+          (when (and (fboundp 'eglot)
+                     (or (derived-mode-p 'python-mode)
+                         (derived-mode-p 'python-ts-mode)))
+            (eglot-ensure))
+
+          ;; Elisp
+          (when (and (derived-mode-p 'emacs-lisp-mode)
+                     (fboundp 'aggressive-indent-mode))
+            (aggressive-indent-mode 1)))
 
         (when env-allow-reformatters
           ;; All modes
@@ -121,12 +135,12 @@ This function is intended for use as :around advice."
                          (derived-mode-p 'sh-mode)
                          (derived-mode-p 'yaml-mode)
                          (derived-mode-p 'yaml-ts-mode)))
-            (apheleia-mode env-allow-reformatters))
+            (apheleia-mode 1))
 
           ;; Elisp
           (when (and (derived-mode-p 'emacs-lisp-mode)
                      (fboundp 'aggressive-indent-mode))
-            (aggressive-indent-mode env-allow-reformatters)))
+            (aggressive-indent-mode 1)))
 
         (let ((code-checker-ignore-p (my-code-checker-and-reformatter-ignore-p)))
           (unless code-checker-ignore-p

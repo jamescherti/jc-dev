@@ -123,9 +123,11 @@ copy_dotfiles() {
   echo "---------------------------------------------------------------------"
 
   local rsync_opts=(--archive
-    --exclude '*.elc' --exclude '*.eln'
-    --exclude '*.git'
-    --exclude='flymake_*' --exclude='flycheck_*')
+    --exclude '*.elc'
+    --exclude '*.eln'
+    --exclude '.git'
+    --exclude='flymake_*'
+    --exclude='flycheck_*')
 
   # rsync without delete
   echo "[RUN-RSYNC]" home/ '->' "$HOME/"
