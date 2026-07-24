@@ -413,7 +413,7 @@ xdevenv-keepassxc() {
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
           --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",gtk-launch org.keepassxc.KeePassXC.desktop,org.keepassxc.KeePassXC"
+          ",flatpak run org.keepassxc.KeePassXC,org.keepassxc.KeePassXC"
       fi
     else
       show_window keepassxc keepassxc.KeePassXC flatpak run org.keepassxc.KeePassXC
