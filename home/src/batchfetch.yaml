@@ -278,6 +278,7 @@ tasks:
   - git: git@github.com:jamescherti/emacs.git
     path: forks/emacs
     revision: master
+    git_pull: false
     remote:
       upstream: https://github.com/emacs-mirror/emacs
 
