@@ -122,19 +122,20 @@ custom-emacs() {
   echo "[CUSTOM-EMACS] ${custom_emacs_name}"
   lightemacs-init-files "$dest_dir"
 
+  # shellcheck disable=SC2188
+  # >"$dest_dir/lisp/local/config.el"
+  # if [[ $# -gt 0 ]]; then
+  #   printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
+  # fi
+  mkdir -p "$EMACS_BASE/lisp/local"
+  rsync "$EMACS_BASE/lisp/local/config.el" "$dest_dir/lisp/local/config.el"
+
   # echo "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
   run-rsync \
     "$EMACS_BASE/lisp/local/" \
     "$dest_dir/lisp/local/"
 
   shift
-
-  # shellcheck disable=SC2188
-  # >"$dest_dir/lisp/local/config.el"
-  # if [[ $# -gt 0 ]]; then
-  #   printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
-  # fi
-  rsync "$EMACS_BASE/lisp/local/config.el" "$dest_dir/lisp/local/config.el"
 }
 
 # ------------------------------------------------------------------------------
@@ -166,11 +167,7 @@ fi
 lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d"
 lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
 
-if [[ -d ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
-  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
-  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-straight.d/lisp/local/
-  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-elpaca.d/lisp/local/
-fi
+wait
 
 # rm -fr "$DEST_DIR/.emacs-27.d"
 # rm -fr "$DEST_DIR/.emacs-sandbox-28/.emacs.d"
@@ -194,3 +191,9 @@ if [[ -d ~/src/dotfiles/jc-dev ]]; then
 fi
 
 wait
+
+if [[ -d ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
+  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
+  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-straight.d/lisp/local/
+  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-elpaca.d/lisp/local/
+fi

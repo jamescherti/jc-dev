@@ -104,7 +104,8 @@
 ;; March .vimrc, .vimrc.local, .vim-after, .vim-before...
 ;; ("/\\.l?vim[^/]*\\'" . vimrc-mode)
 ;; ("/\\.lvimrc?\\'" . vimrc-mode)
-(add-to-list 'auto-mode-alist '("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode))
+;; (add-to-list 'auto-mode-alist '("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode))
+(push '("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode) auto-mode-alist)
 
 ;;; Tree-sitter defaults
 
@@ -378,7 +379,8 @@ only if they are not already available."
       (set-auto-mode)))
   (jinja2-highlight-mode 1))
 
-(add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-autodetect-mode))
+;; (add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-autodetect-mode))
+(push '("\\.j2\\'" . jinja2-autodetect-mode) auto-mode-alist)
 
 ;;; Yaml and Ansible
 
@@ -539,8 +541,9 @@ only if they are not already available."
 (lightemacs-use-package ansible-doc
   :commands ansible-doc
   :init
-  (add-to-list 'display-buffer-alist '("\\*ansible-doc"
-                                       (display-buffer-same-window))))
+  ;; (add-to-list 'display-buffer-alist '("\\*ansible-doc"
+  ;;                                      (display-buffer-same-window)))
+  (push '("\\*ansible-doc" (display-buffer-same-window)) display-buffer-alist))
 
 
 (progn
@@ -577,8 +580,10 @@ only if they are not already available."
 (if (my-treesit-language-available-p 'php)
     (progn
       (push '(php-mode . php-ts-mode) major-mode-remap-alist)
-      (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]\\'" . php-ts-mode))
-      (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]3\\'" . php-ts-mode)))
+      ;; (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]\\'" . php-ts-mode))
+      (push '("\\.[pP][hH][pP]\\'" . php-ts-mode) auto-mode-alist)
+      ;; (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]3\\'" . php-ts-mode))
+      (push '("\\.[pP][hH][pP]3\\'" . php-ts-mode) auto-mode-alist))
   (require 'sub-php-mode))
 
 ;;; Bash
@@ -609,15 +614,26 @@ only if they are not already available."
     (when (fboundp 'sh-indent-supported)
       (sh-indent-supported (append sh-indent-supported '((bash . sh)))))))
 
+;;; css
+
+(when (my-treesit-language-available-p 'css)
+  (progn
+    (push '(css-mode . css-ts-mode) major-mode-remap-alist)
+    (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist )
+    ;; (add-to-list 'auto-mode-alist '("\.[Cc][sS][sS]\\'" . css-ts-mode))
+    ))
+
 ;;; Javascript
 
 (if (my-treesit-language-available-p 'javascript)
     (progn
       (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
       (push '(js-mode . js-ts-mode) major-mode-remap-alist)
-      (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode)))
+      ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode))
+      (push '("\.[jJ][sS]\\'" . js-ts-mode) auto-mode-alist))
   (progn
-    (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
+    ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
+    (push '("\.[jJ][sS]\\'" . js-mode) auto-mode-alist)
 
     ;; Not required
     ;; (use-package js2-mode
@@ -631,22 +647,21 @@ only if they are not already available."
 ;;; Lua
 
 (if (my-treesit-language-available-p 'lua)
-    (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode))
+    (progn
+      ;; (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode))
+      (push '("\\.[lL][uU][aA]\\'" . lua-ts-mode) auto-mode-alist))
   (require 'sub-lua-mode))
 
 ;;; Dockerfile
 
 (if (my-treesit-language-available-p 'dockerfile)
     (progn
-      (add-to-list 'auto-mode-alist
-                   '("/[dD][oO][cC][kK][eE][rR]\\'"
-                     . dockerfile-ts-mode))
-      (add-to-list 'auto-mode-alist
-                   '("/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'"
-                     . dockerfile-ts-mode))
-      (add-to-list 'auto-mode-alist
-                   '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'"
-                     . dockerfile-ts-mode)))
+      ;; (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR]\\'" . dockerfile-ts-mode))
+      ;; (add-to-list 'auto-mode-alist '("/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" . dockerfile-ts-mode))
+      ;; (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" . dockerfile-ts-mode))
+      (push '("/[dD][oO][cC][kK][eE][rR]\\'" . dockerfile-ts-mode) auto-mode-alist)
+      (push '("/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" . dockerfile-ts-mode) auto-mode-alist)
+      (push '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" . dockerfile-ts-mode) auto-mode-alist))
   ;;(use-package dockerfile-mode
   ;;  :defer t
   ;;  :commands dockerfile-mode
@@ -695,7 +710,9 @@ only if they are not already available."
 (if (my-treesit-language-available-p 'html)
     (progn
       (push '(html-mode . html-ts-mode) major-mode-remap-alist)
-      (add-to-list 'auto-mode-alist '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode)))
+      (push '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode) auto-mode-alist)
+      ;; (add-to-list 'auto-mode-alist '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode))
+      )
   (use-package sgml-mode
     :ensure nil
     :commands (sgml-mode
@@ -847,7 +864,8 @@ only if they are not already available."
       (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
       (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
   (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
-  (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
+  (push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
   (with-eval-after-load 'markdown-mode
     (define-key markdown-mode-map (kbd "TAB") #'ignore)
 

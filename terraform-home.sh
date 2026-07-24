@@ -275,10 +275,13 @@ config-gnome() {
       "${HOME}/src/forks/run-or-raise"
 
     # HideActivities
-    install_gnome_extension \
-      "HideActivities" \
-      "Hide_Activities@shay.shayel.org" \
-      "${HOME}/src/forks/HideActivities"
+    # install_gnome_extension \
+    #   "HideActivities" \
+    #   "Hide_Activities@shay.shayel.org" \
+    #   "${HOME}/src/forks/HideActivities"
+    #
+    # Replaced with just perfection
+    rm -fr ~/.local/share/gnome-shell/extensions/Hide_Activities@shay.shayel.org
 
     # Caffeine
     install_gnome_extension \
@@ -291,6 +294,13 @@ config-gnome() {
       "hide-minimized" \
       "hide-minimized@danigm.net" \
       "${HOME}/src/forks/hide-minimized"
+
+    install_gnome_extension \
+      "just-perfection" \
+      "just-perfection-desktop@just-perfection" \
+      "${HOME}/src/forks/gnome-just-perfection/src"
+    cd "${HOME}/src/forks/gnome-just-perfection"
+    glib-compile-resources --sourcedir=src/data src/data/resources.gresource.xml --target="$HOME/.local/share/gnome-shell/extensions/just-perfection-desktop@just-perfection/resources.gresource"
   fi
 }
 

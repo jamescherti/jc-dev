@@ -210,6 +210,12 @@ tasks:
     remote:
       upstream: https://github.com/eonpatapon/gnome-shell-extension-caffeine
 
+  - git: git@github.com:jamescherti/gnome-just-perfection
+    path: forks/gnome-just-perfection
+    revision: main
+    remote:
+      upstream: https://gitlab.gnome.org/jrahmatzadeh/just-perfection
+
   # ----------------------------------------------------------------------------
   # Forks
   # ----------------------------------------------------------------------------
