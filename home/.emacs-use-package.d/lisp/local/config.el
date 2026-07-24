@@ -873,7 +873,7 @@ subsequent GCC invocations."
 
                            ;; mod-misc includes sub-org
                            le-org
-                           ;; le-org-appear
+                           le-org-appear
 
                            le-easysession
                            ))

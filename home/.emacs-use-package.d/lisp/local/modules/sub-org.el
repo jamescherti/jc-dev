@@ -36,9 +36,7 @@
 
 ;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
 ;; editing emphasis.
-;; TODO add again
-;; Setting org-hide-emphasis-markers to t causes jumping issues in org-mode
-(setq org-hide-emphasis-markers nil)
+(setq org-hide-emphasis-markers t)
 
 ;;; Defaults
 
@@ -294,7 +292,7 @@ at the same level."
   ;;   (org-todo 'done)
   ;;   (org-hide-entry))
 
-  (defun org-toggle-emphasis ()
+  (defun my-org-toggle-emphasis ()
     "Toggle hiding/showing of org emphasize markers."
     (interactive)
     (if org-hide-emphasis-markers
