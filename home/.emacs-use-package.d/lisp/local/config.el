@@ -179,7 +179,7 @@
                                      ;; crashes. If you are on standard Emacs
                                      ;; (version 29 or 30), removing it is safe
                                      ;; and faster.
-                                     ;; "-fno-omit-frame-pointer"
+                                     "-fno-omit-frame-pointer"
 
                                      ;; The -fno-finite-math-only flag prevents
                                      ;; the compiler from assuming that

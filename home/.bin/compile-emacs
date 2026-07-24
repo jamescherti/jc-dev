@@ -86,7 +86,7 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 export BASE_CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
 
 # Stable
-# export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
+export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
 
 # Unstable, according to Emacs devs, but it works for me.
 # export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
