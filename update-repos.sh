@@ -81,10 +81,16 @@ config-project-list() {
 }
 
 main() {
-  update-repos
+  cd ~/src/dotfiles/jc-dev
+  git pull
 
+  # This has to be launched first because it ensures all missing repositories
+  # are present
   cd ~/src
+  rsync -a ~/src/dotfiles/jc-dev/home/src/batchfetch.yaml ~/src/batchfetch.yaml
   batchfetch
+
+  update-repos
 
   git rexec --parallel -C ~/src/ \
     --exclude-dir ~/src/local/ \
