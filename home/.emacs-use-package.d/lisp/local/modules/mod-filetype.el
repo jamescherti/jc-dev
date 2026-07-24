@@ -393,12 +393,6 @@ only if they are not already available."
       (push (cons "yaml" 'yaml-ts) org-src-lang-modes)
     (push (cons "yaml" 'yaml) org-src-lang-modes)))
 
-(defun my-setup-yaml-mode ()
-  "Config Yaml mode."
-  ;; this patch has been merged in Emacs 32
-  (when (< emacs-major-version 32)
-    (setq-local tab-width 2)))
-
 (with-suppressed-warnings ((free-vars flymake-yamllint-arguments)
                            (free-vars yaml-ts-mode-yamllint-options))
   (setq flymake-yamllint-arguments
@@ -442,9 +436,7 @@ only if they are not already available."
       (with-eval-after-load 'yaml-ts-mode
         (setq auto-mode-alist
               (rassq-delete-all 'yaml-ts-mode auto-mode-alist))
-
-        (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))
-      (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode))
+        (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist)))
   ;; non tree sitter
   (require 'sub-flymake-yamllint))
 
@@ -495,46 +487,54 @@ only if they are not already available."
 
 ;;; Ansible: Auto detect
 
-(defvar my-ansible-file-regexp (rx "/"
-                                   (group (or "tasks"
-                                              "handlers"
-                                              "vars"
-                                              "defaults"
-                                              "ansible"
-                                              "playbooks"))
-                                   "/" (+ (not (any "/\\")))
-                                   "." (regexp "[yY][aA]?[mM][lL]")
-                                   string-end))
+(defvar my-ansible-file-regexp nil)
+(setq my-ansible-file-regexp (rx "/"
+                                 (group (or "tasks"
+                                            "handlers"
+                                            "vars"
+                                            "defaults"
+                                            "ansible"
+                                            "host_vars"
+                                            "group_vars"
+                                            "playbooks"))
+                                 "/" (* nonl)
+                                 "." (regexp "[yY][aA]?[mM][lL]")
+                                 string-end))
 
 ;; When auto-mode-alist is bypassed, use a hook function
 (defun ansible-detect-and-enable-ansible-mode ()
   "Enable `ansible-mode' for YAML files in Ansible-related directories."
-  (cond
-   ((and treesit-yaml-available
-         (fboundp 'yaml-ts-mode)
-         (not (derived-mode-p 'yaml-ts-mode)))
-    (yaml-ts-mode))
+  (let ((file-name (buffer-file-name (buffer-base-buffer))))
+    (cond
+     ((and (fboundp 'ansible-mode)
+           file-name
+           ;; Auto-mode-alist handles this
+           ;; (string-match my-ansible-file-regexp (expand-file-name file-name))
+           )
+      (ansible-mode)
+      (jinja2-highlight-mode 1))
 
-   ((and (not treesit-yaml-available)
-         (fboundp 'yaml-mode)
-         (not (derived-mode-p 'yaml-mode)))
-    (yaml-mode))
+     ((and treesit-yaml-available
+           (fboundp 'yaml-ts-mode)
+           (not (derived-mode-p 'yaml-ts-mode)))
+      (yaml-ts-mode))
 
-   ;; (t
-   ;;  (error "Undefined: yaml-mode"))
-   )
+     ((and (not treesit-yaml-available)
+           (fboundp 'yaml-mode)
+           (not (derived-mode-p 'yaml-mode)))
+      (yaml-mode)))))
 
-  (when (and (not (derived-mode-p 'ansible-mode))
-             (buffer-file-name (buffer-base-buffer))
-             (string-match my-ansible-file-regexp buffer-file-name)
-             (fboundp 'ansible-mode))
-    (ansible-mode)
-    (jinja2-highlight-mode)))
+(add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-detect-and-enable-ansible-mode))
 
-;; (add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-mode))
-;; (add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-detect-and-enable-ansible-mode))
-(add-hook 'yaml-mode-hook #'ansible-detect-and-enable-ansible-mode)
-(add-hook 'yaml-ts-mode-hook #'ansible-detect-and-enable-ansible-mode)
+;;; Yaml-ts-mode: tab-width
+
+(defun my-setup-yaml-mode ()
+  "Config Yaml mode."
+  ;; This patch has been merged in Emacs 32
+  (when (< emacs-major-version 32)
+    (setq-local tab-width 2)))
+
+(add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode)
 
 ;;; Ansible: ansible-doc
 
