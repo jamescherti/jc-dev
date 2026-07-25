@@ -916,113 +916,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq lightemacs-buffer-terminator-target-hooks '())
 
-;;; Packages: use-package
-
-;; (defun my-package-pin (package repository)
-;;   (setq package-pinned-packages
-;;         (assq-delete-all package package-pinned-packages))
-;;   (add-to-list 'package-pinned-packages (list (cons package repository))))
-
-(defun my-update-package-pinned-packages (pinned-packages)
-  "Update `package-pinned-packages\=' with the entries in PINNED-PACKAGES.
-This replaces existing entries that match the provided packages and appends
-any new ones."
-  (when (eq lightemacs-package-manager 'use-package)
-    (setq package-pinned-packages (append pinned-packages
-                                          (seq-remove
-                                           (lambda (pkg)
-                                             (assq (car pkg) pinned-packages))
-                                           package-pinned-packages)))))
-
-(setq my-package-pinned-packages
-      '((buffer-terminator             . "melpa")
-        (dir-config                    . "melpa")
-        (enhanced-evil-paredit         . "melpa")
-        (outline-indent                . "melpa")
-        (vim-tab-bar                   . "melpa")
-        (persist-text-scale            . "melpa")
-        (quick-sdcv                    . "melpa")
-        (inhibit-mouse                 . "melpa")
-        (stripspace                    . "melpa")
-        (tomorrow-night-deepblue-theme . "melpa")
-        (bufferfile                    . "melpa")
-        (compile-angel                 . "melpa")
-        (easysession                   . "melpa")
-        (flymake-ansible-lint          . "melpa")
-        (flymake-bashate               . "melpa")
-        (buffer-guardian               . "melpa")
-
-        (markdown-mode                 . "melpa")
-
-        (dumb-jump                 . "melpa")
-        ;; Latest
-        (vterm                         . "melpa")
-
-        (git-gutter                    . "melpa")
-
-        (visual-fill-column            . "melpa")
-
-        ;; lightemacs?
-        (undo-fu                       . "melpa")
-        (undo-fu-session               . "melpa")
-
-        ;; To fix the window-start bug
-        (apheleia                      . "melpa-stable")
-
-        ;; 3 months ago
-        ;; (gptel                         . "melpa")
-        ))
-
-;;; config
-
-(defun my-evil-config ()
-  "Setup evil."
-  ;; Make `v$` exclude the final newline
-  (setq evil-v$-excludes-newline t)
-
-  ;; Prevent Evil state from being echoed, preserving Eldoc display in the
-  ;; minibuffer (If set to t, Eldoc output in the minibuffer will be overridden)
-  (setq evil-echo-state nil)
-
-  ;; Enable automatic horizontal split below
-  (setq evil-split-window-below t)
-
-  ;; Enable automatic vertical split to the right
-  (setq evil-vsplit-window-right t)
-
-  ;; Enable fine-grained undo behavior
-  (setq evil-want-fine-undo t)
-
-  ;; Required by evil-collection
-
-  ;; Do not move cursor back when exiting insert state
-  (setq evil-move-cursor-back nil)
-
-  ;; Only complete in the current buffer
-  (setq evil-complete-all-buffers nil)
-
-  (setq evil-command-window-height 8)
-  (setq evil-display-shell-error-in-message nil)
-
-  ;; Controls whether evil-collection defines Vim-unimpaired-style keybindings
-  ;; (setq evil-collection-want-unimpaired-p nil)
-  (setq evil-collection-calendar-want-org-bindings t)
-
-  (setq tooltip-hide-delay 20) ;; seconds
-  (setq tooltip-delay 0.4)
-  (setq tooltip-short-delay 0.08)
-
-  ;; TODO is this good?
-  (setq mouse-wheel-progressive-speed nil) ; disable acceleration of scrolling
-  (setq mouse-wheel-scroll-amount
-        '(1
-          ((shift) . hscroll) ((meta))
-          ((control meta) . global-text-scale)
-          ((control) . text-scale)))
-
-  (setq inhibit-mouse-button-numbers '(1 2 3))
-  (setq pixel-scroll-precision-use-momentum nil))
-
 ;;; user post init
 
 (defun lightemacs-user-post-init ()
@@ -1482,8 +1375,6 @@ any new ones."
           (?< . evil-surround-read-tag)
           (?\C-f . evil-surround-prefix-function)
           (?f . evil-surround-function)))
-
-  (my-evil-config)
 
   (setq user-full-name "user"
         user-mail-address "user@domain.ext")
@@ -2580,78 +2471,6 @@ ARGS - the arguments passed to the original function"
   (setq hs-set-up-overlay 'display-code-line-counts))
 
 ;;; server
-
-;;; quiet
-
-;; In addition to the shut-up package, this module provides the
-;; `lightemacs-shut-up-advice-add' function, which prevents a function from
-;; displaying messages.
-
-;; readme: In addition to the *shut-up* package, this module provides the
-;; `lightemacs-shut-up-advice-add` function, which attaches advice to a given
-;; function to suppress all of its output.
-
-(defun lightemacs--shut-up-funcall (fn &rest args)
-  "Call FN with ARGS while suppressing all output.
-This function evaluates FN with the given ARGS while redirecting output that
-would normally be sent to `standard-output' and suppressing messages produced by
-`message'. It also overrides `write-region' and `load' with custom
-implementations that prevent unintended output."
-  ;; I have an issue with shut-up TODO especially with straight
-  ;; (shut-up
-  ;;   (apply fn args))
-  (let ((inhibit-message t))
-    (apply fn args)
-    ;; (cl-letf
-    ;;     ;; Override `standard-output' (for `print'), `message',
-    ;;     ;; `write-region', `load'.
-    ;;     ((standard-output #'ignore)
-    ;;      ((symbol-function 'message) 'ignore)
-    ;;      ;; ((symbol-function 'write-region) 'shut-up-write-region)
-    ;;      ;; ((symbol-function 'write-region) 'shut-up-write-region)
-    ;;      ;; ((symbol-function 'load) 'shut-up-load)
-    ;;      )
-    ;;   (apply fn args))
-    ))
-
-;;;###autoload
-(defun lightemacs-shut-up-advice-add (fn)
-  "Advise the FN function so that all its output is suppressed.
-This attaches an around-advice to FN using `lightemacs--shut-up-funcall',
-ensuring that when FN is invoked, it produces no messages, does not write to
-`standard-output', and does not display output from `write-region' or `load'."
-  (advice-add fn :around #'lightemacs--shut-up-funcall))
-
-;;;###autoload
-(defun lightemacs-shut-up-advice-remove (fn)
-  "Remove the silence advice from the FN function.
-This detaches the around-advice previously installed by
-`lightemacs-shut-up-advice-add', restoring FN to its original behavior where
-messages and output are no longer suppressed."
-  (advice-remove fn #'lightemacs--shut-up-funcall))
-
-(with-eval-after-load 'undo-fu-session
-  (lightemacs-shut-up-advice-add 'undo-fu-session--recover-safe))
-
-(with-eval-after-load 'evil
-  (lightemacs-shut-up-advice-add 'evil-redo)
-  (lightemacs-shut-up-advice-add 'evil-undo))
-
-(with-eval-after-load 'sh-script
-  (when (fboundp 'sh-set-shell)
-    (lightemacs-shut-up-advice-add 'sh-set-shell)))
-
-;; TODO silence it
-;; (lightemacs-shut-up-advice-add 'toggle-truncate-lines)
-
-;; (with-eval-after-load 'flyspell
-;;   (lightemacs-shut-up-advice-add 'flyspell-prog-mode)
-;;   (lightemacs-shut-up-advice-add 'flyspell-mode))
-
-;; (with-eval-after-load 'recentf
-;;   (lightemacs-shut-up-advice-add 'recentf-save-list)
-;;   (lightemacs-shut-up-advice-add 'recentf-cleanup)
-;;   (lightemacs-shut-up-advice-add 'recentf-mode))
 
 ;;; Golden-ratio
 

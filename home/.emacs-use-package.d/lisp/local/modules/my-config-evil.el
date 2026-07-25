@@ -36,6 +36,54 @@
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'sub-project)
 
+;;; Evil config
+
+;; Make `v$` exclude the final newline
+(setq evil-v$-excludes-newline t)
+
+;; Prevent Evil state from being echoed, preserving Eldoc display in the
+;; minibuffer (If set to t, Eldoc output in the minibuffer will be overridden)
+(setq evil-echo-state nil)
+
+;; Enable automatic horizontal split below
+(setq evil-split-window-below t)
+
+;; Enable automatic vertical split to the right
+(setq evil-vsplit-window-right t)
+
+;; Enable fine-grained undo behavior
+(setq evil-want-fine-undo t)
+
+;; Required by evil-collection
+
+;; Do not move cursor back when exiting insert state
+(setq evil-move-cursor-back nil)
+
+;; Only complete in the current buffer
+(setq evil-complete-all-buffers nil)
+
+(setq evil-command-window-height 8)
+(setq evil-display-shell-error-in-message nil)
+
+;; Controls whether evil-collection defines Vim-unimpaired-style keybindings
+;; (setq evil-collection-want-unimpaired-p nil)
+(setq evil-collection-calendar-want-org-bindings t)
+
+(setq tooltip-hide-delay 20) ;; seconds
+(setq tooltip-delay 0.4)
+(setq tooltip-short-delay 0.08)
+
+;; TODO is this good?
+(setq mouse-wheel-progressive-speed nil) ; disable acceleration of scrolling
+(setq mouse-wheel-scroll-amount
+      '(1
+        ((shift) . hscroll) ((meta))
+        ((control meta) . global-text-scale)
+        ((control) . text-scale)))
+
+(setq inhibit-mouse-button-numbers '(1 2 3))
+(setq pixel-scroll-precision-use-momentum nil)
+
 ;;; Experiments
 
 ;; Disable the Evil jump handler for buffer crossings. By overriding this

@@ -728,6 +728,7 @@ subsequent GCC invocations."
                            mod-gc
                            mod-yasnippet
                            mod-recenter-after-jump
+                           mod-quiet
 
                            mod-kirigami
                            ;; le-kirigami ; replaced with mod-kirigami

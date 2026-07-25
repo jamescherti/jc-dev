@@ -168,6 +168,63 @@
     (transient-mark-mode -1))
   (setq-default transient-mark-mode nil))
 
+;;; Packages: use-package
+
+;; (defun my-package-pin (package repository)
+;;   (setq package-pinned-packages
+;;         (assq-delete-all package package-pinned-packages))
+;;   (add-to-list 'package-pinned-packages (list (cons package repository))))
+
+(defun my-update-package-pinned-packages (pinned-packages)
+  "Update `package-pinned-packages\=' with the entries in PINNED-PACKAGES.
+This replaces existing entries that match the provided packages and appends
+any new ones."
+  (when (eq lightemacs-package-manager 'use-package)
+    (setq package-pinned-packages (append pinned-packages
+                                          (seq-remove
+                                           (lambda (pkg)
+                                             (assq (car pkg) pinned-packages))
+                                           package-pinned-packages)))))
+
+(setq my-package-pinned-packages
+      '((buffer-terminator             . "melpa")
+        (dir-config                    . "melpa")
+        (enhanced-evil-paredit         . "melpa")
+        (outline-indent                . "melpa")
+        (vim-tab-bar                   . "melpa")
+        (persist-text-scale            . "melpa")
+        (quick-sdcv                    . "melpa")
+        (inhibit-mouse                 . "melpa")
+        (stripspace                    . "melpa")
+        (tomorrow-night-deepblue-theme . "melpa")
+        (bufferfile                    . "melpa")
+        (compile-angel                 . "melpa")
+        (easysession                   . "melpa")
+        (flymake-ansible-lint          . "melpa")
+        (flymake-bashate               . "melpa")
+        (buffer-guardian               . "melpa")
+
+        (markdown-mode                 . "melpa")
+
+        (dumb-jump                 . "melpa")
+        ;; Latest
+        (vterm                         . "melpa")
+
+        (git-gutter                    . "melpa")
+
+        (visual-fill-column            . "melpa")
+
+        ;; lightemacs?
+        (undo-fu                       . "melpa")
+        (undo-fu-session               . "melpa")
+
+        ;; To fix the window-start bug
+        (apheleia                      . "melpa-stable")
+
+        ;; 3 months ago
+        ;; (gptel                         . "melpa")
+        ))
+
 ;;; Lazy loader
 
 ;; For file-path-todo
