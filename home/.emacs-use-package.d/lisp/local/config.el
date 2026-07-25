@@ -727,6 +727,7 @@ subsequent GCC invocations."
                            mod-flymake
                            mod-gc
                            mod-yasnippet
+                           mod-recenter-after-jump
 
                            mod-kirigami
                            ;; le-kirigami ; replaced with mod-kirigami
