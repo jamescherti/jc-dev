@@ -51,9 +51,9 @@ fi
 
 # Reset the SSH agent
 # shellcheck disable=SC2034
-SSH_AGENT_PID=""
+# SSH_AGENT_PID=""
 # shellcheck disable=SC2034
-SSH_AUTH_SOCK=""
+# SSH_AUTH_SOCK=""
 
 #-----------------------------------------> INTERACTIVE
 case $- in

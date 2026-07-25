@@ -186,9 +186,9 @@ fi
 
 # Reset the SSH agent (will be loaded later)
 # shellcheck disable=SC2034
-export SSH_AGENT_PID=""
+# export SSH_AGENT_PID=""
 # shellcheck disable=SC2034
-export SSH_AUTH_SOCK=""
+# export SSH_AUTH_SOCK=""
 
 jc_env_path_prepend PATH "$HOME/.bin"
 

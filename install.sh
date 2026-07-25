@@ -227,12 +227,15 @@ config_gpg() {
   cp "$SCRIPT_DIR/.gpg-agent.conf" ~/.gnupg/gpg-agent.conf
 
   local pinentry_bin
-  pinentry_bin=$(type -P pinentry-curses)
-  if [[ $OSTYPE =~ linux ]] && [[ "$pinentry_bin" != "" ]]; then
+  if [[ $XDG_CURRENT_DESKTOP = GNOME ]] \
+    && pinentry_bin=$(type -P pinentry-gnome3) &>/dev/null; then
+    echo "pinentry-program ${pinentry_bin}" >>~/.gnupg/gpg-agent.conf
+  elif [[ $OSTYPE =~ linux ]] && pinentry_bin=$(type -P pinentry-curses); then
     # Linux specific. I added this condition because pinentry-curses does not
     # work on macOS.
-    echo "pinentry-program /usr/bin/pinentry-curses" >>~/.gnupg/gpg-agent.conf
+    echo "pinentry-program $pinentry_bin" >>~/.gnupg/gpg-agent.conf
   fi
+
 }
 
 main() {

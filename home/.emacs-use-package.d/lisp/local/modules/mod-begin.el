@@ -128,7 +128,7 @@
 (setq-default show-paren-mode nil)
 
 ;; Disable Remote File Checks if Not Needed
-(setq-default tramp-mode nil)
+;; (setq-default tramp-mode nil)
 (when (bound-and-true-p windmove-mode)
   (windmove-mode -1))
 (setq-default windmove-mode nil)
