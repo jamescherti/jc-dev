@@ -61,8 +61,8 @@ cleanup-emacs-files() {
       fi
     fi
   done < <(
-    if [[ -d "$HOME/src" ]]; then
-      echo "$HOME/src"
+    if [[ -d "$HOME/src/emacs" ]]; then
+      echo "$HOME/src/emacs"
     fi
 
     if [[ "$HAS_FD" == true ]]; then
