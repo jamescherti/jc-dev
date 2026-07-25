@@ -216,6 +216,12 @@ tasks:
     remote:
       upstream: https://gitlab.gnome.org/jrahmatzadeh/just-perfection
 
+  - git: git@github.com:jamescherti/gnome-tilingshell
+    path: forks/gnome-tilingshell
+    revision: main
+    remote:
+      upstream: https://github.com/domferr/tilingshell
+
   # ----------------------------------------------------------------------------
   # Forks
   # ----------------------------------------------------------------------------
