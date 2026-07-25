@@ -3053,182 +3053,6 @@ messages and output are no longer suppressed."
   ;; Apply the new global setting advice
   (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
 
-;;; vterm-toggle
-
-;; (lightemacs-use-package vterm-toggle
-;;   :commands vterm-toggle
-;;   :bind (("<f2>" . vterm-toggle))
-;;   :init
-;;   (add-to-list 'display-buffer-alist
-;;                '("^\\*vterm"
-;;                  (display-buffer-reuse-window display-buffer-at-bottom)
-;;                  (window-height . 80)))
-;;   ;; :config
-;;   ;; ;; vterm-toggle: Change the default directory
-;;   ;; (defun my-around-vterm-toggle (fn &rest args)
-;;   ;;   "FN is the advised function. ARGS are the function arguments."
-;;   ;;   (with-temp-buffer
-;;   ;;     (insert (expand-file-name default-directory))
-;; Force Emacs to read and write the exact internal byte representation
-;; of the text without attempting any implicit encoding or decoding
-;; conversions.
-;;   ;;     (let ((coding-system-for-write 'utf-8-emacs)
-;;   ;;           (write-region-annotate-functions nil)
-;;   ;;           (write-region-post-annotation-function nil))
-;;   ;;       (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent)))
-;;   ;;   (apply fn args))
-;;   ;; (advice-add 'vterm-toggle :around #'my-around-vterm-toggle)
-;;   ;;
-;;   ;; ;; Inject tmux session on creation
-;;   ;; (defun my-vterm-toggle-tmux-setup (orig-fun &rest args)
-;;   ;;   "Inject tmux command when a new vterm buffer is created."
-;;   ;;   (let* ((buffer-name (or (car args) vterm-buffer-name))
-;;   ;;          (buffer-exists (get-buffer buffer-name))
-;;   ;;          (buf (apply orig-fun args)))
-;;   ;;     (unless buffer-exists
-;;   ;;       (with-current-buffer buf
-;;   ;;         (vterm-send-string "exec tmux-session emacs")
-;;   ;;         (vterm-send-string "\n")
-;;   ;;         (vterm-send-return)))
-;;   ;;     buf))
-;;   ;; (advice-add 'vterm-toggle--new :around #'my-vterm-toggle-tmux-setup)
-;;   ;;
-;;   ;; ;; Ensure switching to insert mode
-;;   ;; (defun my-vterm-toggle-to-insert-state ()
-;;   ;;   "Ensure the terminal is in char-mode and Evil is in insert state."
-;;   ;;   ;; If using term/ansi-term, this lets keys pass to the shell
-;;   ;;   ;; (when (and (fboundp 'term-char-mode)
-;;   ;;   ;;            (derived-mode-p 'term-mode))
-;;   ;;   ;;   (term-char-mode))
-;;   ;;
-;;   ;;   (my-save-all-buffers)
-;;   ;;
-;;   ;;   ;; Force Evil into insert state
-;;   ;;   (when (fboundp 'evil-insert-state)
-;;   ;;     (evil-insert-state))
-;;   ;;
-;;   ;;   ;; Fix issue that causes the cursor to move to the top-left of the screen
-;;   ;;   (when (and (derived-mode-p 'vterm-mode)
-;;   ;;              (fboundp 'vterm-reset-cursor-point))
-;;   ;;     (vterm-reset-cursor-point)))
-;;   ;;
-;;   ;; (add-hook 'vterm-toggle-show-hook #'my-vterm-toggle-to-insert-state)
-;;   )
-
-;;; exec file form shell
-
-;; TODO enable on mac
-;; (lightemacs-use-package exec-path-from-shell
-;;   :if (and (or (display-graphic-p) (daemonp))
-;;            (eq system-type 'darwin)) ; macOS only
-;;   :demand t
-;;   :functions exec-path-from-shell-initialize
-;;   :init
-;;   (setq exec-path-from-shell-variables
-;;         '("PATH" "MANPATH"
-;;           "TMPDIR"
-;;           "SSH_AUTH_SOCK" "SSH_AGENT_PID"
-;;           "GPG_AGENT_INFO"
-;;           ;; "FZF_DEFAULT_COMMAND" "FZF_DEFAULT_OPTS" ; fzf
-;;           ;; "VIRTUAL_ENV" ; Python
-;;           ;; "GOPATH" "GOROOT" "GOBIN" ; Go
-;;           ;; "CARGO_HOME" "RUSTUP_HOME" ; Rust
-;;           ;; "NVM_DIR" "NODE_PATH" ; Node/JS
-;;           "LANG" "LC_CTYPE"))
-;;   :config
-;;   ;; Initialize
-;;   (exec-path-from-shell-initialize))
-
-;;; html
-
-;;; olivetti
-
-;; perfect-margin: Specifically built to play nicely with tools that live on the
-;; edges of your windows, such as line numbers, minimap, and treemacs. It
-;; dynamically calculates the margins to keep the text centered without
-;; displacing these side-pane elements.
-;;
-;; olivetti: Sometimes struggles with side-pane elements. For example, if you
-;; enable line numbers, Olivetti might push them into the middle of the screen
-;; right next to the text block, which can look jarring.
-;; (lightemacs-use-package olivetti
-;;   ;; :if (display-graphic-p)
-;;   :commands olivetti-mode
-;;   :init
-;;   (setq olivetti-body-width 110)
-;;   (setq olivetti-minimum-body-width 60)
-;;
-;;   ;; Removes the default `visual-line-mode'
-;;   (setq olivetti-mode-on-hook nil)
-;;
-;;   :preface
-;;   (defun my-setup-olivetti-mode ()
-;;     "Setup `olivetti-mode'."
-;;     (when (derived-mode-p 'ibuffer-mode)
-;;       (setq-local olivetti-body-width 150))
-;;
-;;     ;; This ensures that olivetti works well with session managers such as
-;;     ;; easysession.
-;;     (if (bound-and-true-p easysession-load-in-progress)
-;;         (run-with-idle-timer
-;;          0 nil
-;;          #'(lambda()
-;;              (unless (bound-and-true-p olivetti-mode)
-;;                (olivetti-mode 1))))
-;;       (olivetti-mode 1)))
-;;
-;;   :init
-;;   (with-eval-after-load 'consult
-;;     (add-hook 'consult-preview-allowed-hooks #'my-setup-olivetti-mode))
-;;   (add-hook 'find-file-hook #'my-setup-olivetti-mode)
-;;   (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
-;;   (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode)
-;;   ;; (add-hook 'text-mode-hook #'my-setup-olivetti-mode)
-;;   ;; (add-hook 'prog-mode-hook #'my-setup-olivetti-mode)
-;;   )
-
-;;; Perfect margin
-
-;; Buggy
-;; (use-package perfect-margin
-;;   :ensure t
-;;   :init
-;;   (setq perfect-margin-visible-width 100)
-;;   ;; auto-center everything --i.e., do not ignore any kind of windows
-;;   (setq perfect-margin-ignore-filters '(window-minibuffer-p))
-;;   (setq perfect-margin-ignore-regexps '(
-;;                                         "^minibuf"
-;;                                         ;; "^[[:space:]]*\\*"
-;;                                         ))
-;;   :hook
-;;   (lightemacs-after-init . perfect-margin-mode))
-
-;;; visual-fill-column
-
-;; (lightemacs-use-package visual-fill-column
-;;   :commands visual-fill-column-for-vline
-;;   ;; :hook
-;;   ;; (
-;;   ;;  ;; (visual-line-mode .  visual-fill-column-for-vline)
-;;   ;;  ;; (prog-mode . visual-line-mode)
-;;   ;;  ;; (text-mode . visual-line-mode)
-;;   ;;
-;;   ;;  (prog-mode . visual-fill-column-mode)
-;;   ;;  (text-mode . visual-fill-column-mode)
-;;   ;;  ((markdown-mode org-mode) . (lambda()
-;;   ;;                                (setq fill-column 120))))
-;;
-;;   :custom
-;;   ;; Global settings
-;;   (visual-fill-column-center-text nil)
-;;   (visual-fill-column-enable-sensible-window-split t)
-;;   ;; :config
-;;   ;; TODO does this replace my config?
-;;   ;; THIS DOES NOT WORK
-;;   ;; Fix for text scaling (C-x C-+ / C-x C--)
-;;   ;; (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust)
-;;   )
-
 ;;; Trust framework files
 
 (defcustom lightemacs-trust-framework-files nil
@@ -3266,82 +3090,14 @@ This prevents Flymake warnings when viewing framework source files in Emacs
 (setq track-eol nil)
 
 ;; (setq evil-track-eol track-eol)
-(setq line-move-ignore-invisible t)
-
-;;; macrostep
-
-;; Buggy
-;; (lightemacs-use-package macrostep
-;;   :bind (:map emacs-lisp-mode-map
-;;               ("C-c e" . macrostep-expand)
-;;               :map lisp-interaction-mode-map
-;;               ("C-c e" . macrostep-expand)))
-
-(defun my-macroexpand ()
-  "Expand the macro at point one level at a time.
-If the result is still a macro, subsequent calls will expand the next level.
-The result is displayed in a pretty-printed temporary buffer."
-  (interactive)
-  (let* ((sexp (sexp-at-point))
-         (expansion (macroexpand-1 sexp)))
-    (if (equal sexp expansion)
-        (message "No further expansion possible.")
-      (with-current-buffer (get-buffer-create "*Macro Expansion*")
-        (let ((inhibit-read-only t))
-          (erase-buffer)
-          (emacs-lisp-mode)
-          (insert (pp-to-string expansion))
-          (indent-region (point-min) (point-max))
-          (goto-char (point-min)))
-        (read-only-mode 1)
-        (display-buffer (current-buffer))))))
+;; (setq line-move-ignore-invisible t)
 
 ;;; so long
 
 ;; (setq so-long-threshold 10000)
 ;; (add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
 
-;;; auto save
-
-;; TODO find a better way
-;; (defvar-local auto-recover-prompted nil
-;;   "Flag to prevent infinite recovery loops.")
-;; (defun auto-recover-prompt-on-visit ()
-;;   "Prompt to recover the auto-save file if it is newer."
-;;   (remove-hook 'find-file-hook #'auto-recover-prompt-on-visit)
-;;   (let ((auto-save-file (make-auto-save-file-name)))
-;;     ;; Check if we have already prompted and ensure we are not currently
-;;     ;; reverting
-;;     ;; let ((find-file-hook (seq-remove
-;;     ;;                       ;; This prevents an infinite loop
-;;     ;;                       (lambda(hook)
-;;     ;;                         (when (eq hook 'auto-recover-prompt-on-visit)
-;;     ;;                           t))
-;;     ;;                       find-file-hook)))
-;;     (when (and buffer-file-name
-;;                (not (buffer-base-buffer))
-;;                (not auto-recover-prompted)
-;;                (not revert-buffer-in-progress-p)
-;;                (file-exists-p auto-save-file)
-;;                (file-newer-than-file-p auto-save-file buffer-file-name))
-;;       ;; Set the flag to true immediately so it cannot fire again for this
-;;       ;; buffer
-;;       (setq auto-recover-prompted t)
-;;       (run-with-timer
-;;        0 nil
-;;        (lambda (buf)
-;;          (when (buffer-live-p buf)
-;;            (with-current-buffer buf
-;;              (when (y-or-n-p
-;;                     (format
-;;                      "An auto-save file is newer than '%s'. Start recovery? "
-;;                      buffer-file-name))
-;;                (call-interactively #'recover-this-file)))))
-;;        (current-buffer)))))
-;;
-;; (add-hook 'find-file-hook #'auto-recover-prompt-on-visit 90)
-
-;;; term kill
+;;; Term kill
 
 ;; Automatically close the buffer when the terminal session ends
 ;; TODO lightemacs
@@ -3356,7 +3112,7 @@ The result is displayed in a pretty-printed temporary buffer."
       (set-process-sentinel proc #'my-term-close-on-exit))))
 (add-hook 'term-exec-hook #'my-term-exec-hook)
 
-;;; term preferences
+;;; Term preferences
 
 ;; ============================================================================
 ;; Terminal Color and Emulation Configuration
@@ -3474,278 +3230,34 @@ The result is displayed in a pretty-printed temporary buffer."
 
 ;; (setq term-buffer-maximum-size 10000)
 
-;;; Lazily load buffers (TODO easysession)
+;;; vterm
 
-(defvar-local my-lazy-load-buffer--filename nil)
-(defvar-local my-lazy-load-buffer--window-start nil)
-(defvar-local my-lazy-load-buffer--point nil)
+;; To stop vterm from asking for confirmation and force it to compile the
+;; module automatically, you need to set the vterm-always-compile-module
+;; variable to t.
+(setq vterm-always-compile-module t)
 
-(defun my-lazy-generate-file-restore-buffer (buffer-name
-                                             filename
-                                             point
-                                             window-start)
-  "Create BUFFER-NAME with a button to load FILENAME when activated.
+(setq vterm-timer-delay 0.001)  ;; Only works when added after :config
+(setq vterm-max-scrollback 1)
+(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
+(setq vterm-disable-inverse-video t)
 
-This function creates a buffer named BUFFER-NAME that contains a button labeled
-[Restore]. When the user activates this button, the buffer is replaced with the
-contents of FILENAME using `find-file-noselect', and the window's point and
-start position are restored to the values given by POINT and WINDOW-START.
+;; TODO lightemacs?
+(defun my-setup-vterm ()
+  "Better evil integration with `vterm'."
+  (my-disable-fringe-truncation-arrow)
 
-If BUFFER-NAME already exists, an error is raised to prevent overwriting.
+  (setq-local line-number-mode nil)
+  (setq-local column-number-mode nil)
 
-This is useful for deferred loading of file buffers, allowing the user to
-explicitly trigger file loading only when desired."
-  (interactive)
-  (when (get-buffer buffer-name)
-    (error "The buffer `%s' is not supposed to exist" filename))
-  (let ((new-buffer (get-buffer-create buffer-name)))
-    (with-current-buffer new-buffer
-      (setq my-lazy-load-buffer--filename new-buffer)
-      (setq my-lazy-load-buffer--window-start window-start)
-      (setq my-lazy-load-buffer--point point)
-      (insert (format-message "This window displayed `%s'.\n" filename))
-      (when filename
-        (insert-button
-         "[Restore]" 'action
-         (lambda (_button)
-           (let ((window (selected-window))
-                 (temporary-buffer (current-buffer)))
-             (set-window-buffer window (find-file-noselect filename))
-             (unless (eq (window-buffer) temporary-buffer)
-               (kill-buffer temporary-buffer))
-             (set-window-start window my-lazy-load-buffer--window-start t)
-             (set-window-point window my-lazy-load-buffer--point))))
-        (insert "\n"))
-      (goto-char (point-min))
-      (special-mode))))
+  ;; Define cursor shapes and colors for Evil states
+  (setq-local evil-normal-state-cursor 'box
+              evil-visual-state-cursor 'box
+              evil-insert-state-cursor 'bar)
 
-;;; vertico postframe
+  (setq-local cursor-type 'bar))
 
-;; Too slow
-;; (unless IS-MAC
-;;   (use-package vertico-posframe
-;;     :after vertico
-;;     :commands vertico-posframe-mode
-;;     :custom
-;;     (vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-right-corner)
-;;     :init
-;;     (add-hook 'vertico-mode-hook #'vertico-posframe-mode)
-;;
-;;     (setq vertico-posframe-parameters
-;;           '((left-fringe . 8)
-;;             (right-fringe . 8)))
-;;
-;;     (setq vertico-posframe-height 11
-;;           vertico-posframe-width 100)
-;;
-;;     ;; vertico-posframe-parameters '((left-fringe . 20)
-;;     ;;                               (right-fringe . 20))
-;;     ;; vertico-posframe-border-width 2
-;;     ;; vertico-posframe-min-height 2
-;;     ;; (vertico-posframe-mode 1)
-;;     ))
-
-;;; embark / vertico
-
-;; (require 'vertico-multiform)
-;; (vertico-multiform-mode 1)
-;; ;; Force all Vertico sessions to use the 'buffer' display style
-;; (setq vertico-multiform-commands
-;;       '((t buffer)))
-
-;; Lightemacs?
-;; (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
-
-;; is this good?
-;; (setq display-buffer-alist
-;;       '(("\\*vertico\\*"
-;;          (display-buffer-reuse-window
-;;           display-buffer-at-bottom)
-;;          (window-height . 0.5)
-;;          (preserved-parameters . (window-height)))))
-
-;; (use-package vertico-buffer
-;;   :ensure nil
-;;   :defer t
-;;   :commands (vertico-buffer-mode
-;;              vertico-buffer--redisplay)
-;;   :hook (vertico-mode . vertico-buffer-mode)
-;;
-;;   ;; causes issues, maybe also because of stillness-mode
-;;   ;; :preface
-;;   ;; (defun my-fit-minibuffer-to-content (win)
-;;   ;;   "Try to fit the minibuffer window height to its content before redisplay."
-;;   ;;   (ignore-errors
-;;   ;;     (fit-window-to-buffer win)))
-;;   ;;
-;;   ;; :config
-;;   ;; ;; TODO: Make it grow only
-;;   ;; (advice-add #'vertico-buffer--redisplay
-;;   ;;             :after #'my-fit-minibuffer-to-content)
-;;
-;;   :init
-;;   (setq vertico-buffer-display-action '((display-buffer-at-bottom)
-;;                                         (window-height . 0.38))))
-
-;;   ;; (defun my-update-consult-async-settings (&rest _)
-;;   ;;   (if (string= (battery-angel-get-charging-state) "AC")
-;;   ;;       (setq consult-async-input-debounce 0.02
-;;   ;;             consult-async-input-throttle 0.05
-;;   ;;             consult-async-refresh-delay 0.02)
-;;   ;;     (setq consult-async-input-debounce 0.2
-;;   ;;           consult-async-input-throttle 0.5
-;;   ;;           consult-async-refresh-delay 0.2)))
-;;
-;;   ;; (my-update-consult-async-settings)
-;;
-;;   ;; (advice-add 'consult-ripgrep :before #'my-update-consult-async-settings)
-;;   ;; (advice-add 'consult-fd :before #'my-update-consult-async-settings)
-;;   ;; (advice-add 'consult-recent-file :before #'my-update-consult-async-settings)
-;;
-;;   ;; (with-eval-after-load 'evil
-;;   ;;   (evil-define-key '(insert normal) consult-async-map (kbd "M-s") 'consult-history))
-;;   )
-
-;;; tab-bar: only display file visiting buffers
-
-(defun custom-tab-valid-buffer-p (buf)
-  "Return non-nil if BUF is visiting a file or is a `dired' buffer."
-  (or (buffer-file-name (or (buffer-base-buffer buf) buf))
-      (with-current-buffer buf
-        (derived-mode-p 'dired-mode))))
-
-(defun custom-tab-bar-tab-name ()
-  "Return the name of the current or visible file-visiting buffer.
-This prevents non-file buffers, such as popup shells or help windows, from
-taking over the tab name. It keeps the tab-bar focused on the actual files you
-are editing by falling back to another visible file buffer."
-  (let ((current-buf (window-buffer (minibuffer-selected-window))))
-    (cond
-     ((or (one-window-p)
-          (custom-tab-valid-buffer-p current-buf))
-      (buffer-name current-buf))
-
-     (t
-      (catch 'found
-        (dolist (win (window-list))
-          (let ((buf (window-buffer win)))
-            (when (custom-tab-valid-buffer-p buf)
-              (throw 'found (buffer-name buf)))))
-        ;; Fallback if no visible valid buffer is found
-        (buffer-name current-buf))))))
-
-(setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
-
-;;; git gutter
-
-;; (lightemacs-use-package git-gutter
-;;   :commands (git-gutter-mode)
-;;
-;;   :init
-;;   (setq git-gutter:modified-sign " "
-;;         git-gutter:added-sign "+"
-;;         git-gutter:deleted-sign "-"
-;;         git-gutter:ask-p nil
-;;         git-gutter:diff-option "-w"
-;;         git-gutter:handled-backends '(git)
-;;         git-gutter:disabled-modes '(image-mode fundamental-mode pdf-view-mode)
-;;         git-gutter:hide-gutter nil
-;;         ;; git-gutter:visual-line t        ; Better for wrapped lines
-;;         git-gutter:update-interval 2
-;;         git-gutter:verbosity 0)
-;;
-;;   :config
-;;   (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
-;;   (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
-;;   (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
-;;
-;;
-;;   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
-;;   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
-;;
-;; (lightemacs-use-package git-gutter-fringe
-;;   :after git-gutter
-;;   :init
-;;   (setq git-gutter-fr:side 'left-fringe))
-
-;;; le-undo-fu
-
-(with-eval-after-load 'le-undo-fu-session
-  (setq undo-fu-session-incompatible-files
-        '(;; ".*\\.age$"
-          ;; "/\\.authinfo\\'"
-          ;; "/\\.netrc\\'"
-          ;; "/SQUASH_MSG\\'"
-          ;; "/TAG_EDITMSG\\'"
-          ;; "/PULLREQ_EDITMSG\\'"
-          "^/tmp/"
-          "^/var/tmp/")))
-
-;;; savefold
-
-;; TODO kill emacs hook issue when editing .asc file, it asks for the password
-;; (lightemacs-use-package savefold
-;;   :init
-;;   ;; Removed org (buggy)
-;;   (setq savefold-backends '(outline hideshow treesit-fold markdown))
-;;
-;;   ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
-;;   (setq savefold-directory
-;;         (expand-file-name "savefold" my-shared-user-emacs-directory))
-;;
-;;   (setq org-startup-folded 'showeverything)
-;;
-;;   :preface
-;;   ;; Fixes: https://github.com/jcfk/savefold.el/issues/7
-;;   (defun my-savefold-utils--get-attr-table-fpath (fpath)
-;;     "Return the FPATH of the attribute table file for FPATH.
-;;   This naively replaces path slashes with ! (/a/b/c -> !a!b!c) leading to a
-;;   chance of collision."
-;;     (let* ((fpath (expand-file-name fpath))
-;;            (fpath (string-replace "/" "!" fpath))
-;;            (fpath (string-replace ":" "!" fpath))  ; For windows
-;;            (old-fpath (expand-file-name fpath savefold-directory))
-;;            (new-fpath (expand-file-name (concat fpath ".savefold")
-;;                                         savefold-directory)))
-;;       (if (and (file-exists-p old-fpath)
-;;                (not (file-exists-p new-fpath)))
-;;           old-fpath
-;;         new-fpath)))
-;;   (advice-add 'savefold-utils--get-attr-table-fpath :override
-;;               #'my-savefold-utils--get-attr-table-fpath)
-;;
-;;   :config
-;;   (savefold-mode 1))
-
-;; Bug fix: https://github.com/jcfk/savefold.el/issues/7
-(defun my-savefold-append-ext-advice (return-path)
-  "Append `savefold' extension to the RETURN-PATH."
-  (concat return-path ".savefold"))
-
-(with-eval-after-load 'savefold
-  (advice-add 'savefold-utils--get-attr-table-fpath
-              :filter-return
-              #'my-savefold-append-ext-advice))
-
-(defun my-save-buffer-savefold-advice (&rest _)
-  "Advise `save-buffer' to persist folds when the buffer is unmodified.
-Standard save hooks handle persistence when the buffer is modified."
-  (when (and (bound-and-true-p savefold-mode)
-             (not (buffer-modified-p)))
-    (dolist (backend (bound-and-true-p savefold-backends))
-      (let ((save-func (intern-soft (format "savefold-%s--save-folds" backend)))
-            (pred-func (intern-soft (format "savefold-%s--bufferp" backend))))
-        (when (and save-func (fboundp save-func)
-                   pred-func (fboundp pred-func)
-                   (funcall pred-func))
-          (funcall save-func))))))
-
-;; (with-eval-after-load 'buffer-guardian
-;;   (with-eval-after-load 'savefold
-;;     (advice-add 'buffer-guardian-save-buffer :before
-;;                 #'my-save-buffer-savefold-advice)
-;;     (advice-add 'buffer-guardian-save-buffer-maybe :before
-;;                 #'my-save-buffer-savefold-advice)))
+(add-hook 'vterm-mode-hook 'my-setup-vterm)
 
 ;;; ghostel
 
@@ -3792,6 +3304,94 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   ;; 'auto routes ESC to the shell if an alt-screen TUI (like vim) is running,
 ;;   ;; otherwise it switches the buffer frame to evil normal state.
 ;;   (evil-ghostel-escape 'auto))
+
+;;; Lazily load buffers (TODO easysession)
+
+(defvar-local my-lazy-load-buffer--filename nil)
+(defvar-local my-lazy-load-buffer--window-start nil)
+(defvar-local my-lazy-load-buffer--point nil)
+
+(defun my-lazy-generate-file-restore-buffer (buffer-name
+                                             filename
+                                             point
+                                             window-start)
+  "Create BUFFER-NAME with a button to load FILENAME when activated.
+
+This function creates a buffer named BUFFER-NAME that contains a button labeled
+[Restore]. When the user activates this button, the buffer is replaced with the
+contents of FILENAME using `find-file-noselect', and the window's point and
+start position are restored to the values given by POINT and WINDOW-START.
+
+If BUFFER-NAME already exists, an error is raised to prevent overwriting.
+
+This is useful for deferred loading of file buffers, allowing the user to
+explicitly trigger file loading only when desired."
+  (interactive)
+  (when (get-buffer buffer-name)
+    (error "The buffer `%s' is not supposed to exist" filename))
+  (let ((new-buffer (get-buffer-create buffer-name)))
+    (with-current-buffer new-buffer
+      (setq my-lazy-load-buffer--filename new-buffer)
+      (setq my-lazy-load-buffer--window-start window-start)
+      (setq my-lazy-load-buffer--point point)
+      (insert (format-message "This window displayed `%s'.\n" filename))
+      (when filename
+        (insert-button
+         "[Restore]" 'action
+         (lambda (_button)
+           (let ((window (selected-window))
+                 (temporary-buffer (current-buffer)))
+             (set-window-buffer window (find-file-noselect filename))
+             (unless (eq (window-buffer) temporary-buffer)
+               (kill-buffer temporary-buffer))
+             (set-window-start window my-lazy-load-buffer--window-start t)
+             (set-window-point window my-lazy-load-buffer--point))))
+        (insert "\n"))
+      (goto-char (point-min))
+      (special-mode))))
+
+;;; tab-bar: only display file visiting buffers
+
+(defun custom-tab-valid-buffer-p (buf)
+  "Return non-nil if BUF is visiting a file or is a `dired' buffer."
+  (or (buffer-file-name (or (buffer-base-buffer buf) buf))
+      (with-current-buffer buf
+        (derived-mode-p 'dired-mode))))
+
+(defun custom-tab-bar-tab-name ()
+  "Return the name of the current or visible file-visiting buffer.
+This prevents non-file buffers, such as popup shells or help windows, from
+taking over the tab name. It keeps the tab-bar focused on the actual files you
+are editing by falling back to another visible file buffer."
+  (let ((current-buf (window-buffer (minibuffer-selected-window))))
+    (cond
+     ((or (one-window-p)
+          (custom-tab-valid-buffer-p current-buf))
+      (buffer-name current-buf))
+
+     (t
+      (catch 'found
+        (dolist (win (window-list))
+          (let ((buf (window-buffer win)))
+            (when (custom-tab-valid-buffer-p buf)
+              (throw 'found (buffer-name buf)))))
+        ;; Fallback if no visible valid buffer is found
+        (buffer-name current-buf))))))
+
+(setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
+
+;;; le-undo-fu
+
+(with-eval-after-load 'le-undo-fu-session
+  (setq undo-fu-session-incompatible-files
+        '(;; ".*\\.age$"
+          ;; "/\\.authinfo\\'"
+          ;; "/\\.netrc\\'"
+          ;; "/SQUASH_MSG\\'"
+          ;; "/TAG_EDITMSG\\'"
+          ;; "/PULLREQ_EDITMSG\\'"
+          "^/tmp/"
+          "^/var/tmp/")))
 
 ;;; diff-hl setup
 
@@ -3909,63 +3509,6 @@ properly handles remote files over Tramp), applying the setting only if
 (setq diff-hl-autohide-margin t)
 (setq diff-hl-bmp-max-width 16)
 (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
-
-;;; Disabled: Emacs Consult / Vertico
-
-;; (setq consult-imenu-config
-;;       '((emacs-lisp-mode :toplevel "Functions"
-;;                          :types ((?f "Functions" font-lock-function-name-face)
-;;                                  (?m "Macros"    font-lock-function-name-face)
-;;                                  (?p "Packages"  font-lock-constant-face)
-;;                                  (?t "Types"     font-lock-type-face)
-;;                                  (?v "Variables" font-lock-variable-name-face)))))
-
-;;; Disabled: consult flymake
-
-;; (with-eval-after-load 'consult
-;;   (with-eval-after-load 'flymake
-;;     (require 'consult-flymake)))
-
-;; TODO fix vertico after enabling this
-;; (lightemacs-use-package vertico-repeat
-;;   ;; Vertico repeat last command
-;;   :ensure nil
-;;   :after vertico
-;;   :commands (vertico-repeat-last
-;;              vertico-repeat
-;;              vertico-repeat-save)
-;;   :hook
-;;   (minibuffer-setup . vertico-repeat-save)
-;;   :init
-;;   (evil-define-key 'normal 'global (kbd "<leader>vr") #'vertico-repeat-last))
-
-;;(lightemacs-use-package vertico-quick
-;;  :ensure nil
-;;  :after (vertico)
-;;  :custom
-;;  (vertico-quick1 "aoeuid")
-;;  (vertico-quick2 "htns")
-;;  :commands (vertico-quick-insert
-;;             vertico-quick-exit
-;;             vertico-quick-jump)
-;;  :general
-;;  (emacs-map
-;;   'vertico-map
-;;   "M-f" #'vertico-quick-insert
-;;   "M-," #'vertico-quick-insert
-;;   "M-." #'vertico-quick-exit))
-
-;; (lightemacs-use-package vertico-directory
-;;   :ensure nil
-;;   :after vertico
-;;   :defer t
-;;   :commands vertico-directory-tidy
-;;   ;; More convenient directory navigation commands
-;;   :bind (:map vertico-map
-;;               ("DEL" . vertico-directory-delete-char)
-;;               ("M-DEL" . vertico-directory-delete-word))
-;;   ;; Tidy shadowed file names
-;;   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 ;;; Lazy autorevert
 
@@ -4092,7 +3635,594 @@ properly handles remote files over Tramp), applying the setting only if
                                      tramp-file-name-regexp
                                      "[/\\\\]node_modules")))
 
-;;; VC: Support git-crypt repositories
+;;; sub-org
+
+(with-eval-after-load 'org
+  (require 'sub-org))
+
+;;; Warnings
+
+;; (unless (fboundp 'json-serialize)
+;;   (warn "Native JSON is *not* available"))
+
+(unless (and (fboundp 'native-comp-available-p)
+             (native-comp-available-p))
+  (warn "Native compilation is *not* available"))
+
+;;; Papyrus Help
+
+(defvar papyrus-help-hook nil
+  "Hook run after describing an Elisp symbol at point.
+This hook is executed after the function
+`papyrus-help-elisp-symbol-at-point' describes the symbol at point as a
+variable or function. It can be used to perform additional actions, such as
+updating the display, highlighting defined functions and variables...")
+
+(defun papyrus-help-elisp-symbol-at-point ()
+  "Describe the symbol at point as either a variable or a function.
+
+This function determines whether the symbol at point is a variable or a
+function. If the symbol is identified as a function or a variable exclusively,
+it will automatically describe it. If both types are detected or neither is
+detected, the user is prompted to choose whether to describe it as a variable or
+a function.
+
+After describing the symbol, if a help buffer is active, it will rename the help
+buffer to include the name of the symbol.
+
+The function displays messages if the symbol at point is not a variable or
+function or if an invalid choice is made."
+  (interactive)
+
+  (let* ((symbol (symbol-at-point))
+         (is-function (and symbol (fboundp symbol)))
+         (is-variable (and symbol (boundp symbol)))
+         (choice nil))
+
+    ;; Automatically select function or variable if only one is at point,
+    ;; otherwise ask the user.
+    (cond
+     (is-function
+      (setq choice ?f))
+     (is-variable
+      (setq choice ?v))
+     (t
+      (setq choice (read-char "Describe (v)ariable or (f)unction? "))))
+
+    ;; Handle the chosen option for describing a function or variable.
+    (cond
+     ((eq choice ?v)
+      (describe-variable symbol))
+     ((eq choice ?f)
+      (describe-function symbol))
+     ((not choice)
+      (message "No function or variable at point."))
+     (t
+      (message
+       "Invalid choice, press 'v' for variable or 'f' for function.")))
+
+    (when (or (eq choice ?v)
+              (eq choice ?f))
+      (let ((help-buffer (get-buffer "*Help*")))
+        (when help-buffer
+          (with-current-buffer help-buffer
+            (rename-buffer
+             (format "*Help:%s*" (symbol-name symbol)) t)
+            (run-hooks 'papyrus-help-hook)))))))
+
+(defun my-setup-evil-papyrus-help ()
+  "Setup papyrus help."
+  (setq-local evil-lookup-func #'papyrus-help-elisp-symbol-at-point))
+
+(add-hook 'emacs-lisp-mode-hook #'my-setup-evil-papyrus-help)
+
+(add-hook 'papyrus-help-hook #'(lambda()
+                                 (when (fboundp 'highlight-defined-mode)
+                                   (highlight-defined-mode))
+                                 (when (bound-and-true-p font-lock-mode)
+                                   (font-lock-ensure))))
+
+;;; dabbrev
+
+;; Control whether dabbrev searches should ignore case.
+;; Any other non-nil version means case is not significant.
+;; nil means case is significant.
+(setq dabbrev-case-fold-search nil)
+
+;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
+;; A value of nil means preserve the expansion's case pattern.
+(setq dabbrev-case-replace nil)
+
+(setq dabbrev-check-all-buffers nil)
+
+;; It configures dabbrev (dynamic abbreviation expansion) to search only in the
+;; current buffer when expanding abbreviations, instead of searching in other
+;; buffers as well.
+;; (setq dabbrev-check-other-buffers t)  ;; Default t
+
+;; Set this variable to "\\sw" if you want ordinary words or "\\sw\\|\\s_" if
+;; you want symbols (including characters whose syntax is "symbol" as well as
+;; those whose syntax is "word"). The abbreviation is from point to the start
+;; of the previous sequence of characters matching this variable.
+;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
+
+;; (dabbrev-ignored-buffer-names '("*Messages*" "*Ibuffer*"))
+;; (dabbrev-limit 1000)
+(setq dabbrev-case-distinction nil)
+
+;; (setq dabbrev-case-fold-search nil)
+;; (setq dabbrev-case-replace 'case-replace)
+;; (setq dabbrev-check-other-buffers t)
+;; (setq dabbrev-eliminate-newlines t)
+;; (setq dabbrev-upcase-means-case-search t)
+
+;; :init
+;;
+;; (when (fboundp 'my-setup-dabbrev)
+;;   (add-hook 'bash-ts-mode-hook #'my-setup-dabbrev)
+;;   (add-hook 'sh-mode-hook #'my-setup-dabbrev)
+;;   (add-hook 'php-mode-hook #'my-setup-dabbrev))
+
+;;; DISABLED: vterm-toggle
+
+;; (lightemacs-use-package vterm-toggle
+;;   :commands vterm-toggle
+;;   :bind (("<f2>" . vterm-toggle))
+;;   :init
+;;   (add-to-list 'display-buffer-alist
+;;                '("^\\*vterm"
+;;                  (display-buffer-reuse-window display-buffer-at-bottom)
+;;                  (window-height . 80)))
+;;   ;; :config
+;;   ;; ;; vterm-toggle: Change the default directory
+;;   ;; (defun my-around-vterm-toggle (fn &rest args)
+;;   ;;   "FN is the advised function. ARGS are the function arguments."
+;;   ;;   (with-temp-buffer
+;;   ;;     (insert (expand-file-name default-directory))
+;; Force Emacs to read and write the exact internal byte representation
+;; of the text without attempting any implicit encoding or decoding
+;; conversions.
+;;   ;;     (let ((coding-system-for-write 'utf-8-emacs)
+;;   ;;           (write-region-annotate-functions nil)
+;;   ;;           (write-region-post-annotation-function nil))
+;;   ;;       (write-region (point-min) (point-max) "~/.bash_lastdir" nil 'silent)))
+;;   ;;   (apply fn args))
+;;   ;; (advice-add 'vterm-toggle :around #'my-around-vterm-toggle)
+;;   ;;
+;;   ;; ;; Inject tmux session on creation
+;;   ;; (defun my-vterm-toggle-tmux-setup (orig-fun &rest args)
+;;   ;;   "Inject tmux command when a new vterm buffer is created."
+;;   ;;   (let* ((buffer-name (or (car args) vterm-buffer-name))
+;;   ;;          (buffer-exists (get-buffer buffer-name))
+;;   ;;          (buf (apply orig-fun args)))
+;;   ;;     (unless buffer-exists
+;;   ;;       (with-current-buffer buf
+;;   ;;         (vterm-send-string "exec tmux-session emacs")
+;;   ;;         (vterm-send-string "\n")
+;;   ;;         (vterm-send-return)))
+;;   ;;     buf))
+;;   ;; (advice-add 'vterm-toggle--new :around #'my-vterm-toggle-tmux-setup)
+;;   ;;
+;;   ;; ;; Ensure switching to insert mode
+;;   ;; (defun my-vterm-toggle-to-insert-state ()
+;;   ;;   "Ensure the terminal is in char-mode and Evil is in insert state."
+;;   ;;   ;; If using term/ansi-term, this lets keys pass to the shell
+;;   ;;   ;; (when (and (fboundp 'term-char-mode)
+;;   ;;   ;;            (derived-mode-p 'term-mode))
+;;   ;;   ;;   (term-char-mode))
+;;   ;;
+;;   ;;   (my-save-all-buffers)
+;;   ;;
+;;   ;;   ;; Force Evil into insert state
+;;   ;;   (when (fboundp 'evil-insert-state)
+;;   ;;     (evil-insert-state))
+;;   ;;
+;;   ;;   ;; Fix issue that causes the cursor to move to the top-left of the screen
+;;   ;;   (when (and (derived-mode-p 'vterm-mode)
+;;   ;;              (fboundp 'vterm-reset-cursor-point))
+;;   ;;     (vterm-reset-cursor-point)))
+;;   ;;
+;;   ;; (add-hook 'vterm-toggle-show-hook #'my-vterm-toggle-to-insert-state)
+;;   )
+
+;;; DISABLED: olivetti
+
+;; perfect-margin: Specifically built to play nicely with tools that live on the
+;; edges of your windows, such as line numbers, minimap, and treemacs. It
+;; dynamically calculates the margins to keep the text centered without
+;; displacing these side-pane elements.
+;;
+;; olivetti: Sometimes struggles with side-pane elements. For example, if you
+;; enable line numbers, Olivetti might push them into the middle of the screen
+;; right next to the text block, which can look jarring.
+;; (lightemacs-use-package olivetti
+;;   ;; :if (display-graphic-p)
+;;   :commands olivetti-mode
+;;   :init
+;;   (setq olivetti-body-width 110)
+;;   (setq olivetti-minimum-body-width 60)
+;;
+;;   ;; Removes the default `visual-line-mode'
+;;   (setq olivetti-mode-on-hook nil)
+;;
+;;   :preface
+;;   (defun my-setup-olivetti-mode ()
+;;     "Setup `olivetti-mode'."
+;;     (when (derived-mode-p 'ibuffer-mode)
+;;       (setq-local olivetti-body-width 150))
+;;
+;;     ;; This ensures that olivetti works well with session managers such as
+;;     ;; easysession.
+;;     (if (bound-and-true-p easysession-load-in-progress)
+;;         (run-with-idle-timer
+;;          0 nil
+;;          #'(lambda()
+;;              (unless (bound-and-true-p olivetti-mode)
+;;                (olivetti-mode 1))))
+;;       (olivetti-mode 1)))
+;;
+;;   :init
+;;   (with-eval-after-load 'consult
+;;     (add-hook 'consult-preview-allowed-hooks #'my-setup-olivetti-mode))
+;;   (add-hook 'find-file-hook #'my-setup-olivetti-mode)
+;;   (add-hook 'dired-mode-hook #'my-setup-olivetti-mode)
+;;   (add-hook 'ibuffer-mode-hook #'my-setup-olivetti-mode)
+;;   ;; (add-hook 'text-mode-hook #'my-setup-olivetti-mode)
+;;   ;; (add-hook 'prog-mode-hook #'my-setup-olivetti-mode)
+;;   )
+
+;;; DISABLED: exec file form shell
+
+;; TODO enable on mac
+;; (lightemacs-use-package exec-path-from-shell
+;;   :if (and (or (display-graphic-p) (daemonp))
+;;            (eq system-type 'darwin)) ; macOS only
+;;   :demand t
+;;   :functions exec-path-from-shell-initialize
+;;   :init
+;;   (setq exec-path-from-shell-variables
+;;         '("PATH" "MANPATH"
+;;           "TMPDIR"
+;;           "SSH_AUTH_SOCK" "SSH_AGENT_PID"
+;;           "GPG_AGENT_INFO"
+;;           ;; "FZF_DEFAULT_COMMAND" "FZF_DEFAULT_OPTS" ; fzf
+;;           ;; "VIRTUAL_ENV" ; Python
+;;           ;; "GOPATH" "GOROOT" "GOBIN" ; Go
+;;           ;; "CARGO_HOME" "RUSTUP_HOME" ; Rust
+;;           ;; "NVM_DIR" "NODE_PATH" ; Node/JS
+;;           "LANG" "LC_CTYPE"))
+;;   :config
+;;   ;; Initialize
+;;   (exec-path-from-shell-initialize))
+
+;;; DISABLED: Perfect margin
+
+;; Buggy
+;; (use-package perfect-margin
+;;   :ensure t
+;;   :init
+;;   (setq perfect-margin-visible-width 100)
+;;   ;; auto-center everything --i.e., do not ignore any kind of windows
+;;   (setq perfect-margin-ignore-filters '(window-minibuffer-p))
+;;   (setq perfect-margin-ignore-regexps '(
+;;                                         "^minibuf"
+;;                                         ;; "^[[:space:]]*\\*"
+;;                                         ))
+;;   :hook
+;;   (lightemacs-after-init . perfect-margin-mode))
+
+;;; DISABLED: visual-fill-column
+
+;; (lightemacs-use-package visual-fill-column
+;;   :commands visual-fill-column-for-vline
+;;   ;; :hook
+;;   ;; (
+;;   ;;  ;; (visual-line-mode .  visual-fill-column-for-vline)
+;;   ;;  ;; (prog-mode . visual-line-mode)
+;;   ;;  ;; (text-mode . visual-line-mode)
+;;   ;;
+;;   ;;  (prog-mode . visual-fill-column-mode)
+;;   ;;  (text-mode . visual-fill-column-mode)
+;;   ;;  ((markdown-mode org-mode) . (lambda()
+;;   ;;                                (setq fill-column 120))))
+;;
+;;   :custom
+;;   ;; Global settings
+;;   (visual-fill-column-center-text nil)
+;;   (visual-fill-column-enable-sensible-window-split t)
+;;   ;; :config
+;;   ;; TODO does this replace my config?
+;;   ;; THIS DOES NOT WORK
+;;   ;; Fix for text scaling (C-x C-+ / C-x C--)
+;;   ;; (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust)
+;;   )
+
+;;; DISABLED: auto save
+
+;; TODO find a better way
+;; (defvar-local auto-recover-prompted nil
+;;   "Flag to prevent infinite recovery loops.")
+;; (defun auto-recover-prompt-on-visit ()
+;;   "Prompt to recover the auto-save file if it is newer."
+;;   (remove-hook 'find-file-hook #'auto-recover-prompt-on-visit)
+;;   (let ((auto-save-file (make-auto-save-file-name)))
+;;     ;; Check if we have already prompted and ensure we are not currently
+;;     ;; reverting
+;;     ;; let ((find-file-hook (seq-remove
+;;     ;;                       ;; This prevents an infinite loop
+;;     ;;                       (lambda(hook)
+;;     ;;                         (when (eq hook 'auto-recover-prompt-on-visit)
+;;     ;;                           t))
+;;     ;;                       find-file-hook)))
+;;     (when (and buffer-file-name
+;;                (not (buffer-base-buffer))
+;;                (not auto-recover-prompted)
+;;                (not revert-buffer-in-progress-p)
+;;                (file-exists-p auto-save-file)
+;;                (file-newer-than-file-p auto-save-file buffer-file-name))
+;;       ;; Set the flag to true immediately so it cannot fire again for this
+;;       ;; buffer
+;;       (setq auto-recover-prompted t)
+;;       (run-with-timer
+;;        0 nil
+;;        (lambda (buf)
+;;          (when (buffer-live-p buf)
+;;            (with-current-buffer buf
+;;              (when (y-or-n-p
+;;                     (format
+;;                      "An auto-save file is newer than '%s'. Start recovery? "
+;;                      buffer-file-name))
+;;                (call-interactively #'recover-this-file)))))
+;;        (current-buffer)))))
+;;
+;; (add-hook 'find-file-hook #'auto-recover-prompt-on-visit 90)
+
+;;; DISABLED: vertico postframe
+
+;; Too slow
+;; (unless IS-MAC
+;;   (use-package vertico-posframe
+;;     :after vertico
+;;     :commands vertico-posframe-mode
+;;     :custom
+;;     (vertico-posframe-poshandler #'posframe-poshandler-frame-bottom-right-corner)
+;;     :init
+;;     (add-hook 'vertico-mode-hook #'vertico-posframe-mode)
+;;
+;;     (setq vertico-posframe-parameters
+;;           '((left-fringe . 8)
+;;             (right-fringe . 8)))
+;;
+;;     (setq vertico-posframe-height 11
+;;           vertico-posframe-width 100)
+;;
+;;     ;; vertico-posframe-parameters '((left-fringe . 20)
+;;     ;;                               (right-fringe . 20))
+;;     ;; vertico-posframe-border-width 2
+;;     ;; vertico-posframe-min-height 2
+;;     ;; (vertico-posframe-mode 1)
+;;     ))
+
+;;; DISABLED: embark / vertico
+
+;; (require 'vertico-multiform)
+;; (vertico-multiform-mode 1)
+;; ;; Force all Vertico sessions to use the 'buffer' display style
+;; (setq vertico-multiform-commands
+;;       '((t buffer)))
+
+;; Lightemacs?
+;; (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+
+;; is this good?
+;; (setq display-buffer-alist
+;;       '(("\\*vertico\\*"
+;;          (display-buffer-reuse-window
+;;           display-buffer-at-bottom)
+;;          (window-height . 0.5)
+;;          (preserved-parameters . (window-height)))))
+
+;; (use-package vertico-buffer
+;;   :ensure nil
+;;   :defer t
+;;   :commands (vertico-buffer-mode
+;;              vertico-buffer--redisplay)
+;;   :hook (vertico-mode . vertico-buffer-mode)
+;;
+;;   ;; causes issues, maybe also because of stillness-mode
+;;   ;; :preface
+;;   ;; (defun my-fit-minibuffer-to-content (win)
+;;   ;;   "Try to fit the minibuffer window height to its content before redisplay."
+;;   ;;   (ignore-errors
+;;   ;;     (fit-window-to-buffer win)))
+;;   ;;
+;;   ;; :config
+;;   ;; ;; TODO: Make it grow only
+;;   ;; (advice-add #'vertico-buffer--redisplay
+;;   ;;             :after #'my-fit-minibuffer-to-content)
+;;
+;;   :init
+;;   (setq vertico-buffer-display-action '((display-buffer-at-bottom)
+;;                                         (window-height . 0.38))))
+
+;;   ;; (defun my-update-consult-async-settings (&rest _)
+;;   ;;   (if (string= (battery-angel-get-charging-state) "AC")
+;;   ;;       (setq consult-async-input-debounce 0.02
+;;   ;;             consult-async-input-throttle 0.05
+;;   ;;             consult-async-refresh-delay 0.02)
+;;   ;;     (setq consult-async-input-debounce 0.2
+;;   ;;           consult-async-input-throttle 0.5
+;;   ;;           consult-async-refresh-delay 0.2)))
+;;
+;;   ;; (my-update-consult-async-settings)
+;;
+;;   ;; (advice-add 'consult-ripgrep :before #'my-update-consult-async-settings)
+;;   ;; (advice-add 'consult-fd :before #'my-update-consult-async-settings)
+;;   ;; (advice-add 'consult-recent-file :before #'my-update-consult-async-settings)
+;;
+;;   ;; (with-eval-after-load 'evil
+;;   ;;   (evil-define-key '(insert normal) consult-async-map (kbd "M-s") 'consult-history))
+;;   )
+
+;;; DISABLED: git gutter
+
+;; NOTE: This causes encoding bugs.
+
+;; (lightemacs-use-package git-gutter
+;;   :commands (git-gutter-mode)
+;;
+;;   :init
+;;   (setq git-gutter:modified-sign " "
+;;         git-gutter:added-sign "+"
+;;         git-gutter:deleted-sign "-"
+;;         git-gutter:ask-p nil
+;;         git-gutter:diff-option "-w"
+;;         git-gutter:handled-backends '(git)
+;;         git-gutter:disabled-modes '(image-mode fundamental-mode pdf-view-mode)
+;;         git-gutter:hide-gutter nil
+;;         ;; git-gutter:visual-line t        ; Better for wrapped lines
+;;         git-gutter:update-interval 2
+;;         git-gutter:verbosity 0)
+;;
+;;   :config
+;;   (global-set-key (kbd "C-x v n") 'git-gutter:next-hunk)
+;;   (global-set-key (kbd "C-x v p") 'git-gutter:previous-hunk)
+;;   (global-set-key (kbd "C-x v c") 'git-gutter:clear-gutter)
+;;
+;;
+;;   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
+;;   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
+;;
+;; (lightemacs-use-package git-gutter-fringe
+;;   :after git-gutter
+;;   :init
+;;   (setq git-gutter-fr:side 'left-fringe))
+
+;;; DISABLED: savefold
+
+;; TODO kill emacs hook issue when editing .asc file, it asks for the password
+
+;; (lightemacs-use-package savefold
+;;   :init
+;;   ;; Removed org (buggy)
+;;   (setq savefold-backends '(outline hideshow treesit-fold markdown))
+;;
+;;   ;; (setq savefold-directory (locate-user-emacs-file "savefold"))
+;;   (setq savefold-directory
+;;         (expand-file-name "savefold" my-shared-user-emacs-directory))
+;;
+;;   (setq org-startup-folded 'showeverything)
+;;
+;;   :preface
+;;   ;; Fixes: https://github.com/jcfk/savefold.el/issues/7
+;;   (defun my-savefold-utils--get-attr-table-fpath (fpath)
+;;     "Return the FPATH of the attribute table file for FPATH.
+;;   This naively replaces path slashes with ! (/a/b/c -> !a!b!c) leading to a
+;;   chance of collision."
+;;     (let* ((fpath (expand-file-name fpath))
+;;            (fpath (string-replace "/" "!" fpath))
+;;            (fpath (string-replace ":" "!" fpath))  ; For windows
+;;            (old-fpath (expand-file-name fpath savefold-directory))
+;;            (new-fpath (expand-file-name (concat fpath ".savefold")
+;;                                         savefold-directory)))
+;;       (if (and (file-exists-p old-fpath)
+;;                (not (file-exists-p new-fpath)))
+;;           old-fpath
+;;         new-fpath)))
+;;   (advice-add 'savefold-utils--get-attr-table-fpath :override
+;;               #'my-savefold-utils--get-attr-table-fpath)
+;;
+;;   :config
+;;   (savefold-mode 1))
+
+;; Bug fix: https://github.com/jcfk/savefold.el/issues/7
+(defun my-savefold-append-ext-advice (return-path)
+  "Append `savefold' extension to the RETURN-PATH."
+  (concat return-path ".savefold"))
+
+(with-eval-after-load 'savefold
+  (advice-add 'savefold-utils--get-attr-table-fpath
+              :filter-return
+              #'my-savefold-append-ext-advice))
+
+(defun my-save-buffer-savefold-advice (&rest _)
+  "Advise `save-buffer' to persist folds when the buffer is unmodified.
+Standard save hooks handle persistence when the buffer is modified."
+  (when (and (bound-and-true-p savefold-mode)
+             (not (buffer-modified-p)))
+    (dolist (backend (bound-and-true-p savefold-backends))
+      (let ((save-func (intern-soft (format "savefold-%s--save-folds" backend)))
+            (pred-func (intern-soft (format "savefold-%s--bufferp" backend))))
+        (when (and save-func (fboundp save-func)
+                   pred-func (fboundp pred-func)
+                   (funcall pred-func))
+          (funcall save-func))))))
+
+;; (with-eval-after-load 'buffer-guardian
+;;   (with-eval-after-load 'savefold
+;;     (advice-add 'buffer-guardian-save-buffer :before
+;;                 #'my-save-buffer-savefold-advice)
+;;     (advice-add 'buffer-guardian-save-buffer-maybe :before
+;;                 #'my-save-buffer-savefold-advice)))
+
+;;; DISABLED: Emacs Consult / Vertico
+
+;; (setq consult-imenu-config
+;;       '((emacs-lisp-mode :toplevel "Functions"
+;;                          :types ((?f "Functions" font-lock-function-name-face)
+;;                                  (?m "Macros"    font-lock-function-name-face)
+;;                                  (?p "Packages"  font-lock-constant-face)
+;;                                  (?t "Types"     font-lock-type-face)
+;;                                  (?v "Variables" font-lock-variable-name-face)))))
+
+;;; DISABLED: consult flymake
+
+;; (with-eval-after-load 'consult
+;;   (with-eval-after-load 'flymake
+;;     (require 'consult-flymake)))
+
+;; TODO fix vertico after enabling this
+;; (lightemacs-use-package vertico-repeat
+;;   ;; Vertico repeat last command
+;;   :ensure nil
+;;   :after vertico
+;;   :commands (vertico-repeat-last
+;;              vertico-repeat
+;;              vertico-repeat-save)
+;;   :hook
+;;   (minibuffer-setup . vertico-repeat-save)
+;;   :init
+;;   (evil-define-key 'normal 'global (kbd "<leader>vr") #'vertico-repeat-last))
+
+;;(lightemacs-use-package vertico-quick
+;;  :ensure nil
+;;  :after (vertico)
+;;  :custom
+;;  (vertico-quick1 "aoeuid")
+;;  (vertico-quick2 "htns")
+;;  :commands (vertico-quick-insert
+;;             vertico-quick-exit
+;;             vertico-quick-jump)
+;;  :general
+;;  (emacs-map
+;;   'vertico-map
+;;   "M-f" #'vertico-quick-insert
+;;   "M-," #'vertico-quick-insert
+;;   "M-." #'vertico-quick-exit))
+
+;; (lightemacs-use-package vertico-directory
+;;   :ensure nil
+;;   :after vertico
+;;   :defer t
+;;   :commands vertico-directory-tidy
+;;   ;; More convenient directory navigation commands
+;;   :bind (:map vertico-map
+;;               ("DEL" . vertico-directory-delete-char)
+;;               ("M-DEL" . vertico-directory-delete-word))
+;;   ;; Tidy shadowed file names
+;;   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
+;;; DISABLED: VC: Support git-crypt repositories
 
 ;; TODO use a .dir-locals.el variable fo this
 
@@ -4167,19 +4297,13 @@ properly handles remote files over Tramp), applying the setting only if
 ;; conflicts. Why?
 ;; (setq vc-resolve-conflicts nil)
 
-;;; highlight-numbers
+;;; DISABLED: highlight-numbers
 
 ;; (lightemacs-use-package highlight-numbers
 ;;   :commands highlight-numbers-mode
 ;;   :hook (emacs-lisp-mode . highlight-numbers-mode))
 
-;;; sub-org
-
-(with-eval-after-load 'org
-  (require 'sub-org))
-
-
-;;; Font lock deferral
+;;; DISABLED: Font lock deferral
 
 ;; JIT Lock Defer Time
 ;; -------------------
@@ -4300,23 +4424,14 @@ properly handles remote files over Tramp), applying the setting only if
 ;; if your machine handles syntax highlighting easily.
 ;; (setq jit-lock-contextually nil)
 
-;;; Warnings
-
-;; (unless (fboundp 'json-serialize)
-;;   (warn "Native JSON is *not* available"))
-
-(unless (and (fboundp 'native-comp-available-p)
-             (native-comp-available-p))
-  (warn "Native compilation is *not* available"))
-
-;;; showparen
+;;; DISABLED: showparen
 
 ;; BUG never turn this variable on. it will break lispy AND smartparens
 ;; (setq show-paren-context-when-offscreen nil)
 ;; (setq show-paren-ring-bell-on-mismatch nil)
 ;; (setq show-paren-data-function #'show-paren--default)
 
-;;; hippie expand
+;;; DISABLED: hippie expand
 
 ;; (setq hippie-expand-try-functions-list '(try-expand-dabbrev
 ;;                                          try-expand-dabbrev-from-kill
@@ -4336,80 +4451,7 @@ properly handles remote files over Tramp), applying the setting only if
 ;;         try-expand-dabbrev-all-buffers
 ;;         try-expand-dabbrev-from-kill))
 
-;;; Papyrus Help
-
-(defvar papyrus-help-hook nil
-  "Hook run after describing an Elisp symbol at point.
-This hook is executed after the function
-`papyrus-help-elisp-symbol-at-point' describes the symbol at point as a
-variable or function. It can be used to perform additional actions, such as
-updating the display, highlighting defined functions and variables...")
-
-(defun papyrus-help-elisp-symbol-at-point ()
-  "Describe the symbol at point as either a variable or a function.
-
-This function determines whether the symbol at point is a variable or a
-function. If the symbol is identified as a function or a variable exclusively,
-it will automatically describe it. If both types are detected or neither is
-detected, the user is prompted to choose whether to describe it as a variable or
-a function.
-
-After describing the symbol, if a help buffer is active, it will rename the help
-buffer to include the name of the symbol.
-
-The function displays messages if the symbol at point is not a variable or
-function or if an invalid choice is made."
-  (interactive)
-
-  (let* ((symbol (symbol-at-point))
-         (is-function (and symbol (fboundp symbol)))
-         (is-variable (and symbol (boundp symbol)))
-         (choice nil))
-
-    ;; Automatically select function or variable if only one is at point,
-    ;; otherwise ask the user.
-    (cond
-     (is-function
-      (setq choice ?f))
-     (is-variable
-      (setq choice ?v))
-     (t
-      (setq choice (read-char "Describe (v)ariable or (f)unction? "))))
-
-    ;; Handle the chosen option for describing a function or variable.
-    (cond
-     ((eq choice ?v)
-      (describe-variable symbol))
-     ((eq choice ?f)
-      (describe-function symbol))
-     ((not choice)
-      (message "No function or variable at point."))
-     (t
-      (message
-       "Invalid choice, press 'v' for variable or 'f' for function.")))
-
-    (when (or (eq choice ?v)
-              (eq choice ?f))
-      (let ((help-buffer (get-buffer "*Help*")))
-        (when help-buffer
-          (with-current-buffer help-buffer
-            (rename-buffer
-             (format "*Help:%s*" (symbol-name symbol)) t)
-            (run-hooks 'papyrus-help-hook)))))))
-
-(defun my-setup-evil-papyrus-help ()
-  "Setup papyrus help."
-  (setq-local evil-lookup-func #'papyrus-help-elisp-symbol-at-point))
-
-(add-hook 'emacs-lisp-mode-hook #'my-setup-evil-papyrus-help)
-
-(add-hook 'papyrus-help-hook #'(lambda()
-                                 (when (fboundp 'highlight-defined-mode)
-                                   (highlight-defined-mode))
-                                 (when (bound-and-true-p font-lock-mode)
-                                   (font-lock-ensure))))
-
-;;; Load specific local variables
+;;; DISABLED: TODO: Load specific local variables
 
 ;; (when (bound-and-true-p lightemacs-package-manager)
 ;;   (put 'lightemacs-package-manager 'safe-local-variable
@@ -4434,7 +4476,7 @@ function or if an invalid choice is made."
 ;;          file-local-variables-alist)))
 ;; (add-hook 'before-hack-local-variables-hook #'my-hack-local-variables-apply)
 
-;;; TODO bufferfile delete
+;;; DISABLED: TODO bufferfile delete
 
 ;; (defun my-dired-do-delete-advice (orig-fn &rest args)
 ;;   "Delete current file or all marked files.
@@ -4452,48 +4494,7 @@ function or if an invalid choice is made."
 ;;
 ;; (advice-add 'dired-do-rename :around 'my-dired-do-rename-advice)
 
-;;; dabbrev
-
-;; Control whether dabbrev searches should ignore case.
-;; Any other non-nil version means case is not significant.
-;; nil means case is significant.
-(setq dabbrev-case-fold-search nil)
-
-;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
-;; A value of nil means preserve the expansion's case pattern.
-(setq dabbrev-case-replace nil)
-
-(setq dabbrev-check-all-buffers nil)
-
-;; It configures dabbrev (dynamic abbreviation expansion) to search only in the
-;; current buffer when expanding abbreviations, instead of searching in other
-;; buffers as well.
-;; (setq dabbrev-check-other-buffers t)  ;; Default t
-
-;; Set this variable to "\\sw" if you want ordinary words or "\\sw\\|\\s_" if
-;; you want symbols (including characters whose syntax is "symbol" as well as
-;; those whose syntax is "word"). The abbreviation is from point to the start
-;; of the previous sequence of characters matching this variable.
-;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
-
-;; (dabbrev-ignored-buffer-names '("*Messages*" "*Ibuffer*"))
-;; (dabbrev-limit 1000)
-(setq dabbrev-case-distinction nil)
-
-;; (setq dabbrev-case-fold-search nil)
-;; (setq dabbrev-case-replace 'case-replace)
-;; (setq dabbrev-check-other-buffers t)
-;; (setq dabbrev-eliminate-newlines t)
-;; (setq dabbrev-upcase-means-case-search t)
-
-;; :init
-;;
-;; (when (fboundp 'my-setup-dabbrev)
-;;   (add-hook 'bash-ts-mode-hook #'my-setup-dabbrev)
-;;   (add-hook 'sh-mode-hook #'my-setup-dabbrev)
-;;   (add-hook 'php-mode-hook #'my-setup-dabbrev))
-
-;;; dabbrev boundaries 1
+;;; DISABLED: dabbrev boundaries 1
 
 ;; dabbrev-abbrev-char-regexp: Defines WHAT you are completing. By setting this
 ;; to "\\sw\\|\\s_", you tell Emacs which characters belong to the string (e.g.,
@@ -4509,35 +4510,6 @@ function or if an invalid choice is made."
 ;; unbroken block. Typing get_u and pressing M-/ will correctly grab the full
 ;; context and expand the string to get_user_data.
 ;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
-
-;;; vterm
-
-;; To stop vterm from asking for confirmation and force it to compile the
-;; module automatically, you need to set the vterm-always-compile-module
-;; variable to t.
-(setq vterm-always-compile-module t)
-
-(setq vterm-timer-delay 0.001)  ;; Only works when added after :config
-(setq vterm-max-scrollback 1)
-(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
-(setq vterm-disable-inverse-video t)
-
-;; TODO lightemacs?
-(defun my-setup-vterm ()
-  "Better evil integration with `vterm'."
-  (my-disable-fringe-truncation-arrow)
-
-  (setq-local line-number-mode nil)
-  (setq-local column-number-mode nil)
-
-  ;; Define cursor shapes and colors for Evil states
-  (setq-local evil-normal-state-cursor 'box
-              evil-visual-state-cursor 'box
-              evil-insert-state-cursor 'bar)
-
-  (setq-local cursor-type 'bar))
-
-(add-hook 'vterm-mode-hook 'my-setup-vterm)
 
 ;;; DISABLED: dabbrev boundaries 2
 

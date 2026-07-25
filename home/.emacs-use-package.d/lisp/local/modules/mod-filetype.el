@@ -52,6 +52,7 @@
 ;; I created a dedicated mode for *.txt files.
 (define-derived-mode txt-file-mode text-mode "SimpleTextFile"
   "Major mode for editing *.txt files.")
+
 (defun setup-txt-file-mode ()
   "Setup txt file mode."
   ;; (setq-local evil-shift-width 2)
@@ -59,8 +60,8 @@
   (setq-local tab-width 2)
   (setq-local standard-indent 2))
 
-;; Bad idea. It loads too many modes.
-;; (setq initial-major-mode 'txt-file-mode)
+(add-hook 'txt-file-mode-hook #'setup-txt-file-mode)
+
 (push (cons "\\.[Tt][Xx][Tt]\\'" 'txt-file-mode) auto-mode-alist)
 (push (cons "\\.[Tt][Xx][Tt]\\.[aA][sS][cC]\\'" 'txt-file-mode) auto-mode-alist)
 

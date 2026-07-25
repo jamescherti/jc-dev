@@ -946,6 +946,34 @@ WIDTH is the tab width."
 ;;                 (t 'unknown)))
 ;;       (file-error 'unknown))))
 
+;;; Macrostep
+
+;; Buggy
+;; (lightemacs-use-package macrostep
+;;   :bind (:map emacs-lisp-mode-map
+;;               ("C-c e" . macrostep-expand)
+;;               :map lisp-interaction-mode-map
+;;               ("C-c e" . macrostep-expand)))
+
+(defun my-macroexpand ()
+  "Expand the macro at point one level at a time.
+If the result is still a macro, subsequent calls will expand the next level.
+The result is displayed in a pretty-printed temporary buffer."
+  (interactive)
+  (let* ((sexp (sexp-at-point))
+         (expansion (macroexpand-1 sexp)))
+    (if (equal sexp expansion)
+        (message "No further expansion possible.")
+      (with-current-buffer (get-buffer-create "*Macro Expansion*")
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (emacs-lisp-mode)
+          (insert (pp-to-string expansion))
+          (indent-region (point-min) (point-max))
+          (goto-char (point-min)))
+        (read-only-mode 1)
+        (display-buffer (current-buffer))))))
+
 ;;; Provide
 (provide 'my-defun)
 
