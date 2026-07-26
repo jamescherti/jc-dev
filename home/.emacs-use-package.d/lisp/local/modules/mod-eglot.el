@@ -60,11 +60,6 @@
   ;;                   (apply orig-fun format args)))))
 
   :preface
-  ;; (defun my-setup-eglot-mode ()
-  ;;   "Setup `eglot-mode'."
-  ;;   (when (bound-and-true-p env-allow-language-servers)
-  ;;     (eglot-ensure)))
-
   (defun my-eglot-format-buffer ()
     "Eglot format buffer."
     (when (and (fboundp 'eglot-managed-p)
@@ -83,40 +78,55 @@
         ;; `eglot.el' is installed via GNU ELPA in an older Emacs.
         `(((python-mode python-ts-mode) . ("pylsp"))))
 
-  ;; (add-hook 'python-ts-mode-hook #'my-setup-eglot-mode)
-  ;; (add-hook 'python-mode-hook #'my-setup-eglot-mode)
-  ;; (add-hook 'php-mode-hook #'my-setup-eglot-mode)
-  ;; (add-hook 'php-ts-mode-hook #'my-setup-eglot-mode)
-
-  ;; (setq eglot-confirm-server-edits '((eglot-rename . nil)
-  ;;                                    (t . maybe-summary)))
-
-  ;; (setq eglot-code-action-indications '(margin))  ;; no need to spam eldoc
-  ;; (setq eglot-stay-out-of '(flymake))
-  ;; (setq eglot-send-changes-idle-time 0.5)
-
   ;; Allow edits without confirmation
   (setq eglot-confirm-server-edits nil)
 
-  ;; TODO recently changed
-  ;; (setq eglot-code-action-indications nil) ;; EMACS-31 -- annoying as hell
-
-  (setq eglot-stay-out-of '(yasnippet))
+  (setq eglot-stay-out-of '(yasnippet company))
   (setq eglot-connect-timeout 40)
 
   (setq eglot-ignored-server-capabilities
-        '(;:hoverProvider  ; For showing the definition and documentation.
+        '(;; Formatting (Handled by external tools like Apheleia)
+          :documentFormattingProvider
+          :documentRangeFormattingProvider
+          :documentOnTypeFormattingProvider
+
+          ;; NOTE: UI noise and performance degradation
+          ;; Disable inlay hints (e.g. inferred types, parameter names) Inlay
+          ;; hints are small, non-intrusive annotations inserted into the code
+          ;; by the LSP server. They provide helpful context such as inferred
+          ;; variable types, function return types, or parameter names in
+          ;; function calls, especially in languages like TypeScript or Rust.
+          ;; These hints do not change the actual source code but are visually
+          ;; rendered in the editor. Disabling this prevents the display of such
+          ;; annotations in the buffer.
+          :inlayHintProvider
+
+          ;; NOTE: UI noise and performance degradation
+          ;; Disables highlighting other instances of the symbol at point in the
+          ;; current buffer (e.g., all usages of a variable are no longer
+          ;; visually highlighted). Usage: This affects the automatic
+          ;; highlighting when the cursor is on a symbol. Normally, all
+          ;; occurrences of that symbol in the buffer are highlighted. Disabling
+          ;; this stops that behavior.
+          :documentHighlightProvider
+
+          ;; NOTE: UI noise and performance degradation
+          ;; Disables inline annotations like test coverage, reference counts,
+          ;; or result indicators that appear above/below code lines.
+          :codeLensProvider
+
+          ;; NOTE: UI noise and performance degradation
+          ;; Disable detection and interaction with links in documents
+          :documentLinkProvider
+
+          ;; NOTE: UI noise and performance degradation
+          ;; Disables rendering of inline color swatches next to color values in
+          ;; code (e.g., "#ff0000" showing a red box).
+          :colorProvider
+
+          ;; :hoverProvider  ; For showing the definition and documentation.
           ;; :completionProvider  ; Completion. DO NOT DISABLE IT.
 
-          ;; If you remove this, it will cause an error
-          ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
-          ;;   plist-member([] :signatures)
-          ;;   #f(compiled-function (jsonrpc-lambda-elem12) #<bytecode 0x14ea63506aea3ca5>)([])
-          ;;   jsonrpc--continue(#<eglot-lsp-server eglot-lsp-server-1323b2317330> 3 (3 :textDocument/signatureHelp #f(compiled-function (jsonrpc-lambda-elem12) #<bytecode 0x14ea63506aea3ca5>) #f(compiled-function (jsonrpc-lambda-elem3) #<bytecode 0x1ff00ae7cafeec70>) [nil 26700 21814 516821 nil #f(compiled-function () #<bytecode 0x1b6df269801a5fe1>) nil nil 28000 nil]) [] nil)
-          ;;   jsonrpc-connection-receive(#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result []))
-          ;;   #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>)(#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result []))
-          ;;   apply(#f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])))
-          ;;   timer-event-handler([t 26700 21804 803197 nil #f(compiled-function (conn msg) #<bytecode -0x1fc66ff688233035>) (#<eglot-lsp-server eglot-lsp-server-1323b2317330> (:jsonrpc "2.0" :id 3 :result [])) nil 238000 nil])
           ;; :signatureHelpProvider  ; For showing the function signature/arguments.
 
           ;; Disable "go to definition" feature
@@ -141,14 +151,6 @@
           ;; Disables showing all references to the symbol at point (e.g., all
           ;; usages of a function or variable in the project).
           ;; :referencesProvider
-
-          ;; Disables highlighting other instances of the symbol at point in the
-          ;; current buffer (e.g., all usages of a variable are no longer
-          ;; visually highlighted).
-          ;; Usage: This affects the automatic highlighting when the cursor is
-          ;; on a symbol. Normally, all occurrences of that symbol in the buffer
-          ;; are highlighted. Disabling this stops that behavior.
-          :documentHighlightProvider
 
           ;; Disables the document-wide symbol tree view used for navigation or
           ;; structural outline (e.g., class and function tree in sidebar).
@@ -180,28 +182,8 @@
           ;; utility.
           ;; :codeActionProvider
 
-          ;; Disables inline annotations like test coverage, reference counts,
-          ;; or result indicators that appear above/below code lines.
-          :codeLensProvider
-
-          ;; Disables detection of URLs or other hyperlinks in documents
-          ;; (clickable links will not be rendered).
-          ;; :documentFormattingProvider
-
-          ;; :documentRangeFormattingProvider
-
-          ;; Disable formatting triggered by typing specific characters (like `}`)
-          ;; :documentOnTypeFormattingProvider
-
           ;; Disable rename symbol functionality
           ;; :renameProvider
-
-          ;; Disable detection and interaction with links in documents
-          :documentLinkProvider
-
-          ;; Disables rendering of inline color swatches next to color values in
-          ;; code (e.g., "#ff0000" showing a red box).
-          :colorProvider
 
           ;; Disables visual fold range markers (e.g., foldable region
           ;; indicators in the fringe or gutter).
@@ -214,29 +196,7 @@
           ;; Many LSP servers require command execution to apply the code
           ;; actions they suggest.
           ;; :executeCommandProvider
-
-          ;; Disable inlay hints (e.g. inferred types, parameter names) Inlay
-          ;; hints are small, non-intrusive annotations inserted into the code
-          ;; by the LSP server. They provide helpful context such as inferred
-          ;; variable types, function return types, or parameter names in
-          ;; function calls, especially in languages like TypeScript or Rust.
-          ;; These hints do not change the actual source code but are visually
-          ;; rendered in the editor. Disabling this prevents the display of such
-          ;; annotations in the buffer.
-          ;; TODO IMPORTANT very recently disabled
-          ;; :inlayHintProvider
-          ))
-
-  ;; (when (string= choice-code-formatter "eglot")
-  ;;   (add-hook 'before-save-hook
-  ;;             #'(lambda()
-  ;;                 (when (eglot-managed-p)
-  ;;                   (be-quiet (eglot-format))))
-  ;;             99 t))
-  )
-
-;;; eglot format
-
+          )))
 
 ;;; Eglot: Python
 
