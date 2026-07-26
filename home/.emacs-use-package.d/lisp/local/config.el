@@ -1450,7 +1450,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;; (add-hook 'after-make-frame-functions #'my-set-frame-size-and-position)
 
 ;; Issue with Emacs 31 and shut-up
-;; (with-eval-after-load "shut-up"
+;; (with-eval-after-load 'shut-up
 ;;   (with-no-warnings
 ;;     (defun my-around-my-frame-geometry-save (fn &rest args)
 ;;       "FN is the advised function. ARGS are the function arguments."

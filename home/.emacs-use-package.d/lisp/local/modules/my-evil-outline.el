@@ -31,7 +31,7 @@
 
 ;;; Outline Keybindings
 
-;; (with-eval-after-load "outline-indent"
+;; (with-eval-after-load 'outline-indent
 ;;   (evil-define-key 'normal outline-mode-map (kbd "]]") nil)
 ;;   (evil-define-key 'normal outline-mode-map (kbd "[[") nil))
 

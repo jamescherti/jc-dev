@@ -1285,7 +1285,7 @@ word after the space that contains at least two uppercase characters."
 (evil-define-key 'insert 'global (kbd "C-x C-f") 'cape-file)
 
 (with-eval-after-load 'corfu
-  (with-eval-after-load "evil"
+  (with-eval-after-load 'evil
     (evil-define-key 'insert 'global (kbd "C-SPC") 'completion-at-point)
 
     (unless (display-graphic-p)
