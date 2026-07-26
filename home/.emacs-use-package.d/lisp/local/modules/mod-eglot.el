@@ -22,87 +22,15 @@
 
 ;;; Commentary:
 
-
 ;;; Code:
 
 ;;; Require
 
-(eval-and-compile (require 'lightemacs-use-package))
+(eval-and-compile
+  (require 'lightemacs-use-package))
 (require 'my-defun)
 
-;;; Eglot server programs
-
-(setq eglot-server-programs
-      ;; FIXME: Maybe this info should be distributed into the major modes
-      ;; themselves where they could set a buffer-local `eglot-server-program'
-      ;; which would allow deprecating this database.
-      ;; FIXME: With `derived-mode-add-parents' in Emacs≥30, some of
-      ;; those entries can be simplified, but we keep them for when
-      ;; `eglot.el' is installed via GNU ELPA in an older Emacs.
-      `(((python-mode python-ts-mode) . ("pylsp"))))
-
-;;; Python: remove flymake
-
-;; Debugger entered--Lisp error: (error "Can't find state for python-flymake in 'flymake--state'")
-;; error("Can't find state for %s in `flymake--state'" python-flymake)
-;; flymake--handle-report(python-flymake backend-token7 nil)
-;; apply(flymake--handle-report python-flymake backend-token7 nil)
-;; #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>)(nil)
-;; python--flymake-parse-output(#<buffer allowed_paths.py> #<process python-flymake> #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>))
-;; #f(compiled-function (proc event) #<bytecode 0xe03bcdda4f319e9>)(#<process python-flymake> "finished\n")
-(defun my-remove-python-flymake ()
-  "Remove `python-flymake' from `flymake-diagnostic-functions'."
-  (remove-hook 'flymake-diagnostic-functions 'python-flymake t))
-
-(add-hook 'python-mode-hook #'my-remove-python-flymake)
-(add-hook 'python-ts-mode-hook #'my-remove-python-flymake)
-
-(with-eval-after-load 'python
-  ;; Remove python-flymake error: "Cannot find suitable checker" when a Python
-  ;; script is loaded before eglot and the checker isn't found
-  (advice-add 'python-flymake :override #'ignore))
-
-;;; fix ignore empty
-
-;; (defun my/jsonrpc--continue-ignore-empty (orig-fun conn id &optional cont result error)
-;;   "Ignore empty JSON-RPC results to prevent plistp errors in Eglot.
-;;
-;; ORIG-FUN is the original `jsonrpc--continue` function.
-;; CONN is the JSON-RPC connection.
-;; ID is the message ID.
-;; CONT is the continuation function.
-;; RESULT is the result from the server.
-;; ERROR is the error (if any)."
-;;   (if (and (vectorp result) (zerop (length result)))
-;;       ;; Pass nil instead of dropping the callback.
-;;       ;; This prevents ElDoc async requests from hanging.
-;;       (funcall orig-fun conn id cont nil error)
-;;     (funcall orig-fun conn id cont result error)))
-;;
-;; (with-eval-after-load 'jsonrpc
-;;   (advice-add 'jsonrpc--continue :around #'my/jsonrpc--continue-ignore-empty))
-
-;;; eglot
-
-;; (defun my-eglot-format-buffer ()
-;;   "Eglot format buffer."
-;;   (when (and
-;;          (fboundp 'eglot-managed-p)
-;;          (eglot-managed-p))
-;;     (let ((inhibit-message t))
-;;       (when (fboundp 'eglot-format-buffer)
-;;         (eglot-format-buffer)))))
-
-(defun my-setup-eglot-mode ()
-  "Setup `eglot-mode'."
-  (when (bound-and-true-p env-allow-language-servers)
-    (eglot-ensure)
-
-    ;; Apheleia takes care of this
-    ;; (when (fboundp 'my-eglot-format-buffer)
-    ;;   (add-hook 'before-save-hook #'my-eglot-format-buffer 90 t))
-
-    ))
+;;; Eglot use-package
 
 (lightemacs-use-package eglot
   :ensure nil
@@ -115,31 +43,66 @@
              eglot-format-buffer)
 
   ;; :config
-  ;; ;; Remove eglot from the modeline
+  ;; Remove eglot from the modeline
   ;; (setq mode-line-misc-info
   ;;       (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
 
+  ;; (advice-add 'eglot--message :around
+  ;;             (lambda(orig-fun format &rest args)
+  ;;               ;; This code provides an Emacs Lisp function to suppress
+  ;;               ;; specific Eglot messages from being shown in the minibuffer.
+  ;;               ;; "Suppress specific eglot messages from being shown in the
+  ;;               ;; minibuffer."
+  ;;               (let ((message-string (apply #'format format args)))
+  ;;                 (unless (or (string-prefix-p "Connected" message-string)
+  ;;                             (string-prefix-p "Waiting" message-string)
+  ;;                             (string-prefix-p "Reconnected" message-string))
+  ;;                   (apply orig-fun format args)))))
+
+  :preface
+  ;; (defun my-setup-eglot-mode ()
+  ;;   "Setup `eglot-mode'."
+  ;;   (when (bound-and-true-p env-allow-language-servers)
+  ;;     (eglot-ensure)))
+
+  (defun my-eglot-format-buffer ()
+    "Eglot format buffer."
+    (when (and (fboundp 'eglot-managed-p)
+               (eglot-managed-p)
+               (fboundp 'eglot-format-buffer))
+      (let ((inhibit-message t))
+        (eglot-format-buffer))))
+
   :init
-  (add-hook 'python-ts-mode-hook #'my-setup-eglot-mode)
-  (add-hook 'python-mode-hook #'my-setup-eglot-mode)
+  (setq eglot-server-programs
+        ;; FIXME: Maybe this info should be distributed into the major modes
+        ;; themselves where they could set a buffer-local `eglot-server-program'
+        ;; which would allow deprecating this database.
+        ;; FIXME: With `derived-mode-add-parents' in Emacs≥30, some of
+        ;; those entries can be simplified, but we keep them for when
+        ;; `eglot.el' is installed via GNU ELPA in an older Emacs.
+        `(((python-mode python-ts-mode) . ("pylsp"))))
+
+  ;; (add-hook 'python-ts-mode-hook #'my-setup-eglot-mode)
+  ;; (add-hook 'python-mode-hook #'my-setup-eglot-mode)
   ;; (add-hook 'php-mode-hook #'my-setup-eglot-mode)
   ;; (add-hook 'php-ts-mode-hook #'my-setup-eglot-mode)
 
-  ;; (setq eglot-prefer-plaintext nil)
-
-  ;; Allow edits without confirmation
-  (setq eglot-confirm-server-edits nil)
   ;; (setq eglot-confirm-server-edits '((eglot-rename . nil)
   ;;                                    (t . maybe-summary)))
 
-  (setq eglot-code-action-indications nil) ;; EMACS-31 -- annoying as hell
   ;; (setq eglot-code-action-indications '(margin))  ;; no need to spam eldoc
+  ;; (setq eglot-stay-out-of '(flymake))
+  ;; (setq eglot-send-changes-idle-time 0.5)
+
+  ;; Allow edits without confirmation
+  (setq eglot-confirm-server-edits nil)
+
+  ;; TODO recently changed
+  ;; (setq eglot-code-action-indications nil) ;; EMACS-31 -- annoying as hell
 
   (setq eglot-stay-out-of '(yasnippet))
-  ;; (setq eglot-stay-out-of '(flymake))
-
   (setq eglot-connect-timeout 40)
-  ;; (setq eglot-send-changes-idle-time 0.5)
 
   (setq eglot-ignored-server-capabilities
         '(;:hoverProvider  ; For showing the definition and documentation.
@@ -270,20 +233,10 @@
   ;;                 (when (eglot-managed-p)
   ;;                   (be-quiet (eglot-format))))
   ;;             99 t))
+  )
 
-  (with-eval-after-load 'evil
-    (define-key evil-normal-state-map (kbd "<leader>ef") #'eglot-format-buffer)))
+;;; eglot format
 
-(advice-add 'eglot--message :around
-            (lambda(orig-fun format &rest args)
-              ;; This code provides an Emacs Lisp function to suppress specific Eglot
-              ;; messages from being shown in the minibuffer.
-              ;; "Suppress specific eglot messages from being shown in the minibuffer."
-              (let ((message-string (apply #'format format args)))
-                (unless (or (string-prefix-p "Connected" message-string)
-                            (string-prefix-p "Waiting" message-string)
-                            (string-prefix-p "Reconnected" message-string))
-                  (apply orig-fun format args)))))
 
 ;;; Eglot: Python
 
@@ -414,7 +367,37 @@
 
                          :rope_autoimport (:enabled :json-false)))))
 
+;;; Python: remove flymake
+
+;; Debugger entered--Lisp error: (error "Can't find state for python-flymake in 'flymake--state'")
+;; error("Can't find state for %s in `flymake--state'" python-flymake)
+;; flymake--handle-report(python-flymake backend-token7 nil)
+;; apply(flymake--handle-report python-flymake backend-token7 nil)
+;; #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>)(nil)
+;; python--flymake-parse-output(#<buffer allowed_paths.py> #<process python-flymake> #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>))
+;; #f(compiled-function (proc event) #<bytecode 0xe03bcdda4f319e9>)(#<process python-flymake> "finished\n")
+(defun my-remove-python-flymake ()
+  "Remove `python-flymake' from `flymake-diagnostic-functions'."
+  (remove-hook 'flymake-diagnostic-functions 'python-flymake t))
+
+(add-hook 'python-mode-hook #'my-remove-python-flymake)
+(add-hook 'python-ts-mode-hook #'my-remove-python-flymake)
+
+(with-eval-after-load 'python
+  ;; Remove python-flymake error: "Cannot find suitable checker" when a Python
+  ;; script is loaded before eglot and the checker isn't found
+  (advice-add 'python-flymake :override #'ignore))
+
 ;;; Cape
+
+;; Configure buffer-local completion backend settings when Eglot manages a
+;; buffer.
+;; 1. Unhooks `python-completion-at-point' to avoid conflicts with LSP
+;; completion.
+;; 2. Replaces standard `eglot-completion-at-point' with a cache-busted variant
+;; via `cape-capf-buster'. This forces Corfu/Emacs to fetch updated completion
+;; candidates from the language server on each keypress rather than reusing
+;; cached results.
 
 (defun my-eglot-capf-cleanup ()
   "Prioritize Eglot and remove conflicting Python completions."
@@ -422,49 +405,17 @@
     ;; Remove legacy python-completion-at-point from the local list
     (remove-hook 'completion-at-point-functions 'python-completion-at-point t)
 
-    ;; Ensure Eglot is at the front and wrapped for cache-busting
     (if (fboundp 'cape-capf-buster)
-        (setq-local completion-at-point-functions
-                    (list (cape-capf-buster 'eglot-completion-at-point)))
+        (progn
+          ;; Remove the default Eglot CAPF
+          (remove-hook 'completion-at-point-functions 'eglot-completion-at-point t)
+          ;; Ensure Eglot is at the front and wrapped for cache-busting
+          (add-hook 'completion-at-point-functions
+                    (cape-capf-buster 'eglot-completion-at-point)
+                    nil t))
       (error "Undefined: cape-capf-buster"))))
 
 (add-hook 'eglot-managed-mode-hook #'my-eglot-capf-cleanup)
-
-;;; DISABLED: cape-wrap-buster
-
-;; TODO lightemacs?
-;; The LSP server assumes that the candidates are retrieved on every change to
-;; the buffer and we can rely on the LSP server to do the heavy lifting and
-;; provide a continuously update list of completions. The problem is that LSP
-;; servers are unaware of Emacs completion-styles, therefore the candidates from
-;; the language server are only post-filtered by the completion style. Corfu
-;; retrieves the candidate completion table once at the beginning of a
-;; completion session and doesn't reload it while the word is being typed. This
-;; is advantageous for most completion-at-point-functions since it opens up
-;; caching opportunities. Eglot completion function doesn't refresh the
-;; completion table itself. This is problematic, as language servers often only
-;; provide limited list of completions. Therefore, when using auto completion
-;; and typing slowly, possible completion candidates may be missing, because the
-;; initial list was missing the intended string. This behavior can be changed
-;; with the cache buster from Cape, which ensures that the completion table is
-;; refreshed such that the candidates are always obtained again from the server.
-;;
-;; Retrieving the candidates on every key press can be seen as a disadvantage,
-;; since it decreases performance. This matters in particular if your language
-;; server returns many candidates (or even a complete set of candidates) right
-;; away on the first invocation of completion. Depending on your language server
-;; you may or may not want the cape-wrap-buster. See also the next section about
-;; requesting more candidates from the Lsp server by default.
-;;
-;; Corfu supports the Orderless completion style. As soon as you press M-SPC, a
-;; space is inserted and Orderless filtering starts. The candidates are not
-;; updated again from the server. Instead the existing candidates are only
-;; post-filtered with Orderless. This feature works always, with or without
-;; cape-wrap-buster. Note that this feature is Orderless-specific. See the next
-;; section.
-(with-eval-after-load 'eglot
-  (with-eval-after-load 'cape
-    (advice-add 'eglot-completion-at-point :around 'cape-wrap-buster)))
 
 ;;; Provide
 

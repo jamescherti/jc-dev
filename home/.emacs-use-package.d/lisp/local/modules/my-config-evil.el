@@ -868,6 +868,10 @@ This enhancement prevents the cursor from moving."
   (define-key vterm-mode-map (kbd "M-H") 'my-vterm--send-Alt-Shift-H)
   (define-key vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L))
 
+;;; eglot
+
+(define-key evil-normal-state-map (kbd "<leader>ef") 'my-eglot-format-buffer)
+
 ;;; evil jump
 
 ;; I changed the order from (imenu, xref, search) to (xref, imenu, search).
