@@ -33,6 +33,20 @@
 
 (require 'treesit nil)
 
+;;; Tree-sitter Fallback Helpers
+
+(defun my-remap-ts-mode (base-mode ts-mode lang)
+  "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
+  (when (my-treesit-language-available-p lang)
+    (push (cons base-mode ts-mode) major-mode-remap-alist)))
+
+(defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
+  "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
+  (if (my-treesit-language-available-p lang)
+      (push (cons regex ts-mode) auto-mode-alist)
+    (when fallback-mode
+      (push (cons regex fallback-mode) auto-mode-alist))))
+
 ;;; Filetype defaults
 
 (setq sgml-basic-offset 2)  ;; HTML
