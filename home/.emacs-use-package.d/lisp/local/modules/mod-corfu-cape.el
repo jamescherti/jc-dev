@@ -20,6 +20,7 @@
 (add-hook 'sh-mode-hook #'mod-corfu-cape--setup-cape-sh-mode)
 
 ;; Elisp
+
 (defun mod-corfu-cape--cape-elisp-setup ()
   "Configure Cape to provide real Elisp completion merged with dabbrev."
   (setq-local completion-at-point-functions (list #'elisp-completion-at-point)))

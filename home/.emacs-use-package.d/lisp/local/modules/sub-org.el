@@ -278,6 +278,8 @@ ORIG-FUN is the function and ARGS are its arguments."
 
 ;;; Org archive / move down
 
+(defvar org-archive-hook)
+
 (defun my-org-toggle-todo ()
   "Toggle the current Org mode item's TODO/DONE."
   (interactive)
@@ -294,14 +296,25 @@ ORIG-FUN is the function and ARGS are its arguments."
                 (org-todo "DONE")
                 (org-hide-entry)
                 ;; Archive only if there is no parent TODO task
-                (if (not (my-org-parent-todo-p))
-                    (org-archive-subtree-default)
-                  ;; Move DONE before the first DONE
-                  (when (string= (substring-no-properties
-                                  (let ((state (org-get-todo-state)))
-                                    (if state state "")))
-                                 "DONE")
-                    (my-org-move-todo-before-first-done))))))
+                (let ((archived-successfully nil))
+                  ;; Temporarily bind our detection lambda to the hook
+                  (let ((org-archive-hook (cons
+                                           (lambda ()
+                                             (setq archived-successfully t))
+                                           org-archive-hook)))
+                    ;; Trigger the archive
+                    (if (my-org-parent-todo-p)
+                        ;; Do not archive
+                        (setq archived-successfully t)
+                      (org-archive-subtree-default))
+
+                    ;; Move DONE before the first DONE
+                    (when archived-successfully
+                      (when (string= (substring-no-properties
+                                      (let ((state (org-get-todo-state)))
+                                        (if state state "")))
+                                     "DONE")
+                        (my-org-move-todo-before-first-done))))))))
         (move-to-column column)))))
 
 (defun my-org-move-todo-before-first-done ()

@@ -345,10 +345,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq shell-kill-buffer-on-exit t)
 
 (setq ;; completion-styles '(partial-completion flex initials)
- completion-ignore-case t
- read-buffer-completion-ignore-case t
- ;; Ignore case in file and buffer completions
- read-file-name-completion-ignore-case t
  completions-format 'one-column
  completions-max-height 20
  completion-show-help nil
@@ -3522,7 +3518,12 @@ function or if an invalid choice is made."
                                  (when (bound-and-true-p font-lock-mode)
                                    (font-lock-ensure))))
 
-;;; dabbrev
+;;; Completion case
+
+(setq completion-ignore-case nil)
+
+(setq read-buffer-completion-ignore-case t
+      read-file-name-completion-ignore-case t)
 
 ;; Control whether dabbrev searches should ignore case.
 ;; Any other non-nil version means case is not significant.
@@ -3532,6 +3533,11 @@ function or if an invalid choice is made."
 ;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
 ;; A value of nil means preserve the expansion's case pattern.
 (setq dabbrev-case-replace nil)
+;; (setq dabbrev-case-replace 'case-replace)
+
+(setq orderless-smart-case t)
+
+;;; dabbrev
 
 (setq dabbrev-check-all-buffers nil)
 
@@ -3550,11 +3556,8 @@ function or if an invalid choice is made."
 ;; (dabbrev-limit 1000)
 (setq dabbrev-case-distinction nil)
 
-;; (setq dabbrev-case-fold-search nil)
-;; (setq dabbrev-case-replace 'case-replace)
 ;; (setq dabbrev-check-other-buffers t)
 ;; (setq dabbrev-eliminate-newlines t)
-;; (setq dabbrev-upcase-means-case-search t)
 
 ;; :init
 ;;

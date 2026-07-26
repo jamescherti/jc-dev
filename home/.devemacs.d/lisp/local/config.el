@@ -179,9 +179,6 @@
 ;; Fido and Fido Vertical Mode are built directly on top of icomplete.
 (setq
  ;; Good
- completion-ignore-case t
- read-buffer-completion-ignore-case t
- read-file-name-completion-ignore-case t
  icomplete-show-matches-on-no-input t
  icomplete-hide-common-prefix nil
  icomplete-compute-delay 0 ; value 0.01 for minimal-emacs.d TODO
