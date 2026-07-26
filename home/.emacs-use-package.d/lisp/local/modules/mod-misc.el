@@ -3563,6 +3563,61 @@ function or if an invalid choice is made."
 ;;   (add-hook 'sh-mode-hook #'my-setup-dabbrev)
 ;;   (add-hook 'php-mode-hook #'my-setup-dabbrev))
 
+;;; embark fix
+
+;; TODO https://github.com/oantolin/embark/issues/813
+;;
+;; Fix: Group titles in embark-collect buffers are aggressively truncated
+;;
+;; In `embark-collect' buffers with grouped candidates (e.g., search results
+;; grouped by file path), group titles are heavily truncated with an ellipsis
+;; despite ample horizontal space being available in the window.
+;;
+;; Inside `embark-collect--format-entries', `max-width' is dynamically
+;; calculated to set the first column's width in `tabulated-list-format'. The
+;; calculation iterates through candidates to determine the maximum
+;; `string-width':
+;;
+;;   (setq max-width (max max-width (+ (string-width prefix)
+;;                                     (string-width display))))
+;;
+;; However, the formatted group title string (constructed via
+;; `embark-collect-group-format') is omitted from this `max-width' calculation.
+;; Because `tabulated-list-mode' strictly enforces column bounds, any group
+;; header longer than the longest candidate in that group gets truncated to match
+;; the candidate column width.
+;;
+;; Steps to Reproduce:
+;; 1. Run a search/completion command that yields short candidates across deep
+;;    directory structures (e.g., matching a short symbol in a long file path).
+;; 2. Run `embark-collect'.
+;; 3. Observe that file path headers are truncated with "..." while most of
+;;    the buffer window remains empty space.
+;;
+;; Expected Behavior:
+;; The `max-width' calculation should include the `string-width' of group
+;; headers so `tabulated-list-mode' allocates enough horizontal space to display
+;; the full group title without artificial truncation.
+;;
+;; Proposed Workaround / Patch Logic:
+;; Below is a temporary `:after' advice on `embark-collect--format-entries' that
+;; recalculates `tabulated-list-format' after inspecting all generated entries
+;; (including headers) in `tabulated-list-entries':
+
+(defun my-embark-collect-fix-width-a (&rest _)
+  "Advice to ensure group titles are not truncated in Embark Collect buffers."
+  (when tabulated-list-format
+    (let ((max-width (cadr (aref tabulated-list-format 0))))
+      (dolist (entry tabulated-list-entries)
+        (let* ((col (aref (cadr entry) 0))
+               (text (if (listp col) (car col) col)))
+          (setq max-width (max max-width (string-width text)))))
+      (setq tabulated-list-format
+            `[("Candidate" ,max-width t) ("Annotation" 0 t)]))))
+
+(with-eval-after-load 'embark
+  (advice-add 'embark-collect--format-entries :after #'my-embark-collect-fix-width-a))
+
 ;;; DISABLED: vterm-toggle
 
 ;; (lightemacs-use-package vterm-toggle
