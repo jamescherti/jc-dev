@@ -28,7 +28,7 @@
 
 options:
   exec_before: ["sh", "-c", "set -e; git-setup"]
-  git_pull: false
+  git_update: false
   exec_after: ["update-project-list"]
   # git_update_strategy: reset
   ignore_untracked:
@@ -284,7 +284,7 @@ tasks:
   - git: git@github.com:jamescherti/emacs.git
     path: forks/emacs
     revision: master
-    git_pull: false
+    git_update: false
     remote:
       upstream: https://github.com/emacs-mirror/emacs
 

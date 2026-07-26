@@ -3,7 +3,7 @@
 
 git_options:
   clone_args: ["--depth", "1"]
-  git_pull: false
+  git_update: false
   # pre_exec: ["bash", "-c", "git branch \"backup-cloneall-$(date +'%Y%m%d-%H%M%S')\""]
 
 git:
@@ -46,7 +46,7 @@ git:
   - url: https://github.com/Raimondi/delimitMate
     path: delimitmate
   - url: https://github.com/ycm-core/YouCompleteMe
-    git_pull: false
+    git_update: false
   - url: https://github.com/tpope/vim-fugitive
   - url: https://github.com/tpope/vim-commentary
     path: commentary
