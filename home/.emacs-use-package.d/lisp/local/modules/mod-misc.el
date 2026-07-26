@@ -1355,27 +1355,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     '(("ot" "to")
       ("i" "I")))
 
-  ;; For some reason, post-init ignores this sometimes
-  ;; Similar to the default configuration, but without spaces surrounding pairs
-  ;; such as (), [], {}
-  (setq evil-surround-pairs-alist
-        '((?\( . ("(" . ")"))
-          (?\[ . ("[" . "]"))
-          (?\{ . ("{" . "}"))
-
-          (?\) . ("(" . ")"))
-          (?\] . ("[" . "]"))
-          (?\} . ("{" . "}"))
-
-          (?# . ("#{" . "}"))
-          (?b . ("(" . ")"))
-          (?B . ("{" . "}"))
-          (?> . ("<" . ">"))
-          (?t . evil-surround-read-tag)
-          (?< . evil-surround-read-tag)
-          (?\C-f . evil-surround-prefix-function)
-          (?f . evil-surround-function)))
-
   (setq user-full-name "user"
         user-mail-address "user@domain.ext")
 

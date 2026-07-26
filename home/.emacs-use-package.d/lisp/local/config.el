@@ -1570,6 +1570,26 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 
 (add-hook 'easysession-new-session-hook 'easysession-reset)
 
+;;; evil
+
+(setq-default evil-surround-pairs-alist
+              '((?\( . ("(" . ")"))
+                (?\[ . ("[" . "]"))
+                (?\{ . ("{" . "}"))
+
+                (?\) . ("(" . ")"))
+                (?\] . ("[" . "]"))
+                (?\} . ("{" . "}"))
+
+                (?# . ("#{" . "}"))
+                (?b . ("(" . ")"))
+                (?B . ("{" . "}"))
+                (?> . ("<" . ">"))
+                (?t . evil-surround-read-tag)
+                (?< . evil-surround-read-tag)
+                (?\C-f . evil-surround-prefix-function)
+                (?f . evil-surround-function)))
+
 ;;; Provide
 
 (provide 'config)
