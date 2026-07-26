@@ -297,24 +297,29 @@ ORIG-FUN is the function and ARGS are its arguments."
                 (org-hide-entry)
                 ;; Archive only if there is no parent TODO task
                 (let ((archived-successfully nil))
+                  (ignore archived-successfully)
+
                   ;; Temporarily bind our detection lambda to the hook
                   (let ((org-archive-hook (cons
                                            (lambda ()
                                              (setq archived-successfully t))
                                            org-archive-hook)))
-                    ;; Trigger the archive
-                    (if (my-org-parent-todo-p)
-                        ;; Do not archive
-                        (setq archived-successfully t)
-                      (org-archive-subtree-default))
+                    (org-archive-subtree-default)
 
-                    ;; Move DONE before the first DONE
-                    (when archived-successfully
-                      (when (string= (substring-no-properties
-                                      (let ((state (org-get-todo-state)))
-                                        (if state state "")))
-                                     "DONE")
-                        (my-org-move-todo-before-first-done))))))))
+                    ;; ;; Trigger the archive
+                    ;; (if (my-org-parent-todo-p)
+                    ;;     ;; Do not archive
+                    ;;     (setq archived-successfully t)
+                    ;;   (org-archive-subtree-default))
+                    ;;
+                    ;; ;; Move DONE before the first DONE
+                    ;; (when archived-successfully
+                    ;;   (when (string= (substring-no-properties
+                    ;;                   (let ((state (org-get-todo-state)))
+                    ;;                     (if state state "")))
+                    ;;                  "DONE")
+                    ;;     (my-org-move-todo-before-first-done)))
+                    )))))
         (move-to-column column)))))
 
 (defun my-org-move-todo-before-first-done ()
