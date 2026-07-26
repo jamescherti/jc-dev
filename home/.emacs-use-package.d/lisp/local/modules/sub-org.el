@@ -34,6 +34,8 @@
 
 ;;; TODO lightemacs
 
+(setq org-archive-reversed-order t)
+
 ;; Log completion time; provides audit trail but adds automatic notes that may
 ;; clutter logs.
 (setq org-log-done 'time)
@@ -52,7 +54,7 @@
 (setq org-todo-keywords '((sequence "TODO" "MAYBE" "CANCELED" "DONE")))
 
 ;; Fall back file for org-capture.el.
-(setq org-default-notes-file (expand-file-name "notes.org" org-directory))
+;; (setq org-default-notes-file (expand-file-name "notes.org" org-directory))
 
 ;; Prevent accidental edits inside hidden or folded text.
 (setq org-fold-catch-invisible-edits 'smart)
@@ -299,43 +301,59 @@ at the same level."
                   (org-move-subtree-down 1)))))))
     (error "Org functions are not defined")))
 
-(defun my-org-todo-and-toggle ()
+(defun my-org-toggle-todo ()
   "Toggle the current Org mode item's TODO/DONE."
   (interactive)
-  (org-back-to-heading t)
-  (let ((state (org-get-todo-state)))
-    (if (string= state "DONE")
-        (org-todo "TODO")
-      ;; Mark as DONE
-      (org-todo "DONE")
-      ;; Trigger native Org archiving
-      (org-archive-subtree-default)))
+  (let ((column (current-column)))
+    (unwind-protect
+        (save-excursion
+          (org-back-to-heading)
+          (let ((state (org-get-todo-state)))
+            (if (string= state "DONE")
+                (org-todo "TODO")
+              ;; Mark as DONE
+              (org-todo "DONE")
+              ;; Trigger native Org archiving
+              (org-archive-subtree-default))))
+      (move-to-column column))))
 
-  ;; Done and move to the end
-  ;; (when (and (fboundp 'org-todo)
-  ;;            (fboundp 'org-hide-entry)
-  ;;            (fboundp 'org-get-todo-state)
-  ;;            (fboundp 'org-back-to-heading)
-  ;;            (fboundp 'org-at-heading-p))
-  ;;   (let ((column (current-column)))
-  ;;     (unwind-protect
-  ;;         (save-excursion
-  ;;           (org-back-to-heading)
-  ;;           (when (org-at-heading-p)
-  ;;             (let ((current-state (substring-no-properties
-  ;;                                   (let ((state (org-get-todo-state)))
-  ;;                                     (if state state "")))))
-  ;;               (if (string= current-state "DONE")
-  ;;                   (org-todo "TODO")
-  ;;                 (org-todo "DONE")
-  ;;                 (when (string= (substring-no-properties
-  ;;                                 (let ((state (org-get-todo-state)))
-  ;;                                   (if state state "")))
-  ;;                                "DONE")
-  ;;                   (my-org-move-todo-before-first-done)))))
-  ;;           (org-hide-entry))
-  ;;       (move-to-column column))))
-  )
+(defun my-org-archive-remove-preceding-blank-line ()
+  "Surgically remove the blank line directly above the newly archived entry."
+  (save-excursion
+    (org-back-to-heading t)
+    (while (and (not (bobp))
+                (eq (char-before) ?\n)
+                (eq (char-before (1- (point))) ?\n))
+      (delete-char -1))))
+(add-hook 'org-archive-finalize-hook #'my-org-archive-remove-preceding-blank-line)
+
+;; (defun my-org-toggle-todo-move-down ()
+;;   "Toggle the current Org mode item's TODO/DONE."
+;;   (interactive)
+;;   (when (and (fboundp 'org-todo)
+;;              (fboundp 'org-hide-entry)
+;;              (fboundp 'org-get-todo-state)
+;;              (fboundp 'org-back-to-heading)
+;;              (fboundp 'org-at-heading-p))
+;;     (let ((column (current-column)))
+;;       (unwind-protect
+;;           (save-excursion
+;;             (org-back-to-heading)
+;;             (when (org-at-heading-p)
+;;               (let ((current-state (substring-no-properties
+;;                                     (let ((state (org-get-todo-state)))
+;;                                       (if state state "")))))
+;;                 (if (string= current-state "DONE")
+;;                     (org-todo "TODO")
+;;                   (org-todo "DONE")
+;;                   (when (string= (substring-no-properties
+;;                                   (let ((state (org-get-todo-state)))
+;;                                     (if state state "")))
+;;                                  "DONE")
+;;                     (my-org-move-todo-before-first-done)))))
+;;             (org-hide-entry))
+;;         (move-to-column column)))))
+
 
 (with-eval-after-load 'org
   ;; The function inserts a new heading at the current cursor position, and
@@ -367,7 +385,7 @@ at the same level."
 
     (define-key org-mode-map (kbd "C-c C-e") 'org-babel-execute-maybe)
     (define-key org-mode-map (kbd "C-c C-c") 'org-edit-src-code)
-    (define-key org-mode-map (kbd "C-c C-d") 'my-org-todo-and-toggle)
+    (define-key org-mode-map (kbd "C-c C-d") 'my-org-toggle-todo)
 
     (define-key org-mode-map (kbd "M-h") nil))
 

@@ -1214,7 +1214,7 @@ word after the space that contains at least two uppercase characters."
   ;; (evil-define-key 'normal org-src-mode-map (kbd "<leader>xx") 'org-edit-src-exit)
   (evil-define-key 'normal org-mode-map (kbd "<leader>oo") 'org-set-tags-command)
   (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-babel-execute-maybe)
-  (evil-define-key 'normal org-mode-map (kbd "<leader>cd") 'my-org-todo-and-toggle))
+  (evil-define-key 'normal org-mode-map (kbd "<leader>cd") 'my-org-toggle-todo))
 
 (evil-define-key 'normal 'global (kbd "<leader>oa") 'org-agenda)
 (evil-define-key 'normal 'global (kbd "<leader>oc") 'org-capture)
