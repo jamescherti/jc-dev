@@ -302,29 +302,40 @@ at the same level."
 (defun my-org-todo-and-toggle ()
   "Toggle the current Org mode item's TODO/DONE."
   (interactive)
-  (when (and (fboundp 'org-todo)
-             (fboundp 'org-hide-entry)
-             (fboundp 'org-get-todo-state)
-             (fboundp 'org-back-to-heading)
-             (fboundp 'org-at-heading-p))
-    (let ((column (current-column)))
-      (unwind-protect
-          (save-excursion
-            (org-back-to-heading)
-            (when (org-at-heading-p)
-              (let ((current-state (substring-no-properties
-                                    (let ((state (org-get-todo-state)))
-                                      (if state state "")))))
-                (if (string= current-state "DONE")
-                    (org-todo "TODO")
-                  (org-todo "DONE")
-                  (when (string= (substring-no-properties
-                                  (let ((state (org-get-todo-state)))
-                                    (if state state "")))
-                                 "DONE")
-                    (my-org-move-todo-before-first-done)))))
-            (org-hide-entry))
-        (move-to-column column)))))
+  (org-back-to-heading t)
+  (let ((state (org-get-todo-state)))
+    (if (string= state "DONE")
+        (org-todo "TODO")
+      ;; Mark as DONE
+      (org-todo "DONE")
+      ;; Trigger native Org archiving
+      (org-archive-subtree-default)))
+
+  ;; Done and move to the end
+  ;; (when (and (fboundp 'org-todo)
+  ;;            (fboundp 'org-hide-entry)
+  ;;            (fboundp 'org-get-todo-state)
+  ;;            (fboundp 'org-back-to-heading)
+  ;;            (fboundp 'org-at-heading-p))
+  ;;   (let ((column (current-column)))
+  ;;     (unwind-protect
+  ;;         (save-excursion
+  ;;           (org-back-to-heading)
+  ;;           (when (org-at-heading-p)
+  ;;             (let ((current-state (substring-no-properties
+  ;;                                   (let ((state (org-get-todo-state)))
+  ;;                                     (if state state "")))))
+  ;;               (if (string= current-state "DONE")
+  ;;                   (org-todo "TODO")
+  ;;                 (org-todo "DONE")
+  ;;                 (when (string= (substring-no-properties
+  ;;                                 (let ((state (org-get-todo-state)))
+  ;;                                   (if state state "")))
+  ;;                                "DONE")
+  ;;                   (my-org-move-todo-before-first-done)))))
+  ;;           (org-hide-entry))
+  ;;       (move-to-column column))))
+  )
 
 (with-eval-after-load 'org
   ;; The function inserts a new heading at the current cursor position, and
