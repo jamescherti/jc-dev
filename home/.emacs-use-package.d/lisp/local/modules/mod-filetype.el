@@ -45,6 +45,15 @@
 (setq lua-ts-indent-offset 2)
 (setq yaml-indent-offset 2)
 
+;;; typescript
+
+(lightemacs-use-package typescript-ts-mode
+  :if (and (>= emacs-major-version 29)
+           (my-treesit-language-available-p 'typescript))
+  :ensure nil
+  :commands typescript-ts-mode
+  :mode "\\.ts\\'")
+
 ;;; txt-file-mode
 
 ;;; Simple text file
@@ -264,64 +273,40 @@ only if they are not already available."
 (defun my-treesit-update-language-grammar ()
   "Update language grammar."
   (interactive)
-  (mod-filetype-install 'python 'python)
-  (mod-filetype-install 'sh-script 'bash)
-  (mod-filetype-install 'json-ts-mode 'json)
-  (mod-filetype-install 'lua-ts-mode 'lua)
-  ;; (mod-filetype-install 'c-ts-mode '(c cpp))
-  (mod-filetype-install 'dockerfile-ts-mode 'dockerfile)
-  ;; (mod-filetype-install 'go-ts-mode 'go)
-  (mod-filetype-install 'js 'javascript)
-  ;; (mod-filetype-install 'java-ts-mode 'java)
-  (mod-filetype-install 'php-ts-mode 'php 'php-ts-mode-install-parsers)
+  ;; (mod-filetype-install PACKAGE lang-key)
   (mod-filetype-install 'markdown-mode '(markdown markdown-inline)
                         'markdown-ts-mode-install-parsers)
+
+  (mod-filetype-install 'js-ts-mode 'javascript)
+  (mod-filetype-install 'typescript-ts-mode 'typescript)
+  (mod-filetype-install 'json-ts-mode 'json)
+
+  (mod-filetype-install 'php-ts-mode 'php 'php-ts-mode-install-parsers)
+  (mod-filetype-install 'css-ts-mode 'css)
+
+  ;; html-ts-mode: Designed strictly for parsing standard HTML. It uses only the
+  ;; tree-sitter-html grammar. If you have <style> or <script> tags, the code
+  ;; inside them will only receive basic HTML highlighting rather than
+  ;; language-specific formatting.
+  (mod-filetype-install 'html-ts-mode 'html)
+
+  ;; mhtml-ts-mode ("Multiple HTML"): Designed for mixed-language web
+  ;; development. It leverages multiple Tree-sitter parsers (html, javascript,
+  ;; and css) simultaneously. It shifts context on the fly, providing smart
+  ;; indentation, code completion, and exact syntax highlighting for JavaScript
+  ;; and CSS code blocks nested right inside the HTML.
   (mod-filetype-install 'mhtml-ts-mode 'html
                         'mhtml-ts-mode-install-parsers)
 
+  (mod-filetype-install 'toml-ts-mode 'toml)
   (mod-filetype-install 'python-ts-mode 'python)
+
   (mod-filetype-install 'yaml-ts-mode 'yaml)
   (mod-filetype-install 'bash-ts-mode 'bash)
   (mod-filetype-install 'lua-ts-mode 'lua)
-  (mod-filetype-install 'json-ts-mode 'json)
   (mod-filetype-install 'c-ts-mode 'c)
   (mod-filetype-install 'c-ts-mode 'cpp)
-  (mod-filetype-install 'dockerfile-ts-mode 'dockerfile)
-
-  ;; (mod-filetype-install 'go-ts-mode 'go)
-  ;; (mod-filetype-install 'java-ts-mode 'java)
-
-  ;; TODO
-  ;; (mod-filetype-install 'java-ts-mode 'javascript)
-
-  (mod-filetype-install nil '(javascript))
-
-  ;; (treesit-install-language-grammar 'python)
-  ;; (treesit-install-language-grammar 'bash)
-  ;; (treesit-install-language-grammar 'yaml)
-  ;; (treesit-install-language-grammar 'json)
-  ;; (treesit-install-language-grammar 'lua)
-  ;; (treesit-install-language-grammar 'c)
-  ;; (treesit-install-language-grammar 'cpp)
-  ;; (treesit-install-language-grammar 'dockerfile)
-  ;; (treesit-install-language-grammar 'go)
-  ;; (treesit-install-language-grammar 'java)
-  ;; (treesit-install-language-grammar 'javascript)
-  ;;
-  ;; (if (fboundp 'mhtml-ts-mode-install-parsers)
-  ;;     (mhtml-ts-mode-install-parsers)
-  ;;   (treesit-install-language-grammar 'html))
-  ;;
-  ;; (if (fboundp 'markdown-ts-mode-install-parsers)
-  ;;     (markdown-ts-mode-install-parsers)
-  ;;   (treesit-install-language-grammar 'markdown)
-  ;;   (treesit-install-language-grammar 'markdown-inline))
-  ;;
-  ;; (if (fboundp 'php-ts-mode-install-parsers)
-  ;;     (php-ts-mode-install-parsers)
-  ;;   (treesit-install-language-grammar 'php))
-
-  )
+  (mod-filetype-install 'dockerfile-ts-mode 'dockerfile))
 
 ;;; Misc languages
 
@@ -334,8 +319,11 @@ only if they are not already available."
 (when (my-treesit-language-available-p 'json)
   (push '(js-json-mode . json-ts-mode) major-mode-remap-alist))
 
-(when (my-treesit-language-available-p 'java)
-  (push '(java-mode . java-ts-mode) major-mode-remap-alist))
+(when (my-treesit-language-available-p 'toml)
+  (push '(conf-toml-mode . toml-ts-mode) major-mode-remap-alist))
+
+;; (when (my-treesit-language-available-p 'java)
+;;   (push '(java-mode . java-ts-mode) major-mode-remap-alist))
 
 ;; (when (my-treesit-language-available-p 'go)
 ;;   (add-to-list 'auto-mode-alist '("\.[gG][oO]\\'" . go-ts-mode)))
@@ -513,7 +501,8 @@ only if they are not already available."
            (not (derived-mode-p 'yaml-mode)))
       (yaml-mode)))))
 
-(add-to-list 'auto-mode-alist (cons my-ansible-file-regexp 'ansible-detect-and-enable-ansible-mode))
+(add-to-list 'auto-mode-alist (cons my-ansible-file-regexp
+                                    'ansible-detect-and-enable-ansible-mode))
 
 ;;; Yaml-ts-mode: tab-width
 
@@ -570,8 +559,8 @@ only if they are not already available."
     (progn
       (push '(php-mode . php-ts-mode) major-mode-remap-alist)
       ;; (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]\\'" . php-ts-mode))
-      (push '("\\.[pP][hH][pP]\\'" . php-ts-mode) auto-mode-alist)
       ;; (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]3\\'" . php-ts-mode))
+      (push '("\\.[pP][hH][pP]\\'" . php-ts-mode) auto-mode-alist)
       (push '("\\.[pP][hH][pP]3\\'" . php-ts-mode) auto-mode-alist))
   (require 'sub-php-mode))
 
@@ -608,30 +597,29 @@ only if they are not already available."
 (when (my-treesit-language-available-p 'css)
   (progn
     (push '(css-mode . css-ts-mode) major-mode-remap-alist)
-    (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist )
-    ;; (add-to-list 'auto-mode-alist '("\.[Cc][sS][sS]\\'" . css-ts-mode))
+    ;; (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist)
     ))
 
 ;;; Javascript
 
-(if (my-treesit-language-available-p 'javascript)
-    (progn
-      (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
-      (push '(js-mode . js-ts-mode) major-mode-remap-alist)
-      ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode))
-      (push '("\.[jJ][sS]\\'" . js-ts-mode) auto-mode-alist))
+(when (my-treesit-language-available-p 'javascript)
   (progn
-    ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
-    (push '("\.[jJ][sS]\\'" . js-mode) auto-mode-alist)
-
-    ;; Not required
-    ;; (use-package js2-mode
-    ;;   :commands js2-mode
-    ;;   ;; :mode
-    ;;   ;; ("\\.js\\'" . js2-mode)
-    ;;   )
-    ))
-
+    (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
+    (push '(js-mode . js-ts-mode) major-mode-remap-alist)
+    ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode))
+    (push '("\.[jJ][sS]\\'" . js-ts-mode) auto-mode-alist))
+  ;; (progn
+  ;;   ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
+  ;;   (push '("\.[jJ][sS]\\'" . js-mode) auto-mode-alist)
+  ;;
+  ;;   ;; Not required
+  ;;   ;; (use-package js2-mode
+  ;;   ;;   :commands js2-mode
+  ;;   ;;   ;; :mode
+  ;;   ;;   ;; ("\\.js\\'" . js2-mode)
+  ;;   ;;   )
+  ;;   )
+  )
 
 ;;; Lua
 
@@ -699,7 +687,9 @@ only if they are not already available."
 (if (my-treesit-language-available-p 'html)
     (progn
       (push '(html-mode . html-ts-mode) major-mode-remap-alist)
-      (push '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode) auto-mode-alist)
+      (push '(mhtml-mode . mhtml-ts-mode) major-mode-remap-alist)
+      (push '("\\.[hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist)
+      (push '("\\.[Pp][hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist)
       ;; (add-to-list 'auto-mode-alist '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode))
       )
   (use-package sgml-mode
