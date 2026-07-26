@@ -217,6 +217,10 @@
 
 (add-hook 'lightemacs-after-init-hook #'fido-vertical-mode)
 
+;;; Disable auto install
+
+(setq treesit-auto-install-grammar nil)
+
 ;;; Modes that are disabled by default
 
 ;; TODO This is a duplicate mode. Move it to lightemacs in le-no-bloat.el

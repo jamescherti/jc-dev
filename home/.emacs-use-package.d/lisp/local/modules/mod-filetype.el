@@ -87,26 +87,14 @@
 
 (lightemacs-use-package vimrc-mode
   :commands vimrc-mode
-  ;; :mode
-  ;; ("/vim\\(rc\\)?\\'" . vimrc-mode)
-  ;; ("\\.vim\\(rc\\)?\\'" . vimrc-mode)
-  ;; ("\\.vimrc.local?\\'" . vimrc-mode)
-  ;; ("\\.lvimrc?\\'" . vimrc-mode)
-  ;; ("/\\.vim\\(rc\\)?\\'" . vimrc-mode)
-  )
-
-(add-hook 'vimrc-mode-hook #'(lambda ()
-                               (setq-local indent-tabs-mode nil)
-                               (if (fboundp 'my-set-tab-width)
-                                   (my-set-tab-width 2)
-                                 (error "Undefined: my-set-tab-width"))))
-
-;; ("/\\.vimrc.local?\\'" . vimrc-mode)
-;; March .vimrc, .vimrc.local, .vim-after, .vim-before...
-;; ("/\\.l?vim[^/]*\\'" . vimrc-mode)
-;; ("/\\.lvimrc?\\'" . vimrc-mode)
-;; (add-to-list 'auto-mode-alist '("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode))
-(push '("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode) auto-mode-alist)
+  :mode
+  ("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode)
+  :init
+  (add-hook 'vimrc-mode-hook #'(lambda ()
+                                 (setq-local indent-tabs-mode nil)
+                                 (if (fboundp 'my-set-tab-width)
+                                     (my-set-tab-width 2)
+                                   (error "Undefined: my-set-tab-width")))))
 
 ;;; Tree-sitter defaults
 
