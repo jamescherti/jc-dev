@@ -32,6 +32,87 @@
 
 (require 'org)
 
+;;; TODO lightemacs
+
+;; Log completion time; provides audit trail but adds automatic notes that may
+;; clutter logs.
+(setq org-log-done 'time)
+
+;; Enable modules on an opt-in basis to reduce initial Org load latency.
+(setq org-modules nil)
+
+;; Enable Speed Keys at the beginning of a heading (press '?' to list
+;; available keys).
+;; (setq org-use-speed-commands t)
+
+;; Ctrl-A/E moves to beginning/end of heading instead of line; improves
+;; navigation.
+(setq org-special-ctrl-a/e t)
+
+(setq org-todo-keywords '((sequence "TODO" "MAYBE" "CANCELED" "DONE")))
+
+;; Fall back file for org-capture.el.
+(setq org-default-notes-file (expand-file-name "notes.org" org-directory))
+
+;; Prevent accidental edits inside hidden or folded text.
+(setq org-fold-catch-invisible-edits 'smart)
+(with-no-warnings
+  ;; Obsolete version of: `org-fold-catch-invisible-edits'
+  (setq org-catch-invisible-edits 'smart))
+
+;; Disable automatic footnote renumbering and sorting on edit.
+(setq org-footnote-auto-adjust nil)
+
+;; Do not insert empty lines between collapsed sections; makes folded view
+;; denser but reduces visual separation between headings. This keeps your
+;; files compact by removing empty lines between folded headings.
+(setq org-cycle-separator-lines 2)
+
+;; Prevent marking a parent to do as done if its child tasks are incomplete;
+;; ensures task consistency but may slow task completion when some subtasks
+;; are still pending.
+(setq org-enforce-todo-dependencies t)
+
+;; Turn on org-indent-mode on startup.
+(setq org-startup-indented t)
+
+(with-eval-after-load 'org-indent
+  (setq org-indent-indentation-per-level 1))
+
+;; Hide leading stars
+(setq org-hide-leading-stars t)
+
+;; Prevent inserting blank lines before new headings and list items.
+(setq org-blank-before-new-entry '((heading)
+                                   (plain-list-item)))
+
+;; Require braces for sub/superscripts (e.g., _{sub} or ^{super}).
+(setq org-use-sub-superscripts '{})
+
+;; Render Org entities (e.g., \tilde) as UTF-8 characters.
+(setq org-pretty-entities t)
+
+;; Pretty entity display includes formatting sub/superscripts
+(setq org-pretty-entities-include-sub-superscripts t)
+
+;; Fontify code in code blocks
+(setq org-src-fontify-natively t)
+
+;; Disable opening links on left click by preventing accidental clicks on
+;; inline images in Org buffers from opening them in new buffers.
+(setq org-mouse-1-follows-link nil)
+
+(setq org-export-backends '(html texinfo md))
+
+(setq org-src-content-indentation 0)
+(with-no-warnings
+  ;; The `with-no-warnings' macro maintains compatibility with older Org
+  ;; versions where the variable was named `org-edit-src-content-indentation'.
+  (setq org-edit-src-content-indentation 0))
+
+;; Make TAB behave according to the language mode inside source blocks.
+(setq org-src-tab-acts-natively t)
+
 ;;; Testing
 
 ;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
@@ -39,6 +120,30 @@
 (setq org-hide-emphasis-markers t)
 
 ;;; Defaults
+
+;; TODO lightemacs
+;; Prevent table cells starting with "=" from auto-evaluating as formulas on
+;; TAB. Avoids unintended evaluation when using "=" for verbatim formatting.
+;; (Formulas can still be manually evaluated with C-c =.)
+(setq org-table-formula-evaluate-inline nil)
+
+;; TODO lightemacs?
+;; Insert new headings after the current subtree instead of at point.
+(setq org-insert-heading-respect-content t)
+
+;; TODO lightemacs
+;; Use the full outline path when refiling; makes it easier to select the
+;; correct target but requires remembering or seeing the full path.
+(setq org-refile-use-outline-path t)
+
+;; Use native major-mode indentation
+;; TODO lightemacs?
+(setq org-src-preserve-indentation t)
+
+;; RET follows links; intuitive navigation but may conflict with normal line
+;; breaks.
+;; TODO lightemacs?
+(setq org-return-follows-link t)
 
 (setq org-tags-column 0)
 
@@ -48,10 +153,6 @@
 (setq org-refile-targets
       '((nil :maxlevel . 3)
         (org-agenda-files :maxlevel . 3)))
-
-;; Use the full outline path when refiling; makes it easier to select the
-;; correct target but requires remembering or seeing the full path.
-(setq org-refile-use-outline-path t)
 
 ;; Indent text according to heading level; makes outline visually clearer but
 ;; can misalign code blocks or tables.
@@ -91,10 +192,6 @@
 ;; to navigate long hierarchies.
 (setq org-outline-path-complete-in-steps nil)
 
-;; Insert new headings after the current subtree instead of at point;
-;; maintains logical structure
-(setq org-insert-heading-respect-content t)
-
 ;; When nil, it will go to the end of the line before making a new line.
 (setq org-M-RET-may-split-line nil)
 
@@ -110,16 +207,12 @@
 ;; (setq org-hide-block-startup nil) ; default nil
 (setq org-startup-folded nil)
 
-(setq
- ;; showeverything is Org's default, but it ignores
- ;; org-hide-block-startup (#+startup: hideblocks), archived trees,
- ;; hidden drawers, and VISIBILITY properties. Setting it to nil has the
- ;; same effect functionally, but respects these settings.
- org-image-actual-width nil
- org-priority-faces
- '((?A . error)
-   (?B . warning)
-   (?C . shadow)))
+;; Allow resizing images and prevent them from defaulting to actual width.
+(setq org-image-actual-width nil)
+
+(setq org-priority-faces '((?A . error)
+                           (?B . warning)
+                           (?C . shadow)))
 
 ;; (setq org-todo-keywords '((sequence "TODO" "DONE")))
 ;; (setq org-todo-keywords
@@ -334,10 +427,6 @@ at the same level."
 ;; readability
 ;; (setq org-link-descriptive t)
 
-;; RET follows links; intuitive navigation but may conflict with normal line
-;; breaks.
-(setq org-return-follows-link t)
-
 (setq org-fold-show-context-detail
       '(;; 'local' reveals the current heading but keeps children folded.
         ;; Useful to focus strictly on the agenda item without visual clutter.
@@ -507,17 +596,10 @@ at the same level."
 ;; (with-eval-after-load 'org-src
 ;;   (add-to-list 'org-src-lang-modes '("md" . markdown)))
 
-;; Make TAB behave according to the language mode inside source blocks;
-;; consistent editing experience
-(setq org-src-tab-acts-natively t)
-
 ;; (setq org-src-lang-modes '(("python" . python)
 ;;                            ("sh" . sh)
 ;;                            ("bash" . sh)
 ;;                            ("elisp" . emacs-lisp)))
-
-;; Use native major-mode indentation
-(setq org-src-preserve-indentation t)
 
 ;; Enforce zero indentation for code within Org source blocks. This prevents Org
 ;; mode from adding artificial leading spaces, ensuring that code copied
