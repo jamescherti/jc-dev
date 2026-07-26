@@ -1415,6 +1415,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (dolist (err '("\\`rx ['']\\*\\*[''] range error"
                    search-failed
 
+                   "Sorry, comparison of identical variants is not what I am made for..."
+
                    ;; find-file-noselect-1: File is not readable: /etc/shadow
                    file-error
 
