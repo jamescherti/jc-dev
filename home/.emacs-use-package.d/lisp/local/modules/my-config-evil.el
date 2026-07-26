@@ -2040,6 +2040,15 @@ truncated."
   (let ((inhibit-message t))
     (evilcursor-forward-line (* count -1))))
 
+(defun my-setup-local-evilcursor-smart-next-prev-line ()
+  "Setup smart next/previous line."
+  (evil-define-key 'normal 'local (kbd "k") #'evilcursor-smart-previous-line)
+  (evil-define-key 'normal 'local (kbd "j") #'evilcursor-smart-next-line)
+  (evil-define-key 'insert 'local (kbd "M-k") #'evilcursor-smart-previous-line)
+  (evil-define-key 'insert 'local (kbd "M-j") #'evilcursor-smart-next-line))
+
+(add-hook 'embark-collect-mode-hook #'my-setup-local-evilcursor-smart-next-prev-line)
+
 ;; (evil-define-key 'insert 'global (kbd "M-k") #'evilcursor-smart-previous-line)
 ;; (evil-define-key 'insert 'global (kbd "M-j") #'evilcursor-smart-next-line)
 ;;

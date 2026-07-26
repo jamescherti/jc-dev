@@ -40,9 +40,6 @@
 
 ;;; Defaults
 
-;; Enable modules on an opt-in basis to reduce initial Org load latency.
-(setq org-modules nil)
-
 (setq org-tags-column 0)
 
 ;; Define refile targets up to maxlevel in the current file and agenda files;
@@ -56,13 +53,9 @@
 ;; correct target but requires remembering or seeing the full path.
 (setq org-refile-use-outline-path t)
 
-;; Ctrl-A/E moves to beginning/end of heading instead of line; improves
-;; navigation.
-(setq org-special-ctrl-a/e t)
-
 ;; Indent text according to heading level; makes outline visually clearer but
 ;; can misalign code blocks or tables.
-(setq org-startup-indented t)
+;; (setq org-startup-indented t)
 
 ;; Color DONE headlines; quickly identifies completed tasks
 (setq org-fontify-done-headline t)
@@ -78,17 +71,10 @@
 ;;             or clashes with your theme.
 (setq org-fontify-whole-heading-line t)
 
+
 ;; Fontify quote and verse blocks; highlights these blocks but may interfere
 ;; with other syntax highlighting.
 (setq org-fontify-quote-and-verse-blocks t)
-
-;; Disable sub/superscript interpretation (_ and ^)
-(setq org-use-sub-superscripts '{})
-
-;; Indentation per heading level; controls visual hierarchy but tight spacing
-;; may feel cramped.
-;; NOTE: Same as default
-;; (setq org-indent-indentation-per-level 2)
 
 ;; Set ellipsis for folded sections; improves folding visibility but may not
 ;; suit all fonts.
@@ -104,11 +90,6 @@
 ;; Disable stepwise path completion; direct path completion but may be harder
 ;; to navigate long hierarchies.
 (setq org-outline-path-complete-in-steps nil)
-
-;; Prevent marking a parent to do as done if its child tasks are incomplete;
-;; ensures task consistency but may slow task completion when some subtasks
-;; are still pending.
-(setq org-enforce-todo-dependencies t)
 
 ;; Insert new headings after the current subtree instead of at point;
 ;; maintains logical structure
@@ -129,18 +110,18 @@
 ;; (setq org-hide-block-startup nil) ; default nil
 (setq org-startup-folded nil)
 
-(setq org-hide-leading-stars t
-      ;; showeverything is Org's default, but it ignores
-      ;; org-hide-block-startup (#+startup: hideblocks), archived trees,
-      ;; hidden drawers, and VISIBILITY properties. Setting it to nil has the
-      ;; same effect functionally, but respects these settings.
-      org-image-actual-width nil
-      org-priority-faces
-      '((?A . error)
-        (?B . warning)
-        (?C . shadow)))
+(setq
+ ;; showeverything is Org's default, but it ignores
+ ;; org-hide-block-startup (#+startup: hideblocks), archived trees,
+ ;; hidden drawers, and VISIBILITY properties. Setting it to nil has the
+ ;; same effect functionally, but respects these settings.
+ org-image-actual-width nil
+ org-priority-faces
+ '((?A . error)
+   (?B . warning)
+   (?C . shadow)))
 
-(setq org-todo-keywords '((sequence "TODO" "DONE")))
+;; (setq org-todo-keywords '((sequence "TODO" "DONE")))
 ;; (setq org-todo-keywords
 ;;       '((sequence
 ;;          "TODO(t)"
@@ -349,12 +330,6 @@ at the same level."
 
 (setq org-clock-report-include-clocking-task t)
 
-;; Do not insert empty lines between collapsed sections; makes folded view
-;; denser but reduces visual separation between headings.
-;; This keeps your files compact by removing empty lines between folded
-;; headings.
-(setq org-cycle-separator-lines 0)
-
 ;; Display descriptive text for links instead of raw URLs; improves
 ;; readability
 ;; (setq org-link-descriptive t)
@@ -425,7 +400,6 @@ at the same level."
 
 ;; Source block settings
 (setq org-edit-src-persistent-message nil)
-(setq org-export-backends '(html texinfo md))
 
 ;; Lists
 (setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
@@ -549,11 +523,6 @@ at the same level."
 ;; mode from adding artificial leading spaces, ensuring that code copied
 ;; directly from the file remains correctly aligned and syntactically valid.
 (setq org-src-content-indentation 0)
-
-(with-no-warnings
-  ;; The `with-no-warnings' macro maintains compatibility with older Org
-  ;; versions where the variable was named `org-edit-src-content-indentation'.
-  (setq org-edit-src-content-indentation 0))
 
 ;; org-src modes
 (defvar my-org-src-minor-mode-alist
@@ -754,11 +723,6 @@ via `unwind-protect' even if the movement signals an error."
 ;; TODO add back?
 ;; (setq org-fontify-whole-block-delimiter-line nil)
 
-;; Log completion time; provides audit trail but adds automatic notes that may
-;; clutter logs.
-;; TODO: Add back?
-;; (setq org-log-done 'time)
-
 ;; Disable highlighting LaTeX fragments and related elements; avoids interfering
 ;; with elisp regex in source blocks
 ;; (setq org-highlight-latex-and-related nil)
@@ -828,11 +792,7 @@ via `unwind-protect' even if the movement signals an error."
 ;; process of selecting agenda entries consequently.
 ;;
 
-;; (org-startup-indented nil)     ;; No auto-indentation
-
 ;; Speed
-
-;; org-catch-invisible-edits 'show-and-error
 
 ;; Disable automatic inheritance of properties; keeps properties local to the
 ;; entry
@@ -840,7 +800,6 @@ via `unwind-protect' even if the movement signals an error."
 
 
 ;; (setq org-footnote-section nil) ; place footnotes locally
-;; (setq org-footnote-auto-adjust nil) ; renumber footnotes
 
 ;; Logging
 
@@ -1143,7 +1102,6 @@ via `unwind-protect' even if the movement signals an error."
 ;;   ;;       ;;                   (45 . "-")
 ;;   ;;       ;;                   (42 . "↪"))
 ;;   ;;       ;; org-modern-radio-target    '("❰" t "❱")
-;;   ;;       ;; org-catch-invisible-edits 'show-and-error
 ;;   ;;       ;; org-modern-internal-target '("↪ " t "")
 ;;   ;;       ;; org-modern-todo t
 ;;   ;;       ;; org-modern-tag t
