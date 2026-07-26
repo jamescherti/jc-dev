@@ -729,6 +729,7 @@ subsequent GCC invocations."
                            mod-yasnippet
                            mod-recenter-after-jump
                            mod-quiet
+                           mod-eglot
 
                            mod-kirigami
                            ;; le-kirigami ; replaced with mod-kirigami
@@ -865,7 +866,6 @@ subsequent GCC invocations."
                            sub-project
                            mod-buffer-terminator
                            le-buffer-guardian
-                           mod-eglot
                            smartindent
                            ;; mod-lsp-mode
                            ;; point-manager

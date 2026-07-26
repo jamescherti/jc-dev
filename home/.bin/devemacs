@@ -31,6 +31,9 @@ export RUN_EMACS_FORCE=1
 
 if [[ -f /usr/bin/emacs ]]; then
   export RUN_EMACS_BIN=/usr/bin/emacs
+else
+  echo "Error: File not found: /usr/bin/emacs" >&2
+  exit 1
 fi
 
 exec run-emacs -nw --init-directory "$EMACS_D" "$@"

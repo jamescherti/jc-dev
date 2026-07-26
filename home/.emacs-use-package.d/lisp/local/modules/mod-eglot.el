@@ -93,40 +93,6 @@
 ;;       (when (fboundp 'eglot-format-buffer)
 ;;         (eglot-format-buffer)))))
 
-;; TODO lightemacs?
-;; The LSP server assumes that the candidates are retrieved on every change to
-;; the buffer and we can rely on the LSP server to do the heavy lifting and
-;; provide a continuously update list of completions. The problem is that LSP
-;; servers are unaware of Emacs completion-styles, therefore the candidates from
-;; the language server are only post-filtered by the completion style. Corfu
-;; retrieves the candidate completion table once at the beginning of a
-;; completion session and doesn't reload it while the word is being typed. This
-;; is advantageous for most completion-at-point-functions since it opens up
-;; caching opportunities. Eglot completion function doesn't refresh the
-;; completion table itself. This is problematic, as language servers often only
-;; provide limited list of completions. Therefore, when using auto completion
-;; and typing slowly, possible completion candidates may be missing, because the
-;; initial list was missing the intended string. This behavior can be changed
-;; with the cache buster from Cape, which ensures that the completion table is
-;; refreshed such that the candidates are always obtained again from the server.
-;;
-;; Retrieving the candidates on every key press can be seen as a disadvantage,
-;; since it decreases performance. This matters in particular if your language
-;; server returns many candidates (or even a complete set of candidates) right
-;; away on the first invocation of completion. Depending on your language server
-;; you may or may not want the cape-wrap-buster. See also the next section about
-;; requesting more candidates from the Lsp server by default.
-;;
-;; Corfu supports the Orderless completion style. As soon as you press M-SPC, a
-;; space is inserted and Orderless filtering starts. The candidates are not
-;; updated again from the server. Instead the existing candidates are only
-;; post-filtered with Orderless. This feature works always, with or without
-;; cape-wrap-buster. Note that this feature is Orderless-specific. See the next
-;; section.
-;; (with-eval-after-load 'eglot
-;;   (with-eval-after-load 'cape
-;;     (advice-add 'eglot-completion-at-point :around 'cape-wrap-buster)))
-
 (defun my-setup-eglot-mode ()
   "Setup `eglot-mode'."
   (when (bound-and-true-p env-allow-language-servers)
@@ -319,22 +285,6 @@
                             (string-prefix-p "Reconnected" message-string))
                   (apply orig-fun format args)))))
 
-;;; Cape
-
-(defun my-eglot-capf-cleanup ()
-  "Prioritize Eglot and remove conflicting Python completions."
-  (when (eglot-managed-p)
-    ;; Remove legacy python-completion-at-point from the local list
-    (remove-hook 'completion-at-point-functions 'python-completion-at-point t)
-
-    ;; Ensure Eglot is at the front and wrapped for cache-busting
-    (if (fboundp 'cape-capf-buster)
-        (setq-local completion-at-point-functions
-                    (list (cape-capf-buster 'eglot-completion-at-point)))
-      (error "Undefined: cape-capf-buster"))))
-
-(add-hook 'eglot-managed-mode-hook #'my-eglot-capf-cleanup)
-
 ;;; Eglot: Python
 
 (setq-default eglot-workspace-configuration
@@ -376,7 +326,7 @@
                                 )
 
                          ;; Syntax checkers
-                         :pylint (:enabled t)  ; TODO replace with ruff
+                         :pylint (:enabled t)
 
                          ;; Old, slow linters
                          :mccabe (:enabled :json-false)
@@ -463,6 +413,58 @@
                          ;;                      "pathlib"])
 
                          :rope_autoimport (:enabled :json-false)))))
+
+;;; Cape
+
+(defun my-eglot-capf-cleanup ()
+  "Prioritize Eglot and remove conflicting Python completions."
+  (when (eglot-managed-p)
+    ;; Remove legacy python-completion-at-point from the local list
+    (remove-hook 'completion-at-point-functions 'python-completion-at-point t)
+
+    ;; Ensure Eglot is at the front and wrapped for cache-busting
+    (if (fboundp 'cape-capf-buster)
+        (setq-local completion-at-point-functions
+                    (list (cape-capf-buster 'eglot-completion-at-point)))
+      (error "Undefined: cape-capf-buster"))))
+
+(add-hook 'eglot-managed-mode-hook #'my-eglot-capf-cleanup)
+
+;;; DISABLED: cape-wrap-buster
+
+;; TODO lightemacs?
+;; The LSP server assumes that the candidates are retrieved on every change to
+;; the buffer and we can rely on the LSP server to do the heavy lifting and
+;; provide a continuously update list of completions. The problem is that LSP
+;; servers are unaware of Emacs completion-styles, therefore the candidates from
+;; the language server are only post-filtered by the completion style. Corfu
+;; retrieves the candidate completion table once at the beginning of a
+;; completion session and doesn't reload it while the word is being typed. This
+;; is advantageous for most completion-at-point-functions since it opens up
+;; caching opportunities. Eglot completion function doesn't refresh the
+;; completion table itself. This is problematic, as language servers often only
+;; provide limited list of completions. Therefore, when using auto completion
+;; and typing slowly, possible completion candidates may be missing, because the
+;; initial list was missing the intended string. This behavior can be changed
+;; with the cache buster from Cape, which ensures that the completion table is
+;; refreshed such that the candidates are always obtained again from the server.
+;;
+;; Retrieving the candidates on every key press can be seen as a disadvantage,
+;; since it decreases performance. This matters in particular if your language
+;; server returns many candidates (or even a complete set of candidates) right
+;; away on the first invocation of completion. Depending on your language server
+;; you may or may not want the cape-wrap-buster. See also the next section about
+;; requesting more candidates from the Lsp server by default.
+;;
+;; Corfu supports the Orderless completion style. As soon as you press M-SPC, a
+;; space is inserted and Orderless filtering starts. The candidates are not
+;; updated again from the server. Instead the existing candidates are only
+;; post-filtered with Orderless. This feature works always, with or without
+;; cape-wrap-buster. Note that this feature is Orderless-specific. See the next
+;; section.
+(with-eval-after-load 'eglot
+  (with-eval-after-load 'cape
+    (advice-add 'eglot-completion-at-point :around 'cape-wrap-buster)))
 
 ;;; Provide
 
