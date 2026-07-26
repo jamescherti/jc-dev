@@ -749,21 +749,15 @@ only if they are not already available."
   )
 
 ;;; BASIC
-;; (lightemacs-use-package basic-mode
-;;   :commands (cp437-dos
-;;              basic-qb45-mode)
-;;   :init
-;;   ;; (setq default-buffer-file-coding-system 'cp437-dos)
-;;
-;;   ;; Djgpp and rhide
-;;   (add-to-list 'file-coding-system-alist '("\\.C\\'" . cp437-dos))
-;;   (add-to-list 'file-coding-system-alist '("\\.H\\'" . cp437-dos))
-;;
-;;   (add-to-list 'file-coding-system-alist '("\\.[bB][aA][sS]\\'" . cp437-dos))
-;;
-;;   ;; (autoload 'basic-generic-mode "basic-mode" "Major mode for editing BASIC
-;;   ;; code." t)
-;;   (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
+(lightemacs-use-package basic-mode
+  :commands basic-qb45-mode
+  :init
+  ;; Djgpp and Rhide
+  (add-to-list 'file-coding-system-alist '("/legacy/.*\\.C\\'" . cp437-dos))
+  (add-to-list 'file-coding-system-alist '("/legacy/.*\\.H\\'" . cp437-dos))
+  (add-to-list 'file-coding-system-alist '("\\.[bB][aA][sS]\\'" . cp437-dos))
+  ;; *.BAS files
+  (add-to-list 'auto-mode-alist '("\\.[bB][aA][sS]\\'" . basic-qb45-mode)))
 
 ;;; auto-mode-alist
 

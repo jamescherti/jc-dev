@@ -78,6 +78,9 @@
  ;; External repositories
  ;; TODO fork them
  ;;-----------------------------------------------------------------------------
+ ;; Unmaintained
+ ("basic-mode" . "1dc1a635d6d80668c8a583b974205e49ff0fc3ce")
+
  ;; Outdated tag
  ;; TODO Add to RSS
  ("groovy-emacs-modes" . "7b8520b2e2d3ab1d62b35c426e17ac25ed0120bb")
