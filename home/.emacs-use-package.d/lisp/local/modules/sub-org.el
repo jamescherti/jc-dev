@@ -268,6 +268,42 @@ ORIG-FUN is the function and ARGS are its arguments."
 (with-eval-after-load 'rng-loc
   (advice-add 'rng-what-schema :around #'my-hide-rng-what-schema-message))
 
+(defun my-org-parent-todo-p ()
+  "Return non-nil if the current heading has a parent with an active TODO state."
+  (when-let* ((element (org-element-at-point))
+              (parent (org-element-lineage element '(headline))))
+    (let ((parent-state (org-element-property :todo-keyword parent)))
+      (and parent-state
+           (member parent-state org-not-done-keywords)))))
+
+;;; Org archive / move down
+
+(defun my-org-toggle-todo ()
+  "Toggle the current Org mode item's TODO/DONE."
+  (interactive)
+  (when (fboundp 'org-hide-entry)
+    (let ((column (current-column))
+          (inhibit-redisplay t)
+          (inhibit-message t))
+      (unwind-protect
+          (save-excursion
+            (org-back-to-heading)
+            (when-let* ((state (org-get-todo-state)))
+              (if (string= state "DONE")
+                  (org-todo "TODO")
+                (org-todo "DONE")
+                (org-hide-entry)
+                ;; Archive only if there is no parent TODO task
+                (if (not (my-org-parent-todo-p))
+                    (org-archive-subtree-default)
+                  ;; Move DONE before the first DONE
+                  (when (string= (substring-no-properties
+                                  (let ((state (org-get-todo-state)))
+                                    (if state state "")))
+                                 "DONE")
+                    (my-org-move-todo-before-first-done))))))
+        (move-to-column column)))))
+
 (defun my-org-move-todo-before-first-done ()
   "Move the current TODO heading down, right before the first DONE heading.
 If there are no DONE headings, it will be moved below all TODO headings
@@ -300,22 +336,6 @@ at the same level."
                     (setq moving nil)
                   (org-move-subtree-down 1)))))))
     (error "Org functions are not defined")))
-
-(defun my-org-toggle-todo ()
-  "Toggle the current Org mode item's TODO/DONE."
-  (interactive)
-  (let ((column (current-column)))
-    (unwind-protect
-        (save-excursion
-          (org-back-to-heading)
-          (let ((state (org-get-todo-state)))
-            (if (string= state "DONE")
-                (org-todo "TODO")
-              ;; Mark as DONE
-              (org-todo "DONE")
-              ;; Trigger native Org archiving
-              (org-archive-subtree-default))))
-      (move-to-column column))))
 
 (defun my-org-archive-remove-preceding-blank-line ()
   "Surgically remove the blank line directly above the newly archived entry."
@@ -354,6 +374,7 @@ at the same level."
 ;;             (org-hide-entry))
 ;;         (move-to-column column)))))
 
+;;; Other settings
 
 (with-eval-after-load 'org
   ;; The function inserts a new heading at the current cursor position, and
