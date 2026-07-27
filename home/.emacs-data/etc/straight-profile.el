@@ -125,7 +125,7 @@
  ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
  ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
- ("org" . "cdc16898fd46a30d7187c0a5830b2b898ffbd2de") ; release_9.8.7 | RSS RELEASE
+ ("org" . "c75ffe4a43355bc76807d9aa711834b33f724fca") ; release_9.8.8 | RSS RELEASE
  ;; ("org" . "5ce6801d3fc127102f8a7a9b2c28e923211b3acb") ; Unstable
 
  ;; TODO remove
