@@ -1340,8 +1340,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (with-eval-after-load 'le-aggressive-indent
     (add-hook 'lua-mode-hook 'aggressive-indent-mode))
 
-  (my-update-package-pinned-packages my-package-pinned-packages)
-
   ;; Abbrev
   (add-hook 'markdown-mode-hook #'abbrev-mode)
   (add-hook 'markdown-ts-mode-hook #'abbrev-mode)

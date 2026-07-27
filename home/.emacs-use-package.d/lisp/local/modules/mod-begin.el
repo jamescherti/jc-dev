@@ -225,6 +225,8 @@ any new ones."
         ;; (gptel                         . "melpa")
         ))
 
+(my-update-package-pinned-packages my-package-pinned-packages)
+
 ;;; Lazy loader
 
 ;; For file-path-todo

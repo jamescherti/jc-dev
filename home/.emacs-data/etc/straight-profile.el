@@ -108,11 +108,11 @@
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
 
  ("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7 | RSS RELEASE
- ("corfu" . "4a9c67da16eb64cadaa4bfcc16713188145c83da") ; 2.10 | RSS RELEASE
+ ("corfu" . "8243708421012f15a5f864ec88f6af01e5395dd8") ; 2.11 | RSS RELEASE
+ ("vertico" . "c9ffb9532eacff7f38d94d51e1914a1e948d5066")  ; 2.11 | RSS RELEASE
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
  ("embark" . "27de48004242e98586b9c9661fdb6912f26fe70f") ; 1.2 | RSS RELEASE
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
- ("vertico" . "6028bd3d32c99c28e2b938e5e5393ec3508d2424")  ; 2.10 | RSS RELEASE
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
  ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
