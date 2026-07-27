@@ -300,6 +300,7 @@ ORIG-FUN is the function and ARGS are its arguments."
                   (ignore archived-successfully)
 
                   ;; Temporarily bind our detection lambda to the hook
+                  (require 'org-archive)
                   (let ((org-archive-hook (cons
                                            (lambda ()
                                              (setq archived-successfully t))
