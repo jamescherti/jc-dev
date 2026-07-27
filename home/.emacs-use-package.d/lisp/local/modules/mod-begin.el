@@ -186,46 +186,47 @@ any new ones."
                                              (assq (car pkg) pinned-packages))
                                            package-pinned-packages)))))
 
-(setq my-package-pinned-packages
-      '((buffer-terminator             . "melpa")
-        (dir-config                    . "melpa")
-        (enhanced-evil-paredit         . "melpa")
-        (outline-indent                . "melpa")
-        (vim-tab-bar                   . "melpa")
-        (persist-text-scale            . "melpa")
-        (quick-sdcv                    . "melpa")
-        (inhibit-mouse                 . "melpa")
-        (stripspace                    . "melpa")
-        (tomorrow-night-deepblue-theme . "melpa")
-        (bufferfile                    . "melpa")
-        (compile-angel                 . "melpa")
-        (easysession                   . "melpa")
-        (flymake-ansible-lint          . "melpa")
-        (flymake-bashate               . "melpa")
-        (buffer-guardian               . "melpa")
+(when (eq lightemacs-package-manager 'builtin-package)
+  (setq my-package-pinned-packages
+        '((buffer-terminator             . "melpa")
+          (dir-config                    . "melpa")
+          (enhanced-evil-paredit         . "melpa")
+          (outline-indent                . "melpa")
+          (vim-tab-bar                   . "melpa")
+          (persist-text-scale            . "melpa")
+          (quick-sdcv                    . "melpa")
+          (inhibit-mouse                 . "melpa")
+          (stripspace                    . "melpa")
+          (tomorrow-night-deepblue-theme . "melpa")
+          (bufferfile                    . "melpa")
+          (compile-angel                 . "melpa")
+          (easysession                   . "melpa")
+          (flymake-ansible-lint          . "melpa")
+          (flymake-bashate               . "melpa")
+          (buffer-guardian               . "melpa")
 
-        (markdown-mode                 . "melpa")
+          (markdown-mode                 . "melpa")
 
-        (dumb-jump                 . "melpa")
-        ;; Latest
-        (vterm                         . "melpa")
+          (dumb-jump                 . "melpa")
+          ;; Latest
+          (vterm                         . "melpa")
 
-        (git-gutter                    . "melpa")
+          (git-gutter                    . "melpa")
 
-        (visual-fill-column            . "melpa")
+          (visual-fill-column            . "melpa")
 
-        ;; lightemacs?
-        (undo-fu                       . "melpa")
-        (undo-fu-session               . "melpa")
+          ;; lightemacs?
+          (undo-fu                       . "melpa")
+          (undo-fu-session               . "melpa")
 
-        ;; To fix the window-start bug
-        (apheleia                      . "melpa-stable")
+          ;; To fix the window-start bug
+          (apheleia                      . "melpa-stable")
 
-        ;; 3 months ago
-        ;; (gptel                         . "melpa")
-        ))
+          ;; 3 months ago
+          ;; (gptel                         . "melpa")
+          ))
 
-(my-update-package-pinned-packages my-package-pinned-packages)
+  (my-update-package-pinned-packages my-package-pinned-packages))
 
 ;;; Lazy loader
 
