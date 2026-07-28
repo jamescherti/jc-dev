@@ -722,7 +722,7 @@ subsequent GCC invocations."
 
 (setq lightemacs-modules '(mod-conditional-modes
                            mod-begin
-                           mod-same-window
+                           ;; mod-same-window
                            mod-dired
                            mod-flymake
                            mod-gc
@@ -1263,6 +1263,9 @@ This uses an around advice to trap errors and verify file timestamps."
             (melpa
              :type git :host github
              :repo "jamescherti/melpa")
+            (same-window
+             :type git :host github
+             :repo "jamescherti/same-window.el")
 
             ;; Straight
             (straight

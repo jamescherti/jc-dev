@@ -354,6 +354,37 @@ This function executes within the Ediff Control Buffer."
 (add-hook 'ediff-prepare-buffer-hook #'mod-ediff--setup-ediff-auto-text-scale)
 (add-hook 'ediff-cleanup-hook #'mod-ediff--ediff-teardown-auto-text-scale)
 
+;;; ediff: Control panel zoom keybindings
+
+(defun mod-ediff-zoom-in (&optional inc)
+  "Increase text scale of the Ediff buffers from the control panel.
+INC is the amount to increase the text scale."
+  (interactive "p")
+  (let ((buf (car (mod-ediff--ediff-buffers-from-control-panel))))
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (text-scale-increase inc)))))
+
+(defun mod-ediff-zoom-out (&optional dec)
+  "Decrease text scale of the Ediff buffers from the control panel.
+DEC is the amount to decrease the text scale."
+  (interactive "p")
+  (let ((buf (car (mod-ediff--ediff-buffers-from-control-panel))))
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (text-scale-decrease dec)))))
+
+;; (with-eval-after-load 'ediff-util
+;;   (define-key ediff-mode-map (kbd "C-+") #'mod-ediff-zoom-in)
+;;   (define-key ediff-mode-map (kbd "C--") #'mod-ediff-zoom-out))
+
+(defun mod-ediff-setup-keybindings ()
+  "Set up custom keybindings for the Ediff control panel."
+  (define-key ediff-mode-map (kbd "C-+") #'mod-ediff-zoom-in)
+  (define-key ediff-mode-map (kbd "C--") #'mod-ediff-zoom-out))
+
+(add-hook 'ediff-keymap-setup-hook #'mod-ediff-setup-keybindings)
+
 ;;; ediff: Synchronize truncate-lines
 
 (defun mod-ediff--ediff-sync-truncate-startup ()

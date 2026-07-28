@@ -85,7 +85,7 @@
                            ;; le-consult
                            ;; le-vertico
                            ;; le-autorevert
-                           ;; le-undo-fu
+                           le-undo-fu
                            ;; le-undo-fu-session
 
                            ;; le-consult-dir

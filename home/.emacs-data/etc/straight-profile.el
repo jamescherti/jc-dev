@@ -2,7 +2,7 @@
  ;; Forks
  ;;-----------------------------------------------------------------------------
  ;; @jamescherti forks of maintained packages
- ("straight.el" . "77d59d395269b9a8d6854ea8b9eb0d9e43e97b37")
+ ("straight.el" . "dba450eb010ee2e9ccf06c84e396723c6dd57c39")
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
  ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO add to RSS
  ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO add to RSS
@@ -64,6 +64,7 @@
  ("stripspace.el" . "f2bd1586cd236f43bce71e254c8d4f647c776599")
  ("shell-pop-el" . "446b1691454e65be648dcb7e316639aa7dd73be2")
  ("compile-angel.el" . "cb87bda462cdfdd39817148a3896b304865f668f")
+ ("same-window.el" . "0f03657a8f3dbfb49f4c977521b3b185e10faec3")
  ("persist-text-scale.el" . "c741d0a21a06b6878518dd75983eb7ca65ddc385")
  ("quick-fasd.el" . "40ac0f067b8c24ab4ac8283a9bf79655e586304f")
  ("quicK-sdcv.el" . "cd4e39f2b71b5789c629c822d099044fadc32b74")
@@ -83,7 +84,7 @@
 
  ;; Outdated tag
  ;; TODO Add to RSS
- ("groovy-emacs-modes" . "7b8520b2e2d3ab1d62b35c426e17ac25ed0120bb")
+ ("groovy-emacs-modes" . "fb296e62a0856d9b293dc29f5471a6d7c7d447ea")
  ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
  ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")

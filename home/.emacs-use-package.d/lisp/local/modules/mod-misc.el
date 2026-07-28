@@ -2112,6 +2112,11 @@ generally one of the lines that are folded."
 
 ;;; Persist text scale
 
+;; Ensure `consult' preview buffers can successfully record their filenames
+;; by allowing `persist-text-scale-restore' to run during the initial file load.
+(with-eval-after-load 'consult
+  (add-to-list 'consult-preview-allowed-hooks 'persist-text-scale-restore))
+
 ;; (defvar-local my-window-redisplay-last-text-scale-amount nil
 ;;   "Store the last text scale amount for window redisplay checks.")
 ;;
@@ -2185,6 +2190,79 @@ generally one of the lines that are folded."
 (with-eval-after-load 'persist-text-scale
   (setq persist-text-scale-buffer-category-function
         #'my-persist-text-scale-function))
+
+;;; Display buffer alist
+
+(unless noninteractive
+  ;; (push '("\\*diff-hl-revert\\*"
+  ;;         (display-buffer-same-window)
+  ;;         (inhibit-same-window . nil))
+  ;;       display-buffer-alist)
+
+  (add-to-list 'display-buffer-alist
+               '((or (derived-mode . occur-mode)
+                     (derived-mode . Buffer-menu-mode)
+                     (derived-mode . proced-mode)
+                     (derived-mode . quick-sdcv-mode)
+                     (derived-mode . log-view-mode)
+                     (derived-mode . woman-mode)
+                     (derived-mode . helpful-mode)
+                     (derived-mode . help-mode)
+                     (derived-mode . compilation-mode)
+                     (derived-mode . grep-mode)
+                     (derived-mode . embark-collect-mode))
+                 ;; Display buffer in the currently selected window
+                 (display-buffer-same-window)
+                 ;; Allow the buffer to be displayed in the same window even if
+                 ;; it is already displayed there
+                 (inhibit-same-window . nil)))
+
+  (dolist (entry
+           '(("\\*pathaction:"
+              (display-buffer-at-bottom)
+              (window-height . 0.33))
+             ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
+             ("\\*Memory-Profiler-Report" (display-buffer-at-bottom))
+             ("\\*Calendar\\*" (display-buffer-at-bottom))))
+    (push entry display-buffer-alist))
+
+  ;; Force Org selection menus and capture buffers into a dedicated bottom side
+  ;; window. This prevents Emacs from spawning new graphical frames, which
+  ;; occurs when pop-up-windows is nil and Org internally requests a window
+  ;; split. The regular expression explicitly traps all three stages of the
+  ;; capture process:
+  ;;
+  ;; - *Org Select*: The initial template selection menu.
+  ;; - *Capture* (and numbered variants): The temporary buffer Org uses to
+  ;;   expand templates.
+  ;; - CAPTURE-: The final indirect buffer where the note is edited.
+  (add-to-list
+   'display-buffer-alist
+   '("\\`\\*\\(Org \\(Select\\|Note\\)\\|Agenda Commands\\)\\*\\'\\|\\`\\*Capture\\*\\(?:<[0-9]+>\\)?\\'\\|\\`CAPTURE-"
+     ;; Use side window for placement
+     (display-buffer-in-side-window)
+     ;; Ensure window is dedicated to this buffer
+     (dedicated . t)
+     ;; Position the window at the bottom of the frame
+     (side . bottom)
+     ;; Set slot to 0 to be the primary window in this side
+     (slot . 0)
+     ;; Set the height to 33% of the total frame height
+     (window-height . 0.20)
+     ;; Force the window to preserve the defined height
+     (preserve-size . (t . t))
+     ;; Apply window parameters to hide the mode line
+     (window-parameters . ((mode-line-format . none))))
+   'append)
+
+  (push `(,(rx (or "*Org Agenda*" "*Agenda Commands*"))
+          display-buffer-in-side-window
+          (side . right)
+          (slot . 0)
+          (window-parameters . ((no-delete-other-windows . t)))
+          (window-width . 100)
+          (dedicated . t))
+        display-buffer-alist))
 
 ;;; DISABLED: sh-mode: Highlight sh-mode and bash-ts-mode $variables
 
@@ -3618,6 +3696,49 @@ function or if an invalid choice is made."
 
 (with-eval-after-load 'embark
   (advice-add 'embark-collect--format-entries :after #'my-embark-collect-fix-width-a))
+
+;;; current window only
+
+(lightemacs-use-package same-window-mode
+  :config
+  (same-window-mode 1)
+
+  ;; ediff
+  (defun same-window--ediff-setup-windows (orig-fun &rest args)
+    "Suspend `same-window-mode' during Ediff window setup.
+Call ORIG-FUN with ARGS while the mode is temporarily disabled.
+This ensures the mode is restored immediately after setup succeeds or fails."
+    (let ((was-active same-window-mode))
+      (when was-active
+        (same-window-mode -1))
+      (unwind-protect
+          (apply orig-fun args)
+        (when was-active
+          (same-window-mode 1)))))
+  (with-eval-after-load 'ediff
+    (advice-add 'ediff-setup-windows :around
+                #'same-window--ediff-setup-windows))
+
+  ;; TODO add this when the mode is disabled
+  ;; (advice-remove 'ediff-setup-windows
+  ;;                #'same-window--ediff-setup-windows)
+  )
+
+;;; workspace actions
+
+(lightemacs-use-package workspace-actions
+  :ensure nil
+  :bind ("C-c a r" . workspace-actions-run)
+  :init
+  (setq workspace-actions-alist
+        (list
+         (cons "straight"
+               (lambda ()
+                 (find-file "~/src/dotfiles/jc-dev/home/.emacs-data/etc/straight-profile.el")
+                 (tab-new)
+                 (find-file "~/src/dotfiles/jc-dev/home/src/batchfetch.yaml")
+                 (tab-new)
+                 (find-file "~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/config.el"))))))
 
 ;;; DISABLED: vterm-toggle
 
