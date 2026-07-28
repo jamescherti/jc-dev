@@ -3699,7 +3699,7 @@ function or if an invalid choice is made."
 
 ;;; current window only
 
-(lightemacs-use-package same-window-mode
+(lightemacs-use-package same-window
   :config
   (same-window-mode 1)
 
