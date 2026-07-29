@@ -641,13 +641,13 @@ at the same level."
         (switch-to-buffer buffer)
       (org-agenda nil "t"))))
 
-(defun my-org-agenda-goto-in-same-window ()
-  "`org-agenda-goto` that opens the target buffer in the current window."
-  (interactive)
-  (require 'cl-lib)
-  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
-    (when (fboundp 'org-agenda-goto)
-      (org-agenda-goto))))
+;; (defun my-org-agenda-goto-in-same-window ()
+;;   "`org-agenda-goto` that opens the target buffer in the current window."
+;;   (interactive)
+;;   (require 'cl-lib)
+;;   (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+;;     (when (fboundp 'org-agenda-goto)
+;;       (org-agenda-goto))))
 
 (with-eval-after-load 'org-agenda
   (unless noninteractive

@@ -1194,8 +1194,8 @@ word after the space that contains at least two uppercase characters."
   (evil-set-initial-state 'org-agenda-mode 'normal)
 
   (evil-define-key 'motion org-agenda-keymap (kbd "/") 'org-agenda-filter)
-  (evil-define-key '(normal motion) org-agenda-keymap (kbd "RET")
-    'my-org-agenda-goto-in-same-window)
+  ;; (evil-define-key '(normal motion) org-agenda-keymap (kbd "RET")
+  ;;   'my-org-agenda-goto-in-same-window)
   (evil-define-key '(normal) org-agenda-keymap (kbd "<leader>cd") 'org-agenda-todo)
   (evil-define-key '(normal) org-agenda-keymap (kbd "<tab>") 'org-agenda-set-tags)
   (evil-define-key '(normal motion) org-agenda-keymap (kbd "<leader>oo") 'org-agenda-set-tags)

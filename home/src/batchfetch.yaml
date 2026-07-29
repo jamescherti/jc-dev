@@ -690,6 +690,6 @@ tasks:
     path: emacs/inhibit-mouse.el
     revision: develop
 
-  - git: git@github.com:jamescherti/same-window.el
-    path: emacs/same-window.el
+  - git: git@github.com:jamescherti/single-window.el
+    path: emacs/single-window.el
     revision: develop

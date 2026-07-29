@@ -1263,9 +1263,9 @@ This uses an around advice to trap errors and verify file timestamps."
             (melpa
              :type git :host github
              :repo "jamescherti/melpa")
-            (same-window
+            (single-window
              :type git :host github
-             :repo "jamescherti/same-window.el")
+             :repo "jamescherti/single-window.el")
 
             ;; Straight
             (straight

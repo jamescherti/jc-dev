@@ -2199,23 +2199,23 @@ generally one of the lines that are folded."
   ;;         (inhibit-same-window . nil))
   ;;       display-buffer-alist)
 
-  (add-to-list 'display-buffer-alist
-               '((or (derived-mode . occur-mode)
-                     (derived-mode . Buffer-menu-mode)
-                     (derived-mode . proced-mode)
-                     (derived-mode . quick-sdcv-mode)
-                     (derived-mode . log-view-mode)
-                     (derived-mode . woman-mode)
-                     (derived-mode . helpful-mode)
-                     (derived-mode . help-mode)
-                     (derived-mode . compilation-mode)
-                     (derived-mode . grep-mode)
-                     (derived-mode . embark-collect-mode))
-                 ;; Display buffer in the currently selected window
-                 (display-buffer-same-window)
-                 ;; Allow the buffer to be displayed in the same window even if
-                 ;; it is already displayed there
-                 (inhibit-same-window . nil)))
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '((or (derived-mode . occur-mode)
+  ;;                    (derived-mode . Buffer-menu-mode)
+  ;;                    (derived-mode . proced-mode)
+  ;;                    (derived-mode . quick-sdcv-mode)
+  ;;                    (derived-mode . log-view-mode)
+  ;;                    (derived-mode . woman-mode)
+  ;;                    (derived-mode . helpful-mode)
+  ;;                    (derived-mode . help-mode)
+  ;;                    (derived-mode . compilation-mode)
+  ;;                    (derived-mode . grep-mode)
+  ;;                    (derived-mode . embark-collect-mode))
+  ;;                ;; Display buffer in the currently selected window
+  ;;                (display-buffer-same-window)
+  ;;                ;; Allow the buffer to be displayed in the same window even if
+  ;;                ;; it is already displayed there
+  ;;                (inhibit-same-window . nil)))
 
   (dolist (entry
            '(("\\*pathaction:"
@@ -3699,29 +3699,29 @@ function or if an invalid choice is made."
 
 ;;; current window only
 
-(lightemacs-use-package same-window
+(lightemacs-use-package single-window
   :config
-  (same-window-mode 1)
+  (single-window-mode 1)
 
   ;; ediff
-  (defun same-window--ediff-setup-windows (orig-fun &rest args)
-    "Suspend `same-window-mode' during Ediff window setup.
+  (defun single-window--ediff-setup-windows (orig-fun &rest args)
+    "Suspend `single-window-mode' during Ediff window setup.
 Call ORIG-FUN with ARGS while the mode is temporarily disabled.
 This ensures the mode is restored immediately after setup succeeds or fails."
-    (let ((was-active same-window-mode))
+    (let ((was-active single-window-mode))
       (when was-active
-        (same-window-mode -1))
+        (single-window-mode -1))
       (unwind-protect
           (apply orig-fun args)
         (when was-active
-          (same-window-mode 1)))))
+          (single-window-mode 1)))))
   (with-eval-after-load 'ediff
     (advice-add 'ediff-setup-windows :around
-                #'same-window--ediff-setup-windows))
+                #'single-window--ediff-setup-windows))
 
   ;; TODO add this when the mode is disabled
   ;; (advice-remove 'ediff-setup-windows
-  ;;                #'same-window--ediff-setup-windows)
+  ;;                #'single-window--ediff-setup-windows)
   )
 
 ;;; workspace actions
