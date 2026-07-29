@@ -1359,6 +1359,11 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
   "Post-modules."
   (my-add-packages-to-load-path))
 
+;; (when (eq lightemacs-package-manager 'straight)
+;;   (with-eval-after-load 'le-core-pm-straight
+;;     (my-add-packages-to-load-path)))
+
+(add-hook 'lightemacs-before-modules-hook #'lightemacs-user-before-modules)
 (add-hook 'lightemacs-before-modules-hook #'lightemacs-user-before-modules)
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-after-modules)
 
