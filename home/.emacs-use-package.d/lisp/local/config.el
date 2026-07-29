@@ -1351,6 +1351,46 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
     ;; (push path load-path)
     (push path load-path)))
 
+;; (when (eq lightemacs-package-manager 'straight)
+;;   (with-eval-after-load 'le-core-pm-straight
+;;     (my-add-packages-to-load-path)))
+
+(when (eq lightemacs-package-manager 'straight)
+  (let ((local-packages
+         '((be-quiet . "~/src/emacs/be-quiet.el")
+           (buffer-guardian . "~/src/emacs/buffer-guardian.el")
+           (buffer-terminator . "~/src/emacs/buffer-terminator.el")
+           (bufferfile . "~/src/emacs/bufferfile.el")
+           (compile-angel . "~/src/emacs/compile-angel.el")
+           ;; (cursorcolumn . "~/src/emacs/cursorcolumn.el")
+           (dir-config . "~/src/emacs/dir-config.el")
+           (easysession . "~/src/emacs/easysession.el")
+           (easysession-scratch . "~/src/emacs/easysession.el/extensions/easysession-scratch.el")
+           (enhanced-evil-paredit . "~/src/emacs/enhanced-evil-paredit.el")
+           (flymake-ansible-lint . "~/src/emacs/flymake-ansible-lint.el")
+           (flymake-bashate . "~/src/emacs/flymake-bashate.el")
+           (inhibit-mouse . "~/src/emacs/inhibit-mouse.el")
+           (kirigami . "~/src/emacs/kirigami.el")
+           (org-ibullets . "~/src/emacs/org-ibullets.el")
+           (outline-indent . "~/src/emacs/outline-indent.el")
+           ;; (outline-yaml . "~/src/emacs/outline-yaml.el")
+           (pathaction . "~/src/emacs/pathaction.el")
+           (persist-text-scale . "~/src/emacs/persist-text-scale.el")
+           (quick-fasd . "~/src/emacs/quick-fasd.el")
+           (quick-sdcv . "~/src/emacs/quick-sdcv.el")
+           (single-window . "~/src/emacs/single-window.el")
+           (stripspace . "~/src/emacs/stripspace.el")
+           (tomorrow-night-deepblue-theme . "~/src/emacs/tomorrow-night-deepblue-theme.el")
+           (ultisnips-mode . "~/src/emacs/ultisnips-mode.el")
+           (vim-tab-bar . "~/src/emacs/vim-tab-bar.el")
+           (wizard . "~/src/emacs/wizard.el"))))
+    (when (boundp 'straight-recipe-overrides)
+      (let ((recipes (alist-get nil straight-recipe-overrides)))
+        (pcase-dolist (`(,pkg . ,path) local-packages)
+          (setq recipes (assq-delete-all pkg recipes))
+          (push `(,pkg :type nil :local-repo ,path) recipes))
+        (setf (alist-get nil straight-recipe-overrides) recipes)))))
+
 (defun lightemacs-user-before-modules ()
   "Pre-modules."
   (my-add-packages-to-load-path))
@@ -1359,11 +1399,6 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
   "Post-modules."
   (my-add-packages-to-load-path))
 
-;; (when (eq lightemacs-package-manager 'straight)
-;;   (with-eval-after-load 'le-core-pm-straight
-;;     (my-add-packages-to-load-path)))
-
-(add-hook 'lightemacs-before-modules-hook #'lightemacs-user-before-modules)
 (add-hook 'lightemacs-before-modules-hook #'lightemacs-user-before-modules)
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-after-modules)
 
