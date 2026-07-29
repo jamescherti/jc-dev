@@ -2194,29 +2194,6 @@ generally one of the lines that are folded."
 ;;; Display buffer alist
 
 (unless noninteractive
-  ;; (push '("\\*diff-hl-revert\\*"
-  ;;         (display-buffer-same-window)
-  ;;         (inhibit-same-window . nil))
-  ;;       display-buffer-alist)
-
-  ;; (add-to-list 'display-buffer-alist
-  ;;              '((or (derived-mode . occur-mode)
-  ;;                    (derived-mode . Buffer-menu-mode)
-  ;;                    (derived-mode . proced-mode)
-  ;;                    (derived-mode . quick-sdcv-mode)
-  ;;                    (derived-mode . log-view-mode)
-  ;;                    (derived-mode . woman-mode)
-  ;;                    (derived-mode . helpful-mode)
-  ;;                    (derived-mode . help-mode)
-  ;;                    (derived-mode . compilation-mode)
-  ;;                    (derived-mode . grep-mode)
-  ;;                    (derived-mode . embark-collect-mode))
-  ;;                ;; Display buffer in the currently selected window
-  ;;                (display-buffer-same-window)
-  ;;                ;; Allow the buffer to be displayed in the same window even if
-  ;;                ;; it is already displayed there
-  ;;                (inhibit-same-window . nil)))
-
   (dolist (entry
            '(("\\*pathaction:"
               (display-buffer-at-bottom)

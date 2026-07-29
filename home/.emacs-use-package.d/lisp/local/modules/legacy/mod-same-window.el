@@ -146,6 +146,41 @@
 ;; (unless noninteractive
 ;;   (mod-same-window--current-window-only-setup))
 
+;; (push '("\\*diff-hl-revert\\*"
+;;         (display-buffer-same-window)
+;;         (inhibit-same-window . nil))
+;;       display-buffer-alist)
+
+;; (add-to-list 'display-buffer-alist
+;;              '((or (derived-mode . occur-mode)
+;;                    (derived-mode . Buffer-menu-mode)
+;;                    (derived-mode . proced-mode)
+;;                    (derived-mode . quick-sdcv-mode)
+;;                    (derived-mode . log-view-mode)
+;;                    (derived-mode . woman-mode)
+;;                    (derived-mode . helpful-mode)
+;;                    (derived-mode . help-mode)
+;;                    (derived-mode . compilation-mode)
+;;                    (derived-mode . grep-mode)
+;;                    (derived-mode . embark-collect-mode))
+;;                ;; Display buffer in the currently selected window
+;;                (display-buffer-same-window)
+;;                ;; Allow the buffer to be displayed in the same window even if
+;;                ;; it is already displayed there
+;;                (inhibit-same-window . nil)))
+
+;; (defun my-org-agenda-goto-in-same-window ()
+;;   "`org-agenda-goto` that opens the target buffer in the current window."
+;;   (interactive)
+;;   (require 'cl-lib)
+;;   (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+;;     (when (fboundp 'org-agenda-goto)
+;;       (org-agenda-goto))))
+
+
+;; (evil-define-key '(normal motion) org-agenda-keymap (kbd "RET")
+;;   'my-org-agenda-goto-in-same-window)
+
 ;;; Provide
 
 (provide 'mod-same-window)
