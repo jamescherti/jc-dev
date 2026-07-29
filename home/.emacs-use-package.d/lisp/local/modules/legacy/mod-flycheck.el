@@ -1,4 +1,4 @@
-;;; pkg-flycheck.el --- Flycheck -*- lexical-binding: t -*-
+;;; mod-flycheck.el --- Flycheck -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -22,10 +22,14 @@
 
 ;;; Commentary:
 
-;;; DEPRECATED: Legacy unmaintained code. Safe to remove if it causes
-;;; regressions.
-
 ;;; Code:
+
+;;; Require
+
+(eval-and-compile
+  (require 'lightemacs-use-package))
+
+;;; Use-package
 
 (lightemacs-use-package flycheck
   :commands (flycheck-mode
@@ -42,15 +46,9 @@
             '(save idle-change new-line mode-enabled)
           '(save mode-enabled)))
 
-  (with-eval-after-load 'evil
-    (evil-define-key 'normal 'global (kbd "<leader>a") #'flycheck-next-error)
-    (evil-define-key 'normal 'global (kbd "<leader>A") #'flycheck-previous-error))
-
-  :config
-  ;; Nice
-  (defun my-flycheck-command-wrapper (command)
-    (append '("nice" "-n" "19") command))
-  (setq flycheck-command-wrapper-function #'my-flycheck-command-wrapper)
+  ;; (with-eval-after-load 'evil
+  ;;   (evil-define-key 'normal 'global (kbd "<leader>a") #'flycheck-next-error)
+  ;;   (evil-define-key 'normal 'global (kbd "<leader>A") #'flycheck-previous-error))
 
   ;; Specify checkers
   (setq flycheck-checkers '(sh-bash
@@ -64,6 +62,11 @@
                             json-jq
                             lua-luacheck
                             lua))
+
+  ;; Nice
+  ;; (defun my-flycheck-command-wrapper (command)
+  ;;   (append '("nice" "-n" "19") command))
+  ;; (setq flycheck-command-wrapper-function #'my-flycheck-command-wrapper)
 
   ;; ;; Icon
   ;; (define-fringe-bitmap 'flycheck-fringe-bitmap-one-excl
@@ -127,35 +130,41 @@
 
   ;; BASHATE CHECKER
   ;; https://github.com/alexmurray/flycheck-bashate
-  (flycheck-define-checker
-   bashate
-   "A checker using bashate."
-   :command ("bashate" "-i" "E003,E006" source)
-   :error-patterns ((error line-start "[E] "(message (minimal-match (one-or-more not-newline))) ": '" (one-or-more not-newline) "'\n"
-                           " - " (file-name) " : L" line line-end)
-                    (warning line-start "[W] "(message (minimal-match (one-or-more not-newline))) ": '" (one-or-more not-newline) "'\n"
-                             " - " (file-name) " : L" line line-end)
-                    (error line-start (file-name) ":" line ":" column ":" " E040"
-                           (message (minimal-match (one-or-more not-newline)) line-end))
-                    (warning line-start (file-name) ":" line ":" column ":" " E"
-                             (message (minimal-match (one-or-more not-newline)) line-end)))
-   :modes (bash-ts-mode sh-mode))
-  (add-to-list 'flycheck-checkers 'bashate)
+  ;; (flycheck-define-checker
+  ;;  bashate
+  ;;  "A checker using bashate."
+  ;;  :command ("bashate" "-i" "E003,E006" source)
+  ;;  :error-patterns ((error line-start "[E] "(message (minimal-match (one-or-more not-newline))) ": '" (one-or-more not-newline) "'\n"
+  ;;                          " - " (file-name) " : L" line line-end)
+  ;;                   (warning line-start "[W] "(message (minimal-match (one-or-more not-newline))) ": '" (one-or-more not-newline) "'\n"
+  ;;                            " - " (file-name) " : L" line line-end)
+  ;;                   (error line-start (file-name) ":" line ":" column ":" " E040"
+  ;;                          (message (minimal-match (one-or-more not-newline)) line-end))
+  ;;                   (warning line-start (file-name) ":" line ":" column ":" " E"
+  ;;                            (message (minimal-match (one-or-more not-newline)) line-end)))
+  ;;  :modes (bash-ts-mode sh-mode))
+  ;; (add-to-list 'flycheck-checkers 'bashate)
+  ;;
+  ;; ;; https://github.com/flycheck/flycheck/issues/1101
+  ;; (add-hook 'flycheck-error-list-mode-hook
+  ;;           (lambda ()
+  ;;             (setq tabulated-list-format '[("Line" 15 flycheck-error-list-entry-< :right-align t)
+  ;;                                           ("Col" 3 nil :right-align t)
+  ;;                                           ("Level" 8 flycheck-error-list-entry-level-<)
+  ;;                                           ("ID" 20 t)
+  ;;                                           (#("Message (Checker)" 0 9
+  ;;                                              (face default)
+  ;;                                              9 16
+  ;;                                              (face flycheck-error-list-checker-name)
+  ;;                                              16 17
+  ;;                                              (face default))
+  ;;                                            0 t)])))
+  )
 
-  ;; https://github.com/flycheck/flycheck/issues/1101
-  (add-hook 'flycheck-error-list-mode-hook
-            (lambda ()
-              (setq tabulated-list-format '[("Line" 15 flycheck-error-list-entry-< :right-align t)
-                                            ("Col" 3 nil :right-align t)
-                                            ("Level" 8 flycheck-error-list-entry-level-<)
-                                            ("ID" 20 t)
-                                            (#("Message (Checker)" 0 9
-                                               (face default)
-                                               9 16
-                                               (face flycheck-error-list-checker-name)
-                                               16 17
-                                               (face default))
-                                             0 t)]))))
+(provide 'mod-flycheck)
 
-(provide 'pkg-flycheck)
-;;; pkg-flycheck.el ends here
+;; Local variables:
+;; byte-compile-warnings: (not free-vars)
+;; End:
+
+;;; mod-flycheck.el ends here

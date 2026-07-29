@@ -861,8 +861,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Configure Emacs to ask for confirmation before exiting
 
-;; (setq switch-to-buffer-in-dedicated-window 'pop)
-
 ;; (customize-set-variable 'completion-cycle-threshold 3)
 ;; (customize-set-variable 'completion-category-overrides
 ;;                         '((file (styles . (partial-completion)))))
