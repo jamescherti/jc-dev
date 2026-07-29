@@ -64,7 +64,7 @@
  ("stripspace.el" . "f2bd1586cd236f43bce71e254c8d4f647c776599")
  ("shell-pop-el" . "446b1691454e65be648dcb7e316639aa7dd73be2")
  ("compile-angel.el" . "cb87bda462cdfdd39817148a3896b304865f668f")
- ("single-window.el" . "76cab203800719be6e903864667d6e3e1c2762b4")
+ ("single-window.el" . "8ee506273ef4cf17178c42cacebec3f64d0067ca")
  ("persist-text-scale.el" . "c741d0a21a06b6878518dd75983eb7ca65ddc385")
  ("quick-fasd.el" . "40ac0f067b8c24ab4ac8283a9bf79655e586304f")
  ("quicK-sdcv.el" . "cd4e39f2b71b5789c629c822d099044fadc32b74")
