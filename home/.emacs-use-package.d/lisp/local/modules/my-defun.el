@@ -466,7 +466,7 @@ CWD is the current working directory."
 
 ;;; ex init-helpers
 
-(defvar text-editing-modes '(conf-mode prog-mode text-mode)
+(defvar text-editing-modes '(conf-mode prog-mode text-mode diff-mode)
   "List of text editing modes.")
 
 (defun add-functions-to-mode-hooks (modes functions &optional only-if-file)

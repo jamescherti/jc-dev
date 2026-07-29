@@ -1266,6 +1266,9 @@ This uses an around advice to trap errors and verify file timestamps."
             (single-window
              :type git :host github
              :repo "jamescherti/single-window.el")
+            (embark
+             :type git :host github
+             :repo "jamescherti/embark")
 
             ;; Straight
             (straight

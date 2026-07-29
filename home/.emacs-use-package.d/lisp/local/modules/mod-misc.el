@@ -3660,19 +3660,19 @@ function or if an invalid choice is made."
 ;; recalculates `tabulated-list-format' after inspecting all generated entries
 ;; (including headers) in `tabulated-list-entries':
 
-(defun my-embark-collect-fix-width-a (&rest _)
-  "Advice to ensure group titles are not truncated in Embark Collect buffers."
-  (when tabulated-list-format
-    (let ((max-width (cadr (aref tabulated-list-format 0))))
-      (dolist (entry tabulated-list-entries)
-        (let* ((col (aref (cadr entry) 0))
-               (text (if (listp col) (car col) col)))
-          (setq max-width (max max-width (string-width text)))))
-      (setq tabulated-list-format
-            `[("Candidate" ,max-width t) ("Annotation" 0 t)]))))
-
-(with-eval-after-load 'embark
-  (advice-add 'embark-collect--format-entries :after #'my-embark-collect-fix-width-a))
+;; (defun my-embark-collect-fix-width-a (&rest _)
+;;   "Advice to ensure group titles are not truncated in Embark Collect buffers."
+;;   (when tabulated-list-format
+;;     (let ((max-width (cadr (aref tabulated-list-format 0))))
+;;       (dolist (entry tabulated-list-entries)
+;;         (let* ((col (aref (cadr entry) 0))
+;;                (text (if (listp col) (car col) col)))
+;;           (setq max-width (max max-width (string-width text)))))
+;;       (setq tabulated-list-format
+;;             `[("Candidate" ,max-width t) ("Annotation" 0 t)]))))
+;;
+;; (with-eval-after-load 'embark
+;;   (advice-add 'embark-collect--format-entries :after #'my-embark-collect-fix-width-a))
 
 ;;; current window only
 

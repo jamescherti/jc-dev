@@ -8,6 +8,7 @@
  ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO add to RSS
  ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf") ; TODO add to RSS
  ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37") ; TODO add to RSS
+ ("embark" . "79531fc6aab311acf6874679082f336de4a91789") ; 1.2 | RSS RELEASE
 
  ;; Removed
  ;; ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO add to RSS
@@ -112,7 +113,6 @@
  ("corfu" . "8243708421012f15a5f864ec88f6af01e5395dd8") ; 2.11 | RSS RELEASE
  ("vertico" . "c9ffb9532eacff7f38d94d51e1914a1e948d5066")  ; 2.11 | RSS RELEASE
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
- ("embark" . "27de48004242e98586b9c9661fdb6912f26fe70f") ; 1.2 | RSS RELEASE
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
