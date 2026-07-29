@@ -375,6 +375,11 @@ tasks:
     remote:
       upstream: https://github.com/kyagi/shell-pop-el
 
+  - git: git@github.com:jamescherti/embark
+    path: forks/embark
+    revision: master
+    remote:
+      upstream: https://github.com/oantolin/embark
 
   # ----------------------------------------------------------------------------
   # Straight
