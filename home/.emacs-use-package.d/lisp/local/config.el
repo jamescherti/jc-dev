@@ -1610,9 +1610,12 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (defun my-easysession-only-main-saved ()
   "Only save the main session."
   (when (and (fboundp 'easysession-get-session-name)
-             (string= "main" (funcall 'easysession-get-session-name)))
+             (string= "main" (easysession-get-session-name)))
     t))
 (setq easysession-save-mode-predicate 'my-easysession-only-main-saved)
+
+;; (setq easysession-debug t)
+(setq easysession-refresh-tab-bar t)
 
 (add-hook 'easysession-new-session-hook 'easysession-reset)
 

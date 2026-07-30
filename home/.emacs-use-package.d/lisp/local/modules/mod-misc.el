@@ -1650,9 +1650,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
           (make-directory auto-save-dir t)))))
   ;;-------------------------------------> BLOCK CHANGE AUTO SAVE PATH
 
-  ;; (setq easysession-debug t)
-  (setq easysession-refresh-tab-bar t)
-
   )
 
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-post-init)
