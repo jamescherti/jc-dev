@@ -184,6 +184,12 @@ tasks:
   - git: git@github.com:jamescherti/lightvim
     path: dotfiles/lightvim
 
+  # Forks: Ansible
+  - git: git@github.com:jamescherti/ansible-collection-hardening
+    path: forks/ansible-collection-hardening
+    remote:
+      upstream: https://github.com/dev-sec/ansible-collection-hardening
+
   # ----------------------------------------------------------------------------
   # Forks: GNOME
   # ----------------------------------------------------------------------------
