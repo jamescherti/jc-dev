@@ -25,6 +25,13 @@ vars:
   last: true
 
 actions:
+  - path_match:
+      - "*/ansible-collection-hardening/*"
+      - "*/ansible-collection-hardening"
+    shell: true
+    tags: install
+    command: "rsync -ar --delete --exclude=.git forks/ansible-collection-hardening ~/src/wip/ansible/roles/collections/"
+
   - path_match: "{{ cwd }}/.pathaction.yaml"
     shell: true
     tags: install
