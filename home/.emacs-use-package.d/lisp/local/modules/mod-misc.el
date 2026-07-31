@@ -3955,27 +3955,27 @@ function or if an invalid choice is made."
 
 (setq vertico-count 20)
 
-(lightemacs-use-package vertico-buffer
-  :ensure nil
-  :commands (vertico-buffer-mode
-             vertico-buffer--redisplay)
-  :hook (vertico-mode . vertico-buffer-mode)
-
-  ;; causes issues, maybe also because of stillness-mode
-  ;; :preface
-  ;; (defun my-fit-minibuffer-to-content (win)
-  ;;   "Try to fit the minibuffer window height to its content before redisplay."
-  ;;   (ignore-errors
-  ;;     (fit-window-to-buffer win)))
-  ;;
-  ;; :config
-  ;; ;; TODO: Make it grow only
-  ;; (advice-add #'vertico-buffer--redisplay
-  ;;             :after #'my-fit-minibuffer-to-content)
-
-  :init
-  (setq vertico-buffer-display-action '((display-buffer-at-bottom)
-                                        (window-height . 0.4))))
+;; (lightemacs-use-package vertico-buffer
+;;   :ensure nil
+;;   :commands (vertico-buffer-mode
+;;              vertico-buffer--redisplay)
+;;   :hook (vertico-mode . vertico-buffer-mode)
+;;
+;;   ;; causes issues, maybe also because of stillness-mode
+;;   ;; :preface
+;;   ;; (defun my-fit-minibuffer-to-content (win)
+;;   ;;   "Try to fit the minibuffer window height to its content before redisplay."
+;;   ;;   (ignore-errors
+;;   ;;     (fit-window-to-buffer win)))
+;;   ;;
+;;   ;; :config
+;;   ;; ;; TODO: Make it grow only
+;;   ;; (advice-add #'vertico-buffer--redisplay
+;;   ;;             :after #'my-fit-minibuffer-to-content)
+;;
+;;   :init
+;;   (setq vertico-buffer-display-action '((display-buffer-at-bottom)
+;;                                         (window-height . 0.4))))
 
 ;; (require 'vertico-multiform)
 ;; (vertico-multiform-mode 1)
