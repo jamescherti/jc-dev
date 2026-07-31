@@ -3676,20 +3676,20 @@ function or if an invalid choice is made."
   (single-window-mode 1)
 
   ;; ediff
-  (defun single-window--ediff-setup-windows (orig-fun &rest args)
-    "Suspend `single-window-mode' during Ediff window setup.
-Call ORIG-FUN with ARGS while the mode is temporarily disabled.
-This ensures the mode is restored immediately after setup succeeds or fails."
-    (let ((was-active single-window-mode))
-      (when was-active
-        (single-window-mode -1))
-      (unwind-protect
-          (apply orig-fun args)
-        (when was-active
-          (single-window-mode 1)))))
-  (with-eval-after-load 'ediff
-    (advice-add 'ediff-setup-windows :around
-                #'single-window--ediff-setup-windows))
+  ;;   (defun single-window--ediff-setup-windows (orig-fun &rest args)
+  ;;     "Suspend `single-window-mode' during Ediff window setup.
+  ;; Call ORIG-FUN with ARGS while the mode is temporarily disabled.
+  ;; This ensures the mode is restored immediately after setup succeeds or fails."
+  ;;     (let ((was-active single-window-mode))
+  ;;       (when was-active
+  ;;         (single-window-mode -1))
+  ;;       (unwind-protect
+  ;;           (apply orig-fun args)
+  ;;         (when was-active
+  ;;           (single-window-mode 1)))))
+  ;; (with-eval-after-load 'ediff
+  ;;   (advice-add 'ediff-setup-windows :around
+  ;;               #'single-window--ediff-setup-windows))
 
   ;; TODO add this when the mode is disabled
   ;; (advice-remove 'ediff-setup-windows
