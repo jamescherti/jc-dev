@@ -1382,7 +1382,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; Set this to nil if you want to do it on demand
   ;; (setq diff-refine nil)
 
-  (setq vertico-count 13)
   (with-eval-after-load 'consult
     (dolist (regexp '("^\*helpful"
                       "^\*sdcv"
@@ -3954,6 +3953,30 @@ function or if an invalid choice is made."
 
 ;;; DISABLED: embark / vertico
 
+(setq vertico-count 20)
+
+(lightemacs-use-package vertico-buffer
+  :ensure nil
+  :commands (vertico-buffer-mode
+             vertico-buffer--redisplay)
+  :hook (vertico-mode . vertico-buffer-mode)
+
+  ;; causes issues, maybe also because of stillness-mode
+  ;; :preface
+  ;; (defun my-fit-minibuffer-to-content (win)
+  ;;   "Try to fit the minibuffer window height to its content before redisplay."
+  ;;   (ignore-errors
+  ;;     (fit-window-to-buffer win)))
+  ;;
+  ;; :config
+  ;; ;; TODO: Make it grow only
+  ;; (advice-add #'vertico-buffer--redisplay
+  ;;             :after #'my-fit-minibuffer-to-content)
+
+  :init
+  (setq vertico-buffer-display-action '((display-buffer-at-bottom)
+                                        (window-height . 0.4))))
+
 ;; (require 'vertico-multiform)
 ;; (vertico-multiform-mode 1)
 ;; ;; Force all Vertico sessions to use the 'buffer' display style
@@ -3970,29 +3993,6 @@ function or if an invalid choice is made."
 ;;           display-buffer-at-bottom)
 ;;          (window-height . 0.5)
 ;;          (preserved-parameters . (window-height)))))
-
-;; (use-package vertico-buffer
-;;   :ensure nil
-;;   :defer t
-;;   :commands (vertico-buffer-mode
-;;              vertico-buffer--redisplay)
-;;   :hook (vertico-mode . vertico-buffer-mode)
-;;
-;;   ;; causes issues, maybe also because of stillness-mode
-;;   ;; :preface
-;;   ;; (defun my-fit-minibuffer-to-content (win)
-;;   ;;   "Try to fit the minibuffer window height to its content before redisplay."
-;;   ;;   (ignore-errors
-;;   ;;     (fit-window-to-buffer win)))
-;;   ;;
-;;   ;; :config
-;;   ;; ;; TODO: Make it grow only
-;;   ;; (advice-add #'vertico-buffer--redisplay
-;;   ;;             :after #'my-fit-minibuffer-to-content)
-;;
-;;   :init
-;;   (setq vertico-buffer-display-action '((display-buffer-at-bottom)
-;;                                         (window-height . 0.38))))
 
 ;;   ;; (defun my-update-consult-async-settings (&rest _)
 ;;   ;;   (if (string= (battery-angel-get-charging-state) "AC")
