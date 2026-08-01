@@ -1269,6 +1269,63 @@ This uses an around advice to trap errors and verify file timestamps."
             (embark
              :type git :host github
              :repo "jamescherti/embark")
+            (evil-matchit
+             :type git :host github
+             :repo "jamescherti/evil-matchit")
+            (apheleia
+             :type git :host github
+             :repo "jamescherti/apheleia")
+            (package-lint
+             :type git :host github
+             :repo "jamescherti/package-lint")
+            (modus-themes
+             :type git :host github
+             :repo "jamescherti/modus-themes")
+            (ef-themes
+             :type git :host github
+             :repo "jamescherti/ef-themes")
+            (orderless
+             :type git :host github
+             :repo "jamescherti/orderless")
+            (vertico
+             :type git :host github
+             :repo "jamescherti/vertico")
+            (marginalia
+             :type git :host github
+             :repo "jamescherti/marginalia")
+            (corfu
+             :type git :host github
+             :repo "jamescherti/corfu")
+            (consult
+             :type git :host github
+             :repo "jamescherti/consult")
+            (cape
+             :type git :host github
+             :repo "jamescherti/cape")
+            (git-modes
+             :type git :host github
+             :repo "jamescherti/git-modes")
+            (gptel
+             :type git :host github
+             :repo "jamescherti/gptel")
+            (dumb-jump
+             :type git :host github
+             :repo "jamescherti/dumb-jump")
+            (indent-bars
+             :type git :host github
+             :repo "jamescherti/indent-bars")
+            (treesit-fold
+             :type git :host github
+             :repo "jamescherti/treesit-fold")
+            (compat
+             :type git :host github
+             :repo "jamescherti/compat")
+            (nerd-icons
+             :type git :host github
+             :repo "jamescherti/nerd-icons.el")
+            (basic-mode
+             :type git :host github
+             :repo "jamescherti/basic-mode")
 
             ;; Straight
             (straight

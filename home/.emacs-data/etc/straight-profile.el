@@ -9,6 +9,20 @@
  ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf") ; TODO add to RSS
  ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37") ; TODO add to RSS
  ("embark" . "79531fc6aab311acf6874679082f336de4a91789") ; 1.2 | RSS RELEASE
+ ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
+ ("apheleia" . "14a0bb4454fb2cc3b5b377619288b742ce117da5") ; RSS RELEASE
+ ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
+ ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
+ ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0 | RSS RELEASE
+ ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
+ ("vertico" . "c9ffb9532eacff7f38d94d51e1914a1e948d5066")  ; 2.11 | RSS RELEASE
+ ("corfu" . "f6306d8c5ba540e75c208c8069b3b677de48a183") ; 2.12 | RSS RELEASE
+ ("cape" . "5a3aa3058eb47bd10ae72c8919921e3fb40952a5") ; 2.8 | RSS RELEASE
+ ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
+ ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
+ ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
+ ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
+ ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
 
  ;; Removed
  ;; ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO add to RSS
@@ -21,6 +35,7 @@
  ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE | TODO fork
 
  ;; Unmaintained (Forked: jamescherti)
+ ("basic-mode" . "1dc1a635d6d80668c8a583b974205e49ff0fc3ce")
  ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
  ("evil-surround" . "e6548372e8359ee55e67d73ca418314086011f1a")
  ("Emacs-wgrep" . "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f")
@@ -80,20 +95,14 @@
  ;; External repositories
  ;; TODO fork them
  ;;-----------------------------------------------------------------------------
- ;; Unmaintained
- ("basic-mode" . "1dc1a635d6d80668c8a583b974205e49ff0fc3ce")
 
  ;; Outdated tag
  ;; TODO Add to RSS
  ("groovy-emacs-modes" . "fb296e62a0856d9b293dc29f5471a6d7c7d447ea")
  ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
  ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")
- ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
- ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
- ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
  ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
- ("apheleia" . "14a0bb4454fb2cc3b5b377619288b742ce117da5") ; RSS RELEASE
  ("company-mode" . "24a4a6b129546a1ce2fcb3e3c5948259dff00685")
 
  ;; No tags
@@ -109,21 +118,11 @@
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
 
- ("cape" . "5a3aa3058eb47bd10ae72c8919921e3fb40952a5") ; 2.8 | RSS RELEASE
- ("corfu" . "f6306d8c5ba540e75c208c8069b3b677de48a183") ; 2.12 | RSS RELEASE
- ("vertico" . "c9ffb9532eacff7f38d94d51e1914a1e948d5066")  ; 2.11 | RSS RELEASE
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
- ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
- ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
- ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
- ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
- ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
  ;; ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
  ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8
- ("ef-themes" . "5cdb7dd361ad3b5d7310f94375a832cd94c182d8") ; 2.2.0 | RSS RELEASE
- ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
  ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
  ("org" . "c75ffe4a43355bc76807d9aa711834b33f724fca") ; release_9.8.8 | RSS RELEASE

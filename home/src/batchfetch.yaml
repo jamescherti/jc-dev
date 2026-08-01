@@ -554,6 +554,101 @@ tasks:
     remote:
       upstream: https://github.com/LuigiPiucco/nerd-icons-corfu
 
+  - git: git@github.com:jamescherti/evil-matchit
+    path: forks/evil-matchit
+    remote:
+      upstream: https://github.com/redguardtoo/evil-matchit
+
+  - git: git@github.com:jamescherti/apheleia
+    path: forks/apheleia
+    remote:
+      upstream: https://github.com/radian-software/apheleia
+
+  - git: git@github.com:jamescherti/package-lint
+    path: forks/package-lint
+    remote:
+      upstream: https://github.com/purcell/package-lint
+
+  - git: git@github.com:jamescherti/modus-themes
+    path: forks/modus-themes
+    remote:
+      upstream: https://github.com/protesilaos/modus-themes
+
+  - git: git@github.com:jamescherti/ef-themes
+    path: forks/ef-themes
+    remote:
+      upstream: https://github.com/protesilaos/ef-themes
+
+  - git: git@github.com:jamescherti/orderless
+    path: forks/orderless
+    remote:
+      upstream: https://github.com/oantolin/orderless
+
+  - git: git@github.com:jamescherti/vertico
+    path: forks/vertico
+    remote:
+      upstream: https://github.com/minad/vertico
+
+  - git: git@github.com:jamescherti/marginalia
+    path: forks/marginalia
+    remote:
+      upstream: https://github.com/minad/marginalia
+
+  - git: git@github.com:jamescherti/consult
+    path: forks/consult
+    remote:
+      upstream: https://github.com/jamescherti/consult
+
+  - git: git@github.com:jamescherti/corfu
+    path: forks/corfu
+    remote:
+      upstream: https://github.com/minad/corfu
+
+  - git: git@github.com:jamescherti/cape
+    path: forks/cape
+    remote:
+      upstream: https://github.com/minad/cape
+
+  - git: git@github.com:jamescherti/git-modes
+    path: forks/git-modes
+    remote:
+      upstream: https://github.com/magit/git-modes
+
+  - git: git@github.com:jamescherti/gptel
+    path: forks/gptel
+    remote:
+      upstream: https://github.com/karthink/gptel
+
+  - git: git@github.com:jamescherti/dumb-jump
+    path: forks/dumb-jump
+    remote:
+      upstream: https://github.com/jdtsmith/indent-bars
+
+  - git: git@github.com:jamescherti/treesit-fold
+    path: forks/treesit-fold
+    remote:
+      upstream: https://github.com/emacs-tree-sitter/treesit-fold
+
+  - git: git@github.com:jamescherti/indent-bars
+    path: forks/indent-bars
+    remote:
+      upstream: https://github.com/jdtsmith/indent-bars
+
+  - git: git@github.com:jamescherti/compat
+    path: forks/compat
+    remote:
+      upstream: https://github.com/emacs-compat/compat
+
+  - git: git@github.com:jamescherti/nerd-icons.el
+    path: forks/nerd-icons.el
+    remote:
+      upstream: https://github.com/rainstormstudio/nerd-icons.el
+
+  - git: git@github.com:jamescherti/emacs-basic-mode
+    path: forks/emacs-basic-mode
+    remote:
+      upstream: https://github.com/dykstrom/basic-mode
+
   # END: UNMAINTAINED PACKAGES THAT I FORKED
   # ----------------------------------------------------------------------------
 
