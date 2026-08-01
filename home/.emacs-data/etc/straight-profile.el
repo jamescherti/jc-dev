@@ -109,8 +109,8 @@
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
 
- ("cape" . "c99911b08831c26179145686b4beffa96f1f8a68") ; 2.7 | RSS RELEASE
- ("corfu" . "8243708421012f15a5f864ec88f6af01e5395dd8") ; 2.11 | RSS RELEASE
+ ("cape" . "5a3aa3058eb47bd10ae72c8919921e3fb40952a5") ; 2.8 | RSS RELEASE
+ ("corfu" . "f6306d8c5ba540e75c208c8069b3b677de48a183") ; 2.12 | RSS RELEASE
  ("vertico" . "c9ffb9532eacff7f38d94d51e1914a1e948d5066")  ; 2.11 | RSS RELEASE
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
