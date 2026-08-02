@@ -1176,7 +1176,7 @@ This uses an around advice to trap errors and verify file timestamps."
             (wgrep
              :type git :host github
              :repo "jamescherti/Emacs-wgrep")
-            (aggressive-indent-mode
+            (aggressive-indent
              :type git :host github
              :repo "jamescherti/aggressive-indent-mode")
             (ansible-doc
