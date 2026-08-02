@@ -108,11 +108,11 @@
  ;; Outdated tag
  ;; TODO Add to RSS
  ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
- ("company-mode" . "24a4a6b129546a1ce2fcb3e3c5948259dff00685")
+ ;; ("company-mode" . "24a4a6b129546a1ce2fcb3e3c5948259dff00685")
 
  ;; No tags
- ("nerd-icons-completion" . "45b585d972192a3eaeb239e15e55de7f46f8920a")
- ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
+ ;; ("nerd-icons-completion" . "45b585d972192a3eaeb239e15e55de7f46f8920a")
+ ;; ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
 
  ;; Repositories
  ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")

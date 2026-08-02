@@ -1123,7 +1123,7 @@ This uses an around advice to trap errors and verify file timestamps."
             ;; TODO fix this
             (ef-themes
              :type git :host github
-             :repo "protesilaos/ef-themes"
+             :repo "jamescherti/ef-themes"
              :branch "main")
 
             ;; Forks of maintained packages
