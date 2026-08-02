@@ -23,6 +23,10 @@
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
+ ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
+ ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
+ ;; ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
+ ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8
 
  ;; Removed
  ;; ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO add to RSS
@@ -33,6 +37,10 @@
  ("ztree" . "b99966d37e3197ac48454780f02278ba4ed5ed51")
  ("yaml-mode" . "96ef0201101a7cd591febd5886633154dae8834c")
  ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE | TODO fork
+ ("groovy-emacs-modes" . "fb296e62a0856d9b293dc29f5471a6d7c7d447ea")
+ ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
+ ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")
+ ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
 
  ;; Unmaintained (Forked: jamescherti)
  ("basic-mode" . "1dc1a635d6d80668c8a583b974205e49ff0fc3ce")
@@ -65,6 +73,7 @@
  ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
  ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
  ("doom-themes" . "cc7686783e5e6e4174a345c768047d524f0dd54f")
+ ("emacs-elisp-autofmt" . "fdae9054c55804def507cf7045c8460573d876a9")
 
  ;; My packages
  ("org-ibullets.el" . "933d5989124a57e83de3eadf82bb194f5e308b98")
@@ -98,15 +107,10 @@
 
  ;; Outdated tag
  ;; TODO Add to RSS
- ("groovy-emacs-modes" . "fb296e62a0856d9b293dc29f5471a6d7c7d447ea")
- ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
- ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")
- ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
  ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
  ("company-mode" . "24a4a6b129546a1ce2fcb3e3c5948259dff00685")
 
  ;; No tags
- ("emacs-elisp-autofmt" . "fdae9054c55804def507cf7045c8460573d876a9")
  ("nerd-icons-completion" . "45b585d972192a3eaeb239e15e55de7f46f8920a")
  ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
 
@@ -118,11 +122,7 @@
  ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
 
- ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
- ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
  ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
- ;; ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
- ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
  ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
  ("org" . "c75ffe4a43355bc76807d9aa711834b33f724fca") ; release_9.8.8 | RSS RELEASE

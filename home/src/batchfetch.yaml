@@ -622,7 +622,7 @@ tasks:
   - git: git@github.com:jamescherti/dumb-jump
     path: forks/dumb-jump
     remote:
-      upstream: https://github.com/jdtsmith/indent-bars
+      upstream: https://github.com/jacktasia/dumb-jump
 
   - git: git@github.com:jamescherti/treesit-fold
     path: forks/treesit-fold

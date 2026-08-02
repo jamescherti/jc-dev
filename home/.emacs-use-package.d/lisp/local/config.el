@@ -1325,7 +1325,7 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/nerd-icons.el")
             (basic-mode
              :type git :host github
-             :repo "jamescherti/basic-mode")
+             :repo "jamescherti/emacs-basic-mode")
 
             ;; Straight
             (straight
