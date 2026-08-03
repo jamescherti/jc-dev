@@ -278,6 +278,7 @@ main() {
   # Legacy files. Replace with .ignore files
   # TODO remove this
   rm -f ~/.rgignore ~/.fdignore ~/src/.rgignore ~/src/.fdignore
+  rm -fr ~/.borgmachine
 
   echo
   echo Success.
