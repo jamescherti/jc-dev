@@ -1374,7 +1374,8 @@ This uses an around advice to trap errors and verify file timestamps."
              :branch "main")
             (basic-mode
              :type git :host github
-             :repo "jamescherti/emacs-basic-mode")
+             :repo "jamescherti/emacs-basic-mode"
+             :branch "master")
 
             ;; Straight
             (straight

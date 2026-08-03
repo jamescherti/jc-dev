@@ -25,12 +25,9 @@
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("consult" . "9bb68cf3941eb618fff18bd7626164951c70eb8a") ; 3.6 | RSS RELEASE
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
- ;; ("markdown-mode" . "f5d520b3ee7722dd2231ab586ba51d8eb166e49b") ; v2.8 | RSS RELEASE
- ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8
-
- ;; Removed
- ;; ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO add to RSS
- ;; ("git-gutter-fringe" . "648cb5b57faec55711803cdc9434e55a733c3eba") ; TODO add to RSS
+ ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8 | RSS RELEASE
+ ("org" . "c75ffe4a43355bc76807d9aa711834b33f724fca") ; release_9.8.8 | RSS RELEASE
+ ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
 
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
@@ -107,7 +104,7 @@
 
  ;; Outdated tag
  ;; TODO Add to RSS
- ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
+ ;; ("php-mode" . "e175393855bba23865d81c4a4d380b54c4506196")
  ;; ("company-mode" . "24a4a6b129546a1ce2fcb3e3c5948259dff00685")
 
  ;; No tags
@@ -116,28 +113,30 @@
 
  ;; Repositories
  ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")
- ("gnu-elpa-mirror" . "1a75d552f3501e228e4390e71dc709d1b391dfdc")
- ;; ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
  ("melpa" . "6a860645041c1ca63437f4ce06ad73bfdd3ff356")
- ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
  ("elpa" . "fcf738c3547216d700e1f67a2e1830ed2acba981")
 
- ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
- ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
- ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
- ("org" . "c75ffe4a43355bc76807d9aa711834b33f724fca") ; release_9.8.8 | RSS RELEASE
- ;; ("org" . "5ce6801d3fc127102f8a7a9b2c28e923211b3acb") ; Unstable
+ ;; ("cond-let" . "c48600dfab6372670225f046cace263700c78eab") ; v1.1.3 | RSS RELEASE
 
  ;; TODO remove
- ("el-get" . "ec3b0a052bf2f90f30c51042ddb06471b35c7ab6") ; 5.2 | RSS RELEASE
- ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
+ ;; DONE ("el-get" . "ec3b0a052bf2f90f30c51042ddb06471b35c7ab6") ; 5.2 | RSS RELEASE
+ ;; DONE ("epkg" . "ddab13104f536bc1027078784ccebdb4c601e16a")
+ ;; DONE ("gnu-elpa-mirror" . "1a75d552f3501e228e4390e71dc709d1b391dfdc")
+ ;; DONE ("melpa" . "35e65c9e778b25fd5a9e95db05e5feb7e63094d3")
 
  ;; No longer necessary
- ("llama" . "d430d48e0b5afd2a34b5531f103dcb110c3539c4") ; v1.0.4 | RSS RELEASE
+ ;; DONE ("emacsmirror-mirror" . "c05ac942a11bae3b84a60109aafde3cea367da82")
+ ;; DONE ("llama" . "d430d48e0b5afd2a34b5531f103dcb110c3539c4") ; v1.0.4 | RSS RELEASE
 
  ;; Marked as built-in
- ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
- ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00") ; 2.24
- ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
- ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c"))
+ ;; DONE ("transient" . "3d20a780605f0a33d6360dc0a2ce9174c69a9a92") ; v0.13.5 | RSS RELEASE
+ ;; DONE ("let-alist" . "a331a39b02da002c6c570c4960106454f88a99a5")
+ ;; DONE ("seq" . "da86da9bf111f68fb81efd466d76d53af5aebc00") ; 2.24
+ ;; DONE ("use-package" . "4b3484b550431f74ab9cda060a8dc983fe482131")
+ ;; DONE ("bind-key" . "6ff8788e347ce31b5c3c4647c2e22e7ee2c5ab7c")
+
+ ;; Removed
+ ;; ("git-gutter" . "101b1e29ec4f4609b29a17877990f95993452188") ; TODO add to RSS
+ ;; ("git-gutter-fringe" . "648cb5b57faec55711803cdc9434e55a733c3eba") ; TODO add to RSS
+ )
 :epsilon
