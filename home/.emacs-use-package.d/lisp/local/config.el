@@ -1109,12 +1109,6 @@ This uses an around advice to trap errors and verify file timestamps."
             (use-package :type built-in)
             (bind-key :type built-in)
 
-            (compat
-             :type git
-             :host github
-             :repo "emacs-compat/compat"
-             :branch "main")
-
             ;; (modus-themes :type built-in)
 
             ;; TODO fix this
