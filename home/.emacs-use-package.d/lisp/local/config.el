@@ -1014,7 +1014,8 @@ This uses an around advice to trap errors and verify file timestamps."
 ;;           (const :tag "GitHub mirror (SSH)"
 ;;                  "git@github.com:emacsmirror/nongnu_elpa.git")
 ;;           (string :tag "Custom value"))
-(setq straight-recipes-nongnu-elpa-url "https://github.com/emacsmirror/nongnu_elpa.git")
+;; (setq straight-recipes-nongnu-elpa-url "https://github.com/emacsmirror/nongnu_elpa.git")
+(setq straight-recipes-nongnu-elpa-url "https://github.com/jamescherti/nongnu_elpa.git")
 
 ;; (defcustom straight-recipes-gnu-elpa-url
 ;;   (if (eq straight-vc-git-default-protocol 'ssh)
@@ -1031,7 +1032,8 @@ This uses an around advice to trap errors and verify file timestamps."
 ;;           (string :tag "Custom value"))
 ;;   :set (straight--set "
 ;; Must be set before bootstrap."))
-(setq straight-recipes-gnu-elpa-url "https://github.com/emacsmirror/gnu_elpa.git")
+;; (setq straight-recipes-gnu-elpa-url "https://github.com/emacsmirror/gnu_elpa.git")
+(setq straight-recipes-gnu-elpa-url "https://github.com/jamescherti/gnu_elpa.git")
 
 (setq straight-initial-recipe-repositories
       (list
@@ -1113,11 +1115,6 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "emacs-compat/compat"
              :branch "main")
 
-            (indent-bars
-             :type git :host github
-             :repo "jdtsmith/indent-bars"
-             :branch "main")
-
             ;; (modus-themes :type built-in)
 
             ;; TODO fix this
@@ -1129,200 +1126,252 @@ This uses an around advice to trap errors and verify file timestamps."
             ;; Forks of maintained packages
             (ztree
              :type git :host github
-             :repo "jamescherti/ztree")
+             :repo "jamescherti/ztree"
+             :branch "master")
             (doom-themes
              :type git :host github
-             :repo "jamescherti/doom-themes")
+             :repo "jamescherti/doom-themes"
+             :branch "master")
             (diff-hl
              :type git :host github
-             :repo "jamescherti/diff-hl")
+             :repo "jamescherti/diff-hl"
+             :branch "master")
             (dtrt-indent
              :type git :host github
-             :repo "jamescherti/dtrt-indent")
+             :repo "jamescherti/dtrt-indent"
+             :branch "master")
             (evil
              :type git :host github
-             :repo "jamescherti/evil")
+             :repo "jamescherti/evil"
+             :branch "master")
             (evil-collection
              :type git :host github
-             :repo "jamescherti/evil-collection")
+             :repo "jamescherti/evil-collection"
+             :branch "master")
             (yasnippet
              :type git :host github
-             :repo "jamescherti/yasnippet")
+             :repo "jamescherti/yasnippet"
+             :branch "master")
             (git-gutter
              :type git :host github
-             :repo "jamescherti/git-gutter")
+             :repo "jamescherti/git-gutter"
+             :branch "master")
 
             ;; No tags (forked)
             (vterm
              :type git :host github
-             :repo "jamescherti/emacs-libvterm")
+             :repo "jamescherti/emacs-libvterm"
+             :branch "master")
 
             ;; Forks of unmaintained packages
             (s
              :type git :host github
-             :repo "jamescherti/s.el")
+             :repo "jamescherti/s.el"
+             :branch "master")
             (undo-fu
              :type git :host github
-             :repo "jamescherti/emacs-undo-fu")
+             :repo "jamescherti/emacs-undo-fu"
+             :branch "main")
             (undo-fu-session
              :type git :host github
-             :repo "jamescherti/emacs-undo-fu-session")
+             :repo "jamescherti/emacs-undo-fu-session"
+             :branch "main")
             (flymake-yamllint
              :type git :host github
-             :repo "jamescherti/flymake-yamllint")
+             :repo "jamescherti/flymake-yamllint"
+             :branch "main")
             (evil-surround
              :type git :host github
-             :repo "jamescherti/evil-surround")
+             :repo "jamescherti/evil-surround"
+             :branch "master")
             (wgrep
              :type git :host github
-             :repo "jamescherti/Emacs-wgrep")
+             :repo "jamescherti/Emacs-wgrep"
+             :branch "master")
             (aggressive-indent
              :type git :host github
-             :repo "jamescherti/aggressive-indent-mode")
+             :repo "jamescherti/aggressive-indent-mode"
+             :branch "master")
             (ansible-doc
              :type git :host github
-             :repo "jamescherti/ansible-doc")
-            ;; (dired-subtree
-            ;;  :type git :host github
-            ;;  :repo "jamescherti/dired-hacks")
-            ;; (dired-narrow
-            ;;  :type git :host github
-            ;;  :repo "jamescherti/dired-hacks")
+             :repo "jamescherti/emacs-ansible-doc"
+             :branch "master")
             (dired-filter
              :type git :host github
-             :repo "jamescherti/dired-hacks")
+             :repo "jamescherti/dired-hacks"
+             :branch "master")
             (easy-escape
              :type git :host github
-             :repo "jamescherti/easy-escape")
+             :repo "jamescherti/easy-escape"
+             :branch "master")
             (edit-indirect
              :type git :host github
-             :repo "jamescherti/edit-indirect")
+             :repo "jamescherti/edit-indirect"
+             :branch "master")
             (elisp-refs
              :type git :host github
-             :repo "jamescherti/elisp-refs")
+             :repo "jamescherti/elisp-refs"
+             :branch "master")
             (evil-snipe
              :type git :host github
-             :repo "jamescherti/evil-snipe")
+             :repo "jamescherti/evil-snipe"
+             :branch "master")
             (f
              :type git :host github
-             :repo "jamescherti/f.el")
+             :repo "jamescherti/f.el"
+             :branch "master")
             (flymake-quickdef
              :type git :host github
-             :repo "jamescherti/flymake-quickdef")
+             :repo "jamescherti/flymake-quickdef"
+             :branch "master")
             (gcmh
              :type git :host github
-             :repo "jamescherti/gcmh")
+             :repo "jamescherti/gcmh"
+             :branch "master")
             (goto-chg
              :type git :host github
-             :repo "jamescherti/goto-chg")
+             :repo "jamescherti/goto-chg"
+             :branch "master")
             (helpful
              :type git :host github
-             :repo "jamescherti/helpful")
+             :repo "jamescherti/helpful"
+             :branch "master")
             (highlight-defined
              :type git :host github
-             :repo "jamescherti/highlight-defined")
+             :repo "jamescherti/highlight-defined"
+             :branch "master")
             (lua-mode
              :type git :host github
              :repo "jamescherti/lua-mode")
+            :branch "master"
             (org-appear
              :type git :host github
-             :repo "jamescherti/org-appear")
+             :repo "jamescherti/org-appear"
+             :branch "master")
             (paredit
              :type git :host github
-             :repo "jamescherti/paredit")
+             :repo "jamescherti/paredit"
+             :branch "master")
             (vimrc-mode
              :type git :host github
-             :repo "jamescherti/vimrc-mode")
+             :repo "jamescherti/vimrc-mode"
+             :branch "master")
             (jinja2-mode
              :type git :host github
-             :repo "jamescherti/jinja2-mode")
+             :repo "jamescherti/jinja2-mode"
+             :branch "master")
             (jenkinsfile-mode
              :type git :host github
-             :repo "jamescherti/jenkinsfile-mode")
+             :repo "jamescherti/jenkinsfile-mode"
+             :branch "master")
             (groovy-mode
              :type git :host github
-             :repo "jamescherti/groovy-emacs-modes")
+             :repo "jamescherti/groovy-emacs-modes"
+             :branch "master")
             (shell-pop
              :type git :host github
-             :repo "jamescherti/shell-pop-el")
+             :repo "jamescherti/shell-pop-el"
+             :branch "master")
             (yaml-mode
              :type git :host github
-             :repo "jamescherti/yaml-mode")
+             :repo "jamescherti/yaml-mode"
+             :branch "master")
             (markdown-mode
              :type git :host github
-             :repo "jamescherti/markdown-mode")
+             :repo "jamescherti/markdown-mode"
+             :branch "master")
             (dash
              :type git :host github
-             :repo "jamescherti/dash.el")
+             :repo "jamescherti/dash.el"
+             :branch "master")
             (elisp-autofmt
              :type git :host github
-             :repo "jamescherti/emacs-elisp-autofmt")
+             :repo "jamescherti/emacs-elisp-autofmt"
+             :branch "main")
             (nerd-icons-corfu
              :type git :host github
-             :repo "jamescherti/nerd-icons-corfu")
+             :repo "jamescherti/nerd-icons-corfu"
+             :branch "master")
             (melpa
              :type git :host github
-             :repo "jamescherti/melpa")
-            (single-window
-             :type git :host github
-             :repo "jamescherti/single-window.el")
+             :repo "jamescherti/melpa"
+             :branch "master")
             (embark
              :type git :host github
-             :repo "jamescherti/embark")
+             :repo "jamescherti/embark"
+             :branch "master")
             (evil-matchit
              :type git :host github
-             :repo "jamescherti/evil-matchit")
+             :repo "jamescherti/evil-matchit"
+             :branch "master")
             (apheleia
              :type git :host github
-             :repo "jamescherti/apheleia")
+             :repo "jamescherti/apheleia"
+             :branch "main")
             (package-lint
              :type git :host github
-             :repo "jamescherti/package-lint")
+             :repo "jamescherti/package-lint"
+             :branch "main")
             (modus-themes
              :type git :host github
-             :repo "jamescherti/modus-themes")
+             :repo "jamescherti/modus-themes"
+             :branch "main")
             (ef-themes
              :type git :host github
-             :repo "jamescherti/ef-themes")
+             :repo "jamescherti/ef-themes"
+             :branch "main")
             (orderless
              :type git :host github
-             :repo "jamescherti/orderless")
+             :repo "jamescherti/orderless"
+             :branch "master")
             (vertico
              :type git :host github
-             :repo "jamescherti/vertico")
+             :repo "jamescherti/vertico"
+             :branch "main")
             (marginalia
              :type git :host github
-             :repo "jamescherti/marginalia")
+             :repo "jamescherti/marginalia"
+             :branch "main")
             (corfu
              :type git :host github
-             :repo "jamescherti/corfu")
+             :repo "jamescherti/corfu"
+             :branch "main")
             (consult
              :type git :host github
-             :repo "jamescherti/consult")
+             :repo "jamescherti/consult"
+             :branch "main")
             (cape
              :type git :host github
              :repo "jamescherti/cape")
+            :branch "main"
             (git-modes
              :type git :host github
-             :repo "jamescherti/git-modes")
+             :repo "jamescherti/git-modes"
+             :branch "main")
             (gptel
              :type git :host github
-             :repo "jamescherti/gptel")
+             :repo "jamescherti/gptel"
+             :branch "master")
             (dumb-jump
              :type git :host github
-             :repo "jamescherti/dumb-jump")
+             :repo "jamescherti/dumb-jump"
+             :branch "master")
             (indent-bars
              :type git :host github
-             :repo "jamescherti/indent-bars")
+             :repo "jamescherti/indent-bars"
+             :branch "main")
             (treesit-fold
              :type git :host github
-             :repo "jamescherti/treesit-fold")
+             :repo "jamescherti/treesit-fold"
+             :branch "master")
             (compat
              :type git :host github
-             :repo "jamescherti/compat")
+             :repo "jamescherti/compat"
+             :branch "main")
             (nerd-icons
              :type git :host github
-             :repo "jamescherti/nerd-icons.el")
+             :repo "jamescherti/nerd-icons.el"
+             :branch "main")
             (basic-mode
              :type git :host github
              :repo "jamescherti/emacs-basic-mode")
@@ -1330,7 +1379,8 @@ This uses an around advice to trap errors and verify file timestamps."
             ;; Straight
             (straight
              :type git :host github
-             :repo "jamescherti/straight.el"))))))
+             :repo "jamescherti/straight.el"
+             :branch "main"))))))
 
 (defun my-straight-list-unpinned-packages ()
   "Find and display packages not present in straight's profile lockfiles."

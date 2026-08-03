@@ -437,8 +437,8 @@ tasks:
     remote:
       upstream: https://github.com/Malabarba/aggressive-indent-mode
 
-  - git: git@github.com:jamescherti/ansible-doc
-    path: forks/ansible-doc
+  - git: git@github.com:jamescherti/emacs-ansible-doc
+    path: forks/emacs-ansible-doc
     revision: master
     remote:
       upstream: https://github.com/emacsorphanage/ansible-doc
@@ -648,6 +648,16 @@ tasks:
     path: forks/emacs-basic-mode
     remote:
       upstream: https://github.com/dykstrom/basic-mode
+
+  - git: git@github.com:jamescherti/gnu_elpa
+    path: forks/gnu_elpa
+    remote:
+      upstream: https://github.com/emacsmirror/gnu_elpa
+
+  - git: git@github.com:jamescherti/nongnu_elpa
+    path: forks/nongnu_elpa
+    remote:
+      upstream: https://github.com/emacsmirror/nongnu_elpa
 
   # END: UNMAINTAINED PACKAGES THAT I FORKED
   # ----------------------------------------------------------------------------
