@@ -55,29 +55,37 @@ tasks:
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/motley-overlay
     path: linux/motley-overlay
+    git_update: false
 
   - git: git@github.com:jamescherti/docker-oddmuse
     path: linux/docker-oddmuse
+    git_update: false
 
   - git: git@github.com:jamescherti/python-dpc3848v-wifi-modem
     path: linux/python-dpc3848v-wifi-modem
+    git_update: false
 
   - git: git@github.com:jamescherti/alpm-reboot-required
     path: linux/alpm-reboot-required
+    git_update: false
 
   # linux-keep-modules
   - git: git@github.com:jamescherti/archlinux-linux-keep-modules
     path: linux/archlinux-linux-keep-modules
+    git_update: false
 
   - git: ssh://aur@aur.archlinux.org/linux-keep-modules
     path: linux/aur-linux-keep-modules
+    git_update: false
 
   # brother-ql1110nwb
   - git: git@github.com:jamescherti/archlinux-brother-ql1110nwb
     path: linux/archlinux-brother-ql1110nwb
+    git_update: false
 
   - git: ssh://aur@aur.archlinux.org/brother-ql1110nwb
     path: linux/aur-brother-ql1110nwb
+    git_update: false
 
   # ----------------------------------------------------------------------------
   # Misc
@@ -91,6 +99,7 @@ tasks:
   - git: git@github.com:jamescherti/cherrybuckle
     # revision: master
     path: tools/cherrybuckle
+    git_update: false
     remote:
       upstream: https://github.com/zevv/bucklespring
 
@@ -102,6 +111,7 @@ tasks:
 
   - git: git@github.com:jamescherti/caffeine-aw
     path: tools/caffeine-aw
+    git_update: false
 
   - git: git@github.com:jamescherti/watch-xfce-xfconf
     path: tools/watch-xfce-xfconf
