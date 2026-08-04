@@ -722,7 +722,7 @@ subsequent GCC invocations."
 
 (setq lightemacs-modules '(mod-conditional-modes
                            mod-begin
-                           ;; mod-same-window
+                           mod-same-window
                            mod-dired
                            mod-flymake
                            mod-gc
