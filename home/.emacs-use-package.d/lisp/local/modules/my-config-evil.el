@@ -727,7 +727,7 @@ This enhancement prevents the cursor from moving."
 (define-key evil-visual-state-map (kbd "U") 'ignore) ;; Disable lower/upper case region
 (define-key evil-visual-state-map (kbd "C-c") 'evil-yank)
 
-(define-key evil-normal-state-map (kbd "<leader>gs") 'global-text-scale-adjust)
+;; (define-key evil-normal-state-map (kbd "<leader>gs") 'global-text-scale-adjust)
 (define-key evil-normal-state-map (kbd "<leader>t")  'my-tab-split)
 (define-key evil-normal-state-map (kbd "<leader>T")  'tab-bar-change-tab-group)
 (define-key evil-normal-state-map (kbd "<leader>em") 'toggle-menu-bar-mode-from-frame)
@@ -746,7 +746,7 @@ This enhancement prevents the cursor from moving."
 (define-key evil-normal-state-map (kbd "<leader>ww") 'my-go-home)
 (define-key evil-normal-state-map (kbd "<leader>W")  'my-go-home)
 
-(define-key evil-normal-state-map (kbd "gs") 'evilbuffer-switch-to-scratch)
+(evil-define-key 'normal 'global (kbd "<leader>gs") #'evilbuffer-switch-to-scratch)
 
 ;; (when (fboundp 'my-dabbrev-completion-backwards)
 ;;   (setq evil-complete-next-func #'my-dabbrev-completion-backwards))
