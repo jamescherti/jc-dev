@@ -437,6 +437,11 @@ tasks:
     remote:
       upstream: https://github.com/emacs-evil/evil-surround
 
+  - git: git@github.com:jamescherti/php-mode
+    path: forks/php-mode
+    remote:
+      upstream: https://github.com/emacs-php/php-mode
+
   - git: git@github.com:jamescherti/Emacs-wgrep
     path: forks/Emacs-wgrep
     remote:
@@ -607,7 +612,7 @@ tasks:
   - git: git@github.com:jamescherti/consult
     path: forks/consult
     remote:
-      upstream: https://github.com/jamescherti/consult
+      upstream: https://github.com/minad/consult
 
   - git: git@github.com:jamescherti/corfu
     path: forks/corfu

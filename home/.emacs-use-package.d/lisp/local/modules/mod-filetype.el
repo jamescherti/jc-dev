@@ -572,8 +572,6 @@ only if they are not already available."
 (if (my-treesit-language-available-p 'php)
     (progn
       (push '(php-mode . php-ts-mode) major-mode-remap-alist)
-      ;; (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]\\'" . php-ts-mode))
-      ;; (add-to-list 'auto-mode-alist '("\\.[pP][hH][pP]3\\'" . php-ts-mode))
       (push '("\\.[pP][hH][pP]\\'" . php-ts-mode) auto-mode-alist)
       (push '("\\.[pP][hH][pP]3\\'" . php-ts-mode) auto-mode-alist))
   (require 'sub-php-mode))
@@ -620,10 +618,8 @@ only if they are not already available."
   (progn
     (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
     (push '(js-mode . js-ts-mode) major-mode-remap-alist)
-    ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-ts-mode))
     (push '("\.[jJ][sS]\\'" . js-ts-mode) auto-mode-alist))
   ;; (progn
-  ;;   ;; (add-to-list 'auto-mode-alist '("\.[jJ][sS]\\'" . js-mode))
   ;;   (push '("\.[jJ][sS]\\'" . js-mode) auto-mode-alist)
   ;;
   ;;   ;; Not required
@@ -639,7 +635,6 @@ only if they are not already available."
 
 (if (my-treesit-language-available-p 'lua)
     (progn
-      ;; (add-to-list 'auto-mode-alist '("\\.[lL][uU][aA]\\'" . lua-ts-mode))
       (push '("\\.[lL][uU][aA]\\'" . lua-ts-mode) auto-mode-alist))
   (require 'sub-lua-mode))
 
@@ -647,9 +642,6 @@ only if they are not already available."
 
 (if (my-treesit-language-available-p 'dockerfile)
     (progn
-      ;; (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR]\\'" . dockerfile-ts-mode))
-      ;; (add-to-list 'auto-mode-alist '("/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" . dockerfile-ts-mode))
-      ;; (add-to-list 'auto-mode-alist '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" . dockerfile-ts-mode))
       (push '("/[dD][oO][cC][kK][eE][rR]\\'" . dockerfile-ts-mode) auto-mode-alist)
       (push '("/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" . dockerfile-ts-mode) auto-mode-alist)
       (push '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" . dockerfile-ts-mode) auto-mode-alist))
@@ -703,9 +695,7 @@ only if they are not already available."
       (push '(html-mode . html-ts-mode) major-mode-remap-alist)
       (push '(mhtml-mode . mhtml-ts-mode) major-mode-remap-alist)
       (push '("\\.[hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist)
-      (push '("\\.[Pp][hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist)
-      ;; (add-to-list 'auto-mode-alist '("\\.[hH][tT][mM][lL]\\'" . html-ts-mode))
-      )
+      (push '("\\.[Pp][hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist))
   (use-package sgml-mode
     :ensure nil
     :commands (sgml-mode
@@ -755,12 +745,7 @@ only if they are not already available."
   :commands jenkinsfile-mode
   :mode
   (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
-   ("/Jenkinsfile\\'" . jenkinsfile-mode))
-  ;; :init
-  ;; (add-to-list 'auto-mode-alist '("/Jenkinsfile.*\\'" . jenkinsfile-mode))
-  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile[^/]*\\'" . jenkinsfile-mode))
-  ;; (add-to-list 'auto-mode-alist '("Jenkinsfile\\'" . jenkinsfile-mode))
-  )
+   ("/Jenkinsfile\\'" . jenkinsfile-mode)))
 
 ;;; BASIC
 (lightemacs-use-package basic-mode
@@ -851,7 +836,6 @@ only if they are not already available."
       (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
       (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
   (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
-  ;; (add-to-list 'auto-mode-alist '("\\.md\\.asc\\'" . markdown-mode))
   (push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
   (with-eval-after-load 'markdown-mode
     (define-key markdown-mode-map (kbd "TAB") #'ignore)
