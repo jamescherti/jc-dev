@@ -22,6 +22,8 @@
 import subprocess
 import sys
 
+print("Removed")
+sys.exit(1)
 
 def check_tag_exists(tag):
     """Check if a Git tag exists."""
