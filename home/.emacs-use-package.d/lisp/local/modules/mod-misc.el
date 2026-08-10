@@ -2656,109 +2656,109 @@ ARGS - the arguments passed to the original function"
 ;;                       (t '("terminal" "*terminal*"
 ;;                            (lambda () (term shell-pop-term-shell)))))
 
-;; (lightemacs-use-package popper
-;;   :commands (popper-mode
-;;              popper-echo-mode
-;;              popper-cycle
-;;              popper-toggle
-;;              popper-toggle-type
-;;              popper-cycle-backwards
-;;              popper-kill-latest-popup)
-;;
-;;   :hook
-;;   ((after-init . popper-mode)
-;;    (after-init . popper-echo-mode))
-;;
-;;   :bind (("C-;"   . popper-toggle)
-;;          ;; ("M-;"   . popper-cycle)  ;; conflict with comment-dwim
-;;          ("C-M-;" . popper-toggle-type))
-;;
-;;   :custom
-;;   (popper-reference-buffers
-;;    '("\\*vterm\\*"
-;;      vterm-mode
-;;      ;; help-mode
-;;      ;; compilation-mode
-;;      ))
-;;   (popper-window-height 80)
-;;
-;;   ;; (setq popper-window-height 20)
-;;   (popper-display-control t)
-;;
-;;   :config
-;;
-;;   ;; group by project.el project root, with fall back to default-directory
-;;   ;; (setq popper-group-function #'popper-group-by-directory)
-;;
-;;   ;; Match eshell, shell, term and/or vterm buffers
-;;   ;; (setq popper-reference-buffers
-;;   ;;       '("\\*Messages\\*"
-;;   ;;         "Output\\*$"
-;;   ;;         "\\*Async Shell Command\\*"
-;;   ;;         help-mode
-;;   ;;         compilation-mode))
-;;
-;;   ;; (setq popper-mode-line "")
-;;   (setq popper-reference-buffers
-;;         '("\\*Messages\\*$"
-;;           "Output\\*$" "\\*Pp Eval Output\\*$"
-;;           "^\\*eldoc.*\\*$"
-;;           "\\*Compile-Log\\*$"
-;;           "\\*Completions\\*$"
-;;           "\\*Warnings\\*$"
-;;           "\\*Async Shell Command\\*$"
-;;           "\\*Apropos\\*$"
-;;           "\\*Backtrace\\*$"
-;;           "\\*Calendar\\*$"
-;;           "\\*Fd\\*$" "\\*Find\\*$" "\\*Finder\\*$"
-;;           "\\*Kill Ring\\*$"
-;;           "\\*Embark \\(Collect\\|Live\\):.*\\*$"
-;;
-;;           bookmark-bmenu-mode
-;;           comint-mode
-;;           compilation-mode
-;;           help-mode helpful-mode
-;;           tabulated-list-mode
-;;           Buffer-menu-mode
-;;
-;;           flymake-diagnostics-buffer-mode
-;;           flycheck-error-list-mode flycheck-verify-mode
-;;
-;;           gnus-article-mode devdocs-mode
-;;           grep-mode occur-mode rg-mode deadgrep-mode ag-mode pt-mode
-;;           youdao-dictionary-mode osx-dictionary-mode fanyi-mode
-;;           "^\\*gt-result\\*$" "^\\*gt-log\\*$"
-;;
-;;           "^\\*Process List\\*$" process-menu-mode
-;;           list-environment-mode cargo-process-mode
-;;
-;;           "^\\*.*eat.*\\*.*$"
-;;           "^\\*.*eshell.*\\*.*$"
-;;           "^\\*.*shell.*\\*.*$"
-;;           "^\\*.*terminal.*\\*.*$"
-;;           "^\\*.*vterm[inal]*.*\\*.*$"
-;;
-;;           "\\*DAP Templates\\*$" dap-server-log-mode
-;;           "\\*ELP Profiling Restuls\\*" profiler-report-mode
-;;           "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
-;;           "\\*[Wo]*Man.*\\*$"
-;;           "\\*ert\\*$" overseer-buffer-mode
-;;           "\\*gud-debug\\*$"
-;;           "\\*lsp-help\\*$" "\\*lsp session\\*$"
-;;           "\\*quickrun\\*$"
-;;           "\\*tldr\\*$"
-;;           "\\*vc-.*\\**"
-;;           "\\*diff-hl\\**"
-;;           "^\\*macro expansion\\**"
-;;
-;;           "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
-;;           "\\*Gofmt Errors\\*$" "\\*Go Test\\*$" godoc-mode
-;;           "\\*docker-.+\\*"
-;;           "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
-;;           "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
-;;           rustic-cargo-outdated-mode rustic-cargo-run-mode
-;;           rustic-cargo-test-mode))
-;;   )
+(lightemacs-use-package popper
+  :commands (popper-mode
+             popper-echo-mode
+             popper-cycle
+             popper-toggle
+             popper-toggle-type
+             popper-cycle-backwards
+             popper-kill-latest-popup)
+
+  :hook
+  ((after-init . popper-mode)
+   (after-init . popper-echo-mode))
+
+  :bind (("C-;"   . popper-toggle)
+         ("M-;"   . popper-cycle)  ;; conflict with comment-dwim
+         ;; ("C-M-;" . popper-toggle-type)
+         )
+
+  :custom
+  ;; (popper-reference-buffers
+  ;;  '("\\*vterm\\*"
+  ;;    vterm-mode
+  ;;    ;; help-mode
+  ;;    ;; compilation-mode
+  ;;    ))
+  (popper-window-height 80)
+
+  ;; (setq popper-window-height 20)
+  (popper-display-control t)
+
+  :config
+
+  ;; group by project.el project root, with fall back to default-directory
+  ;; (setq popper-group-function #'popper-group-by-directory)
+
+  ;; Match eshell, shell, term and/or vterm buffers
+  ;; (setq popper-reference-buffers
+  ;;       '("\\*Messages\\*"
+  ;;         "\\*Async Shell Command\\*"))
+
+  ;; (setq popper-mode-line "")
+
+  (setq popper-reference-buffers
+        '("\\*Messages\\*$"
+          ;; "Output\\*$" "\\*Pp Eval Output\\*$"
+          ;; "^\\*eldoc.*\\*$"
+          ;; "\\*Compile-Log\\*$"
+          ;; "\\*Completions\\*$"
+          ;; "\\*Warnings\\*$"
+          ;; "\\*Async Shell Command\\*$"
+          ;; "\\*Apropos\\*$"
+          ;; "\\*Backtrace\\*$"
+          ;; "\\*Calendar\\*$"
+          ;; "\\*Fd\\*$" "\\*Find\\*$" "\\*Finder\\*$"
+          ;; "\\*Kill Ring\\*$"
+          ;; "\\*Embark \\(Collect\\|Live\\):.*\\*$"
+
+          ;; compilation-mode
+          ;; bookmark-bmenu-mode
+          ;; comint-mode
+          ;; help-mode helpful-mode
+          ;; tabulated-list-mode
+          ;; Buffer-menu-mode
+
+          ;; flymake-diagnostics-buffer-mode
+          ;; flycheck-error-list-mode flycheck-verify-mode
+          ;;
+          ;; gnus-article-mode devdocs-mode
+          ;; grep-mode occur-mode rg-mode deadgrep-mode ag-mode pt-mode
+          ;; youdao-dictionary-mode osx-dictionary-mode fanyi-mode
+          ;; "^\\*gt-result\\*$" "^\\*gt-log\\*$"
+          ;;
+          ;; "^\\*Process List\\*$" process-menu-mode
+          ;; list-environment-mode cargo-process-mode
+          ;;
+          ;; "^\\*.*eat.*\\*.*$"
+          ;; "^\\*.*eshell.*\\*.*$"
+          ;; "^\\*.*shell.*\\*.*$"
+          ;; "^\\*.*terminal.*\\*.*$"
+          ;; "^\\*.*vterm[inal]*.*\\*.*$"
+          ;;
+          ;; "\\*DAP Templates\\*$" dap-server-log-mode
+          ;; "\\*ELP Profiling Restuls\\*" profiler-report-mode
+          ;; "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
+          ;; "\\*[Wo]*Man.*\\*$"
+          ;; "\\*ert\\*$" overseer-buffer-mode
+          ;; "\\*gud-debug\\*$"
+          ;; "\\*lsp-help\\*$" "\\*lsp session\\*$"
+          ;; "\\*quickrun\\*$"
+          ;; "\\*tldr\\*$"
+          ;; "\\*vc-.*\\**"
+          ;; "\\*diff-hl\\**"
+          ;; "^\\*macro expansion\\**"
+          ;;
+          ;; "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
+          ;; "\\*Gofmt Errors\\*$" "\\*Go Test\\*$" godoc-mode
+          ;; "\\*docker-.+\\*"
+          ;; "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
+          ;; "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
+          ;; rustic-cargo-outdated-mode rustic-cargo-run-mode
+          ;; rustic-cargo-test-mode
+          ))
+  )
 
 ;;; shell-pop
 
