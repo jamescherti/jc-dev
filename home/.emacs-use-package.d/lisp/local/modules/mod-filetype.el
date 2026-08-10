@@ -748,6 +748,7 @@ only if they are not already available."
    ("/Jenkinsfile\\'" . jenkinsfile-mode)))
 
 ;;; BASIC
+
 (lightemacs-use-package basic-mode
   :commands basic-qb45-mode
   :init

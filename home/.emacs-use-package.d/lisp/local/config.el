@@ -790,9 +790,11 @@ subsequent GCC invocations."
                            le-cape
                            mod-corfu-cape
 
-                           ;; le-corfu-prescient
-                           ;; le-prescient
-                           ;; le-vertico-prescient
+                           le-corfu-prescient
+                           le-prescient
+                           le-vertico-prescient
+
+                           ;; le-magit
 
                            le-elisp-refs
                            le-easy-escape
@@ -832,10 +834,7 @@ subsequent GCC invocations."
 
                            le-bufferfile
 
-                           ;; TODO This adds support for indirect buffers:
-                           ;;      https://github.com/dgutov/diff-hl/pull/276
-                           ;; le-diff-hl
-                           tmp-diff-hl
+                           diff-hl
 
                            le-dtrt-indent
 

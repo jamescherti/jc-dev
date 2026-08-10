@@ -1,5 +1,25 @@
 ;;; mod-conditional-modes.el --- mod-conditional-modes -*- lexical-binding: t -*-
 
+;; Author: James Cherti
+;; URL: https://github.com/jamescherti/jc-dev
+;; Package-Requires: ((emacs "29.1"))
+;; Keywords: maint
+;; Version: 0.0.9
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 
 
@@ -37,59 +57,36 @@
 ;;; Conditional code checker/reformatter
 
 (defun my-code-checker-get-buffer ()
-  "Docstring."
-  (or (and (fboundp 'org-src-edit-buffer-p)
-           (fboundp 'org-src-source-buffer)
-           (org-src-edit-buffer-p)
-           (when-let* ((new-buffer (org-src-source-buffer)))
-             (when (buffer-live-p new-buffer)
-               (with-current-buffer new-buffer
-                 (current-buffer)))))
-      ;; TODO
-      ;; (bound-and-true-p edit-indirect--overlay)
-      (buffer-base-buffer)
-      (current-buffer)))
+  "Get the current buffer."
+  (or
+   ;; NOTE: It is not necessary to enable these in org-src or edit indirect.
+   ;; (and (fboundp 'org-src-edit-buffer-p)
+   ;;      (fboundp 'org-src-source-buffer)
+   ;;      (org-src-edit-buffer-p)
+   ;;      (when-let* ((new-buffer (org-src-source-buffer)))
+   ;;        (when (buffer-live-p new-buffer)
+   ;;          (with-current-buffer new-buffer
+   ;;            (current-buffer)))))
+   ;; (and (bound-and-true-p edit-indirect--overlay)
+   ;;      (buffer-live-p edit-indirect--overlay)
+   ;;      (overlay-buffer edit-indirect--overlay))
+   (buffer-base-buffer)
+   (current-buffer)))
 
 ;;; Flymake
 
 (defun my-code-checker-and-reformatter-ignore-p ()
   "Files where modes like Flymake and Apheleia are disabled."
-  (let* ((buffer (my-code-checker-get-buffer))
-         (file-name (buffer-file-name buffer))
-         (base-name (when file-name
-                      (file-name-nondirectory file-name))))
-    ;; (and (not (or
-    ;;            (file-in-directory-p file-name "~/src")
-    ;;            (not (file-in-directory-p file-name "~/src/forks"))
-    ;;            (not (file-in-directory-p file-name "~/src/local/emacs-worktrees"))
-    ;;            (not (file-in-directory-p file-name "~/src/other"))
-    ;;            (not (file-in-directory-p file-name tmpedit-dir)))))
+  (when-let* ((buffer (my-code-checker-get-buffer))
+              (file-name (buffer-file-name buffer))
+              (base-name (when file-name
+                           (file-name-nondirectory file-name))))
     (or (string= base-name "make.conf") ; Gentoo
         (string= base-name "PKGBUILD")
         (string= base-name ".dir-locals.el")
         (string= base-name ".my-dir-locals.el")
         (string= base-name "straight-profile.el")
-        (string-suffix-p ".ebuild" file-name)
-
-        ;; TODO
-        ;; (not (string-match-p "/lisp/local/" filename))
-        ;; (not (string-prefix-p "le-" basename))
-        )))
-
-;; Flymake
-;;
-;; This mode is loaded automatically by many other modes such as
-;; `emacs-lisp-mode'. That's why this advice helps a lot controling it.
-(defun my-flymake-execution-only-when-code-checker-allowed (orig-fun &rest args)
-  "Execute ORIG-FUN with ARGS only if it is allowed.
-This function is intended for use as :around advice."
-  (when (and (bound-and-true-p env-allow-syntax-checkers)
-             (not (my-code-checker-and-reformatter-ignore-p)))
-    (apply orig-fun args)))
-
-(with-eval-after-load 'le-flymake
-  (advice-add 'flymake-mode :around
-              #'my-flymake-execution-only-when-code-checker-allowed))
+        (string-suffix-p ".ebuild" file-name))))
 
 ;;; dir-config
 
@@ -119,13 +116,9 @@ This function is intended for use as :around advice."
           (when (and (fboundp 'eglot)
                      (or (derived-mode-p 'python-mode)
                          (derived-mode-p 'python-ts-mode)))
-            (eglot-ensure))
+            (eglot-ensure)))
 
-          ;; Elisp
-          (when (and (derived-mode-p 'emacs-lisp-mode)
-                     (fboundp 'aggressive-indent-mode))
-            (aggressive-indent-mode 1)))
-
+        ;; Formatters
         (when env-allow-reformatters
           ;; All modes
           (when (and (fboundp 'apheleia-mode)
@@ -142,23 +135,20 @@ This function is intended for use as :around advice."
                      (fboundp 'aggressive-indent-mode))
             (aggressive-indent-mode 1)))
 
-        (let ((code-checker-ignore-p (my-code-checker-and-reformatter-ignore-p)))
-          (unless code-checker-ignore-p
-            (when (and env-allow-syntax-checker-package-lint
-                       ;; TODO add exceptions like these to the .my-dir-locals.el
-                       (not (or (file-in-directory-p file-name "~/src/emacs/lightemacs")
-                                (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
-                                (string= base-name "init.el")
-                                (string= base-name "early-init.el"))))
-              (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
+        ;; Flymake
+        (when (and (fboundp 'flymake-mode)
+                   (not (my-code-checker-and-reformatter-ignore-p)))
+          (when (and env-allow-syntax-checker-package-lint
+                     ;; TODO add exceptions like these to the .my-dir-locals.el
+                     (not (or (file-in-directory-p file-name "~/src/emacs/lightemacs")
+                              (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
+                              (string= base-name "init.el")
+                              (string= base-name "early-init.el"))))
+            (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
 
-            (when (fboundp 'flymake-mode)
-              (flymake-mode (bound-and-true-p env-allow-syntax-checkers))
-              ;; (when (/= (bound-and-true-p flymake-mode)
-              ;;           (bound-and-true-p env-allow-syntax-checkers))
-              ;;   (flymake-mode (bound-and-true-p env-allow-syntax-checkers)))
-              )))
+          (flymake-mode 1))
 
+        ;; Stripspace
         (when (and (bound-and-true-p env-allow-whitespace-cleanup)
                    (fboundp 'stripspace-local-mode))
           (stripspace-local-mode 1))))))

@@ -3402,10 +3402,10 @@ properly handles remote files over Tramp), applying the setting only if
 ;; a rare candidate once will immediately place it above your most frequently
 ;; used candidates. Prescient prevents this by keeping high-frequency candidates
 ;; near the top even if they were not the absolute last item selected.
-(with-eval-after-load 'corfu
-  (require 'corfu-history)
-  (when (fboundp 'corfu-history-mode)
-    (corfu-history-mode 1)))
+;; (with-eval-after-load 'corfu
+;;   (require 'corfu-history)
+;;   (when (fboundp 'corfu-history-mode)
+;;     (corfu-history-mode 1)))
 
 ;;; pathaction
 
