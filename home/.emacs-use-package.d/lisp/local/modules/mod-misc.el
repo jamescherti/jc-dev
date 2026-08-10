@@ -103,6 +103,18 @@
                 ;; Slow eval
                 (:eval (mode-line-right))))
 
+;;; Fringe
+;; TODO minimal-emacs?
+
+(defun my-setup-fringe (&optional frame)
+  "Set the fringe width based on the current FRAME."
+  (with-selected-frame (or frame (selected-frame))
+    (fringe-mode (frame-char-width))))
+
+(if (daemonp)
+    (add-hook 'after-make-frame-functions #'my-setup-fringe)
+  (my-setup-fringe))
+
 ;;; Other modules
 
 (unless noninteractive
@@ -1353,8 +1365,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; This seems to change ediff
   (setq diff-default-read-only t)
 
-  ;; TODO minimal-emacs?
-  (fringe-mode (frame-char-width))
   ;; (if (fboundp 'fringe-mode) (fringe-mode '20))
 
   ;; TODO try
@@ -2665,99 +2675,93 @@ ARGS - the arguments passed to the original function"
              popper-cycle-backwards
              popper-kill-latest-popup)
 
-  :hook
-  ((after-init . popper-mode)
-   (after-init . popper-echo-mode))
+  :init
+  (popper-mode 1)
 
   :bind (("C-;"   . popper-toggle)
          ("M-;"   . popper-cycle)  ;; conflict with comment-dwim
          ;; ("C-M-;" . popper-toggle-type)
          )
 
-  :custom
-  ;; (popper-reference-buffers
-  ;;  '("\\*vterm\\*"
-  ;;    vterm-mode
-  ;;    ;; help-mode
-  ;;    ;; compilation-mode
-  ;;    ))
-  (popper-window-height 80)
+  :init
+  (setq popper-window-height 80)
+  (setq popper-display-control t)
 
-  ;; (setq popper-window-height 20)
-  (popper-display-control t)
+  ;; :hook
+  ;; ((after-init . popper-mode)
+  ;;  ;; (after-init . popper-echo-mode)
+  ;;  )
 
   :config
 
+  (setopt popper-reference-buffers
+          '("\\*Messages\\*$"
+            ;; "Output\\*$" "\\*Pp Eval Output\\*$"
+            ;; "^\\*eldoc.*\\*$"
+            ;; "\\*Compile-Log\\*$"
+            ;; "\\*Completions\\*$"
+            ;; "\\*Warnings\\*$"
+            ;; "\\*Async Shell Command\\*$"
+            ;; "\\*Apropos\\*$"
+            ;; "\\*Backtrace\\*$"
+            ;; "\\*Calendar\\*$"
+            ;; "\\*Fd\\*$" "\\*Find\\*$" "\\*Finder\\*$"
+            ;; "\\*Kill Ring\\*$"
+            ;; "\\*Embark \\(Collect\\|Live\\):.*\\*$"
+
+            ;; compilation-mode
+            ;; bookmark-bmenu-mode
+            ;; comint-mode
+            ;; help-mode helpful-mode
+            ;; tabulated-list-mode
+            ;; Buffer-menu-mode
+
+            ;; flymake-diagnostics-buffer-mode
+            ;; flycheck-error-list-mode flycheck-verify-mode
+            ;;
+            ;; gnus-article-mode devdocs-mode
+            ;; grep-mode occur-mode rg-mode deadgrep-mode ag-mode pt-mode
+            ;; youdao-dictionary-mode osx-dictionary-mode fanyi-mode
+            ;; "^\\*gt-result\\*$" "^\\*gt-log\\*$"
+            ;;
+            ;; "^\\*Process List\\*$" process-menu-mode
+            ;; list-environment-mode cargo-process-mode
+            ;;
+            ;; "^\\*.*eat.*\\*.*$"
+            ;; "^\\*.*eshell.*\\*.*$"
+            ;; "^\\*.*shell.*\\*.*$"
+            ;; "^\\*.*terminal.*\\*.*$"
+            ;; "^\\*.*vterm[inal]*.*\\*.*$"
+            ;;
+            ;; "\\*DAP Templates\\*$" dap-server-log-mode
+            ;; "\\*ELP Profiling Restuls\\*" profiler-report-mode
+            ;; "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
+            ;; "\\*[Wo]*Man.*\\*$"
+            ;; "\\*ert\\*$" overseer-buffer-mode
+            ;; "\\*gud-debug\\*$"
+            ;; "\\*lsp-help\\*$" "\\*lsp session\\*$"
+            ;; "\\*quickrun\\*$"
+            ;; "\\*tldr\\*$"
+            ;; "\\*vc-.*\\**"
+            ;; "\\*diff-hl\\**"
+            ;; "^\\*macro expansion\\**"
+            ;;
+            ;; "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
+            ;; "\\*Gofmt Errors\\*$" "\\*Go Test\\*$" godoc-mode
+            ;; "\\*docker-.+\\*"
+            ;; "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
+            ;; "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
+            ;; rustic-cargo-outdated-mode rustic-cargo-run-mode
+            ;; rustic-cargo-test-mode
+            ))
+
   ;; group by project.el project root, with fall back to default-directory
   ;; (setq popper-group-function #'popper-group-by-directory)
-
   ;; Match eshell, shell, term and/or vterm buffers
   ;; (setq popper-reference-buffers
   ;;       '("\\*Messages\\*"
   ;;         "\\*Async Shell Command\\*"))
-
   ;; (setq popper-mode-line "")
-
-  (setq popper-reference-buffers
-        '("\\*Messages\\*$"
-          ;; "Output\\*$" "\\*Pp Eval Output\\*$"
-          ;; "^\\*eldoc.*\\*$"
-          ;; "\\*Compile-Log\\*$"
-          ;; "\\*Completions\\*$"
-          ;; "\\*Warnings\\*$"
-          ;; "\\*Async Shell Command\\*$"
-          ;; "\\*Apropos\\*$"
-          ;; "\\*Backtrace\\*$"
-          ;; "\\*Calendar\\*$"
-          ;; "\\*Fd\\*$" "\\*Find\\*$" "\\*Finder\\*$"
-          ;; "\\*Kill Ring\\*$"
-          ;; "\\*Embark \\(Collect\\|Live\\):.*\\*$"
-
-          ;; compilation-mode
-          ;; bookmark-bmenu-mode
-          ;; comint-mode
-          ;; help-mode helpful-mode
-          ;; tabulated-list-mode
-          ;; Buffer-menu-mode
-
-          ;; flymake-diagnostics-buffer-mode
-          ;; flycheck-error-list-mode flycheck-verify-mode
-          ;;
-          ;; gnus-article-mode devdocs-mode
-          ;; grep-mode occur-mode rg-mode deadgrep-mode ag-mode pt-mode
-          ;; youdao-dictionary-mode osx-dictionary-mode fanyi-mode
-          ;; "^\\*gt-result\\*$" "^\\*gt-log\\*$"
-          ;;
-          ;; "^\\*Process List\\*$" process-menu-mode
-          ;; list-environment-mode cargo-process-mode
-          ;;
-          ;; "^\\*.*eat.*\\*.*$"
-          ;; "^\\*.*eshell.*\\*.*$"
-          ;; "^\\*.*shell.*\\*.*$"
-          ;; "^\\*.*terminal.*\\*.*$"
-          ;; "^\\*.*vterm[inal]*.*\\*.*$"
-          ;;
-          ;; "\\*DAP Templates\\*$" dap-server-log-mode
-          ;; "\\*ELP Profiling Restuls\\*" profiler-report-mode
-          ;; "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
-          ;; "\\*[Wo]*Man.*\\*$"
-          ;; "\\*ert\\*$" overseer-buffer-mode
-          ;; "\\*gud-debug\\*$"
-          ;; "\\*lsp-help\\*$" "\\*lsp session\\*$"
-          ;; "\\*quickrun\\*$"
-          ;; "\\*tldr\\*$"
-          ;; "\\*vc-.*\\**"
-          ;; "\\*diff-hl\\**"
-          ;; "^\\*macro expansion\\**"
-          ;;
-          ;; "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
-          ;; "\\*Gofmt Errors\\*$" "\\*Go Test\\*$" godoc-mode
-          ;; "\\*docker-.+\\*"
-          ;; "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
-          ;; "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
-          ;; rustic-cargo-outdated-mode rustic-cargo-run-mode
-          ;; rustic-cargo-test-mode
-          ))
   )
 
 ;;; shell-pop
@@ -3342,7 +3346,7 @@ properly handles remote files over Tramp), applying the setting only if
   ;; (advice-add 'diff-hl-mode :before #'my-diff-hl-set-upstream-reference)
   )
 
-;; (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
+(add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
 ;; (setq-default diff-hl-reference-revision "origin/main")
 (setq diff-hl-ask-before-revert-hunk t)
