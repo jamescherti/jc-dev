@@ -104,6 +104,7 @@
                 (:eval (mode-line-right))))
 
 ;;; Fringe
+
 ;; TODO minimal-emacs?
 
 (defun my-setup-fringe (&optional frame)
