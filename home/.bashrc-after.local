@@ -241,7 +241,7 @@ _gm_wrapper() {
   if [[ $# -eq 0 ]]; then
     opts+=("--print")
   fi
-  _git_find_repos_wrapper "${opts[@]}" --if-exec "sh -c '! git-is-clean'" -- "$@"
+  _git_find_repos_wrapper "${opts[@]}" --if-exec "sh -c '! git-is-clean || ! git-is-pushed'" -- "$@"
 }
 
 _ga_wrapper() {

@@ -21,7 +21,7 @@
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
  ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
- ("indent-bars" . "6cb21df542dcb56617fc22af29cf3ffb15ae06cb") ; 1.0 | RSS RELEASE
+ ("indent-bars" . "36620c5f3fba2ba8f23d7ef947e0d1d09e412bf5") ; 1.0.1 | RSS RELEASE
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("consult" . "3ddec5493bce5445f099537be50b7a4f79c68321") ; 3.7 | RSS RELEASE
  ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
