@@ -105,6 +105,7 @@
  ;; Outdated tag
  ;; TODO Add to RSS
  ("php-mode" . "a3658f63d85b1558a9dbdec45f33eed8f0d56041")
+ ("prescient.el" . "5649977fa7789e4615efeca09397ed7eccd06dfc") ; v6.3.3
  ;; ("company-mode" . "24a4a6b129546a1ce2fcb3e3c5948259dff00685")
 
  ;; No tags
