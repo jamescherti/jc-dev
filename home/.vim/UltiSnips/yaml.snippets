@@ -611,7 +611,8 @@ snippet restart
 endsnippet
 
 snippet flush
-- meta: flush_handlers
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
 endsnippet
 
 snippet cshell
