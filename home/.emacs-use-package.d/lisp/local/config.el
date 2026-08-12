@@ -1157,6 +1157,18 @@ This uses an around advice to trap errors and verify file timestamps."
              :branch "master")
 
             ;; Forks of unmaintained packages
+            (corfu-prescient
+             :type git :host github
+             :repo "jamescherti/prescient.el"
+             :branch "main")
+            (prescient
+             :type git :host github
+             :repo "jamescherti/prescient.el"
+             :branch "main")
+            (vertico-prescient
+             :type git :host github
+             :repo "jamescherti/prescient.el"
+             :branch "main")
             (s
              :type git :host github
              :repo "jamescherti/s.el"

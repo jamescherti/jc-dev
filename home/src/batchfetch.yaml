@@ -407,7 +407,12 @@ tasks:
 
   # ----------------------------------------------------------------------------
   # START: Forks
-  - git: https://github.com/jamescherti/doom-themes
+  - git: git@github.com:jamescherti/prescient.el
+    path: forks/prescient.el
+    remote:
+      upstream: https://github.com/radian-software/prescient.el
+
+  - git: git@github.com:jamescherti/doom-themes.el
     path: forks/doom-themes
     remote:
       upstream: https://github.com/doomemacs/themes
