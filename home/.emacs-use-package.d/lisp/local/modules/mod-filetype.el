@@ -493,30 +493,36 @@ only if they are not already available."
                                  string-end))
 
 ;; When auto-mode-alist is bypassed, use a hook function
-(defun ansible-detect-and-enable-ansible-mode ()
+(defvar-local my-inhibit-ansible-detect-and-enable-ansible-mode nil)
+
+(defun my-ansible-detect-and-enable-ansible-mode ()
   "Enable `ansible-mode' for YAML files in Ansible-related directories."
-  (let ((file-name (buffer-file-name (buffer-base-buffer))))
-    (cond
-     ((and (fboundp 'ansible-mode)
-           file-name
-           ;; Auto-mode-alist handles this
-           ;; (string-match my-ansible-file-regexp (expand-file-name file-name))
-           )
-      (ansible-mode)
-      (jinja2-highlight-mode 1))
+  (unless my-inhibit-ansible-detect-and-enable-ansible-mode
+    (let ((file-name (buffer-file-name (buffer-base-buffer)))
+          (my-inhibit-ansible-detect-and-enable-ansible-mode t))
+      (cond
+       ((and (fboundp 'ansible-mode)
+             file-name
+             (string-match my-ansible-file-regexp (expand-file-name file-name)))
+        (ansible-mode)
+        (jinja2-highlight-mode 1))
 
-     ((and treesit-yaml-available
-           (fboundp 'yaml-ts-mode)
-           (not (derived-mode-p 'yaml-ts-mode)))
-      (yaml-ts-mode))
+       ((and treesit-yaml-available
+             (fboundp 'yaml-ts-mode)
+             (not (derived-mode-p 'yaml-ts-mode)))
+        (yaml-ts-mode))
 
-     ((and (not treesit-yaml-available)
-           (fboundp 'yaml-mode)
-           (not (derived-mode-p 'yaml-mode)))
-      (yaml-mode)))))
+       ((and (not treesit-yaml-available)
+             (fboundp 'yaml-mode)
+             (not (derived-mode-p 'yaml-mode)))
+        (yaml-mode))))))
 
-(add-to-list 'auto-mode-alist (cons my-ansible-file-regexp
-                                    'ansible-detect-and-enable-ansible-mode))
+;; (add-to-list 'auto-mode-alist
+;;              (cons my-ansible-file-regexp
+;;                    'my-ansible-detect-and-enable-ansible-mode))
+
+(add-hook 'yaml-ts-mode-hook #'my-ansible-detect-and-enable-ansible-mode)
+(add-hook 'yaml-mode-hook #'my-ansible-detect-and-enable-ansible-mode)
 
 ;;; Yaml-ts-mode: tab-width
 

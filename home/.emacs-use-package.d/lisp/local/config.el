@@ -722,6 +722,7 @@ subsequent GCC invocations."
 
 (setq lightemacs-modules '(mod-conditional-modes
                            mod-begin
+                           mod-filetype
                            mod-same-window
                            mod-dired
                            mod-flymake
@@ -860,7 +861,6 @@ subsequent GCC invocations."
                            mod-ediff
                            tmpedit
                            mod-cleanup
-                           mod-filetype
 
                            sub-project
                            mod-buffer-terminator
