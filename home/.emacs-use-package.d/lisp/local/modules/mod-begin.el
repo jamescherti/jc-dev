@@ -327,48 +327,6 @@ any new ones."
                               enhanced-evil-paredit
                               evil
                               evil-collection
-                              evil-collection-bookmark
-                              evil-collection-buff-menu
-                              evil-collection-calendar
-                              evil-collection-comint
-                              evil-collection-compile
-                              evil-collection-consult
-                              evil-collection-corfu
-                              evil-collection-custom
-                              evil-collection-debug
-                              evil-collection-diff-hl
-                              evil-collection-diff-mode
-                              evil-collection-dired
-                              evil-collection-eldoc
-                              evil-collection-elisp-mode
-                              evil-collection-embark
-                              evil-collection-flymake
-                              evil-collection-help
-                              evil-collection-imenu
-                              evil-collection-indent
-                              evil-collection-info
-                              evil-collection-kmacro
-                              evil-collection-log-edit
-                              evil-collection-log-view
-                              evil-collection-markdown-mode
-                              evil-collection-minibuffer
-                              evil-collection-org
-                              evil-collection-outline
-                              evil-collection-process-menu
-                              evil-collection-python
-                              evil-collection-replace
-                              evil-collection-sh-script
-                              evil-collection-simple
-                              evil-collection-tab-bar
-                              evil-collection-tabulated-list
-                              evil-collection-term
-                              evil-collection-unimpaired
-                              evil-collection-vc-dir
-                              evil-collection-vc-git
-                              evil-collection-vertico
-                              evil-collection-vterm
-                              evil-collection-xref
-                              evil-collection-yaml-mode
                               evil-command-window
                               evil-commands
                               evil-common

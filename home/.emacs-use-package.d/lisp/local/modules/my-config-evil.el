@@ -106,10 +106,10 @@
 
 ;; Replaces undo-fu
 (if (< emacs-major-version 28)
-    (progn
-      (setq evil-undo-system 'undo-redo)
-      (evil-set-undo-system 'undo-redo))
-  (require 'le-undo-fu))
+    (require 'le-undo-fu)
+  (progn
+    (setq evil-undo-system 'undo-redo)
+    (evil-set-undo-system 'undo-redo)))
 
 ;;; Stop Visual Paste from Overwriting Your Register
 

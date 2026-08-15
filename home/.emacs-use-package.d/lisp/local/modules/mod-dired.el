@@ -48,7 +48,6 @@
 
 (setq dired-create-destination-dirs 'ask)
 
-;; TODO minimal-emacs.d
 ;; setq native-comp-async-on-battery-power nil) is an excellent default, for
 ;; users running Emacs on laptops. Background native compilation (via gccemacs)
 ;; is a highly CPU-intensive task. When packages are installed or updated,

@@ -2,7 +2,7 @@
  ;; Forks
  ;;-----------------------------------------------------------------------------
  ;; @jamescherti forks of maintained packages
- ("straight.el" . "dba450eb010ee2e9ccf06c84e396723c6dd57c39")
+ ("straight.el" . "b34bdc5b643317d1990f8373cc7d9a3b1cf46601")
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
  ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO add to RSS
  ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO add to RSS

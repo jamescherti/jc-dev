@@ -361,82 +361,6 @@
                                    ;; are not actually used by the code.
                                    "-Wl,--as-needed"))
 
-;; TODO minimal-emacs
-
-;; Disable native compilation for dynamically generated files
-;;
-;; These files change frequently during package updates or are too small to
-;; benefit from native compilation.
-;;
-;; TODO custom.el If your configuration forces the Emacs customize interface to
-;; write to a separate file (e.g., (setq custom-file (expand-file-name
-;; "custom.el" user-emacs-directory))), you should exclude it. Emacs routinely
-;; overwrites this file with raw data (custom variables and face definitions).
-;; libgccjit cannot optimize data parsing.
-(let ((deny-list `(;; Native compilation translates Lisp into C code to optimize
-                   ;; logic paths, loops, and math. A .dir-locals.el file is not
-                   ;; an executable program; it is a static data structure (an
-                   ;; association list) used to apply project-specific
-                   ;; variables. Compiling static data provides zero benefit
-                   ;; because the Lisp reader still has to parse the data
-                   ;; structure regardless of whether it is compiled or not.
-                   "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
-
-                   ;; Yasnippet
-                   "\\(?:[/\\\\]\\.yas-setup\\.el\\(?:\\.gz\\)?$\\)"
-
-                   ;; The *-autoloads.el and *-loaddefs.el files are
-                   ;; automatically generated indices. Every time a package is
-                   ;; installed or updated, these files are overwritten. If you
-                   ;; do not block them, Emacs will spawn background GCC
-                   ;; processes for every update. This wastes CPU cycles and
-                   ;; fills your eln-cache directory with obsolete shared
-                   ;; libraries (.eln files) that will simply be discarded on
-                   ;; the next package update.
-                   "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
-                   "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
-
-                   ;; Just like autoloads, package.el dynamically generates a
-                   ;; -pkg.el file for every package you install. These files
-                   ;; contain a single (define-package ...) form holding
-                   ;; metadata (version number, author, dependencies). Because
-                   ;; it is 100% static data, compiling it is a waste of CPU and
-                   ;; disk I/O.
-                   "\\(?:[/\\\\][^/\\\\]+-pkg\\.el\\(?:\\.gz\\)?$\\)"
-
-                   ;; TODO Useless?
-                   ;; "\\(?:[/\\\\][^/\\\\]+-tests?\\.el\\(?:\\.gz\\)?$\\)"
-                   ;; "\\(?:[/\\\\]\\.dir-settings\\.el\\(?:\\.gz\\)?$\\)"
-
-                   ;; emacs-data directory
-                   ,(concat "^"
-                            (regexp-quote (abbreviate-file-name
-                                           (expand-file-name "~/.emacs-data")))
-                            ".*\\.el\\(?:\\.gz\\)?$")
-
-                   ;; var directory
-                   ,(concat "^"
-                            (regexp-quote (expand-file-name "~/.emacs-data"))
-                            ".*\\.el\\(?:\\.gz\\)?$")
-
-                   ;; TODO this will exclude straight/elpa packages
-                   ;; ,(concat "^"
-                   ;;          (regexp-quote (abbreviate-file-name
-                   ;;                         (expand-file-name lightemacs-var-directory)))
-                   ;;          ".*\\.el\\(?:\\.gz\\)?$")
-                   ;; ,(concat "^"
-                   ;;          (regexp-quote (expand-file-name lightemacs-var-directory))
-                   ;;          ".*\\.el\\(?:\\.gz\\)?$")
-                   )))
-  (setq native-comp-jit-compilation-deny-list deny-list)
-  ;; Backwards compatibility for deprecated variable names that were replaced by
-  ;; `native-comp-jit-compilation-deny-list'.
-  (with-no-warnings
-    (if (boundp 'native-comp-deferred-compilation-deny-list)
-        (setq native-comp-deferred-compilation-deny-list deny-list)
-      (when (boundp 'comp-deferred-compilation-deny-list)
-        (setq comp-deferred-compilation-deny-list deny-list)))))
-
 ;;; Package manager
 
 (let ((user-dir (file-truename lightemacs-user-directory)))
@@ -749,7 +673,6 @@ subsequent GCC invocations."
                            le-enhanced-evil-paredit  ;; using local pkg
                            le-evil-surround
                            le-goto-chg
-                           ;; le-undo-fu ; replaced with undo-redo
                            le-undo-fu-session
                            le-vim-tab-bar
                            ;; le-evil-commentary  ; I am using my own module
@@ -892,7 +815,62 @@ subsequent GCC invocations."
   (advice-add #'x-apply-session-resources :override #'ignore)
   ;; (when (eq lightemacs-package-manager 'builtin-package)
   ;;   (setq use-package-compute-statistics t))
-  )
+
+  ;; TODO add to minimal-emacs?
+  ;; Disable native compilation for some files.
+  ;; (let ((deny-list '(;; Static data structure, not executable logic.
+  ;;                    "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
+  ;;
+  ;;                    ;; Frequently updated auto-generated indices. Compiling them
+  ;;                    ;; wastes CPU and disk I/O.
+  ;;                    "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
+  ;;                    "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
+  ;;
+  ;;                    ;; Static package metadata without runtime logic.
+  ;;                    "\\(?:[/\\\\][^/\\\\]+-pkg\\.el\\(?:\\.gz\\)?$\\)")))
+  ;;   (cond
+  ;;    ((>= emacs-major-version 29)
+  ;;     (setq native-comp-jit-compilation-deny-list deny-list))
+  ;;    ((= emacs-major-version 28)
+  ;;     (setq native-comp-deferred-compilation-deny-list deny-list))
+  ;;    (t
+  ;;     (setq comp-deferred-compilation-deny-list deny-list))))
+
+  ;; Other (not minimal-emacs)
+  (let* ((data-dir (expand-file-name user-emacs-directory))
+         (deny-list `(;; Yasnippet setup files are loaded once during
+                      ;; initialization. Compiling them offers negligible
+                      ;; performance gains.
+                      "\\(?:[/\\\\]\\.yas-setup\\.el\\(?:\\.gz\\)?$\\)"
+
+                      ;; .dir-locals.el is a data structure for project variables,
+                      ;; not executable code. Compiling it wastes resources.
+                      "\\(?:[/\\\\]\\.my-dir-locals\\.el\\(?:\\.gz\\)?$\\)"
+
+                      ;; Emacs data directory: Exclude general data files from compilation.
+                      ;; This conflicts with straight packages or elpa
+                      ;; ,(concat "^" (regexp-quote data-dir) ".*\\.el\\(?:\\.gz\\)?$")
+
+                      ;; TODO: This will exclude straight/elpa packages.
+                      ;; ,(concat "^"
+                      ;;          (regexp-quote (abbreviate-file-name
+                      ;;                        (expand-file-name lightemacs-var-directory)))
+                      ;;          ".*\\.el\\(?:\\.gz\\)?$")
+                      ;; ,(concat "^"
+                      ;;          (regexp-quote (expand-file-name lightemacs-var-directory))
+                      ;;          ".*\\.el\\(?:\\.gz\\)?$")
+                      )))
+    (dolist (regex deny-list)
+      (when (boundp 'native-comp-jit-compilation-deny-list)
+        (push regex native-comp-jit-compilation-deny-list))
+
+      ;; Backwards compatibility for deprecated variable names that were replaced by
+      ;; `native-comp-jit-compilation-deny-list'.
+      (with-no-warnings
+        (if (boundp 'native-comp-deferred-compilation-deny-list)
+            (push regex native-comp-deferred-compilation-deny-list)
+          (when (boundp 'comp-deferred-compilation-deny-list)
+            (push regex comp-deferred-compilation-deny-list)))))))
 
 (add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
 
