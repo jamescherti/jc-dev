@@ -107,18 +107,11 @@ visibility when navigation commands are executed."
               #'lightemacs-default-settings--advice-recenter-maybe))
 
 (with-eval-after-load 'diff-hl
-  (advice-add 'diff-hl-next-hunk :around
+  (advice-add 'diff-hl-previous-hunk :around
               #'lightemacs-default-settings--advice-recenter-always)
   (advice-add 'diff-hl-next-hunk :around
               #'lightemacs-default-settings--advice-recenter-always))
 
-(with-eval-after-load 'git-gutter
-  (advice-add 'git-gutter:previous-hunk :around
-              #'lightemacs-default-settings--advice-recenter-maybe)
-  (advice-add 'git-gutter:next-hunk :around
-              #'lightemacs-default-settings--advice-recenter-maybe))
-
-;; TODO use a loop to add to hooks and advice functions
 (with-eval-after-load 'git-gutter
   (advice-add 'git-gutter:previous-hunk :around
               #'lightemacs-default-settings--advice-recenter-maybe)
