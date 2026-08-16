@@ -1,5 +1,25 @@
 ;;; mod-flymake.el --- mod-flymake -*- lexical-binding: t -*-
 
+;; Author: James Cherti
+;; URL: https://github.com/jamescherti/jc-dev
+;; Package-Requires: ((emacs "29.1"))
+;; Keywords: maint
+;; Version: 0.0.9
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 
 
@@ -13,8 +33,7 @@
 
 ;;; Flymake defaults
 
-(setq flymake-start-on-flymake-mode (when (> (num-processors) 8)
-                                      t))
+(setq flymake-start-on-flymake-mode (> (num-processors) 8))
 
 (setq flymake-no-changes-timeout (if (> (num-processors) 8)
                                      0.5
@@ -68,7 +87,7 @@
 
                            (vc-root
                             (list "--project-dir"
-                                  (expand-file-name project-root)))
+                                  (expand-file-name vc-root)))
 
                            (t
                             nil)))))))
@@ -92,6 +111,7 @@
 ;; Why does it start with elisp? TODO
 
 ;;; Flymake bashate
+
 (lightemacs-use-package flymake-bashate
   :commands flymake-bashate-setup
   :init
@@ -129,7 +149,7 @@ environment for accurate linting."
 (add-hook 'lightemacs-emacs-startup-hook
           #'lightemacs-flymake-initialize-elisp-path 99)
 
-;;; Flymake
+;;; DISABLED: Flymake
 
 ;; (progn
 ;;   (defun my/flymake-error-no-exit (_orig-fun text &rest args)
@@ -171,37 +191,26 @@ environment for accurate linting."
 ;;   :init
 ;;   (add-hook 'markdown-mode-hook #'flymake-markdownlint-setup))
 
-;;; Flymake fixes
+;;; DISABLED: Flymake fixes
 
-(defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
-  "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
-
-ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
-ARGS are the arguments passed to ORIG-FUN.
-
-If the error message contains \"find a suitable init function\", it is
-ignored and logged as a warning. All other errors are re-raised."
-  (condition-case err
-      (apply orig-fun args)
-    ((error)
-     (let ((error-message (error-message-string err))
-           (inhibit-message t))
-       (message "[WARNING] Flymake: %s: %s"
-                (buffer-file-name (buffer-base-buffer))
-                error-message))
-     ;; (if (string-match-p "find a suitable init function"
-     ;;                     error-message)
-     ;;     (let ((inhibit-message t))
-     ;;       (message "[WARNING] Flymake: %s: %s"
-     ;;                buffer-file-name
-     ;;                error-message))
-     ;;   (signal (car err) (cdr err)))
-     )))
-
-(with-eval-after-load 'flymake-proc
-  (advice-add 'flymake-proc-legacy-flymake :around
-              #'my-flymake-proc-legacy-safe-advice))
-
+;; (defun my-flymake-proc-legacy-safe-advice (orig-fun &rest args)
+;;   "Call `flymake-proc-legacy-flymake' safely, ignoring missing init function.
+;;
+;; ORIG-FUN is the original `flymake-proc-legacy-flymake` function.
+;; ARGS are the arguments passed to ORIG-FUN.
+;;
+;; If the error message contains \"find a suitable init function\", it is
+;; ignored and logged as a warning. All other errors are re-raised."
+;;   (condition-case err
+;;       (apply orig-fun args)
+;;     (error
+;;      (let ((error-message (error-message-string err))
+;;            (inhibit-message t))
+;;        (message "[WARNING] Flymake: %s: %s" (buffer-name) error-message)))))
+;;
+;; (with-eval-after-load 'flymake-proc
+;;   (advice-add 'flymake-proc-legacy-flymake :around
+;;               #'my-flymake-proc-legacy-safe-advice))
 
 ;;; DISABLED: Sideline flymake
 
