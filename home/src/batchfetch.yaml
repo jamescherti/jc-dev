@@ -244,7 +244,7 @@ tasks:
   - git: git@github.com:jamescherti/emacs-ansible
     path: forks/emacs-ansible
     remote:
-      upstream: https://gitlab.com/emacs-ansible/emacs-ansible/
+      upstream: https://gitlab.com/emacs-ansible/emacs-ansible.git/
 
   - git: git@github.com:jamescherti/ztree
     path: forks/ztree
@@ -306,9 +306,12 @@ tasks:
 
   - git: git@github.com:jamescherti/emacs-shfmt
     path: forks/emacs-shfmt
+    delete: true
 
   - git: git@github.com:jamescherti/highlight-symbol.el
     path: forks/highlight-symbol.el
+    remote:
+      upstream: https://github.com/nschum/highlight-symbol.el
 
   - git: git@github.com:jamescherti/git-gutter
     path: forks/git-gutter
@@ -317,6 +320,7 @@ tasks:
 
   - git: git@github.com:jamescherti/vline
     path: forks/vline
+    delete: true
 
   # - git: ssh://git@codeberg.org/jamescherti/emacs-eat.git
   # I have change it and the developer hasn't merged my changes yet.
@@ -327,12 +331,16 @@ tasks:
 
   - git: git@codeberg.org:jamescherti/git-timemachine
     path: forks/git-timemachine
+    delete: true
 
   - git: git@github.com:jamescherti/modeline-region.el
     path: forks/modeline-region.el
+    delete: true
 
   - git: git@github.com:jamescherti/cherrybuckle
     path: forks/cherrybuckle
+    remote:
+      upstream: https://github.com/zevv/bucklespring
 
   - git: git@github.com:jamescherti/markdown-mode
     path: forks/markdown-mode
@@ -412,7 +420,7 @@ tasks:
     remote:
       upstream: https://github.com/radian-software/prescient.el
 
-  - git: git@github.com:jamescherti/doom-themes.el
+  - git: git@github.com:jamescherti/doom-themes
     path: forks/doom-themes
     remote:
       upstream: https://github.com/doomemacs/themes
@@ -502,7 +510,7 @@ tasks:
     path: forks/gcmh
     revision: master
     remote:
-      upstream: https://gitlab.com/koral/gcmh
+      upstream: https://gitlab.com/koral/gcmh.git/
 
   - git: git@github.com:jamescherti/goto-chg
     path: forks/goto-chg
