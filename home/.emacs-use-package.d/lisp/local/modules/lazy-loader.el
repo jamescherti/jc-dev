@@ -43,11 +43,6 @@
   :group 'lazy-loader)
 
 (defcustom lazy-loader-buffers nil
-  "Files to load when Emacs is unfocused or idle."
-  :type '(repeat string)
-  :group 'lazy-loader)
-
-(defcustom lazy-loader-buffers nil
   "Alist of buffers to load when Emacs is unfocused or idle.
 Each entry should be a cons cell (BUFFER-NAME . INIT-FUNC),
 where BUFFER-NAME is a string and INIT-FUNC is a function

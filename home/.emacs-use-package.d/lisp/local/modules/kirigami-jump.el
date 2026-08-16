@@ -199,11 +199,12 @@ If ENABLE is non-nil, install hooks. Otherwise remove them."
           (advice-add 'evil-goto-mark :around #'kirigami-jump--around-outline-show-entry)))
     ;; DISABLE
     (with-eval-after-load 'flymake
-      (advice-remove 'flymake-goto-next-error #'kirigami-jump--open-fold)
-      (advice-remove 'flymake-goto-prev-error #'kirigami-jump--open-fold))
+      (advice-remove 'flymake-goto-next-error #'kirigami-jump--around-outline-show-entry)
+      (advice-remove 'flymake-goto-prev-error #'kirigami-jump--around-outline-show-entry))
 
     (with-eval-after-load 'evil
-      (advice-remove 'evil-goto-mark #'kirigami-jump--open-fold))))
+      (advice-remove 'evil-goto-line #'kirigami-jump--around-outline-show-entry)
+      (advice-remove 'evil-goto-mark #'kirigami-jump--around-outline-show-entry))))
 
 (define-minor-mode kirigami-jump-mode
   "Enhancements for `jump-mode', `jump-minor-mode', and related modes.
