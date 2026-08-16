@@ -66,6 +66,7 @@ actions:
     tags: install
     list_commands:
       - "cp tools/efasd/fasd {{ '~/src/dotfiles/jc-dev/home/.bin/fasd' | expanduser | quote }}"
+      - "cp tools/efasd/fasd {{ '~/.bin/fasd' | expanduser | quote }}"
 
   - path_match:
       - "*/update-iptables.sh"

@@ -612,3 +612,23 @@ alias gpg-src="git-rexec -C ~/src --exclude ~/src/forks --exclude ~/src/local --
 alias emacsdiff=emacs-diff
 alias ediff=emacs-diff
 alias ccf=cbcopy-files
+
+# Disable Version Control System (VCS) directory traversal.
+# By default, fasd recursively searches upward for a .git or .hg directory.
+# Disabling this prevents disk I/O overhead on every command execution.
+export _FASD_ONLY_VCS=0
+
+# Reduce the maximum size of the fasd database.
+# A smaller database reduces the parsing overhead incurred by awk
+# when rewriting the file during prompt evaluation.
+export _FASD_MAX=500
+
+# Disable symlink resolution. This prevents the script from spawning
+# sub-processes to run 'xargs' and 'readlink'.
+export _FASD_RESOLVE_SYMLINKS=0
+
+# The GNU awk (gawk) implementation is standard on many systems, but mawk is a
+# bytecode-compiled implementation that is significantly faster.
+if type -P mawk &>/dev/null; then
+  export _FASD_AWK="mawk"
+fi
