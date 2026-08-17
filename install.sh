@@ -280,6 +280,11 @@ main() {
   rm -f ~/.rgignore ~/.fdignore ~/src/.rgignore ~/src/.fdignore
   rm -fr ~/.borgmachine
 
+  if _MAWK_PATH=$(type -P mawk 2>/dev/null); then
+    mkdir -p ~/.local/bin
+    ln -sf "$_MAWK_PATH" ~/.local/bin/awk
+  fi
+
   echo
   echo Success.
 }

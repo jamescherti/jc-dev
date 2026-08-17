@@ -214,7 +214,30 @@
                                 ;; rules.
                                 ;; Let's add 'I' (isort), 'W' (warnings), and
                                 ;; 'UP' (pyupgrade)
-                                :extendSelect ["I" "W" "UP"]
+                                ;;
+                                ;; NOTE: Removed "I" (false positives)
+                                :extendSelect ["W" "UP"]
+
+                                ;; UP035: Deprecation of imports from typing
+                                ;; (e.g., typing.List, typing.Dict).
+                                ;;
+                                ;; Why ignore:
+                                ;; - Maintains compatibility with codebases
+                                ;;   targeting Python < 3.9 where built-in
+                                ;;   collection types cannot be parameterized
+                                ;;   directly without from __future__ import
+                                ;;   annotations.
+                                ;; - Prevents multiple diagnostics from firing
+                                ;;   on the same import line (e.g., from typing
+                                ;;   import Dict, List), which causes
+                                ;;   overlapping Flymake overlays.
+                                ;;
+                                ;; When to remove:
+                                ;; - Remove once all target environments are on
+                                ;;   Python 3.9+ and codebases migrate to
+                                ;;   standard PEP 585 generics (e.g.,
+                                ;;   list[str], dict[str, int]).
+                                :ignore ["UP035"]
 
                                 ;; Target your specific Python version
                                 ;; :targetVersion "py310"

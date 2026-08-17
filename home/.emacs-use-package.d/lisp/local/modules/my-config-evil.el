@@ -255,8 +255,8 @@
         ;;   (flyspell-prog-mode))
         ))))
 
-(add-hook 'prog-mode-hook #'my-setup-spell-checker)
-(add-hook 'text-mode-hook #'my-setup-spell-checker)
+;; (add-hook 'prog-mode-hook #'my-setup-spell-checker)
+;; (add-hook 'text-mode-hook #'my-setup-spell-checker)
 
 ;;; Better evil
 

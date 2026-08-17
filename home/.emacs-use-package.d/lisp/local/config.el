@@ -438,7 +438,6 @@
 
 ;; Direct subprocesses (like libgccjit) to the new directory
 (setenv "TMPDIR" my-session-temp-directory)
-;; (message "TMP:%s" my-session-temp-directory)
 
 (defun my-cleanup-session-temp-directory ()
   "Remove the unique session temporary directory and its contents."
@@ -888,7 +887,7 @@ subsequent GCC invocations."
 (setq stripspace-normalize-indentation t)
 (setq stripspace-restore-column t)
 (setq stripspace-only-if-initially-clean t)
-(setq stripspace-use-virtual-overlay nil)
+(setq stripspace-use-virtual-overlay t)
 
 ;; If you want the lowest possible latency and do not care about system-level
 ;; Compose keys, or if you are willing to map them entirely within Emacs using

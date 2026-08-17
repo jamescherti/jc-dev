@@ -631,4 +631,5 @@ export _FASD_RESOLVE_SYMLINKS=0
 # bytecode-compiled implementation that is significantly faster.
 if type -P mawk &>/dev/null; then
   export _FASD_AWK="mawk"
+  alias awk=mawk
 fi
