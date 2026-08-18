@@ -505,6 +505,7 @@ only if they are not already available."
              file-name
              (string-match my-ansible-file-regexp (expand-file-name file-name)))
         (ansible-mode)
+        ;; (remove-hook 'flymake-diagnostic-functions 'yaml-ts-mode-flymake 'local)
         (jinja2-highlight-mode 1))
 
        ((and treesit-yaml-available
