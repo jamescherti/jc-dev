@@ -1909,31 +1909,30 @@ truncated."
        ;;  )
 
        ((eq line-number-type 'visual)
-        (funcall func-change-line-visual count)
+        ;; (funcall func-change-line-visual count)
 
-        ;; (if (or truncate-lines
-        ;;         (= count 1))
-        ;;     ;; This speeds-up scrolling because it does not take into
-        ;;     ;; consideration visual things
-        ;;     (progn
-        ;;       ;; (let ((line-move-visual t))
-        ;;       ;;   (if (> n 0)
-        ;;       ;;       (progn
-        ;;       ;;         (call-interactively 'next-line count)
-        ;;       ;;         (when (get-char-property (point) 'invisible)
-        ;;       ;;           (let ((prev-visible (previous-single-char-property-change (point) 'invisible nil (point-min))))
-        ;;       ;;             (when prev-visible
-        ;;       ;;               (goto-char prev-visible))))
-        ;;       ;;         )
-        ;;       ;;     (call-interactively 'previous-line count)))
-        ;;
-        ;;       ;; Fixes kirigami/outline/org...
-        ;;       (funcall func-change-line-visual count)
-        ;;
-        ;;
-        ;;       ;; (funcall func-change-line count)
-        ;;       )
-        ;;   (funcall func-change-line-visual count))
+        (if (and (not truncate-lines)
+                 (= count 1))
+            ;; This speeds-up scrolling because it does not take into
+            ;; consideration visual things
+            (progn
+              ;; (let ((line-move-visual t))
+              ;;   (if (> n 0)
+              ;;       (progn
+              ;;         (call-interactively 'next-line count)
+              ;;         (when (get-char-property (point) 'invisible)
+              ;;           (let ((prev-visible (previous-single-char-property-change (point) 'invisible nil (point-min))))
+              ;;             (when prev-visible
+              ;;               (goto-char prev-visible))))
+              ;;         )
+              ;;     (call-interactively 'previous-line count)))
+
+              ;; Fixes kirigami/outline/org...
+              (funcall func-change-line-visual count)
+
+              ;; (funcall func-change-line count)
+              )
+          (funcall func-change-line-visual count))
         )
 
        ((eq line-number-type 'relative)
