@@ -40,6 +40,7 @@
  ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
 
  ;; Unmaintained (Forked: jamescherti)
+ ("avy" . "2105e049e9bba72da5232042b6a816783438f225")
  ("basic-mode" . "1dc1a635d6d80668c8a583b974205e49ff0fc3ce")
  ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
  ("evil-surround" . "e6548372e8359ee55e67d73ca418314086011f1a")

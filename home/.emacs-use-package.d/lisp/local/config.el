@@ -751,7 +751,7 @@ subsequent GCC invocations."
 
                            le-maybe-yaml-ts
 
-                           ;; le-avy
+                           le-avy
                            ;; le-ace-window
                            ;; le-expand-region
 
