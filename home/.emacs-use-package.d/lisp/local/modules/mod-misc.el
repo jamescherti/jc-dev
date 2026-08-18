@@ -2781,20 +2781,21 @@ ARGS - the arguments passed to the original function"
   :config
   ;; The key sequence used to toggle the shell window.
   (setopt shell-pop-universal-key "C-c t")
-  (setopt shell-pop-shell-type '("vterm" "*vterm*"
-                                 (lambda ()
-                                   (when (fboundp 'vterm)
-                                     (let* ((vterm-shell shell-pop-term-shell))
-                                       (vterm))))))
+  ;; (setopt shell-pop-shell-type '("vterm" "*vterm*"
+  ;;                                (lambda ()
+  ;;                                  (when (fboundp 'vterm)
+  ;;                                    (let* ((vterm-shell shell-pop-term-shell))
+  ;;                                      (vterm))))))
 
   ;; (setopt shell-pop-shell-type '("eat" "*eat*"
   ;;                         (lambda ()
   ;;                           (when (fboundp 'eat)
   ;;                             (eat shell-pop-term-shell)))))
-  ;; (setopt shell-pop-shell-type '("ansi-term"
-  ;;                                "*ansi-term*"
-  ;;                                (lambda ()
-  ;;                                  (ansi-term shell-pop-term-shell))))
+
+  (setopt shell-pop-shell-type '("ansi-term"
+                                 "*ansi-term*"
+                                 (lambda ()
+                                   (ansi-term shell-pop-term-shell))))
 
   :init
   ;; (setq shell-pop-term-shell "/usr/bin/env bash")
@@ -2877,25 +2878,26 @@ ARGS - the arguments passed to the original function"
   (when (fboundp 'my-project-name)
     (let* ((proj-name (or (my-project-name) "misc"))
            (buf-name (format "*vterm:%s*" proj-name)))
-      ;; (setopt shell-pop-shell-type (list "ansi-term"
-      ;;                                    "*ansi-term*"
-      ;;                                    `(lambda ()
-      ;;                                       (let* ((shell-cmd
-      ;;                                               (format "tmux-session emacs-%s"
-      ;;                                                       (replace-regexp-in-string
-      ;;                                                        "[^a-z0-9]+" "-"
-      ;;                                                        (shell-quote-argument ,proj-name)))))
-      ;;                                         (ansi-term shell-cmd)))))
-      (setopt shell-pop-shell-type
-              (list "vterm"
-                    buf-name
-                    `(lambda ()
-                       (let* ((vterm-shell
-                               (format "tmux-session emacs-%s"
-                                       (replace-regexp-in-string
-                                        "[^a-z0-9]+" "-"
-                                        (shell-quote-argument ,proj-name))))
-                              (tmux-buffer (vterm ,buf-name))))))))))
+      (setopt shell-pop-shell-type (list "ansi-term"
+                                         "*ansi-term*"
+                                         `(lambda ()
+                                            (let* ((shell-cmd
+                                                    (format "tmux-session emacs-%s"
+                                                            (replace-regexp-in-string
+                                                             "[^a-z0-9]+" "-"
+                                                             (shell-quote-argument ,proj-name)))))
+                                              (ansi-term shell-cmd)))))
+      ;; (setopt shell-pop-shell-type
+      ;;         (list "vterm"
+      ;;               buf-name
+      ;;               `(lambda ()
+      ;;                  (let* ((vterm-shell
+      ;;                          (format "tmux-session emacs-%s"
+      ;;                                  (replace-regexp-in-string
+      ;;                                   "[^a-z0-9]+" "-"
+      ;;                                   (shell-quote-argument ,proj-name))))
+      ;;                         (tmux-buffer (vterm ,buf-name)))))))
+      )))
 
 (with-eval-after-load 'shell-pop
   ;; Apply the new global setting advice
