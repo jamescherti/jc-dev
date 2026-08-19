@@ -1874,21 +1874,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                  ;;             (name . "^\\.newsrc-dribble")))
                  )))))
 
-;;; Setup scratch
-
-(defvar-local my-scratch-setup-done nil)
-
-(defun my-setup-scratch-buffer ()
-  "Setup the scratch buffer."
-  (let ((buffer (get-buffer "*scratch*")))
-    (when (buffer-live-p buffer)
-      (with-current-buffer buffer
-        (unless my-scratch-setup-done
-          (setq my-scratch-setup-done t)
-          (setq fill-column 60))))))
-
-(advice-add 'scratch-buffer :after #'my-setup-scratch-buffer)
-
 ;;; Display line numbers
 
 (defun my-setup-display-line-numbers-mode ()
