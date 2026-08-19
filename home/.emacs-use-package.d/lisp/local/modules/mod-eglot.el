@@ -83,6 +83,7 @@
 
   (setq eglot-stay-out-of '(yasnippet company))
   (setq eglot-connect-timeout 40)
+  (setq eglot-max-file-watches 5000)
 
   (setq eglot-ignored-server-capabilities
         '(;; Formatting (Handled by external tools like Apheleia)
