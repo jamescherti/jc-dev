@@ -809,14 +809,14 @@ only if they are not already available."
          ("\\.log\\'" . txt-file-mode)))
 
 ;; Gentoo
-(if (treesit-ready-p 'bash)
+(if (treesit-ready-p 'bash t)
     (push '("/make\\.conf\\'" . bash-ts-mode) auto-mode-alist)
   (push '("/make\\.conf\\'" . sh-mode) auto-mode-alist))
 
 (push '("/\\.gitconfig\\.local\\'" . gitconfig-mode) auto-mode-alist)
 (push '("/\\.gitattributes\\.local\\'" . gitattributes-mode) auto-mode-alist)
 
-(if (treesit-ready-p 'json)
+(if (treesit-ready-p 'json t)
     (push '("/\\.ipynb\\'" . json-ts-mode) auto-mode-alist)
   (push '("/\\.ipynb\\'" . js-json-mode) auto-mode-alist))
 
@@ -838,7 +838,7 @@ only if they are not already available."
   (let ((inhibit-message t))
     (toggle-truncate-lines 0)))
 
-(if (and (>= emacs-major-version 32)
+(if (and (> emacs-major-version 30)
          (my-treesit-language-available-p 'markdown))
     (progn
       (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)

@@ -75,6 +75,7 @@
 (setq lightemacs-modules '(le-flavor-micro
                            le-pathaction
                            le-markdown-mode
+                           ;; le-maybe-markdown-ts
                            le-group-evil
                            le-persist-text-scale
                            le-xclip
