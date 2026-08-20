@@ -263,146 +263,24 @@ any new ones."
                               aggressive-indent
                               yasnippet
                               apheleia
-                              dired
-
-                              add-log
-                              advice
-                              apheleia-dp
-                              apheleia-formatter-context
-                              apheleia-formatters
-                              apheleia-log
-                              apheleia-rcs
-                              apheleia-utils
-                              auth-source
-                              autorevert
-                              avl-tree
-                              backtrace
-                              bibtex
-                              bookmark
-                              buffer-terminator
-                              byte-opt
-                              c++-ts-mode
-                              c-ts-common
-                              c-ts-mode
-                              cal-loaddefs
-                              cal-menu
-                              calendar
-                              checkdoc
-                              cl-print
-                              color
+                              apheleia
                               compile-angel
                               consult
-                              consult-imenu
-                              consult-info
-                              consult-xref
                               corfu
-                              corfu-history
-                              corfu-popupinfo
-                              cursor-sensor
-                              dash
-                              debug
+                              dired
                               diff-hl
-                              diff-mode
-                              dired-aux
                               dired-filter
-                              dired-hacks-utils
-                              dired-loaddefs
-                              dired-x
-                              disp-table
-                              display-fill-column-indicator
-                              display-line-numbers
-                              dtrt-indent
-                              easy-escape
-                              edit-indirect
-                              edmacro
-                              ef-melissa-dark-theme
-                              ef-themes
-                              ehelp
-                              eieio
-                              eieio-core
-                              elec-pair
                               embark
                               embark-consult
                               embark-org
                               enhanced-evil-paredit
                               evil
                               evil-collection
-                              evil-command-window
-                              evil-commands
-                              evil-common
-                              evil-core
-                              evil-ex
-                              evil-integration
-                              evil-jumps
-                              evil-macros
-                              evil-maps
-                              evil-matchit
-                              evil-matchit-autoloads
-                              evil-matchit-evil-setup
-                              evil-matchit-sdk
-                              evil-repeat
-                              evil-search
-                              evil-snipe
-                              evil-states
-                              evil-surround
-                              evil-types
-                              evil-vars
-                              ewoc
-                              executable
-                              f
-                              face-remap
-                              ffap
-                              filenotify
-                              files-x
-                              find-func
-                              flymake
-                              flyspell
-                              format-spec
-                              gcmh
-                              gcsentinel
-                              generator
-                              gptel-autoloads
-                              help-fns
-                              highlight-defined
-                              imenu
                               inhibit-mouse
-                              inline
-                              iso8601
-                              ispell
-                              jka-compr
-                              json
                               kirigami
                               kirigami-evil
                               kirigami-jump
-                              kmacro
                               lazy-autorevert
-                              lazy-loader
-                              le-undo-fu
-                              le-wgrep
-                              log-edit
-                              log-view
-                              map
-                              marginalia
-                              markdown-mode
-                              mb-depth
-                              mode-local
-                              modus-themes
-                              my-config-evil
-                              my-evil-outline
-                              noutline
-                              ob
-                              ob-comint
-                              ob-core
-                              ob-emacs-lisp
-                              ob-eval
-                              ob-exp
-                              ob-lob
-                              ob-ref
-                              ob-table
-                              ob-tangle
-                              oc
-                              oc-basic
-                              ol
                               org-capture
                               org-compat
                               org-cycle
@@ -430,75 +308,7 @@ any new ones."
                               org-version
                               outline
                               outline-indent
-                              paredit
-                              parse-time
-                              password-cache
-                              pcase
-                              pcomplete
-                              pcvs-util
-                              persist-text-scale
-                              project
-                              pulse
-                              python
-                              quick-fasd
-                              quick-fasd-autoloads
-                              recentf
-                              rect
-                              reveal
-                              s
-                              savehist
-                              saveplace
-                              semantic/fw
-                              semantic/lex
-                              server
-                              sh-script
-                              shell
-                              smie
-                              stripspace
-                              sub-better-evil
-                              sub-evil-gptel
-                              sub-org
-                              tabify
-                              term
-                              term/xterm
-                              thingatpt
-                              time
-                              time-date
-                              time-stamp
-                              track-changes
-                              tramp
-                              tramp-cache
-                              tramp-cmds
-                              tramp-compat
-                              tramp-integration
-                              tramp-loaddefs
-                              tramp-message
-                              trampver
-                              tree-widget
-                              treesit-fold
-                              treesit-fold-parsers
-                              treesit-fold-summary
-                              treesit-fold-util
-                              undo-fu-autoloads
-                              undo-fu-session
-                              url-parse
-                              url-util
-                              url-vars
-                              vc
-                              vc-dir
-                              vc-dispatcher
-                              vc-git
-                              vertico
-                              vertico-sort
-                              vterm-module
-                              wgrep-autoloads
-                              wizard
-                              wizard-autoloads
-                              xdg
-                              xref
-                              xterm
-                              yaml-mode
-                              yank-media))
+                              persist-text-scale))
   ;; (lazy-loader-buffers
   ;;  '(("*tmux*" .
   ;;     (lambda ()
