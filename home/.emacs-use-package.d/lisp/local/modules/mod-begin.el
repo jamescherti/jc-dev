@@ -258,21 +258,23 @@ any new ones."
   (setq lazy-loader-files (delq nil
                                 (list (when (bound-and-true-p file-path-todo)
                                         file-path-todo))))
-  (setq lazy-loader-modules '(org
-                              vterm
-                              aggressive-indent
-                              yasnippet
-                              apheleia
+  (setq lazy-loader-modules '(aggressive-indent
                               apheleia
                               compile-angel
+                              buffer-terminator
                               consult
                               corfu
-                              dired
+                              ;; evil-snipe
+                              shell-pop
+                              vertico
+                              ;; sh-script
+                              ;; smie
+                              ;; avy
                               diff-hl
+                              dired
                               dired-filter
                               embark
                               embark-consult
-                              embark-org
                               enhanced-evil-paredit
                               evil
                               evil-collection
@@ -281,6 +283,7 @@ any new ones."
                               kirigami-evil
                               kirigami-jump
                               lazy-autorevert
+                              org
                               org-capture
                               org-compat
                               org-cycle
@@ -308,6 +311,8 @@ any new ones."
                               org-version
                               outline
                               outline-indent
+                              vterm
+                              yasnippet
                               persist-text-scale))
   ;; (lazy-loader-buffers
   ;;  '(("*tmux*" .
