@@ -633,3 +633,5 @@ if type -P mawk &>/dev/null; then
   export _FASD_AWK="mawk"
   alias awk=mawk
 fi
+
+export _FASD_IGNORE_DUPS=1
