@@ -109,6 +109,7 @@ fasd() {
           [ -z "$_FASD_ONLY_VCS" ] && _FASD_ONLY_VCS=1
           [ -z "$_FASD_RECENTLY_USED_XBEL" ] && \
             _FASD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
+          [ -z "$_FASD_IGNORE_DUPS" ] && _FASD_IGNORE_DUPS=0
 
           if [ -z "$_FASD_AWK" ]; then
             # awk preferences
@@ -170,6 +171,10 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
+  if [ "\$_FASD_IGNORE_DUPS" = "1" ]; then
+    [ "\$2" = "\$_FASD_LAST_CMD" ] && return
+    _FASD_LAST_CMD="\$2"
+  fi
   { fasd --proc \$(fasd --sanitize "\$2") } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
@@ -195,9 +200,16 @@ EOS
       bash-hook) cat <<EOS
 _fasd_prompt_func() {
   local _exit_code="\$?"
+  local _fasd_cmd="\$(HISTTIMEFORMAT= history 1 | \\
+    sed 's/^[ ]*[0-9]*[ ]*//')"
+  if [ "\$_FASD_IGNORE_DUPS" = "1" ]; then
+    if [ "\$_fasd_cmd" = "\$_FASD_LAST_CMD" ]; then
+      return \$_exit_code
+    fi
+    _FASD_LAST_CMD="\$_fasd_cmd"
+  fi
   (
-  eval "fasd --proc \$(fasd --sanitize \$(HISTTIMEFORMAT= history 1 | \\
-    sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1 &
+  eval "fasd --proc \$(fasd --sanitize \"\$_fasd_cmd\")" >> "$_FASD_SINK" 2>&1 &
   )
   # preserve exit code
   return \$_exit_code
