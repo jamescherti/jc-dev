@@ -129,6 +129,12 @@ main() {
     # echo "[INFO] Change GDK_BACKEND to wayland and GTK_IM_MODULE to none"
   fi
 
+  # Use /bin/sh (typically dash or ash) instead of bash for background
+  # subprocesses to minimize startup overhead and reduce memory consumption
+  # across frequent process forks.
+  export SHELL
+  SHELL=$(/usr/bin/env sh)
+
   local emacs_dir
   emacs_dir=$(dirname "$emacs_bin")
   export PATH="$emacs_dir:$PATH"
@@ -141,12 +147,13 @@ main() {
     EMACS_DAEMON=$(run-emacsclient-nowait -e '(daemonp)' || :)
 
     if [[ $EMACS_DAEMON == "t" ]]; then
-      emacsclient -c
+      exec emacsclient -c
     fi
 
     exit 0
   else
     echo "[RUN]" "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
+
     exec "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
     # exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
   fi

@@ -3036,6 +3036,11 @@ This prevents Flymake warnings when viewing framework source files in Emacs
 (setenv "COLORTERM" "truecolor")
 (setq term-term-name "eterm-color")
 
+;; Use /bin/sh (typically dash or ash) instead of bash for background
+;; subprocesses to minimize startup overhead and reduce memory consumption
+;; across frequent process forks.
+(setq shell-file-name "/bin/sh")
+(setenv "SHELL" shell-file-name)
 (setq explicit-shell-file-name "bash")
 (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
 

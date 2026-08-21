@@ -464,9 +464,6 @@ By default, closing the last window in a tab does not close the tab."
         (user-error "You cannot close: %s" (buffer-name))
       (let* ((buffer (or (buffer-base-buffer) (current-buffer)))
              (number-of-splits (length (mod-buffer-terminator---non-minibuffer-windows))))
-        ;; (with-current-buffer buffer
-        ;;   (buffer-guardian-save-buffer))
-
         ;; Close the window/tab
         (if (and (boundp 'tab-bar-mode) tab-bar-mode)
             (let ((amount-open-tabs (length (funcall tab-bar-tabs-function))))

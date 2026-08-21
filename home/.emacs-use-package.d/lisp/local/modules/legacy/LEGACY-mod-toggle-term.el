@@ -277,7 +277,6 @@ Returns: None. It resets the tmux session and optionally switches to it."
 This function runs the `git-commitflow` command in the tmux session and
 waits for the user to press a key before finishing execution."
   (interactive)
-  (buffer-guardian-save-buffer)
   (toggle-term-tmux-default-bash "git-commitflow" :wait-for-key))
 
 (defun cip ()
@@ -286,7 +285,6 @@ waits for the user to press a key before finishing execution."
 This function runs the `git cip` command in the tmux session and waits for
 the user to press a key before finishing execution."
   (interactive)
-  (buffer-guardian-save-buffer)
   (toggle-term-tmux-default-bash "git cip" :wait-for-key))
 
 (defun gpl ()
@@ -295,7 +293,6 @@ the user to press a key before finishing execution."
 This function runs the `gpl` command in the tmux session and waits for the
 user to press a key before finishing execution."
   (interactive)
-  (buffer-guardian-save-buffer)
   (toggle-term-tmux-default-bash
    (toggle-term-tmux-default-bash "gpl" :wait-for-key)))
 
