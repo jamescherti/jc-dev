@@ -82,6 +82,7 @@
                            le-flavor-micro
                            le-pathaction
                            le-term
+                           le-dired-filter
 
                            le-maybe-markdown-ts
                            le-maybe-yaml-ts
