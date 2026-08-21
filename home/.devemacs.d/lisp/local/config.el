@@ -35,9 +35,6 @@
 
 ;;; Optimization
 
-(setq minimal-emacs-inhibit-message-during-startup t)
-(setq minimal-emacs-inhibit-redisplay-during-startup t)
-
 (setq site-run-file nil)
 (setq inhibit-default-init t)
 
@@ -45,6 +42,9 @@
 (with-eval-after-load 'cus-edit
   ;; Prevent Emacs from writing custom settings to any file
   (advice-add 'custom-save-all :override #'ignore))
+
+(setq minimal-emacs-inhibit-message-during-startup t)
+(setq minimal-emacs-inhibit-redisplay-during-startup t)
 
 ;;; Native-compilation
 
@@ -62,7 +62,6 @@
 (setq lightemacs-theme-default-font "Iosevka Term SemiBold")
 (setq lightemacs-theme-variable-font "Iosevka")
 
-(setq lightemacs-load-compiled-init-files t)
 (setq lightemacs-saveplace-recenter-after-find-file t)
 
 (setq minimal-emacs-frame-title-format "Devemacs")
@@ -72,12 +71,18 @@
 (setq lightemacs-theme-name 'tomorrow-night-deepblue)
 (setq lightemacs-theme-package 'tomorrow-night-deepblue-theme)
 
-(setq lightemacs-modules '(le-compile-angel
+(setq treesit-language-source-alist nil)
+(add-to-list
+ 'treesit-language-source-alist
+ '(yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml"
+        :commit "b733d3f5f5005890f324333dd57e1f0badec5c87")
+ t)
+
+(setq lightemacs-modules '(;;le-compile-angel
                            le-flavor-micro
                            le-pathaction
                            le-term
 
-                           ;; le-markdown-mode
                            le-maybe-markdown-ts
                            le-maybe-yaml-ts
 
@@ -85,21 +90,18 @@
                            le-xclip
 
                            le-group-evil
+
+                           ;; le-autorevert
                            ;; le-org
                            ;; le-consult
                            ;; le-vertico
-                           ;; le-autorevert
-                           ;; le-undo-fu
-                           ;; le-undo-fu-session
-
                            ;; le-consult-dir
                            ;; le-embark-consult
                            ;; le-embark
                            ;; le-wgrep
                            ;; le-orderless
-
-                           ;; le-evil-visualstar
                            ;; le-git-modes
+                           ;; le-evil-visualstar
                            ))
 
 ;;; DISABLED: Better commit message 3
