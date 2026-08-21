@@ -68,7 +68,7 @@ config-pip-packages() {
 
   if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
     || ! type -P git-rexec &>/dev/null; then
-    MY_PIP_PACKAGES+=(git+https://github.com/jamescherti/git-rexec)
+    MY_PIP_PACKAGES+=(git-rexec)
   fi
 
   if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
