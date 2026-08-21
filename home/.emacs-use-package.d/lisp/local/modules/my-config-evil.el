@@ -104,13 +104,6 @@
 
 ;;; undo
 
-;; Replaces undo-fu
-(if (< emacs-major-version 28)
-    (require 'le-undo-fu)
-  (progn
-    (setq evil-undo-system 'undo-redo)
-    (evil-set-undo-system 'undo-redo)))
-
 ;;; Stop Visual Paste from Overwriting Your Register
 
 ;; By default, when you highlight text in Visual mode and press p to paste, Evil

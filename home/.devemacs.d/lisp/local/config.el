@@ -74,10 +74,13 @@
 
 (setq lightemacs-modules '(le-flavor-micro
                            le-pathaction
-                           le-markdown-mode
-                           ;; le-maybe-markdown-ts
+
+                           ;; le-markdown-mode
+                           le-maybe-markdown-ts
+                           le-maybe-yaml-ts
+
                            le-group-evil
-                           le-persist-text-scale
+                           ;; le-persist-text-scale
                            le-xclip
 
                            le-compile-angel
