@@ -27,12 +27,11 @@ EMACS_ARGS_DICT=(
   --no-site-lisp
   --no-splash
   --no-x-resources
-  # Removed: --no-loadup
   # The --no-loadup option in GNU Emacs prevents Emacs from loading its standard
   # startup file loadup.el. This file normally initializes a large portion of
   # the core environment. Using this option therefore has significant side
   # effects.
-  --no-loadup
+  # --no-loadup
 )
 EMACS_EDIT_TIMEOUT="${EMACS_EDIT_TIMEOUT:-3}"
 EMACS_D="${EMACS_D:-}"
@@ -84,7 +83,7 @@ main() {
   EMACS_ARGS_DICT+=("$EMACS_D")
 
   # Unset variables
-  local emacs_bin="$RUN_EMACS_BIN"
+  local emacs_bin="${RUN_EMACS_BIN:-}"
   local emacs_force="$RUN_EMACS_FORCE"
   unset EMACS_D
   unset RUN_EMACS_FORCE
@@ -96,8 +95,9 @@ main() {
   fi
 
   # Correctly check if the binary exists in the system PATH
+  local original_bin="$emacs_bin"
   if ! emacs_bin=$(type -P "$emacs_bin" 2>/dev/null); then
-    echo "Error: Command not found in PATH: '$emacs_bin'" >&2
+    echo "Error: Command not found in PATH: '$original_bin'" >&2
     exit 1
   fi
 
@@ -133,7 +133,7 @@ main() {
   # subprocesses to minimize startup overhead and reduce memory consumption
   # across frequent process forks.
   export SHELL
-  SHELL=$(/usr/bin/env sh)
+  SHELL=$(type -P sh)
 
   local emacs_dir
   emacs_dir=$(dirname "$emacs_bin")
@@ -155,7 +155,6 @@ main() {
     echo "[RUN]" "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
 
     exec "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
-    # exec jemacs "${EMACS_ARGS_DICT[@]}" "$@"
   fi
 }
 

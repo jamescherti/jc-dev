@@ -635,3 +635,5 @@ if type -P mawk &>/dev/null; then
 fi
 
 export _FASD_IGNORE_DUPS=1
+
+export _FASD_IGNORE_TMP_DIRS=1
