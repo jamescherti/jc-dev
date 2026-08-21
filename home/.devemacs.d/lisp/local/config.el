@@ -72,24 +72,24 @@
 (setq lightemacs-theme-name 'tomorrow-night-deepblue)
 (setq lightemacs-theme-package 'tomorrow-night-deepblue-theme)
 
-(setq lightemacs-modules '(le-flavor-micro
+(setq lightemacs-modules '(le-compile-angel
+                           le-flavor-micro
                            le-pathaction
+                           le-term
 
                            ;; le-markdown-mode
                            le-maybe-markdown-ts
                            le-maybe-yaml-ts
 
-                           le-group-evil
                            ;; le-persist-text-scale
                            le-xclip
 
-                           le-compile-angel
-
+                           le-group-evil
                            ;; le-org
                            ;; le-consult
                            ;; le-vertico
                            ;; le-autorevert
-                           le-undo-fu
+                           ;; le-undo-fu
                            ;; le-undo-fu-session
 
                            ;; le-consult-dir
