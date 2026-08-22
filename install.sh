@@ -285,6 +285,11 @@ main() {
     ln -sf "$_MAWK_PATH" ~/.local/bin/awk
   fi
 
+  # Ensure predictable behavior across diverse execution environments
+  if BASH_PATH="$(type -P bash)"; then
+    echo "set -g default-shell $BASH_PATH" >>"$HOME/.tmux.conf"
+  fi
+
   echo
   echo Success.
 }

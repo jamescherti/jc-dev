@@ -129,12 +129,6 @@ main() {
     # echo "[INFO] Change GDK_BACKEND to wayland and GTK_IM_MODULE to none"
   fi
 
-  # Use /bin/sh (typically dash or ash) instead of bash for background
-  # subprocesses to minimize startup overhead and reduce memory consumption
-  # across frequent process forks.
-  export SHELL
-  SHELL=$(type -P sh)
-
   local emacs_dir
   emacs_dir=$(dirname "$emacs_bin")
   export PATH="$emacs_dir:$PATH"
