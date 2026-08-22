@@ -2875,7 +2875,11 @@ ARGS - the arguments passed to the original function"
               (list "vterm"
                     buf-name
                     `(lambda ()
-                       (let* ((vterm-shell
+                       (let* ((bash-shell (executable-find "bash"))
+                              (process-environment
+                               (cons (format "SHELL=%s" bash-shell)
+                                     process-environment))
+                              (vterm-shell
                                (format "tmux-session emacs-%s"
                                        (replace-regexp-in-string
                                         "[^a-z0-9]+" "-"
