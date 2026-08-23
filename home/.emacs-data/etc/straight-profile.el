@@ -15,16 +15,16 @@
  ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
  ("ef-themes" . "e1f617607a5f0692b398365dcd8412ba1e98ccb3") ; 2.2.1 | RSS RELEASE
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
- ("vertico" . "be96000c2b0b3501723291b3721ceba12f784dcd")  ; 2.12 | RSS RELEASE
- ("corfu" . "6477aac54fa1ea4865b23d7562e48b83a082a1e4") ; 2.13 | RSS RELEASE
- ("cape" . "5a3aa3058eb47bd10ae72c8919921e3fb40952a5") ; 2.8 | RSS RELEASE
+ ("vertico" . "a6874e3d8c74a9eea77967d702d608ebbd6b27ec")  ; 2.12 | RSS RELEASE
+ ("corfu" . "75be36fe63e78c63ac71c32039ab07836bd532ac") ; 2.13 | RSS RELEASE
+ ("cape" . "f0135abaf95a22b9fb2c951751a5d0733ce61bbd") ; 2.8 | RSS RELEASE
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
  ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("indent-bars" . "36620c5f3fba2ba8f23d7ef947e0d1d09e412bf5") ; 1.0.1 | RSS RELEASE
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("consult" . "3ddec5493bce5445f099537be50b7a4f79c68321") ; 3.7 | RSS RELEASE
- ("marginalia" . "feb66c02bbd88dba867cdd92b94fe24279ed578a") ; 2.11 | RSS RELEASE
+ ("marginalia" . "7ec0b70afb43a756ecd45a958c6ebe797717fc91") ; 2.11 | RSS RELEASE
  ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8 | RSS RELEASE
  ("org" . "c75ffe4a43355bc76807d9aa711834b33f724fca") ; release_9.8.9 | RSS RELEASE
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
