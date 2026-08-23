@@ -3603,15 +3603,15 @@ function or if an invalid choice is made."
 ;; Set the global default dictionary for the Ispell process.
 (setq ispell-dictionary "en_US")
 
-;; Suppress non-corrective messages from ispell-word.
+;; Reduce unnecessary messages when checking individual words.
 (setq ispell-quietly t)
 
-;; Configures Aspell's suggestion mode to "ultra", which provides more
-;; aggressive and detailed suggestions for misspelled words.
+;; Configure Aspell's suggestion mode to "ultra", which favors very close
+;; spelling and phonetic matches when generating suggestions.
 (setq ispell-extra-args '("--sug-mode=ultra"))
 
 (defun my-flyspell-prog-mode (&rest _args)
-  "Append Ispell arguments buffer-locally."
+  "Enable `flyspell-prog-mode' with buffer-local Aspell arguments."
   ;; The --run-together flag instructs Aspell to accept words formed by
   ;; combining two or more valid dictionary words without spaces, treating the
   ;; resulting string as valid.
@@ -3624,7 +3624,7 @@ function or if an invalid choice is made."
   (dolist (item '("--run-together"
                   ;; "--ignore=2"
                   ;; "--run-together-min=3"
-                  ;; "--run-together-limit=16"
+                  ;; "--run-together-limit=4"
                   ;; "--camel-case"
                   ))
     (add-to-list 'ispell-extra-args item))
