@@ -38,6 +38,9 @@
 
 (defvar inhibit-interaction)
 
+(defvar-local buffer-guardian-ignore-save-prompt nil
+  "If non-nil, do not prompt to save this buffer even if the file does not exist.")
+
 (defun save-all-new-file-buffers ()
   "Save all file-visiting buffers whose files do not exist on disk.
 Prompts the operator for confirmation before creating directories and saving
@@ -50,6 +53,7 @@ each buffer."
         (when (and file-path
                    (and (not (bound-and-true-p archive-subfile-mode))
                         (not (bound-and-true-p tar-subfile-mode))
+                        (not (bound-and-true-p buffer-guardian-ignore-save-prompt))
                         (not (file-exists-p file-path))))
           (if (y-or-n-p (format "File '%s' does not exist on disk. Save it? "
                                 file-path))
@@ -78,7 +82,11 @@ each buffer."
                        (when (bound-and-true-p buffer-guardian-verbose)
                          (message "Failed to save '%s': %s"
                                   (buffer-name)
-                                  (error-message-string err))))))))))))))
+                                  (error-message-string err))))))))
+            ;; User chose not to save; ask if they plan to save it later
+            (unless (y-or-n-p (format "Do you plan to save '%s' later? " (buffer-name)))
+              (setq-local buffer-guardian-ignore-save-prompt t)
+              (message "Will not ask to save '%s' again." (buffer-name)))))))))
 
 (defun my-save-all-buffers ()
   "Save all buffers."
