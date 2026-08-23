@@ -3621,7 +3621,6 @@ function or if an invalid choice is made."
   ;; compound variable names and technical terms (e.g., filepath, buffername,
   ;; checkbox).
   ;; URL: https://www.jamescherti.com/emacs-spell-checker-flyspell-ispell-aspell/
-  (flyspell-prog-mode)
   (make-local-variable 'ispell-extra-args)
   (dolist (item '("--run-together"
                   ;; "--ignore=2"
@@ -3629,7 +3628,8 @@ function or if an invalid choice is made."
                   ;; "--run-together-limit=16"
                   ;; "--camel-case"
                   ))
-    (add-to-list 'ispell-extra-args item)))
+    (add-to-list 'ispell-extra-args item))
+  (flyspell-prog-mode))
 
 ;; The flyspell package is a built-in Emacs minor mode that provides on-the-fly
 ;; spell checking. It highlights misspelled words as you type, offering
