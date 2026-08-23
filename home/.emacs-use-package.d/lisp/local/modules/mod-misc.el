@@ -59,7 +59,9 @@
              (fboundp 'treesit-parser-list)
              (fboundp 'treesit-parser-create))
     (let* ((base (buffer-base-buffer))
-           (parser-list (and base (with-current-buffer base (treesit-parser-list)))))
+           (parser-list (and base
+                             (with-current-buffer base
+                               (treesit-parser-list)))))
       (when parser-list
         ;; Instantiate identical parsers exclusively for this
         ;; indirect buffer
