@@ -3584,7 +3584,6 @@ function or if an invalid choice is made."
                  (tab-new)
                  (find-file "~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/config.el"))))))
 
-
 ;;; Sync dictionary
 
 ;; Silence: Truncate long lines disabled
