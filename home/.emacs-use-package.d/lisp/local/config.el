@@ -746,8 +746,8 @@ subsequent GCC invocations."
                            le-yasnippet
                            ;; le-yasnippet-snippets
 
-                           ;; le-markdown-mode
-                           le-maybe-markdown-ts
+                           le-markdown-mode
+                           ;; le-maybe-markdown-ts
 
                            le-maybe-yaml-ts
 

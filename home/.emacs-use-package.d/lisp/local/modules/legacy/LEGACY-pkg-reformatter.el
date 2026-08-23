@@ -49,7 +49,7 @@
   ;;   (when (my-code-checker-allowed-p)
   ;;     (shfmt-on-save-mode)))
 
-  :custom
+  :init
   (setq shfmt-arguments "--binary-next-line")
   (setq shfmt-respect-sh-basic-offset t)
 

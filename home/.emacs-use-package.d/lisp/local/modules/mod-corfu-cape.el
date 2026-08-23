@@ -51,11 +51,10 @@
   :after corfu
   :if (display-graphic-p)
   :commands nerd-icons-corfu-formatter
-  :custom
-  (nerd-icons-font-family "Symbols Nerd Font Mono")
+  :init
+  (setq nerd-icons-font-family "Symbols Nerd Font Mono")
   ;; (setq nerd-icons-font-family "Iosevka Nerd Font Mono")
   ;; (setq nerd-icons-font-family "Jetbrains Mono")
-  :init
   (with-eval-after-load 'corfu
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
 
