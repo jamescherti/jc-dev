@@ -158,7 +158,7 @@ gen_unified_spell_file() {
 
   # Unified spell file (Source of truth)
   # tr removes carriage returns before grep processes the text
-  tr -d '\r' <"$TMP_FILE" | grep -v '^$' | grep -E "^[[:alpha:]'-]+$" \
+  tr -d '\r' <"$TMP_FILE" | grep -v '^$' | grep -E "^[[:alpha:]']+$" \
     | LC_ALL=C sort -u >"$TMP_OUT" || true
 
   if [[ -s "$TMP_OUT" ]]; then

@@ -201,6 +201,14 @@ tasks:
       upstream: https://github.com/dev-sec/ansible-collection-hardening
 
   # ----------------------------------------------------------------------------
+  # Forks: Wordpress
+  # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/syntax-highlighting-code-block
+    path: forks/syntax-highlighting-code-block
+    remote:
+      upstream: https://github.com/westonruter/syntax-highlighting-code-block
+
+  # ----------------------------------------------------------------------------
   # Forks: GNOME
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/hide-minimized
