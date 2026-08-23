@@ -3618,6 +3618,7 @@ function or if an invalid choice is made."
 ;;; Sync dictionary
 
 ;; Set the ispell program name to aspell
+;; (switching to aspell will generally offer better performance than ispell.)
 (setq ispell-program-name "aspell")
 
 ;; Set the global default dictionary for the Ispell process.
