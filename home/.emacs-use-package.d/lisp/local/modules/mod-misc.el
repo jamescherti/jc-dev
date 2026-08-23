@@ -160,6 +160,19 @@
     (add-hook 'after-make-frame-functions #'my-setup-fringe)
   (my-setup-fringe))
 
+;;; Security issue
+
+;; https://eshelyaron.com/posts/2026-08-06-emacs-arbitrary-code-execution-returns.html
+
+(defun suppress-shorthands (orig &rest args)
+  (let (read-symbol-shorthands) (apply orig args)))
+
+(when (< emacs-major-version 32)
+  (advice-add 'vc-find-backend-function :around #'suppress-shorthands)
+
+  (with-eval-after-load 'cc-fonts
+    (advice-add 'c-compose-keywords-list :around #'suppress-shorthands)))
+
 ;;; Other modules
 
 (unless noninteractive

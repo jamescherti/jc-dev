@@ -60,11 +60,13 @@ each buffer."
               (let ((parent-dir (file-name-directory file-path))
                     (proceed-to-save t))
                 (unless (file-exists-p parent-dir)
-                  (if (y-or-n-p (format "Directory '%s' does not exist. Create it? "
-                                        parent-dir))
+                  (if (y-or-n-p (format
+                                 "Directory '%s' does not exist. Create it? "
+                                 parent-dir))
                       (make-directory parent-dir t)
                     (setq proceed-to-save nil)
-                    (message "Skipped saving '%s': missing parent directory." (buffer-name))))
+                    (message "Skipped saving '%s': missing parent directory."
+                             (buffer-name))))
                 (when proceed-to-save
                   (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
                         (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
@@ -84,7 +86,8 @@ each buffer."
                                   (buffer-name)
                                   (error-message-string err))))))))
             ;; User chose not to save; ask if they plan to save it later
-            (unless (y-or-n-p (format "Do you plan to save '%s' later? " (buffer-name)))
+            (unless (y-or-n-p (format "Should I ask you to save '%s' later? "
+                                      (buffer-name)))
               (setq-local buffer-guardian-ignore-save-prompt t)
               (message "Will not ask to save '%s' again." (buffer-name)))))))))
 
