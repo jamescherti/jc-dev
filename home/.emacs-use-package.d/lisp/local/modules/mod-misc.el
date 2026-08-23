@@ -35,6 +35,48 @@
 (require 'seq)
 (require 'my-defun)
 
+;;; Fix indirect buffers bug
+
+(add-hook 'clone-indirect-buffer-hook
+          (lambda ()
+            ;; URL: https://lists.gnu.org/archive/html/bug-gnu-emacs/2026-08/msg00904.html
+            ;;
+            ;; As of Emacs 31/32, indirect buffers no longer share tree-sitter
+            ;; parsers with the base buffer to avoid issues when the buffers
+            ;; have different narrowing.
+            ;;
+            ;; Because the major mode function is not run when cloning an
+            ;; indirect buffer, no parser is created for it, resulting in a
+            ;; total loss of syntax highlighting.
+            ;;
+            ;; This workaround implements Yuan's suggestion to automatically
+            ;; create the parser if the buffer is an indirect buffer. By
+            ;; iterating over the base buffer's parser list, it also supports
+            ;; modes that rely on multiple parsers (like php or markdown) as
+            ;; pointed out by Marks.
+            (when (and (fboundp 'treesit-major-mode-setup)
+                       (fboundp 'treesit-parser-list)
+                       (fboundp 'treesit-parser-create))
+              (let* ((base (buffer-base-buffer))
+                     (parser-list (when base
+                                    (with-current-buffer base
+                                      (treesit-parser-list)))))
+                (when (and base
+                           parser-list)
+                  ;; Instantiate identical parsers exclusively for this
+                  ;; indirect buffer
+                  (dolist (parser parser-list)
+                    (treesit-parser-create (treesit-parser-language parser)))
+
+                  ;; Re-wire tree-sitter (font-lock, indentation) using the
+                  ;; inherited variables This safely bypasses
+                  ;; kill-all-local-variables
+                  (treesit-major-mode-setup)
+
+                  ;; Force an immediate font-lock refresh
+                  (when (fboundp 'font-lock-flush)
+                    (font-lock-flush)))))))
+
 ;;; Modeline
 
 (setq line-number-mode t)
