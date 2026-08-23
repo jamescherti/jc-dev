@@ -3584,6 +3584,37 @@ function or if an invalid choice is made."
                  (tab-new)
                  (find-file "~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/config.el"))))))
 
+;; Silence: Truncate long lines disabled
+;; TODO: Should we execute it after inserting anything in the speller
+(defun run-sync-spell-dict-if-exists ()
+  "Run sync-spell-dict command if it exists."
+  (when (executable-find "sync-spell-dict")
+    (call-process "sync-spell-dict" nil 0 nil)))
+
+(add-hook 'kill-emacs-hook 'run-sync-spell-dict-if-exists)
+
+;;; Flyspell and ispell Optimizations
+
+;; Setting flyspell-check-changes to a non-nil value causes Flyspell to check
+;; only words that have been typed or edited, instead of also checking words
+;; that point moves across. This can reduce spell-checking activity when
+;; navigating through existing text. The tradeoff is that existing misspellings
+;; are not checked merely because point moves across them, so they may remain
+;; undetected until the text is edited or checked explicitly.
+(setq flyspell-check-changes t)
+
+;; Setting flyspell-mark-duplications-flag to nil prevents Flyspell from
+;; reporting repeated words as errors. This eliminates duplicate-word detection,
+;; so accidental repetitions such as "the the" are no longer reported.
+;; Repeated-word detection is also not implemented when Flyspell checks large
+;; regions.
+(setq flyspell-mark-duplications-flag nil)
+
+(setq flyspell-large-region 500)
+
+;; TODO minimal emacs?
+(setq flyspell-delay 1)
+
 ;;; Sync dictionary
 
 ;; Set the ispell program name to aspell
