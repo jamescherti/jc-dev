@@ -3592,7 +3592,7 @@ function or if an invalid choice is made."
 (defun run-sync-spell-dict-if-exists ()
   "Run sync-spell-dict command if it exists."
   (when (executable-find "sync-spell-dict")
-    (shell-command "sync-spell-dict >/dev/null 2>&1 & disown")))
+    (call-process "sync-spell-dict" nil 0 nil)))
 
 (add-hook 'kill-emacs-hook 'run-sync-spell-dict-if-exists)
 
