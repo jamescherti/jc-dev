@@ -3586,17 +3586,6 @@ function or if an invalid choice is made."
 
 ;;; Sync dictionary
 
-;; Silence: Truncate long lines disabled
-;; TODO: Should we execute it after inserting anything in the speller
-(defun run-sync-spell-dict-if-exists ()
-  "Run sync-spell-dict command if it exists."
-  (when (executable-find "sync-spell-dict")
-    (call-process "sync-spell-dict" nil 0 nil)))
-
-(add-hook 'kill-emacs-hook 'run-sync-spell-dict-if-exists)
-
-;;; Spell
-
 ;; Set the ispell program name to aspell
 (setq ispell-program-name "aspell")
 
