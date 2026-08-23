@@ -3611,7 +3611,7 @@ function or if an invalid choice is made."
 ;; aggressive and detailed suggestions for misspelled words.
 (setq ispell-extra-args '("--sug-mode=ultra"))
 
-(defun my-flyspell-prog-mode-advice (&rest _args)
+(defun my-flyspell-prog-mode (&rest _args)
   "Append Ispell arguments buffer-locally."
   ;; The --run-together flag instructs Aspell to accept words formed by
   ;; combining two or more valid dictionary words without spaces, treating the
@@ -3620,20 +3620,21 @@ function or if an invalid choice is made."
   ;; This is excellent for source code. Code is heavily populated with
   ;; compound variable names and technical terms (e.g., filepath, buffername,
   ;; checkbox).
-  (unless (member "--run-together" ispell-extra-args)
-    (setq-local ispell-extra-args
-                (append ispell-extra-args '("--run-together"
-                                            ;; "--run-together-limit=4"
-                                            ;; "--ignore=2"
-                                            ;; "--camel-case"
-                                            )))))
-
-(with-eval-after-load 'flyspell
-  (advice-add 'flyspell-prog-mode :before #'my-flyspell-prog-mode-advice))
+  ;; URL: https://www.jamescherti.com/emacs-spell-checker-flyspell-ispell-aspell/
+  (flyspell-prog-mode)
+  (make-local-variable 'ispell-extra-args)
+  (dolist (item '("--run-together"
+                  ;; "--ignore=2"
+                  ;; "--run-together-min=3"
+                  ;; "--run-together-limit=16"
+                  ;; "--camel-case"
+                  ))
+    (add-to-list 'ispell-extra-args item)))
 
 ;; The flyspell package is a built-in Emacs minor mode that provides on-the-fly
 ;; spell checking. It highlights misspelled words as you type, offering
 ;; interactive corrections.
+;; URL: https://www.jamescherti.com/emacs-spell-checker-flyspell-ispell-aspell/
 (defun my-flyspell-enable-appropriate-mode ()
   "Enable the appropriate Flyspell mode based on the current major mode."
   (if (or (derived-mode-p 'conf-mode)
@@ -3642,10 +3643,10 @@ function or if an invalid choice is made."
           (derived-mode-p 'ansible-mode)
           (derived-mode-p 'nxml-mode)
           (derived-mode-p 'sgml-mode))
-      (flyspell-prog-mode)
+      (my-flyspell-prog-mode)
     (flyspell-mode 1)))
 
-(add-hook 'prog-mode-hook #'flyspell-prog-mode)
+(add-hook 'prog-mode-hook #'my-flyspell-prog-mode)
 (add-hook 'conf-mode-hook #'my-flyspell-enable-appropriate-mode)
 (add-hook 'text-mode-hook #'my-flyspell-enable-appropriate-mode)
 
