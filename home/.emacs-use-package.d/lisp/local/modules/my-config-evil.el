@@ -113,9 +113,9 @@
 ;; replacements from touching your yank history.
 (setq evil-kill-on-visual-paste nil)
 
-;;; Spell checker: Jinx or Flyspell
+;;; DISABLED: Spell checker: Jinx or Flyspell
 
-(defvar my-spell-checker 'ispell)
+;; (defvar my-spell-checker 'ispell)
 
 ;; (use-package jinx
 ;;   :if (eq my-spell-checker 'jinx)
@@ -159,97 +159,57 @@
 ;;   )
 
 ;; Router functions to handle the active spell checker dynamically
-(defun my-spell-correct ()
-  "Correct spelling at point."
-  (interactive)
-  (if (and (eq my-spell-checker 'jinx)
-           (fboundp 'jinx-correct)
-           (bound-and-true-p jinx-mode))
-      (call-interactively #'jinx-correct)
-    (call-interactively #'ispell-word)))
+;; (defun my-spell-correct ()
+;;   "Correct spelling at point."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (fboundp 'jinx-correct)
+;;            (bound-and-true-p jinx-mode))
+;;       (call-interactively #'jinx-correct)
+;;     (call-interactively #'ispell-word)))
+;;
+;; (defun my-spell-next ()
+;;   "Jump to next spelling error."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (fboundp 'jinx-next)
+;;            (bound-and-true-p jinx-mode))
+;;       (call-interactively #'jinx-next)
+;;     (call-interactively #'evil-next-flyspell-error)))
+;;
+;; (defun my-spell-previous ()
+;;   "Jump to previous spelling error."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (fboundp 'jinx-previous)
+;;            (bound-and-true-p jinx-mode))
+;;       (call-interactively #'jinx-previous)
+;;     (call-interactively #'evil-prev-flyspell-error)))
+;;
+;; (defun my-spell-add-word ()
+;;   "Emulate Vim zg behavior for adding words."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (bound-and-true-p jinx-mode))
+;;       (progn
+;;         (message "Jinx: Press '+' (personal) or '*' (local) inside the correction menu.")
+;;         (sit-for 1.5)
+;;         (when (fboundp 'jinx-correct)
+;;           (jinx-correct)))
+;;     (call-interactively #'ispell-word)))
 
-(defun my-spell-next ()
-  "Jump to next spelling error."
-  (interactive)
-  (if (and (eq my-spell-checker 'jinx)
-           (fboundp 'jinx-next)
-           (bound-and-true-p jinx-mode))
-      (call-interactively #'jinx-next)
-    (call-interactively #'evil-next-flyspell-error)))
-
-(defun my-spell-previous ()
-  "Jump to previous spelling error."
-  (interactive)
-  (if (and (eq my-spell-checker 'jinx)
-           (fboundp 'jinx-previous)
-           (bound-and-true-p jinx-mode))
-      (call-interactively #'jinx-previous)
-    (call-interactively #'evil-prev-flyspell-error)))
-
-(defun my-spell-add-word ()
-  "Emulate Vim zg behavior for adding words."
-  (interactive)
-  (if (and (eq my-spell-checker 'jinx)
-           (bound-and-true-p jinx-mode))
-      (progn
-        (message "Jinx: Press '+' (personal) or '*' (local) inside the correction menu.")
-        (sit-for 1.5)
-        (when (fboundp 'jinx-correct)
-          (jinx-correct)))
-    (call-interactively #'ispell-word)))
-
-(with-eval-after-load 'evil
-  ;; Override Evil's default normal maps
-  (define-key evil-normal-state-map (kbd "z=") #'my-spell-correct)
-  (define-key evil-normal-state-map (kbd "zg") #'my-spell-add-word)
-
-  ;; Override Evil's default motion maps
-  (define-key evil-motion-state-map (kbd "]s") #'my-spell-next)
-  (define-key evil-motion-state-map (kbd "[s") #'my-spell-previous)
-
-  ;; Hook the router functions into Evil's jump list
-  (evil-add-command-properties #'my-spell-next :jump t)
-  (evil-add-command-properties #'my-spell-previous :jump t))
-
-(defun my-setup-spell-checker ()
-  "Setup `jinx-mode' or `flyspell-mode' depending on `my-spell-checker'."
-  (when (and (not (derived-mode-p 'conf-mode))
-             (not (derived-mode-p 'txt-file-mode)))
-    (if (or (derived-mode-p 'markdown-mode)
-            (derived-mode-p 'markdown-ts-mode)
-            (derived-mode-p 'org-mode))
-        ;; Other (e.g., Markdown)
-        (let* ((file-name (buffer-file-name (buffer-base-buffer)))
-               (file-name-downcase (when file-name
-                                     (downcase file-name))))
-          (when (and file-name-downcase
-                     (or (string-suffix-p "/readme.md" file-name-downcase)
-                         (string-suffix-p "/readme.org" file-name-downcase)
-                         (string-suffix-p "/changelog.md" file-name-downcase)))
-            ;; (run-with-idle-timer 1 nil #'jinx-mode 1)
-            (if (eq my-spell-checker 'jinx)
-                (when (fboundp 'jinx-mode)
-                  (require 'jinx)
-                  (when (fboundp 'my-jinx-setup)
-                    (my-jinx-setup))
-                  (jinx-mode 1))
-              (flyspell-mode 1))))
-      ;; Prog
-      (if (eq my-spell-checker 'jinx)
-          (when (fboundp 'jinx-mode)
-            (require 'jinx)
-            (when (fboundp 'my-jinx-setup)
-              (my-jinx-setup))
-            (jinx-mode 1))
-        (flyspell-prog-mode)
-        ;; (when (or (derived-mode-p 'yaml-mode)
-        ;;           (derived-mode-p 'yaml-ts-mode)
-        ;;           (derived-mode-p 'ansible-mode))
-        ;;   (flyspell-prog-mode))
-        ))))
-
-;; (add-hook 'prog-mode-hook #'my-setup-spell-checker)
-;; (add-hook 'text-mode-hook #'my-setup-spell-checker)
+;; (with-eval-after-load 'evil
+;;   ;; Override Evil's default normal maps
+;;   (define-key evil-normal-state-map (kbd "z=") #'my-spell-correct)
+;;   (define-key evil-normal-state-map (kbd "zg") #'my-spell-add-word)
+;;
+;;   ;; Override Evil's default motion maps
+;;   (define-key evil-motion-state-map (kbd "]s") #'my-spell-next)
+;;   (define-key evil-motion-state-map (kbd "[s") #'my-spell-previous)
+;;
+;;   ;; Hook the router functions into Evil's jump list
+;;   (evil-add-command-properties #'my-spell-next :jump t)
+;;   (evil-add-command-properties #'my-spell-previous :jump t))
 
 ;;; Better evil
 

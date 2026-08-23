@@ -1222,128 +1222,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   (setq which-key-idle-delay 1.5)
 
-  ;; It defines the "en_US" spell-check dictionary locally, telling Emacs to use
-  ;; UTF-8 encoding, match words using alphabetic characters, allow apostrophes
-  ;; inside words, treat non-alphabetic characters as word boundaries, and pass
-  ;; -d en_US to the underlying spell-check program.
-  (setq ispell-local-dictionary-alist
-        '(("en_US"
-           "[[:alpha:]]"
-           "[^[:alpha:]]"
-           "['‘’]"
-           ;; When set to nil: A word can contain the defined "other characters"
-           ;; (like an apostrophe), but only one at a time between valid word
-           ;; characters. For example, FFmpeg's is parsed as a single word, but
-           ;; if a typo like FFmpeg''s occurs, the parser will split it at the
-           ;; consecutive apostrophes.
-           ;;
-           ;; When set to t: The parser allows multiple consecutive instances of
-           ;; the defined "other characters" inside a word without breaking the
-           ;; word boundary.
-           ;;
-           ;; For a standard English dictionary configuration, nil is the
-           ;; correct and expected value, because standard English grammar does
-           ;; not use consecutive apostrophes within a single word.
-           nil
-           ("-d" "en_US")
-           nil
-           utf-8)))
-
-  ;; (setq ispell-extra-args '("--add-word-chars='")
-  (setq flyspell-default-dictionary "en_US")
-  (setq ispell-dictionary "en_US")
-
-  ;; Non-nil means suppress messages in ispell-word.
-  (setq ispell-quietly t)
-
-  ;; If non-nil, add correction to abbreviation table.
-  ;; (setq flyspell-abbrev-p nil)
-  ;; (setq flyspell-use-global-abbrev-table-p t)
-
-  ;; (with-eval-after-load 'flyspell
-  ;;   ;; Remove strings from Flyspell
-  ;;   (setq flyspell-prog-text-faces (delq 'font-lock-string-face
-  ;;                                        flyspell-prog-text-faces))
-  ;;
-  ;;   ;; Remove doc from Flyspell
-  ;;   (setq flyspell-prog-text-faces (delq 'font-lock-doc-face
-  ;;                                        flyspell-prog-text-faces)))
-
-  (setq ispell-program-name "aspell")
-  (setq ispell-local-dictionary "en_US")
-
-  ;; TODO use this to ignore emacs symbols
-  ;; (defun my-flyspell-ignore-short-words (beg end _info)
-  ;;   "Instruct Flyspell to ignore words with 3 or fewer characters."
-  ;;   (<= (- end beg) 3))
-  ;;
-  ;; (add-hook 'flyspell-incorrect-hook #'my-flyspell-ignore-short-words)
-
-  ;; Configures Aspell's suggestion mode to "ultra", which provides more
-  ;; aggressive and detailed suggestions for misspelled words.
-  ;;
-  ;; The language is set to "en_US" for US English, which can be replaced with
-  ;; your desired language code (e.g., "en_GB" for British English, "de_DE" for
-  ;; German).
-  (setq ispell-extra-args '(;; This flag changes the internal algorithm Aspell
-                            ;; uses to find replacement words when it detects a
-                            ;; typo. Aspell has multiple modes (ultra, fast,
-                            ;; normal, and bad-spellers).
-                            ;;
-                            ;; Benefits:
-                            ;; Zero UI Blocking: It prioritizes execution speed
-                            ;; above all else. When Flyspell requests suggestions,
-                            ;; Aspell returns them instantly. This prevents the
-                            ;; single-threaded Emacs UI from locking up while you
-                            ;; are typing.
-                            ;; Lower CPU Usage: It prevents Emacs from spiking
-                            ;; your CPU when running bulk checks over large
-                            ;; files.
-                            ;;
-                            ;; Drawbacks:
-                            ;; Reduced Accuracy: Because the search algorithm is
-                            ;; shallow, it is less forgiving of heavy typos or
-                            ;; phonetic mistakes. If a word is severely
-                            ;; misspelled, the correct replacement might not
-                            ;; appear in the generated suggestion list.
-                            "--sug-mode=ultra"
-                            ;; Ignore 1 and 2 characters words
-                            "--ignore=3"
-                            ;; "--ignore-case"
-                            ;; This flag instructs Aspell to accept words formed
-                            ;; by combining two or more valid dictionary words
-                            ;; without spaces, treating the resulting string as
-                            ;; valid.
-                            ;;
-                            ;; Benefits: Excellent for Source Code: Code is
-                            ;; heavily populated with compound variable names
-                            ;; and technical terms (e.g., filepath, buffername,
-                            ;; checkbox). This flag stops the spell checker from
-                            ;; highlighting every combined word as an error,
-                            ;; significantly reducing false positives and visual
-                            ;; noise in your programming buffers.
-                            ;;
-                            ;; Drawback: Masks Real Typos in Prose: It makes the
-                            ;; spell checker too lenient for standard text or
-                            ;; markdown files. If you accidentally miss a space
-                            ;; while typing regular sentences (e.g., typing
-                            ;; "andthe" instead of "and the"), Aspell will
-                            ;; consider it a valid run-together string and fail
-                            ;; to flag the typo.
-                            "--run-together"
-                            "--lang=en_US"))
-
-  (add-hook 'text-mode-hook
-            #'(lambda()
-                (setq-local ispell-extra-args
-                            (remove "--run-together" ispell-extra-args))))
-
-  ;; (defun my-ispell-perl-mode-setup ()
-  ;;   "Remove the --run-together argument from Aspell in text modes."
-  ;;   (setq-local ispell-extra-args (append '("--mode=perl") ispell-extra-args)))
-  ;; (add-hook 'bash-ts-mode-hook #'my-ispell-perl-mode-setup)
-  ;; (add-hook 'sh-mode-hook #'my-ispell-perl-mode-setup)
-
   (with-eval-after-load 'which-key
     (when (bound-and-true-p which-key-buffer-name)
       (add-to-list 'winner-boring-buffers which-key-buffer-name)))
@@ -1915,17 +1793,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq display-line-numbers-grow-only nil)
 
 (setq display-line-numbers-current-absolute nil)  ;; t=line num / nil=0
-
-;;; Sync dictionary
-
-;; Silence: Truncate long lines disabled
-;; TODO: Should we execute it after inserting anything in the speller
-(defun run-sync-spell-dict-if-exists ()
-  "Run sync-spell-dict command if it exists."
-  (when (executable-find "sync-spell-dict")
-    (shell-command "sync-spell-dict >/dev/null 2>&1 & disown")))
-
-(add-hook 'kill-emacs-hook 'run-sync-spell-dict-if-exists)
 
 ;;; apheleia
 
@@ -3716,6 +3583,227 @@ function or if an invalid choice is made."
                  (find-file "~/src/dotfiles/jc-dev/home/src/batchfetch.yaml")
                  (tab-new)
                  (find-file "~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/config.el"))))))
+
+
+;;; Sync dictionary
+
+;; Silence: Truncate long lines disabled
+;; TODO: Should we execute it after inserting anything in the speller
+(defun run-sync-spell-dict-if-exists ()
+  "Run sync-spell-dict command if it exists."
+  (when (executable-find "sync-spell-dict")
+    (shell-command "sync-spell-dict >/dev/null 2>&1 & disown")))
+
+(add-hook 'kill-emacs-hook 'run-sync-spell-dict-if-exists)
+
+;;; Spell
+
+;; Set the ispell program name to aspell
+(setq ispell-program-name "aspell")
+
+;; Set the global default dictionary for the Ispell process.
+(setq ispell-dictionary "en_US")
+
+;; Suppress non-corrective messages from ispell-word.
+(setq ispell-quietly t)
+
+;; Configures Aspell's suggestion mode to "ultra", which provides more
+;; aggressive and detailed suggestions for misspelled words.
+(setq ispell-extra-args '("--sug-mode=ultra"))
+
+(defun my-flyspell-prog-mode-advice (&rest _args)
+  "Append Ispell arguments buffer-locally."
+  ;; The --run-together flag instructs Aspell to accept words formed by
+  ;; combining two or more valid dictionary words without spaces, treating the
+  ;; resulting string as valid.
+  ;;
+  ;; This is excellent for source code. Code is heavily populated with
+  ;; compound variable names and technical terms (e.g., filepath, buffername,
+  ;; checkbox).
+  (unless (member "--run-together" ispell-extra-args)
+    (setq-local ispell-extra-args
+                (append ispell-extra-args '("--run-together"
+                                            ;; "--run-together-limit=4"
+                                            ;; "--ignore=2"
+                                            ;; "--camel-case"
+                                            )))))
+
+(with-eval-after-load 'flyspell
+  (advice-add 'flyspell-prog-mode :before #'my-flyspell-prog-mode-advice))
+
+;; The flyspell package is a built-in Emacs minor mode that provides on-the-fly
+;; spell checking. It highlights misspelled words as you type, offering
+;; interactive corrections.
+(defun my-flyspell-enable-appropriate-mode ()
+  "Enable the appropriate Flyspell mode based on the current major mode."
+  (if (or (derived-mode-p 'conf-mode)
+          (derived-mode-p 'yaml-mode)
+          (derived-mode-p 'yaml-ts-mode)
+          (derived-mode-p 'ansible-mode)
+          (derived-mode-p 'nxml-mode)
+          (derived-mode-p 'sgml-mode))
+      (flyspell-prog-mode)
+    (flyspell-mode 1)))
+
+(add-hook 'prog-mode-hook #'flyspell-prog-mode)
+(add-hook 'conf-mode-hook #'my-flyspell-enable-appropriate-mode)
+(add-hook 'text-mode-hook #'my-flyspell-enable-appropriate-mode)
+
+;; (defun my-setup-spell-checker ()
+;;   "Setup `jinx-mode' or `flyspell-mode' depending on `my-spell-checker'."
+;;   (when (and (not (derived-mode-p 'conf-mode))
+;;              (not (derived-mode-p 'txt-file-mode)))
+;;     (if (or (derived-mode-p 'markdown-mode)
+;;             (derived-mode-p 'markdown-ts-mode)
+;;             (derived-mode-p 'org-mode))
+;;         ;; Other (e.g., Markdown)
+;;         (let* ((file-name (buffer-file-name (buffer-base-buffer)))
+;;                (file-name-downcase (when file-name
+;;                                      (downcase file-name))))
+;;           (when (and file-name-downcase
+;;                      (or (string-suffix-p "/readme.md" file-name-downcase)
+;;                          (string-suffix-p "/readme.org" file-name-downcase)
+;;                          (string-suffix-p "/changelog.md" file-name-downcase)))
+;;             ;; (run-with-idle-timer 1 nil #'jinx-mode 1)
+;;             (if (eq my-spell-checker 'jinx)
+;;                 (when (fboundp 'jinx-mode)
+;;                   (require 'jinx)
+;;                   (when (fboundp 'my-jinx-setup)
+;;                     (my-jinx-setup))
+;;                   (jinx-mode 1))
+;;               (flyspell-mode 1))))
+;;       ;; Prog
+;;       (if (eq my-spell-checker 'jinx)
+;;           (when (fboundp 'jinx-mode)
+;;             (require 'jinx)
+;;             (when (fboundp 'my-jinx-setup)
+;;               (my-jinx-setup))
+;;             (jinx-mode 1))
+;;         (flyspell-prog-mode)
+;;         ;; (when (or (derived-mode-p 'yaml-mode)
+;;         ;;           (derived-mode-p 'yaml-ts-mode)
+;;         ;;           (derived-mode-p 'ansible-mode))
+;;         ;;   (flyspell-prog-mode))
+;;         ))))
+
+;; (add-hook 'prog-mode-hook #'my-setup-spell-checker)
+;; (add-hook 'text-mode-hook #'my-setup-spell-checker)
+
+;; ;; It defines the "en_US" spell-check dictionary locally, telling Emacs to use
+;; ;; UTF-8 encoding, match words using alphabetic characters, allow apostrophes
+;; ;; inside words, treat non-alphabetic characters as word boundaries, and pass
+;; ;; -d en_US to the underlying spell-check program.
+;; (setq ispell-local-dictionary-alist
+;;       '(("en_US"
+;;          "[[:alpha:]]"
+;;          "[^[:alpha:]]"
+;;          "[']"
+;;          ;; When set to nil: A word can contain the defined "other characters"
+;;          ;; (like an apostrophe), but only one at a time between valid word
+;;          ;; characters. For example, FFmpeg's is parsed as a single word, but
+;;          ;; if a typo like FFmpeg''s occurs, the parser will split it at the
+;;          ;; consecutive apostrophes.
+;;          ;;
+;;          ;; When set to t: The parser allows multiple consecutive instances of
+;;          ;; the defined "other characters" inside a word without breaking the
+;;          ;; word boundary.
+;;          ;;
+;;          ;; For a standard English dictionary configuration, nil is the
+;;          ;; correct and expected value, because standard English grammar does
+;;          ;; not use consecutive apostrophes within a single word.
+;;          nil
+;;          ("-d" "en_US")
+;;          nil
+;;          utf-8)))
+
+;; Configures Aspell's suggestion mode to "ultra", which provides more
+;; aggressive and detailed suggestions for misspelled words.
+;;
+;; The language is set to "en_US" for US English, which can be replaced with
+;; your desired language code (e.g., "en_GB" for British English, "de_DE" for
+;; German).
+;; (setq ispell-extra-args '(;; This flag changes the internal algorithm Aspell
+;;                           ;; uses to find replacement words when it detects a
+;;                           ;; typo. Aspell has multiple modes (ultra, fast,
+;;                           ;; normal, and bad-spellers).
+;;                           ;;
+;;                           ;; Benefits:
+;;                           ;; Zero UI Blocking: It prioritizes execution speed
+;;                           ;; above all else. When Flyspell requests suggestions,
+;;                           ;; Aspell returns them instantly. This prevents the
+;;                           ;; single-threaded Emacs UI from locking up while you
+;;                           ;; are typing.
+;;                           ;; Lower CPU Usage: It prevents Emacs from spiking
+;;                           ;; your CPU when running bulk checks over large
+;;                           ;; files.
+;;                           ;;
+;;                           ;; Drawbacks:
+;;                           ;; Reduced Accuracy: Because the search algorithm is
+;;                           ;; shallow, it is less forgiving of heavy typos or
+;;                           ;; phonetic mistakes. If a word is severely
+;;                           ;; misspelled, the correct replacement might not
+;;                           ;; appear in the generated suggestion list.
+;;                           "--sug-mode=ultra"
+;;                           ;; Ignore 1 and 2 characters words
+;;                           "--ignore=3"
+;;                           ;; "--ignore-case"
+;;                           ;; This flag instructs Aspell to accept words formed
+;;                           ;; by combining two or more valid dictionary words
+;;                           ;; without spaces, treating the resulting string as
+;;                           ;; valid.
+;;                           ;;
+;;                           ;; Benefits: Excellent for Source Code: Code is
+;;                           ;; heavily populated with compound variable names
+;;                           ;; and technical terms (e.g., filepath, buffername,
+;;                           ;; checkbox). This flag stops the spell checker from
+;;                           ;; highlighting every combined word as an error,
+;;                           ;; significantly reducing false positives and visual
+;;                           ;; noise in your programming buffers.
+;;                           ;;
+;;                           ;; Drawback: Masks Real Typos in Prose: It makes the
+;;                           ;; spell checker too lenient for standard text or
+;;                           ;; markdown files. If you accidentally miss a space
+;;                           ;; while typing regular sentences (e.g., typing
+;;                           ;; "andthe" instead of "and the"), Aspell will
+;;                           ;; consider it a valid run-together string and fail
+;;                           ;; to flag the typo.
+;;                           ;; "--run-together"
+;;                           "--lang=en_US"))
+
+
+;; If non-nil, add correction to abbreviation table.
+;; (setq flyspell-abbrev-p nil)
+;; (setq flyspell-use-global-abbrev-table-p t)
+
+;; (with-eval-after-load 'flyspell
+;;   ;; Remove strings from Flyspell
+;;   (setq flyspell-prog-text-faces (delq 'font-lock-string-face
+;;                                        flyspell-prog-text-faces))
+;;
+;;   ;; Remove doc from Flyspell
+;;   (setq flyspell-prog-text-faces (delq 'font-lock-doc-face
+;;                                        flyspell-prog-text-faces)))
+
+
+
+;; TODO use this to ignore emacs symbols
+;; (defun my-flyspell-ignore-short-words (beg end _info)
+;;   "Instruct Flyspell to ignore words with 3 or fewer characters."
+;;   (<= (- end beg) 3))
+;;
+;; (add-hook 'flyspell-incorrect-hook #'my-flyspell-ignore-short-words)
+
+
+;; (add-hook 'text-mode-hook
+;;           #'(lambda()
+;;               (setq-local ispell-extra-args
+;;                           (remove "--run-together" ispell-extra-args))))
+
+;; (defun my-ispell-perl-mode-setup ()
+;;   "Remove the --run-together argument from Aspell in text modes."
+;;   (setq-local ispell-extra-args (append '("--mode=perl") ispell-extra-args)))
+;; (add-hook 'bash-ts-mode-hook #'my-ispell-perl-mode-setup)
+;; (add-hook 'sh-mode-hook #'my-ispell-perl-mode-setup)
 
 ;;; DISABLED: vterm-toggle
 
