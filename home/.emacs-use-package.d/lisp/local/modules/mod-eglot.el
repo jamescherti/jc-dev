@@ -59,14 +59,14 @@
   ;;                             (string-prefix-p "Reconnected" message-string))
   ;;                   (apply orig-fun format args)))))
 
-  :preface
-  (defun my-eglot-format-buffer ()
-    "Eglot format buffer."
-    (when (and (fboundp 'eglot-managed-p)
-               (eglot-managed-p)
-               (fboundp 'eglot-format-buffer))
-      (let ((inhibit-message t))
-        (eglot-format-buffer))))
+  ;; :preface
+  ;; (defun my-eglot-format-buffer ()
+  ;;   "Eglot format buffer."
+  ;;   (when (and (fboundp 'eglot-managed-p)
+  ;;              (eglot-managed-p)
+  ;;              (fboundp 'eglot-format-buffer))
+  ;;     (let ((inhibit-message t))
+  ;;       (eglot-format-buffer))))
 
   :init
   (setq eglot-server-programs

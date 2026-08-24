@@ -1515,43 +1515,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (setq kept-old-versions 15)
   (setq kept-new-versions 15)
 
-  ;; (setq suggest-key-bindings t)
-  ;; Many X desktop environments support a feature called the clipboard manager.
-  ;; If you exit Emacs while it is the current “owner” of the clipboard data, and
-  ;; there is a clipboard manager running, Emacs transfers the clipboard data to
-  ;; the clipboard manager so that it is not lost. In some circumstances, this may
-  ;; cause a delay when exiting Emacs; if you wish to prevent Emacs from
-  ;; transferring data to the clipboard manager, change the variable
-  ;; x-select-enable-clipboard-manager to nil.
-  (setq x-select-enable-clipboard-manager nil)
-
-  (setq select-enable-clipboard t)
-  (setq select-enable-primary nil)
-
-  ;; Plain Text Pasting (Fixing "Org-Mode Bleed")
-  ;;
-  ;; Copying text from an Org buffer often results in unwanted colors,
-  ;; backgrounds, or text weights bleeding into the destination buffer.
-  ;;
-  ;; By default, vanilla Emacs preserves explicit text formatting (face
-  ;; properties) when copying and pasting to support rich-text environments.
-  ;; While standard syntax highlighting (font-lock-face) is automatically
-  ;; stripped, modes like org-mode rely heavily on the face property for their
-  ;; visual styling.
-  ;;
-  ;; Benefits of (push 'face yank-excluded-properties):
-  ;; - Prevents visual formatting bleed between different major modes.
-  ;; - Unlike the common workaround of stripping all text properties entirely
-  ;;   (setq yank-excluded-properties t), this method is surgical. It only
-  ;;   removes visual properties, ensuring that functional text properties
-  ;;   remain fully intact.
-  ;;
-  ;; This configuration intentionally disables the ability to copy and paste
-  ;; rich-text formatting. If you specifically require the preservation of text
-  ;; colors or weights across buffers (for example, when using enriched-mode or
-  ;; composing HTML emails), you should omit this setting.
-  (push 'face yank-excluded-properties)
-
   ;; Shows all options when running apropos. For more info,
   (setq calendar-week-start-day 1)
 
@@ -1602,6 +1565,60 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   )
 
 (add-hook 'lightemacs-after-modules-hook #'lightemacs-user-post-init)
+
+;;; Clipboard
+
+;; (setq suggest-key-bindings t)
+;; Many X desktop environments support a feature called the clipboard manager.
+;; If you exit Emacs while it is the current “owner” of the clipboard data, and
+;; there is a clipboard manager running, Emacs transfers the clipboard data to
+;; the clipboard manager so that it is not lost. In some circumstances, this may
+;; cause a delay when exiting Emacs; if you wish to prevent Emacs from
+;; transferring data to the clipboard manager, change the variable
+;; x-select-enable-clipboard-manager to nil.
+(setq x-select-enable-clipboard-manager nil)
+
+(setq select-enable-clipboard t)
+(setq select-enable-primary nil)
+
+;; Plain Text Pasting (Fixing "Org-Mode Bleed")
+;;
+;; Copying text from an Org buffer often results in unwanted colors,
+;; backgrounds, or text weights bleeding into the destination buffer.
+;;
+;; By default, vanilla Emacs preserves explicit text formatting (face
+;; properties) when copying and pasting to support rich-text environments.
+;; While standard syntax highlighting (font-lock-face) is automatically
+;; stripped, modes like org-mode rely heavily on the face property for their
+;; visual styling.
+;;
+;; Benefits of (push 'face yank-excluded-properties):
+;; - Prevents visual formatting bleed between different major modes.
+;; - Unlike the common workaround of stripping all text properties entirely
+;;   (setq yank-excluded-properties t), this method is surgical. It only
+;;   removes visual properties, ensuring that functional text properties
+;;   remain fully intact.
+;;
+;; This configuration intentionally disables the ability to copy and paste
+;; rich-text formatting. If you specifically require the preservation of text
+;; colors or weights across buffers (for example, when using enriched-mode or
+;; composing HTML emails), you should omit this setting.
+;; (push 'face yank-excluded-properties)
+
+;; Alternative to (push 'face yank-excluded-properties)
+(defun my-strip-face-property-from-string (string)
+  "Remove visual face properties from STRING."
+  (remove-text-properties 0 (length string) '(face nil font-lock-face nil) string)
+  string)
+
+(defun my-setup-copy-filter ()
+  "Apply a buffer-local filter to strip faces when copying from Org-mode."
+  (add-function :filter-return (local 'filter-buffer-substring-function)
+                #'my-strip-face-property-from-string))
+
+(add-hook 'markdown-mode-hook #'my-setup-copy-filter)
+(add-hook 'markdown-ts-mode-hook #'my-setup-copy-filter)
+(add-hook 'org-mode-hook #'my-setup-copy-filter)
 
 ;;; Useful functions
 
