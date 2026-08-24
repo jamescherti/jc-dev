@@ -30,176 +30,145 @@
   (require 'lightemacs-use-package))
 (require 'my-defun)
 
-;;; Eglot use-package
+;;; Defaults
 
-(lightemacs-use-package eglot
-  :ensure nil
-  :commands (eglot
-             eglot-rename
-             eglot-managed-p
-             eglot-format
-             eglot-ensure
-             eglot-rename
-             eglot-format-buffer)
+(with-eval-after-load 'jsonrpc
+  (defun jsonrpc--log-event (&rest _)))
 
-  ;; :config
-  ;; Remove eglot from the modeline
-  ;; (setq mode-line-misc-info
-  ;;       (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
+(setq eglot-server-programs
+      ;; FIXME: Maybe this info should be distributed into the major modes
+      ;; themselves where they could set a buffer-local `eglot-server-program'
+      ;; which would allow deprecating this database.
+      ;; FIXME: With `derived-mode-add-parents' in Emacs≥30, some of
+      ;; those entries can be simplified, but we keep them for when
+      ;; `eglot.el' is installed via GNU ELPA in an older Emacs.
+      `(((python-mode python-ts-mode) . ("pylsp"))))
 
-  ;; (advice-add 'eglot--message :around
-  ;;             (lambda(orig-fun format &rest args)
-  ;;               ;; This code provides an Emacs Lisp function to suppress
-  ;;               ;; specific Eglot messages from being shown in the minibuffer.
-  ;;               ;; "Suppress specific eglot messages from being shown in the
-  ;;               ;; minibuffer."
-  ;;               (let ((message-string (apply #'format format args)))
-  ;;                 (unless (or (string-prefix-p "Connected" message-string)
-  ;;                             (string-prefix-p "Waiting" message-string)
-  ;;                             (string-prefix-p "Reconnected" message-string))
-  ;;                   (apply orig-fun format args)))))
+;; Allow edits without confirmation
+(setq eglot-confirm-server-edits nil)
 
-  ;; :preface
-  ;; (defun my-eglot-format-buffer ()
-  ;;   "Eglot format buffer."
-  ;;   (when (and (fboundp 'eglot-managed-p)
-  ;;              (eglot-managed-p)
-  ;;              (fboundp 'eglot-format-buffer))
-  ;;     (let ((inhibit-message t))
-  ;;       (eglot-format-buffer))))
+(setq eglot-watch-files-outside-project-root nil)
+(setq eglot-stay-out-of '(yasnippet company))
+(setq eglot-connect-timeout 40)
+(setq eglot-max-file-watches 5000)
 
-  :init
-  (setq eglot-server-programs
-        ;; FIXME: Maybe this info should be distributed into the major modes
-        ;; themselves where they could set a buffer-local `eglot-server-program'
-        ;; which would allow deprecating this database.
-        ;; FIXME: With `derived-mode-add-parents' in Emacs≥30, some of
-        ;; those entries can be simplified, but we keep them for when
-        ;; `eglot.el' is installed via GNU ELPA in an older Emacs.
-        `(((python-mode python-ts-mode) . ("pylsp"))))
+;;; Disable capabilities
 
-  ;; Allow edits without confirmation
-  (setq eglot-confirm-server-edits nil)
+(setq eglot-ignored-server-capabilities
+      '(;; Formatting (Handled by external tools like Apheleia)
+        :documentFormattingProvider
+        :documentRangeFormattingProvider
+        :documentOnTypeFormattingProvider
 
-  (setq eglot-stay-out-of '(yasnippet company))
-  (setq eglot-connect-timeout 40)
-  (setq eglot-max-file-watches 5000)
+        ;; NOTE: UI noise and performance degradation
+        ;; Disable inlay hints (e.g. inferred types, parameter names) Inlay
+        ;; hints are small, non-intrusive annotations inserted into the code
+        ;; by the LSP server. They provide helpful context such as inferred
+        ;; variable types, function return types, or parameter names in
+        ;; function calls, especially in languages like TypeScript or Rust.
+        ;; These hints do not change the actual source code but are visually
+        ;; rendered in the editor. Disabling this prevents the display of such
+        ;; annotations in the buffer.
+        :inlayHintProvider
 
-  (setq eglot-ignored-server-capabilities
-        '(;; Formatting (Handled by external tools like Apheleia)
-          :documentFormattingProvider
-          :documentRangeFormattingProvider
-          :documentOnTypeFormattingProvider
+        ;; NOTE: UI noise and performance degradation
+        ;; Disables highlighting other instances of the symbol at point in the
+        ;; current buffer (e.g., all usages of a variable are no longer
+        ;; visually highlighted). Usage: This affects the automatic
+        ;; highlighting when the cursor is on a symbol. Normally, all
+        ;; occurrences of that symbol in the buffer are highlighted. Disabling
+        ;; this stops that behavior.
+        :documentHighlightProvider
 
-          ;; NOTE: UI noise and performance degradation
-          ;; Disable inlay hints (e.g. inferred types, parameter names) Inlay
-          ;; hints are small, non-intrusive annotations inserted into the code
-          ;; by the LSP server. They provide helpful context such as inferred
-          ;; variable types, function return types, or parameter names in
-          ;; function calls, especially in languages like TypeScript or Rust.
-          ;; These hints do not change the actual source code but are visually
-          ;; rendered in the editor. Disabling this prevents the display of such
-          ;; annotations in the buffer.
-          :inlayHintProvider
+        ;; NOTE: UI noise and performance degradation
+        ;; Disables inline annotations like test coverage, reference counts,
+        ;; or result indicators that appear above/below code lines.
+        :codeLensProvider
 
-          ;; NOTE: UI noise and performance degradation
-          ;; Disables highlighting other instances of the symbol at point in the
-          ;; current buffer (e.g., all usages of a variable are no longer
-          ;; visually highlighted). Usage: This affects the automatic
-          ;; highlighting when the cursor is on a symbol. Normally, all
-          ;; occurrences of that symbol in the buffer are highlighted. Disabling
-          ;; this stops that behavior.
-          :documentHighlightProvider
+        ;; NOTE: UI noise and performance degradation
+        ;; Disable detection and interaction with links in documents
+        :documentLinkProvider
 
-          ;; NOTE: UI noise and performance degradation
-          ;; Disables inline annotations like test coverage, reference counts,
-          ;; or result indicators that appear above/below code lines.
-          :codeLensProvider
+        ;; NOTE: UI noise and performance degradation
+        ;; Disables rendering of inline color swatches next to color values in
+        ;; code (e.g., "#ff0000" showing a red box).
+        :colorProvider
 
-          ;; NOTE: UI noise and performance degradation
-          ;; Disable detection and interaction with links in documents
-          :documentLinkProvider
+        ;; :hoverProvider  ; For showing the definition and documentation.
+        ;; :completionProvider  ; Completion. DO NOT DISABLE IT.
 
-          ;; NOTE: UI noise and performance degradation
-          ;; Disables rendering of inline color swatches next to color values in
-          ;; code (e.g., "#ff0000" showing a red box).
-          :colorProvider
+        ;; :signatureHelpProvider  ; For showing the function signature/arguments.
 
-          ;; :hoverProvider  ; For showing the definition and documentation.
-          ;; :completionProvider  ; Completion. DO NOT DISABLE IT.
+        ;; Disable "go to definition" feature
+        ;; :definitionProvider
 
-          ;; :signatureHelpProvider  ; For showing the function signature/arguments.
+        ;; Disable support for "go to type definition"
+        ;; :typeDefinitionProvider
 
-          ;; Disable "go to definition" feature
-          ;; :definitionProvider
+        ;; Disable support for finding implementation locations This
+        ;; capability allows the LSP client (like Eglot) to query the server
+        ;; for the actual implementation(s) of an interface, abstract method,
+        ;; or symbol. For example, if the cursor is on a function declaration
+        ;; or interface, this enables jumping directly to the concrete
+        ;; implementation(s). Disabling it will prevent Eglot from offering
+        ;; this navigation feature.
+        ;; :implementationProvider
 
-          ;; Disable support for "go to type definition"
-          ;; :typeDefinitionProvider
+        ;; Disables ability to jump to a symbol's declaration location (e.g.,
+        ;; jumping to where a variable was declared).
+        ;; :declarationProvider
 
-          ;; Disable support for finding implementation locations This
-          ;; capability allows the LSP client (like Eglot) to query the server
-          ;; for the actual implementation(s) of an interface, abstract method,
-          ;; or symbol. For example, if the cursor is on a function declaration
-          ;; or interface, this enables jumping directly to the concrete
-          ;; implementation(s). Disabling it will prevent Eglot from offering
-          ;; this navigation feature.
-          ;; :implementationProvider
+        ;; Disables showing all references to the symbol at point (e.g., all
+        ;; usages of a function or variable in the project).
+        ;; :referencesProvider
 
-          ;; Disables ability to jump to a symbol's declaration location (e.g.,
-          ;; jumping to where a variable was declared).
-          ;; :declarationProvider
+        ;; Disables the document-wide symbol tree view used for navigation or
+        ;; structural outline (e.g., class and function tree in sidebar).
+        ;; Usage: This impacts commands or UI elements that display a tree or
+        ;; list of all symbols (functions, classes, variables) in the current
+        ;; buffer. Disabling this removes that outline view.
+        ;;
+        ;; TODO: :documentSymbolProvider: Enable this if you use imenu. It
+        ;; populates the buffer's index of classes, methods, and functions,
+        ;; allowing for rapid structural navigation.
+        ;; :documentSymbolProvider
 
-          ;; Disables showing all references to the symbol at point (e.g., all
-          ;; usages of a function or variable in the project).
-          ;; :referencesProvider
+        ;; Disables workspace-wide symbol search (e.g., `M-x
+        ;; xref-find-apropos` or project-wide function/class name search).
+        ;;
+        ;; TODO: :workspaceSymbolProvider: Enable this if you want
+        ;; project-wide navigation. It feeds xref-find-apropos, letting you
+        ;; search for symbols across the entire repository.
+        ;; :workspaceSymbolProvider
 
-          ;; Disables the document-wide symbol tree view used for navigation or
-          ;; structural outline (e.g., class and function tree in sidebar).
-          ;; Usage: This impacts commands or UI elements that display a tree or
-          ;; list of all symbols (functions, classes, variables) in the current
-          ;; buffer. Disabling this removes that outline view.
-          ;;
-          ;; TODO: :documentSymbolProvider: Enable this if you use imenu. It
-          ;; populates the buffer's index of classes, methods, and functions,
-          ;; allowing for rapid structural navigation.
-          ;; :documentSymbolProvider
+        ;; Usage: This prevents displaying available quick fixes or
+        ;; refactorings that normally appear as code actions or lightbulb
+        ;; hints in the editor. Disabling this means you won't get automatic
+        ;; fix suggestions from the server.
+        ;;
+        ;; TODO: :codeActionProvider: You should definitely enable this. It
+        ;; provides the quick fixes, such as organizing imports or fixing lint
+        ;; errors. Without it, you lose a significant portion of Ruff's
+        ;; utility.
+        ;; :codeActionProvider
 
-          ;; Disables workspace-wide symbol search (e.g., `M-x
-          ;; xref-find-apropos` or project-wide function/class name search).
-          ;;
-          ;; TODO: :workspaceSymbolProvider: Enable this if you want
-          ;; project-wide navigation. It feeds xref-find-apropos, letting you
-          ;; search for symbols across the entire repository.
-          ;; :workspaceSymbolProvider
+        ;; Disable rename symbol functionality
+        ;; :renameProvider
 
-          ;; Usage: This prevents displaying available quick fixes or
-          ;; refactorings that normally appear as code actions or lightbulb
-          ;; hints in the editor. Disabling this means you won't get automatic
-          ;; fix suggestions from the server.
-          ;;
-          ;; TODO: :codeActionProvider: You should definitely enable this. It
-          ;; provides the quick fixes, such as organizing imports or fixing lint
-          ;; errors. Without it, you lose a significant portion of Ruff's
-          ;; utility.
-          ;; :codeActionProvider
+        ;; Disables visual fold range markers (e.g., foldable region
+        ;; indicators in the fringe or gutter).
+        ;; :foldingRangeProvider
 
-          ;; Disable rename symbol functionality
-          ;; :renameProvider
+        ;; Disables execution of commands exposed by the server (e.g., special
+        ;; refactoring or custom commands via `M-x eglot-execute-command`).
+        ;;
+        ;; TODO: :executeCommandProvider: Enable this alongside code actions.
+        ;; Many LSP servers require command execution to apply the code
+        ;; actions they suggest.
+        ;; :executeCommandProvider
+        ))
 
-          ;; Disables visual fold range markers (e.g., foldable region
-          ;; indicators in the fringe or gutter).
-          ;; :foldingRangeProvider
-
-          ;; Disables execution of commands exposed by the server (e.g., special
-          ;; refactoring or custom commands via `M-x eglot-execute-command`).
-          ;;
-          ;; TODO: :executeCommandProvider: Enable this alongside code actions.
-          ;; Many LSP servers require command execution to apply the code
-          ;; actions they suggest.
-          ;; :executeCommandProvider
-          )))
-
-;;; Eglot: Python
+;;; Python
 
 (setq-default eglot-workspace-configuration
               `(:pylsp (:plugins
@@ -350,6 +319,47 @@
                          ;;                      "pathlib"])
 
                          :rope_autoimport (:enabled :json-false)))))
+
+;;; Eglot use-package
+
+(lightemacs-use-package eglot
+  :ensure nil
+  :commands (eglot
+             eglot-rename
+             eglot-managed-p
+             eglot-format
+             eglot-ensure
+             eglot-rename
+             eglot-format-buffer)
+
+  ;; :config
+  ;; Remove eglot from the modeline
+  ;; (setq mode-line-misc-info
+  ;;       (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
+
+  ;; (advice-add 'eglot--message :around
+  ;;             (lambda(orig-fun format &rest args)
+  ;;               ;; This code provides an Emacs Lisp function to suppress
+  ;;               ;; specific Eglot messages from being shown in the minibuffer.
+  ;;               ;; "Suppress specific eglot messages from being shown in the
+  ;;               ;; minibuffer."
+  ;;               (let ((message-string (apply #'format format args)))
+  ;;                 (unless (or (string-prefix-p "Connected" message-string)
+  ;;                             (string-prefix-p "Waiting" message-string)
+  ;;                             (string-prefix-p "Reconnected" message-string))
+  ;;                   (apply orig-fun format args)))))
+
+  ;; :preface
+  ;; (defun my-eglot-format-buffer ()
+  ;;   "Eglot format buffer."
+  ;;   (when (and (fboundp 'eglot-managed-p)
+  ;;              (eglot-managed-p)
+  ;;              (fboundp 'eglot-format-buffer))
+  ;;     (let ((inhibit-message t))
+  ;;       (eglot-format-buffer))))
+  )
+
+;;; Eglot: Python
 
 ;;; Python: remove flymake
 
