@@ -1603,22 +1603,43 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; rich-text formatting. If you specifically require the preservation of text
 ;; colors or weights across buffers (for example, when using enriched-mode or
 ;; composing HTML emails), you should omit this setting.
-;; (push 'face yank-excluded-properties)
+(push 'face yank-excluded-properties)
 
-;; Alternative to (push 'face yank-excluded-properties)
-(defun my-strip-face-property-from-string (string)
-  "Remove visual face properties from STRING."
-  (remove-text-properties 0 (length string) '(face nil font-lock-face nil) string)
-  string)
-
-(defun my-setup-copy-filter ()
-  "Apply a buffer-local filter to strip faces when copying from Org-mode."
-  (add-function :filter-return (local 'filter-buffer-substring-function)
-                #'my-strip-face-property-from-string))
-
-(add-hook 'markdown-mode-hook #'my-setup-copy-filter)
-(add-hook 'markdown-ts-mode-hook #'my-setup-copy-filter)
-(add-hook 'org-mode-hook #'my-setup-copy-filter)
+;; ;; Per mode
+;; ;; Copy-paste without org-mode or markdown-mode formatting bleeding into other
+;; ;; buffers. Alternative to: (push 'face yank-excluded-properties)
+;; ;; URL: https://www.jamescherti.com/emacs-fix-org-mode-copy-paste-yank-bleed/
+;; (defun my-strip-face-properties-from-string (string)
+;;   "Remove visual face properties from STRING."
+;;   (remove-text-properties 0 (length string)
+;;                           '(face nil font-lock-face nil)
+;;                           string)
+;;   string)
+;;
+;; (defun my-enable-plain-text-copy ()
+;;   "Strip visual face properties from copied text in the current buffer."
+;;   (add-function :filter-return
+;;                 (local 'filter-buffer-substring-function)
+;;                 #'my-strip-face-properties-from-string))
+;;
+;; (add-hook 'markdown-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'markdown-ts-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'org-mode-hook #'my-enable-plain-text-copy)
+;;
+;; ;; Other modes
+;; (add-hook 'prog-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'text-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'conf-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'diff-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'help-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'info-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'compilation-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'shell-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'eshell-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'magit-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'dired-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'term-mode-hook #'my-enable-plain-text-copy)
+;; (add-hook 'vterm-mode-hook #'my-enable-plain-text-copy)
 
 ;;; Useful functions
 
