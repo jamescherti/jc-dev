@@ -112,31 +112,53 @@
 ;;           (call-process my-dired-xdg-open-cmd nil nil nil file)))
 ;;     (error "Undefined: dired-get-file-for-visit")))
 ;;
+
 ;; (with-eval-after-load 'dired
-;;   ;; --------------------------------------------------------------------------
-;;   ;; Using xdg-open/open/start for certain filetypes
-;;   ;; --------------------------------------------------------------------------
-;;   (defvar my-dired-xdg-open-cmd nil)
-;;
-;;   (when-let* ((cmd (cond (IS-MAC "open")
-;;                          (IS-LINUX "xdg-open")
-;;                          (IS-WINDOWS "start"))))
-;;     (when cmd
-;;       (setq my-dired-xdg-open-cmd cmd)))
-;;
-;;   (setq dired-guess-shell-alist-user
-;;         `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
-;;           ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
-;;           ("\\.\\(?:xcf\\)\\'" ,cmd)
-;;           ("\\.tex\\'" ,cmd)
-;;           ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
-;;           ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)))
-;;
 ;;   ;; Advise `dired-find-file' to use `my-dired-open-with-external-command'
 ;;   ;; instead
 ;;   (advice-add 'dired-find-file :override #'my-dired-open-with-external-command))
 
-;;; Abbreviate dired headers
+;;; Using xdg-open/open/start for certain filetypes
+
+(defvar my-dired-xdg-open-cmd nil)
+(with-eval-after-load 'dired
+  (when-let* ((cmd (cond (IS-MAC "open")
+                         (IS-LINUX "xdg-open")
+                         (IS-WINDOWS "start"))))
+    (when cmd
+      (setq my-dired-xdg-open-cmd cmd))
+
+    (setq dired-guess-shell-alist-user
+          `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
+            ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
+            ("\\.\\(?:xcf\\)\\'" ,cmd)
+            ("\\.tex\\'" ,cmd)
+            ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
+            ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)))))
+
+;;; Useful functions
+
+(defun my-dired-home ()
+  "Dired home."
+  (interactive)
+  (dired "~/"))
+
+;;; DISABLED: Icons dired
+
+;; (lightemacs-use-package nerd-icons-dired
+;;   :if (display-graphic-p)
+;;   ;;:diminish nerd-icons-dired-mode
+;;   :commands nerd-icons-dired-mode
+;;   ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
+;;   ;; aligned properly)
+;;   :hook
+;;   (dired-mode . nerd-icons-dired-mode))
+
+;; Local variables:
+;; byte-compile-warnings: (not free-vars)
+;; End:
+
+;;; DISABLED: Abbreviate dired headers
 
 ;; --------------------------------------------------------------------------
 ;; Abbreviate dired header
@@ -163,28 +185,8 @@
 ;;
 ;; (advice-add 'dired-readin :after 'my-dired-readin-abbreviate-header)
 
-;;; Misc
-
-(defun my-dired-home ()
-  "Dired home."
-  (interactive)
-  (dired "~/"))
-
-;;; Icons dired
-
-;; (lightemacs-use-package nerd-icons-dired
-;;   :if (display-graphic-p)
-;;   ;;:diminish nerd-icons-dired-mode
-;;   :commands nerd-icons-dired-mode
-;;   ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
-;;   ;; aligned properly)
-;;   :hook
-;;   (dired-mode . nerd-icons-dired-mode))
+;;; Provide
 
 (provide 'mod-dired)
-
-;; Local variables:
-;; byte-compile-warnings: (not free-vars)
-;; End:
 
 ;;; mod-dired.el ends here

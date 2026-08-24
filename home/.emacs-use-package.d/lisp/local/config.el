@@ -722,7 +722,7 @@ subsequent GCC invocations."
                            le-elisp-refs
                            le-easy-escape
                            le-aggressive-indent
-                           le-highlight-defined
+                           ;; le-highlight-defined
                            le-paredit
                            le-elisp-autofmt
                            ;; le-page-break-lines

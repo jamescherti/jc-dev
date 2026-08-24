@@ -53,31 +53,31 @@
 ;; modes that rely on multiple parsers (like php or markdown) as
 ;; pointed out by Marks.
 
-(defun initialize-indirect-buffer-treesit-parsers ()
-  "Initialize tree-sitter parsers in indirect buffers based on the base buffer."
-  (when (and (fboundp 'treesit-major-mode-setup)
-             (fboundp 'treesit-parser-list)
-             (fboundp 'treesit-parser-create))
-    (let* ((base (buffer-base-buffer))
-           (parser-list (and base
-                             (with-current-buffer base
-                               (treesit-parser-list)))))
-      (when parser-list
-        ;; Instantiate identical parsers exclusively for this
-        ;; indirect buffer
-        (dolist (parser parser-list)
-          (treesit-parser-create (treesit-parser-language parser)))
-
-        ;; Re-wire tree-sitter (font-lock, indentation) using the
-        ;; inherited variables This safely bypasses
-        ;; kill-all-local-variables
-        (treesit-major-mode-setup)
-
-        ;; Force an immediate font-lock refresh
-        (when (fboundp 'font-lock-flush)
-          (font-lock-flush))))))
-
-(add-hook 'clone-indirect-buffer-hook #'initialize-indirect-buffer-treesit-parsers)
+;; (defun initialize-indirect-buffer-treesit-parsers ()
+;;   "Initialize tree-sitter parsers in indirect buffers based on the base buffer."
+;;   (when (and (fboundp 'treesit-major-mode-setup)
+;;              (fboundp 'treesit-parser-list)
+;;              (fboundp 'treesit-parser-create))
+;;     (let* ((base (buffer-base-buffer))
+;;            (parser-list (and base
+;;                              (with-current-buffer base
+;;                                (treesit-parser-list)))))
+;;       (when parser-list
+;;         ;; Instantiate identical parsers exclusively for this
+;;         ;; indirect buffer
+;;         (dolist (parser parser-list)
+;;           (treesit-parser-create (treesit-parser-language parser)))
+;;
+;;         ;; Re-wire tree-sitter (font-lock, indentation) using the
+;;         ;; inherited variables This safely bypasses
+;;         ;; kill-all-local-variables
+;;         (treesit-major-mode-setup)
+;;
+;;         ;; Force an immediate font-lock refresh
+;;         (when (fboundp 'font-lock-flush)
+;;           (font-lock-flush))))))
+;;
+;; (add-hook 'clone-indirect-buffer-hook #'initialize-indirect-buffer-treesit-parsers)
 
 ;;; Modeline
 
