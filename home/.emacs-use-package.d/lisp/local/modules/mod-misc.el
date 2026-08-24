@@ -407,6 +407,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; Emacs 31
+(setq treesit-enabled-modes t)
+
 (setq save-silently t)
 
 ;; Disable macro set definition
@@ -3675,6 +3678,10 @@ function or if an invalid choice is made."
 
 ;; TODO minimal emacs?
 (setq flyspell-delay 1)
+
+;; Force Flyspell to run spell-checks using idle timers rather than blocking via
+;; sit-for. This prevents brief input delays while typing.
+(setq flyspell-delay-use-timer t)
 
 ;;; Sync dictionary
 
