@@ -407,9 +407,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; Emacs 31
-(setq treesit-enabled-modes t)
-
 (setq save-silently t)
 
 ;; Disable macro set definition
