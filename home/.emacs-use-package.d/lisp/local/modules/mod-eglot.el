@@ -145,7 +145,7 @@
 
         ;; Disables visual fold range markers (e.g., foldable region
         ;; indicators in the fringe or gutter).
-        ;; :foldingRangeProvider
+        :foldingRangeProvider
 
         ;; NOTE: Keep this commented out
         ;; They are on-demand (zero passive overhead): Capabilities like
