@@ -35,6 +35,10 @@
 
 ;;; Tree-sitter Fallback Helpers
 
+;; Enable native Tree-sitter mode redirection globally for Emacs 31+
+(when (boundp 'treesit-enabled-modes)
+  (setq treesit-enabled-modes t))
+
 (defun my-remap-ts-mode (base-mode ts-mode lang)
   "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
   (when (my-treesit-language-available-p lang)

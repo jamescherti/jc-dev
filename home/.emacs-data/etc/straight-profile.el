@@ -33,7 +33,7 @@
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
  ("ztree" . "b99966d37e3197ac48454780f02278ba4ed5ed51")
  ("yaml-mode" . "96ef0201101a7cd591febd5886633154dae8834c")
- ("nerd-icons-corfu" . "f821e953b1a3dc9b381bc53486aabf366bf11cb1") ; v1.0.0 | RSS RELEASE | TODO fork
+ ("nerd-icons-corfu" . "e1197d6c1db673f4ec7ee20cb2c4297f479420e7") ; v1.1.0 | RSS RELEASE
  ("groovy-emacs-modes" . "fb296e62a0856d9b293dc29f5471a6d7c7d447ea")
  ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
  ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")

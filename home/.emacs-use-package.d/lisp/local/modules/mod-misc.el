@@ -3197,6 +3197,16 @@ are editing by falling back to another visible file buffer."
 
 ;;; le-undo-fu
 
+;; Configure undo-fu-session to save a linear history instead of a full tree.
+;; Since the workflow only requires standard undo and redo operations, storing
+;; alternate branches (changes that were undone and diverged from) is
+;; unnecessary.
+;;
+;; Enabling this setting provides two main benefits:
+;; - Reduces disk storage requirements for the gzipped history files.
+;; - Improves file loading performance by minimizing parsing time.
+(setq undo-fu-session-linear t)
+
 (with-eval-after-load 'le-undo-fu-session
   (setq undo-fu-session-incompatible-files
         '(;; ".*\\.age$"

@@ -78,7 +78,9 @@
 (setq eglot-code-action-indications nil)
 
 (with-eval-after-load 'jsonrpc
-  (defun jsonrpc--log-event (&rest _)))
+  (when (fboundp 'jsonrpc--log-event)
+    (fset 'jsonrpc--log-event #'ignore))
+  (remove-hook 'jsonrpc-event-hook 'jsonrpc--log-event))
 
 (setq eglot-server-programs
       ;; FIXME: Maybe this info should be distributed into the major modes
