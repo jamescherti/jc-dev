@@ -116,6 +116,13 @@
           (when (and (fboundp 'eglot)
                      (or (derived-mode-p 'python-mode)
                          (derived-mode-p 'python-ts-mode)))
+            (when (treesit-parser-list)
+              ;; This is to avoid redundant semantic highlighting, disabling
+              ;; Eglot's :semanticTokensProvider is reasonable when Tree-sitter
+              ;; is already providing semantic fontification.
+              (make-local-variable 'eglot-ignored-server-capabilities)
+              (add-to-list 'eglot-ignored-server-capabilities
+                           :semanticTokensProvider))
             (eglot-ensure)))
 
         ;; Formatters
