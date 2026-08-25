@@ -36,8 +36,28 @@
 ;;; Tree-sitter Fallback Helpers
 
 ;; Enable native Tree-sitter mode redirection globally for Emacs 31+
-(when (>= emacs-major-version 31)
-  (setq treesit-enabled-modes t))
+;; We use `setopt' instead of `setq' because this variable
+;; requires its custom `:set' function to execute the actual remaps.
+(with-eval-after-load 'treesit
+  (when (>= emacs-major-version 31)
+    (if (fboundp 'setopt)
+        (setopt treesit-enabled-modes t)
+      (customize-set-variable 'treesit-enabled-modes t))))
+
+;; (defun my-remap-ts-mode (base-mode ts-mode lang)
+;;   "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
+;;   (when (and (< emacs-major-version 31)
+;;              (my-treesit-language-available-p lang))
+;;     (push (cons base-mode ts-mode) major-mode-remap-alist)))
+;;
+;; (defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
+;;   "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
+;;   (if (my-treesit-language-available-p lang)
+;;       (if (and fallback-mode (>= emacs-major-version 31))
+;;           (push (cons regex fallback-mode) auto-mode-alist)
+;;         (push (cons regex ts-mode) auto-mode-alist))
+;;     (when fallback-mode
+;;       (push (cons regex fallback-mode) auto-mode-alist))))
 
 ;;; Filetype defaults
 
@@ -46,10 +66,15 @@
 (setq js-indent-level 2)
 (setq javascript-indent-level 2)
 (setq html-indent-offset 2)
-(setq sgml-basic-offset 2)
 (setq lua-indent-level 2)
 (setq lua-ts-indent-offset 2)
 (setq yaml-indent-offset 2)
+
+;;; Filetype defaults
+(setq typescript-ts-mode-indent-offset 2) ;; TypeScript (Tree-sitter)
+(setq json-ts-mode-indent-offset 2)       ;; JSON (Tree-sitter)
+;; (setq c-basic-offset 2)                   ;; C/C++
+;; (setq c-ts-mode-indent-offset 2)          ;; C/C++ (Tree-sitter)
 
 ;;; typescript
 
@@ -795,16 +820,20 @@ invoking the original function ORIG-FUN with ARGS."
          ("\\.log\\'" . txt-file-mode)))
 
 ;; Gentoo
-(if (treesit-ready-p 'bash t)
-    (push '("/make\\.conf\\'" . bash-ts-mode) auto-mode-alist)
-  (push '("/make\\.conf\\'" . sh-mode) auto-mode-alist))
+(let ((mode (if (and (< emacs-major-version 31)
+                     (treesit-ready-p 'bash t))
+                'bash-ts-mode
+              'sh-mode)))
+  (push (cons "/make\\.conf\\'" mode) auto-mode-alist))
 
 (push '("/\\.gitconfig\\.local\\'" . gitconfig-mode) auto-mode-alist)
 (push '("/\\.gitattributes\\.local\\'" . gitattributes-mode) auto-mode-alist)
 
-(if (treesit-ready-p 'json t)
-    (push '("/\\.ipynb\\'" . json-ts-mode) auto-mode-alist)
-  (push '("/\\.ipynb\\'" . js-json-mode) auto-mode-alist))
+(let ((mode (if (and (< emacs-major-version 31)
+                     (treesit-ready-p 'json t))
+                'json-ts-mode
+              'js-json-mode)))
+  (push (cons "/\\.ipynb\\'" mode) auto-mode-alist))
 
 ;;; Markdown
 
