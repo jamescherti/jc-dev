@@ -25,6 +25,7 @@
 ;; Config evil.
 
 ;;; Code:
+
 ;;; Require
 
 (require 'my-defun)
@@ -44,15 +45,27 @@
         (setopt treesit-enabled-modes t)
       (customize-set-variable 'treesit-enabled-modes t))))
 
+(defvar mod-filetype--ts-lang-cache nil
+  "Cache for tree-sitter language availability checks.")
+
+(defun mod-filetype--ts-lang-available-p (lang)
+  "Return non-nil if Tree-sitter LANG is available, caching the result."
+  (let ((cached (assq lang mod-filetype--ts-lang-cache)))
+    (if cached
+        (cdr cached)
+      (let ((available (my-treesit-language-available-p lang)))
+        (push (cons lang available) mod-filetype--ts-lang-cache)
+        available))))
+
 (defun my-remap-ts-mode (base-mode ts-mode lang)
   "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
   (when (and (< emacs-major-version 31)
-             (my-treesit-language-available-p lang))
+             (mod-filetype--ts-lang-available-p lang))
     (push (cons base-mode ts-mode) major-mode-remap-alist)))
 
 (defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
   "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
-  (if (my-treesit-language-available-p lang)
+  (if (mod-filetype--ts-lang-available-p lang)
       (if (and fallback-mode (>= emacs-major-version 31))
           (push (cons regex fallback-mode) auto-mode-alist)
         (push (cons regex ts-mode) auto-mode-alist))
