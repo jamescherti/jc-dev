@@ -32,6 +32,51 @@
 
 ;;; Defaults
 
+;; 0.5 seconds (The Default)
+;; ---------------------------
+;; Best for: Developers who rely heavily on instantaneous autocompletion, live
+;; error squiggles, and real-time hover documentation.
+;;
+;; When to use: If your language server is incredibly fast (e.g., gopls or
+;; rust-analyzer), your hardware is modern, and you don't experience any
+;; stuttering while typing.
+;;
+;; 0.75 to 1.0 seconds (The Sweet Spot)
+;; ----------------------------------------
+;; Best for: Fast, bursty typists who want to eliminate micro-stutters without
+;; sacrificing too much responsiveness.
+;;
+;; When to use: This is often the recommended middle ground. It gives you enough
+;; time to finish typing a variable name or method call before Emacs fires the
+;; textDocument/didChange payload to the server. It drastically cuts down on
+;; the server trying to parse half-finished, invalid syntax trees while you are
+;; still typing.
+;;
+;; 2.0 seconds or higher (High Performance/Low Overhead)
+;; -------------------------------------------------------
+;; Best for: Developers working on massive, monolithic codebases, or using
+;; extremely resource-heavy language servers (like clangd on large projects).
+;;
+;; When to use: If your editor constantly freezes while typing, or if you notice
+;; your laptop fans spinning up just from regular editing. At this value, Eglot
+;; acts more like a "pause to check my work" tool rather than a real-time
+;; linter.
+(setq eglot-send-changes-idle-time 0.5)
+
+;; ## Disable Automatic Code Action Probing
+;; By default, Eglot asynchronously polls the language server for available code
+;; actions (`:textDocument/codeAction`) whenever the cursor idles. This
+;; mechanism is responsible for displaying visual indicators, such as a
+;; lightbulb, in the editor's fringe or margin.
+;;
+;; Disabling these automatic indications significantly reduces continuous
+;; process communication and background overhead during routine editing.
+;;
+;; Note: Disabling this feature only removes the automatic UI indicators. You
+;; retain the ability to manually request and execute code actions at any time
+;; by invoking `M-x eglot-code-actions`.
+(setq eglot-code-action-indications nil)
+
 (with-eval-after-load 'jsonrpc
   (defun jsonrpc--log-event (&rest _)))
 
