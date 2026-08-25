@@ -113,7 +113,7 @@
           (dtrt-indent-mode 1))
         (when env-allow-lsp
           ;; All modes
-          (when (and (fboundp 'eglot)
+          (when (and (fboundp 'eglot-ensure)
                      (or (derived-mode-p 'python-mode)
                          (derived-mode-p 'python-ts-mode)))
             (when (treesit-parser-list)
