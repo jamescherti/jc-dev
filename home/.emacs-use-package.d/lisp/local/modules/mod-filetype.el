@@ -36,18 +36,21 @@
 ;;; Tree-sitter Fallback Helpers
 
 ;; Enable native Tree-sitter mode redirection globally for Emacs 31+
-(when (boundp 'treesit-enabled-modes)
+(when (>= emacs-major-version 31)
   (setq treesit-enabled-modes t))
 
 (defun my-remap-ts-mode (base-mode ts-mode lang)
   "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
-  (when (my-treesit-language-available-p lang)
+  (when (and (< emacs-major-version 31)
+             (my-treesit-language-available-p lang))
     (push (cons base-mode ts-mode) major-mode-remap-alist)))
 
 (defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
   "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
   (if (my-treesit-language-available-p lang)
-      (push (cons regex ts-mode) auto-mode-alist)
+      (if (and fallback-mode (>= emacs-major-version 31))
+          (push (cons regex fallback-mode) auto-mode-alist)
+        (push (cons regex ts-mode) auto-mode-alist))
     (when fallback-mode
       (push (cons regex fallback-mode) auto-mode-alist))))
 
@@ -328,23 +331,18 @@ only if they are not already available."
 
 ;;; Misc languages
 
-(when (my-treesit-language-available-p 'c)
-  (push '(c-mode . c-ts-mode) major-mode-remap-alist))
+(when (< emacs-major-version 31)
+  (when (my-treesit-language-available-p 'c)
+    (push '(c-mode . c-ts-mode) major-mode-remap-alist))
 
-(when (my-treesit-language-available-p 'cpp)
-  (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
+  (when (my-treesit-language-available-p 'cpp)
+    (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
 
-(when (my-treesit-language-available-p 'json)
-  (push '(js-json-mode . json-ts-mode) major-mode-remap-alist))
+  (when (my-treesit-language-available-p 'json)
+    (push '(js-json-mode . json-ts-mode) major-mode-remap-alist))
 
-(when (my-treesit-language-available-p 'toml)
-  (push '(conf-toml-mode . toml-ts-mode) major-mode-remap-alist))
-
-;; (when (my-treesit-language-available-p 'java)
-;;   (push '(java-mode . java-ts-mode) major-mode-remap-alist))
-
-;; (when (my-treesit-language-available-p 'go)
-;;   (add-to-list 'auto-mode-alist '("\.[gG][oO]\\'" . go-ts-mode)))
+  (when (my-treesit-language-available-p 'toml)
+    (push '(conf-toml-mode . toml-ts-mode) major-mode-remap-alist)))
 
 ;;; jinja2
 
@@ -431,7 +429,8 @@ only if they are not already available."
       (with-eval-after-load 'yaml-ts-mode
         (setq auto-mode-alist
               (rassq-delete-all 'yaml-ts-mode auto-mode-alist))
-        (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist)))
+        (when (< emacs-major-version 31)
+          (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))))
   ;; non tree sitter
   (require 'sub-flymake-yamllint))
 
@@ -557,8 +556,8 @@ only if they are not already available."
   ;; Prevent ANSI color codes from being inserted into the buffer
   (defun ansible-doc--with-nocolor (orig-fun &rest args)
     "Advice around `ansible-doc-revert-module-buffer' to disable colors.
-  Temporarily set the environment variable ANSIBLE_NOCOLOR=1 when
-  invoking the original function ORIG-FUN with ARGS."
+Temporarily set the environment variable ANSIBLE_NOCOLOR=1 when
+invoking the original function ORIG-FUN with ARGS."
     (let ((process-environment (cons "ANSIBLE_NOCOLOR=1" process-environment)))
       (apply orig-fun args)))
   (with-eval-after-load 'ansible-doc
@@ -582,7 +581,8 @@ only if they are not already available."
 
 (if (my-treesit-language-available-p 'php)
     (progn
-      (push '(php-mode . php-ts-mode) major-mode-remap-alist)
+      (when (< emacs-major-version 31)
+        (push '(php-mode . php-ts-mode) major-mode-remap-alist))
       (push '("\\.[pP][hH][pP]\\'" . php-ts-mode) auto-mode-alist)
       (push '("\\.[pP][hH][pP]3\\'" . php-ts-mode) auto-mode-alist))
   (require 'sub-php-mode))
@@ -602,8 +602,9 @@ only if they are not already available."
 
 (if (my-treesit-language-available-p 'bash)
     (progn
-      (push '(shell-script-mode . bash-ts-mode) major-mode-remap-alist)
-      (push '(sh-mode . bash-ts-mode) major-mode-remap-alist))
+      (when (< emacs-major-version 31)
+        (push '(shell-script-mode . bash-ts-mode) major-mode-remap-alist)
+        (push '(sh-mode . bash-ts-mode) major-mode-remap-alist)))
   ;; use-package sh-mode
   ;; :ensure nil
   ;; :commands shell-script-mode
@@ -619,7 +620,8 @@ only if they are not already available."
 
 (when (my-treesit-language-available-p 'css)
   (progn
-    (push '(css-mode . css-ts-mode) major-mode-remap-alist)
+    (when (< emacs-major-version 31)
+      (push '(css-mode . css-ts-mode) major-mode-remap-alist))
     ;; (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist)
     ))
 
@@ -627,9 +629,10 @@ only if they are not already available."
 
 (when (my-treesit-language-available-p 'javascript)
   (progn
-    (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
-    (push '(js-mode . js-ts-mode) major-mode-remap-alist)
-    (push '("\.[jJ][sS]\\'" . js-ts-mode) auto-mode-alist))
+    (when (< emacs-major-version 31)
+      (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
+      (push '(js-mode . js-ts-mode) major-mode-remap-alist))
+    (push '("\\.[jJ][sS]\\'" . js-ts-mode) auto-mode-alist))
   ;; (progn
   ;;   (push '("\.[jJ][sS]\\'" . js-mode) auto-mode-alist)
   ;;
@@ -703,8 +706,9 @@ only if they are not already available."
 
 (if (my-treesit-language-available-p 'html)
     (progn
-      (push '(html-mode . html-ts-mode) major-mode-remap-alist)
-      (push '(mhtml-mode . mhtml-ts-mode) major-mode-remap-alist)
+      (when (< emacs-major-version 31)
+        (push '(html-mode . html-ts-mode) major-mode-remap-alist)
+        (push '(mhtml-mode . mhtml-ts-mode) major-mode-remap-alist))
       (push '("\\.[hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist)
       (push '("\\.[Pp][hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist))
   (use-package sgml-mode
@@ -721,7 +725,8 @@ only if they are not already available."
 ;;; Python: major-mode remap alist
 
 (when (my-treesit-language-available-p 'python)
-  (push '(python-mode . python-ts-mode) major-mode-remap-alist))
+  (when (< emacs-major-version 31)
+    (push '(python-mode . python-ts-mode) major-mode-remap-alist)))
 
 ;;; Python
 
