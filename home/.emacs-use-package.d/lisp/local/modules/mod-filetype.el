@@ -264,17 +264,6 @@
 
 ;;; Functions
 
-;; (defun my-treesit-require-and-override (feature)
-;;   "Require FEATURE and override `treesit-language-source-alist' with its entries."
-;;   (let ((new-entries nil))
-;;     (let ((treesit-language-source-alist nil))
-;;       (require feature)
-;;       (setq new-entries treesit-language-source-alist))
-;;     (dolist (entry new-entries)
-;;       (setq treesit-language-source-alist
-;;             (assq-delete-all (car entry) treesit-language-source-alist))
-;;       (push entry treesit-language-source-alist))))
-
 (defun mod-filetype-install (package lang-keys &optional install-fn)
   "Load PACKAGE and prepare the tree-sitter sources for LANG-KEYS.
 LANG-KEYS can be a single symbol or a list of symbols.
@@ -341,18 +330,10 @@ only if they are not already available."
 
 ;;; Misc languages
 
-(when (< emacs-major-version 31)
-  (when (my-treesit-language-available-p 'c)
-    (push '(c-mode . c-ts-mode) major-mode-remap-alist))
-
-  (when (my-treesit-language-available-p 'cpp)
-    (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
-
-  (when (my-treesit-language-available-p 'json)
-    (push '(js-json-mode . json-ts-mode) major-mode-remap-alist))
-
-  (when (my-treesit-language-available-p 'toml)
-    (push '(conf-toml-mode . toml-ts-mode) major-mode-remap-alist)))
+(my-remap-ts-mode 'c-mode 'c-ts-mode 'c)
+(my-remap-ts-mode 'c++-mode 'c++-ts-mode 'cpp)
+(my-remap-ts-mode 'js-json-mode 'json-ts-mode 'json)
+(my-remap-ts-mode 'conf-toml-mode 'toml-ts-mode 'toml)
 
 ;;; jinja2
 
@@ -439,8 +420,7 @@ only if they are not already available."
       (with-eval-after-load 'yaml-ts-mode
         (setq auto-mode-alist
               (rassq-delete-all 'yaml-ts-mode auto-mode-alist))
-        (when (< emacs-major-version 31)
-          (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist))))
+        (my-remap-ts-mode 'yaml-mode 'yaml-ts-mode 'yaml)))
   ;; non tree sitter
   (require 'sub-flymake-yamllint))
 
@@ -591,11 +571,9 @@ invoking the original function ORIG-FUN with ARGS."
 
 (if (my-treesit-language-available-p 'php)
     (progn
-      (when (< emacs-major-version 31)
-        (push '(php-mode . php-ts-mode) major-mode-remap-alist))
-      (let ((mode (if (>= emacs-major-version 31) 'php-mode 'php-ts-mode)))
-        (push (cons "\\.[pP][hH][pP]\\'" mode) auto-mode-alist)
-        (push (cons "\\.[pP][hH][pP]3\\'" mode) auto-mode-alist)))
+      (my-remap-ts-mode 'php-mode 'php-ts-mode 'php)
+      (my-auto-mode-ts "\\.[pP][hH][pP]\\'" 'php-ts-mode 'php-mode 'php)
+      (my-auto-mode-ts "\\.[pP][hH][pP]3\\'" 'php-ts-mode 'php-mode 'php))
   (require 'sub-php-mode))
 
 ;;; Bash
@@ -611,68 +589,56 @@ invoking the original function ORIG-FUN with ARGS."
 (add-hook 'sh-mode-hook #'setup-sh-mode)
 (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
 
-(if (my-treesit-language-available-p 'bash)
-    (progn
-      (when (< emacs-major-version 31)
-        (push '(shell-script-mode . bash-ts-mode) major-mode-remap-alist)
-        (push '(sh-mode . bash-ts-mode) major-mode-remap-alist)))
-  ;; use-package sh-mode
-  ;; :ensure nil
-  ;; :commands shell-script-mode
-  ;; :mode (("\\.sh\\'" . shell-script-mode)
-  ;;        ("\\.bash\\'" . shell-script-mode)
-  ;;        ("\\.pbs\\'" . shell-script-mode))
-  ;; :custom
-  (with-eval-after-load 'sh-script
-    (when (fboundp 'sh-indent-supported)
-      (sh-indent-supported (append sh-indent-supported '((bash . sh)))))))
+(my-remap-ts-mode 'shell-script-mode 'bash-ts-mode 'bash)
+(my-remap-ts-mode 'sh-mode 'bash-ts-mode 'bash)
+
+;; use-package sh-mode
+;; :ensure nil
+;; :commands shell-script-mode
+;; :mode (("\\.sh\\'" . shell-script-mode)
+;;        ("\\.bash\\'" . shell-script-mode)
+;;        ("\\.pbs\\'" . shell-script-mode))
+;; :custom
+(with-eval-after-load 'sh-script
+  (when (fboundp 'sh-indent-supported)
+    (sh-indent-supported (append sh-indent-supported '((bash . sh))))))
 
 ;;; css
 
-(when (my-treesit-language-available-p 'css)
-  (progn
-    (when (< emacs-major-version 31)
-      (push '(css-mode . css-ts-mode) major-mode-remap-alist))
-    ;; (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist)
-    ))
+(my-remap-ts-mode 'css-mode 'css-ts-mode 'css)
+;; (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist)
 
 ;;; Javascript
 
-(when (my-treesit-language-available-p 'javascript)
-  (progn
-    (when (< emacs-major-version 31)
-      (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
-      (push '(js-mode . js-ts-mode) major-mode-remap-alist))
-    (let ((mode (if (>= emacs-major-version 31) 'js-mode 'js-ts-mode)))
-      (push (cons "\\.[jJ][sS]\\'" mode) auto-mode-alist))))
+(my-remap-ts-mode 'js2-mode 'js-ts-mode 'javascript)
+(my-remap-ts-mode 'js-mode 'js-ts-mode 'javascript)
+(my-auto-mode-ts "\\.[jJ][sS]\\'" 'js-ts-mode 'js-mode 'javascript)
 
 ;;; Lua
 
 (if (my-treesit-language-available-p 'lua)
     (progn
-      (push '("\\.[lL][uU][aA]\\'" . lua-ts-mode) auto-mode-alist))
+      (my-auto-mode-ts "\\.[lL][uU][aA]\\'" 'lua-ts-mode nil 'lua))
   (require 'sub-lua-mode))
 
 ;;; Dockerfile
 
-(if (my-treesit-language-available-p 'dockerfile)
-    (progn
-      (push '("/[dD][oO][cC][kK][eE][rR]\\'" . dockerfile-ts-mode) auto-mode-alist)
-      (push '("/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" . dockerfile-ts-mode) auto-mode-alist)
-      (push '("/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" . dockerfile-ts-mode) auto-mode-alist))
-  ;;(use-package dockerfile-mode
-  ;;  :defer t
-  ;;  :commands dockerfile-mode
-  ;;  :init
-  ;;  ;; For some reason, this path is not automatically added to load-path
-  ;;  (add-to-list 'load-path (expand-file-name "dockerfile-mode"
-  ;;                                            emacs-packages-dir))
-  ;;  (add-to-list 'auto-mode-alist
-  ;;               (cons (concat "[/\\]"
-  ;;                             "\\(?:Containerfile\\|Dockerfile\\)"
-  ;;                             "\\(?:\\.[^/\\]*\\)?\\'")
-  ;;                     'dockerfile-mode)))
-  t)
+(my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+(my-auto-mode-ts "/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+(my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+
+;;(use-package dockerfile-mode
+;;  :defer t
+;;  :commands dockerfile-mode
+;;  :init
+;;  ;; For some reason, this path is not automatically added to load-path
+;;  (add-to-list 'load-path (expand-file-name "dockerfile-mode"
+;;                                            emacs-packages-dir))
+;;  (add-to-list 'auto-mode-alist
+;;               (cons (concat "[/\\]"
+;;                             "\\(?:Containerfile\\|Dockerfile\\)"
+;;                             "\\(?:\\.[^/\\]*\\)?\\'")
+;;                     'dockerfile-mode)))
 
 ;;; HTML
 
@@ -704,15 +670,12 @@ invoking the original function ORIG-FUN with ARGS."
 ;;   ;; (web-mode-code-indent-offset 2)
 ;;   )
 
-
 (if (my-treesit-language-available-p 'html)
     (progn
-      (when (< emacs-major-version 31)
-        (push '(html-mode . html-ts-mode) major-mode-remap-alist)
-        (push '(mhtml-mode . mhtml-ts-mode) major-mode-remap-alist))
-      (let ((mode (if (>= emacs-major-version 31) 'mhtml-mode 'mhtml-ts-mode)))
-        (push (cons "\\.[hH][tT][mM][lL]\\'" mode) auto-mode-alist)
-        (push (cons "\\.[Pp][hH][tT][mM][lL]\\'" mode) auto-mode-alist)))
+      (my-remap-ts-mode 'html-mode 'html-ts-mode 'html)
+      (my-remap-ts-mode 'mhtml-mode 'mhtml-ts-mode 'html)
+      (my-auto-mode-ts "\\.[hH][tT][mM][lL]\\'" 'mhtml-ts-mode 'mhtml-mode 'html)
+      (my-auto-mode-ts "\\.[Pp][hH][tT][mM][lL]\\'" 'mhtml-ts-mode 'mhtml-mode 'html))
   (use-package sgml-mode
     :ensure nil
     :commands (sgml-mode
@@ -724,13 +687,9 @@ invoking the original function ORIG-FUN with ARGS."
     (html-mode . sgml-name-8bit-mode)
     (mhtml-mode . sgml-name-8bit-mode)))
 
-;;; Python: major-mode remap alist
-
-(when (my-treesit-language-available-p 'python)
-  (when (< emacs-major-version 31)
-    (push '(python-mode . python-ts-mode) major-mode-remap-alist)))
-
 ;;; Python
+
+(my-remap-ts-mode 'python-mode 'python-ts-mode 'python)
 
 (defun setup-python-mode ()
   "Setup `python-mode'."
@@ -745,8 +704,8 @@ invoking the original function ORIG-FUN with ARGS."
 ;;; jinja2-mode and csv-mode
 
 ;; (lightemacs-use-package jinja2-mode
-;;   :commands jinja2-mode
-;;   :mode ("\\.j2\\'" . jinja2-mode))
+;;    :commands jinja2-mode
+;;    :mode ("\\.j2\\'" . jinja2-mode))
 
 ;;; ultisnips-mode
 
@@ -779,18 +738,6 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; auto-mode-alist
 
-;; magic mode alist replaces this
-;;
-;; This regular expression matches the full file path for any .conf file
-;; residing within either /etc/fonts/ or .config/fontconfig/ and maps them
-;; directly to xml-mode.
-;; (push '("/etc/fonts/.*\\.conf\\'" . nxml-mode) auto-mode-alist)
-;; (push (cons (concat
-;;              (regexp-quote (expand-file-name "~/.config/fontconfig/"))
-;;              ".*\\.conf\\'")
-;;             'nxml-mode)
-;;       auto-mode-alist)
-
 (nconc auto-mode-alist
        '(;; conf-mode
          ;; ("\\.profile\\'" . conf-mode)  ; firejail profiles
@@ -820,20 +767,12 @@ invoking the original function ORIG-FUN with ARGS."
          ("\\.log\\'" . txt-file-mode)))
 
 ;; Gentoo
-(let ((mode (if (and (< emacs-major-version 31)
-                     (treesit-ready-p 'bash t))
-                'bash-ts-mode
-              'sh-mode)))
-  (push (cons "/make\\.conf\\'" mode) auto-mode-alist))
+(my-auto-mode-ts "/make\\.conf\\'" 'bash-ts-mode 'sh-mode 'bash)
 
 (push '("/\\.gitconfig\\.local\\'" . gitconfig-mode) auto-mode-alist)
 (push '("/\\.gitattributes\\.local\\'" . gitattributes-mode) auto-mode-alist)
 
-(let ((mode (if (and (< emacs-major-version 31)
-                     (treesit-ready-p 'json t))
-                'json-ts-mode
-              'js-json-mode)))
-  (push (cons "/\\.ipynb\\'" mode) auto-mode-alist))
+(my-auto-mode-ts "/\\.ipynb\\'" 'json-ts-mode 'js-json-mode 'json)
 
 ;;; Markdown
 
@@ -853,94 +792,71 @@ invoking the original function ORIG-FUN with ARGS."
   (let ((inhibit-message t))
     (toggle-truncate-lines 0)))
 
-(if (and (> emacs-major-version 30)
-         (my-treesit-language-available-p 'markdown))
-    (progn
-      (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
-      (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
-  (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
-  (push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
-  (with-eval-after-load 'markdown-mode
-    (define-key markdown-mode-map (kbd "TAB") #'ignore)
+(when (and (> emacs-major-version 30)
+           (my-treesit-language-available-p 'markdown))
+  (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
+  (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
 
-    ;; Lock list indentation to 2 spaces. When you hit Tab to nest a list item
-    ;; under a dash, it aligns perfectly with a 2-space structure, matching
-    ;; standard configuration habits (like your YAML spacing).
-    (setq markdown-list-indent-width 2)
+;;; Setup markdown mode
 
-    (setq markdown-disable-tooltip-prompt t)
-    (setq markdown-split-window-direction 'right)
+(add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
+(push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
 
-    ;; Automates your formatting standard. When you press M-RET
-    ;; (markdown-insert-list-item), Emacs will insert the dash automatically
-    ;; rather than the default asterisk.
-    (setq markdown-unordered-list-item-prefix "- ")
+;; Uncomment this if you use Roam, Obsidian, or Logseq, as it enables proper
+;; fontification and navigation for [[WikiLinks]].
+(setq markdown-enable-wiki-links t)
 
-    ;; Enables Previewing: Without configuring markdown-command, features like
-    ;; markdown-preview (C-c C-c p) or markdown-export will fail if Emacs cannot
-    ;; find a default compiler on your system path.
-    ;;
-    ;; Advanced Syntax: multimarkdown supports robust extensions that standard
-    ;; Markdown lacks, such as native tables, footnotes, and metadata blocks.
-    ;; (setq markdown-command "multimarkdown")
+;; Uncomment this if you work with static site generators (like Hugo or
+;; Jekyll) or Pandoc. It ensures the YAML frontmatter at the top of your
+;; markdown files is correctly syntax-highlighted.
+(setq markdown-use-pandoc-style-yaml-metadata t)
 
-    (setq markdown-fontify-whole-heading-line t)
+;; Lock list indentation to 2 spaces. When you hit Tab to nest a list item
+;; under a dash, it aligns perfectly with a 2-space structure, matching
+;; standard configuration habits (like your YAML spacing).
+(setq markdown-list-indent-width 2)
 
-    ;; (custom-set-faces
-    ;;  '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.5 :weight bold))))
-    ;;  '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4 :weight bold))))
-    ;;  '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.3 :weight bold))))
-    ;;  '(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2 :weight bold)))))
-    (setq markdown-gfm-use-electric-backquote nil)
-    (setq markdown-heading-scaling t)
+(setq markdown-disable-tooltip-prompt t)
+(setq markdown-split-window-direction 'right)
 
-    ;; Already merged to upstream
-    ;; (with-eval-after-load 'markdown-mode
-    ;;   ;; Modify the shared syntax table globally for all markdown buffers
-    ;;   (modify-syntax-entry ?' "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?* "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?> "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?< "." markdown-mode-syntax-table)
-    ;;   (modify-syntax-entry ?_ "." markdown-mode-syntax-table))
+;; Automates your formatting standard. When you press M-RET
+;; (markdown-insert-list-item), Emacs will insert the dash automatically
+;; rather than the default asterisk.
+(setq markdown-unordered-list-item-prefix "- ")
 
-    ;; TODO reenable this
-    ;; (setq markdown-enable-wiki-links t)
-    ;; (setq markdown-use-pandoc-style-yaml-metadata t)
+;; Enables Previewing: Without configuring markdown-command, features like
+;; markdown-preview (C-c C-c p) or markdown-export will fail if Emacs cannot
+;; find a default compiler on your system path.
+;;
+;; Advanced Syntax: multimarkdown supports robust extensions that standard
+;; Markdown lacks, such as native tables, footnotes, and metadata blocks.
+(setq markdown-command "multimarkdown")
 
-    ;; (setq markdown-footnote-location 'immediately)
-    ;; (setq markdown-fontify-whole-heading-line t)
-    ;; (setq markdown-italic-underscore t)
-    ;; (setq markdown-blockquote-display-char '("┃" ">"))
-    ;; (setq markdown-list-item-bullets '("⏺" "▪" "◆" "►" "•" "◇"))
-    ;; (setq markdown-asymmetric-header t)
-    ;; (setq markdown-make-gfm-checkboxes-buttons t)
-    ;; (setq markdown-open-command "~/bin/mark.sh")
+(setq markdown-fontify-whole-heading-line t)
 
-    ;; (setq markdown-enable-math nil)
-    ;; (setq markdown-display-remote-images nil)
-    ;; Contain bugs when make-window-start-visible is set to t
-    ;; (setq markdown-hide-markup t)
-    ;; (setq markdown-nested-imenu-heading-index t)
+(setq markdown-gfm-use-electric-backquote nil)
+(setq markdown-header-scaling t)
 
-    )
+(with-eval-after-load 'markdown-mode
+  (define-key markdown-mode-map (kbd "TAB") #'ignore))
 
-  (defun my-markdown-toc-gen-if-present ()
-    "Gen table of contents if present."
-    (when (and (fboundp 'markdown-toc--toc-already-present-p)
-               (fboundp 'markdown-toc-generate-toc)
-               (markdown-toc--toc-already-present-p))
-      (markdown-toc-generate-toc)))
+(defun my-markdown-toc-gen-if-present ()
+  "Gen table of contents if present."
+  (when (and (fboundp 'markdown-toc--toc-already-present-p)
+             (fboundp 'markdown-toc-generate-toc)
+             (markdown-toc--toc-already-present-p))
+    (markdown-toc-generate-toc)))
 
-  (defun my-setup-markdown-toc ()
-    "Setup the markdown-toc package."
-    (when (fboundp 'my-markdown-toc-gen-if-present)
-      (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
+(defun my-setup-markdown-toc ()
+  "Setup the markdown-toc package."
+  (when (fboundp 'my-markdown-toc-gen-if-present)
+    (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
 
-  (when (fboundp 'my-setup-markdown-toc)
-    (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
+(when (fboundp 'my-setup-markdown-toc)
+  (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
 
-  (setq markdown-toc-mode-map nil)
-  (setq markdown-toc-header-toc-title "## Table of Contents"))
+(setq markdown-toc-mode-map nil)
+(setq markdown-toc-header-toc-title "## Table of Contents")
 
 ;;; custom-modes: Simple conf mode
 
@@ -961,25 +877,6 @@ invoking the original function ORIG-FUN with ARGS."
   "Major mode to highlight only # comments."
   (setq font-lock-defaults '(simple-conf-mode-font-lock-keywords))
   (set-syntax-table simple-conf-mode-syntax-table))
-
-;;; DISABLED: polymode
-
-;; (lightemacs-use-package polymode
-;;   :init
-;;   (setq polymode-prefix-key (kbd "C-c n"))
-;;   ;; :config
-;;   ;; (setq polymode-display-output-buffer nil)
-;;   ;; (add-hook 'polymode-init-inner-hook
-;;   ;;           (lambda ()
-;;   ;;             (display-line-numbers-mode -1)
-;;   ;;             (flyspell-mode -1)))
-;;   )
-;;
-;; (lightemacs-use-package poly-markdown
-;;   :mode ("\\.md\\'" . poly-markdown-mode))
-
-;; (lightemacs-use-package poly-ansible
-;;   :mode ("\\.ya?ml\\'" . poly-ansible-mode))
 
 ;;; Provide
 
