@@ -79,7 +79,7 @@
         :commit "b733d3f5f5005890f324333dd57e1f0badec5c87")
  t)
 
-(setq lightemacs-modules '(;;le-compile-angel
+(setq lightemacs-modules '(le-compile-angel
                            le-flavor-micro
                            le-pathaction
                            le-term
