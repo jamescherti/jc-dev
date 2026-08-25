@@ -44,20 +44,20 @@
         (setopt treesit-enabled-modes t)
       (customize-set-variable 'treesit-enabled-modes t))))
 
-;; (defun my-remap-ts-mode (base-mode ts-mode lang)
-;;   "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
-;;   (when (and (< emacs-major-version 31)
-;;              (my-treesit-language-available-p lang))
-;;     (push (cons base-mode ts-mode) major-mode-remap-alist)))
-;;
-;; (defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
-;;   "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
-;;   (if (my-treesit-language-available-p lang)
-;;       (if (and fallback-mode (>= emacs-major-version 31))
-;;           (push (cons regex fallback-mode) auto-mode-alist)
-;;         (push (cons regex ts-mode) auto-mode-alist))
-;;     (when fallback-mode
-;;       (push (cons regex fallback-mode) auto-mode-alist))))
+(defun my-remap-ts-mode (base-mode ts-mode lang)
+  "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
+  (when (and (< emacs-major-version 31)
+             (my-treesit-language-available-p lang))
+    (push (cons base-mode ts-mode) major-mode-remap-alist)))
+
+(defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
+  "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
+  (if (my-treesit-language-available-p lang)
+      (if (and fallback-mode (>= emacs-major-version 31))
+          (push (cons regex fallback-mode) auto-mode-alist)
+        (push (cons regex ts-mode) auto-mode-alist))
+    (when fallback-mode
+      (push (cons regex fallback-mode) auto-mode-alist))))
 
 ;;; Filetype defaults
 
