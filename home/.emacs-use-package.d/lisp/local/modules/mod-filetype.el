@@ -39,21 +39,6 @@
 (when (>= emacs-major-version 31)
   (setq treesit-enabled-modes t))
 
-(defun my-remap-ts-mode (base-mode ts-mode lang)
-  "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
-  (when (and (< emacs-major-version 31)
-             (my-treesit-language-available-p lang))
-    (push (cons base-mode ts-mode) major-mode-remap-alist)))
-
-(defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
-  "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
-  (if (my-treesit-language-available-p lang)
-      (if (and fallback-mode (>= emacs-major-version 31))
-          (push (cons regex fallback-mode) auto-mode-alist)
-        (push (cons regex ts-mode) auto-mode-alist))
-    (when fallback-mode
-      (push (cons regex fallback-mode) auto-mode-alist))))
-
 ;;; Filetype defaults
 
 (setq sgml-basic-offset 2)  ;; HTML
@@ -583,8 +568,9 @@ invoking the original function ORIG-FUN with ARGS."
     (progn
       (when (< emacs-major-version 31)
         (push '(php-mode . php-ts-mode) major-mode-remap-alist))
-      (push '("\\.[pP][hH][pP]\\'" . php-ts-mode) auto-mode-alist)
-      (push '("\\.[pP][hH][pP]3\\'" . php-ts-mode) auto-mode-alist))
+      (let ((mode (if (>= emacs-major-version 31) 'php-mode 'php-ts-mode)))
+        (push (cons "\\.[pP][hH][pP]\\'" mode) auto-mode-alist)
+        (push (cons "\\.[pP][hH][pP]3\\'" mode) auto-mode-alist)))
   (require 'sub-php-mode))
 
 ;;; Bash
@@ -632,18 +618,8 @@ invoking the original function ORIG-FUN with ARGS."
     (when (< emacs-major-version 31)
       (push '(js2-mode . js-ts-mode) major-mode-remap-alist)
       (push '(js-mode . js-ts-mode) major-mode-remap-alist))
-    (push '("\\.[jJ][sS]\\'" . js-ts-mode) auto-mode-alist))
-  ;; (progn
-  ;;   (push '("\.[jJ][sS]\\'" . js-mode) auto-mode-alist)
-  ;;
-  ;;   ;; Not required
-  ;;   ;; (use-package js2-mode
-  ;;   ;;   :commands js2-mode
-  ;;   ;;   ;; :mode
-  ;;   ;;   ;; ("\\.js\\'" . js2-mode)
-  ;;   ;;   )
-  ;;   )
-  )
+    (let ((mode (if (>= emacs-major-version 31) 'js-mode 'js-ts-mode)))
+      (push (cons "\\.[jJ][sS]\\'" mode) auto-mode-alist))))
 
 ;;; Lua
 
@@ -709,8 +685,9 @@ invoking the original function ORIG-FUN with ARGS."
       (when (< emacs-major-version 31)
         (push '(html-mode . html-ts-mode) major-mode-remap-alist)
         (push '(mhtml-mode . mhtml-ts-mode) major-mode-remap-alist))
-      (push '("\\.[hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist)
-      (push '("\\.[Pp][hH][tT][mM][lL]\\'" . mhtml-ts-mode) auto-mode-alist))
+      (let ((mode (if (>= emacs-major-version 31) 'mhtml-mode 'mhtml-ts-mode)))
+        (push (cons "\\.[hH][tT][mM][lL]\\'" mode) auto-mode-alist)
+        (push (cons "\\.[Pp][hH][tT][mM][lL]\\'" mode) auto-mode-alist)))
   (use-package sgml-mode
     :ensure nil
     :commands (sgml-mode
