@@ -377,34 +377,42 @@
              eglot-rename
              eglot-format-buffer)
 
-  ;; :config
+  :config
   ;; Remove eglot from the modeline
-  ;; (setq mode-line-misc-info
-  ;;       (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
+  (setq mode-line-misc-info
+        (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
 
-  ;; (advice-add 'eglot--message :around
-  ;;             (lambda(orig-fun format &rest args)
-  ;;               ;; This code provides an Emacs Lisp function to suppress
-  ;;               ;; specific Eglot messages from being shown in the minibuffer.
-  ;;               ;; "Suppress specific eglot messages from being shown in the
-  ;;               ;; minibuffer."
-  ;;               (let ((message-string (apply #'format format args)))
-  ;;                 (unless (or (string-prefix-p "Connected" message-string)
-  ;;                             (string-prefix-p "Waiting" message-string)
-  ;;                             (string-prefix-p "Reconnected" message-string))
-  ;;                   (apply orig-fun format args)))))
-
-  ;; :preface
-  ;; (defun my-eglot-format-buffer ()
-  ;;   "Eglot format buffer."
-  ;;   (when (and (fboundp 'eglot-managed-p)
-  ;;              (eglot-managed-p)
-  ;;              (fboundp 'eglot-format-buffer))
-  ;;     (let ((inhibit-message t))
-  ;;       (eglot-format-buffer))))
-  )
+  :preface
+  (defun my-eglot-format-buffer ()
+    "Eglot format buffer."
+    (interactive)
+    (when (and (fboundp 'eglot-managed-p)
+               (eglot-managed-p)
+               (fboundp 'eglot-format-buffer))
+      (let ((inhibit-message t))
+        (eglot-format-buffer)))))
 
 ;;; Eglot: Python
+
+;;; Eglot: quiet
+
+(defun my-eglot--message-filter (orig-fun format &rest args)
+  "Suppress selected Eglot messages from the minibuffer.
+ORIG-FUN is the original `eglot--message` function.
+FORMAT and ARGS are the message format string and its arguments."
+  (let ((message-string (apply #'format format args)))
+    (let ((inhibit-message (or (string-prefix-p "Connected" message-string)
+                               (string-prefix-p "Waiting" message-string)
+                               (string-prefix-p "Reconnected" message-string))))
+      (apply orig-fun format args)))
+  ;; (let ((message-string (apply #'format format args)))
+  ;;   (unless (or (string-prefix-p "Connected" message-string)
+  ;;               (string-prefix-p "Waiting" message-string)
+  ;;               (string-prefix-p "Reconnected" message-string))
+  ;;     (apply orig-fun format args)))
+  )
+
+(advice-add 'eglot--message :around #'my-eglot--message-filter)
 
 ;;; Python: remove flymake
 
