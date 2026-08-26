@@ -39,11 +39,19 @@
 ;; Enable native Tree-sitter mode redirection globally for Emacs 31+
 ;; We use `setopt' instead of `setq' because this variable
 ;; requires its custom `:set' function to execute the actual remaps.
-(with-eval-after-load 'treesit
-  (when (>= emacs-major-version 31)
-    (if (fboundp 'setopt)
-        (setopt treesit-enabled-modes t)
-      (customize-set-variable 'treesit-enabled-modes t))))
+;; (with-eval-after-load 'treesit
+;;   (when (>= emacs-major-version 31)
+;;     (if (fboundp 'setopt)
+;;         (setopt treesit-enabled-modes t)
+;;       (customize-set-variable 'treesit-enabled-modes t))))
+
+;; (with-eval-after-load 'markdown-ts-mode-maybe
+;;   (defun markdown-ts-mode-maybe ()
+;;     "Enable `markdown-ts-mode' when its grammars are available.
+;; Also propose to install the grammars when `treesit-enabled-modes'
+;; is t or contains the mode name."
+;;     (when (fboundp 'markdown-mode)
+;;       (markdown-mode 1))))
 
 (defvar mod-filetype--ts-lang-cache nil
   "Cache for tree-sitter language availability checks.")
@@ -66,7 +74,7 @@
 (defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
   "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
   (if (mod-filetype--ts-lang-available-p lang)
-      (if (and fallback-mode (>= emacs-major-version 31))
+      (if (and fallback-mode treesit-enabled-modes)
           (push (cons regex fallback-mode) auto-mode-alist)
         (push (cons regex ts-mode) auto-mode-alist))
     (when fallback-mode
@@ -814,6 +822,8 @@ invoking the original function ORIG-FUN with ARGS."
 
 (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
+
+(setq markdown-nested-imenu-heading-index nil)
 
 ;; Uncomment this if you use Roam, Obsidian, or Logseq, as it enables proper
 ;; fontification and navigation for [[WikiLinks]].

@@ -160,6 +160,67 @@
     (add-hook 'after-make-frame-functions #'my-setup-fringe)
   (my-setup-fringe))
 
+;;; Scroll
+
+;; This fixes the skipping when scrolling long org documents
+;; NOTE: MANAGED BY MINIMAL-EMACS
+;; (setq scroll-conservatively most-positive-fixnum)
+(setq scroll-conservatively 20)
+
+;; Removed it from m.e
+(setq next-screen-context-lines 0)  ;; Setting this to 0 can make it
+
+(setq-local redisplay-skip-fontification-on-input t)
+
+;; Maximizes screen real estate by hiding the mode-line.
+(setq fast-but-imprecise-scrolling nil)
+;; (setq scroll-step 1)
+
+;; Prevents isearch from stubbornly freezing at the end of a buffer match before
+;; wrapping. It keeps navigation continuous and allows you to use standard
+;; scrolling actions while remaining inside a search block.
+(setq isearch-wrap-pause 'no
+      isearch-allow-scroll 'unlimited)
+
+;; Setting this to nil prevents Emacs from "snapping" the viewport to fit the
+;; entire line when point moves to a partially visible line.
+;; Pros: Enables true smooth/pixel scrolling; prevents jarring UI jumps
+;;       when navigating past large images or long wrapped blocks of text.
+;; Cons: The cursor can technically be on a line that is only half-visible
+;;       at the very top or bottom edge of the window.
+;; Recently disabled. Causes issues?
+;; (setq make-cursor-line-fully-visible t)
+
+;; The Problem: If you scroll down a file and land on a line that is only 90%
+;; visible at the bottom of the window, vanilla Emacs will violently "snap" the
+;; entire screen to force that line into full view. This destroys smooth
+;; scrolling.
+;; Why it has no tradeoff: Note: Your snippet had this set to t, which is the
+;; vanilla default. Changing it to nil is universally preferred by users who
+;; want modern, predictable scrolling behavior, especially when dealing with
+;; large images in Org-mode or long wrapped paragraphs.
+;; TODO minimal emacs?
+(setq make-cursor-line-fully-visible nil)
+
+;; (setq compilation-scroll-output nil)
+
+(setq-default comint-scroll-to-bottom-on-input t)
+;; (setq-default comint-scroll-to-bottom-on-output nil)
+
+;; (setq-default comint-scroll-to-bottom-on-input t)
+;; (setq-default comint-scroll-to-bottom-on-output nil)
+
+;; Apply the following settings if you also want scrolling with an ordinary
+;; mouse to be almost as smooth as scrolling with a touchpad, on systems other
+;; than X:
+;; (setq pixel-scroll-precision-large-scroll-height 40.0)
+
+;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
+;; absolute top or bottom line of the window. If this is set to a positive
+;; integer (like 3 or 5), Emacs will force the screen to scroll before you reach
+;; the edge.
+;; (setq scroll-margin 0)
+
 ;;; Security issue
 
 ;; https://eshelyaron.com/posts/2026-08-06-emacs-arbitrary-code-execution-returns.html
@@ -223,35 +284,9 @@ during unsafe operations like interning symbols on file open."
 
 ;; (setq isearch-allow-motion t)
 
-;; Prevents isearch from stubbornly freezing at the end of a buffer match before
-;; wrapping. It keeps navigation continuous and allows you to use standard
-;; scrolling actions while remaining inside a search block.
-(setq isearch-wrap-pause 'no
-      isearch-allow-scroll 'unlimited)
-
 (setq resize-mini-windows t)
 
 ;; (setq switch-to-buffer-obey-display-actions nil)
-
-;; Setting this to nil prevents Emacs from "snapping" the viewport to fit the
-;; entire line when point moves to a partially visible line.
-;; Pros: Enables true smooth/pixel scrolling; prevents jarring UI jumps
-;;       when navigating past large images or long wrapped blocks of text.
-;; Cons: The cursor can technically be on a line that is only half-visible
-;;       at the very top or bottom edge of the window.
-;; Recently disabled. Causes issues?
-;; (setq make-cursor-line-fully-visible t)
-
-;; The Problem: If you scroll down a file and land on a line that is only 90%
-;; visible at the bottom of the window, vanilla Emacs will violently "snap" the
-;; entire screen to force that line into full view. This destroys smooth
-;; scrolling.
-;; Why it has no tradeoff: Note: Your snippet had this set to t, which is the
-;; vanilla default. Changing it to nil is universally preferred by users who
-;; want modern, predictable scrolling behavior, especially when dealing with
-;; large images in Org-mode or long wrapped paragraphs.
-;; TODO minimal emacs?
-(setq make-cursor-line-fully-visible nil)
 
 ;; also useful for org
 (setq imenu-max-items 30)
@@ -516,14 +551,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (setq compilation-context-lines 10)  ; not good
 ;; (setq compilation-skip-threshold 2)
 ;; (setq compilation-window-height 100)
-;; (setq compilation-scroll-output nil)
-
-;; (setq read-process-output-max ; Increase single chunk bytes to read from subprocess (def. 4096)
-;;       (condition-case nil
-;;           (with-temp-buffer ; On GNU/Linux systems, the value should not exceed `pipe-max-size'
-;;             (insert-file-contents "/proc/sys/fs/pipe-max-size")
-;;             (string-to-number (buffer-string)))
-;;         (error (* 1024 1024))))
 
 ;; TODO minimal-emacs?
 ;; (setq bookmark-watch-bookmark-file 'silent)
@@ -588,22 +615,12 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq archive-hidden-columns '(Mode Ids Date&Time Ratio))
 (setq archive-alternate-hidden-columns '())
 
-(setq redisplay-skip-fontification-on-input nil)
-
-;; Maximizes screen real estate by hiding the mode-line.
-(setq-local redisplay-skip-fontification-on-input nil)
-(setq fast-but-imprecise-scrolling nil)
-;; (setq scroll-step 1)
-
 (setq font-lock-maximum-decoration t)
 
 ;; Auto-scroll to bottom only when you type, not when output arrives
 
 ;; Expands history commands like !! or !$ before execution
 (setq-default comint-input-autoexpand 'input)
-
-(setq-default comint-scroll-to-bottom-on-input t)
-;; (setq-default comint-scroll-to-bottom-on-output nil)
 
 ;; Prevent duplicates in your shell history
 (setq comint-input-ignoredups t)
@@ -847,8 +864,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (setq shell-has-auto-cd nil) ; Emacs 29.1
 ;; (setq shell-get-old-input-include-continuation-lines t) ; Emacs 30.1
 ;; (setq shell-completion-fignore '("~" "#" "%"))
-;; (setq-default comint-scroll-to-bottom-on-input t)
-;; (setq-default comint-scroll-to-bottom-on-output nil)
 
 ;; Removed from minimal-emacs.d
 
@@ -928,11 +943,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; - cursor-sensor-functions: Cursor-triggered actions; irrelevant when yanked.
 ;; - syntax-table: Syntax hints; unnecessary unless parsing the text.
 
-;; Apply the following settings if you also want scrolling with an ordinary
-;; mouse to be almost as smooth as scrolling with a touchpad, on systems other
-;; than X:
-;; (setq pixel-scroll-precision-large-scroll-height 40.0)
-
 ;; Configure Emacs to ask for confirmation before exiting
 
 ;; (customize-set-variable 'completion-cycle-threshold 3)
@@ -945,12 +955,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;   "User post init."
 ;;   (my-add-packages-to-load-path))
 
-;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
-;; absolute top or bottom line of the window. If this is set to a positive
-;; integer (like 3 or 5), Emacs will force the screen to scroll before you reach
-;; the edge.
-;; (setq scroll-margin 0)
-
 ;; If you hate the "0.5 character" margin you mentioned earlier, be careful.
 ;; Using window-resize-pixelwise can actually create that half-character look at
 ;; the bottom of your windows more often, because the window height is no longer
@@ -960,15 +964,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; removed
 ;; (setq tramp-completion-reread-directory-timeout 50)
 
-;; Removed it from m.e
-;; (setq next-screen-context-lines 0): Setting this to 0 can make it
 ;; disorienting to track your position when paging down. The default value of 2
 ;; provides better visual continuity when reading large files.
 ;; TODO check again
-
-;;
-;; Number of lines of continuity when scrolling by screenfuls.
-;; (setq next-screen-context-lines 0)
 
 ;; removed from minimal-emacs.d
 ;; (setq savehist-save-minibuffer-history t)
@@ -1025,11 +1023,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; (add-hook 'js-ts-mode-hook 'hs-minor-mode)
 
   ;; (add-hook 'lisp-interaction-mode-hook #'outline-minor-mode)
-
-  ;; This fixes the skipping when scrolling long org documents
-  ;; NOTE: MANAGED BY MINIMAL-EMACS
-  ;; (setq scroll-conservatively most-positive-fixnum)
-  (setq scroll-conservatively 20)
 
   (setq eldoc-idle-delay 0.5)
   (setq eldoc-echo-area-display-truncation-message nil)
@@ -3331,7 +3324,7 @@ properly handles remote files over Tramp), applying the setting only if
 (setq diff-hl-disable-on-remote t)
 (setq diff-hl-draw-borders nil)
 (setq diff-hl-next-previous-hunk-auto-recenter nil)
-(setq diff-hl-autohide-margin t)
+(setq diff-hl-autohide-margin nil)
 (setq diff-hl-bmp-max-width 16)
 (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
 
@@ -4484,8 +4477,6 @@ Standard save hooks handle persistence when the buffer is modified."
 
 ;; JIT Lock Defer Time
 ;; -------------------
-;; (setq fast-but-imprecise-scrolling nil)
-
 ;; NOTE: This adds timers, for some reason...
 ;; In addition to that, it causes issues with dired
 ;; (setq jit-lock-defer-time 0)  ; 0 = Fontification deferred while there is input
@@ -4537,8 +4528,8 @@ Standard save hooks handle persistence when the buffer is modified."
 ;; images. Set the following variables to prevent that:
 ;; (setq scroll-up-aggressively 0.0
 ;;       scroll-down-aggressively 0.0)
-;; (setq scroll-up-aggressively 0.01
-;;       scroll-down-aggressively 0.01)
+(setq scroll-up-aggressively 0.01
+      scroll-down-aggressively 0.01)
 
 ;; To speed up Emacs when working with large files, increasing
 ;; jit-lock-chunk-size to a larger value, such as 2000, will generally improve
