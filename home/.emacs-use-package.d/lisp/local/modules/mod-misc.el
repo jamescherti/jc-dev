@@ -176,6 +176,44 @@
 (setq fast-but-imprecise-scrolling nil)
 ;; (setq scroll-step 1)
 
+;; The number of lines to try scrolling a window by when point moves out.
+;; If that fails to bring point back on frame, point is centered instead.
+;; If this is zero, point is always centered after it moves off frame.
+;; If you want scrolling to always be a line at a time, you should set
+;; 'scroll-conservatively' to a large value rather than set this to 1.
+;; (setq scroll-step 0)
+
+;; Scroll Aggressively
+;; - scroll-up-aggressively: Controls how far Emacs lets the point get from the
+;;   bottom of the window before it scrolls.
+;; - scroll-down-aggressively: Controls how far the point can get from the top
+;;   of the window before scrolling.
+;;
+;; 0.01 means “scroll as soon as the point starts moving away from the edge.”.
+;; 1 would mean “wait until the point is almost off the screen.”
+;;
+;; What happens with 0.01: When you scroll down (e.g., pressing C-n or C-v),
+;; Emacs will try to keep the point near the top of the screen. When you scroll
+;; up, Emacs will keep the point near the bottom.
+;;
+;; In Emacs, when you move the cursor (called the point) up or down, sometimes
+;; the screen scrolls to keep the point visible. The variables
+;; scroll-up-aggressively and scroll-down-aggressively control how soon that
+;; scrolling happens.
+;;
+;; Benefits:
+;; - Provides a more "stick-to-edge" scrolling experience, which many users find
+;;   helpful when reading or editing code sequentially from top to bottom (e.g.,
+;;   in programming).
+;; - Avoids excessive recentring, giving a more predictable and less jumpy scroll.
+;;
+;; Also emacs by default will jump around a lot when scrolling a buffer with
+;; images. Set the following variables to prevent that:
+;; (setq scroll-up-aggressively 0.0
+;;       scroll-down-aggressively 0.0)
+(setq scroll-up-aggressively 0.01
+      scroll-down-aggressively 0.01)
+
 ;; Prevents isearch from stubbornly freezing at the end of a buffer match before
 ;; wrapping. It keeps navigation continuous and allows you to use standard
 ;; scrolling actions while remaining inside a search block.
@@ -4492,44 +4530,6 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;                                (setq-local jit-lock-defer-time nil)
 ;;                                (when (bound-and-true-p font-lock-mode)
 ;;                                  (font-lock-ensure))))
-
-;; The number of lines to try scrolling a window by when point moves out.
-;; If that fails to bring point back on frame, point is centered instead.
-;; If this is zero, point is always centered after it moves off frame.
-;; If you want scrolling to always be a line at a time, you should set
-;; 'scroll-conservatively' to a large value rather than set this to 1.
-;; (setq scroll-step 0)
-
-;; Scroll Aggressively
-;; - scroll-up-aggressively: Controls how far Emacs lets the point get from the
-;;   bottom of the window before it scrolls.
-;; - scroll-down-aggressively: Controls how far the point can get from the top
-;;   of the window before scrolling.
-;;
-;; 0.01 means “scroll as soon as the point starts moving away from the edge.”.
-;; 1 would mean “wait until the point is almost off the screen.”
-;;
-;; What happens with 0.01: When you scroll down (e.g., pressing C-n or C-v),
-;; Emacs will try to keep the point near the top of the screen. When you scroll
-;; up, Emacs will keep the point near the bottom.
-;;
-;; In Emacs, when you move the cursor (called the point) up or down, sometimes
-;; the screen scrolls to keep the point visible. The variables
-;; scroll-up-aggressively and scroll-down-aggressively control how soon that
-;; scrolling happens.
-;;
-;; Benefits:
-;; - Provides a more "stick-to-edge" scrolling experience, which many users find
-;;   helpful when reading or editing code sequentially from top to bottom (e.g.,
-;;   in programming).
-;; - Avoids excessive recentring, giving a more predictable and less jumpy scroll.
-;;
-;; Also emacs by default will jump around a lot when scrolling a buffer with
-;; images. Set the following variables to prevent that:
-;; (setq scroll-up-aggressively 0.0
-;;       scroll-down-aggressively 0.0)
-(setq scroll-up-aggressively 0.01
-      scroll-down-aggressively 0.01)
 
 ;; To speed up Emacs when working with large files, increasing
 ;; jit-lock-chunk-size to a larger value, such as 2000, will generally improve
