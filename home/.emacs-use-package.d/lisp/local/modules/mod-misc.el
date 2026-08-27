@@ -162,26 +162,27 @@
 
 ;;; Scroll
 
-;; This fixes the skipping when scrolling long org documents
-;; NOTE: MANAGED BY MINIMAL-EMACS
-;; (setq scroll-conservatively most-positive-fixnum)
+(setq redisplay-skip-fontification-on-input t)
+
+;; Disable the optimization locally for dired to guarantee directory
+;; fontification
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (setq-local redisplay-skip-fontification-on-input nil)))
+
 (setq scroll-conservatively 20)
+(setq next-screen-context-lines 0)
 
-;; Removed it from m.e
-(setq next-screen-context-lines 0)  ;; Setting this to 0 can make it
-
-(setq-local redisplay-skip-fontification-on-input t)
-
-;; Maximizes screen real estate by hiding the mode-line.
-(setq fast-but-imprecise-scrolling nil)
-;; (setq scroll-step 1)
+(setq fast-but-imprecise-scrolling t)
 
 ;; The number of lines to try scrolling a window by when point moves out.
 ;; If that fails to bring point back on frame, point is centered instead.
 ;; If this is zero, point is always centered after it moves off frame.
 ;; If you want scrolling to always be a line at a time, you should set
 ;; 'scroll-conservatively' to a large value rather than set this to 1.
-;; (setq scroll-step 0)
+
+;; scroll-conservatively replaces scroll-step
+;; (setq scroll-step 1)
 
 ;; Scroll Aggressively
 ;; - scroll-up-aggressively: Controls how far Emacs lets the point get from the
@@ -211,8 +212,8 @@
 ;; images. Set the following variables to prevent that:
 ;; (setq scroll-up-aggressively 0.0
 ;;       scroll-down-aggressively 0.0)
-(setq scroll-up-aggressively 0.01
-      scroll-down-aggressively 0.01)
+(setq-default scroll-up-aggressively 0.01
+              scroll-down-aggressively 0.01)
 
 ;; Prevents isearch from stubbornly freezing at the end of a buffer match before
 ;; wrapping. It keeps navigation continuous and allows you to use standard

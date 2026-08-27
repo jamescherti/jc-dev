@@ -58,12 +58,6 @@
 ;; NOTE: Issue. This stops native compilation, even when the laptop is charging.
 ;; (setq native-comp-async-on-battery-power nil)
 
-;; Disable the optimization locally for dired to guarantee directory
-;; fontification
-;; (add-hook 'dired-mode-hook
-;;           (lambda ()
-;;             (setq-local redisplay-skip-fontification-on-input nil)))
-
 (setq lightemacs-dired-filter-global-enabled t)
 (setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
                                            dired-filter-by-git-ignored
