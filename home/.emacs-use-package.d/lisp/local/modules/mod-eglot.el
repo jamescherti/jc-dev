@@ -201,21 +201,23 @@
   (setf (alist-get 'pylsp (default-value 'eglot-workspace-configuration))
         `(:pylsp
           (:plugins
-           (,@(when has-ruff
-                `(;; Plugin: https://github.com/python-lsp/python-lsp-ruff
-                  :ruff (;; Ruff configuration
-                         :enabled t
-                         :formatEnabled t
-                         ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
-                         ;; and 'D' (pydocstyle).
-                         :extendSelect ["W" "UP" "D"]
-                         ;; Ignore specific rules
-                         ;;   D213: Multi-line docstring summary should start on
-                         ;;         the second line.
-                         ;;   D202: No blank lines allowed after function
-                         ;;         docstring.
-                         ;; :ignore ["D213" "D202"]
-                         )))
+           (;; Plugin: https://github.com/python-lsp/python-lsp-ruff
+            :ruff (;; Ruff configuration
+                   :enabled ,(if has-ruff t :json-false)
+
+                   :formatEnabled ,(if has-ruff t :json-false)
+
+                   ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
+                   ;; and 'D' (pydocstyle).
+                   :extendSelect ["W" "UP" "D"]
+
+                   ;; Ignore specific rules
+                   ;;   D213: Multi-line docstring summary should start on
+                   ;;         the second line.
+                   ;;   D202: No blank lines allowed after function
+                   ;;         docstring.
+                   ;; :ignore ["D213" "D202"]
+                   )
 
             ;; Pylint remains enabled regardless of whether Ruff
             ;; or Flake8 is active because it serves
@@ -248,6 +250,7 @@
                           :enabled ,(if (or has-ruff has-flake8)
                                         :json-false
                                       t)
+
                           ;; Ignore specific rules
                           ;; :ignore ["W293"]
                           )
@@ -259,6 +262,7 @@
                                        ;; https://github.com/pycqa/flake8-docstrings
                                        :json-false
                                      t)
+
                          ;; Ignore specific rules
                          ;;   D213 Multi-line docstring summary should start on
                          ;;        the second line.
@@ -274,11 +278,11 @@
             ;; Formatting: autopep8
             :autopep8 (:enabled ,(if has-ruff :json-false t))
             :yapf (:enabled :json-false)
-            :black (:enabled :json-false)
 
             ;; Code completion
             :jedi_completion (;; jedi configuration
                               :enabled t
+
                               ;; Disable resolving documentation details eagerly
                               ;; :eager t
 
@@ -294,7 +298,7 @@
                               ;; Fuzzy matching for typos/abbreviations
                               ;; :fuzzy t
 
-                              ;; Cache labels and snippets for these modules:
+                              ;; Modules for which labels and snippets should be cached.
                               ;; :cache_for ["pandas", "numpy", "tensorflow", "matplotlib"]
 
                               ;; How many labels and snippets should be resolved?
