@@ -176,6 +176,14 @@
 
 (setq-default eglot-workspace-configuration)
 
+;; Use ruff when it is available because it is fast (written in Rust) and
+;; consolidates multiple tools (linting, formatting, and import sorting) into a
+;; single backend. when it is not available, fall back to flake8 and its
+;; individual underlying tools (pyflakes, pycodestyle) to ensure your code is
+;; still properly linted when ruff isn't available.
+;;
+;; URL:
+;; https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
 (let* ((has-ruff (executable-find "ruff"))
        (use-flake8 (unless has-ruff
                      (executable-find "flake8")))
@@ -188,50 +196,48 @@
                           :lineLength ,max-line-length
                           :formatEnabled ,(if has-ruff t :json-false)
 
-                          ;; By default, Ruff only checks 'E' and 'F'
-                          ;; rules. Add 'W' (warnings), and 'UP'
-                          ;; (pyupgrade).
+                          ;; By default, Ruff only checks 'E' (pycodestyle
+                          ;; errors) and 'F' (pyflakes). Add 'W' (pycodestyle
+                          ;; warnings), and 'UP' (pyupgrade).
                           ;;
-                          ;; NOTE: Removed "I". I sometimes causes false
-                          ;; positives.
+                          ;; NOTE: Removed "I" (isort). Letting Ruff handle
+                          ;; import sorting dynamically on-the-fly can sometimes
+                          ;; cause false positives in the editor.
                           :extendSelect ["W" "UP"]
 
-                          ;; UP035: Deprecation of imports from typing
-                          ;; (e.g., typing.List, typing.Dict).
+                          ;; UP035: Deprecation of imports from typing (e.g.,
+                          ;; typing.List).
                           ;;
                           ;; Why ignore:
-                          ;; - Maintains compatibility with codebases
-                          ;;   targeting Python < 3.9 where built-in
-                          ;;   collection types cannot be parameterized
-                          ;;   directly without from __future__ import
-                          ;;   annotations.
-                          ;; - Prevents multiple diagnostics from firing
-                          ;;   on the same import line (e.g., from
-                          ;;   typing import Dict, List), which causes
-                          ;;   overlapping Flymake overlays.
+                          ;; - Maintains compatibility with codebases targeting
+                          ;;   Python < 3.9 where built-in collection types
+                          ;;   cannot be parameterized directly without `from
+                          ;;   __future__ import annotations`.
+                          ;; - Prevents duplicate Flymake diagnostic overlaps on
+                          ;; the same import line.
                           ;;
                           ;; When to remove:
-                          ;; - Remove once all target environments are
-                          ;;   on Python 3.9+ and codebases migrate to
-                          ;;   standard PEP 585 generics (e.g.,
+                          ;; - Remove once all target environments are on Python
+                          ;;   3.9+ and use standard PEP 585 generics (e.g.,
                           ;;   list[str], dict[str, int]).
                           ;; :ignore ["UP035"]
 
-                          ;; Target your specific Python version
+                          ;; Target your specific Python version for pyupgrade
+                          ;; rules
                           ;; :targetVersion "py310"
 
                           ;; File Management
-                          ;; Exclude specific files from being linted
+                          ;; Exclude specific files from being linted by Ruff
                           ;; :exclude ["__about__.py" "docs/"]
 
-                          ;; Advanced: Per-file ignores (Dictionary/Plist
-                          ;; translation) E.g., Ignore missing docstrings
-                          ;; (D100) in __init__.py
+                          ;; Advanced: Per-file ignores
+                          ;; E.g., Ignore missing docstrings (D100) specifically
+                          ;; in __init__.py
                           ;; :perFileIgnores (:__init__.py ["D100"])
 
                           ;; Advanced: Custom Severities
-                          ;; E.g., Make 'I' (isort) violations show as
-                          ;; Info instead of Warning
+                          ;; E.g., Make 'I' (isort) violations show as Info
+                          ;; instead of Warning
                           ;; :severities (:I "I")
 
                           ;; Code Actions
@@ -245,84 +251,86 @@
                          ;; Old, slow linters
                          :flake8 (:enabled ,(if use-flake8 t :json-false))
 
-                         ;; If Flake8 is enabled (fallback mode): Flake8
-                         ;; is a wrapper tool that bundles pyflakes,
-                         ;; pycodestyle, and mccabe. When Flake8 runs,
-                         ;; it automatically executes pycodestyle under
-                         ;; the hood (as noted in your configuration
-                         ;; comments). Enabling both flake8 and
-                         ;; pycodestyle in pylsp causes the language
-                         ;; server to run the exact same checks twice,
-                         ;; often resulting in duplicate diagnostics in
-                         ;; the editor.
+                         ;; Flake8 is a wrapper tool that bundles pyflakes,
+                         ;; pycodestyle, and mccabe. When Flake8 runs, it
+                         ;; executes these under the hood. If we enable flake8,
+                         ;; we must explicitly disable the individual pylsp
+                         ;; plugins for them, otherwise the language server will
+                         ;; run the exact same checks twice and duplicate all
+                         ;; editor diagnostics.
                          :mccabe (:enabled ,(if use-flake8 :json-false t))
-                         :pyflakes (;; pyflakes
-                                    :enabled ,(if use-flake8 :json-false t)
-                                    :ignore ["W293"])
-                         :pycodestyle (;; This is also executed by flake8
+                         :pyflakes (;; pyflakes catches logical errors (unused imports, undefined names)
+                                    :enabled ,(if use-flake8 :json-false t))
+
+                         :pycodestyle (;; pycodestyle catches style/formatting violations (PEP 8)
                                        :enabled ,(if use-flake8 :json-false t)
                                        :maxLineLength ,max-line-length
+                                       ;; W293 is a pycodestyle rule (blank line
+                                       ;; contains whitespace).
+                                       ;; :ignore ["W293"]
                                        ;; :match "(?!test_).*\\.py"
                                        ;; :convention "pep257"
-                                       ;; :ignore ["W293"]
                                        ;; :hangClosing :json-false
                                        )
-                         :pydocstyle (;; pydocstyle options
+
+                         :pydocstyle (;; pydocstyle enforces PEP 257 docstring conventions
                                       :enabled ,(if use-flake8 :json-false t)
-                                      ;; 213: Multi-line docstring
-                                      ;; summary should start in the
-                                      ;; second line.
-                                      ;;
-                                      ;; 202: no blank lines allowed
-                                      ;; after function docstring.
-                                      :ignore ["W213" "W202"])
+                                      ;; Note: pydocstyle uses 'D' prefixes, not 'W'.
+                                      ;; D213: Multi-line docstring summary should start on the second line.
+                                      ;; D202: No blank lines allowed after function docstring.
+                                      :ignore ["D213" "D202"])
 
                          :yapf (:enabled :json-false)
                          :isort (:enabled ,(if has-ruff :json-false t))
                          :autopep8 (:enabled ,(if has-ruff :json-false t))
+                         :black (:enabled :json-false)
+
+                         ;; Jedi Core Settings
+                         :jedi (:auto_import_modules ["os"
+                                                      "re"
+                                                      "sys"
+                                                      "subprocess"
+                                                      "pathlib"
+                                                      "logging"
+                                                      "shlex"
+                                                      "typing"])
 
                          :jedi_completion
-                         (:enabled t
-                                   ;; Controls whether Jedi (the
-                                   ;; autocompletion engine used by pylsp)
-                                   ;; automatically imports certain
-                                   ;; modules to provide better
-                                   ;; autocompletion.
-                                   ;; NOTE: Removed just to test
-                                   ;; :auto_import_modules ["os"
-                                   ;;                       "re"
-                                   ;;                       "sys"
-                                   ;;                       "subprocess"
-                                   ;;                       "pathlib"
-                                   ;;                       "logging"
-                                   ;;                       "shlex"
-                                   ;;                       "typing"]
+                         (;; Jedi completion configuration
+                          :enabled t
 
-                                   ;; Resolve documentation and detail
-                                   ;; eagerly.
-                                   :eager :json-false
+                          ;; Resolve documentation and detail eagerly.
+                          :eager :json-false
 
-                                   :include_class_objects :json-false
-                                   :include_function_objects :json-false
-                                   :include_params :json-false
+                          :include_class_objects :json-false
+                          :include_function_objects :json-false
 
-                                   ;; How many labels and snippets (at most)
-                                   ;; should be resolved?
-                                   ;; :resolve_at_most 40
-                                   )
+                          ;; Set to t if you use yasnippet and want function
+                          ;; arguments auto-inserted with tab-stops. Set to
+                          ;; :json-false to just insert the name.
+                          :include_params t
 
-                         ;; NOTE: Removed because it causes on Arch: Debugger
-                         ;; entered--Lisp error: (wrong-type-argument plistp [])
+                          ;; Disable fuzzy matching for typos/abbreviations
+                          :fuzzy :json-false
+
+                          ;; Optional: Override default caching (pandas, numpy,
+                          ;; etc.) if you work with different heavy libraries.
+                          ;; :cache_for ["django" "fastapi"]
+
+                          ;; How many labels and snippets (at most)
+                          ;; should be resolved?
+                          ;; :resolve_at_most 40
+                          )
+
+                         ;; NOTE: Removed because it causes an Eglot
+                         ;; serialization bug on Arch: "Debugger entered--Lisp
+                         ;; error: (wrong-type-argument plistp [])" Eglot
+                         ;; attempts to parse the JSON array of modules as a
+                         ;; property list.
                          ;;
-                         ;; Enables or disables the preloading of
-                         ;; specified Python modules when the language
-                         ;; server starts. When enabled, the preload
-                         ;; plugin loads specified modules at the start of
-                         ;; the language server session, making them
-                         ;; readily available in memory. This is intended
-                         ;; to speed up language server operations, like
-                         ;; autocompletion or code analysis, by reducing
-                         ;; the need to load these modules on demand.
+                         ;; Preload loads specified modules into memory at the
+                         ;; start of the language server session to speed up
+                         ;; autocompletion and analysis.
                          ;; :preload ( :enabled t
                          ;;            :modules ["os"
                          ;;                      "re"
