@@ -40,20 +40,33 @@
 
 ;; I don't like it in the minibuffer, especially when searching for
 ;; things
-(add-hook 'minibuffer-setup-hook 'electric-pair-local-mode)
 
-(defun my-disable-electric-pair-in-evil (orig-fn &rest args)
-  "Temporarily remove `electric-pair-local-mode' from minibuffer setup.
-ORIG-FN and ARGS are the original function and its arguments."
-  (let ((minibuffer-setup-hook (remove 'electric-pair-local-mode minibuffer-setup-hook)))
-    (apply orig-fn args)))
-(with-eval-after-load 'evil-commands
-  (advice-add 'evil-ex-search-forward :around #'my-disable-electric-pair-in-evil)
-  (advice-add 'evil-ex-search-backward :around #'my-disable-electric-pair-in-evil)
-  (advice-add 'evil-search-forward :around #'my-disable-electric-pair-in-evil)
-  (advice-add 'evil-search-backward :around #'my-disable-electric-pair-in-evil))
-(with-eval-after-load 'evil-ex
-  (advice-add 'evil-ex :around #'my-disable-electric-pair-in-evil))
+(defun my-disable-electric-pair-in-evil ()
+  "Temporarily remove `electric-pair-local-mode' from minibuffer setup."
+  (if (memq this-command '(evil-ex
+                           evil-ex-search-forward
+                           evil-ex-search-backward
+                           evil-search-forward
+                           evil-search-backward))
+      (electric-pair-local-mode -1)
+    (electric-pair-local-mode 1)))
+
+(add-hook 'minibuffer-setup-hook #'my-disable-electric-pair-in-evil t)
+
+;; Buggy
+;; (add-hook 'minibuffer-setup-hook 'electric-pair-local-mode)
+;; (defun my-disable-electric-pair-in-evil (orig-fn &rest args)
+;;   "Temporarily remove `electric-pair-local-mode' from minibuffer setup.
+;; ORIG-FN and ARGS are the original function and its arguments."
+;;   (let ((minibuffer-setup-hook (remove 'electric-pair-local-mode minibuffer-setup-hook)))
+;;     (apply orig-fn args)))
+;; (with-eval-after-load 'evil-commands
+;;   (advice-add 'evil-ex-search-forward :around #'my-disable-electric-pair-in-evil)
+;;   (advice-add 'evil-ex-search-backward :around #'my-disable-electric-pair-in-evil)
+;;   (advice-add 'evil-search-forward :around #'my-disable-electric-pair-in-evil)
+;;   (advice-add 'evil-search-backward :around #'my-disable-electric-pair-in-evil))
+;; (with-eval-after-load 'evil-ex
+;;   (advice-add 'evil-ex :around #'my-disable-electric-pair-in-evil))
 
 (with-eval-after-load 'le-evil-snipe
   (setq lightemacs-evil-snipe-local-target-hooks nil)
