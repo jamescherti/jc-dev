@@ -30,6 +30,18 @@
   (require 'lightemacs-use-package))
 (require 'my-defun)
 
+;;; use-package eglot
+
+(lightemacs-use-package eglot
+  :ensure nil
+  :commands (eglot
+             eglot-rename
+             eglot-managed-p
+             eglot-format
+             eglot-ensure
+             eglot-rename
+             eglot-format-buffer))
+
 ;;; Defaults
 
 ;; 0.5 seconds (The Default)
@@ -83,12 +95,6 @@
   (remove-hook 'jsonrpc-event-hook 'jsonrpc--log-event))
 
 (setq eglot-server-programs
-      ;; FIXME: Maybe this info should be distributed into the major modes
-      ;; themselves where they could set a buffer-local `eglot-server-program'
-      ;; which would allow deprecating this database.
-      ;; FIXME: With `derived-mode-add-parents' in Emacs≥30, some of
-      ;; those entries can be simplified, but we keep them for when
-      ;; `eglot.el' is installed via GNU ELPA in an older Emacs.
       `(((python-mode python-ts-mode) . ("pylsp"))))
 
 ;; Allow edits without confirmation
@@ -195,23 +201,21 @@
   (setf (alist-get 'pylsp (default-value 'eglot-workspace-configuration))
         `(:pylsp
           (:plugins
-           ;; Plugin: https://github.com/python-lsp/python-lsp-ruff
-           :ruff (;; Ruff configuration
-                  :enabled ,(if has-ruff t :json-false)
-
-                  :formatEnabled ,(if has-ruff t :json-false)
-
-                  ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
-                  ;; and 'D' (pydocstyle).
-                  :extendSelect ["W" "UP" "D"]
-
-                  ;; Ignore specific rules
-                  ;;   D213: Multi-line docstring summary should start on
-                  ;;         the second line.
-                  ;;   D202: No blank lines allowed after function
-                  ;;         docstring.
-                  ;; :ignore ["D213" "D202"]
-                  )
+           ,@(when has-ruff
+               `(;; Plugin: https://github.com/python-lsp/python-lsp-ruff
+                 :ruff (;; Ruff configuration
+                        :enabled t
+                        :formatEnabled t
+                        ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
+                        ;; and 'D' (pydocstyle).
+                        :extendSelect ["W" "UP" "D"]
+                        ;; Ignore specific rules
+                        ;;   D213: Multi-line docstring summary should start on
+                        ;;         the second line.
+                        ;;   D202: No blank lines allowed after function
+                        ;;         docstring.
+                        ;; :ignore ["D213" "D202"]
+                        )))
 
            ;; Pylint remains enabled regardless of whether Ruff
            ;; or Flake8 is active because it serves
@@ -244,7 +248,6 @@
                          :enabled ,(if (or has-ruff has-flake8)
                                        :json-false
                                      t)
-
                          ;; Ignore specific rules
                          ;; :ignore ["W293"]
                          )
@@ -256,7 +259,6 @@
                                       ;; https://github.com/pycqa/flake8-docstrings
                                       :json-false
                                     t)
-
                         ;; Ignore specific rules
                         ;;   D213 Multi-line docstring summary should start on
                         ;;        the second line.
@@ -277,56 +279,39 @@
            ;; Code completion
            :jedi_completion (;; jedi configuration
                              :enabled t
-
                              ;; Disable resolving documentation details eagerly
                              ;; :eager t
-
                              ;; Add class objects as a separate completion item
                              ;; :include_class_objects t
-
                              ;; Add function objects as a separate completion item
                              ;; :include_function_objects t
-
                              ;; Auto-complete methods and classes for each parameter
                              ;; :include_params t
-
                              ;; Fuzzy matching for typos/abbreviations
                              ;; :fuzzy t
-
                              ;; Modules for which labels and snippets should be cached.
                              ;; :cache_for ["pandas", "numpy", "tensorflow", "matplotlib"]
-
                              ;; How many labels and snippets should be resolved?
                              ;; :resolve_at_most 25
                              )))))
 
+;;; Function: my-eglot-format-buffer
 
-(lightemacs-use-package eglot
-  :ensure nil
-  :commands (eglot
-             eglot-rename
-             eglot-managed-p
-             eglot-format
-             eglot-ensure
-             eglot-rename
-             eglot-format-buffer)
+(defun my-eglot-format-buffer ()
+  "Eglot format buffer."
+  (interactive)
+  (when (and (fboundp 'eglot-managed-p)
+             (eglot-managed-p)
+             (fboundp 'eglot-format-buffer))
+    (let ((inhibit-message t))
+      (eglot-format-buffer))))
 
-  :config
-  ;; Remove eglot from the modeline
+;;; Remove eglot from the modeline
+
+;; Remove eglot from the modeline
+(with-eval-after-load 'eglot
   (setq mode-line-misc-info
-        (assq-delete-all 'eglot--managed-mode mode-line-misc-info))
-
-  :preface
-  (defun my-eglot-format-buffer ()
-    "Eglot format buffer."
-    (interactive)
-    (when (and (fboundp 'eglot-managed-p)
-               (eglot-managed-p)
-               (fboundp 'eglot-format-buffer))
-      (let ((inhibit-message t))
-        (eglot-format-buffer)))))
-
-;;; Eglot: Python
+        (assq-delete-all 'eglot--managed-mode mode-line-misc-info)))
 
 ;;; Eglot: quiet
 
@@ -338,17 +323,11 @@ FORMAT and ARGS are the message format string and its arguments."
     (let ((inhibit-message (or (string-prefix-p "Connected" message-string)
                                (string-prefix-p "Waiting" message-string)
                                (string-prefix-p "Reconnected" message-string))))
-      (apply orig-fun format args)))
-  ;; (let ((message-string (apply #'format format args)))
-  ;;   (unless (or (string-prefix-p "Connected" message-string)
-  ;;               (string-prefix-p "Waiting" message-string)
-  ;;               (string-prefix-p "Reconnected" message-string))
-  ;;     (apply orig-fun format args)))
-  )
+      (apply orig-fun format args))))
 
 (advice-add 'eglot--message :around #'my-eglot--message-filter)
 
-;;; Python: remove flymake
+;;; Python: Remove flymake
 
 ;; Debugger entered--Lisp error: (error "Can't find state for python-flymake in 'flymake--state'")
 ;; error("Can't find state for %s in `flymake--state'" python-flymake)
