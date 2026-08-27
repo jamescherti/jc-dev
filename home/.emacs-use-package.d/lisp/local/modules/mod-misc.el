@@ -239,7 +239,7 @@
 ;; want modern, predictable scrolling behavior, especially when dealing with
 ;; large images in Org-mode or long wrapped paragraphs.
 ;; TODO minimal emacs?
-(setq make-cursor-line-fully-visible nil)
+(setq make-cursor-line-fully-visible t)
 
 ;; (setq compilation-scroll-output nil)
 

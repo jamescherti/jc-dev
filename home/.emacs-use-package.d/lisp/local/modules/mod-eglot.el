@@ -203,7 +203,15 @@
 
                   ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
                   ;; and 'D' (pydocstyle).
-                  :extendSelect ["W" "UP" "D"])
+                  :extendSelect ["W" "UP" "D"]
+
+                  ;; Ignore specific rules
+                  ;;   D213: Multi-line docstring summary should start on
+                  ;;         the second line.
+                  ;;   D202: No blank lines allowed after function
+                  ;;         docstring.
+                  ;; :ignore ["D213" "D202"]
+                  )
 
            ;; Pylint remains enabled regardless of whether Ruff
            ;; or Flake8 is active because it serves
@@ -235,7 +243,11 @@
                          ;; violations (PEP 8)
                          :enabled ,(if (or has-ruff has-flake8)
                                        :json-false
-                                     t))
+                                     t)
+
+                         ;; Ignore specific rules
+                         ;; :ignore ["W293"]
+                         )
 
            :pydocstyle (;; pydocstyle enforces PEP 257 docstring
                         ;; conventions
@@ -243,7 +255,15 @@
                                       ;; Use flake8-docstrings
                                       ;; https://github.com/pycqa/flake8-docstrings
                                       :json-false
-                                    t))
+                                    t)
+
+                        ;; Ignore specific rules
+                        ;;   D213 Multi-line docstring summary should start on
+                        ;;        the second line.
+                        ;;   D202 No blank lines allowed after function
+                        ;;        docstring.
+                        ;; :ignore ["D213" "D202"]
+                        )
 
            ;; Formatting: isort
            ;; https://github.com/chantera/python-lsp-isort
@@ -254,191 +274,32 @@
            :yapf (:enabled :json-false)
            :black (:enabled :json-false)
 
-           ;; Completion
-           :jedi_completion (:enabled t)))))
+           ;; Code completion
+           :jedi_completion (;; jedi configuration
+                             :enabled t
 
+                             ;; Disable resolving documentation details eagerly
+                             :eager :json-false
 
-;; (with-eval-after-load 'eglot
-;;   (let* ((has-ruff (executable-find "ruff"))
-;;          (has-flake8 (executable-find "flake8"))
-;;          (max-line-length 79))
-;;     ;; Target ONLY the 'pylsp key in the global configuration alist safely
-;;     (setf (alist-get 'pylsp (default-value 'eglot-workspace-configuration))
-;;           ;; Plugin: https://github.com/python-lsp/python-lsp-ruff
-;;           `(:pylsp (:plugins
-;;                     (:ruff (;; Ruff configuration
-;;                             :enabled ,(if has-ruff t :json-false)
-;;
-;;                             ;; lineLength are ignored when Ruff detects a project
-;;                             ;; configuration file such as pyproject.toml or
-;;                             ;; ruff.toml.
-;;                             :lineLength ,max-line-length
-;;
-;;                             :formatEnabled ,(if has-ruff t :json-false)
-;;
-;;                             ;; By default, Ruff only checks 'E' (pycodestyle
-;;                             ;; errors) and 'F' (pyflakes). Add 'W' (pycodestyle
-;;                             ;; warnings), 'UP' (pyupgrade), 'I' (isort), and 'D'
-;;                             ;; (pydocstyle).
-;;                             :extendSelect ["W" "UP" "I" "D"]
-;;
-;;                             ;; Ignore specific docstring rules to match pydocstyle
-;;                             ;; fallback
-;;                             ;; D213: Multi-line docstring summary should start on
-;;                             ;; the second line.
-;;                             ;; D202: No blank lines allowed after function
-;;                             ;; docstring.
-;;                             :ignore ["D213" "D202"]
-;;
-;;                             ;; UP035: Deprecation of imports from typing (e.g.,
-;;                             ;; typing.List).
-;;                             ;;
-;;                             ;; Why ignore:
-;;                             ;; - Maintains compatibility with codebases targeting
-;;                             ;;   Python < 3.9 where built-in collection types
-;;                             ;;   cannot be parameterized directly without `from
-;;                             ;;   __future__ import annotations`.
-;;                             ;; - Prevents duplicate Flymake diagnostic overlaps on
-;;                             ;;   the same import line.
-;;                             ;;
-;;                             ;; When to remove:
-;;                             ;; - Remove once all target environments are on Python
-;;                             ;;   3.9+ and use standard PEP 585 generics (e.g.,
-;;                             ;;   list[str], dict[str, int]).
-;;                             ;; (Note: If uncommenting, merge with the :ignore list above)
-;;                             ;; :ignore ["UP035"]
-;;
-;;                             ;; Target your specific Python version for pyupgrade
-;;                             ;; rules
-;;                             ;; :targetVersion "py310"
-;;
-;;                             ;; File Management
-;;                             ;; Exclude specific files from being linted by Ruff
-;;                             ;; :exclude ["__about__.py" "docs/"]
-;;
-;;                             ;; Advanced: Per-file ignores
-;;                             ;; E.g., Ignore missing docstrings (D100) specifically
-;;                             ;; in __init__.py
-;;                             ;; :perFileIgnores (:__init__.py ["D100"])
-;;
-;;                             ;; Advanced: Custom Severities
-;;                             ;; E.g., Make 'I' (isort) violations show as Info
-;;                             ;; instead of Warning
-;;                             ;; :severities (:I "I")
-;;
-;;                             ;; Code Actions
-;;                             ;; :unsafeFixes :json-false
-;;                             ;; :unfixable ["F401"]
-;;                             )
-;;
-;;                            :pylint (:enabled t)
-;;
-;;                            ;; Old, slow linters
-;;                            :flake8 (:enabled ,(if has-flake8 t :json-false))
-;;
-;;                            ;; Flake8 is a wrapper tool that bundles pyflakes,
-;;                            ;; pycodestyle, and mccabe. When Flake8 or Ruff runs,
-;;                            ;; they execute these under the hood. If we enable either,
-;;                            ;; we must explicitly disable the individual pylsp
-;;                            ;; plugins for them, otherwise the language server will
-;;                            ;; run the exact same checks twice and duplicate all
-;;                            ;; editor diagnostics.
-;;                            :mccabe (:enabled ,(if (or has-ruff has-flake8)
-;;                                                   :json-false
-;;                                                 t))
-;;                            :pyflakes (;; pyflakes catches logical errors
-;;                                       ;; (unused imports, undefined names)
-;;                                       :enabled ,(if (or has-ruff has-flake8)
-;;                                                     :json-false
-;;                                                   t))
-;;
-;;                            :pycodestyle (;; pycodestyle catches style/formatting
-;;                                          ;; violations (PEP 8)
-;;                                          :enabled ,(if (or has-ruff has-flake8)
-;;                                                        :json-false
-;;                                                      t)
-;;                                          :maxLineLength ,max-line-length
-;;                                          ;; W293 is a pycodestyle rule (blank line
-;;                                          ;; contains whitespace).
-;;                                          ;; :ignore ["W293"]
-;;                                          ;; :match "(?!test_).*\\.py"
-;;                                          ;; :convention "pep257"
-;;                                          ;; :hangClosing :json-false
-;;                                          )
-;;
-;;                            :pydocstyle (;; pydocstyle enforces PEP 257 docstring conventions
-;;                                         :enabled ,(if (or has-ruff has-flake8)
-;;                                                       :json-false
-;;                                                     t)
-;;                                         ;; Note: pydocstyle uses 'D' prefixes, not 'W'.
-;;                                         ;; D213: Multi-line docstring summary should start on the second line.
-;;                                         ;; D202: No blank lines allowed after function docstring.
-;;                                         :ignore ["D213" "D202"])
-;;
-;;                            :yapf (:enabled :json-false)
-;;
-;;                            ;; Plugin: https://github.com/chantera/python-lsp-isort
-;;                            :isort (:enabled ,(if has-ruff :json-false t))
-;;
-;;                            :autopep8 (:enabled ,(if has-ruff :json-false t))
-;;
-;;                            ;; Plugin: https://github.com/python-lsp/python-lsp-black
-;;                            :black (:enabled :json-false)
-;;
-;;                            ;; Jedi Core Settings
-;;                            :jedi (:auto_import_modules ["os"
-;;                                                         "re"
-;;                                                         "sys"
-;;                                                         "subprocess"
-;;                                                         "pathlib"
-;;                                                         "logging"
-;;                                                         "shlex"
-;;                                                         "typing"])
-;;
-;;                            :jedi_completion
-;;                            (;; Jedi completion configuration
-;;                             :enabled t
-;;
-;;                             ;; Resolve documentation and detail eagerly.
-;;                             :eager :json-false
-;;
-;;                             :include_class_objects :json-false
-;;                             :include_function_objects :json-false
-;;
-;;                             ;; Set to t if you use yasnippet and want function
-;;                             ;; arguments auto-inserted with tab-stops. Set to
-;;                             ;; :json-false to just insert the name.
-;;                             :include_params t
-;;
-;;                             ;; Disable fuzzy matching for typos/abbreviations
-;;                             :fuzzy :json-false
-;;
-;;                             ;; Optional: Override default caching (pandas, numpy,
-;;                             ;; etc.) if you work with different heavy libraries.
-;;                             ;; :cache_for ["django" "fastapi"]
-;;
-;;                             ;; How many labels and snippets (at most)
-;;                             ;; should be resolved?
-;;                             ;; :resolve_at_most 40
-;;                             )
-;;
-;;                            ;; NOTE: Removed because it causes an Eglot
-;;                            ;; serialization bug on Arch: "Debugger entered--Lisp
-;;                            ;; error: (wrong-type-argument plistp [])" Eglot
-;;                            ;; attempts to parse the JSON array of modules as a
-;;                            ;; property list.
-;;                            ;;
-;;                            ;; Preload loads specified modules into memory at the
-;;                            ;; start of the language server session to speed up
-;;                            ;; autocompletion and analysis.
-;;                            ;; :preload ( :enabled t
-;;                            ;;            :modules ["os"
-;;                            ;;                      "re"
-;;                            ;;                      "sys"
-;;                            ;;                      "subprocess"
-;;                            ;;                      "pathlib"])
-;;
-;;                            :rope_autoimport (:enabled :json-false)))))))
+                             ;; Add class objects as a separate completion item
+                             ;; :include_class_objects t
+
+                             ;; Add function objects as a separate completion item
+                             ;; :include_function_objects t
+
+                             ;; Auto-complete methods and classes for each parameter
+                             ;; :include_params t
+
+                             ;; Fuzzy matching for typos/abbreviations
+                             ;; :fuzzy t
+
+                             ;; Modules for which labels and snippets should be cached.
+                             ;; :cache_for ["pandas", "numpy", "tensorflow", "matplotlib"]
+
+                             ;; How many labels and snippets should be resolved?
+                             ;; :resolve_at_most 25
+                             )))))
+
 
 (lightemacs-use-package eglot
   :ensure nil
