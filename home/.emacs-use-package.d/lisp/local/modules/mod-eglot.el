@@ -174,7 +174,9 @@
 
 ;;; Python
 
-(let ((has-ruff (executable-find "ruff")))
+(let* ((has-ruff (executable-find "ruff"))
+       (use-flake8 (unless has-ruff
+                     (executable-find "flake8"))))
   (setq-default eglot-workspace-configuration
                 `(:pylsp (:plugins
                           (:ruff (;; Core
@@ -236,7 +238,7 @@
                                  :pylint (:enabled t)
 
                                  ;; Old, slow linters
-                                 :flake8 (:enabled ,(if has-ruff :json-false t))
+                                 :flake8 (:enabled ,(if use-flake8 t :json-false))
 
                                  ;; If Flake8 is enabled (fallback mode): Flake8
                                  ;; is a wrapper tool that bundles pyflakes,
@@ -250,10 +252,10 @@
                                  ;; the editor.
                                  :mccabe :json-false
                                  :pyflakes (;; pyflakes
-                                            :enabled :json-false,
+                                            :enabled ,(if use-flake8 :json-false t),
                                             :ignore ["W293"])
                                  :pycodestyle (;; This is also executed by flake8
-                                               :enabled :json-false
+                                               :enabled ,(if use-flake8 :json-false t)
                                                ;; :match "(?!test_).*\\.py"
                                                ;; :maxLineLength 79
                                                ;; :convention "pep257"
@@ -261,7 +263,7 @@
                                                ;; :hangClosing :json-false
                                                )
                                  :pydocstyle (;; pydocstyle options
-                                              :enabled ,(if has-ruff :json-false t)
+                                              :enabled ,(if use-flake8 :json-false t)
                                               ;; :ignore ["W293"]
                                               ;; ,(if eglot-code-checker
                                               ;;      t
@@ -278,7 +280,6 @@
                                               ;; after function docstring.
                                               :ignore ["W213" "W202"])
 
-                                 ;; Disable old formatters (Handled by Apheleia)
                                  :yapf (:enabled :json-false)
                                  :isort (:enabled ,(if has-ruff :json-false t))
                                  :autopep8 (:enabled ,(if has-ruff :json-false t))
