@@ -170,7 +170,7 @@
           (lambda ()
             (setq-local redisplay-skip-fontification-on-input nil)))
 
-(setq scroll-conservatively 20)
+(setq scroll-conservatively 10)
 (setq next-screen-context-lines 0)
 
 (setq fast-but-imprecise-scrolling t)
