@@ -236,10 +236,21 @@
                                  :pylint (:enabled t)
 
                                  ;; Old, slow linters
-                                 :mccabe (:enabled ,(if has-ruff :json-false t))
                                  :flake8 (:enabled ,(if has-ruff :json-false t))
+
+                                 ;; If Flake8 is enabled (fallback mode): Flake8
+                                 ;; is a wrapper tool that bundles pyflakes,
+                                 ;; pycodestyle, and mccabe. When Flake8 runs,
+                                 ;; it automatically executes pycodestyle under
+                                 ;; the hood (as noted in your configuration
+                                 ;; comments). Enabling both flake8 and
+                                 ;; pycodestyle in pylsp causes the language
+                                 ;; server to run the exact same checks twice,
+                                 ;; often resulting in duplicate diagnostics in
+                                 ;; the editor.
+                                 :mccabe :json-false
                                  :pyflakes (;; pyflakes
-                                            :enabled ,(if has-ruff :json-false t)
+                                            :enabled :json-false,
                                             :ignore ["W293"])
                                  :pycodestyle (;; This is also executed by flake8
                                                :enabled :json-false
