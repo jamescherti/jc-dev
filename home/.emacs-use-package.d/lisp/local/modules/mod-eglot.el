@@ -293,7 +293,7 @@
 
                          :rope_autoimport (:enabled :json-false))))))
 
-
+;; REPLACED:
 ;; Use ruff when it is available because it is fast (written in Rust) and
 ;; consolidates multiple tools (linting, formatting, and import sorting) into a
 ;; single backend. When it is not available, fall back to flake8 and its
