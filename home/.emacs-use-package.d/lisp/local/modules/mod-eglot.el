@@ -279,7 +279,7 @@
                              :enabled t
 
                              ;; Disable resolving documentation details eagerly
-                             :eager :json-false
+                             ;; :eager t
 
                              ;; Add class objects as a separate completion item
                              ;; :include_class_objects t
