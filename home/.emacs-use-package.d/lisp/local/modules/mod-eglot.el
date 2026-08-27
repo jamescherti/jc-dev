@@ -178,9 +178,9 @@
 
 ;; Use ruff when it is available because it is fast (written in Rust) and
 ;; consolidates multiple tools (linting, formatting, and import sorting) into a
-;; single backend. when it is not available, fall back to flake8 and its
+;; single backend. When it is not available, fall back to flake8 and its
 ;; individual underlying tools (pyflakes, pycodestyle) to ensure your code is
-;; still properly linted when ruff isn't available.
+;; still properly linted.
 ;;
 ;; URL:
 ;; https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
@@ -214,7 +214,7 @@
                           ;;   cannot be parameterized directly without `from
                           ;;   __future__ import annotations`.
                           ;; - Prevents duplicate Flymake diagnostic overlaps on
-                          ;; the same import line.
+                          ;;   the same import line.
                           ;;
                           ;; When to remove:
                           ;; - Remove once all target environments are on Python
