@@ -1791,12 +1791,12 @@ truncated."
   (interactive)
   (setq n (or n 1))
   (cond
-   ((minibufferp)
-    ;; ignore-errors fixes issues with icomplete
-    (ignore-errors
-      (if (> n 0)
-          (next-line-or-history-element)
-        (previous-line-or-history-element))))
+   ;; ((minibufferp)
+   ;;  ;; ignore-errors fixes issues with icomplete
+   ;;  (ignore-errors
+   ;;    (if (> n 0)
+   ;;        (next-line-or-history-element)
+   ;;      (previous-line-or-history-element))))
 
    ;; Not Minibuffer
    (t
@@ -2009,12 +2009,21 @@ truncated."
 (add-hook 'embark-collect-mode-hook #'my-setup-local-evilcursor-smart-next-prev-line)
 
 ;; Alternative: SMART
-(evil-define-key 'insert 'global (kbd "M-k") #'evilcursor-smart-previous-line)
-(evil-define-key 'insert 'global (kbd "M-j") #'evilcursor-smart-next-line)
+(evil-define-key '(insert visual) 'global (kbd "M-k") #'evilcursor-smart-previous-line)
+(evil-define-key '(insert visual) 'global (kbd "M-j") #'evilcursor-smart-next-line)
 (evil-define-key 'normal 'global (kbd "k") #'evilcursor-smart-previous-line)
 (evil-define-key 'normal 'global (kbd "j") #'evilcursor-smart-next-line)
 (evil-define-key 'motion 'global (kbd "k") nil)
 (evil-define-key 'motion 'global (kbd "j") nil)
+
+;; (evil-define-key 'insert minibuffer-local-map (kbd "M-k") #'previous-history-element)
+;; (evil-define-key 'insert minibuffer-local-map (kbd "M-j") #'next-history-element)
+(evil-define-key 'insert evil-eval-map (kbd "M-k") #'previous-history-element)
+(evil-define-key 'insert evil-eval-map (kbd "M-j") #'next-history-element)
+(evil-define-key 'insert evil-ex-completion-map (kbd "M-k") #'previous-history-element)
+(evil-define-key 'insert evil-ex-completion-map (kbd "M-j") #'next-history-element)
+(evil-define-key 'insert evil-ex-search-keymap (kbd "M-k") #'previous-history-element)
+(evil-define-key 'insert evil-ex-search-keymap (kbd "M-j") #'next-history-element)
 
 ;; Alternative: NORMAL
 ;; (evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
