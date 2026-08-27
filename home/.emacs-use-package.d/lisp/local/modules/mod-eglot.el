@@ -193,94 +193,71 @@
        (has-flake8 (executable-find "flake8")))
   ;; Target ONLY the 'pylsp key in the global configuration alist safely
   (setf (alist-get 'pylsp (default-value 'eglot-workspace-configuration))
-        `(:pylsp (:plugins
-                  ;; Plugin: https://github.com/python-lsp/python-lsp-ruff
-                  (:ruff (;; Ruff configuration
-                          :enabled ,(if has-ruff t :json-false)
+        `(:pylsp
+          (:plugins
+           ;; Plugin: https://github.com/python-lsp/python-lsp-ruff
+           :ruff (;; Ruff configuration
+                  :enabled ,(if has-ruff t :json-false)
 
-                          :formatEnabled ,(if has-ruff t :json-false)
+                  :formatEnabled ,(if has-ruff t :json-false)
 
-                          ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
-                          ;; and 'D' (pydocstyle).
-                          :extendSelect ["W" "UP" "D"])
+                  ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
+                  ;; and 'D' (pydocstyle).
+                  :extendSelect ["W" "UP" "D"])
 
-                         ;; Pylint remains enabled regardless of whether Ruff
-                         ;; or Flake8 is active because it serves
-                         ;; complementary role.
-                         :pylint (:enabled t)
+           ;; Pylint remains enabled regardless of whether Ruff
+           ;; or Flake8 is active because it serves
+           ;; complementary role.
+           :pylint (:enabled t)
 
-                         ;; Flake8 is a wrapper tool that bundles pyflakes,
-                         ;; pycodestyle, and mccabe.
-                         :flake8 (:enabled ,(if (and (not has-ruff) has-flake8)
-                                                t
-                                              :json-false))
+           ;; Flake8 is a wrapper tool that bundles pyflakes,
+           ;; pycodestyle, and mccabe.
+           :flake8 (:enabled ,(if (and (not has-ruff) has-flake8)
+                                  t
+                                :json-false))
 
-                         ;; When Flake8 or Ruff runs, they execute these under
-                         ;; the hood. If we enable either, we must explicitly
-                         ;; disable the individual pylsp plugins for them,
-                         ;; otherwise the language server will run the exact
-                         ;; same checks twice and duplicate all editor
-                         ;; diagnostics.
-                         :mccabe (:enabled ,(if (or has-ruff has-flake8)
-                                                :json-false
-                                              t))
-                         :pyflakes (;; pyflakes catches logical errors
-                                    ;; (unused imports, undefined names...)
-                                    :enabled ,(if (or has-ruff has-flake8)
-                                                  :json-false
-                                                t))
+           ;; When Flake8 or Ruff runs, they execute these under
+           ;; the hood. If we enable either, we must explicitly
+           ;; disable the individual pylsp plugins for them,
+           ;; otherwise the language server will run the exact
+           ;; same checks twice and duplicate all editor
+           ;; diagnostics.
+           :mccabe (:enabled ,(if (or has-ruff has-flake8)
+                                  :json-false
+                                t))
+           :pyflakes (;; pyflakes catches logical errors
+                      ;; (unused imports, undefined names...)
+                      :enabled ,(if (or has-ruff has-flake8)
+                                    :json-false
+                                  t))
 
-                         :pycodestyle (;; pycodestyle catches style/formatting
-                                       ;; violations (PEP 8)
-                                       :enabled ,(if (or has-ruff has-flake8)
-                                                     :json-false
-                                                   t))
+           :pycodestyle (;; pycodestyle catches style/formatting
+                         ;; violations (PEP 8)
+                         :enabled ,(if (or has-ruff has-flake8)
+                                       :json-false
+                                     t))
 
-                         :pydocstyle (;; pydocstyle enforces PEP 257 docstring
-                                      ;; conventions
-                                      :enabled ,(if (or has-ruff has-flake8)
-                                                     ;; Use flake8-docstrings
-                                                     ;; https://github.com/pycqa/flake8-docstrings
-                                                    :json-false
-                                                  t)
-                                      ;; D213: Multi-line docstring summary
-                                      ;; should start on the second line.
-                                      ;;
-                                      ;; D202: No blank lines allowed after
-                                      ;; function docstring.
-                                      :ignore ["D213" "D202"])
+           :pydocstyle (;; pydocstyle enforces PEP 257 docstring
+                        ;; conventions
+                        :enabled ,(if (or has-ruff has-flake8)
+                                      ;; Use flake8-docstrings
+                                      ;; https://github.com/pycqa/flake8-docstrings
+                                      :json-false
+                                    t))
 
-                         ;; Formatting: isort
-                         ;; https://github.com/chantera/python-lsp-isort
-                         :isort (:enabled ,(if has-ruff :json-false t))
+           ;; Formatting: isort
+           ;; https://github.com/chantera/python-lsp-isort
+           :isort (:enabled ,(if has-ruff :json-false t))
 
-                         ;; Formatting: autopep8
-                         :autopep8 (:enabled ,(if has-ruff :json-false t))
-                         :yapf (:enabled :json-false)
-                         :black (:enabled :json-false)
+           ;; Formatting: autopep8
+           :autopep8 (:enabled ,(if has-ruff :json-false t))
+           :yapf (:enabled :json-false)
+           :black (:enabled :json-false)
 
-                         ;; Completion
-                         :jedi_completion (:enabled t))))))
+           ;; Completion
+           :jedi_completion (:enabled t)))))
 
 
-;; REPLACED:
-;; Use ruff when it is available because it is fast (written in Rust) and
-;; consolidates multiple tools (linting, formatting, and import sorting) into a
-;; single backend. When it is not available, fall back to flake8 and its
-;; individual underlying tools (pyflakes, pycodestyle) to ensure your code is
-;; still properly linted.
-;;
-;; When ruff is available, this configuration runs Ruff + Pylint.
-;; when Ruff is not available: Flake8 + Pylint
-;;
-;; URL:
-;; https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
-;;
-;; Requirements for ruff users:
-;; - Ruff plugin (for ruff users): https://github.com/python-lsp/python-lsp-ruff
-;;
-;; Requirements when ruff isn't installed:
-;; - isort plugin: https://github.com/chantera/python-lsp-isort
 ;; (with-eval-after-load 'eglot
 ;;   (let* ((has-ruff (executable-find "ruff"))
 ;;          (has-flake8 (executable-find "flake8"))
