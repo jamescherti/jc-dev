@@ -53,21 +53,6 @@
 
 (add-hook 'minibuffer-setup-hook #'my-disable-electric-pair-in-evil t)
 
-;; Buggy
-;; (add-hook 'minibuffer-setup-hook 'electric-pair-local-mode)
-;; (defun my-disable-electric-pair-in-evil (orig-fn &rest args)
-;;   "Temporarily remove `electric-pair-local-mode' from minibuffer setup.
-;; ORIG-FN and ARGS are the original function and its arguments."
-;;   (let ((minibuffer-setup-hook (remove 'electric-pair-local-mode minibuffer-setup-hook)))
-;;     (apply orig-fn args)))
-;; (with-eval-after-load 'evil-commands
-;;   (advice-add 'evil-ex-search-forward :around #'my-disable-electric-pair-in-evil)
-;;   (advice-add 'evil-ex-search-backward :around #'my-disable-electric-pair-in-evil)
-;;   (advice-add 'evil-search-forward :around #'my-disable-electric-pair-in-evil)
-;;   (advice-add 'evil-search-backward :around #'my-disable-electric-pair-in-evil))
-;; (with-eval-after-load 'evil-ex
-;;   (advice-add 'evil-ex :around #'my-disable-electric-pair-in-evil))
-
 (with-eval-after-load 'le-evil-snipe
   (setq lightemacs-evil-snipe-local-target-hooks nil)
   (setq lightemacs-evil-snipe-global-target-hooks nil)
