@@ -1983,9 +1983,7 @@ truncated."
 
        (t
         (message
-         "Unsupported evilcursor-smart-next-line/evilcursor-smart-previous-line.")
-        ;; (funcall func-change-line count)
-        ))))))
+         "Unsupported evilcursor-smart-next-line/evilcursor-smart-previous-line.")))))))
 
 (evil-define-motion evilcursor-smart-next-line (count)
   :type line
@@ -2010,12 +2008,9 @@ truncated."
 
 (add-hook 'embark-collect-mode-hook #'my-setup-local-evilcursor-smart-next-prev-line)
 
-;; (evil-define-key 'insert 'global (kbd "M-k") #'evilcursor-smart-previous-line)
-;; (evil-define-key 'insert 'global (kbd "M-j") #'evilcursor-smart-next-line)
-
 ;; Alternative: SMART
-(evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
-(evil-define-key 'insert 'global (kbd "M-j") #'evil-next-visual-line)
+(evil-define-key 'insert 'global (kbd "M-k") #'evilcursor-smart-previous-line)
+(evil-define-key 'insert 'global (kbd "M-j") #'evilcursor-smart-next-line)
 (evil-define-key 'normal 'global (kbd "k") #'evilcursor-smart-previous-line)
 (evil-define-key 'normal 'global (kbd "j") #'evilcursor-smart-next-line)
 (evil-define-key 'motion 'global (kbd "k") nil)
@@ -2055,43 +2050,43 @@ re-indentation after inserting the copied indentation."
 
 ;;; Evil search forward without jumping
 
-(evil-define-motion my-evil-ex-search-forward (count)
-  "Start a forward search without jumping to the next item."
-  :jump t
-  :type exclusive
-  :repeat evil-repeat-ex-search
-  (save-excursion (evil-ex-search-forward count)))
-
-(evil-define-key 'normal 'global (kbd "C-/") #'my-evil-ex-search-forward)
-
-;;; Evil search key mappings for cursor
-
-(defun evilcursor-previous-history-element-and-move-end-of-line ()
-  "Previous history element and move to the end of the line."
-  (interactive)
-  (previous-history-element 1)
-  (move-end-of-line 1))
-
-(defun evilcursor-next-history-element-and-move-end-of-line ()
-  "Next history element and move to the end of the line."
-  (interactive)
-  (next-history-element 1)
-  (move-end-of-line 1))
-
-(define-key evil-eval-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
-(define-key evil-ex-completion-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
-(define-key evil-ex-search-keymap "\C-p" 'evilcursor-previous-history-element-and-move-end-of-line)
-(define-key evil-ex-search-keymap (kbd "M-k") 'evilcursor-previous-history-element-and-move-end-of-line)
-
-(define-key evil-eval-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
-(define-key evil-ex-completion-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
-(define-key evil-ex-search-keymap "\C-n" 'evilcursor-next-history-element-and-move-end-of-line)
-(define-key evil-ex-search-keymap (kbd "M-j") 'evilcursor-next-history-element-and-move-end-of-line)
-
-(define-key evil-eval-map (kbd "M-k") 'previous-complete-history-element)
-(define-key evil-ex-completion-map (kbd "M-k") 'previous-complete-history-element)
-(define-key evil-eval-map (kbd "M-j") 'next-complete-history-element)
-(define-key evil-ex-completion-map (kbd "M-j") 'next-complete-history-element)
+;; (evil-define-motion my-evil-ex-search-forward (count)
+;;   "Start a forward search without jumping to the next item."
+;;   :jump t
+;;   :type exclusive
+;;   :repeat evil-repeat-ex-search
+;;   (save-excursion (evil-ex-search-forward count)))
+;;
+;; (evil-define-key 'normal 'global (kbd "C-/") #'my-evil-ex-search-forward)
+;;
+;; ;;; Evil search key mappings for cursor
+;;
+;; (defun evilcursor-previous-history-element-and-move-end-of-line ()
+;;   "Previous history element and move to the end of the line."
+;;   (interactive)
+;;   (previous-history-element 1)
+;;   (move-end-of-line 1))
+;;
+;; (defun evilcursor-next-history-element-and-move-end-of-line ()
+;;   "Next history element and move to the end of the line."
+;;   (interactive)
+;;   (next-history-element 1)
+;;   (move-end-of-line 1))
+;;
+;; (define-key evil-eval-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
+;; (define-key evil-ex-completion-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
+;; (define-key evil-ex-search-keymap "\C-p" 'evilcursor-previous-history-element-and-move-end-of-line)
+;; (define-key evil-ex-search-keymap (kbd "M-k") 'evilcursor-previous-history-element-and-move-end-of-line)
+;;
+;; (define-key evil-eval-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
+;; (define-key evil-ex-completion-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
+;; (define-key evil-ex-search-keymap "\C-n" 'evilcursor-next-history-element-and-move-end-of-line)
+;; (define-key evil-ex-search-keymap (kbd "M-j") 'evilcursor-next-history-element-and-move-end-of-line)
+;;
+;; (define-key evil-eval-map (kbd "M-k") 'previous-complete-history-element)
+;; (define-key evil-ex-completion-map (kbd "M-k") 'previous-complete-history-element)
+;; (define-key evil-eval-map (kbd "M-j") 'next-complete-history-element)
+;; (define-key evil-ex-completion-map (kbd "M-j") 'next-complete-history-element)
 
 ;;; Evil search next and previous
 
