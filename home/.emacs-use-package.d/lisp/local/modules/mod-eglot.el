@@ -61,7 +61,7 @@
 ;; your laptop fans spinning up just from regular editing. At this value, Eglot
 ;; acts more like a "pause to check my work" tool rather than a real-time
 ;; linter.
-(setq eglot-send-changes-idle-time 0.5)
+(setq eglot-send-changes-idle-time 0.25)
 
 ;; ## Disable Automatic Code Action Probing
 ;; By default, Eglot asynchronously polls the language server for available code
@@ -119,7 +119,42 @@
         ;; occurrences of that symbol (eglot-highlight-eldoc-function).
         ;; Disabling it will stop Eglot from highlighting other occurrences of
         ;; the symbol under the cursor:
-        :documentHighlightProvider))
+        :documentHighlightProvider
+
+        ;; eldoc
+        ;; Sends textDocument/hover to fetch documentation for the symbol at
+        ;; point. Eglot parses the returned Markdown and renders it for the echo
+        ;; area or ElDoc buffer.
+        :hoverProvider
+
+        ;; eldoc
+        ;; Sends textDocument/codeAction strictly to check if actions are
+        ;; available (like refactors or quickfixes). Eglot uses this to draw the
+        ;; lightbulb icon in the mode-line, fringes, or margins.
+        ;; :codeActionProvider
+
+        ;; eldoc
+        ;; Sends textDocument/signatureHelp to parse the surrounding function
+        ;; call and identify the active parameter.
+        ;; :signatureHelpProvider
+
+        ;; Flymake
+        ;; If the server supports "pull" diagnostics, Eglot actively polls the
+        ;; server (textDocument/diagnostic) whenever the Flymake idle timer
+        ;; triggers (typically after 0.5 seconds of inactivity). Disabling it
+        ;; stops Eglot from polling for diagnostics. (Note: Many servers also
+        ;; push diagnostics asynchronously; disabling this only stops the
+        ;; explicit pull requests).
+        ;; :diagnosticProvider
+
+        ;; Eglot itself does not call this in the background, but if you use an
+        ;; external auto-completion framework (like company-mode or corfu), that
+        ;; framework will invoke Eglot's completion backend on a very short idle
+        ;; timer or as you type. This results in heavy textDocument/completion
+        ;; traffic. Disabling it stops Eglot from participating in
+        ;; auto-completion entirely.
+        ;; :completionProvider
+        ))
 
 ;;; Python
 
