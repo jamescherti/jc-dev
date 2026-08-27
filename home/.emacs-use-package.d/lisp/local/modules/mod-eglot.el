@@ -107,158 +107,19 @@
         ;; formatting workflows. The tradeoff is additional formatter
         ;; configuration and the loss of the language server's built-in
         ;; formatting:
-        :documentFormattingProvider
-        :documentRangeFormattingProvider
         :documentOnTypeFormattingProvider
 
-        ;; NOTE: UI noise and performance degradation
-        ;; Disable inlay hints (e.g. inferred types, parameter names) Inlay
-        ;; hints are small, non-intrusive annotations inserted into the code
-        ;; by the LSP server. They provide helpful context such as inferred
-        ;; variable types, function return types, or parameter names in
-        ;; function calls, especially in languages like TypeScript or Rust.
-        ;; These hints do not change the actual source code but are visually
-        ;; rendered in the editor. Disabling this prevents the display of such
-        ;; annotations in the buffer.
+        ;; Inlay hints (eglot-inlay-hints-mode) insert automatically determined
+        ;; types and parameter names directly into the buffer. Disabling them
+        ;; removes the associated visual annotations and any work required to
+        ;; maintain them:
         :inlayHintProvider
 
-        ;; NOTE: UI noise and performance degradation
-        ;; Disables highlighting other instances of the symbol at point in the
-        ;; current buffer (e.g., all usages of a variable are no longer
-        ;; visually highlighted). Usage: This affects the automatic
-        ;; highlighting when the cursor is on a symbol. Normally, all
-        ;; occurrences of that symbol in the buffer are highlighted. Disabling
-        ;; this stops that behavior.
-        :documentHighlightProvider
-
-        ;; NOTE: UI noise and performance degradation
-        ;; Disables inline annotations like test coverage, reference counts,
-        ;; or result indicators that appear above/below code lines.
-        :codeLensProvider
-
-        ;; NOTE: UI noise and performance degradation
-        ;; Disable detection and interaction with links in documents
-        :documentLinkProvider
-
-        ;; NOTE: UI noise and performance degradation
-        ;; Disables rendering of inline color swatches next to color values in
-        ;; code (e.g., "#ff0000" showing a red box).
-        :colorProvider
-
-        ;; Disables visual fold range markers (e.g., foldable region
-        ;; indicators in the fringe or gutter).
-        ;; :foldingRangeProvider
-
-        ;; NOTE: Keep this commented out
-        ;; They are on-demand (zero passive overhead): Capabilities like
-        ;; definitionProvider, referencesProvider, declarationProvider,
-        ;; implementationProvider, typeDefinitionProvider, and
-        ;; workspaceSymbolProvider are entirely user-driven. Eglot only sends a
-        ;; JSON-RPC request to the server when you explicitly invoke a command
-        ;; (such as pressing M-. to jump to a definition). Because they do
-        ;; absolutely nothing while you are just typing, disabling them yields
-        ;; zero performance gain during active editing. You only succeed in
-        ;; breaking your code navigation.
-        ;;
-        ;; Disable "go to definition" feature
-        ;; :definitionProvider
-        ;;
-        ;; Disables showing all references to the symbol at point (e.g., all
-        ;; usages of a function or variable in the project).
-        ;; :referencesProvider
-        ;;
-        ;; Disables ability to jump to a symbol's declaration location (e.g.,
-        ;; jumping to where a variable was declared).
-        ;; :declarationProvider
-        ;;
-        ;; Disable support for finding implementation locations This
-        ;; capability allows the LSP client (like Eglot) to query the server
-        ;; for the actual implementation(s) of an interface, abstract method,
-        ;; or symbol. For example, if the cursor is on a function declaration
-        ;; or interface, this enables jumping directly to the concrete
-        ;; implementation(s). Disabling it will prevent Eglot from offering
-        ;; this navigation feature.
-        ;; :implementationProvider
-        ;;
-        ;; Disable support for "go to type definition"
-        ;; :typeDefinitionProvider
-        ;;
-        ;; Disables workspace-wide symbol search (e.g., `M-x
-        ;; xref-find-apropos` or project-wide function/class name search).
-        ;;
-        ;; :workspaceSymbolProvider: Enable this if you want
-        ;; project-wide navigation. It feeds xref-find-apropos, letting you
-        ;; search for symbols across the entire repository.
-        ;; :workspaceSymbolProvider
-
-        ;; NOTE: keep removed
-        ;; They are the core value of an LSP: completionProvider (autocomplete),
-        ;; hoverProvider (documentation tooltips), and signatureHelpProvider
-        ;; (function argument hints) are the primary reasons developers use
-        ;; language servers. While they do generate traffic as you type,
-        ;; disabling them effectively turns Eglot into a very heavy, glorified
-        ;; linter. If a user needs to disable autocomplete to get Emacs to run
-        ;; smoothly, they should likely turn off the LSP entirely and use ctags.
-        ;; :hoverProvider  ; For showing the definition and documentation.
-        ;; :completionProvider  ; Completion. DO NOT DISABLE IT.
-        ;; :signatureHelpProvider  ; For showing the function signature/arguments.
-
-        ;; NOTE: Keep it commented out
-        ;;
-        ;; They power essential Emacs features: documentSymbolProvider is what
-        ;; powers Emacs' imenu feature and breadcrumbs. Disabling it removes
-        ;; your ability to jump to functions, classes, and variables within the
-        ;; current file.
-        ;;
-        ;; Disables the document-wide symbol tree view used for navigation or
-        ;; structural outline (e.g., class and function tree in sidebar).
-        ;; Usage: This impacts commands or UI elements that display a tree or
-        ;; list of all symbols (functions, classes, variables) in the current
-        ;; buffer. Disabling this removes that outline view.
-        ;;
-        ;; TODO: :documentSymbolProvider: Enable this if you use imenu. It
-        ;; populates the buffer's index of classes, methods, and functions,
-        ;; allowing for rapid structural navigation.
-        ;; :documentSymbolProvider
-
-        ;; NOTE: keep it commented out
-        ;; Usage: This prevents displaying available quick fixes or
-        ;; refactorings that normally appear as code actions or lightbulb
-        ;; hints in the editor. Disabling this means you won't get automatic
-        ;; fix suggestions from the server.
-        ;;
-        ;; :codeActionProvider: You should definitely enable this. It
-        ;; provides the quick fixes, such as organizing imports or fixing lint
-        ;; errors. Without it, you lose a significant portion of Ruff's
-        ;; utility.
-        ;;
-        ;; Disabling :codeActionProvider strips away one of the primary reasons
-        ;; developers use an LSP in the first place: it removes all quick fixes,
-        ;; automated refactorings, and features like "organize imports".
-        ;; Furthermore, the performance gain from disabling it is usually
-        ;; minimal during active typing. Unlike inlay hints or document
-        ;; highlights, which servers constantly recalculate as you type or move
-        ;; the cursor, code actions are typically computed on-demand—only when
-        ;; you explicitly invoke a code action command or click on a diagnostic.
-        ;; However, if a user relies strictly on external tools for linting and
-        ;; fixing (e.g., Ruff or ESLint via Flymake/Flycheck) and uses Eglot
-        ;; solely for auto-completion and jumping to definitions, disabling it
-        ;; will prevent the server from wasting cycles computing redundant
-        ;; fixes. ;
-        ;; :codeActionProvider
-
-        ;; NOTE: Keep this commented out
-        ;; Disables execution of commands exposed by the server (e.g., special
-        ;; refactoring or custom commands via `M-x eglot-execute-command`).
-        ;; TODO: :executeCommandProvider: Enable this alongside code actions.
-        ;; Many LSP servers require command execution to apply the code
-        ;; actions they suggest.
-        ;; :executeCommandProvider
-
-        ;; NOTE: Keep this commented out
-        ;; Disable rename symbol functionality
-        ;; :renameProvider
-        ))
+        ;; When the cursor rests on a symbol, the LSP server can highlight other
+        ;; occurrences of that symbol (eglot-highlight-eldoc-function).
+        ;; Disabling it will stop Eglot from highlighting other occurrences of
+        ;; the symbol under the cursor:
+        :documentHighlightProvider))
 
 ;;; Python
 
