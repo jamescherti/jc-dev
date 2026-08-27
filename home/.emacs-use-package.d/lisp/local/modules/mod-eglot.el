@@ -131,7 +131,23 @@
         ;; Sends textDocument/codeAction strictly to check if actions are
         ;; available (like refactors or quickfixes). Eglot uses this to draw the
         ;; lightbulb icon in the mode-line, fringes, or margins.
-        ;; :codeActionProvider
+        :codeActionProvider
+
+        ;; Eglot implements this via eglot-semantic-tokens-mode, which disables
+        ;; Emacs's default regex-based font-lock and delegates syntax
+        ;; highlighting to the LSP server. When the buffer changes, Eglot issues
+        ;; a textDocument/semanticTokens/full/delta request.
+        ;;
+        ;; The server responds with large arrays of integers representing token
+        ;; coordinates. In eglot--semtok-font-lock-1, Eglot iterates through
+        ;; this array (for i from 0 below (length data) by 5). For every token,
+        ;; it must convert LSP line/character coordinates to Emacs buffer
+        ;; positions using eglot-move-to-linepos-function (which calculates
+        ;; UTF-16 code units), and then apply eglot--semtok-names and
+        ;; eglot--semtok-faces text properties. This creates significant Elisp
+        ;; execution overhead, garbage collection pressure from heavy JSON
+        ;; payloads, and blocking UI work during scrolling and editing.
+        ;; :semanticTokensProvider
 
         ;; eldoc
         ;; Sends textDocument/signatureHelp to parse the surrounding function
