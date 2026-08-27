@@ -174,26 +174,26 @@
 
 ;;; Python
 
-(setq-default eglot-workspace-configuration nil)
+(setq-default eglot-workspace-configuration)
 
 (let* ((has-ruff (executable-find "ruff"))
        (use-flake8 (unless has-ruff
                      (executable-find "flake8")))
        (max-line-length 79))
-  ;; Target ONLY the 'pylsp key in the configuration alist
-  (setf (alist-get 'pylsp eglot-workspace-configuration)
+  ;; Target ONLY the 'pylsp key in the global configuration alist safely
+  (setf (alist-get 'pylsp (default-value 'eglot-workspace-configuration))
         `(:pylsp (:plugins
                   (:ruff (;; Ruff configuration
                           :enabled ,(if has-ruff t :json-false)
                           :lineLength ,max-line-length
                           :formatEnabled ,(if has-ruff t :json-false)
 
-                          ;; Rule Selection
                           ;; By default, Ruff only checks 'E' and 'F'
                           ;; rules. Add 'W' (warnings), and 'UP'
                           ;; (pyupgrade).
                           ;;
-                          ;; NOTE: Removed "I" (false positives)
+                          ;; NOTE: Removed "I". I sometimes causes false
+                          ;; positives.
                           :extendSelect ["W" "UP"]
 
                           ;; UP035: Deprecation of imports from typing
