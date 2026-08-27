@@ -176,17 +176,19 @@
 
 (let* ((has-ruff (executable-find "ruff"))
        (use-flake8 (unless has-ruff
-                     (executable-find "flake8"))))
+                     (executable-find "flake8")))
+       (max-line-length 79))
   (setq-default eglot-workspace-configuration
                 `(:pylsp (:plugins
-                          (:ruff (;; Core
+                          (:ruff (;; Ruff configuration
                                   :enabled ,(if has-ruff t :json-false)
-                                  :lineLength 79
-                                  :formatEnabled :json-false ; Use Apheleia
+                                  :lineLength ,max-line-length
+                                  :formatEnabled ,(if has-ruff t :json-false)
 
                                   ;; Rule Selection
                                   ;; By default, Ruff only checks 'E' and 'F'
-                                  ;; rules. 'W' (warnings), and 'UP' (pyupgrade)
+                                  ;; rules. Add 'W' (warnings), and 'UP'
+                                  ;; (pyupgrade).
                                   ;;
                                   ;; NOTE: Removed "I" (false positives)
                                   :extendSelect ["W" "UP"]
@@ -250,28 +252,20 @@
                                  ;; server to run the exact same checks twice,
                                  ;; often resulting in duplicate diagnostics in
                                  ;; the editor.
-                                 :mccabe :json-false
+                                 :mccabe ,(if use-flake8 :json-false t)
                                  :pyflakes (;; pyflakes
                                             :enabled ,(if use-flake8 :json-false t),
                                             :ignore ["W293"])
                                  :pycodestyle (;; This is also executed by flake8
                                                :enabled ,(if use-flake8 :json-false t)
+                                               :maxLineLength ,max-line-length
                                                ;; :match "(?!test_).*\\.py"
-                                               ;; :maxLineLength 79
                                                ;; :convention "pep257"
                                                ;; :ignore ["W293"]
                                                ;; :hangClosing :json-false
                                                )
                                  :pydocstyle (;; pydocstyle options
                                               :enabled ,(if use-flake8 :json-false t)
-                                              ;; :ignore ["W293"]
-                                              ;; ,(if eglot-code-checker
-                                              ;;      t
-                                              ;;    :json-false)
-                                              ;; string (one of: 'pep257',
-                                              ;; 'numpy', 'google', None)
-                                              ;; :convention "google"
-
                                               ;; 213: Multi-line docstring
                                               ;; summary should start in the
                                               ;; second line.
