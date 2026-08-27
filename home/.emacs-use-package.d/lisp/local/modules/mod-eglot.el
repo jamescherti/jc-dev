@@ -174,155 +174,304 @@
 
 ;;; Python
 
-(setq-default eglot-workspace-configuration
-              `(:pylsp (:plugins
-                        (; Improve syntax
+(let ((has-ruff (executable-find "ruff")))
+  (setq-default eglot-workspace-configuration
+                `(:pylsp (:plugins
+                          (:ruff (;; Core
+                                  :enabled ,(if has-ruff t :json-false)
+                                  :lineLength 79
+                                  :formatEnabled :json-false ; Use Apheleia
 
-                         :ruff (;; Core
-                                :enabled t
-                                ;; :formatEnabled :json-false ; Use Apheleia
-                                :lineLength 79
+                                  ;; Rule Selection
+                                  ;; By default, Ruff only checks 'E' and 'F'
+                                  ;; rules. 'W' (warnings), and 'UP' (pyupgrade)
+                                  ;;
+                                  ;; NOTE: Removed "I" (false positives)
+                                  :extendSelect ["W" "UP"]
 
-                                ;; Rule Selection
-                                ;; By default, Ruff only checks 'E' and 'F'
-                                ;; rules.
-                                ;; Let's add 'I' (isort), 'W' (warnings), and
-                                ;; 'UP' (pyupgrade)
-                                ;;
-                                ;; NOTE: Removed "I" (false positives)
-                                :extendSelect ["W" "UP"]
+                                  ;; UP035: Deprecation of imports from typing
+                                  ;; (e.g., typing.List, typing.Dict).
+                                  ;;
+                                  ;; Why ignore:
+                                  ;; - Maintains compatibility with codebases
+                                  ;;   targeting Python < 3.9 where built-in
+                                  ;;   collection types cannot be parameterized
+                                  ;;   directly without from __future__ import
+                                  ;;   annotations.
+                                  ;; - Prevents multiple diagnostics from firing
+                                  ;;   on the same import line (e.g., from
+                                  ;;   typing import Dict, List), which causes
+                                  ;;   overlapping Flymake overlays.
+                                  ;;
+                                  ;; When to remove:
+                                  ;; - Remove once all target environments are
+                                  ;;   on Python 3.9+ and codebases migrate to
+                                  ;;   standard PEP 585 generics (e.g.,
+                                  ;;   list[str], dict[str, int]).
+                                  ;; :ignore ["UP035"]
 
-                                ;; UP035: Deprecation of imports from typing
-                                ;; (e.g., typing.List, typing.Dict).
-                                ;;
-                                ;; Why ignore:
-                                ;; - Maintains compatibility with codebases
-                                ;;   targeting Python < 3.9 where built-in
-                                ;;   collection types cannot be parameterized
-                                ;;   directly without from __future__ import
-                                ;;   annotations.
-                                ;; - Prevents multiple diagnostics from firing
-                                ;;   on the same import line (e.g., from typing
-                                ;;   import Dict, List), which causes
-                                ;;   overlapping Flymake overlays.
-                                ;;
-                                ;; When to remove:
-                                ;; - Remove once all target environments are on
-                                ;;   Python 3.9+ and codebases migrate to
-                                ;;   standard PEP 585 generics (e.g.,
-                                ;;   list[str], dict[str, int]).
-                                :ignore ["UP035"]
+                                  ;; Target your specific Python version
+                                  ;; :targetVersion "py310"
 
-                                ;; Target your specific Python version
-                                ;; :targetVersion "py310"
+                                  ;; File Management
+                                  ;; Exclude specific files from being linted
+                                  ;; :exclude ["__about__.py" "docs/"]
 
-                                ;; File Management
-                                ;; Exclude specific files from being linted
-                                ;; :exclude ["__about__.py" "docs/"]
+                                  ;; Advanced: Per-file ignores (Dictionary/Plist
+                                  ;; translation) E.g., Ignore missing docstrings
+                                  ;; (D100) in __init__.py
+                                  ;; :perFileIgnores (:__init__.py ["D100"])
 
-                                ;; Advanced: Per-file ignores (Dictionary/Plist
-                                ;; translation) E.g., Ignore missing docstrings
-                                ;; (D100) in __init__.py
-                                ;; :perFileIgnores (:__init__.py ["D100"])
+                                  ;; Advanced: Custom Severities
+                                  ;; E.g., Make 'I' (isort) violations show as
+                                  ;; Info instead of Warning
+                                  ;; :severities (:I "I")
 
-                                ;; Advanced: Custom Severities
-                                ;; E.g., Make 'I' (isort) violations show as
-                                ;; Info instead of Warning
-                                ;; :severities (:I "I")
+                                  ;; Code Actions
+                                  ;; :unsafeFixes :json-false
+                                  ;; :unfixable ["F401"]
+                                  )
 
-                                ;; Code Actions
-                                ;; :unsafeFixes :json-false
-                                ;; :unfixable ["F401"]
-                                )
+                                 ;; Syntax checkers
+                                 :pylint (:enabled t)
 
-                         ;; Syntax checkers
-                         :pylint (:enabled t)
-
-                         ;; Old, slow linters
-                         :mccabe (:enabled :json-false)
-                         :flake8 (:enabled :json-false)
-                         :pyflakes (:enabled :json-false :ignore ["W293"])
-                         :pycodestyle (;; This is also executed by flake8
-                                       :enabled :json-false
-                                       ;; :match "(?!test_).*\\.py"
-                                       ;; :maxLineLength 79
-                                       ;; :convention "pep257"
-                                       ;; :ignore ["W293"]
-                                       ;; :hangClosing :json-false
-                                       )
-                         :pydocstyle (:enabled :json-false
+                                 ;; Old, slow linters
+                                 :mccabe (:enabled ,(if has-ruff :json-false t))
+                                 :flake8 (:enabled ,(if has-ruff :json-false t))
+                                 :pyflakes (;; pyflakes
+                                            :enabled ,(if has-ruff :json-false t)
+                                            :ignore ["W293"])
+                                 :pycodestyle (;; This is also executed by flake8
+                                               :enabled :json-false
+                                               ;; :match "(?!test_).*\\.py"
+                                               ;; :maxLineLength 79
+                                               ;; :convention "pep257"
                                                ;; :ignore ["W293"]
-                                               ;; ,(if eglot-code-checker
-                                               ;;      t
-                                               ;;    :json-false)
-                                               ;; string (one of: 'pep257',
-                                               ;; 'numpy', 'google', None)
-                                               ;; :convention "google"
+                                               ;; :hangClosing :json-false
+                                               )
+                                 :pydocstyle (;; pydocstyle options
+                                              :enabled ,(if has-ruff :json-false t)
+                                              ;; :ignore ["W293"]
+                                              ;; ,(if eglot-code-checker
+                                              ;;      t
+                                              ;;    :json-false)
+                                              ;; string (one of: 'pep257',
+                                              ;; 'numpy', 'google', None)
+                                              ;; :convention "google"
 
-                                               ;; 213: Multi-line docstring
-                                               ;; summary should start in the
-                                               ;; second line.
-                                               ;;
-                                               ;; 202: no blank lines allowed
-                                               ;; after function docstring.
-                                               :ignore ["W213",
-                                                        "W202"])
+                                              ;; 213: Multi-line docstring
+                                              ;; summary should start in the
+                                              ;; second line.
+                                              ;;
+                                              ;; 202: no blank lines allowed
+                                              ;; after function docstring.
+                                              :ignore ["W213" "W202"])
 
-                         ;; Disable old formatters (Handled by Apheleia)
-                         :yapf (:enabled :json-false)
-                         :isort (:enabled :json-false)
-                         :autopep8 (:enabled :json-false)
+                                 ;; Disable old formatters (Handled by Apheleia)
+                                 :yapf (:enabled :json-false)
+                                 :isort (:enabled ,(if has-ruff :json-false t))
+                                 :autopep8 (:enabled ,(if has-ruff :json-false t))
 
-                         :jedi_completion
-                         (:enabled t
-                                   ;; Controls whether Jedi (the
-                                   ;; autocompletion engine used by pylsp)
-                                   ;; automatically imports certain
-                                   ;; modules to provide better
-                                   ;; autocompletion.
-                                   ;; NOTE: Removed just to test
-                                   ;; :auto_import_modules ["os"
-                                   ;;                       "re"
-                                   ;;                       "sys"
-                                   ;;                       "subprocess"
-                                   ;;                       "pathlib"
-                                   ;;                       "logging"
-                                   ;;                       "shlex"
-                                   ;;                       "typing"]
+                                 :jedi_completion
+                                 (:enabled t
+                                           ;; Controls whether Jedi (the
+                                           ;; autocompletion engine used by pylsp)
+                                           ;; automatically imports certain
+                                           ;; modules to provide better
+                                           ;; autocompletion.
+                                           ;; NOTE: Removed just to test
+                                           ;; :auto_import_modules ["os"
+                                           ;;                       "re"
+                                           ;;                       "sys"
+                                           ;;                       "subprocess"
+                                           ;;                       "pathlib"
+                                           ;;                       "logging"
+                                           ;;                       "shlex"
+                                           ;;                       "typing"]
 
-                                   ;; Resolve documentation and detail
-                                   ;; eagerly.
-                                   :eager :json-false
+                                           ;; Resolve documentation and detail
+                                           ;; eagerly.
+                                           :eager :json-false
 
-                                   :include_class_objects :json-false
-                                   :include_function_objects :json-false
-                                   :include_params :json-false
+                                           :include_class_objects :json-false
+                                           :include_function_objects :json-false
+                                           :include_params :json-false
 
-                                   ;; How many labels and snippets (at most)
-                                   ;; should be resolved?
-                                   ;; :resolve_at_most 40
-                                   )
+                                           ;; How many labels and snippets (at most)
+                                           ;; should be resolved?
+                                           ;; :resolve_at_most 40
+                                           )
 
-                         ;; NOTE: Removed because it causes on Arch: Debugger
-                         ;; entered--Lisp error: (wrong-type-argument plistp [])
-                         ;;
-                         ;; Enables or disables the preloading of
-                         ;; specified Python modules when the language
-                         ;; server starts. When enabled, the preload
-                         ;; plugin loads specified modules at the start of
-                         ;; the language server session, making them
-                         ;; readily available in memory. This is intended
-                         ;; to speed up language server operations, like
-                         ;; autocompletion or code analysis, by reducing
-                         ;; the need to load these modules on demand.
-                         ;; :preload ( :enabled t
-                         ;;            :modules ["os"
-                         ;;                      "re"
-                         ;;                      "sys"
-                         ;;                      "subprocess"
-                         ;;                      "pathlib"])
+                                 ;; NOTE: Removed because it causes on Arch: Debugger
+                                 ;; entered--Lisp error: (wrong-type-argument plistp [])
+                                 ;;
+                                 ;; Enables or disables the preloading of
+                                 ;; specified Python modules when the language
+                                 ;; server starts. When enabled, the preload
+                                 ;; plugin loads specified modules at the start of
+                                 ;; the language server session, making them
+                                 ;; readily available in memory. This is intended
+                                 ;; to speed up language server operations, like
+                                 ;; autocompletion or code analysis, by reducing
+                                 ;; the need to load these modules on demand.
+                                 ;; :preload ( :enabled t
+                                 ;;            :modules ["os"
+                                 ;;                      "re"
+                                 ;;                      "sys"
+                                 ;;                      "subprocess"
+                                 ;;                      "pathlib"])
 
-                         :rope_autoimport (:enabled :json-false)))))
+                                 :rope_autoimport (:enabled :json-false))))))
+
+;; (setq-default eglot-workspace-configuration
+;;               `(:pylsp (:plugins
+;;                         (; Improve syntax
+;;
+;;                          :ruff (;; Core
+;;                                 :enabled t
+;;                                 ;; :formatEnabled :json-false ; Use Apheleia
+;;                                 :lineLength 79
+;;
+;;                                 ;; Rule Selection
+;;                                 ;; By default, Ruff only checks 'E' and 'F'
+;;                                 ;; rules.
+;;                                 ;; Let's add 'I' (isort), 'W' (warnings), and
+;;                                 ;; 'UP' (pyupgrade)
+;;                                 ;;
+;;                                 ;; NOTE: Removed "I" (false positives)
+;;                                 :extendSelect ["W" "UP"]
+;;
+;;                                 ;; UP035: Deprecation of imports from typing
+;;                                 ;; (e.g., typing.List, typing.Dict).
+;;                                 ;;
+;;                                 ;; Why ignore:
+;;                                 ;; - Maintains compatibility with codebases
+;;                                 ;;   targeting Python < 3.9 where built-in
+;;                                 ;;   collection types cannot be parameterized
+;;                                 ;;   directly without from __future__ import
+;;                                 ;;   annotations.
+;;                                 ;; - Prevents multiple diagnostics from firing
+;;                                 ;;   on the same import line (e.g., from typing
+;;                                 ;;   import Dict, List), which causes
+;;                                 ;;   overlapping Flymake overlays.
+;;                                 ;;
+;;                                 ;; When to remove:
+;;                                 ;; - Remove once all target environments are on
+;;                                 ;;   Python 3.9+ and codebases migrate to
+;;                                 ;;   standard PEP 585 generics (e.g.,
+;;                                 ;;   list[str], dict[str, int]).
+;;                                 :ignore ["UP035"]
+;;
+;;                                 ;; Target your specific Python version
+;;                                 ;; :targetVersion "py310"
+;;
+;;                                 ;; File Management
+;;                                 ;; Exclude specific files from being linted
+;;                                 ;; :exclude ["__about__.py" "docs/"]
+;;
+;;                                 ;; Advanced: Per-file ignores (Dictionary/Plist
+;;                                 ;; translation) E.g., Ignore missing docstrings
+;;                                 ;; (D100) in __init__.py
+;;                                 ;; :perFileIgnores (:__init__.py ["D100"])
+;;
+;;                                 ;; Advanced: Custom Severities
+;;                                 ;; E.g., Make 'I' (isort) violations show as
+;;                                 ;; Info instead of Warning
+;;                                 ;; :severities (:I "I")
+;;
+;;                                 ;; Code Actions
+;;                                 ;; :unsafeFixes :json-false
+;;                                 ;; :unfixable ["F401"]
+;;                                 )
+;;
+;;                          ;; Syntax checkers
+;;                          :pylint (:enabled t)
+;;
+;;                          ;; Old, slow linters
+;;                          :mccabe (:enabled :json-false)
+;;                          :flake8 (:enabled :json-false)
+;;                          :pyflakes (:enabled :json-false :ignore ["W293"])
+;;                          :pycodestyle (;; This is also executed by flake8
+;;                                        :enabled :json-false
+;;                                        ;; :match "(?!test_).*\\.py"
+;;                                        ;; :maxLineLength 79
+;;                                        ;; :convention "pep257"
+;;                                        ;; :ignore ["W293"]
+;;                                        ;; :hangClosing :json-false
+;;                                        )
+;;                          :pydocstyle (:enabled :json-false
+;;                                                ;; :ignore ["W293"]
+;;                                                ;; ,(if eglot-code-checker
+;;                                                ;;      t
+;;                                                ;;    :json-false)
+;;                                                ;; string (one of: 'pep257',
+;;                                                ;; 'numpy', 'google', None)
+;;                                                ;; :convention "google"
+;;
+;;                                                ;; 213: Multi-line docstring
+;;                                                ;; summary should start in the
+;;                                                ;; second line.
+;;                                                ;;
+;;                                                ;; 202: no blank lines allowed
+;;                                                ;; after function docstring.
+;;                                                :ignore ["W213",
+;;                                                         "W202"])
+;;
+;;                          ;; Disable old formatters (Handled by Apheleia)
+;;                          :yapf (:enabled :json-false)
+;;                          :isort (:enabled :json-false)
+;;                          :autopep8 (:enabled :json-false)
+;;
+;;                          :jedi_completion
+;;                          (:enabled t
+;;                                    ;; Controls whether Jedi (the
+;;                                    ;; autocompletion engine used by pylsp)
+;;                                    ;; automatically imports certain
+;;                                    ;; modules to provide better
+;;                                    ;; autocompletion.
+;;                                    ;; NOTE: Removed just to test
+;;                                    ;; :auto_import_modules ["os"
+;;                                    ;;                       "re"
+;;                                    ;;                       "sys"
+;;                                    ;;                       "subprocess"
+;;                                    ;;                       "pathlib"
+;;                                    ;;                       "logging"
+;;                                    ;;                       "shlex"
+;;                                    ;;                       "typing"]
+;;
+;;                                    ;; Resolve documentation and detail
+;;                                    ;; eagerly.
+;;                                    :eager :json-false
+;;
+;;                                    :include_class_objects :json-false
+;;                                    :include_function_objects :json-false
+;;                                    :include_params :json-false
+;;
+;;                                    ;; How many labels and snippets (at most)
+;;                                    ;; should be resolved?
+;;                                    ;; :resolve_at_most 40
+;;                                    )
+;;
+;;                          ;; NOTE: Removed because it causes on Arch: Debugger
+;;                          ;; entered--Lisp error: (wrong-type-argument plistp [])
+;;                          ;;
+;;                          ;; Enables or disables the preloading of
+;;                          ;; specified Python modules when the language
+;;                          ;; server starts. When enabled, the preload
+;;                          ;; plugin loads specified modules at the start of
+;;                          ;; the language server session, making them
+;;                          ;; readily available in memory. This is intended
+;;                          ;; to speed up language server operations, like
+;;                          ;; autocompletion or code analysis, by reducing
+;;                          ;; the need to load these modules on demand.
+;;                          ;; :preload ( :enabled t
+;;                          ;;            :modules ["os"
+;;                          ;;                      "re"
+;;                          ;;                      "sys"
+;;                          ;;                      "subprocess"
+;;                          ;;                      "pathlib"])
+;;
+;;                          :rope_autoimport (:enabled :json-false)))))
 
 ;;; Eglot use-package
 
