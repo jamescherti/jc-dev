@@ -105,7 +105,7 @@
 (setq eglot-connect-timeout 40)
 (setq eglot-max-file-watches 5000)
 
-;;; Disable capabilities
+;;; Disable Eglot capabilities
 
 (setq eglot-ignored-server-capabilities
       '(;; Delegating code formatting to dedicated tools such as Apheleia can
@@ -178,7 +178,7 @@
         ;; :completionProvider
         ))
 
-;;; Python
+;;; Python Eglot
 
 (setq-default eglot-workspace-configuration)
 
@@ -337,27 +337,6 @@ FORMAT and ARGS are the message format string and its arguments."
 
 (advice-add 'eglot--message :around #'my-eglot--message-filter)
 
-;;; Python: Remove flymake
-
-;; Debugger entered--Lisp error: (error "Can't find state for python-flymake in 'flymake--state'")
-;; error("Can't find state for %s in `flymake--state'" python-flymake)
-;; flymake--handle-report(python-flymake backend-token7 nil)
-;; apply(flymake--handle-report python-flymake backend-token7 nil)
-;; #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>)(nil)
-;; python--flymake-parse-output(#<buffer allowed_paths.py> #<process python-flymake> #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>))
-;; #f(compiled-function (proc event) #<bytecode 0xe03bcdda4f319e9>)(#<process python-flymake> "finished\n")
-(defun my-remove-python-flymake ()
-  "Remove `python-flymake' from `flymake-diagnostic-functions'."
-  (remove-hook 'flymake-diagnostic-functions 'python-flymake t))
-
-(add-hook 'python-mode-hook #'my-remove-python-flymake)
-(add-hook 'python-ts-mode-hook #'my-remove-python-flymake)
-
-(with-eval-after-load 'python
-  ;; Remove python-flymake error: "Cannot find suitable checker" when a Python
-  ;; script is loaded before eglot and the checker isn't found
-  (advice-add 'python-flymake :override #'ignore))
-
 ;;; Cape
 
 ;; Configure buffer-local completion backend settings when Eglot manages a
@@ -386,6 +365,27 @@ FORMAT and ARGS are the message format string and its arguments."
       (error "Undefined: cape-capf-buster"))))
 
 (add-hook 'eglot-managed-mode-hook #'my-eglot-capf-cleanup)
+
+;;; DISABLED: Python: Remove flymake
+
+;; Debugger entered--Lisp error: (error "Can't find state for python-flymake in 'flymake--state'")
+;; error("Can't find state for %s in `flymake--state'" python-flymake)
+;; flymake--handle-report(python-flymake backend-token7 nil)
+;; apply(flymake--handle-report python-flymake backend-token7 nil)
+;; #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>)(nil)
+;; python--flymake-parse-output(#<buffer allowed_paths.py> #<process python-flymake> #f(compiled-function (&rest args) #<bytecode 0xc7a15d2072c6e28>))
+;; #f(compiled-function (proc event) #<bytecode 0xe03bcdda4f319e9>)(#<process python-flymake> "finished\n")
+
+;; (defun my-remove-python-flymake ()
+;;   "Remove `python-flymake' from `flymake-diagnostic-functions'."
+;;   (remove-hook 'flymake-diagnostic-functions 'python-flymake t))
+;;
+;; (add-hook 'python-mode-hook #'my-remove-python-flymake)
+
+;; (with-eval-after-load 'python
+;;   ;; Remove python-flymake error: "Cannot find suitable checker" when a Python
+;;   ;; script is loaded before eglot and the checker isn't found
+;;   (advice-add 'python-flymake :override #'ignore))
 
 ;;; Provide
 
