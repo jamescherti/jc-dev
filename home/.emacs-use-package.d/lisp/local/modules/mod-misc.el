@@ -1580,7 +1580,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; TODO: minimal emacs?
   (setq debugger-bury-or-kill 'kill)
 
-  (setq tramp-default-remote-shell "/bin/bash")
+  ;; (setq tramp-default-remote-shell "/bin/bash")
 
   ;; (setq byte-compile-warnings
   ;;       '(not
