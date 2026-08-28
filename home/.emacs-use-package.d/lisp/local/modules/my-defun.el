@@ -25,8 +25,6 @@
 
 ;;; Code:
 
-(require 'tmpedit)
-
 (defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
 (defconst IS-MAC (eq system-type 'darwin))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))

@@ -347,13 +347,6 @@ only if they are not already available."
   (mod-filetype-install 'c-ts-mode 'cpp)
   (mod-filetype-install 'dockerfile-ts-mode 'dockerfile))
 
-;;; Misc languages
-
-(my-remap-ts-mode 'c-mode 'c-ts-mode 'c)
-(my-remap-ts-mode 'c++-mode 'c++-ts-mode 'cpp)
-(my-remap-ts-mode 'js-json-mode 'json-ts-mode 'json)
-(my-remap-ts-mode 'conf-toml-mode 'toml-ts-mode 'toml)
-
 ;;; jinja2
 
 ;; TODO make a plugin
@@ -586,15 +579,6 @@ invoking the original function ORIG-FUN with ARGS."
 
 (add-hook 'ansible-mode-hook 'my-ansible-doc-local-setup-buffer)
 
-;;; PHP
-
-(if (my-treesit-language-available-p 'php)
-    (progn
-      (my-remap-ts-mode 'php-mode 'php-ts-mode 'php)
-      (my-auto-mode-ts "\\.[pP][hH][pP]\\'" 'php-ts-mode 'php-mode 'php)
-      (my-auto-mode-ts "\\.[pP][hH][pP]3\\'" 'php-ts-mode 'php-mode 'php))
-  (require 'sub-php-mode))
-
 ;;; Bash
 
 (setq sh-basic-offset 2)
@@ -607,9 +591,6 @@ invoking the original function ORIG-FUN with ARGS."
 
 (add-hook 'sh-mode-hook #'setup-sh-mode)
 (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
-
-(my-remap-ts-mode 'shell-script-mode 'bash-ts-mode 'bash)
-(my-remap-ts-mode 'sh-mode 'bash-ts-mode 'bash)
 
 ;; use-package sh-mode
 ;; :ensure nil
@@ -624,40 +605,7 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; css
 
-(my-remap-ts-mode 'css-mode 'css-ts-mode 'css)
 ;; (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist)
-
-;;; Javascript
-
-(my-remap-ts-mode 'js2-mode 'js-ts-mode 'javascript)
-(my-remap-ts-mode 'js-mode 'js-ts-mode 'javascript)
-(my-auto-mode-ts "\\.[jJ][sS]\\'" 'js-ts-mode 'js-mode 'javascript)
-
-;;; Lua
-
-(if (my-treesit-language-available-p 'lua)
-    (progn
-      (my-auto-mode-ts "\\.[lL][uU][aA]\\'" 'lua-ts-mode nil 'lua))
-  (require 'sub-lua-mode))
-
-;;; Dockerfile
-
-(my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR]\\'" 'dockerfile-ts-mode nil 'dockerfile)
-(my-auto-mode-ts "/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
-(my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
-
-;;(use-package dockerfile-mode
-;;  :defer t
-;;  :commands dockerfile-mode
-;;  :init
-;;  ;; For some reason, this path is not automatically added to load-path
-;;  (add-to-list 'load-path (expand-file-name "dockerfile-mode"
-;;                                            emacs-packages-dir))
-;;  (add-to-list 'auto-mode-alist
-;;               (cons (concat "[/\\]"
-;;                             "\\(?:Containerfile\\|Dockerfile\\)"
-;;                             "\\(?:\\.[^/\\]*\\)?\\'")
-;;                     'dockerfile-mode)))
 
 ;;; HTML
 
@@ -689,26 +637,7 @@ invoking the original function ORIG-FUN with ARGS."
 ;;   ;; (web-mode-code-indent-offset 2)
 ;;   )
 
-(if (my-treesit-language-available-p 'html)
-    (progn
-      (my-remap-ts-mode 'html-mode 'html-ts-mode 'html)
-      (my-remap-ts-mode 'mhtml-mode 'mhtml-ts-mode 'html)
-      (my-auto-mode-ts "\\.[hH][tT][mM][lL]\\'" 'mhtml-ts-mode 'mhtml-mode 'html)
-      (my-auto-mode-ts "\\.[Pp][hH][tT][mM][lL]\\'" 'mhtml-ts-mode 'mhtml-mode 'html))
-  (use-package sgml-mode
-    :ensure nil
-    :commands (sgml-mode
-               sgml-electric-tag-pair-mode
-               sgml-name-8bit-mode)
-    :hook
-    (html-mode . sgml-electric-tag-pair-mode)
-    (mhtml-mode . sgml-electric-tag-pair-mode)
-    (html-mode . sgml-name-8bit-mode)
-    (mhtml-mode . sgml-name-8bit-mode)))
-
 ;;; Python
-
-(my-remap-ts-mode 'python-mode 'python-ts-mode 'python)
 
 (defun setup-python-mode ()
   "Setup `python-mode'."
@@ -785,13 +714,8 @@ invoking the original function ORIG-FUN with ARGS."
 
          ("\\.log\\'" . txt-file-mode)))
 
-;; Gentoo
-(my-auto-mode-ts "/make\\.conf\\'" 'bash-ts-mode 'sh-mode 'bash)
-
 (push '("/\\.gitconfig\\.local\\'" . gitconfig-mode) auto-mode-alist)
 (push '("/\\.gitattributes\\.local\\'" . gitattributes-mode) auto-mode-alist)
-
-(my-auto-mode-ts "/\\.ipynb\\'" 'json-ts-mode 'js-json-mode 'json)
 
 ;;; Markdown
 
@@ -810,11 +734,6 @@ invoking the original function ORIG-FUN with ARGS."
 
   (let ((inhibit-message t))
     (toggle-truncate-lines 0)))
-
-(when (and (> emacs-major-version 30)
-           (my-treesit-language-available-p 'markdown))
-  (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
-  (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode))
 
 ;;; Setup markdown mode
 
@@ -898,6 +817,66 @@ invoking the original function ORIG-FUN with ARGS."
   "Major mode to highlight only # comments."
   (setq font-lock-defaults '(simple-conf-mode-font-lock-keywords))
   (set-syntax-table simple-conf-mode-syntax-table))
+
+;;; Deferred Fallbacks Loader
+
+(defun my-load-treesit-fallbacks ()
+  "Initialize tree-sitter mode remaps and fallbacks after UI is drawn."
+  (my-remap-ts-mode 'c-mode 'c-ts-mode 'c)
+  (my-remap-ts-mode 'c++-mode 'c++-ts-mode 'cpp)
+  (my-remap-ts-mode 'js-json-mode 'json-ts-mode 'json)
+  (my-remap-ts-mode 'conf-toml-mode 'toml-ts-mode 'toml)
+
+  (if (my-treesit-language-available-p 'php)
+      (progn
+        (my-remap-ts-mode 'php-mode 'php-ts-mode 'php)
+        (my-auto-mode-ts "\\.[pP][hH][pP]\\'" 'php-ts-mode 'php-mode 'php)
+        (my-auto-mode-ts "\\.[pP][hH][pP]3\\'" 'php-ts-mode 'php-mode 'php))
+    (require 'sub-php-mode))
+
+  (my-remap-ts-mode 'shell-script-mode 'bash-ts-mode 'bash)
+  (my-remap-ts-mode 'sh-mode 'bash-ts-mode 'bash)
+  (my-auto-mode-ts "/make\\.conf\\'" 'bash-ts-mode 'sh-mode 'bash)
+
+  (my-remap-ts-mode 'css-mode 'css-ts-mode 'css)
+
+  (my-remap-ts-mode 'js2-mode 'js-ts-mode 'javascript)
+  (my-remap-ts-mode 'js-mode 'js-ts-mode 'javascript)
+  (my-auto-mode-ts "\\.[jJ][sS]\\'" 'js-ts-mode 'js-mode 'javascript)
+  (my-auto-mode-ts "/\\.ipynb\\'" 'json-ts-mode 'js-json-mode 'json)
+
+  (if (my-treesit-language-available-p 'lua)
+      (progn
+        (my-auto-mode-ts "\\.[lL][uU][aA]\\'" 'lua-ts-mode nil 'lua))
+    (require 'sub-lua-mode))
+
+  (my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+  (my-auto-mode-ts "/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+  (my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+
+  (if (my-treesit-language-available-p 'html)
+      (progn
+        (my-remap-ts-mode 'html-mode 'html-ts-mode 'html)
+        (my-remap-ts-mode 'mhtml-mode 'mhtml-ts-mode 'html)
+        (my-auto-mode-ts "\\.[hH][tT][mM][lL]\\'" 'mhtml-ts-mode 'mhtml-mode 'html)
+        (my-auto-mode-ts "\\.[Pp][hH][tT][mM][lL]\\'" 'mhtml-ts-mode 'mhtml-mode 'html))
+    (use-package sgml-mode
+      :ensure nil
+      :commands (sgml-mode sgml-electric-tag-pair-mode sgml-name-8bit-mode)
+      :hook
+      (html-mode . sgml-electric-tag-pair-mode)
+      (mhtml-mode . sgml-electric-tag-pair-mode)
+      (html-mode . sgml-name-8bit-mode)
+      (mhtml-mode . sgml-name-8bit-mode)))
+
+  (my-remap-ts-mode 'python-mode 'python-ts-mode 'python)
+
+  (when (and (> emacs-major-version 30)
+             (my-treesit-language-available-p 'markdown))
+    (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
+    (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)))
+
+(add-hook 'after-init-hook #'my-load-treesit-fallbacks)
 
 ;;; Provide
 

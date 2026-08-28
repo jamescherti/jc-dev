@@ -1582,7 +1582,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   (setq tramp-default-remote-shell "/bin/bash")
 
-
   ;; (setq byte-compile-warnings
   ;;       '(not
   ;;         ;; free-vars   ;; Using variables not defined with defvar (catches typos)
@@ -1600,6 +1599,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
       (unless (file-exists-p auto-save-dir)
         (with-file-modes #o700
           (make-directory auto-save-dir t)))))
+
   ;;-------------------------------------> BLOCK CHANGE AUTO SAVE PATH
 
   )
@@ -3045,10 +3045,6 @@ This prevents Flymake warnings when viewing framework source files in Emacs
               (setenv "SHELL" shell-file-name))
             (when-let* ((executable (executable-find "bash")))
               (setq explicit-shell-file-name executable))))
-
-(let ((executable (executable-find "bash")))
-  (when executable
-    (setq explicit-shell-file-name executable)))
 
 (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
 
