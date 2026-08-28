@@ -1592,8 +1592,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;;         obsolete
   ;;         ))  ;; Use of deprecated functions slated for removal
 
-
-
   (when auto-save-default
     (let ((auto-save-dir (file-name-directory auto-save-list-file-prefix)))
       (unless (file-exists-p auto-save-dir)
