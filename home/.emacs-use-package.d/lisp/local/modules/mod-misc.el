@@ -277,11 +277,17 @@ during unsafe operations like interning symbols on file open."
   (with-eval-after-load 'cc-fonts
     (advice-add 'c-compose-keywords-list :around #'suppress-shorthands)))
 
-;;; Other modules
+;;; Load: mod-misc2.el (optional)
+
+(defun my-load-mod-misc2 ()
+  "Load `mod-misc2' after initialization."
+  (require 'mod-misc2 nil t))
 
 (unless noninteractive
   ;; Optional
-  (require 'mod-misc2 nil t))
+  (add-hook 'after-init-hook #'my-load-mod-misc2))
+
+;;; Other modules
 
 (unless noninteractive
   (with-eval-after-load 'evil
@@ -362,13 +368,15 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; TODO Interesting for lightemacs?
 
-(let ((early-init-el (expand-file-name "early-init.el" lightemacs-user-directory))
-      (early-init-elc (expand-file-name "early-init.elc" lightemacs-user-directory)))
-  (when (and (file-exists-p early-init-elc)
-             ;; (file-exists-p early-init-el) ; Not necessary
-             (file-newer-than-file-p early-init-el early-init-elc))
-    (message "[AUTO DELETE] %s" early-init-elc)
-    (delete-file early-init-elc)))
+(add-hook 'kill-emacs-hook
+          (lambda ()
+            (let ((early-init-el (expand-file-name "early-init.el" lightemacs-user-directory))
+                  (early-init-elc (expand-file-name "early-init.elc" lightemacs-user-directory)))
+              (when (and (file-exists-p early-init-elc)
+                         ;; (file-exists-p early-init-el) ; Not necessary
+                         (file-newer-than-file-p early-init-el early-init-elc))
+                (message "[AUTO DELETE] %s" early-init-elc)
+                (delete-file early-init-elc)))))
 
 ;;; compile-angel timer (test)
 
@@ -3030,10 +3038,13 @@ This prevents Flymake warnings when viewing framework source files in Emacs
 ;; Use /bin/sh (typically dash or ash) instead of bash for background
 ;; subprocesses to minimize startup overhead and reduce memory consumption
 ;; across frequent process forks.
-(let ((executable (executable-find "sh")))
-  (when executable
-    (setq shell-file-name executable)
-    (setenv "SHELL" shell-file-name)))
+(add-hook 'after-init-hook
+          (lambda ()
+            (when-let* ((executable (executable-find "sh")))
+              (setq shell-file-name executable)
+              (setenv "SHELL" shell-file-name))
+            (when-let* ((executable (executable-find "bash")))
+              (setq explicit-shell-file-name executable))))
 
 (let ((executable (executable-find "bash")))
   (when executable
