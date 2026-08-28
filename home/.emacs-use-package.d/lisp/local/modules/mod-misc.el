@@ -1675,17 +1675,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; Useful functions
 
-;;; Startup time
-
-(defun display-startup-time ()
-  "Display the startup time and number of garbage collections."
-  (message "Emacs loaded in %.2f seconds (Init only: %.2fs) with %d garbage collections."
-           (time-to-seconds (time-since before-init-time))
-           (float-time (time-subtract after-init-time before-init-time))
-           gcs-done))
-
-(add-hook 'lightemacs-emacs-startup-hook #'display-startup-time 200)
-
 ;;; Ignored errors
 
 ;; Org + vertico preview error: Debugger entered--Lisp error: (error "rx '**'

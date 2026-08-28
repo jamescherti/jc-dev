@@ -1735,6 +1735,17 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
                 (?\C-f . evil-surround-prefix-function)
                 (?f . evil-surround-function)))
 
+;;; Startup speed
+
+(defun my-display-startup-time ()
+  "Display the startup time and number of garbage collections."
+  (message "Emacs loaded in %.2f seconds (Init time: %.2fs) with %d garbage collections."
+           (float-time (time-since before-init-time))
+           (float-time (time-subtract after-init-time before-init-time))
+           gcs-done))
+
+(add-hook 'window-setup-hook #'my-display-startup-time 99)
+
 ;;; Provide
 
 (provide 'config)
