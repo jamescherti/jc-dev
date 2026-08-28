@@ -37,7 +37,7 @@
 
 ;;; Native compilation settings
 
-(setq lightemacs-native-comp-excluded-cpus 2)
+(setq lightemacs-native-comp-excluded-cpus 1)
 
 (setq native-comp-jit-compilation nil)
 (setq compile-angel-enable-native-compile t)
