@@ -3795,15 +3795,33 @@ function or if an invalid choice is made."
 ;; interactive corrections.
 ;; URL: https://www.jamescherti.com/emacs-spell-checker-flyspell-ispell-aspell/
 (defun my-flyspell-enable-appropriate-mode ()
-  "Enable the appropriate Flyspell mode based on the current major mode."
-  (if (or (derived-mode-p 'conf-mode)
-          (derived-mode-p 'yaml-mode)
-          (derived-mode-p 'yaml-ts-mode)
-          (derived-mode-p 'ansible-mode)
-          (derived-mode-p 'nxml-mode)
-          (derived-mode-p 'sgml-mode))
-      (my-flyspell-prog-mode)
-    (flyspell-mode 1)))
+  "Enable the appropriate Flyspell mode based on the current major mode.
+Defers actual initialization to prevent blocking file loads."
+  (let ((is-prog (derived-mode-p 'conf-mode
+                                 'yaml-mode
+                                 'yaml-ts-mode
+                                 'ansible-mode
+                                 'nxml-mode
+                                 'sgml-mode))
+        ;; Capture the buffer we are currently opening
+        (buf (current-buffer)))
+    ;; Wait 0.5 seconds of idle time before booting the heavy ispell process
+    (run-with-idle-timer 1 nil
+                         (lambda ()
+                           ;; Ensure the buffer wasn't closed while we waited
+                           (when (buffer-live-p buf)
+                             (with-current-buffer buf
+                               (if is-prog
+                                   (my-flyspell-prog-mode)
+                                 (flyspell-mode 1))))))))
+
+;; Slow version
+;; (defun my-flyspell-enable-appropriate-mode ()
+;;   "Enable the appropriate Flyspell mode based on the current major mode."
+;;   (if (derived-mode-p 'conf-mode 'yaml-mode 'yaml-ts-mode
+;;                       'ansible-mode 'nxml-mode 'sgml-mode)
+;;       (my-flyspell-prog-mode)
+;;     (flyspell-mode 1)))
 
 (add-hook 'prog-mode-hook #'my-flyspell-prog-mode)
 (add-hook 'conf-mode-hook #'my-flyspell-enable-appropriate-mode)

@@ -39,8 +39,9 @@
 
 (setq lightemacs-native-comp-excluded-cpus 1)
 
-(setq native-comp-jit-compilation nil)
+(setq native-comp-jit-compilation t)
 (setq compile-angel-enable-native-compile t)
+;; (setq compile-angel-cache-locate-file t)
 
 (setq lightemacs-load-compiled-init-files t)
 (setq lightemacs-recentf-track-switch-to-buffer t)
@@ -69,11 +70,66 @@
 
 (setq native-comp-async-report-warnings-errors t)
 
-;; (when (eq lightemacs-package-manager 'straight)
-;;   ;; TODO compile angel readme?
-;;   (setq straight-disable-native-compile t)
-;;   (setq straight-disable-compile t)
-;;   )
+(progn
+  ;; straight.el runs find commands during startup to detect if any package
+  ;; source files have been modified since their last build timestamp. This is
+  ;; how it determines if a package needs to be byte-recompiled or if its
+  ;; autoloads need to be regenerated.
+  ;;
+  ;; It is not strictly necessary unless you frequently edit package source code
+  ;; (either your own packages or upstream dependencies) outside of Emacs and
+  ;; rely on straight.el to automatically rebuild them on the next launch.
+  (setq straight-check-for-modifications nil)
+
+  ;; If you do actively develop Emacs packages, you can configure straight.el to
+  ;; monitor modifications only when you save a file from within Emacs. This
+  ;; entirely eliminates the find commands during startup while keeping
+  ;; live-rebuild functionality intact for local development.
+  ;; (setq straight-check-for-modifications '(check-on-save))
+
+  ;; If set to nil, straight.el abandons the bulk autoload cache
+  ;; (straight--autoloads-cache) and performs expensive disk reads to parse
+  ;; every individual package's autoload file during startup.
+  ;;
+  ;; Setting straight-cache-autoloads to nil will significantly degrade Emacs
+  ;; startup performance by forcing a high volume of synchronous disk I/O
+  ;; operations.
+  ;;
+  ;; With cache enabled (t, default): straight.el aggregates the autoload forms
+  ;; for all installed packages into a single, unified data structure
+  ;; (straight--autoloads-cache). This cache is serialized to disk within the
+  ;; main build cache file and read exactly once during initialization.
+  ;; straight.el then evaluates the autoload forms directly from memory.
+  ;;
+  ;; With cache disabled (nil): straight.el bypasses the bulk cache entirely.
+  ;; Instead, it executes (load "<package>-autoloads.el") individually for every
+  ;; registered package. If you have 150 packages, Emacs must locate, open,
+  ;; parse, and evaluate 150 separate files on the disk during the critical
+  ;; startup path.
+  ;; (setq straight-cache-autoloads nil)
+
+  ;; When t, straight.el explicitly disables package.el by setting
+  ;; package-enable-at-startup to nil. If this is changed to nil, both package
+  ;; managers will execute their initialization routines, duplicating effort.
+  (setq straight-enable-package-integration nil)
+
+  ;; Change straight-vc-git-default-clone-depth to 1 (or '(1 single-branch)):
+  ;; The default is 'full, which downloads the entire commit history. While this
+  ;; does not affect cached startups, any time straight.el installs a missing
+  ;; package or dependency during init.el evaluation, it blocks the main thread.
+  ;; Shallow clones reduce this delay.
+  ;; (setq straight-vc-git-default-clone-depth 1)
+
+  ;; Keep straight-fix-flycheck set to nil (Default): If set to t, straight.el
+  ;; adds an advice to flycheck-start-current-syntax-check and attaches a
+  ;; function to first-change-hook. Keeping it nil avoids this extra evaluation
+  ;; overhead.
+  (setq straight-fix-flycheck nil))
+
+;; TODO compile angel readme?
+;; (setq straight-disable-native-compile t)
+;; (setq straight-disable-compile t)
+
 
 ;; native-comp-speed controls the Emacs Lisp frontend. It dictates how
 ;; aggressively the Emacs Lisp compiler optimizes your code at the semantic
@@ -95,7 +151,7 @@
 (setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
-      "-DCMAKE_C_FLAGS='-O2 -march=native -mtune=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
+      "-DCMAKE_C_FLAGS='-O3 -march=native -mtune=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
 
 ;; `native-comp-compiler-options' specifies flags passed directly to the C
 ;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
@@ -645,7 +701,9 @@ subsequent GCC invocations."
 
 ;;; Lightemacs modules
 
-(setq lightemacs-modules '(mod-conditional-modes
+(setq lightemacs-modules '(le-compile-angel
+
+                           mod-conditional-modes
                            mod-begin
                            mod-filetype
                            mod-same-window
@@ -660,7 +718,6 @@ subsequent GCC invocations."
                            mod-kirigami
                            ;; le-kirigami ; replaced with mod-kirigami
 
-                           le-compile-angel
                            le-flymake
                            le-pathaction
                            le-theme
