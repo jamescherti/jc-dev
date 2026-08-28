@@ -1546,6 +1546,12 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 (defun lightemacs-user-before-modules ()
   "Pre-modules."
+  (require 'benchmark-init)
+  (require 'benchmark-init-modes)
+  (when (fboundp 'benchmark-init/activate)
+    (benchmark-init/activate)
+    (add-hook 'window-setup-hook 'benchmark-init/deactivate 90))
+
   (my-add-packages-to-load-path))
 
 (defun lightemacs-user-after-modules ()
