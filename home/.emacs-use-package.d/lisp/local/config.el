@@ -760,6 +760,7 @@ subsequent GCC invocations."
                            le-apheleia
 
                            le-consult
+                           le-embark
                            le-embark-consult
                            le-embark
                            le-vertico
