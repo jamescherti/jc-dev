@@ -32,8 +32,6 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 
-(require 'treesit nil)
-
 ;;; Tree-sitter Fallback Helpers
 
 ;; Enable native Tree-sitter mode redirection globally for Emacs 31+
