@@ -512,7 +512,7 @@ If ONLY-IF-FILE is non-nil, the function is only executed when visiting a file."
         (if only-if-file
             (add-hook hook
                       (lambda ()
-                        (when (buffer-file-name (buffer-base-buffer))
+                        (when (my-valid-file-buffer-p)
                           (funcall func))))
           (add-hook hook func))))))
 
