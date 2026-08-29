@@ -740,10 +740,6 @@ any minor mode associated with the current `major-mode'."
 ;;; org-ibullets
 
 (lightemacs-use-package org-ibullets
-  :straight (org-ibullets
-             :type git
-             :host github
-             :repo "jamescherti/org-ibullets.el")
   ;; :vc (:url "https://github.com/jamescherti/org-ibullets.el"
   ;;           :rev :newest)
   :after org

@@ -530,7 +530,7 @@ CONFIGURE_ARGS=(
   #Emacs is "born" fully optimized. Every built-in feature is already running
   # as native machine code the very first time I launch it. There is no
   # background "churn" for the standard library.
-  # --with-native-compilation=aot
+  --with-native-compilation=aot
 
   # When I use this flag alone, it enables Just-In-Time (JIT) compilation
   # The Emacs C source compiles quickly. Only a absolute minimum set of Lisp
@@ -540,7 +540,7 @@ CONFIGURE_ARGS=(
   # magit, or org-mode), Emacs will notice those files are only available as
   # byte-code (.elc). It will then spawn background processes to compile them
   # into .eln files on the fly.
-  --with-native-compilation
+  # --with-native-compilation
 
   --with-modules
   --with-threads

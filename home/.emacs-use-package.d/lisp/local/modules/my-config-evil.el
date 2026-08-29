@@ -2457,10 +2457,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 (lightemacs-use-package wizard
   ;; :vc (:url "https://github.com/jamescherti/wizard.el"
   ;;           :rev :newest)
-  :straight (wizard
-             :type git
-             :host github
-             :repo "jamescherti/wizard.el")
   :commands (wizard-clone-and-switch-to-indirect-buffer
              wizard-unhighlight
              wizard-toggle-highlight-at-point

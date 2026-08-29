@@ -19,8 +19,7 @@
 ;; (setq dired-create-destination-dirs 'ask)
 
 ;; Automatically creates destination directories without asking if the
-;; destination path ends with a trailing slash. This is highly efficient because
-;; the trailing slash indicates clear intent to create a directory.
+;; destination path ends with a trailing slash.
 ;; (setq dired-create-destination-dirs-on-trailing-dirsep t) ; Emacs 29
 
 ;; Reuses a single buffer for Dired navigation instead of opening a new buffer
@@ -28,7 +27,7 @@
 ;; buffer proliferation.
 ;;
 ;; NOTE: Disabled because too buffers in other tabs are killed.
-;; (setq dired-kill-when-opening-new-dired-buffer t)
+(setq dired-kill-when-opening-new-dired-buffer t)
 
 ;; Allows wdired to automatically create missing parent directories when you
 ;; rename files to paths that do not exist yet. This makes bulk project

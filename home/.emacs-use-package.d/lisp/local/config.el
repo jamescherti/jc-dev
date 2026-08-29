@@ -79,7 +79,7 @@
   ;; It is not strictly necessary unless you frequently edit package source code
   ;; (either your own packages or upstream dependencies) outside of Emacs and
   ;; rely on straight.el to automatically rebuild them on the next launch.
-  (setq straight-check-for-modifications nil)
+  ;; (setq straight-check-for-modifications nil)
 
   ;; If you do actively develop Emacs packages, you can configure straight.el to
   ;; monitor modifications only when you save a file from within Emacs. This
@@ -702,6 +702,8 @@ subsequent GCC invocations."
 ;;; Lightemacs modules
 
 (setq lightemacs-modules '(le-compile-angel
+                           le-vim-tab-bar
+                           le-theme
 
                            mod-conditional-modes
                            mod-begin
@@ -710,17 +712,17 @@ subsequent GCC invocations."
                            mod-dired
                            mod-flymake
                            mod-gc
-                           mod-yasnippet
                            mod-recenter-after-jump
                            mod-quiet
                            mod-eglot
 
-                           mod-kirigami
+                           le-yasnippet
+                           mod-yasnippet
+                           mod-kirigami  ;; requires yasnippet
                            ;; le-kirigami ; replaced with mod-kirigami
 
                            le-flymake
                            le-pathaction
-                           le-theme
                            le-default-settings
                            le-default-keybindings
                            le-gcmh
@@ -732,7 +734,6 @@ subsequent GCC invocations."
                            le-evil-surround
                            le-goto-chg
                            le-undo-fu-session
-                           le-vim-tab-bar
                            ;; le-evil-commentary  ; I am using my own module
 
                            le-buffer-terminator
@@ -803,7 +804,6 @@ subsequent GCC invocations."
 
                            le-edit-indirect
 
-                           le-yasnippet
                            ;; le-yasnippet-snippets
 
                            le-markdown-mode
@@ -1230,6 +1230,14 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jamescherti/avy"
              :branch "master")
+            (org-ibullets
+             :type git :host github
+             :repo "jamescherti/org-ibullets.el"
+             :branch "main")
+            (wizard
+             :type git :host github
+             :repo "jamescherti/wizard.el"
+             :branch "main")
             (wgrep
              :type git :host github
              :repo "jamescherti/Emacs-wgrep"
