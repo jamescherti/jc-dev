@@ -778,6 +778,24 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Enable automatic buffer refresh when VC-controlled files change externally.
 ;; (setq auto-revert-check-vc-info t)
 
+;;; scratch
+
+(defvar my-scratch-init-done nil)
+
+(defun my-advice-scratch-buffer-create (orig-fn &rest args)
+  "Advice to disable fringe truncation arrows in the scratch buffer.
+ORIG-FN is the original function being advised (`get-scratch-buffer-create`).
+ARGS are the arguments passed to the original function."
+  (unless my-scratch-init-done
+    (setq my-scratch-init-done t)
+    (let ((buffer (apply orig-fn args)))
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
+          (my-disable-fringe-truncation-arrow)))
+      buffer)))
+
+(advice-add 'get-scratch-buffer-create :around #'my-advice-scratch-buffer-create)
+
 ;;; completion preview
 
 ;; Completion preview displays only one suggestion at a time.
