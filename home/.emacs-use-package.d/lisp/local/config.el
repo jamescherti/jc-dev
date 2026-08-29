@@ -79,7 +79,7 @@
   ;; It is not strictly necessary unless you frequently edit package source code
   ;; (either your own packages or upstream dependencies) outside of Emacs and
   ;; rely on straight.el to automatically rebuild them on the next launch.
-  ;; (setq straight-check-for-modifications nil)
+  (setq straight-check-for-modifications nil)
 
   ;; If you do actively develop Emacs packages, you can configure straight.el to
   ;; monitor modifications only when you save a file from within Emacs. This
@@ -129,7 +129,6 @@
 ;; TODO compile angel readme?
 ;; (setq straight-disable-native-compile t)
 ;; (setq straight-disable-compile t)
-
 
 ;; native-comp-speed controls the Emacs Lisp frontend. It dictates how
 ;; aggressively the Emacs Lisp compiler optimizes your code at the semantic
