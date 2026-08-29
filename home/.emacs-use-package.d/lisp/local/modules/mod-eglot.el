@@ -73,7 +73,7 @@
 ;; your laptop fans spinning up just from regular editing. At this value, Eglot
 ;; acts more like a "pause to check my work" tool rather than a real-time
 ;; linter.
-(setq eglot-send-changes-idle-time 0.25)
+(setq eglot-send-changes-idle-time 0.5)
 
 ;; ## Disable Automatic Code Action Probing
 ;; By default, Eglot asynchronously polls the language server for available code
@@ -333,7 +333,11 @@ FORMAT and ARGS are the message format string and its arguments."
   (let ((message-string (apply #'format format args)))
     (let ((inhibit-message (or (string-prefix-p "Connected" message-string)
                                (string-prefix-p "Waiting" message-string)
-                               (string-prefix-p "Reconnected" message-string))))
+                               (string-prefix-p "Reconnected" message-string)
+                               ;; [eglot] Asking EGLOT
+                               ;; (ansible-cleanup/(python-mode python-ts-mode))
+                               ;; politely to terminate
+                               (string-suffix-p "politely to terminate" message-string))))
       (apply orig-fun format args))))
 
 (advice-add 'eglot--message :around #'my-eglot--message-filter)
