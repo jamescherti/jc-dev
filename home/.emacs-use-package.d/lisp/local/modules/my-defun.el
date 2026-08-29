@@ -473,7 +473,24 @@ CWD is the current working directory."
       (goto-char point)
       (set-window-start nil window-start t))))
 
-;;; ex init-helpers
+;;; Text editing buffers: Exclude
+
+(defun my-valid-file-buffer-p ()
+  "Return non-nil if the current buffer is a valid file buffer.
+This checks that the base buffer visits a file and the buffer name
+does not start with a space or an asterisk."
+  (and (buffer-file-name (buffer-base-buffer))
+       (not (string-prefix-p " " (buffer-name)))
+       (not (string-prefix-p "*" (buffer-name)))))
+
+(defun my-wrap-file-buffer-only (func)
+  "Return a lambda that calls FUNC only in valid file buffers.
+FUNC is the function to execute when the buffer passes `my-valid-file-buffer-p'."
+  (lambda (&rest args)
+    (when (my-valid-file-buffer-p)
+      (apply func args))))
+
+;;; Text editing buffers
 
 (defvar text-editing-modes '(conf-mode prog-mode text-mode diff-mode)
   "List of text editing modes.")
@@ -499,15 +516,35 @@ If ONLY-IF-FILE is non-nil, the function is only executed when visiting a file."
                           (funcall func))))
           (add-hook hook func))))))
 
-(defun add-hook-text-editing-modes (functions)
-  "Add FUNCTIONS to hooks corresponding to `text-editing-modes`.
-FUNCTIONS can be a single function or a list of functions."
-  (add-functions-to-mode-hooks text-editing-modes functions))
+;; TODO remove
+;; (defun add-hook-text-editing-modes (functions)
+;;   "Add FUNCTIONS to hooks corresponding to `text-editing-modes`.
+;; FUNCTIONS can be a single function or a list of functions."
+;;   (add-functions-to-mode-hooks text-editing-modes functions))
+
+(defmacro add-hook-text-editing-modes (functions &optional any-buffer)
+  "Add FUNCTIONS to hooks corresponding to `text-editing-modes'.
+
+FUNCTIONS can be a single function or a list of functions.
+ANY-BUFFER is an optional boolean that controls the execution context.
+If ANY-BUFFER is nil, the functions are wrapped with
+`my-wrap-file-buffer-only' and execute only in valid file buffers.
+If ANY-BUFFER is non-nil, the functions are added directly and execute
+in all buffers."
+  `(let ((funcs ,functions))
+     (add-functions-to-mode-hooks
+      text-editing-modes
+      (if (not ,any-buffer)
+          (if (listp funcs)
+              (mapcar #'my-wrap-file-buffer-only funcs)
+            (my-wrap-file-buffer-only funcs))
+        funcs))))
 
 (defun add-hook-text-editing-modes-if-file (functions)
   "Add FUNCTIONS to `text-editing-modes' only if visiting a file.
 FUNCTIONS can be a single function or a list of functions."
   (add-functions-to-mode-hooks text-editing-modes functions t))
+
 ;;; ignore-errors advice
 
 (defun my--ignore-error-advice (orig-fn &rest args)

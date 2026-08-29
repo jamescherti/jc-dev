@@ -78,7 +78,9 @@
   )
 
 (setq lightemacs-saveplace-target-hooks nil)
-(add-hook-text-editing-modes 'save-place-local-mode)
+;; (add-hook-text-editing-modes 'save-place-local-mode)
+(with-eval-after-load 'saveplace
+  (add-hook-text-editing-modes-if-file #'save-place-local-mode))
 
 (with-eval-after-load 'le-undo-fu-session
   (setq lightemacs-undo-fu-session-local-target-hooks nil)
