@@ -489,6 +489,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO: recently removed
+;; dired-dwim-target t  ; Propose a target for intelligent moving/copying
+
 (setq save-silently t)
 
 ;; Disable macro set definition
@@ -565,13 +568,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq help-clean-buttons t)
 (setq help-enable-variable-value-editing t)
-
-;; Allow drag and drop out of dired into other apps (e.g. browser)
-(setq dired-mouse-drag-files t)
-
-;; Tell dired-x to not bind "I" key to `dired-info' or "N" to `dired-man'
-(setq dired-bind-info nil)
-(setq dired-bind-man nil)
 
 ;; TODO minimal-emacs.d README
 ;; Execute the enclosed code only if Emacs is running in a graphical user

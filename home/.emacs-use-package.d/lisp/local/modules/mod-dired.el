@@ -13,14 +13,10 @@
 
 ;;; Dired defaults
 
-;; Asks for confirmation before creating missing parent directories during file
-;; copy or rename operations. This protects against creating unintended
-;; directories due to typos while remaining convenient.
-;; (setq dired-create-destination-dirs 'ask)
+;; Allow drag and drop out of dired into other apps (e.g. browser)
+(setq dired-mouse-drag-files t)
 
-;; Automatically creates destination directories without asking if the
-;; destination path ends with a trailing slash.
-;; (setq dired-create-destination-dirs-on-trailing-dirsep t) ; Emacs 29
+(setq dired-movement-style 'bounded-files)
 
 ;; Reuses a single buffer for Dired navigation instead of opening a new buffer
 ;; for every directory. This keeps your buffer list clean and prevents Dired
@@ -29,23 +25,7 @@
 ;; NOTE: Disabled because too buffers in other tabs are killed.
 (setq dired-kill-when-opening-new-dired-buffer t)
 
-;; Allows wdired to automatically create missing parent directories when you
-;; rename files to paths that do not exist yet. This makes bulk project
-;; restructuring incredibly fast.
-;; (setq wdired-create-parent-directories t)
-
-;; Automatically kills the buffers of files that you delete or rename within
-;; Dired. This prevents you from accidentally interacting with stale buffers
-;; that no longer correspond to the filesystem.
-;; (setq dired-clean-up-buffers-too t)
-
-;; TODO: add to minimal-emacs.d?
-;; Doesn't work
-;; (setq dired-create-destination-dirs-on-trailing-dirsep t)
-
 (setq dired-hide-details-hide-symlink-targets nil)
-
-(setq dired-create-destination-dirs 'ask)
 
 ;; setq native-comp-async-on-battery-power nil) is an excellent default, for
 ;; users running Emacs on laptops. Background native compilation (via gccemacs)
@@ -62,7 +42,102 @@
                                            dired-filter-by-git-ignored
                                            dired-filter-by-dot-files))
 
-;;; Open dired with external command
+;; Asks for confirmation before creating missing parent directories during file
+;; copy or rename operations. This protects against creating unintended
+;; directories due to typos while remaining convenient.
+;; (setq dired-create-destination-dirs 'ask)
+
+;; Automatically creates destination directories without asking if the
+;; destination path ends with a trailing slash.
+;; (setq dired-create-destination-dirs-on-trailing-dirsep t) ; Emacs 29
+
+;; Allows wdired to automatically create missing parent directories when you
+;; rename files to paths that do not exist yet. This makes bulk project
+;; restructuring incredibly fast.
+;; (setq wdired-create-parent-directories t)
+
+;; Automatically kills the buffers of files that you delete or rename within
+;; Dired. This prevents you from accidentally interacting with stale buffers
+;; that no longer correspond to the filesystem.
+;; (setq dired-clean-up-buffers-too t)
+
+;; TODO: add to minimal-emacs.d?
+;; Doesn't work
+;; (setq dired-create-destination-dirs-on-trailing-dirsep t)
+
+;; Tell dired-x to not bind "I" key to `dired-info' or "N" to `dired-man'
+;; (setq dired-bind-info nil)
+;; (setq dired-bind-man nil)
+
+;;; Using xdg-open/open/start for certain filetypes
+
+;; No confirmation
+
+;; (defun my-dired-do-shell-command-around (orig-fun &rest args)
+;;   "Bypass the minibuffer prompt for `dired-do-shell-command'.
+;; Uses `my-dired-xdg-open-cmd' automatically unless a prefix argument is provided."
+;;   (interactive
+;;    (when (and (fboundp 'dired-get-marked-files)
+;;               (fboundp 'dired-read-shell-command))
+;;      (let ((files (dired-get-marked-files t current-prefix-arg nil nil t)))
+;;        (if current-prefix-arg
+;;            ;; Restore original behavior if prefix arg is passed (e.g., C-u !)
+;;            (list (dired-read-shell-command "! on %s: " current-prefix-arg files)
+;;                  current-prefix-arg
+;;                  files)
+;;          ;; Bypass prompt and supply the predefined command
+;;          (list my-dired-xdg-open-cmd
+;;                current-prefix-arg
+;;                files)))))
+;;   (apply orig-fun args))
+;;
+;; (advice-add 'dired-do-shell-command :around #'my-dired-do-shell-command-around)
+
+(setq dired-confirm-shell-command t)
+
+(defvar my-dired-xdg-open-cmd nil)
+
+(with-eval-after-load 'dired
+  (when-let* ((cmd (cond
+                    ((eq system-type 'darwin)
+                     "open")
+                    ((memq system-type '(gnu gnu/linux gnu/kfreebsd
+                                             berkeley-unix))
+                     "xdg-open")
+                    ((memq system-type '(cygwin windows-nt ms-dos))
+                     "start"))))
+    (setq dired-guess-shell-alist-user
+          `((".*" ,cmd)))
+    (when cmd
+      (setq my-dired-xdg-open-cmd cmd))))
+
+(with-eval-after-load 'dired
+  (when-let* ((cmd (cond
+                    ((eq system-type 'darwin)
+                     "open")
+                    ((memq system-type '(gnu gnu/linux gnu/kfreebsd
+                                             berkeley-unix))
+                     "xdg-open")
+                    ((memq system-type '(cygwin windows-nt ms-dos))
+                     "start"))))
+    (setq dired-guess-shell-alist-user
+          `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
+            ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
+            ("\\.\\(?:xcf\\)\\'" ,cmd)
+            ("\\.tex\\'" ,cmd)
+            ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
+            ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)))
+    (when cmd
+      (setq my-dired-xdg-open-cmd cmd))))
+
+;;; Functions
+
+(defun my-dired-home ()
+  "Dired home."
+  (interactive)
+  (dired "~/"))
+
+;;; DISABLED: Open dired with external command
 
 ;; (defun my-dired-get-file-open-command (file-path)
 ;;   "Return FILE-PATH corresponding command from `dired-guess-shell-alist-user'."
@@ -110,31 +185,6 @@
 ;;   ;; Advise `dired-find-file' to use `my-dired-open-with-external-command'
 ;;   ;; instead
 ;;   (advice-add 'dired-find-file :override #'my-dired-open-with-external-command))
-
-;;; Using xdg-open/open/start for certain filetypes
-
-(defvar my-dired-xdg-open-cmd nil)
-(with-eval-after-load 'dired
-  (when-let* ((cmd (cond (IS-MAC "open")
-                         (IS-LINUX "xdg-open")
-                         (IS-WINDOWS "start"))))
-    (when cmd
-      (setq my-dired-xdg-open-cmd cmd))
-
-    (setq dired-guess-shell-alist-user
-          `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
-            ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
-            ("\\.\\(?:xcf\\)\\'" ,cmd)
-            ("\\.tex\\'" ,cmd)
-            ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
-            ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)))))
-
-;;; Useful functions
-
-(defun my-dired-home ()
-  "Dired home."
-  (interactive)
-  (dired "~/"))
 
 ;;; DISABLED: Icons dired
 
