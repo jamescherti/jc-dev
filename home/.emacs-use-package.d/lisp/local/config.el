@@ -291,7 +291,7 @@
                                      ;; libgccjit handles internal Elisp symbol
                                      ;; resolution strictly. The measurable
                                      ;; performance gain here is virtually zero.
-                                     "-fno-semantic-interposition"
+                                     ;; "-fno-semantic-interposition"
 
                                      ;; -fgraphite-identity & -floop-nest-optimize
                                      ;;
@@ -705,6 +705,10 @@ subsequent GCC invocations."
                            le-vim-tab-bar
                            le-theme
 
+                           ;; All modules like mod-begin require this
+                           le-yasnippet
+                           mod-yasnippet
+
                            mod-conditional-modes
                            mod-begin
                            mod-filetype
@@ -716,8 +720,6 @@ subsequent GCC invocations."
                            mod-quiet
                            mod-eglot
 
-                           le-yasnippet
-                           mod-yasnippet
                            mod-kirigami  ;; requires yasnippet
                            ;; le-kirigami ; replaced with mod-kirigami
 

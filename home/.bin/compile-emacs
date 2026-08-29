@@ -524,12 +524,11 @@ CONFIGURE_ARGS=(
   --without-included-regex
 
   # The make process will be significantly longer (often 30 to 60 minutes
-  # depending on your CPU). It systematically iterates through every single .el
-  # file bundled with the Emacs distribution and compiles it into an .eln file
-  # before the installation is complete.
-  #Emacs is "born" fully optimized. Every built-in feature is already running
-  # as native machine code the very first time I launch it. There is no
-  # background "churn" for the standard library.
+  # depending on your CPU). It iterates through every single .el file bundled
+  # with the Emacs distribution and compiles it into an .eln file before the
+  # installation is complete. Every built-in feature is already running as
+  # native machine code the very first time I launch it. There is no background
+  # natively compile the standard library.
   --with-native-compilation=aot
 
   # When I use this flag alone, it enables Just-In-Time (JIT) compilation
