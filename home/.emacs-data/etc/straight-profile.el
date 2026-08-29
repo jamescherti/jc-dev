@@ -26,7 +26,7 @@
  ("consult" . "3ddec5493bce5445f099537be50b7a4f79c68321") ; 3.7 | RSS RELEASE
  ("marginalia" . "7ec0b70afb43a756ecd45a958c6ebe797717fc91") ; 2.11 | RSS RELEASE
  ("markdown-mode" . "1f72cefa6a4b759f90e335e4908725a721b17ad9") ; newer than v2.8 | RSS RELEASE
- ("org" . "c75ffe4a43355bc76807d9aa711834b33f724fca") ; release_9.8.9 | RSS RELEASE
+ ("org" . "80c431fe0c59bb6b6c4d05ad2d4d279f34b5fcd5") ; release_9.8.10 | RSS RELEASE
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
 
  ;; Outdated tag
