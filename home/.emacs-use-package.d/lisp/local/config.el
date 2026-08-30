@@ -576,46 +576,6 @@ or if it IS within `my-denied-local-variables-directories'."
   ;; `inhibit-local-variables-p' handles variables written directly inside the file.
   (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice))
 
-;;; Hardening: Only enable .dir-locals.el in specific directories
-
-;; (defcustom my-allowed-local-variables-directories '("~/src/")
-;;   "List of directories where local variables are permitted."
-;;   :type '(repeat directory)
-;;   :group 'files)
-;; 
-;; (defun my-path-allowed-p (path)
-;;   "Return t if PATH is inside `my-allowed-local-variables-directories'."
-;;   (let ((is-allowed nil))
-;;     (dolist (dir my-allowed-local-variables-directories)
-;;       (when (file-in-directory-p path dir)
-;;         (setq is-allowed t)))
-;;     is-allowed))
-;; 
-;; ;; Neutralize directory-local variables (.dir-locals.el)
-;; (defun my-restrict-dir-locals (orig-fun file)
-;;   (when (my-path-allowed-p file)
-;;     (funcall orig-fun file)))
-;; 
-;; ;; 2. Neutralize file-local variables (;; Local Variables:)
-;; (defun my-restrict-file-locals (orig-fun &rest args)
-;;   (let ((path (or (buffer-file-name (buffer-base-buffer))
-;;                   default-directory)))
-;;     (if (my-path-allowed-p path)
-;;         (apply orig-fun args)
-;;       t)))
-;; 
-;; ;; `dir-locals-find-file' handles standalone files like .dir-locals.el. Emacs
-;; ;; actively scans your hard drive looking for these files every time you open a
-;; ;; buffer. Advising this prevents Emacs from even looking for these files
-;; ;; outside your trusted directories (saving I/O and preventing execution).
-;; (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals)
-;; 
-;; ;; `inhibit-local-variables-p' handles variables written directly inside the
-;; ;; source code file itself (usually at the very bottom, looking like ;; Local
-;; ;; Variables: ...). Advising this tells Emacs to refuse to parse those text
-;; ;; blocks in untrusted files.
-;; (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals)
-
 ;;; Temporary dir
 
 (defvar my-session-temp-directory
@@ -997,80 +957,59 @@ subsequent GCC invocations."
 
 ;;; Frame, disable cus-edit and x-apply-session-resources
 
-(defun lightemacs-user-post-early-init ()
-  "Post early init."
-  ;; TODO: Lightemacs?
-  (let ((no-border '(internal-border-width . 0)))
-    (add-to-list 'default-frame-alist no-border)
-    (add-to-list 'initial-frame-alist no-border))
+(defcustom my-local-variables-acl
+  '((allow . "~/src/forks/emacs/") 
+    (deny  . "~/src/forks/")      
+    (allow . "~/src/"))          
+  "Access control list for local variables.
+Rules are evaluated sequentially from top to bottom.
+The first rule that matches the file's directory determines the result.
+If no rules match, local variables are denied by default."
+  :type '(alist :key-type (choice (const allow) (const deny))
+                :value-type directory)
+  :group 'files)
 
-  ;; Ignore X resources
-  (advice-add #'x-apply-session-resources :override #'ignore)
-  ;; (when (eq lightemacs-package-manager 'builtin-package)
-  ;;   (setq use-package-compute-statistics t))
+(defun my-local-variables-path-allowed-p (path)
+  "Return t if PATH is allowed by `my-local-variables-acl', nil otherwise."
+  (let ((expanded-path (and path (expand-file-name path))))
+    (if expanded-path
+        ;; Evaluate rules top-to-bottom. The moment `throw` is called, 
+        ;; the loop stops and returns the value instantly.
+        (catch 'match
+          (dolist (rule my-local-variables-acl)
+            (let ((action (car rule))
+                  (dir (expand-file-name (cdr rule))))
+              (when (file-in-directory-p expanded-path dir)
+                ;; If action is `allow`, throw `t`. If `deny`, throw `nil`.
+                (throw 'match (eq action 'allow)))))
+          ;; Default to implicit deny if no rules matched
+          nil)
+      nil)))
 
-  ;; TODO add to minimal-emacs?
-  ;; Disable native compilation for some files.
-  ;; (let ((deny-list '(;; Static data structure, not executable logic.
-  ;;                    "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
-  ;;
-  ;;                    ;; Frequently updated auto-generated indices. Compiling them
-  ;;                    ;; wastes CPU and disk I/O.
-  ;;                    "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
-  ;;                    "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
-  ;;
-  ;;                    ;; Static package metadata without runtime logic.
-  ;;                    "\\(?:[/\\\\][^/\\\\]+-pkg\\.el\\(?:\\.gz\\)?$\\)")))
-  ;;   (cond
-  ;;    ((>= emacs-major-version 29)
-  ;;     (setq native-comp-jit-compilation-deny-list deny-list))
-  ;;    ((= emacs-major-version 28)
-  ;;     (setq native-comp-deferred-compilation-deny-list deny-list))
-  ;;    (t
-  ;;     (setq comp-deferred-compilation-deny-list deny-list))))
+(defun my-restrict-dir-locals-search-advice (orig-fun file)
+  "Prevent searching for .dir-locals.el outside allowed directories."
+  (if (my-local-variables-path-allowed-p file)
+      (progn
+        (message "[FILE-LOCALS] Allowed .dir-locals.el: %s" (current-buffer))
+        (funcall orig-fun file))
+    (message "[FILE-LOCALS] Disallowed .dir-locals.el: %s" (current-buffer))
+    nil))
 
-  ;; Other (not minimal-emacs)
-  (let* ((data-dir (expand-file-name user-emacs-directory))
-         (deny-list `(;; Yasnippet setup files are loaded once during
-                      ;; initialization. Compiling them offers negligible
-                      ;; performance gains.
-                      "\\(?:[/\\\\]\\.yas-setup\\.el\\(?:\\.gz\\)?$\\)"
+(defun my-restrict-file-locals-inhibit-advice (orig-fun &rest args)
+  "Natively inhibit file-local variables outside allowed directories."
+  (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
+         (target-path (or (buffer-file-name base-buffer)
+                          default-directory)))
+    (if (my-local-variables-path-allowed-p target-path)
+        (progn
+          (message "[FILE-LOCALS] Allow file locals: %s" base-buffer)
+          (apply orig-fun args))
+      (message "[FILE-LOCALS] Disallow file locals: %s" base-buffer)
+      t))) 
 
-                      ;; .dir-locals.el is a data structure for project variables,
-                      ;; not executable code. Compiling it wastes resources.
-                      "\\(?:[/\\\\]\\.my-dir-locals\\.el\\(?:\\.gz\\)?$\\)"
-
-                      ;; Emacs data directory: Exclude general data files from compilation.
-                      ;; This conflicts with straight packages or elpa
-                      ;; ,(concat "^" (regexp-quote data-dir) ".*\\.el\\(?:\\.gz\\)?$")
-
-                      ;; TODO: This will exclude straight/elpa packages.
-                      ;; ,(concat "^"
-                      ;;          (regexp-quote (abbreviate-file-name
-                      ;;                        (expand-file-name lightemacs-var-directory)))
-                      ;;          ".*\\.el\\(?:\\.gz\\)?$")
-                      ;; ,(concat "^"
-                      ;;          (regexp-quote (expand-file-name lightemacs-var-directory))
-                      ;;          ".*\\.el\\(?:\\.gz\\)?$")
-                      )))
-    (dolist (regex deny-list)
-      (when (boundp 'native-comp-jit-compilation-deny-list)
-        (push regex native-comp-jit-compilation-deny-list))
-
-      ;; Backwards compatibility for deprecated variable names that were replaced by
-      ;; `native-comp-jit-compilation-deny-list'.
-      (with-no-warnings
-        (if (boundp 'native-comp-deferred-compilation-deny-list)
-            (push regex native-comp-deferred-compilation-deny-list)
-          (when (boundp 'comp-deferred-compilation-deny-list)
-            (push regex comp-deferred-compilation-deny-list)))))))
-
-(add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
-
-;; TODO remove from devemacs and my emacs and add this to lightemacs
-(with-eval-after-load 'cus-edit
-  ;; Prevent Emacs from writing custom settings to any file
-  (advice-add 'custom-save-all :override #'ignore))
+(with-eval-after-load 'files
+  (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
+  (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice))
 
 ;;; Package defaults
 
