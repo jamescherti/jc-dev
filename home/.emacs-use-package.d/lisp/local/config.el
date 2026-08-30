@@ -538,7 +538,9 @@ directory is not within `my-allowed-local-variables-directories'."
                                 (throw 'found t)))
                             nil))))
     (if is-allowed
-        (apply orig-fun args)
+        ;; (message "ALLOWED: %s" base-buffer)
+      (apply orig-fun args)
+      ;; (message "NOT ALLOWED: %s" base-buffer)
       t))) ; Returning t natively forces Emacs to abort file-local parsing
 
 ;; 1. Neutralize directory-local variables (.dir-locals.el) at the filesystem lookup level
