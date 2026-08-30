@@ -200,7 +200,9 @@
 ;; No need to ask. Just exercise caution.
 (setq org-confirm-babel-evaluate t  ; Security
       ;; Do not ask for confirmation before executing Emacs Lisp links.
-      org-link-elisp-confirm-function nil)
+      org-link-elisp-confirm-function 'y-or-n-p)
+
+(setq org-link-shell-confirm-function 'y-or-n-p)
 
 ;; Set tag column to 0 (tags appear immediately after heading); simplifies
 ;; layout but may make long headings with tags harder to read.

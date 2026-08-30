@@ -431,15 +431,6 @@
 
 (setq user-lisp-auto-scrape nil)
 
-(when (boundp 'trusted-content)
-  (let ((dirs (list "~/src/dotfiles/jc-dev/"
-                    "~/src/emacs/"
-                    "~/src/forks/")))
-    (dolist (dir dirs)
-      (when dir
-        ;; Ensure the path ends with a slash so it registers as a directory
-        (push dir trusted-content)))))
-
 ;; Prevent Emacs from loading the system-wide 'default.el' initialization file.
 ;;
 ;; By default, after loading the user's own init file (e.g., ~/.emacs or
@@ -482,6 +473,71 @@
 
 ;; (message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
+
+;;; Hardening
+
+;; Harden network settings.
+;; TODO: minimal-emacs?
+(with-no-warnings
+  (setq network-security-level 'high)
+  (setq nsm-noninteractive t))
+
+;; Enable directory variables globally to allow whitelisting
+(setq enable-dir-local-variables nil)
+(setq enable-local-variables nil)
+
+;; Trust buffer contents for Flymake
+(when (boundp 'trusted-content)
+  (let ((dirs (list "~/src/dotfiles/jc-dev/"
+                    "~/src/emacs/"
+                    "~/src/forks/")))
+    (dolist (dir dirs)
+      (when dir
+        ;; Ensure the path ends with a slash so it registers as a directory
+        (push dir trusted-content)))))
+
+;;; Only enable .dir-locals.el in ~/src
+
+(defcustom my-allowed-local-variables-directories '("~/src/")
+  "List of directories where local variables are permitted.
+If `default-directory' is inside any of these directories, directory-local and
+file-local variables will be processed. Otherwise, they are ignored."
+  :type '(repeat directory)
+  :group 'files)
+
+(defun my-restrict-local-variables-advice (orig-fun &rest args)
+  "Completely disable local variables processing outside of allowed paths.
+This advice wraps ORIG-FUN, applying ARGS to it, while dynamically binding
+`enable-dir-local-variables' and `enable-local-variables' to their original
+values if allowed, or nil if the current directory is not within
+`my-allowed-local-variables-directories'."
+  (let* ((is-allowed (and default-directory
+                          (catch 'found
+                            (dolist (dir my-allowed-local-variables-directories)
+                              (when (file-in-directory-p default-directory dir)
+                                (throw 'found t)))
+                            nil)))
+         ;; Preserve the exact original value if allowed
+         (enable-dir-local-variables (if is-allowed
+                                         enable-dir-local-variables
+                                       nil))
+         (enable-local-variables     (if is-allowed
+                                         enable-local-variables
+                                       nil)))
+    
+    (unless is-allowed
+      (message "Blocked local variables for %s (not in allowed list)"
+               default-directory))
+    
+    (apply orig-fun args)))
+
+;; Apply advice to directory-local variables
+(with-eval-after-load 'files
+  (advice-add 'hack-dir-local-variables :around #'my-restrict-local-variables-advice)
+  (advice-add 'hack-dir-local-variables-non-file-buffer :around #'my-restrict-local-variables-advice))
+
+;; Apply advice to file-local variables (embedded inside files)
+(advice-add 'hack-local-variables :around #'my-restrict-local-variables-advice)
 
 ;;; Temporary dir
 
@@ -947,7 +1003,7 @@ subsequent GCC invocations."
 (setq stripspace-verbose nil)
 (setq stripspace-normalize-indentation t)
 (setq stripspace-restore-column t)
-(setq stripspace-only-if-initially-clean t)
+(setq stripspace-only-if-initially-clean nil)
 (setq stripspace-use-virtual-overlay t)
 
 ;; If you want the lowest possible latency and do not care about system-level
@@ -1787,6 +1843,10 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (setq easysession-refresh-tab-bar t)
 
 (add-hook 'easysession-new-session-hook 'easysession-reset)
+
+;; TODO add this to the easysession core?
+(with-eval-after-load 'saveplace
+  (add-hook 'easysession-after-save-hook 'save-place-kill-emacs-hook))
 
 ;;; evil
 

@@ -221,25 +221,28 @@
 (setq isearch-wrap-pause 'no
       isearch-allow-scroll 'unlimited)
 
-;; Setting this to nil prevents Emacs from "snapping" the viewport to fit the
+;; Setting this to nil prevents Emacs from snapping the viewport to fit the
 ;; entire line when point moves to a partially visible line.
-;; Pros: Enables true smooth/pixel scrolling; prevents jarring UI jumps
-;;       when navigating past large images or long wrapped blocks of text.
-;; Cons: The cursor can technically be on a line that is only half-visible
-;;       at the very top or bottom edge of the window.
-;; Recently disabled. Causes issues?
-;; (setq make-cursor-line-fully-visible t)
-
-;; The Problem: If you scroll down a file and land on a line that is only 90%
-;; visible at the bottom of the window, vanilla Emacs will violently "snap" the
-;; entire screen to force that line into full view. This destroys smooth
-;; scrolling.
-;; Why it has no tradeoff: Note: Your snippet had this set to t, which is the
-;; vanilla default. Changing it to nil is universally preferred by users who
-;; want modern, predictable scrolling behavior, especially when dealing with
-;; large images in Org-mode or long wrapped paragraphs.
+;;
+;; Background: By default (t), if point lands on a line at the window edge
+;; that is only partially visible, Emacs shifts the viewport to force the
+;; entire line into view. This disrupts smooth scrolling and causes abrupt
+;; visual shifts, especially when traversing large inline images or long
+;; wrapped blocks of text.
+;;
+;; Trade-offs: Disabling this feature (nil) ensures predictable, continuous
+;; scrolling. The only side effect is that point may reside on a line that
+;; is cut off at the top or bottom edge of the window.
+;;
+;; Note: Recently disabled to investigate potential secondary issues.
 ;; TODO minimal emacs?
-(setq make-cursor-line-fully-visible t)
+(setq make-cursor-line-fully-visible nil)
+
+;; Keep at least 1 line of context above and below the cursor
+;; This forces Emacs to start scrolling before the cursor reaches the absolute
+;; edge of the window. This ensures the cursor always rests on a line that is
+;; 100% visible because there is always a buffer line below it.
+;; (setq scroll-margin 1)
 
 ;; (setq compilation-scroll-output nil)
 
@@ -1687,8 +1690,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq mac-command-modifier 'control)
 (setq mac-option-modifier 'meta)
 
-(setq enable-local-variables :safe)
-
 ;;; ibuffer
 
 (setq ibuffer-filter-group-name-face '(:inherit (success bold)))
@@ -2882,21 +2883,6 @@ ARGS - the arguments passed to the original function"
 (with-eval-after-load 'shell-pop
   ;; Apply the new global setting advice
   (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
-
-;;; Trust framework files
-
-(defcustom lightemacs-trust-framework-files nil
-  "If non-nil, append the Lightemacs core directory to `trusted-content'.
-This prevents Flymake warnings when viewing framework source files in Emacs
-30+."
-  :type 'boolean
-  :group 'lightemacs)
-
-(when (and lightemacs-trust-framework-files
-           (boundp 'trusted-content)
-           (listp trusted-content))
-  (let ((dir (file-name-as-directory lightemacs-core-directory)))
-    (add-to-list 'trusted-content dir)))
 
 ;;; track eol (TODO light emacs)
 

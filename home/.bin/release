@@ -53,7 +53,11 @@ class Release:
         self.chdir_git_toplevel()
 
         # Ensure we are on a release branch
-        self.ensure_branch_main_or_master()
+        try:
+            self.ensure_branch_main_or_master()
+        except PyReleaseError as err:
+            print(f"Error: {err}", file=sys.stderr)
+            sys.exit(1)
 
         self.tags: list[str] = []
         self.all_tag_variants: list[str] = []

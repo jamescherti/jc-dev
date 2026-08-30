@@ -49,9 +49,6 @@
 
 ;;; Native-compilation
 
-(setq enable-dir-local-variables t)
-(setq enable-local-variables :safe)
-
 (setq native-comp-jit-compilation t)
 (setq native-comp-deferred-compilation t)
 (setq package-native-compile t)

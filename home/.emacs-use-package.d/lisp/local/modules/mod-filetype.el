@@ -737,6 +737,14 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; Setup markdown mode
 
+(defun my-markdown-electric-pairs ()
+  "Add backtick pairing specifically for markdown modes.
+This function modifies `electric-pair-pairs' buffer-locally."
+  (setq-local electric-pair-pairs
+              (append '((?\` . ?\`)) original-electric-pair-pairs)))
+(add-hook 'markdown-mode-hook #'my-markdown-electric-pairs)
+(add-hook 'markdown-ts-mode-hook #'my-markdown-electric-pairs)
+
 (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
 
@@ -780,20 +788,20 @@ invoking the original function ORIG-FUN with ARGS."
 (with-eval-after-load 'markdown-mode
   (define-key markdown-mode-map (kbd "TAB") #'ignore))
 
-(defun my-markdown-toc-gen-if-present ()
-  "Gen table of contents if present."
-  (when (and (fboundp 'markdown-toc--toc-already-present-p)
-             (fboundp 'markdown-toc-generate-toc)
-             (markdown-toc--toc-already-present-p))
-    (markdown-toc-generate-toc)))
-
-(defun my-setup-markdown-toc ()
-  "Setup the markdown-toc package."
-  (when (fboundp 'my-markdown-toc-gen-if-present)
-    (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
-
-(when (fboundp 'my-setup-markdown-toc)
-  (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
+;; (defun my-markdown-toc-gen-if-present ()
+;;   "Gen table of contents if present."
+;;   (when (and (fboundp 'markdown-toc--toc-already-present-p)
+;;              (fboundp 'markdown-toc-generate-toc)
+;;              (markdown-toc--toc-already-present-p))
+;;     (markdown-toc-generate-toc)))
+;;
+;; (defun my-setup-markdown-toc ()
+;;   "Setup the markdown-toc package."
+;;   (when (fboundp 'my-markdown-toc-gen-if-present)
+;;     (add-hook 'before-save-hook #'my-markdown-toc-gen-if-present 99 t)))
+;;
+;; (when (fboundp 'my-setup-markdown-toc)
+;;   (add-hook 'markdown-mode-hook #'my-setup-markdown-toc))
 
 (setq markdown-toc-mode-map nil)
 (setq markdown-toc-header-toc-title "## Table of Contents")

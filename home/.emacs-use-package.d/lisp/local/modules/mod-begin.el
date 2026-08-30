@@ -117,7 +117,8 @@ ARGS are the arguments passed to the original function."
   (add-hook-text-editing-modes 'undo-fu-session-mode))
 
 ;; Started from mod-conditional-modes.el
-(setq lightemacs-stripspace-target-hooks nil)
+(setq lightemacs-stripspace-local-target-hooks nil)
+(setq lightemacs-stripspace-global-target-hooks nil)
 (setq lightemacs-aggressive-indent-local-target-hooks nil)
 (setq lightemacs-aggressive-indent-global-target-hooks nil)
 (setq lightemacs-apheleia-local-target-hooks nil)

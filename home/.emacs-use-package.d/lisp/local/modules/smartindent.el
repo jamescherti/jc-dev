@@ -20,9 +20,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
-
 ;;; Commentary:
-
 
 ;;; Code:
 
@@ -128,67 +126,18 @@ This function wraps `indent-relative' with the following enhancements:
                    (> next-indentation cur-indentation))
           (indent-line-to next-indentation))))))
 
-;; (defun smartindent-relative ()
-;;   "Indent based on the previous non-blank line with lookahead for blocks.
-;; This function wraps `indent-relative' with two enhancements:
-;; 1. Strict Tab Fallback: It suppresses the default `tab-to-tab-stop' fallback
-;;    behavior of `indent-relative' unless the command was triggered by an explicit
-;;    TAB key press. This prevents unwanted tab stops from being inserted when
-;;    simply pressing Return.
-;; 2. Lookahead Alignment: After calculating the relative indentation from the
-;;    previous line, it checks the indentation of the immediately following line.
-;;    If the next line has a deeper indentation than the current line, it aligns
-;;    the current line to match the next line. This is particularly useful in
-;;    formats like YAML when inserting a new line above an indented block."
-;;   ;; (indent-relative :first-only :unindented-ok)
-;;   ;; (when indent-line-ignored-functions
-;;   ;;   (setq-local indent-line-ignored-functions '()))
-;;
-;;   (let ((orig-point (point)))
-;;     (unwind-protect
-;;         ;; first-only: Indent the current line like the previous nonblank line.
-;;         ;; Indent to the first indentation position in the previous nonblank
-;;         ;; line if that position is greater than the current column.
-;;         ;;
-;;         ;; unindented-ok: controls whether indent-relative is allowed to do
-;;         ;; nothing when it cannot find a sensible indentation target.
-;;         (indent-relative :first-only :unindented-ok)
-;;
-;;       (when (= orig-point (point))
-;;         (cond
-;;          ;; Indent when the user presses tab
-;;          ((eq last-command-event ?\t)
-;;           (tab-to-tab-stop))))
-;;
-;;       ;; This is useful for Yaml
-;;       ;; - name: Create file /etc/profile.d/mozilla-custom-wayland.sh
-;;       ;;   ansible.builtin.copy: |     <-------------- Press enter here
-;;       ;;     |     <------- Same indentation as next line
-;;       ;;     dest: /etc/profile.d/mozilla-custom-wayland.sh
-;;       (let ((previous-indentation (save-excursion
-;;                                     (when (= 0 (forward-line -1))
-;;                                       (current-indentation))))
-;;             (cur-indentation (current-indentation))
-;;             (next-indentation (save-excursion
-;;                                 (when (= 0 (forward-line 1))
-;;                                   (current-indentation)))))
-;;         (when (and previous-indentation
-;;                    next-indentation
-;;                    (> next-indentation cur-indentation))
-;;           (indent-line-to next-indentation))))))
-
 (setq-default indent-line-function #'smartindent-relative)
 
-;;; smartindent-indent-relative-to-visible
+(defun my-set-indent-line-relative ()
+  "Indent-line relative."
+  (setq-local indent-line-functions #'smartindent-relative))
 
-;; (defun my-set-indent-line-relative ()
-;;   "Indent-line relative."
-;;   (setq-local indent-line-functions #'smartindent-relative))
-;;
-;; (add-hook 'bash-ts-mode-hook #'my-set-indent-line-relative)
-;; (add-hook 'sh-mode-hook #'my-set-indent-line-relative)
-;; (add-hook 'python-mode-hook #'my-set-indent-line-relative)
-;; (add-hook 'python-ts-mode-hook #'my-set-indent-line-relative)
+(add-hook 'bash-ts-mode-hook #'my-set-indent-line-relative)
+(add-hook 'sh-mode-hook #'my-set-indent-line-relative)
+(add-hook 'python-mode-hook #'my-set-indent-line-relative)
+(add-hook 'python-ts-mode-hook #'my-set-indent-line-relative)
+
+;;; smartindent-indent-relative-to-visible
 
 (defun smartindent-indent-relative-to-visible ()
   "Indent to the next indent point in the previous visible, non-empty line.
@@ -249,6 +198,57 @@ If no suitable indent point is found and UNINDENTED-OK is nil, fall back to
        (unindented-ok nil)
        (t
         (tab-to-tab-stop))))))
+
+;;; DISABLED: smart indent relative 2
+
+;; (defun smartindent-relative2 ()
+;;   "Indent based on the previous non-blank line with lookahead for blocks.
+;; This function wraps `indent-relative' with two enhancements:
+;; 1. Strict Tab Fallback: It suppresses the default `tab-to-tab-stop' fallback
+;;    behavior of `indent-relative' unless the command was triggered by an explicit
+;;    TAB key press. This prevents unwanted tab stops from being inserted when
+;;    simply pressing Return.
+;; 2. Lookahead Alignment: After calculating the relative indentation from the
+;;    previous line, it checks the indentation of the immediately following line.
+;;    If the next line has a deeper indentation than the current line, it aligns
+;;    the current line to match the next line. This is particularly useful in
+;;    formats like YAML when inserting a new line above an indented block."
+;;   ;; (indent-relative :first-only :unindented-ok)
+;;   ;; (when indent-line-ignored-functions
+;;   ;;   (setq-local indent-line-ignored-functions '()))
+;;
+;;   (let ((orig-point (point)))
+;;     (unwind-protect
+;;         ;; first-only: Indent the current line like the previous nonblank line.
+;;         ;; Indent to the first indentation position in the previous nonblank
+;;         ;; line if that position is greater than the current column.
+;;         ;;
+;;         ;; unindented-ok: controls whether indent-relative is allowed to do
+;;         ;; nothing when it cannot find a sensible indentation target.
+;;         (indent-relative :first-only :unindented-ok)
+;;
+;;       (when (= orig-point (point))
+;;         (cond
+;;          ;; Indent when the user presses tab
+;;          ((eq last-command-event ?\t)
+;;           (tab-to-tab-stop))))
+;;
+;;       ;; This is useful for Yaml
+;;       ;; - name: Create file /etc/profile.d/mozilla-custom-wayland.sh
+;;       ;;   ansible.builtin.copy: |     <-------------- Press enter here
+;;       ;;     |     <------- Same indentation as next line
+;;       ;;     dest: /etc/profile.d/mozilla-custom-wayland.sh
+;;       (let ((previous-indentation (save-excursion
+;;                                     (when (= 0 (forward-line -1))
+;;                                       (current-indentation))))
+;;             (cur-indentation (current-indentation))
+;;             (next-indentation (save-excursion
+;;                                 (when (= 0 (forward-line 1))
+;;                                   (current-indentation)))))
+;;         (when (and previous-indentation
+;;                    next-indentation
+;;                    (> next-indentation cur-indentation))
+;;           (indent-line-to next-indentation))))))
 
 ;;; Provide
 
