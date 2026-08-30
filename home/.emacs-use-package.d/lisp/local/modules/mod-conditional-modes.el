@@ -22,16 +22,85 @@
 
 ;;; Commentary:
 
-
 ;;; Code:
+
+;;; Auto set env-* vars
+
+(defcustom my-custom-dir-variables
+  ;; env-deny-all?
+  '(("~/src/forks/"
+     . ((env-allow-syntax-checkers . nil)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-lsp . nil)
+        (env-allow-whitespace-cleanup . nil)
+        (env-allow-language-servers . nil)
+        (env-allow-reformatters . nil)))
+    
+    ("~/src/local/"
+     . ((env-allow-syntax-checkers . nil)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-lsp . nil)
+        (env-allow-whitespace-cleanup . nil)
+        (env-allow-language-servers . nil)
+        (env-allow-reformatters . nil)))
+
+    ("~/src/emacs"
+     . ((env-allow-syntax-checkers . t)
+        (env-allow-syntax-checker-package-lint . t)
+        (env-allow-lsp . t)
+        (env-allow-whitespace-cleanup . t)
+        (env-allow-language-servers . t)
+        (env-allow-reformatters . t)))
+
+    ("~/Sync/src"
+     . ((env-allow-syntax-checkers . t)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-lsp . t)
+        (env-allow-whitespace-cleanup . t)
+        (env-allow-language-servers . t)
+        (env-allow-reformatters . t)))
+
+    ("~/src/"
+     . ((env-allow-syntax-checkers . t)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-lsp . t)
+        (env-allow-whitespace-cleanup . t)
+        (env-allow-language-servers . t)
+        (env-allow-reformatters . t))))
+  "Alist mapping directories to a list of buffer-local variables.
+Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
+  :type '(alist :key-type directory
+                :value-type (alist :key-type symbol :value-type sexp))
+  :group 'files)
+
+(defun my-apply-custom-dir-variables ()
+  "Apply directory-specific variables from `my-custom-dir-variables'."
+  (let ((path (or (buffer-file-name (buffer-base-buffer)) default-directory)))
+    (when path
+      (catch 'break
+        (dolist (entry my-custom-dir-variables)
+          (let ((dir (expand-file-name (car entry)))
+                (vars (cdr entry)))
+            (when (file-in-directory-p path dir)
+              (dolist (var-val vars)
+                ;; This is the programmatic runtime equivalent of `setq-local`
+                (set (make-local-variable (car var-val)) (cdr var-val)))
+              (throw 'break t))))))))
+
+;; Run this exactly when Emacs normally sets local variables
+(add-hook 'hack-local-variables-hook #'my-apply-custom-dir-variables)
 
 ;;; .my-dir-locals.el
 
-(require 'my-dir-locals)
-(my-dir-locals-mode 1)
+;; (require 'my-dir-locals)
+;; (my-dir-locals-mode 1)
+
+;;; dir-locals-trigger
 
 (require 'dir-locals-trigger)
 (dir-locals-trigger-mode 1)
+
+;;; env- vars
 
 (dir-locals-trigger-defvar env-deny-all nil
   "Deny all the allowed modes.")

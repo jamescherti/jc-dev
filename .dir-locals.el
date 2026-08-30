@@ -1,4 +1,4 @@
-;;; Directory Local Variables         -*- no-byte-compile: t; -*-
+;;; Directory Local Variables -*- no-byte-compile: t; -*-
 
 ((nil . (;; pre-commit-elisp .dir-locals.el - https://github.com/jamescherti/pre-commit-elisp
          (pre-commit-elisp-load-path . ("home/.emacs-use-package.d/lisp/local/"
@@ -28,8 +28,8 @@
                      (electric-quote-comment . nil)
                      (electric-quote-string . nil)))
  ;; LUA
- (lua-mode . (lua-indent-level . 2))
- (lua-ts-mode . (lua-ts-indent-offset . 2))
+ (lua-mode . ((lua-indent-level . 2)))
+ (lua-ts-mode . ((lua-ts-indent-offset . 2)))
  ;; Python
  ;; (python-ts-mode . ((python-indent-offset . 4)
  ;;                    (python-indent-guess-indent-offset-verbose . nil)))

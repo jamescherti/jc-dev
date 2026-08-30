@@ -485,8 +485,8 @@
 ;;; Hardening
 
 ;; Enable directory variables globally to allow whitelisting
-(setq enable-dir-local-variables nil)
-(setq enable-local-variables nil)
+(setq enable-dir-local-variables t)
+(setq enable-local-variables :safe)
 
 ;; Trust buffer contents for Flymake
 (when (boundp 'trusted-content)
@@ -520,8 +520,12 @@ it returns nil, effectively bypassing the directory search."
                            (throw 'found t)))
                        nil)))
     (if is-allowed
-        (funcall orig-fun file)
-      nil))) ; Returning nil emulates "no .dir-locals.el found"
+        (progn
+          (message "[FILE-LOCALS] Allowed .dir-locals.el: %s" (current-buffer))
+          (funcall orig-fun file))
+      (message "[FILE-LOCALS] Disallowed .dir-locals.el: %s" (current-buffer))
+      ;; Returning nil emulates "no .dir-locals.el found"
+      nil)))
 
 (defun my-restrict-file-locals-inhibit-advice (orig-fun &rest args)
   "Natively inhibit file-local variables outside allowed directories.
@@ -538,16 +542,64 @@ directory is not within `my-allowed-local-variables-directories'."
                                 (throw 'found t)))
                             nil))))
     (if is-allowed
-        ;; (message "ALLOWED: %s" base-buffer)
-      (apply orig-fun args)
-      ;; (message "NOT ALLOWED: %s" base-buffer)
+        (progn
+          (message "[FILE-LOCALS] Allow file locals: %s" base-buffer)
+          (apply orig-fun args))
+      (message "[FILE-LOCALS] Disallow file locals: %s" base-buffer)
       t))) ; Returning t natively forces Emacs to abort file-local parsing
 
-;; 1. Neutralize directory-local variables (.dir-locals.el) at the filesystem lookup level
-(advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
+(with-eval-after-load 'files
+  ;; `dir-locals-find-file' handles standalone files like .dir-locals.el. Emacs
+  ;; actively scans your hard drive looking for these files every time you open a
+  ;; buffer. Advising this prevents Emacs from even looking for these files
+  ;; outside your trusted directories (saving I/O and preventing execution).
+  (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
 
-;; 2. Neutralize file-local variables (;; Local Variables:) at the parsing level
-(advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice)
+  ;; `inhibit-local-variables-p' handles variables written directly inside the
+  ;; source code file itself (usually at the very bottom, looking like ;; Local
+  ;; Variables: ...). Advising this tells Emacs to refuse to parse those text
+  ;; blocks in untrusted files.
+  (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice))
+
+;;; Hardening: Only enable .dir-locals.el in specific directories
+
+;; (defcustom my-allowed-local-variables-directories '("~/src/")
+;;   "List of directories where local variables are permitted."
+;;   :type '(repeat directory)
+;;   :group 'files)
+;; 
+;; (defun my-path-allowed-p (path)
+;;   "Return t if PATH is inside `my-allowed-local-variables-directories'."
+;;   (let ((is-allowed nil))
+;;     (dolist (dir my-allowed-local-variables-directories)
+;;       (when (file-in-directory-p path dir)
+;;         (setq is-allowed t)))
+;;     is-allowed))
+;; 
+;; ;; Neutralize directory-local variables (.dir-locals.el)
+;; (defun my-restrict-dir-locals (orig-fun file)
+;;   (when (my-path-allowed-p file)
+;;     (funcall orig-fun file)))
+;; 
+;; ;; 2. Neutralize file-local variables (;; Local Variables:)
+;; (defun my-restrict-file-locals (orig-fun &rest args)
+;;   (let ((path (or (buffer-file-name (buffer-base-buffer))
+;;                   default-directory)))
+;;     (if (my-path-allowed-p path)
+;;         (apply orig-fun args)
+;;       t)))
+;; 
+;; ;; `dir-locals-find-file' handles standalone files like .dir-locals.el. Emacs
+;; ;; actively scans your hard drive looking for these files every time you open a
+;; ;; buffer. Advising this prevents Emacs from even looking for these files
+;; ;; outside your trusted directories (saving I/O and preventing execution).
+;; (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals)
+;; 
+;; ;; `inhibit-local-variables-p' handles variables written directly inside the
+;; ;; source code file itself (usually at the very bottom, looking like ;; Local
+;; ;; Variables: ...). Advising this tells Emacs to refuse to parse those text
+;; ;; blocks in untrusted files.
+;; (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals)
 
 ;;; Temporary dir
 
