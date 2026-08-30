@@ -786,15 +786,17 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   "Advice to disable fringe truncation arrows in the scratch buffer.
 ORIG-FN is the original function being advised (`get-scratch-buffer-create`).
 ARGS are the arguments passed to the original function."
-  (unless my-scratch-init-done
-    (setq my-scratch-init-done t)
-    (let ((buffer (apply orig-fn args)))
-      (when (buffer-live-p buffer)
-        (with-current-buffer buffer
-          (my-disable-fringe-truncation-arrow)))
-      buffer)))
+  (let ((result (apply orig-fn args))
+        (scratch-buf (get-buffer "*scratch*")))
+    (unless my-scratch-init-done
+      (setq my-scratch-init-done t)
+      (when (buffer-live-p scratch-buf)
+        (with-current-buffer scratch-buf
+          (my-disable-fringe-truncation-arrow))))
+    result))
 
-(advice-add 'get-scratch-buffer-create :around #'my-advice-scratch-buffer-create)
+(with-eval-after-load 'simple
+  (advice-add 'get-scratch-buffer-create :around #'my-advice-scratch-buffer-create))
 
 ;;; completion preview
 
