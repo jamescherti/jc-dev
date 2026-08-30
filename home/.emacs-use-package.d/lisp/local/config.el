@@ -509,7 +509,10 @@ Otherwise, they are completely ignored."
   :group 'files)
 
 (defun my-restrict-dir-locals-search-advice (orig-fun file)
-  "Prevent searching for .dir-locals.el outside allowed directories."
+  "Prevent searching for .dir-locals.el outside allowed directories.
+This advice wraps ORIG-FUN, applying it to FILE only if FILE is
+located within `my-allowed-local-variables-directories'.  Otherwise,
+it returns nil, effectively bypassing the directory search."
   (let* ((expanded-file (expand-file-name file))
          (is-allowed (catch 'found
                        (dolist (dir my-allowed-local-variables-directories)
@@ -521,7 +524,10 @@ Otherwise, they are completely ignored."
       nil))) ; Returning nil emulates "no .dir-locals.el found"
 
 (defun my-restrict-file-locals-inhibit-advice (orig-fun &rest args)
-  "Natively inhibit file-local variables outside allowed directories."
+  "Natively inhibit file-local variables outside allowed directories.
+This advice wraps ORIG-FUN, passing ARGS to it.  It forces a return
+value of t (meaning variables are inhibited) if the current file or
+directory is not within `my-allowed-local-variables-directories'."
   (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
          (target-path (or (buffer-file-name base-buffer)
                           default-directory))
@@ -535,8 +541,7 @@ Otherwise, they are completely ignored."
         (apply orig-fun args)
       t))) ; Returning t natively forces Emacs to abort file-local parsing
 
-;; 1. Neutralize directory-local variables (.dir-locals.el) at the filesystem
-;; lookup level
+;; 1. Neutralize directory-local variables (.dir-locals.el) at the filesystem lookup level
 (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
 
 ;; 2. Neutralize file-local variables (;; Local Variables:) at the parsing level
