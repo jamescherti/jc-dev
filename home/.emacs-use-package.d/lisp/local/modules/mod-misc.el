@@ -1252,6 +1252,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; nil means case is significant.
   (setq-default case-fold-search nil)
 
+  (setq persist-text-scale-autosave-interval (* 15 60))
   (setq persist-text-scale-handle-file-renames t)
 
   (setq eat-enable-yank-to-terminal t
