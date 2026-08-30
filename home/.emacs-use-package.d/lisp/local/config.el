@@ -500,8 +500,9 @@
 
 (defcustom my-allowed-local-variables-directories '("~/src/")
   "List of directories where local variables are permitted.
-If `default-directory' is inside any of these directories, directory-local and
-file-local variables will be processed. Otherwise, they are ignored."
+If the current file or `default-directory' is inside any of these
+directories, directory-local and file-local variables will be processed.
+Otherwise, they are ignored."
   :type '(repeat directory)
   :group 'files)
 
@@ -509,14 +510,23 @@ file-local variables will be processed. Otherwise, they are ignored."
   "Completely disable local variables processing outside of allowed paths.
 This advice wraps ORIG-FUN, applying ARGS to it, while dynamically binding
 `enable-dir-local-variables' and `enable-local-variables' to their original
-values if allowed, or nil if the current directory is not within
+values if allowed, or nil if the current file/directory is not within
 `my-allowed-local-variables-directories'."
-  (let* ((is-allowed (and default-directory
+  (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
+         ;; Use the actual file path if it's a file buffer, else
+         ;; default-directory
+         (target-path (or (buffer-file-name base-buffer)
+                          default-directory))
+         
+         (is-allowed (and target-path
                           (catch 'found
                             (dolist (dir my-allowed-local-variables-directories)
-                              (when (file-in-directory-p default-directory dir)
+                              ;; file-in-directory-p accepts both files and
+                              ;; directories
+                              (when (file-in-directory-p target-path dir)
                                 (throw 'found t)))
                             nil)))
+         
          ;; Preserve the exact original value if allowed
          (enable-dir-local-variables (if is-allowed
                                          enable-dir-local-variables
@@ -527,7 +537,7 @@ values if allowed, or nil if the current directory is not within
     
     (unless is-allowed
       (message "Blocked local variables for %s (not in allowed list)"
-               default-directory))
+               target-path))
     
     (apply orig-fun args)))
 
