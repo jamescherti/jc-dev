@@ -1882,7 +1882,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq save-place-forget-unreadable-files nil)
 
 ;; Keep the alist bounded to prevent parsing slowdowns
-(setq save-place-limit 200)
+(setq save-place-limit 300)
 
 ;;; Display line numbers
 
