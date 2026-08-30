@@ -455,7 +455,10 @@ BUFFERS is a buffer or a list of alive buffers."
 
 (defun mod-buffer-terminator-close-window (&optional kill-buffer)
   "Close the current window and kill the buffer when KILL-BUFFER is set to t.
-When KILL-BUFFER is t, file-visiting buffers are saved before being killed.
+
+KILL-BUFFER: Optional argument. When t, file-visiting buffers are saved
+before being killed.
+
 If the window is the last one in its tab-bar tab, the tab will also be closed.
 By default, closing the last window in a tab does not close the tab."
   (interactive)
@@ -463,22 +466,29 @@ By default, closing the last window in a tab does not close the tab."
     (if mod-buffer-terminator--protected-from-close
         (user-error "You cannot close: %s" (buffer-name))
       (let* ((buffer (or (buffer-base-buffer) (current-buffer)))
-             (number-of-splits (length (mod-buffer-terminator---non-minibuffer-windows))))
+             (number-of-splits (length (mod-buffer-terminator---non-minibuffer-windows)))
+             (switched-to-scratch nil))
+
         ;; Close the window/tab
-        (if (and (boundp 'tab-bar-mode) tab-bar-mode)
-            (let ((amount-open-tabs (length (funcall tab-bar-tabs-function))))
-              (cond ((and (= 1 number-of-splits)
-                          (> amount-open-tabs 1))
-                     (tab-close))
-                    ((> number-of-splits 1)
-                     (delete-window))
-                    (t
-                     (scratch-buffer))))
-          (delete-window))
+        (cond ((> number-of-splits 1)
+               (delete-window))
+              ((and (boundp 'tab-bar-mode)
+                    tab-bar-mode
+                    (> (length (funcall tab-bar-tabs-function)) 1))
+               (tab-close))
+              (t
+               (scratch-buffer)
+               (setq switched-to-scratch t)))
 
         ;; Save and close the buffer
         (when kill-buffer
-          (mod-buffer-terminator-kill-non-visible-buffers buffer))))))
+          (mod-buffer-terminator-kill-non-visible-buffers buffer))
+
+        ;; If we killed the scratch buffer in the last window, Emacs will
+        ;; automatically select another buffer. We force it back to scratch.
+        (when (and switched-to-scratch
+                   (not (equal (buffer-name (current-buffer)) "*scratch*")))
+          (scratch-buffer))))))
 
 (defun mod-buffer-terminator-close-window-kill-buffer ()
   "Save and kill the current buffer and close the current window.
