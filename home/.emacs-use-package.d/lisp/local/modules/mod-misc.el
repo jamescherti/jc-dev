@@ -1885,20 +1885,13 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     ;; (setq-local display-line-numbers-type 'visual)
     (display-line-numbers-mode 1))))
 
-;; TODO replace add hook with add-hook-text-editing-modes
-;; (add-hook-text-editing-modes 'my-setup-display-line-numbers-mode)
-(add-hook 'prog-mode-hook #'my-setup-display-line-numbers-mode)
-(add-hook 'text-mode-hook #'my-setup-display-line-numbers-mode)
-(add-hook 'conf-mode-hook #'my-setup-display-line-numbers-mode)
+(add-hook-text-editing-modes 'my-setup-display-line-numbers-mode)
+(add-hook 'my-scratch-buffer-created-hook 'my-setup-display-line-numbers-mode)
 (add-hook 'ibuffer-mode-hook #'my-setup-display-line-numbers-mode)
-
 (add-hook 'grep-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'helpful-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'dired-mode-hook #'my-setup-display-line-numbers-mode)
 (add-hook 'org-agenda-mode-hook #'my-setup-display-line-numbers-mode)
-
-;; TODO
-;; (setq lightemacs-display-line-numbers-mode-target-hooks nil)
 
 ;; Use absolute numbers; 'relative and 'visual are significantly slower
 ;; t=absolute

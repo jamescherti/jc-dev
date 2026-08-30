@@ -37,11 +37,6 @@
 ;; NOTE: Issue. This stops native compilation, even when the laptop is charging.
 ;; (setq native-comp-async-on-battery-power nil)
 
-(setq lightemacs-dired-filter-global-enabled t)
-(setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
-                                           dired-filter-by-git-ignored
-                                           dired-filter-by-dot-files))
-
 ;; Asks for confirmation before creating missing parent directories during file
 ;; copy or rename operations. This protects against creating unintended
 ;; directories due to typos while remaining convenient.
