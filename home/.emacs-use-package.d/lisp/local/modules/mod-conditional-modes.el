@@ -88,7 +88,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
               (throw 'break t))))))))
 
 ;; Run this exactly when Emacs normally sets local variables
-(add-hook 'hack-local-variables-hook #'my-apply-custom-dir-variables)
+;; (add-hook 'hack-local-variables-hook #'my-apply-custom-dir-variables)
 
 ;;; .my-dir-locals.el
 
@@ -170,6 +170,8 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
   "Manually check variables and enable modes."
+  (my-apply-custom-dir-variables)
+  
   (let ((buffer-name (buffer-name)))
     (when (and (not env-deny-all)
                (not (or (string-prefix-p " " buffer-name)
