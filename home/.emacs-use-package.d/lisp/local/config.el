@@ -503,23 +503,36 @@
 (defcustom my-allowed-local-variables-directories '("~/src/")
   "List of directories where local variables are permitted.
 If a file or `default-directory' is inside any of these directories,
-directory-local and file-local variables will be processed.
-Otherwise, they are completely ignored."
+directory-local and file-local variables will be processed, unless it is also in
+`my-denied-local-variables-directories'."
+  :type '(repeat directory)
+  :group 'files)
+
+(defcustom my-denied-local-variables-directories '("~/src/forks"
+                                                   "~/src/local")
+  "List of directories where local variables are strictly forbidden.
+This overrides `my-allowed-local-variables-directories'. Useful for blocking
+specific untrusted subdirectories inside allowed ones."
   :type '(repeat directory)
   :group 'files)
 
 (defun my-restrict-dir-locals-search-advice (orig-fun file)
   "Prevent searching for .dir-locals.el outside allowed directories.
-This advice wraps ORIG-FUN, applying it to FILE only if FILE is
-located within `my-allowed-local-variables-directories'.  Otherwise,
-it returns nil, effectively bypassing the directory search."
+This advice wraps ORIG-FUN, applying it to FILE only if FILE is located within
+`my-allowed-local-variables-directories' and NOT in
+`my-denied-local-variables-directories'."
   (let* ((expanded-file (expand-file-name file))
          (is-allowed (catch 'found
                        (dolist (dir my-allowed-local-variables-directories)
-                         (when (file-in-directory-p expanded-file dir)
+                         (when (file-in-directory-p expanded-file (expand-file-name dir))
                            (throw 'found t)))
-                       nil)))
-    (if is-allowed
+                       nil))
+         (is-denied (catch 'denied
+                      (dolist (dir my-denied-local-variables-directories)
+                        (when (file-in-directory-p expanded-file (expand-file-name dir))
+                          (throw 'denied t)))
+                      nil)))
+    (if (and is-allowed (not is-denied))
         (progn
           (message "[FILE-LOCALS] Allowed .dir-locals.el: %s" (current-buffer))
           (funcall orig-fun file))
@@ -529,19 +542,27 @@ it returns nil, effectively bypassing the directory search."
 
 (defun my-restrict-file-locals-inhibit-advice (orig-fun &rest args)
   "Natively inhibit file-local variables outside allowed directories.
-This advice wraps ORIG-FUN, passing ARGS to it.  It forces a return
+This advice wraps ORIG-FUN, passing ARGS to it. It forces a return
 value of t (meaning variables are inhibited) if the current file or
-directory is not within `my-allowed-local-variables-directories'."
+directory is not within `my-allowed-local-variables-directories',
+or if it IS within `my-denied-local-variables-directories'."
   (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
          (target-path (or (buffer-file-name base-buffer)
                           default-directory))
-         (is-allowed (and target-path
+         (expanded-path (and target-path (expand-file-name target-path)))
+         (is-allowed (and expanded-path
                           (catch 'found
                             (dolist (dir my-allowed-local-variables-directories)
-                              (when (file-in-directory-p target-path dir)
+                              (when (file-in-directory-p expanded-path (expand-file-name dir))
                                 (throw 'found t)))
-                            nil))))
-    (if is-allowed
+                            nil)))
+         (is-denied (and expanded-path
+                         (catch 'denied
+                           (dolist (dir my-denied-local-variables-directories)
+                             (when (file-in-directory-p expanded-path (expand-file-name dir))
+                               (throw 'denied t)))
+                           nil))))
+    (if (and is-allowed (not is-denied))
         (progn
           (message "[FILE-LOCALS] Allow file locals: %s" base-buffer)
           (apply orig-fun args))
@@ -549,16 +570,10 @@ directory is not within `my-allowed-local-variables-directories'."
       t))) ; Returning t natively forces Emacs to abort file-local parsing
 
 (with-eval-after-load 'files
-  ;; `dir-locals-find-file' handles standalone files like .dir-locals.el. Emacs
-  ;; actively scans your hard drive looking for these files every time you open a
-  ;; buffer. Advising this prevents Emacs from even looking for these files
-  ;; outside your trusted directories (saving I/O and preventing execution).
+  ;; `dir-locals-find-file' handles standalone files like .dir-locals.el.
   (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
 
-  ;; `inhibit-local-variables-p' handles variables written directly inside the
-  ;; source code file itself (usually at the very bottom, looking like ;; Local
-  ;; Variables: ...). Advising this tells Emacs to refuse to parse those text
-  ;; blocks in untrusted files.
+  ;; `inhibit-local-variables-p' handles variables written directly inside the file.
   (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice))
 
 ;;; Hardening: Only enable .dir-locals.el in specific directories
