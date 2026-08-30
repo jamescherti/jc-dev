@@ -104,6 +104,12 @@
                            ;; le-evil-visualstar
                            ))
 
+;;; Security
+
+(setq enable-local-variables nil)
+(setq enable-dir-local-variables nil)
+(setq enable-local-eval nil)
+
 ;;; DISABLED: Better commit message 3
 
 ;; BUG: This colors lists (-)

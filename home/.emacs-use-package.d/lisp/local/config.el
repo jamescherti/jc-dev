@@ -474,13 +474,15 @@
 ;; (message "LOADING config.el")
 (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
 
-;;; Hardening
+;;; Hardening: network
 
 ;; Harden network settings.
 ;; TODO: minimal-emacs?
 (with-no-warnings
   (setq network-security-level 'high)
   (setq nsm-noninteractive t))
+
+;;; Hardening
 
 ;; Enable directory variables globally to allow whitelisting
 (setq enable-dir-local-variables nil)
@@ -496,58 +498,48 @@
         ;; Ensure the path ends with a slash so it registers as a directory
         (push dir trusted-content)))))
 
-;;; Only enable .dir-locals.el in ~/src
+;;; Hardening: Only enable .dir-locals.el in ~/src
 
 (defcustom my-allowed-local-variables-directories '("~/src/")
   "List of directories where local variables are permitted.
-If the current file or `default-directory' is inside any of these
-directories, directory-local and file-local variables will be processed.
-Otherwise, they are ignored."
+If a file or `default-directory' is inside any of these directories,
+directory-local and file-local variables will be processed.
+Otherwise, they are completely ignored."
   :type '(repeat directory)
   :group 'files)
 
-(defun my-restrict-local-variables-advice (orig-fun &rest args)
-  "Completely disable local variables processing outside of allowed paths.
-This advice wraps ORIG-FUN, applying ARGS to it, while dynamically binding
-`enable-dir-local-variables' and `enable-local-variables' to their original
-values if allowed, or nil if the current file/directory is not within
-`my-allowed-local-variables-directories'."
+(defun my-restrict-dir-locals-search-advice (orig-fun file)
+  "Prevent searching for .dir-locals.el outside allowed directories."
+  (let* ((expanded-file (expand-file-name file))
+         (is-allowed (catch 'found
+                       (dolist (dir my-allowed-local-variables-directories)
+                         (when (file-in-directory-p expanded-file dir)
+                           (throw 'found t)))
+                       nil)))
+    (if is-allowed
+        (funcall orig-fun file)
+      nil))) ; Returning nil emulates "no .dir-locals.el found"
+
+(defun my-restrict-file-locals-inhibit-advice (orig-fun &rest args)
+  "Natively inhibit file-local variables outside allowed directories."
   (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
-         ;; Use the actual file path if it's a file buffer, else
-         ;; default-directory
          (target-path (or (buffer-file-name base-buffer)
                           default-directory))
-         
          (is-allowed (and target-path
                           (catch 'found
                             (dolist (dir my-allowed-local-variables-directories)
-                              ;; file-in-directory-p accepts both files and
-                              ;; directories
                               (when (file-in-directory-p target-path dir)
                                 (throw 'found t)))
-                            nil)))
-         
-         ;; Preserve the exact original value if allowed
-         (enable-dir-local-variables (if is-allowed
-                                         enable-dir-local-variables
-                                       nil))
-         (enable-local-variables     (if is-allowed
-                                         enable-local-variables
-                                       nil)))
-    
-    (unless is-allowed
-      (message "Blocked local variables for %s (not in allowed list)"
-               target-path))
-    
-    (apply orig-fun args)))
+                            nil))))
+    (if is-allowed
+        (apply orig-fun args)
+      t))) ; Returning t natively forces Emacs to abort file-local parsing
 
-;; Apply advice to directory-local variables
-(with-eval-after-load 'files
-  (advice-add 'hack-dir-local-variables :around #'my-restrict-local-variables-advice)
-  (advice-add 'hack-dir-local-variables-non-file-buffer :around #'my-restrict-local-variables-advice))
+;; 1. Neutralize directory-local variables (.dir-locals.el) at the filesystem lookup level
+(advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
 
-;; Apply advice to file-local variables (embedded inside files)
-(advice-add 'hack-local-variables :around #'my-restrict-local-variables-advice)
+;; 2. Neutralize file-local variables (;; Local Variables:) at the parsing level
+(advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice)
 
 ;;; Temporary dir
 
