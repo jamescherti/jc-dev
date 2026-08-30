@@ -535,7 +535,8 @@ Otherwise, they are completely ignored."
         (apply orig-fun args)
       t))) ; Returning t natively forces Emacs to abort file-local parsing
 
-;; 1. Neutralize directory-local variables (.dir-locals.el) at the filesystem lookup level
+;; 1. Neutralize directory-local variables (.dir-locals.el) at the filesystem
+;; lookup level
 (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
 
 ;; 2. Neutralize file-local variables (;; Local Variables:) at the parsing level
