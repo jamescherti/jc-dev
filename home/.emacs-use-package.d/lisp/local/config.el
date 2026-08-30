@@ -1769,7 +1769,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (setq easysession-quiet t)
 
 (setq easysession-switch-to-exclude-current t)
-(setq easysession-save-interval (* 14 60))
+(setq easysession-save-interval (* 20 60))
 (add-hook 'easysession-before-reset-hook
           #'(lambda()
               ;; Save all with no questions

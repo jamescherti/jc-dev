@@ -232,14 +232,15 @@
 (defun mod-buffer-terminator-crazy ()
   "Buffer terminator crazy."
   (interactive)
-  (setopt buffer-terminator-verbose t)
-  (setopt buffer-terminator-inactivity-timeout 3)
+  (setq buffer-terminator-verbose t)
+  (setq buffer-terminator-inactivity-timeout 3)
   (setopt buffer-terminator-interval 1))
 
 (defun mod-buffer-terminator-sane ()
   "Buffer terminator crazy."
   (interactive)
-  (setopt buffer-terminator-inactivity-timeout 300)
+  (setq buffer-terminator-verbose nil)
+  (setq buffer-terminator-inactivity-timeout 1800)
   (setopt buffer-terminator-interval 200))
 
 (mod-buffer-terminator-sane)
