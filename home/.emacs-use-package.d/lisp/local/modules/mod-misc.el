@@ -1039,10 +1039,6 @@ ARGS are the arguments passed to the original function."
 ;; (setq-default indicate-buffer-boundaries nil)
 ;; (setq-default indicate-empty-lines nil)
 
-;;; Target hooks
-
-(setq lightemacs-buffer-terminator-target-hooks '())
-
 ;;; user post init
 
 (defun lightemacs-user-post-init ()

@@ -32,6 +32,99 @@
   (require 'lightemacs-use-package))
 (require 'my-defun)
 
+;;; Code folding settings
+
+(setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook
+                                                     yaml-ts-mode-hook
+                                                     python-mode-hook
+                                                     python-ts-mode-hook
+                                                     haskell-mode-hook
+                                                     ;; My preference
+                                                     sh-mode-hook
+                                                     bash-ts-mode-hook
+                                                     php-mode-hook
+                                                     php-ts-mode-hook
+                                                     txt-file-mode-hook))
+
+(setq lightemacs-outline-minor-target-hooks '(emacs-lisp-mode-hook
+                                              lisp-mode-hook
+                                              conf-mode-hook
+                                              markdown-mode-hook
+                                              ;; TODO?
+                                              ;; markdown-ts-mode-hook
+                                              diff-mode-hook))
+
+(setq lightemacs-treesit-fold-target-hooks '(c-ts-mode-hook
+                                             c++-ts-mode-hook
+                                             java-ts-mode-hook
+                                             rust-ts-mode-hook
+                                             go-ts-mode-hook
+                                             ruby-ts-mode-hook
+                                             php-ts-mode-hook
+                                             csharp-ts-mode-hook
+                                             go-mod-ts-mode-hook
+                                             lua-ts-mode-hook
+                                             js-ts-mode-hook
+                                             typescript-ts-mode-hook
+                                             tsx-ts-mode-hook
+                                             css-ts-mode-hook
+                                             html-ts-mode-hook
+                                             heex-ts-mode-hook
+                                             xml-ts-mode-hook
+                                             ;; bash-ts-mode-hook
+                                             cmake-ts-mode-hook
+                                             dockerfile-ts-mode-hook
+                                             awk-ts-mode-hook
+                                             vimscript-ts-mode-hook
+                                             nix-ts-mode-hook
+                                             json-ts-mode-hook
+                                             toml-ts-mode-hook
+                                             makefile-ts-mode-hook
+                                             verilog-ts-mode-hook
+                                             vhdl-ts-mode-hook
+                                             hlsl-ts-mode-hook
+                                             latex-ts-mode-hook
+                                             beancount-ts-mode-hook
+                                             markdown-ts-mode-hook
+                                             mermaid-ts-mode-hook
+                                             gdscript-ts-mode-hook
+                                             clojure-ts-mode-hook
+                                             caml-ts-mode-hook
+                                             ocaml-ts-mode-hook
+                                             erlang-ts-mode-hook
+                                             elixir-ts-mode-hook
+                                             scala-ts-mode-hook
+                                             dart-ts-mode-hook
+                                             haskell-ts-mode-hook
+                                             julia-ts-mode-hook
+                                             kotlin-ts-mode-hook
+                                             gleam-ts-mode-hook
+                                             noir-ts-mode-hook
+                                             kotlin-ts-mode-hook
+                                             swift-ts-mode-hook
+                                             elixir-ts-mode-hook
+                                             zig-ts-mode-hook))
+
+(setq lightemacs-hs-minor-target-hooks '(;; Systems and General Purpose
+                                         c-mode-hook
+                                         c++-mode-hook
+                                         java-mode-hook
+                                         rust-mode-hook
+                                         go-mode-hook
+                                         ruby-mode-hook
+                                         perl-mode-hook
+
+                                         ;; Web and frontend
+                                         js-mode-hook
+                                         typescript-mode-hook
+                                         css-mode-hook
+
+                                         ;; Scripting, Data, and Infrastructure
+                                         json-mode-hook
+                                         lua-mode-hook
+                                         nxml-mode-hook
+                                         html-mode-hook))
+
 ;;; Local modes instead of global ones
 
 (setq lightemacs-electric-pair-local-target-hooks nil)
@@ -53,15 +146,15 @@
 
 (add-hook 'minibuffer-setup-hook #'my-disable-electric-pair-in-evil t)
 
+(setq lightemacs-evil-snipe-local-target-hooks nil)
+(setq lightemacs-evil-snipe-global-target-hooks nil)
 (with-eval-after-load 'le-evil-snipe
-  (setq lightemacs-evil-snipe-local-target-hooks nil)
-  (setq lightemacs-evil-snipe-global-target-hooks nil)
   (add-hook-text-editing-modes 'evil-snipe-local-mode)
   (add-hook 'minibuffer-setup-hook 'evil-snipe-local-mode))
 
+(setq lightemacs-evil-surround-local-target-hooks nil)
+(setq lightemacs-evil-surround-global-target-hooks nil)
 (with-eval-after-load 'le-evil-surround
-  (setq lightemacs-evil-surround-local-target-hooks nil)
-  (setq lightemacs-evil-surround-global-target-hooks nil)
   (add-hook-text-editing-modes 'evil-surround-mode)
   (add-hook 'minibuffer-setup-hook 'evil-surround-mode))
 
@@ -82,9 +175,9 @@
 (with-eval-after-load 'saveplace
   (add-hook-text-editing-modes-if-file #'save-place-local-mode))
 
+(setq lightemacs-undo-fu-session-local-target-hooks nil)
+(setq lightemacs-undo-fu-session-global-target-hooks nil)
 (with-eval-after-load 'le-undo-fu-session
-  (setq lightemacs-undo-fu-session-local-target-hooks nil)
-  (setq lightemacs-undo-fu-session-global-target-hooks nil)
   (add-hook-text-editing-modes 'undo-fu-session-mode))
 
 ;; Started from mod-conditional-modes.el
@@ -96,31 +189,32 @@
 (setq lightemacs-flymake-target-hooks nil)
 (setq lightemacs-dtrt-indent-global-target-hooks nil)
 (setq lightemacs-dtrt-indent-local-target-hooks nil)
+(setq lightemacs-buffer-terminator-target-hooks nil)
 
 (setq lightemacs-package-lint-flymake-target-hooks nil)
 
-;; Yasnippet
-(progn
-  (setq lightemacs-yasnippet-global-target-hooks nil)
-  (setq lightemacs-yasnippet-local-target-hooks nil)
-  (add-hook-text-editing-modes 'yas-minor-mode)
+;;; Yasnippet
 
-  (defun le-yasnippet-reload-if-empty ()
-    "Reload all YASnippet snippets only if they are not already loaded."
-    (when (and (fboundp 'yas-reload-all)
-               (not (and (boundp 'yas--tables)
-                         (hash-table-p yas--tables)
-                         (> (hash-table-count yas--tables) 0))))
-      (yas-reload-all)))
+(setq lightemacs-yasnippet-global-target-hooks nil)
+(setq lightemacs-yasnippet-local-target-hooks nil)
+(add-hook-text-editing-modes 'yas-minor-mode)
 
-  ;; (defun le-yasnippet-delayed-reload-if-empty ()
-  ;;   "Reload if empty."
-  ;;   ;; Instead of calling (le-yasnippet-reload-if-empty) directly:
-  ;;   (run-with-idle-timer 2 nil #'le-yasnippet-reload-if-empty))
-  ;; (add-hook 'lightemacs-after-init-hook 'le-yasnippet-delayed-reload-if-empty)
+(defun le-yasnippet-reload-if-empty ()
+  "Reload all YASnippet snippets only if they are not already loaded."
+  (when (and (fboundp 'yas-reload-all)
+             (not (and (boundp 'yas--tables)
+                       (hash-table-p yas--tables)
+                       (> (hash-table-count yas--tables) 0))))
+    (yas-reload-all)))
 
-  (add-hook 'lightemacs-after-init-hook 'le-yasnippet-reload-if-empty)
-  )
+;; (defun le-yasnippet-delayed-reload-if-empty ()
+;;   "Reload if empty."
+;;   ;; Instead of calling (le-yasnippet-reload-if-empty) directly:
+;;   (run-with-idle-timer 2 nil #'le-yasnippet-reload-if-empty))
+;; (add-hook 'lightemacs-after-init-hook 'le-yasnippet-delayed-reload-if-empty)
+
+(add-hook 'lightemacs-after-init-hook 'le-yasnippet-reload-if-empty)
+
 
 ;;; Default modes that I disabled
 

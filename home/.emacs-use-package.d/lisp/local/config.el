@@ -700,16 +700,9 @@ subsequent GCC invocations."
 
 ;;; Lightemacs modules
 
-(setq lightemacs-modules '(le-compile-angel
-                           le-vim-tab-bar
-                           le-theme
-
-                           ;; All modules like mod-begin require this
-                           le-yasnippet
-                           mod-yasnippet
-
-                           mod-conditional-modes
+(setq lightemacs-modules '(mod-conditional-modes
                            mod-begin
+
                            mod-filetype
                            mod-same-window
                            mod-dired
@@ -721,6 +714,13 @@ subsequent GCC invocations."
 
                            mod-kirigami  ;; requires yasnippet
                            ;; le-kirigami ; replaced with mod-kirigami
+
+                           le-yasnippet
+                           le-compile-angel
+                           le-vim-tab-bar
+                           le-theme
+
+                           mod-yasnippet
 
                            le-flymake
                            le-pathaction
