@@ -232,6 +232,9 @@
 
 ;;; Modes that are disabled by default
 
+(with-eval-after-load 'simple
+  (remove-hook 'post-self-insert-hook #'blink-paren-post-self-insert-function))
+
 ;; TODO This is a duplicate mode. Move it to lightemacs in le-no-bloat.el
 
 ;; Force the unimpaired mode off globally

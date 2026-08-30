@@ -153,6 +153,9 @@ ARGS are the arguments passed to the original function."
 
 ;;; Default modes that I disabled
 
+(with-eval-after-load 'simple
+  (remove-hook 'post-self-insert-hook #'blink-paren-post-self-insert-function))
+
 ;; Minibuffer-nonselected-mode: This mode highlights the minibuffer contents
 ;; using the minibuffer-nonselected face when an active minibuffer (such as a
 ;; recursive prompt or a background process) remains active after focus has
