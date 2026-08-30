@@ -105,10 +105,11 @@ ARGS are the arguments passed to the original function."
 ;;   ;; (add-hook 'minibuffer-setup-hook 'company-mode)
 ;;   )
 
-(setq lightemacs-saveplace-target-hooks nil)
-;; (add-hook-text-editing-modes 'save-place-local-mode)
-(with-eval-after-load 'saveplace
-  (add-hook-text-editing-modes 'save-place-local-mode))
+;; NOTE: Doesn't work
+;; (setq lightemacs-saveplace-target-hooks nil)
+;; ;; (add-hook-text-editing-modes 'save-place-local-mode)
+;; (with-eval-after-load 'saveplace
+;;   (add-hook-text-editing-modes 'save-place-local-mode))
 
 (setq lightemacs-undo-fu-session-local-target-hooks nil)
 (setq lightemacs-undo-fu-session-global-target-hooks nil)

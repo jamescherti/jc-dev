@@ -1871,6 +1871,19 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                  ;;             (name . "^\\.newsrc-dribble")))
                  )))))
 
+;;; saveplace
+
+;; Optimize I/O by skipping filesystem readability checks
+;; TODO: minimal-emacs?
+;;
+;; When set to nil (the optimization): Emacs skips the file-readable-p checks
+;; completely. It takes the list from RAM and writes it straight to disk in one
+;; operation, completely bypassing the file existence overhead.
+(setq save-place-forget-unreadable-files nil)
+
+;; Keep the alist bounded to prevent parsing slowdowns
+(setq save-place-limit 200)
+
 ;;; Display line numbers
 
 (defun my-setup-display-line-numbers-mode ()
