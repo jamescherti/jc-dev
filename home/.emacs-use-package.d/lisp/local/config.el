@@ -951,6 +951,83 @@ subsequent GCC invocations."
                            le-easysession
                            ))
 
+;;; Frame, disable cus-edit and x-apply-session-resources
+
+(defun lightemacs-user-post-early-init ()
+  "Post early init."
+  ;; TODO: Lightemacs?
+  (let ((no-border '(internal-border-width . 0)))
+    (add-to-list 'default-frame-alist no-border)
+    (add-to-list 'initial-frame-alist no-border))
+
+  ;; Ignore X resources
+  (advice-add #'x-apply-session-resources :override #'ignore)
+  ;; (when (eq lightemacs-package-manager 'builtin-package)
+  ;;   (setq use-package-compute-statistics t))
+
+  ;; TODO add to minimal-emacs?
+  ;; Disable native compilation for some files.
+  ;; (let ((deny-list '(;; Static data structure, not executable logic.
+  ;;                    "\\(?:[/\\\\]\\.dir-locals\\.el\\(?:\\.gz\\)?$\\)"
+  ;;
+  ;;                    ;; Frequently updated auto-generated indices. Compiling them
+  ;;                    ;; wastes CPU and disk I/O.
+  ;;                    "\\(?:[/\\\\][^/\\\\]+-autoloads\\.el\\(?:\\.gz\\)?$\\)"
+  ;;                    "\\(?:[/\\\\][^/\\\\]+-loaddefs\\.el\\(?:\\.gz\\)?$\\)"
+  ;;
+  ;;                    ;; Static package metadata without runtime logic.
+  ;;                    "\\(?:[/\\\\][^/\\\\]+-pkg\\.el\\(?:\\.gz\\)?$\\)")))
+  ;;   (cond
+  ;;    ((>= emacs-major-version 29)
+  ;;     (setq native-comp-jit-compilation-deny-list deny-list))
+  ;;    ((= emacs-major-version 28)
+  ;;     (setq native-comp-deferred-compilation-deny-list deny-list))
+  ;;    (t
+  ;;     (setq comp-deferred-compilation-deny-list deny-list))))
+
+  ;; Other (not minimal-emacs)
+  (let* ((data-dir (expand-file-name user-emacs-directory))
+         (deny-list `(;; Yasnippet setup files are loaded once during
+                      ;; initialization. Compiling them offers negligible
+                      ;; performance gains.
+                      "\\(?:[/\\\\]\\.yas-setup\\.el\\(?:\\.gz\\)?$\\)"
+
+                      ;; .dir-locals.el is a data structure for project variables,
+                      ;; not executable code. Compiling it wastes resources.
+                      "\\(?:[/\\\\]\\.my-dir-locals\\.el\\(?:\\.gz\\)?$\\)"
+
+                      ;; Emacs data directory: Exclude general data files from compilation.
+                      ;; This conflicts with straight packages or elpa
+                      ;; ,(concat "^" (regexp-quote data-dir) ".*\\.el\\(?:\\.gz\\)?$")
+
+                      ;; TODO: This will exclude straight/elpa packages.
+                      ;; ,(concat "^"
+                      ;;          (regexp-quote (abbreviate-file-name
+                      ;;                        (expand-file-name lightemacs-var-directory)))
+                      ;;          ".*\\.el\\(?:\\.gz\\)?$")
+                      ;; ,(concat "^"
+                      ;;          (regexp-quote (expand-file-name lightemacs-var-directory))
+                      ;;          ".*\\.el\\(?:\\.gz\\)?$")
+                      )))
+    (dolist (regex deny-list)
+      (when (boundp 'native-comp-jit-compilation-deny-list)
+        (push regex native-comp-jit-compilation-deny-list))
+
+      ;; Backwards compatibility for deprecated variable names that were replaced by
+      ;; `native-comp-jit-compilation-deny-list'.
+      (with-no-warnings
+        (if (boundp 'native-comp-deferred-compilation-deny-list)
+            (push regex native-comp-deferred-compilation-deny-list)
+          (when (boundp 'comp-deferred-compilation-deny-list)
+            (push regex comp-deferred-compilation-deny-list)))))))
+
+(add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
+
+;; TODO remove from devemacs and my emacs and add this to lightemacs
+(with-eval-after-load 'cus-edit
+  ;; Prevent Emacs from writing custom settings to any file
+  (advice-add 'custom-save-all :override #'ignore))
+
 ;;; Package defaults
 
 (with-eval-after-load 'le-gcmh
