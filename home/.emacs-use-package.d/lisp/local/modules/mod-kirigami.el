@@ -62,6 +62,7 @@
     (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold))
 
   (add-hook-text-editing-modes 'kirigami-mode)
+  (add-hook 'my-scratch-buffer-created-hook 'kirigami-mode)
 
   :config
   (require 'kirigami-jump)

@@ -492,7 +492,10 @@ FUNC is the function to execute when the buffer passes `my-valid-file-buffer-p'.
 
 ;;; Text editing buffers
 
-(defvar text-editing-modes '(conf-mode prog-mode text-mode diff-mode)
+(defvar text-editing-modes '(conf-mode
+                             prog-mode
+                             text-mode
+                             diff-mode)
   "List of text editing modes.")
 
 (defun add-functions-to-mode-hooks (modes functions &optional only-if-file)
@@ -540,10 +543,10 @@ in all buffers."
             (my-wrap-file-buffer-only funcs))
         funcs))))
 
-(defun add-hook-text-editing-modes-if-file (functions)
-  "Add FUNCTIONS to `text-editing-modes' only if visiting a file.
-FUNCTIONS can be a single function or a list of functions."
-  (add-functions-to-mode-hooks text-editing-modes functions t))
+;; (defun add-hook-text-editing-modes-if-file (functions)
+;;   "Add FUNCTIONS to `text-editing-modes' only if visiting a file.
+;; FUNCTIONS can be a single function or a list of functions."
+;;   (add-functions-to-mode-hooks text-editing-modes functions t))
 
 ;;; ignore-errors advice
 

@@ -32,6 +32,29 @@
   (require 'lightemacs-use-package))
 (require 'my-defun)
 
+;;; scratch
+
+(defvar my-scratch-buffer-created-hook nil
+  "Hook run once when the *scratch* buffer is created.")
+
+(defvar-local my-scratch-init-done nil
+  "Non-nil if the current scratch buffer has been initialized.")
+
+(defun my-advice-scratch-buffer-create (orig-fn &rest args)
+  "Advice when the scratch buffer is created.
+ORIG-FN is the original function being advised (`get-scratch-buffer-create`).
+ARGS are the arguments passed to the original function."
+  (let ((result (apply orig-fn args))
+        (scratch-buf (get-buffer "*scratch*")))
+    (when (buffer-live-p scratch-buf)
+      (with-current-buffer scratch-buf
+        (unless my-scratch-init-done
+          (setq my-scratch-init-done t)
+          (run-hooks 'my-scratch-buffer-created-hook))))
+    result))
+
+(advice-add 'get-scratch-buffer-create :around #'my-advice-scratch-buffer-create)
+
 ;;; Code folding settings
 
 (setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook
@@ -130,6 +153,7 @@
 (setq lightemacs-electric-pair-local-target-hooks nil)
 (setq lightemacs-electric-pair-global-target-hooks nil)
 (add-hook-text-editing-modes #'electric-pair-local-mode)
+(add-hook 'my-scratch-buffer-created-hook 'electric-pair-local-mode)
 
 ;; I don't like it in the minibuffer, especially when searching for
 ;; things
@@ -150,12 +174,14 @@
 (setq lightemacs-evil-snipe-global-target-hooks nil)
 (with-eval-after-load 'le-evil-snipe
   (add-hook-text-editing-modes 'evil-snipe-local-mode)
+  (add-hook 'my-scratch-buffer-created-hook 'evil-snipe-local-mode)
   (add-hook 'minibuffer-setup-hook 'evil-snipe-local-mode))
 
 (setq lightemacs-evil-surround-local-target-hooks nil)
 (setq lightemacs-evil-surround-global-target-hooks nil)
 (with-eval-after-load 'le-evil-surround
   (add-hook-text-editing-modes 'evil-surround-mode)
+  (add-hook 'my-scratch-buffer-created-hook 'evil-surround-mode)
   (add-hook 'minibuffer-setup-hook 'evil-surround-mode))
 
 (setq lightemacs-corfu-local-target-hooks nil)
@@ -163,17 +189,19 @@
 ;; This is enabled by `mod-conditional-modes'
 (with-eval-after-load 'le-corfu
   (add-hook-text-editing-modes 'corfu-mode)
+  (add-hook 'my-scratch-buffer-created-hook 'corfu-mode)
   (add-hook 'minibuffer-setup-hook 'corfu-mode))
 
-(with-eval-after-load 'le-company
-  (add-hook-text-editing-modes 'company-mode)
-  ;; (add-hook 'minibuffer-setup-hook 'company-mode)
-  )
+;; (with-eval-after-load 'le-company
+;;   (add-hook-text-editing-modes 'company-mode)
+;;   (add-hook 'my-scratch-buffer-created-hook 'company-mode)
+;;   ;; (add-hook 'minibuffer-setup-hook 'company-mode)
+;;   )
 
 (setq lightemacs-saveplace-target-hooks nil)
 ;; (add-hook-text-editing-modes 'save-place-local-mode)
 (with-eval-after-load 'saveplace
-  (add-hook-text-editing-modes-if-file #'save-place-local-mode))
+  (add-hook-text-editing-modes 'save-place-local-mode))
 
 (setq lightemacs-undo-fu-session-local-target-hooks nil)
 (setq lightemacs-undo-fu-session-global-target-hooks nil)
@@ -198,6 +226,7 @@
 (setq lightemacs-yasnippet-global-target-hooks nil)
 (setq lightemacs-yasnippet-local-target-hooks nil)
 (add-hook-text-editing-modes 'yas-minor-mode)
+(add-hook 'my-scratch-buffer-created-hook 'yas-minor-mode)
 
 (defun le-yasnippet-reload-if-empty ()
   "Reload all YASnippet snippets only if they are not already loaded."

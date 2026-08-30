@@ -132,23 +132,11 @@
 ;;       (yas-next-field))))
 
 (with-eval-after-load 'yasnippet
-  ;; (define-key yas-keymap (kbd "RET") 'my-yas-next-field-or-corfu)
-  ;; (define-key yas-keymap (kbd "<return>") 'my-yas-next-field-or-corfu)
-
-  ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
   (unless noninteractive
     (define-key yas-minor-mode-map (kbd "C-f") 'yas-expand))
 
-  (setq yas-prompt-functions '(yas-no-prompt))  ; Do not ask the user
-
-  ;; (add-to-list 'yas-snippet-dirs
-  ;;              (expand-file-name "yasnippet/snippets" emacs-var-dir))
-  ;; (add-hook-text-editing-modes 'yas-minor-mode-on)
-
-  ;; (define-key yas-keymap (kbd "RET") (yas-filtered-definition
-  ;;                                     'yas-next-field-or-maybe-expand))
-
-  )
+  ;; Do not ask the user
+  (setq yas-prompt-functions '(yas-no-prompt)))
 
 ;;; Provide
 

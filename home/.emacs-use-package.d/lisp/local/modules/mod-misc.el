@@ -778,26 +778,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Enable automatic buffer refresh when VC-controlled files change externally.
 ;; (setq auto-revert-check-vc-info t)
 
-;;; scratch
-
-(defvar my-scratch-init-done nil)
-
-(defun my-advice-scratch-buffer-create (orig-fn &rest args)
-  "Advice to disable fringe truncation arrows in the scratch buffer.
-ORIG-FN is the original function being advised (`get-scratch-buffer-create`).
-ARGS are the arguments passed to the original function."
-  (let ((result (apply orig-fn args))
-        (scratch-buf (get-buffer "*scratch*")))
-    (unless my-scratch-init-done
-      (setq my-scratch-init-done t)
-      (when (buffer-live-p scratch-buf)
-        (with-current-buffer scratch-buf
-          (my-disable-fringe-truncation-arrow))))
-    result))
-
-(with-eval-after-load 'simple
-  (advice-add 'get-scratch-buffer-create :around #'my-advice-scratch-buffer-create))
-
 ;;; completion preview
 
 ;; Completion preview displays only one suggestion at a time.
@@ -2363,6 +2343,7 @@ generally one of the lines that are folded."
   (add-hook 'minibuffer-setup-hook #'my-minibuffer-mode-setup))
 
 (add-hook-text-editing-modes #'my-disable-fringe-truncation-arrow)
+(add-hook 'my-scratch-buffer-created-hook 'my-disable-fringe-truncation-arrow)
 (with-eval-after-load 'consult
   (add-hook 'consult-preview-allowed-hooks #'my-disable-fringe-truncation-arrow))
 

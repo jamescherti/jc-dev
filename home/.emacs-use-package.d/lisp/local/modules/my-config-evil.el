@@ -2495,8 +2495,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   ;; ;; Assign the adapter to the global paste variable
   ;; (setq clipboard-paste-function #'evil-clipboard-paste-adapter)
 
-  (add-hook-text-editing-modes 'wizard-hl-todo-local-mode)
-
   ;; Indirect buffer
   (evil-define-key 'normal 'global (kbd "<leader>ec") 'wizard-clone-and-switch-to-indirect-buffer)
   (evil-define-key 'normal 'global (kbd "<leader>eC") 'wizard-switch-to-base-buffer)
@@ -2509,10 +2507,11 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (evil-define-key 'normal 'global (kbd "<leader>eh") 'wizard-toggle-highlight-at-point)
   (evil-define-key 'normal 'global (kbd "<leader>eH") 'wizard-unhighlight)
 
-  (when (fboundp 'wizard-hl-todo-local-mode)
-    (add-hook-text-editing-modes #'wizard-hl-todo-local-mode)
-    (with-eval-after-load 'consult
-      (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode)))
+  (add-hook-text-editing-modes 'wizard-hl-todo-local-mode)
+  (add-hook 'my-scratch-buffer-created-hook 'wizard-hl-todo-local-mode)
+
+  (with-eval-after-load 'consult
+    (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode))
 
   (defun pkg-wizard-smart-rename ()
     "Smartly decide how to rename the symbol at point."
