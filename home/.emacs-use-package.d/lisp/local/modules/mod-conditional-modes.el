@@ -24,71 +24,118 @@
 
 ;;; Code:
 
+;;; DISABLED: env vars replacement
+
+;; 1. Define the classes and their variable configurations.
+;; The `nil` key indicates that these variables apply to all major modes.
+
+(defvar env-allow-syntax-checkers nil)
+(defvar env-allow-syntax-checker-package-lint nil)
+(defvar env-allow-lsp nil)
+(defvar env-allow-whitespace-cleanup nil)
+(defvar env-allow-language-servers nil)
+(defvar env-allow-reformatters nil)
+
+(dolist (var '(env-allow-syntax-checkers
+               env-allow-syntax-checker-package-lint
+               env-allow-lsp
+               env-allow-whitespace-cleanup
+               env-allow-language-servers
+               env-allow-reformatters))
+  (put var 'safe-local-variable #'booleanp))
+
+(dir-locals-set-class-variables 'env-deny-all
+                                '((nil . ((env-allow-syntax-checkers . nil)
+                                          (env-allow-syntax-checker-package-lint . nil)
+                                          (env-allow-lsp . nil)
+                                          (env-allow-whitespace-cleanup . nil)
+                                          (env-allow-language-servers . nil)
+                                          (env-allow-reformatters . nil)))))
+
+(dir-locals-set-class-variables 'env-allow-emacs-dev
+                                '((nil . ((env-allow-syntax-checkers . t)
+                                          (env-allow-syntax-checker-package-lint . t)
+                                          (env-allow-lsp . t)
+                                          (env-allow-whitespace-cleanup . t)
+                                          (env-allow-language-servers . t)
+                                          (env-allow-reformatters . t)))))
+
+(dir-locals-set-class-variables 'env-allow-standard
+                                '((nil . ((env-allow-syntax-checkers . t)
+                                          (env-allow-syntax-checker-package-lint . nil)
+                                          (env-allow-lsp . t)
+                                          (env-allow-whitespace-cleanup . t)
+                                          (env-allow-language-servers . t)
+                                          (env-allow-reformatters . t)))))
+
+(dir-locals-set-directory-class "~/src/forks/" 'env-deny-all)
+(dir-locals-set-directory-class "~/src/local/" 'env-deny-all)
+(dir-locals-set-directory-class "~/src/emacs/" 'env-allow-emacs-dev)
+(dir-locals-set-directory-class "~/Sync/src/" 'env-allow-standard)
+(dir-locals-set-directory-class "~/src/" 'env-allow-standard)
+
 ;;; Auto set env-* vars
 
-(defcustom my-custom-dir-variables
-  ;; env-deny-all?
-  '(("~/src/forks/"
-     . ((env-allow-syntax-checkers . nil)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . nil)
-        (env-allow-whitespace-cleanup . nil)
-        (env-allow-language-servers . nil)
-        (env-allow-reformatters . nil)))
-    
-    ("~/src/local/"
-     . ((env-allow-syntax-checkers . nil)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . nil)
-        (env-allow-whitespace-cleanup . nil)
-        (env-allow-language-servers . nil)
-        (env-allow-reformatters . nil)))
-
-    ("~/src/emacs"
-     . ((env-allow-syntax-checkers . t)
-        (env-allow-syntax-checker-package-lint . t)
-        (env-allow-lsp . t)
-        (env-allow-whitespace-cleanup . t)
-        (env-allow-language-servers . t)
-        (env-allow-reformatters . t)))
-
-    ("~/Sync/src"
-     . ((env-allow-syntax-checkers . t)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . t)
-        (env-allow-whitespace-cleanup . t)
-        (env-allow-language-servers . t)
-        (env-allow-reformatters . t)))
-
-    ("~/src/"
-     . ((env-allow-syntax-checkers . t)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . t)
-        (env-allow-whitespace-cleanup . t)
-        (env-allow-language-servers . t)
-        (env-allow-reformatters . t))))
-  "Alist mapping directories to a list of buffer-local variables.
-Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
-  :type '(alist :key-type directory
-                :value-type (alist :key-type symbol :value-type sexp))
-  :group 'files)
-
-(defun my-apply-custom-dir-variables ()
-  "Apply directory-specific variables from `my-custom-dir-variables'."
-  (let ((path (or (buffer-file-name (buffer-base-buffer)) default-directory)))
-    (when path
-      (catch 'break
-        (dolist (entry my-custom-dir-variables)
-          (let ((dir (expand-file-name (car entry)))
-                (vars (cdr entry)))
-            (when (file-in-directory-p path dir)
-              (dolist (var-val vars)
-                ;; This is the programmatic runtime equivalent of `setq-local`
-                (set (make-local-variable (car var-val)) (cdr var-val)))
-              (throw 'break t))))))))
-
-;; Run this exactly when Emacs normally sets local variables
-;; (add-hook 'hack-local-variables-hook #'my-apply-custom-dir-variables)
+;; (defcustom my-custom-dir-variables
+;;   ;; env-deny-all?
+;;   '(("~/src/forks/"
+;;      . ((env-allow-syntax-checkers . nil)
+;;         (env-allow-syntax-checker-package-lint . nil)
+;;         (env-allow-lsp . nil)
+;;         (env-allow-whitespace-cleanup . nil)
+;;         (env-allow-language-servers . nil)
+;;         (env-allow-reformatters . nil)))
+;; 
+;;     ("~/src/local/"
+;;      . ((env-allow-syntax-checkers . nil)
+;;         (env-allow-syntax-checker-package-lint . nil)
+;;         (env-allow-lsp . nil)
+;;         (env-allow-whitespace-cleanup . nil)
+;;         (env-allow-language-servers . nil)
+;;         (env-allow-reformatters . nil)))
+;; 
+;;     ("~/src/emacs"
+;;      . ((env-allow-syntax-checkers . t)
+;;         (env-allow-syntax-checker-package-lint . t)
+;;         (env-allow-lsp . t)
+;;         (env-allow-whitespace-cleanup . t)
+;;         (env-allow-language-servers . t)
+;;         (env-allow-reformatters . t)))
+;; 
+;;     ("~/Sync/src"
+;;      . ((env-allow-syntax-checkers . t)
+;;         (env-allow-syntax-checker-package-lint . nil)
+;;         (env-allow-lsp . t)
+;;         (env-allow-whitespace-cleanup . t)
+;;         (env-allow-language-servers . t)
+;;         (env-allow-reformatters . t)))
+;; 
+;;     ("~/src/"
+;;      . ((env-allow-syntax-checkers . t)
+;;         (env-allow-syntax-checker-package-lint . nil)
+;;         (env-allow-lsp . t)
+;;         (env-allow-whitespace-cleanup . t)
+;;         (env-allow-language-servers . t)
+;;         (env-allow-reformatters . t))))
+;;   "Alist mapping directories to a list of buffer-local variables.
+;; Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
+;;   :type '(alist :key-type directory
+;;                 :value-type (alist :key-type symbol :value-type sexp))
+;;   :group 'files)
+;; 
+;; (defun my-apply-custom-dir-variables ()
+;;   "Apply directory-specific variables from `my-custom-dir-variables'."
+;;   (let ((path (or (buffer-file-name (buffer-base-buffer)) default-directory)))
+;;     (when path
+;;       (catch 'break
+;;         (dolist (entry my-custom-dir-variables)
+;;           (let ((dir (expand-file-name (car entry)))
+;;                 (vars (cdr entry)))
+;;             (when (file-in-directory-p path dir)
+;;               (dolist (var-val vars)
+;;                 ;; This is the programmatic runtime equivalent of `setq-local`
+;;                 (set (make-local-variable (car var-val)) (cdr var-val)))
+;;               (throw 'break t))))))))
 
 ;;; .my-dir-locals.el
 
@@ -170,8 +217,8 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
   "Manually check variables and enable modes."
-  (my-apply-custom-dir-variables)
-  
+  ;; (my-apply-custom-dir-variables)
+
   (let ((buffer-name (buffer-name)))
     (when (and (not env-deny-all)
                (not (or (string-prefix-p " " buffer-name)
