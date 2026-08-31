@@ -5151,7 +5151,6 @@ on text following the cursor."
 (provide 'mod-misc)
 
 ;; Local variables:
-;; fill-column: 101
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 
