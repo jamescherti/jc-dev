@@ -485,8 +485,17 @@
 ;;; Hardening
 
 ;; Enable directory variables globally to allow whitelisting
-(setq enable-dir-local-variables t)
+
+;; The `enable-local-variables' variable controls how Emacs handles file-local
+;; variables. File-local variables are configurations embedded directly within a
+;; file that affect the buffer visiting that file. Here is an example of a
+;; file-local variable:
 (setq enable-local-variables :safe)
+
+;; The `enable-dir-local-variables' variable dictates whether Emacs searches for
+;; and applies settings from .dir-locals.el files located in the directory
+;; hierarchy of a visited file.
+(setq enable-dir-local-variables t)
 
 ;; Trust buffer contents for Flymake
 (when (boundp 'trusted-content)
@@ -500,77 +509,90 @@
 
 ;;; Hardening: Only enable .dir-locals.el in ~/src
 
-(defcustom my-local-variables-acl
-  '((allow . "~/src/forks/emacs/")
-    (deny  . "~/src/forks/")
-    (allow . "~/src/"))
-  "Access control list for local variables.
-Rules are evaluated sequentially from top to bottom.
-The first rule that matches the file's directory determines the result.
-If no rules match, local variables are denied by default."
-  :type '(alist :key-type (choice (const allow) (const deny))
-                :value-type directory)
-  :group 'files)
-
-(defvar-local my-local-variables-acl-cache nil
-  "Buffer-local cache for the ACL check.
-Stores the result as a cons cell: (EXPANDED-PATH . STATUS).")
-
-(defun my-local-variables-path-allowed-p (path)
-  "Return t if PATH is allowed by `my-local-variables-acl', nil otherwise.
-PATH is the file or directory string to be checked against the ACL rules.
-Uses `my-local-variables-acl-cache' to avoid redundant checks."
-  (let ((expanded-path (and path (expand-file-name path))))
-    ;; Check if we already computed the answer for this exact path in this
-    ;; buffer
-    (if (and my-local-variables-acl-cache
-             (equal (car my-local-variables-acl-cache) expanded-path))
-        (cdr my-local-variables-acl-cache)
-      ;; Otherwise, do the work to compute it
-      (let ((status
-             (if expanded-path
-                 (catch 'match
-                   (dolist (rule my-local-variables-acl)
-                     (let ((action (car rule))
-                           (dir (expand-file-name (cdr rule))))
-                       (when (file-in-directory-p expanded-path dir)
-                         (throw 'match (eq action 'allow)))))
-                   nil)
-               nil)))
-        ;; Save the computed result in the local variable and return it
-        (setq my-local-variables-acl-cache (cons expanded-path status))
-        status))))
-
-(defun my-restrict-dir-locals-search-advice (orig-fun file)
-  "Prevent searching for .dir-locals.el outside allowed directories.
-This advice wraps ORIG-FUN, applying it to FILE only if FILE is
-permitted by `my-local-variables-acl'. Otherwise, it bypasses the
-search and returns nil to emulate \"no directory local variables found\"."
-  (if (my-local-variables-path-allowed-p file)
-      (progn
-        (message "[FILE-LOCALS] Allowed .dir-locals.el: %s" (current-buffer))
-        (funcall orig-fun file))
-    (message "[FILE-LOCALS] Disallowed .dir-locals.el: %s" (current-buffer))
-    nil))
-
-(defun my-restrict-file-locals-inhibit-advice (orig-fun &rest args)
-  "Natively inhibit file-local variables outside allowed directories.
-This advice wraps ORIG-FUN, passing ARGS to it if the current buffer's
-file or directory is permitted by `my-local-variables-acl'. Otherwise,
-it natively forces Emacs to abort file-local parsing by returning t."
-  (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
-         (target-path (or (buffer-file-name base-buffer)
-                          default-directory)))
-    (if (my-local-variables-path-allowed-p target-path)
-        (progn
-          (message "[FILE-LOCALS] Allow file locals: %s" base-buffer)
-          (apply orig-fun args))
-      (message "[FILE-LOCALS] Disallow file locals: %s" base-buffer)
-      t)))
-
-(with-eval-after-load 'files
-  (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
-  (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice))
+;; (defcustom my-local-variables-acl
+;;   '((allow . "~/src/forks/emacs/")
+;;     (deny  . "~/src/forks/")
+;;     (allow . "~/src/"))
+;;   "Access control list for local variables.
+;; Rules are evaluated sequentially from top to bottom.
+;; The first rule that matches the file's directory determines the result.
+;; If no rules match, local variables are denied by default."
+;;   :type '(alist :key-type (choice (const allow) (const deny))
+;;                 :value-type directory)
+;;   :group 'files)
+;;
+;; (defvar-local my-local-variables-acl-cache nil
+;;   "Buffer-local cache for the ACL check.
+;; Stores the result as a cons cell: (EXPANDED-PATH . STATUS).")
+;;
+;; (defun my-local-variables-path-allowed-p (path)
+;;   "Return t if PATH is allowed by `my-local-variables-acl', nil otherwise.
+;; PATH is the file or directory string to be checked against the ACL rules.
+;; Uses `my-local-variables-acl-cache' to avoid redundant checks."
+;;   (let ((expanded-path (and path (expand-file-name path))))
+;;     ;; Check if we already computed the answer for this exact path in this
+;;     ;; buffer
+;;     (if (and my-local-variables-acl-cache
+;;              (equal (car my-local-variables-acl-cache) expanded-path))
+;;         (cdr my-local-variables-acl-cache)
+;;       ;; Otherwise, do the work to compute it
+;;       (let ((status
+;;              (if expanded-path
+;;                  (catch 'match
+;;                    (dolist (rule my-local-variables-acl)
+;;                      (let ((action (car rule))
+;;                            (dir (expand-file-name (cdr rule))))
+;;                        (when (file-in-directory-p expanded-path dir)
+;;                          (throw 'match (eq action 'allow)))))
+;;                    nil)
+;;                nil)))
+;;         ;; Save the computed result in the local variable and return it
+;;         (setq my-local-variables-acl-cache (cons expanded-path status))
+;;         status))))
+;;
+;; (defun my-restrict-dir-locals-search-advice (orig-fun file)
+;;   "Prevent searching for .dir-locals.el outside allowed directories.
+;; This advice wraps ORIG-FUN, applying it to FILE only if FILE is
+;; permitted by `my-local-variables-acl'. Otherwise, it bypasses the
+;; search and returns nil to emulate \"no directory local variables found\"."
+;;   (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
+;;          (target-path (or (buffer-file-name base-buffer)
+;;                           default-directory)))
+;;     (if (and target-path
+;;              (my-local-variables-path-allowed-p target-path))
+;;         (progn
+;;           (message "[FILE-LOCALS] Allowed .dir-locals.el: %s (%s)"
+;;                    (current-buffer)
+;;                    target-path)
+;;           (funcall orig-fun file))
+;;       (message "[FILE-LOCALS] Disallowed .dir-locals.el: %s (%s)"
+;;                (current-buffer)
+;;                target-path)
+;;       nil)))
+;;
+;; (defun my-restrict-file-locals-inhibit-advice (orig-fun &rest args)
+;;   "Natively inhibit file-local variables outside allowed directories.
+;; This advice wraps ORIG-FUN, passing ARGS to it if the current buffer's
+;; file or directory is permitted by `my-local-variables-acl'. Otherwise,
+;; it natively forces Emacs to abort file-local parsing by returning t."
+;;   (let* ((base-buffer (or (buffer-base-buffer) (current-buffer)))
+;;          (target-path (or (buffer-file-name base-buffer)
+;;                           default-directory)))
+;;     (if (and target-path
+;;              (my-local-variables-path-allowed-p target-path))
+;;         (progn
+;;           (message "[FILE-LOCALS] Allow file locals: %s (%s)"
+;;                    base-buffer
+;;                    target-path)
+;;           (apply orig-fun args))
+;;       (message "[FILE-LOCALS] Disallow file locals: %s (%s)"
+;;                base-buffer
+;;                target-path)
+;;       t)))
+;;
+;; (with-eval-after-load 'files
+;;   (advice-add 'dir-locals-find-file :around #'my-restrict-dir-locals-search-advice)
+;;   (advice-add 'inhibit-local-variables-p :around #'my-restrict-file-locals-inhibit-advice))
 
 ;;; Temporary dir
 
