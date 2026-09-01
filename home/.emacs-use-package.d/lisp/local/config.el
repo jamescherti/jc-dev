@@ -967,7 +967,6 @@ subsequent GCC invocations."
                            le-server
 
                            ;; mod-misc includes sub-org
-                           le-org
                            le-org-appear
 
                            le-easysession
