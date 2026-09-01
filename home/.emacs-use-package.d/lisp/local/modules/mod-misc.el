@@ -267,7 +267,11 @@
 
 ;; https://eshelyaron.com/posts/2026-08-06-emacs-arbitrary-code-execution-returns.html
 
-(defun suppress-shorthands (orig &rest args)
+;; A workaround patch (Commit 8466eb44) was applied to the emacs-31 release
+;; branch on August 5, 2026. Early pretest versions of Emacs 31 do not
+;; include this mitigation.
+
+(defun my-suppress-shorthands (orig &rest args)
   "Call ORIG with ARGS while binding `read-symbol-shorthands' to nil.
 This acts as advice to prevent arbitrary code execution via symbol shorthands
 during unsafe operations like interning symbols on file open."
@@ -275,10 +279,10 @@ during unsafe operations like interning symbols on file open."
     (apply orig args)))
 
 (when (< emacs-major-version 32)
-  (advice-add 'vc-find-backend-function :around #'suppress-shorthands)
+  (advice-add 'vc-find-backend-function :around #'my-suppress-shorthands)
 
   (with-eval-after-load 'cc-fonts
-    (advice-add 'c-compose-keywords-list :around #'suppress-shorthands)))
+    (advice-add 'c-compose-keywords-list :around #'my-suppress-shorthands)))
 
 ;;; Load: mod-misc2.el (optional)
 
