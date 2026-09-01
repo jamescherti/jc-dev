@@ -115,6 +115,25 @@
 ;; Make TAB behave according to the language mode inside source blocks.
 (setq org-src-tab-acts-natively t)
 
+;;; use-package org
+
+(lightemacs-use-package org
+  :commands (org-mode
+             org-indent-mode
+             org-set-tags-command
+             org-version
+             org-agenda
+             org-capture
+             org-schedule
+             org-agenda-filter
+             org-agenda-todo
+             org-agenda-set-tags
+             org-agenda-filter-remove-all
+             org-agenda-goto)
+
+  :mode
+  ("\\.org\\'" . org-mode))
+
 ;;; Testing
 
 ;; Hide markers like * / _ = ~; cleaner view but markers are not visible for
