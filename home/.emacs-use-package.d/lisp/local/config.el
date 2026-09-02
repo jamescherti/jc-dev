@@ -944,7 +944,6 @@ subsequent GCC invocations."
                            le-stripspace
 
                            le-vterm
-                           le-term
 
                            le-persist-text-scale
 

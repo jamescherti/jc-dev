@@ -79,7 +79,6 @@
 (setq lightemacs-modules '(le-compile-angel
                            le-flavor-micro
                            le-pathaction
-                           le-term
                            le-dired-filter
 
                            le-markdown-mode
