@@ -62,7 +62,7 @@
 
 (setq lightemacs-saveplace-recenter-after-find-file t)
 
-(setq minimal-emacs-frame-title-format "Devemacs")
+(setq lightemacs-frame-title-format "Devemacs")
 
 (setq lightemacs-dired-omit-parent-directory t)
 (setq lightemacs-cycle nil)
