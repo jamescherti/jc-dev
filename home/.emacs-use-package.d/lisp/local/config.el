@@ -484,14 +484,6 @@
 
 ;;; Hardening
 
-;; Enable directory variables globally to allow whitelisting
-
-;; The `enable-local-variables' variable controls how Emacs handles file-local
-;; variables. File-local variables are configurations embedded directly within a
-;; file that affect the buffer visiting that file. Here is an example of a
-;; file-local variable:
-(setq enable-local-variables :safe)
-
 ;; The `enable-dir-local-variables' variable dictates whether Emacs searches for
 ;; and applies settings from .dir-locals.el files located in the directory
 ;; hierarchy of a visited file.
@@ -790,8 +782,12 @@ subsequent GCC invocations."
 ;; (setq lightemacs-theme-default-font "Iosevka Term")
 ;; (setq lightemacs-theme-default-font "Iosevka Medium")
 ;; (setq lightemacs-theme-default-font "Iosevka SemiBold")
+
 (setq lightemacs-theme-default-font "Iosevka Term SemiBold")
 (setq lightemacs-theme-variable-font "Iosevka")
+
+;; (setq lightemacs-theme-default-font "DejaVu Sans Mono")
+;; (setq lightemacs-theme-variable-font "Deja Vu Sans")
 
 (setq lightemacs-reduce-messages t)
 (setq lightemacs-saveplace-recenter-after-find-file t)

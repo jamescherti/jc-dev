@@ -57,6 +57,7 @@
 
 ;; (setq lightemacs-theme-default-font "Iosevka Medium")
 ;; (setq lightemacs-theme-default-font "Iosevka SemiBold")
+
 (setq lightemacs-theme-default-font "Iosevka Term SemiBold")
 (setq lightemacs-theme-variable-font "Iosevka")
 

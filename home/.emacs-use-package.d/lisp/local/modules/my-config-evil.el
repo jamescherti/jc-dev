@@ -1325,8 +1325,7 @@ word after the space that contains at least two uppercase characters."
           (abort-recursive-edit))
       ;; If no minibuffer is active, just run shell-pop normally
       (when (fboundp 'shell-pop)
-        (call-interactively 'shell-pop))))
-  )
+        (call-interactively 'shell-pop)))))
 
 (unless noninteractive
   (global-set-key (kbd "M-RET") 'my-shell-pop)
