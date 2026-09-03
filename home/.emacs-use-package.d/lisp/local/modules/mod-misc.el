@@ -33,7 +33,6 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 (require 'seq)
-(require 'my-defun)
 
 ;;; Fix indirect buffers bug
 
@@ -81,18 +80,19 @@
 
 ;;; Modeline
 
-(setq line-number-mode t)
-(setq column-number-mode t)
-(setq mode-line-position-column-line-format '("%l:%C"))
-(setq mode-line-percent-position nil)
+(setq line-number-mode t
+      column-number-mode t
+      mode-line-position-column-line-format '("%l:%C")
+      mode-line-percent-position nil)
 
 (add-hook 'lightemacs-after-init-hook #'display-time-mode)
-(setq display-time-mail-function #'ignore)
-(setq display-time-mail-string "")
-(setq display-time-mail-directory nil)
-(setq display-time-use-mail-icon nil)
-(setq display-time-mail-face nil)
-(setq display-time-format " %Y-%m-%d  %I:%M %p")
+
+(setq display-time-mail-function #'ignore
+      display-time-mail-string ""
+      display-time-mail-directory nil
+      display-time-use-mail-icon nil
+      display-time-mail-face nil
+      display-time-format " %Y-%m-%d  %I:%M %p")
 
 (defun mode-line-right ()
   "Render the `mode-line-right-format'."
@@ -162,18 +162,16 @@
 
 ;;; Scroll
 
-(setq redisplay-skip-fontification-on-input t)
+(setq redisplay-skip-fontification-on-input t
+      scroll-conservatively 101
+      next-screen-context-lines 0
+      fast-but-imprecise-scrolling t)
 
 ;; Disable the optimization locally for dired to guarantee directory
 ;; fontification
 (add-hook 'dired-mode-hook
           (lambda ()
             (setq-local redisplay-skip-fontification-on-input nil)))
-
-(setq scroll-conservatively 101)
-(setq next-screen-context-lines 0)
-
-(setq fast-but-imprecise-scrolling t)
 
 ;; The number of lines to try scrolling a window by when point moves out.
 ;; If that fails to bring point back on frame, point is centered instead.
@@ -190,8 +188,8 @@
 ;; - scroll-down-aggressively: Controls how far the point can get from the top
 ;;   of the window before scrolling.
 ;;
-;; 0.01 means “scroll as soon as the point starts moving away from the edge.”.
-;; 1 would mean “wait until the point is almost off the screen.”
+;; 0.01 means 'scroll as soon as the point starts moving away from the edge.'.
+;; 1 would mean 'wait until the point is almost off the screen.'
 ;;
 ;; What happens with 0.01: When you scroll down (e.g., pressing C-n or C-v),
 ;; Emacs will try to keep the point near the top of the screen. When you scroll
@@ -213,30 +211,32 @@
 ;; (setq scroll-up-aggressively 0.0
 ;;       scroll-down-aggressively 0.0)
 (setq-default scroll-up-aggressively 0.01
-              scroll-down-aggressively 0.01)
+              scroll-down-aggressively 0.01
+              comint-scroll-to-bottom-on-input t)
 
-;; Prevents isearch from stubbornly freezing at the end of a buffer match before
-;; wrapping. It keeps navigation continuous and allows you to use standard
-;; scrolling actions while remaining inside a search block.
-(setq isearch-wrap-pause 'no
-      isearch-allow-scroll 'unlimited)
+(setq
+ ;; Prevents isearch from stubbornly freezing at the end of a buffer match before
+ ;; wrapping. It keeps navigation continuous and allows you to use standard
+ ;; scrolling actions while remaining inside a search block.
+ isearch-wrap-pause 'no
+ isearch-allow-scroll 'unlimited
 
-;; Setting this to nil prevents Emacs from snapping the viewport to fit the
-;; entire line when point moves to a partially visible line.
-;;
-;; Background: By default (t), if point lands on a line at the window edge
-;; that is only partially visible, Emacs shifts the viewport to force the
-;; entire line into view. This disrupts smooth scrolling and causes abrupt
-;; visual shifts, especially when traversing large inline images or long
-;; wrapped blocks of text.
-;;
-;; Trade-offs: Disabling this feature (nil) ensures predictable, continuous
-;; scrolling. The only side effect is that point may reside on a line that
-;; is cut off at the top or bottom edge of the window.
-;;
-;; Note: Recently disabled to investigate potential secondary issues.
-;; TODO minimal emacs?
-(setq make-cursor-line-fully-visible nil)
+ ;; Setting this to nil prevents Emacs from snapping the viewport to fit the
+ ;; entire line when point moves to a partially visible line.
+ ;;
+ ;; Background: By default (t), if point lands on a line at the window edge
+ ;; that is only partially visible, Emacs shifts the viewport to force the
+ ;; entire line into view. This disrupts smooth scrolling and causes abrupt
+ ;; visual shifts, especially when traversing large inline images or long
+ ;; wrapped blocks of text.
+ ;;
+ ;; Trade-offs: Disabling this feature (nil) ensures predictable, continuous
+ ;; scrolling. The only side effect is that point may reside on a line that
+ ;; is cut off at the top or bottom edge of the window.
+ ;;
+ ;; Note: Recently disabled to investigate potential secondary issues.
+ ;; TODO minimal emacs?
+ make-cursor-line-fully-visible nil)
 
 ;; Keep at least 1 line of context above and below the cursor
 ;; This forces Emacs to start scrolling before the cursor reaches the absolute
@@ -246,7 +246,6 @@
 
 ;; (setq compilation-scroll-output nil)
 
-(setq-default comint-scroll-to-bottom-on-input t)
 ;; (setq-default comint-scroll-to-bottom-on-output nil)
 
 ;; (setq-default comint-scroll-to-bottom-on-input t)
@@ -301,47 +300,47 @@ during unsafe operations like interning symbols on file open."
     (with-eval-after-load 'evil-collection
       (require 'my-config-evil))))
 
-;; Automatically resizes all windows proportionally when splitting or deleting a
-;; window. This prevents new windows from taking all the space from the current
-;; window, maintaining a balanced layout across your frame.
-(setq window-combination-resize t)
+(setq
+ ;; Automatically resizes all windows proportionally when splitting or deleting a
+ ;; window. This prevents new windows from taking all the space from the current
+ ;; window, maintaining a balanced layout across your frame.
+ window-combination-resize t
 
-;; Disable displaying a bookmark icon on the fringe. Removing this icon reduces
-;; visual clutter in the margins, especially if you use bookmarks frequently and
-;; prefer a minimalist interface.
-(setq bookmark-fringe-mark nil)
+ ;; Disable displaying a bookmark icon on the fringe. Removing this icon reduces
+ ;; visual clutter in the margins, especially if you use bookmarks frequently and
+ ;; prefer a minimalist interface.
+ bookmark-fringe-mark nil
 
-;; t is bad for accessibility HTML email in dark themes. Disabling custom colors
-;; in HTML rendering ensures the text uses your active theme's colors,
-;; preventing unreadable situations like dark text on a dark background.
-(setq shr-use-colors nil)
+ ;; t is bad for accessibility HTML email in dark themes. Disabling custom colors
+ ;; in HTML rendering ensures the text uses your active theme's colors,
+ ;; preventing unreadable situations like dark text on a dark background.
+ shr-use-colors nil
 
-;; Use `variable-pitch-mode' instead. Disabling custom fonts ensures HTML
-;; documents do not override your preferred Emacs typography, maintaining a
-;; consistent reading experience.
-(setq shr-use-fonts nil)
+ ;; Use `variable-pitch-mode' instead. Disabling custom fonts ensures HTML
+ ;; documents do not override your preferred Emacs typography, maintaining a
+ ;; consistent reading experience.
+ shr-use-fonts nil
 
-;; (setq lazy-count-prefix-format "(%s/%s) ")
+ ;; (setq lazy-count-prefix-format "(%s/%s) ")
 
-;; When stepping through search results, pressing the up or down arrow normally
-;; interrupts the search. This setting allows directional keys to automatically
-;; reverse or advance the search direction.
-(setq isearch-motion-changes-direction t)
+ ;; When stepping through search results, pressing the up or down arrow normally
+ ;; interrupts the search. This setting allows directional keys to automatically
+ ;; reverse or advance the search direction.
+ isearch-motion-changes-direction t
 
-;; TODO minimal-emacs
-;; Adds an explicit count of matches (e.g., [3/12]) directly into your
-;; minibuffer search line, exactly like modern text editors or web browsers.
-(setq isearch-lazy-count t
-      lazy-count-suffix-format " (%s/%s)")
+ ;; TODO minimal-emacs
+ ;; Adds an explicit count of matches (e.g., [3/12]) directly into your
+ ;; minibuffer search line, exactly like modern text editors or web browsers.
+ isearch-lazy-count t
+ lazy-count-suffix-format " (%s/%s)"
 
-;; (setq isearch-allow-motion t)
+ ;; (setq isearch-allow-motion t)
+ resize-mini-windows t
 
-(setq resize-mini-windows t)
+ ;; (setq switch-to-buffer-obey-display-actions nil)
 
-;; (setq switch-to-buffer-obey-display-actions nil)
-
-;; also useful for org
-(setq imenu-max-items 30)
+ ;; also useful for org
+ imenu-max-items 30)
 
 ;; (setq lazy-highlight-initial-delay 0.5)
 
@@ -437,12 +436,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
          (let ((sym-name (symbol-name sym))
                (def (indirect-function sym))) ; Resolve aliases to their true definition
            (when (and def
-                      ;; Filter out generalized variable setters
-                      (not (string-prefix-p "(setf " sym-name))
-                      ;; Filter out runtime dynamically generated function patterns
-                      (not (string-prefix-p "vterm-send-" sym-name))
-                      (not (string-prefix-p "orgtbl-hijacker-command-" sym-name))
-                      (not (string-prefix-p "recentf-open-most-recent-file-" sym-name))
+                      ;; Filter out generalized variable setters and runtime dynamically generated function patterns
+                      (not (string-match-p "\\`\\(?:(setf \\|vterm-send-\\|orgtbl-hijacker-command-\\|recentf-open-most-recent-file-\\)" sym-name))
                       ;; Filter out macros and autoload stubs
                       (not (eq (car-safe def) 'autoload))
                       (not (eq (car-safe def) 'macro))
@@ -499,34 +494,31 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; TODO: recently removed
 ;; dired-dwim-target t  ; Propose a target for intelligent moving/copying
 
-(setq save-silently t)
-
 ;; Disable macro set definition
 (global-set-key (kbd "C-x e") 'ignore)
 
-;; Warns about undefined commands in the prompt (Emacs 29.1)
-(setq shell-highlight-undef-enable t)
-
-;; Automatically cleans up dead shell buffers (Emacs 29.1)
-(setq shell-kill-buffer-on-exit t)
-
-(setq ;; completion-styles '(partial-completion flex initials)
- completions-format 'one-column
- completions-max-height 20
- completion-show-help nil
- completion-show-inline-help nil)
-(setq icomplete-separator "\n")
-(setq icomplete-delay-completions-threshold 0)
-(setq icomplete-compute-delay 0)
-(setq icomplete-prospects-height 10)
-(setq icomplete-hide-common-prefix nil)
-(setq icomplete-with-completion-tables t)
-(setq icomplete-show-matches-on-no-input t)
-(setq icomplete-max-delay-chars 0)
-(setq icomplete-tidy-shadowed-file-names t)
-(setq icomplete-scroll t)
-(setq icomplete-in-buffer t)
-(setq completion-auto-select nil  ; Alternative: 'second-tab
+(setq save-silently t
+      ;; Warns about undefined commands in the prompt (Emacs 29.1)
+      shell-highlight-undef-enable t
+      ;; Automatically cleans up dead shell buffers (Emacs 29.1)
+      shell-kill-buffer-on-exit t
+      ;; completion-styles '(partial-completion flex initials)
+      completions-format 'one-column
+      completions-max-height 20
+      completion-show-help nil
+      completion-show-inline-help nil
+      icomplete-separator "\n"
+      icomplete-delay-completions-threshold 0
+      icomplete-compute-delay 0
+      icomplete-prospects-height 10
+      icomplete-hide-common-prefix nil
+      icomplete-with-completion-tables t
+      icomplete-show-matches-on-no-input t
+      icomplete-max-delay-chars 0
+      icomplete-tidy-shadowed-file-names t
+      icomplete-scroll t
+      icomplete-in-buffer t
+      completion-auto-select nil  ; Alternative: 'second-tab
       completions-detailed t
       completions-group t
       completions-group-sort 'alphabetical)
@@ -564,17 +556,39 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; computational work every time you move the cursor.
 ;; (setq visual-order-cursor-movement nil)
 
-;; C-x =
-;; What it does: When you press C-x = (what-cursor-position), Emacs displays
-;; technical details about the character under the point in the echo area.
-;; Setting this to t appends the official, full Unicode name of the character to
-;; that string. Verdict: Nice to have, but unnecessary. If you are tracking down
-;; weird invisible spacing bugs or non-ASCII quotes (like ’ vs '), it helps.
-;; Otherwise, it just adds verbosity to the echo line.
-(setq what-cursor-show-names t)
+(setq
+ ;; C-x =
+ ;; What it does: When you press C-x = (what-cursor-position), Emacs displays
+ ;; technical details about the character under the point in the echo area.
+ ;; Setting this to t appends the official, full Unicode name of the character to
+ ;; that string. Verdict: Nice to have, but unnecessary. If you are tracking down
+ ;; weird invisible spacing bugs or non-ASCII quotes (like ' vs '), it helps.
+ ;; Otherwise, it just adds verbosity to the echo line.
+ what-cursor-show-names t
+ help-clean-buttons t
+ help-enable-variable-value-editing t
 
-(setq help-clean-buttons t)
-(setq help-enable-variable-value-editing t)
+ ;; Automatically enable ANSI color support in compilation buffers
+ ;; by parsing and applying ANSI escape sequences during output filtering.
+ ansi-color-for-compilation-mode t
+
+ ;; This variable specifies a function for splitting a window, in order
+ ;; to make a new window for displaying a buffer. It is used by the
+ ;; display-buffer-pop-up-window action function to actually split the
+ ;; window.  The value must be a function that takes one argument, a
+ ;; window, and returns either a new window (which will be used to
+ ;; display the desired buffer) or nil (which means the splitting
+ ;; failed). The default value is split-window-sensibly, which is
+ ;; documented next.
+ split-window-preferred-function nil
+ eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly
+ electric-quote-comment nil
+ electric-quote-string nil
+ diff-add-log-use-relative-names t
+ archive-hidden-columns '(Mode Ids Date&Time Ratio)
+ archive-alternate-hidden-columns '()
+ font-lock-maximum-decoration t
+ next-error-message-highlight 'keep)
 
 ;; TODO minimal-emacs.d README
 ;; Execute the enclosed code only if Emacs is running in a graphical user
@@ -588,10 +602,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;
 ;;   ;; Set the truncated line indicator to a Unicode rightwards arrow (→).
 ;;   (set-display-table-slot standard-display-table 'truncation ?\u2192))
-
-;; Automatically enable ANSI color support in compilation buffers
-;; by parsing and applying ANSI escape sequences during output filtering.
-(setq ansi-color-for-compilation-mode t)
 
 ;; Alternatively, explicitly add the ANSI color filter to the compilation filter hook
 ;; to apply colors immediately during compilation output processing.
@@ -622,31 +632,12 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Treat clipboard input as UTF-8 string first, compound text next
 ;; TODO: add it to minimal-emacs.d
 
-(setq next-error-message-highlight 'keep)
-
-;; This variable specifies a function for splitting a window, in order
-;; to make a new window for displaying a buffer. It is used by the
-;; display-buffer-pop-up-window action function to actually split the
-;; window.  The value must be a function that takes one argument, a
-;; window, and returns either a new window (which will be used to
-;; display the desired buffer) or nil (which means the splitting
-;; failed). The default value is split-window-sensibly, which is
-;; documented next.
-(setq split-window-preferred-function nil)
-
 ;; (setq read-minibuffer-restore-windows t) ; Emacs 28
-
-(setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
 
 ;; TODO is eager better?
 ;; compose is broken. It makes erases the content of the message the help
 ;; buffer.
 ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose)
-
-(setq electric-quote-comment nil)
-(setq electric-quote-string nil)
-
-(setq diff-add-log-use-relative-names t)
 
 ;; (setq package-native-compile t)
 
@@ -662,106 +653,102 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (when (fboundp 'xref-push-marker-stack)
       (xref-push-marker-stack))))
 
-(setq archive-hidden-columns '(Mode Ids Date&Time Ratio))
-(setq archive-alternate-hidden-columns '())
-
-(setq font-lock-maximum-decoration t)
-
 ;; Auto-scroll to bottom only when you type, not when output arrives
 
 ;; Expands history commands like !! or !$ before execution
 (setq-default comint-input-autoexpand 'input)
 
-;; Prevent duplicates in your shell history
-(setq comint-input-ignoredups t)
+(setq
+ ;; Prevent duplicates in your shell history
+ comint-input-ignoredups t
 
-;; Leaves the cursor at the end of the newly duplicated text block.
-(setq duplicate-line-final-position -1 ; both are Emacs 29
-      duplicate-region-final-position -1)
+ ;; Leaves the cursor at the end of the newly duplicated text block.
+ ;; both are Emacs 29
+ duplicate-line-final-position -1
+ duplicate-region-final-position -1
 
-;; NOTE disabled recently
-;;
-;; Emacs packages are very verbose. Language servers, version control
-;; operations, and background linters (like Flymake) constantly print to the
-;; *Messages* buffer.
-;;
-;; The Real Benefit: If you run Emacs as a daemon or keep it open for days, the
-;; default 1000-line limit is overwritten quickly. If you experience a sudden UI
-;; freeze or a package fails silently, a limit of 16384 ensures the error trace
-;; from three hours ago is still there for you to read. It turns your log into a
-;; reliable diagnostic tool instead of a fleeting ticker.
-(setq message-log-max 16384)
+ ;; NOTE disabled recently
+ ;;
+ ;; Emacs packages are very verbose. Language servers, version control
+ ;; operations, and background linters (like Flymake) constantly print to the
+ ;; *Messages* buffer.
+ ;;
+ ;; The Real Benefit: If you run Emacs as a daemon or keep it open for days, the
+ ;; default 1000-line limit is overwritten quickly. If you experience a sudden UI
+ ;; freeze or a package fails silently, a limit of 16384 ensures the error trace
+ ;; from three hours ago is still there for you to read. It turns your log into a
+ ;; reliable diagnostic tool instead of a fleeting ticker.
+ message-log-max 16384
 
-;; Emacs drops a mark in the global ring every time you jump across files, such
-;; as when using xref-find-definitions to trace Python or Elisp functions.
-;;
-;; The Real Benefit: If you are exploring a large codebase and following a call
-;; stack through a dozen files, the default limit of 16 means your earliest
-;; marks are erased. A limit of 512 turns your global mark ring into an infinite
-;; "back button" for your entire project. You can pop the mark continuously to
-;; retrace your steps and return to your exact starting point, regardless of how
-;; many files you visited.
-(setq global-mark-ring-max 512)
+ ;; Emacs drops a mark in the global ring every time you jump across files, such
+ ;; as when using xref-find-definitions to trace Python or Elisp functions.
+ ;;
+ ;; The Real Benefit: If you are exploring a large codebase and following a call
+ ;; stack through a dozen files, the default limit of 16 means your earliest
+ ;; marks are erased. A limit of 512 turns your global mark ring into an infinite
+ ;; "back button" for your entire project. You can pop the mark continuously to
+ ;; retrace your steps and return to your exact starting point, regardless of how
+ ;; many files you visited.
+ global-mark-ring-max 512
 
-;; In Emacs, almost every deletion command (such as killing a word, killing a
-;; line, or deleting a sentence) saves the text to the clipboard history.
-;;
-;; The Real Benefit: If you copy a block of code to paste elsewhere, but then
-;; delete 70 individual lines to clean up a buffer, the default limit of 60 will
-;; push your copied code out of memory before you can paste it. A limit of 1024
-;; prevents this data loss. It allows you to use completion frameworks to search
-;; for text you cut hours ago, treating your clipboard as a safe, long-term
-;; scratchpad rather than a fragile queue.
-(setq kill-ring-max 1024)
-(setq mark-ring-max 32)
+ ;; In Emacs, almost every deletion command (such as killing a word, killing a
+ ;; line, or deleting a sentence) saves the text to the clipboard history.
+ ;;
+ ;; The Real Benefit: If you copy a block of code to paste elsewhere, but then
+ ;; delete 70 individual lines to clean up a buffer, the default limit of 60 will
+ ;; push your copied code out of memory before you can paste it. A limit of 1024
+ ;; prevents this data loss. It allows you to use completion frameworks to search
+ ;; for text you cut hours ago, treating your clipboard as a safe, long-term
+ ;; scratchpad rather than a fragile queue.
+ kill-ring-max 1024
+ mark-ring-max 32
 
-;; If this variable is t, splitting a window tries to get the space
-;; proportionally from all windows in the same combination.  This also
-;; allows splitting a window that is otherwise too small or of fixed size.
-;; Resizing and deleting a window proportionally resize all windows in the
-;; same combination.
-;;
-;; Emacs can balance window sizes automatically, but you can turn this behavior
-;; off by setting even-window-sizes to nil: This prevents Emacs from resizing
-;; existing windows to match the size of a new split window.
-(setq even-window-sizes nil)
-(setq even-window-sizes 'height-only)
+ ;; If this variable is t, splitting a window tries to get the space
+ ;; proportionally from all windows in the same combination.  This also
+ ;; allows splitting a window that is otherwise too small or of fixed size.
+ ;; Resizing and deleting a window proportionally resize all windows in the
+ ;; same combination.
+ ;;
+ ;; Emacs can balance window sizes automatically, but you can turn this behavior
+ ;; off by setting even-window-sizes to nil: This prevents Emacs from resizing
+ ;; existing windows to match the size of a new split window.
+ even-window-sizes 'height-only
+
+ ;; Deletes all contiguous whitespace characters at once, preventing repeated
+ ;; backspace presses.
+ ;;
+ ;; 'hungry' deletes all consecutive whitespace characters at once
+ ;; Alternatives is: 'all (remove all consecutive whitespace characters, even newlines).
+ backward-delete-char-untabify-method 'hungry
+
+ ;; Prevent prompting for identifier when running xref-find-* commands, including
+ ;; xref-find-references, which enables faster navigation to all usages of the
+ ;; symbol at point without manual input
+ ;;
+ ;; Default: (not xref-find-definitions xref-find-definitions-other-window
+ ;; xref-find-definitions-other-frame)
+ ;;
+ ;; The Problem: When you place your cursor over a function and press M-?
+ ;; (xref-find-references), vanilla Emacs stops and prompts you in the
+ ;; minibuffer: Find references for: [Function Name]. You have to press RET to
+ ;; confirm, adding an unnecessary keystroke to a highly repetitive action.
+ ;;
+ ;; Why it has no tradeoff: It makes code navigation immediate. If you ever need
+ ;; to search for a symbol that is not under your cursor, you can simply call the
+ ;; command with a prefix argument (C-u M-?), and Emacs will prompt you normally.
+ ;; TODO: minimal-emacs.d
+ xref-prompt-for-identifier
+ '(not xref-find-definitions
+       xref-find-definitions-other-window
+       xref-find-definitions-other-frame
+       ;; This adds the following
+       ;; This setting skips the redundant prompt asking you to confirm the
+       ;; identifier under the cursor, making code navigation immediate.
+       xref-find-references))
 
 ;; Kills the entire line plus the newline character
 ;; kills the entire line plus the newline
 ;; (setq kill-whole-line t)
-
-;; Deletes all contiguous whitespace characters at once, preventing repeated
-;; backspace presses.
-;;
-;; 'hungry' deletes all consecutive whitespace characters at once
-;; Alternatives is: 'all (remove all consecutive whitespace characters, even newlines).
-(setq backward-delete-char-untabify-method 'hungry)
-
-;; Prevent prompting for identifier when running xref-find-* commands, including
-;; xref-find-references, which enables faster navigation to all usages of the
-;; symbol at point without manual input
-;;
-;; Default: (not xref-find-definitions xref-find-definitions-other-window
-;; xref-find-definitions-other-frame)
-;;
-;; The Problem: When you place your cursor over a function and press M-?
-;; (xref-find-references), vanilla Emacs stops and prompts you in the
-;; minibuffer: Find references for: [Function Name]. You have to press RET to
-;; confirm, adding an unnecessary keystroke to a highly repetitive action.
-;;
-;; Why it has no tradeoff: It makes code navigation immediate. If you ever need
-;; to search for a symbol that is not under your cursor, you can simply call the
-;; command with a prefix argument (C-u M-?), and Emacs will prompt you normally.
-;; TODO: minimal-emacs.d
-(setq xref-prompt-for-identifier
-      '(not xref-find-definitions
-            xref-find-definitions-other-window
-            xref-find-definitions-other-frame
-            ;; This adds the following
-            ;; This setting skips the redundant prompt asking you to confirm the
-            ;; identifier under the cursor, making code navigation immediate.
-            xref-find-references))
 
 ;; Decrease verbosity and use faster connection methods
 ;; (setq tramp-verbose 2)
@@ -1033,15 +1020,20 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (defun lightemacs-user-post-init ()
   "This function is executed right before loading modules."
   ;; pre early init
+  (setq uniquify-buffer-name-style 'reverse
+        uniquify-separator "-"
 
-  (setq uniquify-buffer-name-style 'reverse)
-  (setq uniquify-separator "•")
-
-  ;; I find the default prefix for smerge-mode C-c^ cumbersome so I have changed
-  ;; it to C-cv
-  (setq smerge-command-prefix "\C-xc")
-  (setq smerge-diff-buffer-name "*smerge-diff*")
-  (setq smerge-refine-shadow-cursor nil)
+        ;; I find the default prefix for smerge-mode C-c^ cumbersome so I have changed
+        ;; it to C-cv
+        smerge-command-prefix "\C-xc"
+        smerge-diff-buffer-name "*smerge-diff*"
+        smerge-refine-shadow-cursor nil
+        hs-hide-comments-when-hiding-all nil
+        hs-isearch-open t  ;; Open both comments and code
+        eldoc-idle-delay 0.5
+        eldoc-echo-area-display-truncation-message nil
+        ;; eldoc-echo-area-prefer-doc-buffer nil
+        eldoc-echo-area-use-multiline-p nil)
 
   (unless noninteractive
     (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
@@ -1058,9 +1050,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (global-set-key (kbd "C-k") 'my-tab-previous)
     (global-set-key (kbd "C-j") 'my-tab-next))
 
-  (setq hs-hide-comments-when-hiding-all nil)
-  (setq hs-isearch-open t)  ;; Open both comments and code
-
   ;; Code folding
   ;; Note: html-mode usually relies on specialized packages like sgml-mode or web-mode folding
 
@@ -1070,137 +1059,132 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   ;; (add-hook 'lisp-interaction-mode-hook #'outline-minor-mode)
 
-  (setq eldoc-idle-delay 0.5)
-  (setq eldoc-echo-area-display-truncation-message nil)
-  ;; (setq eldoc-echo-area-prefer-doc-buffer nil)
-  (setq eldoc-echo-area-use-multiline-p nil)
-
   (with-eval-after-load 'recentf
     (setq recentf-exclude
           (append recentf-exclude
-                  (list
-                   "^~/\\.bin/"
+                  '("^~/\\.bin/"
 
-                   "^~/\\.emacs"
-                   "^~/\\.src"
-                   "^~/src/forks/"
-                   "^~/\\.[a-z-]*-?emacs.d/"
-                   "^/opt/local/"
+                    "^~/\\.emacs"
+                    "^~/\\.src"
+                    "^~/src/forks/"
+                    "^~/\\.[a-z-]*-?emacs.d/"
+                    "^/opt/local/"
 
-                   ;; Archives and Compressed Files
-                   "\\.tar$" "\\.gz$" "\\.zip$" "\\.7z$" "\\.rar$" "\\.xz$" "\\.bz2?$"
-                   ;; "\\.tbz2?$" "\\.tgz$" "\\.gzip$"
-                   ;; "\\.zpaq$" "\\.lz$" "\\.lrz$" "\\.lzo$" "\\.lzma$"
-                   ;; "\\.shar$" "\\.kgb$" "\\.Z$" "\\.zst$"
-                   ;; "\\.tzst$" "\\.lz4$" "\\.br$" "\\.cpio$" "\\.cab$" "\\.arj$"
-                   ;; "\\.lzh$" "\\.lha$"
+                    ;; Archives and Compressed Files
+                    "\\.tar$" "\\.gz$" "\\.zip$" "\\.7z$" "\\.rar$" "\\.xz$" "\\.bz2?$"
+                    ;; "\\.tbz2?$" "\\.tgz$" "\\.gzip$"
+                    ;; "\\.zpaq$" "\\.lz$" "\\.lrz$" "\\.lzo$" "\\.lzma$"
+                    ;; "\\.shar$" "\\.kgb$" "\\.Z$" "\\.zst$"
+                    ;; "\\.tzst$" "\\.lz4$" "\\.br$" "\\.cpio$" "\\.cab$" "\\.arj$"
+                    ;; "\\.lzh$" "\\.lha$"
 
-                   ;; Packages, Images, and Ecosystem Archives
-                   ;; "\\.deb$" "\\.rpm$" "\\.apk$" "\\.dmg$" "\\.iso$"
-                   ;; "\\.jar$" "\\.war$" "\\.ear$" "\\.whl$"
+                    ;; Packages, Images, and Ecosystem Archives
+                    ;; "\\.deb$" "\\.rpm$" "\\.apk$" "\\.dmg$" "\\.iso$"
+                    ;; "\\.jar$" "\\.war$" "\\.ear$" "\\.whl$"
 
-                   ;; Images and Media
-                   "\\.\\(?:gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
-                   ;; "\\.mkv$" "\\.mp[34]$" "\\.avi$" "\\.wav$"
+                    ;; Images and Media
+                    "\\.\\(?:gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
+                    ;; "\\.mkv$" "\\.mp[34]$" "\\.avi$" "\\.wav$"
 
-                   ;; Exclude OS temporary directories
-                   "^/tmp/"
-                   "^/var/tmp/"
+                    ;; Exclude OS temporary directories
+                    "^/tmp/"
+                    "^/var/tmp/"
 
-                   "/elpa/.*\\'"
-                   "/tramp.*\\'"
-                   "/ssh\\(x\\)?:"
+                    "/elpa/.*\\'"
+                    "/tramp.*\\'"
+                    "/ssh\\(x\\)?:"
 
-                   ;; Exclude local bypass and root
-                   ;; "^/\\(?:su\\|sudo\\)?:"
+                    ;; Exclude local bypass and root
+                    ;; "^/\\(?:su\\|sudo\\)?:"
 
-                   ;; Version Control (keeps out COMMIT_EDITMSG, MERGE_MSG,
-                   ;; etc.)
-                   "/\\.git/.*\\'"
-                   ;; "/\\.hg/.*\\'"
-                   ;; "/\\.svn/.*\\'"
+                    ;; Version Control (keeps out COMMIT_EDITMSG, MERGE_MSG,
+                    ;; etc.)
+                    "/\\.git/.*\\'"
+                    ;; "/\\.hg/.*\\'"
+                    ;; "/\\.svn/.*\\'"
 
-                   ;; Emacs cache files
-                   ;; "/recentf\\'"   ; Don't track recentf itself
-                   ;; "/bookmarks\\'" ; Don't track bookmarks
+                    ;; Emacs cache files
+                    ;; "/recentf\\'"   ; Don't track recentf itself
+                    ;; "/bookmarks\\'" ; Don't track bookmarks
 
-                   ;; Include
-                   ;; "^/usr/include/"
-                   ;; "/TAGS\\'"
-                   ;; "/GTAGS\\'"
-                   ;; "/GRAGS\\'"
-                   ;; "/GPATH$\\'"
+                    ;; Include
+                    ;; "^/usr/include/"
+                    ;; "/TAGS\\'"
+                    ;; "/GTAGS\\'"
+                    ;; "/GRAGS\\'"
+                    ;; "/GPATH$\\'"
 
-                   ;; "/\\.loaddefs\\.elc?\\'"
-                   ;; "-autoloads\\.el$"
-                   ;; "autoload\\.el$"
+                    ;; "/\\.loaddefs\\.elc?\\'"
+                    ;; "-autoloads\\.el$"
+                    ;; "autoload\\.el$"
 
-                   ;; "/\\.cache/"
-                   ;; "/\\.git/"
-                   ;; "/\\.svn/"
+                    ;; "/\\.cache/"
+                    ;; "/\\.git/"
+                    ;; "/\\.svn/"
 
-                   ;; "emacs/src/"
-                   ;; "/usr/share/emacs/"
-                   ;; "/usr/local/share/emacs/"
+                    ;; "emacs/src/"
+                    ;; "/usr/share/emacs/"
+                    ;; "/usr/local/share/emacs/"
 
-                   ;; Exclude all remote files (prevents TRAMP hangs)
-                   ;; #'file-remote-p
+                    ;; Exclude all remote files (prevents TRAMP hangs)
+                    ;; #'file-remote-p
 
-                   ;; binary
-                   ;; "\\.docx?$"
-                   ;; "\\.xlsx?$"
-                   ;; sub-titles
-                   ;; "\\.sub$"
-                   ;; "\\.srt$"
-                   ;; "\\.ass$"
+                    ;; binary
+                    ;; "\\.docx?$"
+                    ;; "\\.xlsx?$"
+                    ;; sub-titles
+                    ;; "\\.sub$"
+                    ;; "\\.srt$"
+                    ;; "\\.ass$"
 
-                   ;; "/eln-cache/"
+                    ;; "/eln-cache/"
 
-                   ;; TODO add lightemacs dir
-                   ;; ".cask"
-                   ;; "/G?TAGS$"
-                   ;; "\\.?cache"
-                   ;; "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
-                   ;; "\\.revive$"
-                   ;; "^/ssh:"
-                   ;; "/persp-confs/"
-                   ;; Emacs state/cache files (Fixing the TODO)
-                   ;; "url"
-                   ;; tramp-file-name-regexp
-                   ))))
+                    ;; TODO add lightemacs dir
+                    ;; ".cask"
+                    ;; "/G?TAGS$"
+                    ;; "\\.?cache"
+                    ;; "\\.\\(?:gz\\|gif\\|svg\\|png\\|jpe?g\\|bmp\\|xpm\\)$"
+                    ;; "\\.revive$"
+                    ;; "^/ssh:"
+                    ;; "/persp-confs/"
+                    ;; Emacs state/cache files (Fixing the TODO)
+                    ;; "url"
+                    ;; tramp-file-name-regexp
+                    ))))
 
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (setq
+   ;; Global settings (defaults)
+   doom-themes-enable-bold t    ; if nil, bold is universally disabled
+   doom-themes-enable-italic t  ; if nil, italics is universally disabled
 
-  (setq modus-themes-italic-constructs t)
-  (setq modus-themes-bold-constructs t)
-  (setq modus-themes-mixed-fonts nil)
+   modus-themes-italic-constructs t
+   modus-themes-bold-constructs t
+   modus-themes-mixed-fonts nil
 
-  (setq kirigami-enhance-outline-open t)
-  (setq kirigami-enhance-outline-close-all t)
-  (setq kirigami-preserve-visual-position t)
+   kirigami-enhance-outline-open t
+   kirigami-enhance-outline-close-all t
+   kirigami-preserve-visual-position t
 
-  (setq savehist-autosave-interval 650)
-  (setq tab-bar-history-limit 15)
+   savehist-autosave-interval 650
+   tab-bar-history-limit 15
 
-  (setq outline-blank-line t)
+   outline-blank-line t
 
-  (setq vim-tab-bar-update-group-name-function #'(lambda(name)
-                                                   (concat " [" name "] ")))
-  (setq vim-tab-bar-show-groups nil)
+   vim-tab-bar-update-group-name-function #'(lambda(name) (concat " [" name "] "))
+   vim-tab-bar-show-groups nil
 
-  (setq bufferfile-use-vc t)
-  ;; (setq bufferfile-delete-switch-to 'previous-buffer)
-  (setq bufferfile-delete-switch-to 'parent-directory)
+   bufferfile-use-vc t
+   ;; bufferfile-delete-switch-to 'previous-buffer
+   bufferfile-delete-switch-to 'parent-directory
 
-  (setq grep-use-null-device nil
-        grep-use-null-filename-separator nil
-        grep-use-headings nil)
+   grep-use-null-device nil
+   grep-use-null-filename-separator nil
+   grep-use-headings nil)
+
   (with-eval-after-load 'le-core-cli-tools
-    (setq grep-use-null-device nil)
-    (setq grep-command-position nil)
-    (setq grep-command
+    (setq grep-use-null-device nil
+          grep-command-position nil
+          grep-command
           (concat "rg"
                   ;; Include hidden files
                   " --hidden"
@@ -1209,14 +1193,14 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                   ;; Default
                   " --null --line-buffered --color=never --max-columns=1000"
                   " --path-separator / --smart-case --no-heading"
-                  " --with-filename --line-number --search-zip"))
-    ;; Synchronize grep-template with the custom ripgrep command defined above.
-    ;; The <R> and <F> tokens serve as dynamic placeholders that Emacs replaces
-    ;; with the search regular expression and target file patterns at runtime.
-    ;; This setup ensures that built-in recursive search utilities like rgrep
-    ;; and lgrep automatically inherit the same optimized ripgrep options
-    ;; without duplicating the configuration string.
-    (setq grep-template (concat grep-command " <R> <F>")))
+                  " --with-filename --line-number --search-zip")
+          ;; Synchronize grep-template with the custom ripgrep command defined above.
+          ;; The <R> and <F> tokens serve as dynamic placeholders that Emacs replaces
+          ;; with the search regular expression and target file patterns at runtime.
+          ;; This setup ensures that built-in recursive search utilities like rgrep
+          ;; and lgrep automatically inherit the same optimized ripgrep options
+          ;; without duplicating the configuration string.
+          grep-template (concat grep-command " <R> <F>")))
 
   (with-eval-after-load 'savehist
     (setq savehist-autosave-interval 650)
@@ -1235,8 +1219,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
                ;; Custom
                lightemacs-theme-package
-               lightemacs-theme-name)))
-      (setq my-savehist-additional-variables-added t))
+               lightemacs-theme-name))
+            my-savehist-additional-variables-added t))
 
     ;; Moved it here because it does not work from :hook
     ;; TODO replace this with easysession or with custom le-theme
@@ -1249,31 +1233,35 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (with-eval-after-load 'icomplete
       (define-key icomplete-minibuffer-map (kbd "RET") 'icomplete-force-complete-and-exit)))
 
-  ;; Modify all of them
-  ;; ORIGINAL:               "[-–!|#%;>*·•‣⁃◦ 	]*"
-  ;; This prevents fill from adding - to every new line
-  (setq adaptive-fill-regexp "[  !|#%;>*·•‣⁃◦   ]*")
+  (setq
+   ;; Modify all of them
+   ;; ORIGINAL:               "[--!|#%;>*·-‣⁃◦    ]*"
+   ;; This prevents fill from adding - to every new line
+   adaptive-fill-regexp "[ !|#%;>*·-‣⁃◦ ]*"
 
-  ;; Display the current line and column numbers in the mode line
-  ;; Non-nil if searches and matches should ignore case.
-  ;; nil means case is significant.
+   ;; Display the current line and column numbers in the mode line
+   ;; Non-nil if searches and matches should ignore case.
+   ;; nil means case is significant.
+   ;; (setq-default case-fold-search nil)
+
+   persist-text-scale-autosave-interval (* 15 60)
+   persist-text-scale-handle-file-renames t
+
+   eat-enable-yank-to-terminal t
+   eat-enable-directory-tracking t
+   eat-enable-shell-command-history t
+   eat-enable-shell-prompt-annotation t
+   eat-term-scrollback-size nil)
+
   (setq-default case-fold-search nil)
 
-  (setq persist-text-scale-autosave-interval (* 15 60))
-  (setq persist-text-scale-handle-file-renames t)
-
-  (setq eat-enable-yank-to-terminal t
-        eat-enable-directory-tracking t
-        eat-enable-shell-command-history t
-        eat-enable-shell-prompt-annotation t
-        eat-term-scrollback-size nil)
   (add-hook 'eat-mode-hook
             #'(lambda ()
                 (my-disable-fringe-truncation-arrow)
                 (display-line-numbers-mode -1)
-                (setq-local show-paren-mode nil)
-                (setq-local line-number-mode nil)
-                (setq-local column-number-mode nil)))
+                (setq-local show-paren-mode nil
+                            line-number-mode nil
+                            column-number-mode nil)))
   (with-eval-after-load 'eat
     (with-eval-after-load 'evil-collection
       (defun evil-collection-enable-eat-toggle-send-escape ()
@@ -1286,16 +1274,16 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   (add-hook 'emacs-lisp-mode-hook
             #'(lambda()
-                (setq-local dabbrev-case-fold-search t)
-                (setq-local case-fold-search t)))
+                (setq-local dabbrev-case-fold-search t
+                            case-fold-search t)))
 
-  (setq epg-gpg-program "gpg2")
-  ;; (setq epa-pinentry-mode 'loopback)  ;; Obsolete
+  (setq epg-gpg-program "gpg2"
+        ;; epa-pinentry-mode 'loopback  ;; Obsolete
 
-  (setq epa-file-name-regexp "\\.\\(gpg\\|asc\\)\\(~\\|\\.~[0-9]+~\\)?\\'")
+        epa-file-name-regexp "\\.\\(gpg\\|asc\\)\\(~\\|\\.~[0-9]+~\\)?\\'"
 
-  ;; Manually update the handler alist to recognize the new extension immediately
-  (setq file-name-handler-alist
+        ;; Manually update the handler alist to recognize the new extension immediately
+        file-name-handler-alist
         (cons (cons epa-file-name-regexp #'epa-file-handler)
               file-name-handler-alist))
 
@@ -1318,10 +1306,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                                               (8216 . 8217)
                                               (8220 . 8221)))
 
-  (setq electric-pair-text-pairs original-electric-pair-text-pairs)
-  (setq electric-pair-pairs original-electric-pair-pairs)
-
-  (setq which-key-idle-delay 1.5)
+  (setq electric-pair-text-pairs original-electric-pair-text-pairs
+        electric-pair-pairs original-electric-pair-pairs
+        which-key-idle-delay 1.5)
 
   (with-eval-after-load 'which-key
     (when (bound-and-true-p which-key-buffer-name)
@@ -1331,38 +1318,37 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (add-hook 'lua-mode-hook 'aggressive-indent-mode))
 
   ;; Abbrev
-  (add-hook 'markdown-mode-hook #'abbrev-mode)
-  (add-hook 'markdown-ts-mode-hook #'abbrev-mode)
-  (add-hook 'markdown-ts-mode-hook #'abbrev-mode)
-  (add-hook 'org-mode-hook #'abbrev-mode)
+  (mapc (lambda (m) (add-hook m #'abbrev-mode))
+        '(markdown-mode-hook markdown-ts-mode-hook org-mode-hook))
+
   (define-abbrev-table 'global-abbrev-table
     '(("ot" "to")
       ("i" "I")))
 
   (setq user-full-name "user"
-        user-mail-address "user@domain.ext")
+        user-mail-address "user@domain.ext"
 
-  ;; This seems to change ediff
-  (setq diff-default-read-only t)
+        ;; This seems to change ediff
+        diff-default-read-only t
 
-  ;; (if (fboundp 'fringe-mode) (fringe-mode '20))
+        ;; (if (fboundp 'fringe-mode) (fringe-mode '20))
 
-  ;; TODO try
-  ;; (setq-default fringes-outside-margins t)
+        ;; TODO try
+        ;; (setq-default fringes-outside-margins t)
 
-  ;; Use reliable file-based syntax highlighting when available and hunk-based
-  ;; syntax highlighting otherwise as a fallback.
-  ;;
-  ;; The Problem: When you look at a diff in Emacs, added lines are strictly
-  ;; green and removed lines are strictly red. You lose all of the programming
-  ;; language's native syntax highlighting, making the code harder to read.
-  ;;
-  ;; Why it has no tradeoff: Emacs will apply the correct major mode syntax
-  ;; highlighting (like Python or Elisp keywords) inside the diff hunk itself,
-  ;; blending the diff colors with your code colors perfectly.
-  ;;
-  ;; TODO add to minimal-emacs.d
-  (setq diff-font-lock-syntax 'hunk-also)
+        ;; Use reliable file-based syntax highlighting when available and hunk-based
+        ;; syntax highlighting otherwise as a fallback.
+        ;;
+        ;; The Problem: When you look at a diff in Emacs, added lines are strictly
+        ;; green and removed lines are strictly red. You lose all of the programming
+        ;; language's native syntax highlighting, making the code harder to read.
+        ;;
+        ;; Why it has no tradeoff: Emacs will apply the correct major mode syntax
+        ;; highlighting (like Python or Elisp keywords) inside the diff hunk itself,
+        ;; blending the diff colors with your code colors perfectly.
+        ;;
+        ;; TODO add to minimal-emacs.d
+        diff-font-lock-syntax 'hunk-also)
 
   ;; (setq diff-advance-after-apply-hunk t)
 
@@ -1373,121 +1359,57 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; (setq diff-refine nil)
 
   (with-eval-after-load 'consult
-    (dolist (regexp '("^\*helpful"
-                      "^\*sdcv"
-                      "^\*EGLOT"
-                      "^\*Help"
-                      "^\*scratch\*"
-                      "^\*tmux\*"
-                      "^\*Warnings\*"
-                      "^todo.org$"
-                      "^\*Native-compile-Log\*"
-                      "^\*Async-native-compile-log\*"
-                      "^tmp-"
-                      "^\*Ediff"
-                      "^\*Compile-Log\*"
-                      "^\*ansible-doc"))
-      (push regexp consult-buffer-filter)))
+    (setq consult-buffer-filter
+          (append '("^\*helpful"
+                    "^\*sdcv"
+                    "^\*EGLOT"
+                    "^\*Help"
+                    "^\*scratch\*"
+                    "^\*tmux\*"
+                    "^\*Warnings\*"
+                    "^todo.org$"
+                    "^\*Native-compile-Log\*"
+                    "^\*Async-native-compile-log\*"
+                    "^tmp-"
+                    "^\*Ediff"
+                    "^\*Compile-Log\*"
+                    "^\*ansible-doc")
+                  consult-buffer-filter)))
 
   (when debug-on-error
     ;; TODO le-default config?
-    (push 'search-failed debug-ignored-errors)
-
-    (dolist (err '("\\`rx ['']\\*\\*[''] range error"
-                   search-failed
-
-                   "Sorry, comparison of identical variants is not what I am made for..."
-
-                   ;; find-file-noselect-1: File is not readable: /etc/shadow
-                   file-error
-
-                   ;; Wrong syntax (PDF)
-                   invalid-read-syntax
-
-                   "This function supports only emacs-lisp-mode"
-
-                   "Cannot find a suitable checker"
-
-                   ;; ibuffer when the user presses enter on [ section ]
-                   "No buffer on this line"
-
-                   ;; "Attempt to delete the sole visible or iconified frame"
-                   ;; (push "Attempt to delete the sole visible or iconified frame" debug-ignored-errors)
-
-                   "Selecting deleted buffer"
-
-                   "Already at top level of the outline"
-
-                   "This buffer cannot use 'imenu-default-create-index-function'"
-
-                   ;; Debugger entered--Lisp error: (permission-denied "Setting current directory"
-                   ;; "Permission denied" "/dir/")
-                   permission-denied
-
-                   ;; Debugger entered--Lisp error: (invalid-regexp "Unmatched [ or [^")
-                   ;;  evil-ex-search-find-next-pattern(("[\"" t t) forward)
-                   ;;  evil-ex-find-next(("[\"" t t) forward t)
-                   ;;  evil-ex-search-full-pattern("[\"" nil forward)
-                   ;;  evil-ex-start-search(forward nil)
-                   ;;  evil-ex-search-forward(nil)
-                   ;;  funcall-interactively(evil-ex-search-forward nil)
-                   ;;  command-execute(evil-ex-search-forward)
-                   invalid-regexp
-
-                   ;; Debugger entered--Lisp error: (error "Accessing an empty ring")
-                   ;;  error("Accessing an empty ring")
-                   ;;  ring-ref((0 0 . [nil nil nil nil nil nil nil nil nil nil]) 0)
-                   ;;  evil-repeat(nil nil)
-                   ;;  funcall-interactively(evil-repeat nil nil)
-                   ;;  command-execute(evil-repeat)
-                   "Accessing an empty ring"
-
-                   ;; goto last change
-                   ;; ----------------
-                   ;; Debugger entered--Lisp error: (error "Negative arg: Cannot reverse as the first operation")
-                   ;; error("Negative arg: Cannot reverse as the first operation")
-                   ;; goto-last-change(-)
-                   ;; goto-last-change-reverse(nil)
-                   ;; evil-goto-last-change-reverse(nil)
-                   ;; funcall-interactively(evil-goto-last-change-reverse nil)
-                   ;; command-execute(evil-goto-last-change-reverse)
-                   "Negative arg: Cannot reverse as the first operation"
-
-                   ;; goto-chg
-                   "Buffer has not been changed"
-
-                   ;; Paredit
-                   "Mismatched parenthesis depth"
-                   "Mismatched character quotation"
-                   "Mismatched comment state:"
-                   "Mismatched string state:"
-
-                   ;; Outline next/previous heading
-                   ;; (outline-back-to-heading) and (show-children)
-                   outline-before-first-heading
-                   "No previous same-level heading"
-                   "No following same-level heading"
-
-                   ;; Debugger entered--Lisp error: (error "Last directory")
-                   ;;   error("%s directory" "Last")
-                   ;;   dired-next-subdir(1)
-                   ;;   funcall-interactively(dired-next-subdir 1)
-                   ;;   command-execute(dired-next-subdir)
-                   "Last directory"
-
-                   ;; easysession
-                   treesit-query-error
-
-                   ;; scan-error: "Unbalanced parentheses"
-                   scan-error
-
-                   ;; hideshow
-                   "Already at end of element"
-
-                   imenu-unavailable
-
-                   "Bad diff region number"))
-      (push err debug-ignored-errors)))
+    (setq debug-ignored-errors
+          (append '("search-failed"
+                    "\\`rx ['']\\*\\*[''] range error"
+                    search-failed
+                    "Sorry, comparison of identical variants is not what I am made for..."
+                    file-error
+                    invalid-read-syntax
+                    "This function supports only emacs-lisp-mode"
+                    "Cannot find a suitable checker"
+                    "No buffer on this line"
+                    "Selecting deleted buffer"
+                    "Already at top level of the outline"
+                    "This buffer cannot use 'imenu-default-create-index-function'"
+                    permission-denied
+                    invalid-regexp
+                    "Accessing an empty ring"
+                    "Negative arg: Cannot reverse as the first operation"
+                    "Buffer has not been changed"
+                    "Mismatched parenthesis depth"
+                    "Mismatched character quotation"
+                    "Mismatched comment state:"
+                    "Mismatched string state:"
+                    outline-before-first-heading
+                    "No previous same-level heading"
+                    "No following same-level heading"
+                    "Last directory"
+                    treesit-query-error
+                    scan-error
+                    "Already at end of element"
+                    imenu-unavailable
+                    "Bad diff region number")
+                  debug-ignored-errors)))
 
   (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
                                          "\\`/[^/|:]+:" "\\.gpg\\'"))
@@ -1537,60 +1459,60 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     ;; (global-set-key (kbd "C-?") 'help-command)
     )
 
-  ;; Non-nil means show the equivalent keybinding when M-x has one.
-  ;; The value can be a length of time to show the message for.
-  ;; If the value is non-nil and not a number, we wait 2 seconds.
-  (setq suggest-key-bindings nil)
+  (setq
+   ;; Non-nil means show the equivalent keybinding when M-x has one.
+   ;; The value can be a length of time to show the message for.
+   ;; If the value is non-nil and not a number, we wait 2 seconds.
+   suggest-key-bindings nil
 
-  ;; (setq tooltip-resize-echo-area t)
-  ;; (setq-default line-spacing 0.05)
-  (setq enhanced-evil-paredit-handle-paste t)
-  (setq confirm-kill-emacs 'y-or-n-p)
-  (setq history-delete-duplicates t)
-  (setq widget-image-enable nil)
-  (setq mode-line-collapse-minor-modes t)  ;; Emacs 31
-  (setq abbrev-suggest t)
-  (setq copy-directory-create-symlink t)
-  (setq echo-keystrokes-help nil) ; Emacs 30
-  (setq kept-old-versions 15)
-  (setq kept-new-versions 15)
+   ;; (setq tooltip-resize-echo-area t)
+   ;; (setq-default line-spacing 0.05)
+   enhanced-evil-paredit-handle-paste t
+   confirm-kill-emacs 'y-or-n-p
+   history-delete-duplicates t
+   widget-image-enable nil
+   mode-line-collapse-minor-modes t  ;; Emacs 31
+   abbrev-suggest t
+   copy-directory-create-symlink t
+   echo-keystrokes-help nil ; Emacs 30
+   kept-old-versions 15
+   kept-new-versions 15
 
-  ;; Shows all options when running apropos. For more info,
-  (setq calendar-week-start-day 1)
+   ;; Shows all options when running apropos. For more info,
+   calendar-week-start-day 1
 
-  (setq echo-keystrokes 0)  ;; Do not show keystrokes in the mini buffer
+   echo-keystrokes 0  ;; Do not show keystrokes in the mini buffer
+   delete-pair-blink-delay 0
 
-  (setq delete-pair-blink-delay 0)
+   ;; Other things
+   tab-bar-close-tab-select 'right
+   history-length 200
 
-  ;; Other things
-  (setq tab-bar-close-tab-select 'right)
+   ;; testing
+   transient-detect-key-conflicts t
 
-  (setq history-length 200)
+   ;; TODO minimal-emacs
+   ;; tramp-copy-size-limit (* 2 1024 1024) ; 1mb
+   ;; tramp-use-scp-direct-remote-copying t
+   ;; tramp-completion-reread-directory-timeout 60
 
-  ;; testing
-  (setq transient-detect-key-conflicts t)
+   remote-file-name-inhibit-auto-save t
 
-  ;; TODO minimal-emacs
-  ;; tramp-copy-size-limit (* 2 1024 1024) ; 1mb
-  ;; tramp-use-scp-direct-remote-copying t
-  ;; tramp-completion-reread-directory-timeout 60
+   ;; TODO: minimal emacs?
+   debugger-bury-or-kill 'kill
 
-  (setq remote-file-name-inhibit-auto-save t)
+   ;; (setq tramp-default-remote-shell "/bin/bash")
 
-  ;; TODO: minimal emacs?
-  (setq debugger-bury-or-kill 'kill)
-
-  ;; (setq tramp-default-remote-shell "/bin/bash")
-
-  ;; (setq byte-compile-warnings
-  ;;       '(not
-  ;;         ;; free-vars   ;; Using variables not defined with defvar (catches typos)
-  ;;         unresolved  ;; Calling functions that aren't defined yet
-  ;;         ;; noruntime   ;; Using functions/macros only available at compile-time
-  ;;         lexical     ;; Missing "lexical-binding: t" header (the .dir-locals warning)
-  ;;         ;; make-local  ;; Variables being made buffer-local in potentially odd ways
-  ;;         obsolete
-  ;;         ))  ;; Use of deprecated functions slated for removal
+   ;; (setq byte-compile-warnings
+   ;;       '(not
+   ;;         ;; free-vars   ;; Using variables not defined with defvar (catches typos)
+   ;;         unresolved  ;; Calling functions that aren't defined yet
+   ;;         ;; noruntime  ;; Using functions/macros only available at compile-time
+   ;;         lexical     ;; Missing "lexical-binding: t" header (the .dir-locals warning)
+   ;;         ;; make-local ;; Variables being made buffer-local in potentially odd ways
+   ;;         obsolete
+   ;;         ))  ;; Use of deprecated functions slated for removal
+   )
 
   (when auto-save-default
     (let ((auto-save-dir (file-name-directory auto-save-list-file-prefix)))
@@ -1606,18 +1528,18 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; Clipboard
 
-;; (setq suggest-key-bindings t)
-;; Many X desktop environments support a feature called the clipboard manager.
-;; If you exit Emacs while it is the current “owner” of the clipboard data, and
-;; there is a clipboard manager running, Emacs transfers the clipboard data to
-;; the clipboard manager so that it is not lost. In some circumstances, this may
-;; cause a delay when exiting Emacs; if you wish to prevent Emacs from
-;; transferring data to the clipboard manager, change the variable
-;; x-select-enable-clipboard-manager to nil.
-(setq x-select-enable-clipboard-manager nil)
-
-(setq select-enable-clipboard t)
-(setq select-enable-primary nil)
+(setq
+ ;; (setq suggest-key-bindings t)
+ ;; Many X desktop environments support a feature called the clipboard manager.
+ ;; If you exit Emacs while it is the current 'owner' of the clipboard data, and
+ ;; there is a clipboard manager running, Emacs transfers the clipboard data to
+ ;; the clipboard manager so that it is not lost. In some circumstances, this may
+ ;; cause a delay when exiting Emacs; if you wish to prevent Emacs from
+ ;; transferring data to the clipboard manager, change the variable
+ ;; x-select-enable-clipboard-manager to nil.
+ x-select-enable-clipboard-manager nil
+ select-enable-clipboard t
+ select-enable-primary nil)
 
 ;; Plain Text Pasting (Fixing "Org-Mode Bleed")
 ;;
@@ -1688,16 +1610,16 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; Other settings
 
-;; Control ^ = Control
-;; Command = Fn/Globe
-;; Fn/Globe = Command
-(setq mac-command-modifier 'control)
-(setq mac-option-modifier 'meta)
-
-;;; ibuffer
-
-(setq ibuffer-filter-group-name-face '(:inherit (success bold)))
 (setq
+ ;; Control ^ = Control
+ ;; Command = Fn/Globe
+ ;; Fn/Globe = Command
+ mac-command-modifier 'control
+ mac-option-modifier 'meta
+
+ ;;; ibuffer
+
+ ibuffer-filter-group-name-face '(:inherit (success bold))
  ;; ibuffer-hidden-filter-groups nil
 
  ;; The number of hours before a buffer is considered "old".
@@ -1878,16 +1800,17 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; saveplace
 
-;; Optimize I/O by skipping filesystem readability checks
-;; TODO: minimal-emacs?
-;;
-;; When set to nil (the optimization): Emacs skips the file-readable-p checks
-;; completely. It takes the list from RAM and writes it straight to disk in one
-;; operation, completely bypassing the file existence overhead.
-(setq save-place-forget-unreadable-files nil)
+(setq
+ ;; Optimize I/O by skipping filesystem readability checks
+ ;; TODO: minimal-emacs?
+ ;;
+ ;; When set to nil (the optimization): Emacs skips the file-readable-p checks
+ ;; completely. It takes the list from RAM and writes it straight to disk in one
+ ;; operation, completely bypassing the file existence overhead.
+ save-place-forget-unreadable-files nil
 
-;; Keep the alist bounded to prevent parsing slowdowns
-(setq save-place-limit 300)
+ ;; Keep the alist bounded to prevent parsing slowdowns
+ save-place-limit 300)
 
 ;;; Display line numbers
 
@@ -1906,11 +1829,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (add-hook-text-editing-modes 'my-setup-display-line-numbers-mode)
 (add-hook 'my-scratch-buffer-created-hook 'my-setup-display-line-numbers-mode)
-(add-hook 'ibuffer-mode-hook #'my-setup-display-line-numbers-mode)
-(add-hook 'grep-mode-hook #'my-setup-display-line-numbers-mode)
-(add-hook 'helpful-mode-hook #'my-setup-display-line-numbers-mode)
-(add-hook 'dired-mode-hook #'my-setup-display-line-numbers-mode)
-(add-hook 'org-agenda-mode-hook #'my-setup-display-line-numbers-mode)
+(mapc (lambda (m) (add-hook m #'my-setup-display-line-numbers-mode))
+      '(ibuffer-mode-hook grep-mode-hook helpful-mode-hook dired-mode-hook org-agenda-mode-hook))
 
 ;; Use absolute numbers; 'relative and 'visual are significantly slower
 ;; t=absolute
@@ -1918,11 +1838,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (setq-default display-line-numbers-type 'visual)
 (setq-default display-line-numbers-type 'visual)
 
-;; t is slow. Use nil.
-;; Scroll profiling: 7% + display-line-numbers-update-width
-(setq display-line-numbers-grow-only nil)
-
-(setq display-line-numbers-current-absolute nil)  ;; t=line num / nil=0
+(setq
+ ;; t is slow. Use nil.
+ ;; Scroll profiling: 7% + display-line-numbers-update-width
+ display-line-numbers-grow-only nil
+ display-line-numbers-current-absolute nil)  ;; t=line num / nil=0
 
 ;;; apheleia
 
@@ -2181,14 +2101,12 @@ generally one of the lines that are folded."
 ;;; Display buffer alist
 
 (unless noninteractive
-  (dolist (entry
-           '(("\\*pathaction:"
-              (display-buffer-at-bottom)
-              (window-height . 0.33))
-             ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
-             ("\\*Memory-Profiler-Report" (display-buffer-at-bottom))
-             ("\\*Calendar\\*" (display-buffer-at-bottom))))
-    (push entry display-buffer-alist))
+  (setq display-buffer-alist
+        (append '(("\\*pathaction:" (display-buffer-at-bottom) (window-height . 0.33))
+                  ("\\*CPU-Profiler-Report" (display-buffer-at-bottom))
+                  ("\\*Memory-Profiler-Report" (display-buffer-at-bottom))
+                  ("\\*Calendar\\*" (display-buffer-at-bottom)))
+                display-buffer-alist))
 
   ;; Force Org selection menus and capture buffers into a dedicated bottom side
   ;; window. This prevents Emacs from spawning new graphical frames, which
@@ -2308,7 +2226,7 @@ generally one of the lines that are folded."
   ;; recognize function names with dashes in them
   ;; (add-to-list 'sh-imenu-generic-expression
   ;;              '(sh (nil "^\\s-*function\\s-+\\([[:alpha:]_-][[:alnum:]_-]*\\)\\s-*\\(?:()\\)?" 1)
-  ;;                   (nil "^\\s-*\\([[:alpha:]_-][[:alnum:]_-]*\\)\\s-*()" 1)))
+  ;;                  (nil "^\\s-*\\([[:alpha:]_-][[:alnum:]_-]*\\)\\s-*()" 1)))
 
   ;; `sh-set-shell' is verbose about setting up indentation
   (when (fboundp 'sh-set-shell)
@@ -2644,11 +2562,11 @@ ARGS - the arguments passed to the original function"
 
 ;; shell-pop-default-directory "~/src"
 ;; shell-pop-shell-type (cond
-;;                       ((eq system-type 'gnu/linux)
-;;                        '("vterm" "*vterm*" #'vterm))
-;;                       (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
-;;                       (t '("terminal" "*terminal*"
-;;                            (lambda () (term shell-pop-term-shell)))))
+;;                        ((eq system-type 'gnu/linux)
+;;                         '("vterm" "*vterm*" #'vterm))
+;;                        (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
+;;                        (t '("terminal" "*terminal*"
+;;                             (lambda () (term shell-pop-term-shell)))))
 
 ;; (lightemacs-use-package popper
 ;;   :commands (popper-mode
@@ -2752,11 +2670,11 @@ ARGS - the arguments passed to the original function"
 
 ;; shell-pop-default-directory "~/src"
 ;; shell-pop-shell-type (cond
-;;                       ((eq system-type 'gnu/linux)
-;;                        '("vterm" "*vterm*" #'vterm))
-;;                       (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
-;;                       (t '("terminal" "*terminal*"
-;;                            (lambda () (term shell-pop-term-shell)))))
+;;                        ((eq system-type 'gnu/linux)
+;;                         '("vterm" "*vterm*" #'vterm))
+;;                        (IS-WINDOWS '("eshell" "*eshell*" #'eshell))
+;;                        (t '("terminal" "*terminal*"
+;;                             (lambda () (term shell-pop-term-shell)))))
 
 (lightemacs-use-package shell-pop
   :commands shell-pop
@@ -2771,9 +2689,9 @@ ARGS - the arguments passed to the original function"
                                        (vterm))))))
 
   ;; (setopt shell-pop-shell-type '("eat" "*eat*"
-  ;;                         (lambda ()
-  ;;                           (when (fboundp 'eat)
-  ;;                             (eat shell-pop-term-shell)))))
+  ;;                          (lambda ()
+  ;;                            (when (fboundp 'eat)
+  ;;                              (eat shell-pop-term-shell)))))
   ;; (setopt shell-pop-shell-type '("ansi-term"
   ;;                                "*ansi-term*"
   ;;                                (lambda ()
@@ -2782,12 +2700,12 @@ ARGS - the arguments passed to the original function"
   :init
   ;; (setq shell-pop-term-shell "/usr/bin/env bash")
   ;; (setq shell-pop-window-position "full")
-  (setq shell-pop-window-position "bottom")
-  (setq shell-pop-full-span nil)
-  (setq shell-pop-autocd-to-working-dir nil)
-  (setq shell-pop-term-shell "tmux-session emacs")
-  (setq shell-pop-window-size 80)
-  (setq shell-pop-restore-window-configuration t))
+  (setq shell-pop-window-position "bottom"
+        shell-pop-full-span nil
+        shell-pop-autocd-to-working-dir nil
+        shell-pop-term-shell "tmux-session emacs"
+        shell-pop-window-size 80
+        shell-pop-restore-window-configuration t))
 
 ;;; shell-pop: last dir
 
@@ -3064,29 +2982,29 @@ ARGS - the arguments passed to the original function"
 
 (with-eval-after-load 'le-vterm
   (setq vterm-timer-delay 0.001))
-(setq vterm-max-scrollback 1)
-(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y"))
-(setq vterm-disable-inverse-video t)
+(setq vterm-max-scrollback 1
+      vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y")
+      vterm-disable-inverse-video t
 
-;; To stop vterm from asking for confirmation and force it to compile the
-;; module automatically, you need to set the vterm-always-compile-module
-;; variable to t.
-(setq vterm-always-compile-module t)
+      ;; To stop vterm from asking for confirmation and force it to compile the
+      ;; module automatically, you need to set the vterm-always-compile-module
+      ;; variable to t.
+      vterm-always-compile-module t)
 
 ;; TODO lightemacs?
 (defun my-setup-vterm ()
   "Better evil integration with `vterm'."
   (my-disable-fringe-truncation-arrow)
 
-  (setq-local line-number-mode nil)
-  (setq-local column-number-mode nil)
+  (setq-local line-number-mode nil
+              column-number-mode nil
 
-  ;; Define cursor shapes and colors for Evil states
-  (setq-local evil-normal-state-cursor 'box
+              ;; Define cursor shapes and colors for Evil states
+              evil-normal-state-cursor 'box
               evil-visual-state-cursor 'box
-              evil-insert-state-cursor 'bar)
+              evil-insert-state-cursor 'bar
 
-  (setq-local cursor-type 'bar))
+              cursor-type 'bar))
 
 (add-hook 'vterm-mode-hook 'my-setup-vterm)
 
@@ -3342,14 +3260,15 @@ properly handles remote files over Tramp), applying the setting only if
 
 (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
-;; (setq-default diff-hl-reference-revision "origin/main")
-(setq diff-hl-ask-before-revert-hunk t)
-(setq diff-hl-disable-on-remote t)
-(setq diff-hl-draw-borders nil)
-(setq diff-hl-next-previous-hunk-auto-recenter nil)
-(setq diff-hl-autohide-margin nil)
-(setq diff-hl-bmp-max-width 16)
-(setq diff-hl-global-modes '(not image-mode pdf-view-mode))
+(setq
+ ;; (setq-default diff-hl-reference-revision "origin/main")
+ diff-hl-ask-before-revert-hunk t
+ diff-hl-disable-on-remote t
+ diff-hl-draw-borders nil
+ diff-hl-next-previous-hunk-auto-recenter nil
+ diff-hl-autohide-margin nil
+ diff-hl-bmp-max-width 16
+ diff-hl-global-modes '(not image-mode pdf-view-mode))
 
 ;;; Lazy autorevert
 
@@ -3422,51 +3341,52 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; VC
 
-(setq vc-git-log-switches '("--stat"))
+(setq
+ vc-git-log-switches '("--stat")
 
-;; The function that is called by default is `vc-shrink-buffer-window',
-;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
-;; This function shrinks height of WINDOW if its buffer doesn't need so many
-;; lines. More precisely, shrink WINDOW vertically to be as small as possible,
-;; while still showing the full contents of its buffer. WINDOW must be a live
-;; window and defaults to the selected one.
-(setq vc-diff-finish-functions nil)
-(setq vc-git-diff-switches '("--histogram"  ; Faster algorithm
-                             "--stat"
-                             "--textconv"
+ ;; The function that is called by default is `vc-shrink-buffer-window',
+ ;; which calls `shrink-window-if-larger-than-buffer' when BUFFER is visible.
+ ;; This function shrinks height of WINDOW if its buffer doesn't need so many
+ ;; lines. More precisely, shrink WINDOW vertically to be as small as possible,
+ ;; while still showing the full contents of its buffer. WINDOW must be a live
+ ;; window and defaults to the selected one.
+ vc-diff-finish-functions nil
+ vc-git-diff-switches '("--histogram"  ; Faster algorithm
+                        "--stat"
+                        "--textconv"
 
-                             ;; "--ignore-cr-at-eol"
+                        ;; "--ignore-cr-at-eol"
 
-                             ;; Ignore changes in amount of white space.
-                             ;; For example these would be considered the same:
-                             ;; -foo    bar
-                             ;; +foo bar
-                             ;; "--ignore-space-change"
+                        ;; Ignore changes in amount of white space.
+                        ;; For example these would be considered the same:
+                        ;; -foo    bar
+                        ;; +foo bar
+                        ;; "--ignore-space-change"
 
-                             ;; Ignore all white space.
-                             ;; "--ignore-all-space"
-                             ;; "-w"
+                        ;; Ignore all white space.
+                        ;; "--ignore-all-space"
+                        ;; "-w"
 
-                             ;; Ignore changes whose lines are all blank.
-                             ;; "--ignore-blank-lines"
-                             ))
-;; Allow completing Git revisions from all refs, not only branches.
-(setq vc-git-revision-complete-only-branches nil)
+                        ;; Ignore changes whose lines are all blank.
+                        ;; "--ignore-blank-lines"
+                        )
+ ;; Allow completing Git revisions from all refs, not only branches.
+ vc-git-revision-complete-only-branches nil
 
-;; Keep related changes together when generating changelogs.
-;;
-;; When you run `add-change-log-entry' or generate a changelog,
-;; Emacs groups changes that belong to the same logical change together,
-;; rather than scattering them across separate entries.
-;;
-;; This results in cleaner, more coherent changelog entries,
-;; especially useful when editing multiple related files or making
-;; several small fixes that belong to a single change.
-(setq add-log-keep-changes-together t)
+ ;; Keep related changes together when generating changelogs.
+ ;;
+ ;; When you run `add-change-log-entry' or generate a changelog,
+ ;; Emacs groups changes that belong to the same logical change together,
+ ;; rather than scattering them across separate entries.
+ ;;
+ ;; This results in cleaner, more coherent changelog entries,
+ ;; especially useful when editing multiple related files or making
+ ;; several small fixes that belong to a single change.
+ add-log-keep-changes-together t
 
-;; Hide "up-to-date" messages in vc-dir buffers when reverting, reducing noise
-;; (available since Emacs 31).
-(setq vc-dir-hide-up-to-date-on-revert t)
+ ;; Hide "up-to-date" messages in vc-dir buffers when reverting, reducing noise
+ ;; (available since Emacs 31).
+ vc-dir-hide-up-to-date-on-revert t)
 
 ;; Ignore large, commonly untracked directories (like node_modules) in VC
 ;; operations to improve performance.
@@ -3565,41 +3485,41 @@ function or if an invalid choice is made."
 
 ;;; Completion case
 
-(setq completion-ignore-case nil)
+(setq
+ completion-ignore-case nil
+ read-buffer-completion-ignore-case t
+ read-file-name-completion-ignore-case t
 
-(setq read-buffer-completion-ignore-case t
-      read-file-name-completion-ignore-case t)
+ ;; Control whether dabbrev searches should ignore case.
+ ;; Any other non-nil version means case is not significant.
+ ;; nil means case is significant.
+ dabbrev-case-fold-search nil
 
-;; Control whether dabbrev searches should ignore case.
-;; Any other non-nil version means case is not significant.
-;; nil means case is significant.
-(setq dabbrev-case-fold-search nil)
+ ;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
+ ;; A value of nil means preserve the expansion's case pattern.
+ dabbrev-case-replace nil
+ ;; (setq dabbrev-case-replace 'case-replace)
 
-;; Whether dabbrev applies the abbreviations's case pattern to the expansion.
-;; A value of nil means preserve the expansion's case pattern.
-(setq dabbrev-case-replace nil)
-;; (setq dabbrev-case-replace 'case-replace)
+ orderless-smart-case t
 
-(setq orderless-smart-case t)
+ ;;; dabbrev
 
-;;; dabbrev
+ dabbrev-check-all-buffers nil
 
-(setq dabbrev-check-all-buffers nil)
+ ;; It configures dabbrev (dynamic abbreviation expansion) to search only in the
+ ;; current buffer when expanding abbreviations, instead of searching in other
+ ;; buffers as well.
+ ;; (setq dabbrev-check-other-buffers t)  ;; Default t
 
-;; It configures dabbrev (dynamic abbreviation expansion) to search only in the
-;; current buffer when expanding abbreviations, instead of searching in other
-;; buffers as well.
-;; (setq dabbrev-check-other-buffers t)  ;; Default t
+ ;; Set this variable to "\\sw" if you want ordinary words or "\\sw\\|\\s_" if
+ ;; you want symbols (including characters whose syntax is "symbol" as well as
+ ;; those whose syntax is "word"). The abbreviation is from point to the start
+ ;; of the previous sequence of characters matching this variable.
+ ;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
 
-;; Set this variable to "\\sw" if you want ordinary words or "\\sw\\|\\s_" if
-;; you want symbols (including characters whose syntax is "symbol" as well as
-;; those whose syntax is "word"). The abbreviation is from point to the start
-;; of the previous sequence of characters matching this variable.
-;; (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
-
-;; (dabbrev-ignored-buffer-names '("*Messages*" "*Ibuffer*"))
-;; (dabbrev-limit 1000)
-(setq dabbrev-case-distinction nil)
+ ;; (dabbrev-ignored-buffer-names '("*Messages*" "*Ibuffer*"))
+ ;; (dabbrev-limit 1000)
+ dabbrev-case-distinction nil)
 
 ;; (setq dabbrev-check-other-buffers t)
 ;; (setq dabbrev-eliminate-newlines t)
@@ -3627,7 +3547,7 @@ function or if an invalid choice is made."
 ;; `string-width':
 ;;
 ;;   (setq max-width (max max-width (+ (string-width prefix)
-;;                                     (string-width display))))
+;;                                      (string-width display))))
 ;;
 ;; However, the formatted group title string (constructed via
 ;; `embark-collect-group-format') is omitted from this `max-width' calculation.
@@ -3720,45 +3640,46 @@ function or if an invalid choice is made."
 
 ;;; Flyspell and ispell Optimizations
 
-;; Setting flyspell-check-changes to a non-nil value causes Flyspell to check
-;; only words that have been typed or edited, instead of also checking words
-;; that point moves across. This can reduce spell-checking activity when
-;; navigating through existing text. The tradeoff is that existing misspellings
-;; are not checked merely because point moves across them, so they may remain
-;; undetected until the text is edited or checked explicitly.
-(setq flyspell-check-changes t)
+(setq
+ ;; Setting flyspell-check-changes to a non-nil value causes Flyspell to check
+ ;; only words that have been typed or edited, instead of also checking words
+ ;; that point moves across. This can reduce spell-checking activity when
+ ;; navigating through existing text. The tradeoff is that existing misspellings
+ ;; are not checked merely because point moves across them, so they may remain
+ ;; undetected until the text is edited or checked explicitly.
+ flyspell-check-changes t
 
-;; Setting flyspell-mark-duplications-flag to nil prevents Flyspell from
-;; reporting repeated words as errors. This eliminates duplicate-word detection,
-;; so accidental repetitions such as "the the" are no longer reported.
-;; Repeated-word detection is also not implemented when Flyspell checks large
-;; regions.
-(setq flyspell-mark-duplications-flag nil)
+ ;; Setting flyspell-mark-duplications-flag to nil prevents Flyspell from
+ ;; reporting repeated words as errors. This eliminates duplicate-word detection,
+ ;; so accidental repetitions such as "the the" are no longer reported.
+ ;; Repeated-word detection is also not implemented when Flyspell checks large
+ ;; regions.
+ flyspell-mark-duplications-flag nil
 
-(setq flyspell-large-region 500)
+ flyspell-large-region 500
 
-;; TODO minimal emacs?
-(setq flyspell-delay 1)
+ ;; TODO minimal emacs?
+ flyspell-delay 1
 
-;; Force Flyspell to run spell-checks using idle timers rather than blocking via
-;; sit-for. This prevents brief input delays while typing.
-(setq flyspell-delay-use-timer t)
+ ;; Force Flyspell to run spell-checks using idle timers rather than blocking via
+ ;; sit-for. This prevents brief input delays while typing.
+ flyspell-delay-use-timer t
 
-;;; Sync dictionary
+ ;;; Sync dictionary
 
-;; Set the ispell program name to aspell
-;; (switching to aspell will generally offer better performance than ispell.)
-(setq ispell-program-name "aspell")
+ ;; Set the ispell program name to aspell
+ ;; (switching to aspell will generally offer better performance than ispell.)
+ ispell-program-name "aspell"
 
-;; Set the global default dictionary for the Ispell process.
-(setq ispell-dictionary "en_US")
+ ;; Set the global default dictionary for the Ispell process.
+ ispell-dictionary "en_US"
 
-;; Reduce unnecessary messages when checking individual words.
-(setq ispell-quietly t)
+ ;; Reduce unnecessary messages when checking individual words.
+ ispell-quietly t
 
-;; Configure Aspell's suggestion mode to "ultra", which favors very close
-;; spelling and phonetic matches when generating suggestions.
-(setq ispell-extra-args '("--sug-mode=ultra"))
+ ;; Configure Aspell's suggestion mode to "ultra", which favors very close
+ ;; spelling and phonetic matches when generating suggestions.
+ ispell-extra-args '("--sug-mode=ultra"))
 
 (defun my-flyspell-prog-mode (&rest _args)
   "Enable `flyspell-prog-mode' with buffer-local Aspell arguments."
@@ -3963,9 +3884,9 @@ Defers actual initialization to prevent blocking file loads."
 
 
 ;; (add-hook 'text-mode-hook
-;;           #'(lambda()
-;;               (setq-local ispell-extra-args
-;;                           (remove "--run-together" ispell-extra-args))))
+;;            #'(lambda()
+;;                (setq-local ispell-extra-args
+;;                            (remove "--run-together" ispell-extra-args))))
 
 ;; (defun my-ispell-perl-mode-setup ()
 ;;   "Remove the --run-together argument from Aspell in text modes."
@@ -4134,7 +4055,7 @@ Defers actual initialization to prevent blocking file loads."
 ;;   ;;  (prog-mode . visual-fill-column-mode)
 ;;   ;;  (text-mode . visual-fill-column-mode)
 ;;   ;;  ((markdown-mode org-mode) . (lambda()
-;;   ;;                                (setq fill-column 120))))
+;;   ;;                              (setq fill-column 120))))
 ;;
 ;;   :custom
 ;;   ;; Global settings
@@ -4159,11 +4080,11 @@ Defers actual initialization to prevent blocking file loads."
 ;;     ;; Check if we have already prompted and ensure we are not currently
 ;;     ;; reverting
 ;;     ;; let ((find-file-hook (seq-remove
-;;     ;;                       ;; This prevents an infinite loop
-;;     ;;                       (lambda(hook)
-;;     ;;                         (when (eq hook 'auto-recover-prompt-on-visit)
-;;     ;;                           t))
-;;     ;;                       find-file-hook)))
+;;     ;;                      ;; This prevents an infinite loop
+;;     ;;                      (lambda(hook)
+;;     ;;                        (when (eq hook 'auto-recover-prompt-on-visit)
+;;     ;;                          t))
+;;     ;;                      find-file-hook)))
 ;;     (when (and buffer-file-name
 ;;                (not (buffer-base-buffer))
 ;;                (not auto-recover-prompted)
@@ -4454,9 +4375,9 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;         (when (and top-level-dir
 ;;                    (file-directory-p (expand-file-name ".git/git-crypt"
 ;;                                                        top-level-dir)))
-;;           (unless (member "--textconv" vc-git-diff-switches)
-;;             (setq-local vc-git-diff-switches
-;;                         (append vc-git-diff-switches '("--textconv")))))))))
+;;            (unless (member "--textconv" vc-git-diff-switches)
+;;              (setq-local vc-git-diff-switches
+;;                          (append vc-git-diff-switches '("--textconv")))))))))
 ;;
 ;; (add-hook 'find-file-hook #'mod-better-vc-git-crypt-support 90)
 
@@ -4616,11 +4537,11 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;                                          try-complete-lisp-symbol))
 
 ;; (setq hippie-expand-try-functions-list
-;;       '(try-complete-file-name-partially
-;;         try-complete-file-name
-;;         try-expand-dabbrev
-;;         try-expand-dabbrev-all-buffers
-;;         try-expand-dabbrev-from-kill))
+;;        '(try-complete-file-name-partially
+;;          try-complete-file-name
+;;          try-expand-dabbrev
+;;          try-expand-dabbrev-all-buffers
+;;          try-expand-dabbrev-from-kill))
 
 ;;; DISABLED: TODO: Load specific local variables
 
