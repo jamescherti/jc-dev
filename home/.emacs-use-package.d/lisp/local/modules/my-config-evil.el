@@ -1,4 +1,4 @@
-;;; mod-misc.el --- mod-misc -*- lexical-binding: t -*-
+;;; my-config-evil.el --- my config evil -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -281,7 +281,6 @@
 (defun my-clear-highlights ()
   "Clear highlight and related state in the buffer."
   (let ((inhibit-message t)
-        (cur-buf (current-buffer))
         (buffer (current-buffer)))
     (when (buffer-live-p buffer)
       (with-current-buffer buffer
@@ -340,21 +339,20 @@
 (defun my-goto-end-of-buffer (&rest _)
   "Go to the end of the buffer."
   (interactive)
-  (let ((column (current-column)))
-    (unwind-protect
-        (progn
-          (goto-char (point-max)))
-      ;; Small customization to never be on eobp
-      ;; NOTE: this is handeled by a post-command-hook
-      ;; (when (eobp)
-      ;;   ;; Move the cursor before `eobp' (last empty line).
-      ;;   (backward-char 1))
+  (unwind-protect
+      (progn
+        (goto-char (point-max)))
+    ;; Small customization to never be on eobp
+    ;; NOTE: this is handeled by a post-command-hook
+    ;; (when (eobp)
+    ;;   ;; Move the cursor before `eobp' (last empty line).
+    ;;   (backward-char 1))
 
-      ;; (beginning-of-visual-line)
-      ;; (move-to-column column)
-      ;; (recenter -1)
+    ;; (beginning-of-visual-line)
+    ;; (move-to-column column)
+    ;; (recenter -1)
 
-      (lightemacs-recenter-maybe -1 t))))
+    (lightemacs-recenter-maybe -1 t)))
 
 ;; TODO: Article? Bug report?
 (defun my-uncomment-and-join-region ()
@@ -424,7 +422,8 @@
 (defun my-bash-stdops-sre ()
   "Call sre."
   (interactive)
-  (let ((project-dir (expand-file-name (my-project-root-dir))))
+  (let* ((root (my-project-root-dir))
+         (project-dir (when root (expand-file-name root))))
     (unless project-dir
       (user-error "Unable to find the project path: %s" project-dir))
     (when (fboundp 'bash-stdops-project-sre)
@@ -445,10 +444,10 @@
 (defun evileval-region ()
   "Evaluate the current region and display a message."
   (interactive)
-  (unless (or (derived-mode-p 'markdown-mode)
-              (derived-mode-p 'markdown-ts-mode)
-              (derived-mode-p 'org-mode)
-              (derived-mode-p 'emacs-lisp-mode))
+  (unless (derived-mode-p 'markdown-mode
+                          'markdown-ts-mode
+                          'org-mode
+                          'emacs-lisp-mode)
     (error "This function supports only emacs-lisp-mode"))
   (if (use-region-p)
       (progn
@@ -755,10 +754,10 @@ This enhancement prevents the cursor from moving."
 
   ;; Open in a NEW TAB
   (keymap-set vertico-map "C-t"
-              #'(lambda()
-                  ;; Open embark-dwim in a new tab
-                  (when (fboundp 'tab-new-func-buffer-from-other-window)
-                    (tab-new-func-buffer-from-other-window 'embark-dwim))))
+              (lambda()
+                ;; Open embark-dwim in a new tab
+                (when (fboundp 'tab-new-func-buffer-from-other-window)
+                  (tab-new-func-buffer-from-other-window 'embark-dwim))))
 
   (if (< emacs-major-version 31)
       (require 'le-wgrep)
@@ -775,22 +774,22 @@ This enhancement prevents the cursor from moving."
           (when (fboundp 'wgrep-finish-edit)
             ;; TODO: save and restore the cursor: wgrep-finish-edit
             (evil-define-key 'normal 'local (kbd "C-s")
-              #'(lambda()
-                  (interactive)
-                  (lightemacs-save-window-scroll
-                    (lightemacs-save-window-start
-                      (save-mark-and-excursion
-                        (wgrep-finish-edit)
-                        (wgrep-change-to-wgrep-mode))))))))
+              (lambda()
+                (interactive)
+                (lightemacs-save-window-scroll
+                  (lightemacs-save-window-start
+                    (save-mark-and-excursion
+                      (wgrep-finish-edit)
+                      (wgrep-change-to-wgrep-mode))))))))
       ;; Emacs >= 31
       (when (fboundp 'grep-change-to-grep-edit-mode)
         (grep-change-to-grep-edit-mode)
         (when (fboundp 'grep-edit-save-changes)
           ;; TODO: save and restore the cursor: wgrep-finish-edit
           (evil-define-key 'normal 'local (kbd "C-s")
-            #'(lambda()
-                (interactive)
-                (grep-edit-save-changes)))))))
+            (lambda()
+              (interactive)
+              (grep-edit-save-changes)))))))
 
   ;; (add-hook 'embark-after-export-hook #'my-grep-edit)
 
@@ -891,8 +890,8 @@ When IMENU-ONLY is nil it only uses imenu."
       ;; Try the others
       (unless imenu-only
         (let ((evil-goto-definition-functions
-               (cl-remove 'evil-goto-definition-imenu
-                          evil-goto-definition-functions)))
+               (remq 'evil-goto-definition-imenu
+                     evil-goto-definition-functions)))
           (evil-goto-definition))))))
 
 (defun eviljump-goto-definition (&optional force-all)
@@ -906,8 +905,7 @@ When FORCE-ALL is non-nil, use all functions."
            (eglot-managed-p))
       (xref-find-definitions (thing-at-point 'symbol t)))
 
-     ((and (boundp 'lsp-mode)
-           lsp-mode
+     ((and (bound-and-true-p lsp-mode)
            (fboundp 'lsp-find-definition))
       (lsp-find-definition))
 
@@ -953,7 +951,7 @@ guarantees that the new window is selected, as in Vim."
         (pos (point))
         (view (window-start)))
     ;; Split the window
-    (if (equal split-direction "v")
+    (if (string= split-direction "v")
         (evil-window-vsplit)
       (evil-window-split))
     ;; Restore cursor and view of previous window
@@ -1068,9 +1066,10 @@ guarantees that the new window is selected, as in Vim."
     (let ((orig-buffer-list (symbol-function 'buffer-list)))
       (cl-letf (((symbol-function 'buffer-list)
                  (lambda (&optional frame)
-                   (seq-filter (lambda (buf)
-                                 (not (with-current-buffer buf
-                                        (derived-mode-p 'dired-mode))))
+                   (seq-remove (lambda (buf)
+                                 (provided-mode-derived-p
+                                  (buffer-local-value 'major-mode buf)
+                                  'dired-mode))
                                (funcall orig-buffer-list frame)))))
         (consult-buffer)))))
 
@@ -1163,12 +1162,12 @@ word after the space that contains at least two uppercase characters."
   (evil-define-key '(normal motion) org-agenda-keymap (kbd "<leader>oo") 'org-agenda-set-tags)
   ;; (evil-define-key '(normal motion) org-agenda-keymap (kbd "<tab>") 'org-agenda-goto)
   (evil-define-key '(normal motion) org-agenda-keymap (kbd "C-l")
-    #'(lambda()
-        (interactive)
-        (when (fboundp 'org-agenda-filter-remove-all)
-          (org-agenda-filter-remove-all))
+    (lambda()
+      (interactive)
+      (when (fboundp 'org-agenda-filter-remove-all)
+        (org-agenda-filter-remove-all))
 
-        (evilbuffer-clear-highlights)))
+      (evilbuffer-clear-highlights)))
 
   (evil-define-key 'insert org-mode-map (kbd "C-u") 'my-evil-delete-to-heading-star)
 
@@ -1450,18 +1449,18 @@ If the parentheses are balanced, the function returns t."
   (advice-add 'check-parens :override #'my-check-parens-no-jump))
 
 (add-hook 'emacs-lisp-mode-hook
-          #'(lambda ()
-              (with-eval-after-load 'evil
-                (evil-define-key 'normal 'global (kbd "gV")
-                  #'my-elisp-mode-select-sexp)
+          (lambda ()
+            (with-eval-after-load 'evil
+              (evil-define-key 'normal 'global (kbd "gV")
+                #'my-elisp-mode-select-sexp)
 
-                (add-hook 'evil-insert-state-exit-hook
-                          #'(lambda() (when (and
-                                             (fboundp 'evil-insert-state-p)
-                                             (evil-insert-state-p))
-                                        (my-check-parens-no-jump t)))
-                          nil t))
-              (add-hook 'after-save-hook #'my-check-parens-no-jump -99 t)))
+              (add-hook 'evil-insert-state-exit-hook
+                        (lambda() (when (and
+                                         (fboundp 'evil-insert-state-p)
+                                         (evil-insert-state-p))
+                                    (my-check-parens-no-jump t)))
+                        nil t))
+            (add-hook 'after-save-hook #'my-check-parens-no-jump -99 t)))
 
 ;;; Markdown mode
 

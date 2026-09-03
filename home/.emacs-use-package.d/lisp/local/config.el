@@ -1253,7 +1253,6 @@ This uses an around advice to trap errors and verify file timestamps."
             (let-alist :type built-in)
             (use-package :type built-in)
             (bind-key :type built-in)
-            (benchmark-init :type built-in)
 
             ;; (modus-themes :type built-in)
 
