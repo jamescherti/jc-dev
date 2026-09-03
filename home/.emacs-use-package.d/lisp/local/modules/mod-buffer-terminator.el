@@ -364,7 +364,7 @@
   "Return :keep the non file-visiting buffers whose name start with a space."
   (let ((buffer-name (buffer-name)))
     (when (and buffer-name
-               (string-prefix-p " " (buffer-name))
+               (string-prefix-p " " buffer-name)
                (not (buffer-file-name (buffer-base-buffer))))
       :keep)))
 
@@ -377,7 +377,7 @@ BUFFERS is a buffer or a list of alive buffers."
                   (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
                   ;; (keep-buffer-property . process)
                   ;; (keep-buffer-property . special)
-                  (keep-buffer-name . ,mod-buffer-terminator-always-keep)
+                  ;; (keep-buffer-name . ,mod-buffer-terminator-always-keep)
                   (keep-buffer-name-regexp . ,mod-buffer-terminator-keep-buffer-regexp)
                   (keep-buffer-property . visible)
                   (return . :kill)))
