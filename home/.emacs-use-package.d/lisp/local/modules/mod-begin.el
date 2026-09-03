@@ -57,8 +57,8 @@ ARGS are the arguments passed to the original function."
 
 ;;; Local modes instead of global ones
 
-(setq lightemacs-electric-pair-local-target-hooks nil)
-(setq lightemacs-electric-pair-global-target-hooks nil)
+(setq lightemacs-electric-pair-local-target-hooks nil
+      lightemacs-electric-pair-global-target-hooks nil)
 (add-hook-text-editing-modes #'electric-pair-local-mode)
 (add-hook 'my-scratch-buffer-created-hook 'electric-pair-local-mode)
 
@@ -77,22 +77,22 @@ ARGS are the arguments passed to the original function."
 
 (add-hook 'minibuffer-setup-hook #'my-disable-electric-pair-in-evil t)
 
-(setq lightemacs-evil-snipe-local-target-hooks nil)
-(setq lightemacs-evil-snipe-global-target-hooks nil)
+(setq lightemacs-evil-snipe-local-target-hooks nil
+      lightemacs-evil-snipe-global-target-hooks nil)
 (with-eval-after-load 'le-evil-snipe
   (add-hook-text-editing-modes 'evil-snipe-local-mode)
   (add-hook 'my-scratch-buffer-created-hook 'evil-snipe-local-mode)
   (add-hook 'minibuffer-setup-hook 'evil-snipe-local-mode))
 
-(setq lightemacs-evil-surround-local-target-hooks nil)
-(setq lightemacs-evil-surround-global-target-hooks nil)
+(setq lightemacs-evil-surround-local-target-hooks nil
+      lightemacs-evil-surround-global-target-hooks nil)
 (with-eval-after-load 'le-evil-surround
   (add-hook-text-editing-modes 'evil-surround-mode)
   (add-hook 'my-scratch-buffer-created-hook 'evil-surround-mode)
   (add-hook 'minibuffer-setup-hook 'evil-surround-mode))
 
-(setq lightemacs-corfu-local-target-hooks nil)
-(setq lightemacs-corfu-global-target-hooks nil)
+(setq lightemacs-corfu-local-target-hooks nil
+      lightemacs-corfu-global-target-hooks nil)
 ;; This is enabled by `mod-conditional-modes'
 (with-eval-after-load 'le-corfu
   (add-hook-text-editing-modes 'corfu-mode)
@@ -111,29 +111,28 @@ ARGS are the arguments passed to the original function."
 ;; (with-eval-after-load 'saveplace
 ;;   (add-hook-text-editing-modes 'save-place-local-mode))
 
-(setq lightemacs-undo-fu-session-local-target-hooks nil)
-(setq lightemacs-undo-fu-session-global-target-hooks nil)
+(setq lightemacs-undo-fu-session-local-target-hooks nil
+      lightemacs-undo-fu-session-global-target-hooks nil)
 (with-eval-after-load 'le-undo-fu-session
   (add-hook-text-editing-modes 'undo-fu-session-mode))
 
 ;; Started from mod-conditional-modes.el
-(setq lightemacs-stripspace-local-target-hooks nil)
-(setq lightemacs-stripspace-global-target-hooks nil)
-(setq lightemacs-aggressive-indent-local-target-hooks nil)
-(setq lightemacs-aggressive-indent-global-target-hooks nil)
-(setq lightemacs-apheleia-local-target-hooks nil)
-(setq lightemacs-apheleia-global-target-hooks nil)
-(setq lightemacs-flymake-target-hooks nil)
-(setq lightemacs-dtrt-indent-global-target-hooks nil)
-(setq lightemacs-dtrt-indent-local-target-hooks nil)
-(setq lightemacs-buffer-terminator-target-hooks nil)
-
-(setq lightemacs-package-lint-flymake-target-hooks nil)
+(setq lightemacs-stripspace-local-target-hooks nil
+      lightemacs-stripspace-global-target-hooks nil
+      lightemacs-aggressive-indent-local-target-hooks nil
+      lightemacs-aggressive-indent-global-target-hooks nil
+      lightemacs-apheleia-local-target-hooks nil
+      lightemacs-apheleia-global-target-hooks nil
+      lightemacs-flymake-target-hooks nil
+      lightemacs-dtrt-indent-global-target-hooks nil
+      lightemacs-dtrt-indent-local-target-hooks nil
+      lightemacs-buffer-terminator-target-hooks nil
+      lightemacs-package-lint-flymake-target-hooks nil)
 
 ;;; Yasnippet
 
-(setq lightemacs-yasnippet-global-target-hooks nil)
-(setq lightemacs-yasnippet-local-target-hooks nil)
+(setq lightemacs-yasnippet-global-target-hooks nil
+      lightemacs-yasnippet-local-target-hooks nil)
 (add-hook-text-editing-modes 'yas-minor-mode)
 (add-hook 'my-scratch-buffer-created-hook 'yas-minor-mode)
 
@@ -388,10 +387,10 @@ Opens a split window showing the added and removed features."
   (if (not lazy-loader-initial-features)
       (message "Comparison canceled.")
     (let ((added (seq-remove (lambda (f)
-                               (seq-contains-p lazy-loader-initial-features f))
+                               (memq f lazy-loader-initial-features))
                              features))
           (removed (seq-remove (lambda (f)
-                                 (seq-contains-p features f))
+                                 (memq f features))
                                lazy-loader-initial-features))
           (buf (get-buffer-create "*Feature Diff*")))
       (with-current-buffer buf
