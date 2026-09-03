@@ -3894,6 +3894,15 @@ Defers actual initialization to prevent blocking file loads."
 ;; (add-hook 'bash-ts-mode-hook #'my-ispell-perl-mode-setup)
 ;; (add-hook 'sh-mode-hook #'my-ispell-perl-mode-setup)
 
+;;; benchmark init
+
+(lightemacs-use-package benchmark-init
+  :ensure nil
+  :commands (benchmark-init/activate
+             benchmark-init/deactivate)
+  :config
+  (require 'benchmark-init-modes))
+
 ;;; DISABLED: vterm-toggle
 
 ;; (lightemacs-use-package vterm-toggle
