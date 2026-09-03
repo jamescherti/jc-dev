@@ -37,6 +37,9 @@
 
 ;;; Native compilation settings
 
+;; (setq lightemacs-ui-features '(dialogs menu-bar tooltips context-menu))
+;; (setq lightemacs-ui-features '(dialogs tool-bar menu-bar tooltips context-menu))
+
 (setq lightemacs-native-comp-excluded-cpus 1)
 
 (setq native-comp-jit-compilation t)

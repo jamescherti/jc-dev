@@ -375,15 +375,15 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; TODO Interesting for lightemacs?
 
-(add-hook 'kill-emacs-hook
-          (lambda ()
-            (let ((early-init-el (expand-file-name "early-init.el" lightemacs-user-directory))
-                  (early-init-elc (expand-file-name "early-init.elc" lightemacs-user-directory)))
-              (when (and (file-exists-p early-init-elc)
-                         ;; (file-exists-p early-init-el) ; Not necessary
-                         (file-newer-than-file-p early-init-el early-init-elc))
-                (message "[AUTO DELETE] %s" early-init-elc)
-                (delete-file early-init-elc)))))
+;; (add-hook 'kill-emacs-hook
+;;           (lambda ()
+;;             (let ((early-init-el (expand-file-name "early-init.el" lightemacs-user-directory))
+;;                   (early-init-elc (expand-file-name "early-init.elc" lightemacs-user-directory)))
+;;               (when (and (file-exists-p early-init-elc)
+;;                          ;; (file-exists-p early-init-el) ; Not necessary
+;;                          (file-newer-than-file-p early-init-el early-init-elc))
+;;                 (message "[AUTO DELETE] %s" early-init-elc)
+;;                 (delete-file early-init-elc)))))
 
 ;;; compile-angel timer (test)
 
