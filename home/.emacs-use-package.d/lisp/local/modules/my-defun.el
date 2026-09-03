@@ -569,8 +569,8 @@ After that, restore cursor, `window-start', and hscroll."
   (interactive)
   (unless (derived-mode-p 'ansible-mode)
     (error "This only works when ansible-mode is active"))
-  (if (or (derived-mode-p 'yaml-mode)
-          (derived-mode-p 'yaml-ts-mode))
+  (if (derived-mode-p 'yaml-mode
+                      'yaml-ts-mode)
       (let* ((path (buffer-file-name (buffer-base-buffer)))
              (cursor-pos (point))
              (window (selected-window))

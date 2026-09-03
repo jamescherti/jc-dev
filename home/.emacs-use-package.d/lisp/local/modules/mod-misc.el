@@ -1817,9 +1817,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (defun my-setup-display-line-numbers-mode ()
   "Setup `display-line-numbers-mode'."
   (cond
-   ((or (derived-mode-p 'markdown-mode)
-        (derived-mode-p 'markdown-ts-mode)
-        (derived-mode-p 'org-mode))
+   ((derived-mode-p 'markdown-mode
+                    'markdown-ts-mode
+                    'org-mode)
     ;; (setq-local display-line-numbers-type 'relative)
     (display-line-numbers-mode 1))
 

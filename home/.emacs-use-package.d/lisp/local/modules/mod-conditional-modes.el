@@ -35,7 +35,7 @@
 ;; (defvar env-allow-whitespace-cleanup nil)
 ;; (defvar env-allow-language-servers nil)
 ;; (defvar env-allow-reformatters nil)
-;; 
+;;
 ;; (dolist (var '(env-allow-syntax-checkers
 ;;                env-allow-syntax-checker-package-lint
 ;;                env-allow-lsp
@@ -43,7 +43,7 @@
 ;;                env-allow-language-servers
 ;;                env-allow-reformatters))
 ;;   (put var 'safe-local-variable #'booleanp))
-;; 
+;;
 ;; (dir-locals-set-class-variables 'env-deny-all
 ;;                                 '((nil . ((env-allow-syntax-checkers . nil)
 ;;                                           (env-allow-syntax-checker-package-lint . nil)
@@ -51,7 +51,7 @@
 ;;                                           (env-allow-whitespace-cleanup . nil)
 ;;                                           (env-allow-language-servers . nil)
 ;;                                           (env-allow-reformatters . nil)))))
-;; 
+;;
 ;; (dir-locals-set-class-variables 'env-allow-emacs-dev
 ;;                                 '((nil . ((env-allow-syntax-checkers . t)
 ;;                                           (env-allow-syntax-checker-package-lint . t)
@@ -59,7 +59,7 @@
 ;;                                           (env-allow-whitespace-cleanup . t)
 ;;                                           (env-allow-language-servers . t)
 ;;                                           (env-allow-reformatters . t)))))
-;; 
+;;
 ;; (dir-locals-set-class-variables 'env-allow-standard
 ;;                                 '((nil . ((env-allow-syntax-checkers . t)
 ;;                                           (env-allow-syntax-checker-package-lint . nil)
@@ -67,7 +67,7 @@
 ;;                                           (env-allow-whitespace-cleanup . t)
 ;;                                           (env-allow-language-servers . t)
 ;;                                           (env-allow-reformatters . t)))))
-;; 
+;;
 ;; (dir-locals-set-directory-class "~/src/forks/" 'env-deny-all)
 ;; (dir-locals-set-directory-class "~/src/local/" 'env-deny-all)
 ;; (dir-locals-set-directory-class "~/src/emacs/" 'env-allow-emacs-dev)
@@ -232,8 +232,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
         (when env-allow-lsp
           ;; All modes
           (when (and (fboundp 'eglot-ensure)
-                     (or (derived-mode-p 'python-mode)
-                         (derived-mode-p 'python-ts-mode)))
+                     (derived-mode-p 'python-mode 'python-ts-mode))
             (when (treesit-parser-list)
               ;; This is to avoid redundant semantic highlighting, disabling
               ;; Eglot's :semanticTokensProvider is reasonable when Tree-sitter
@@ -247,12 +246,12 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
         (when env-allow-reformatters
           ;; All modes
           (when (and (fboundp 'apheleia-mode)
-                     (or (derived-mode-p 'python-mode)
-                         (derived-mode-p 'python-ts-mode)
-                         (derived-mode-p 'bash-ts-mode)
-                         (derived-mode-p 'sh-mode)
-                         (derived-mode-p 'yaml-mode)
-                         (derived-mode-p 'yaml-ts-mode)))
+                     (derived-mode-p 'python-mode
+                                     'python-ts-mode
+                                     'bash-ts-mode
+                                     'sh-mode
+                                     'yaml-mode
+                                     'yaml-ts-mode))
             (apheleia-mode 1))
 
           ;; Elisp

@@ -272,8 +272,8 @@
        ((derived-mode-p 'org-mode)
         (insert "* "))
 
-       ((or (derived-mode-p 'markdown-ts-mode)
-            (derived-mode-p 'markdown-mode))
+       ((derived-mode-p 'markdown-ts-mode
+                        'markdown-mode)
         (insert "# ")))
 
       (evil-insert-state)))))

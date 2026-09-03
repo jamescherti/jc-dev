@@ -166,8 +166,8 @@ If no suitable indent point is found and UNINDENTED-OK is nil, fall back to
                             (goto-char (line-beginning-position))
                             (looking-at-p "^[ \t]*$"))))))
         (cond
-         ((and (or (derived-mode-p 'yaml-mode)
-                   (derived-mode-p 'yaml-ts-mode))
+         ((and (derived-mode-p 'yaml-mode
+                               'yaml-ts-mode)
                (looking-at "^[ \t]*-"))
           (save-excursion
             (goto-char (line-beginning-position))
