@@ -3258,7 +3258,11 @@ properly handles remote files over Tramp), applying the setting only if
   ;; (advice-add 'diff-hl-mode :before #'my-diff-hl-set-upstream-reference)
   )
 
-;; (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
+(defun my-diff-hl-add-local-hooks ()
+  "Add `diff-hl' local hooks."
+  (add-hook 'after-save-hook #'my-setup-diff-hl-mode nil t))
+
+(add-hook-text-editing-modes 'my-diff-hl-add-local-hooks)
 
 ;; (setq
 ;;  ;; (setq-default diff-hl-reference-revision "origin/main")
@@ -3267,6 +3271,8 @@ properly handles remote files over Tramp), applying the setting only if
 ;;  ;; diff-hl-autohide-margin nil
 ;;  ;; diff-hl-bmp-max-width 16
 ;;  )
+
+(setq diff-hl-disable-on-remote t)
 
 ;;; Lazy autorevert
 

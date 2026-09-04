@@ -57,6 +57,10 @@ ARGS are the arguments passed to the original function."
 
 ;;; Local modes instead of global ones
 
+(setq lightemacs-diff-hl-flydiff-global-target-hooks nil
+      lightemacs-diff-hl-local-target-hooks nil
+      lightemacs-diff-hl-global-target-hooks nil)
+
 (setq lightemacs-electric-pair-local-target-hooks nil
       lightemacs-electric-pair-global-target-hooks nil)
 (add-hook-text-editing-modes #'electric-pair-local-mode)
