@@ -37,22 +37,24 @@
 
 (defun my-evil-define-key-outline-indent-minor-mode ()
   "Set `M-h' and `M-l' to decrease/increase the indentation level of blocks."
-  (evil-define-key 'normal 'local (kbd "M-h") 'outline-indent-shift-left)
-  (evil-define-key 'normal 'local (kbd "M-l") 'outline-indent-shift-right)
+  (evil-define-key 'normal 'local
+    (kbd "M-h") 'outline-indent-shift-left
+    (kbd "M-l") 'outline-indent-shift-right
+    (kbd "gV") 'outline-indent-select)
 
   (unless (derived-mode-p 'prog-mode)
     ;; In prog-mode, [[, ]], gj, and gk provide navigation to the previous
     ;; and next function, so there is no need to override them.
-    (evil-define-key 'normal 'local (kbd "]]") 'outline-indent-forward-same-level)
-    (evil-define-key 'normal 'local (kbd "[[") 'outline-indent-backward-same-level)
-    (evil-define-key 'normal 'local (kbd "gj") 'outline-indent-forward-same-level)
-    (evil-define-key 'normal 'local (kbd "gk") 'outline-indent-backward-same-level))
-
-  (evil-define-key 'normal 'local (kbd "gV") 'outline-indent-select)
+    (evil-define-key 'normal 'local
+      (kbd "]]") 'outline-indent-forward-same-level
+      (kbd "[[") 'outline-indent-backward-same-level
+      (kbd "gj") 'outline-indent-forward-same-level
+      (kbd "gk") 'outline-indent-backward-same-level))
 
   ;; Set C-<return> to insert a new line with the same indentation
   ;; level/depth as the current line just before the next heading
-  (evil-define-key '(normal insert) 'local (kbd "C-<return>")
+  (evil-define-key '(normal insert) 'local
+    (kbd "C-<return>")
     (defun my-evil-outline-indent-insert-heading ()
       (interactive)
       (when (fboundp 'outline-indent-insert-heading)

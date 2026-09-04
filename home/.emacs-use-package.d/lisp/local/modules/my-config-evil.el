@@ -63,27 +63,27 @@
 ;; Only complete in the current buffer
 (setq evil-complete-all-buffers nil)
 
-(setq evil-command-window-height 8)
-(setq evil-display-shell-error-in-message nil)
+(setq evil-command-window-height 8
+      evil-display-shell-error-in-message nil)
 
 ;; Controls whether evil-collection defines Vim-unimpaired-style keybindings
 ;; (setq evil-collection-want-unimpaired-p nil)
 (setq evil-collection-calendar-want-org-bindings t)
 
-(setq tooltip-hide-delay 20) ;; seconds
-(setq tooltip-delay 0.4)
-(setq tooltip-short-delay 0.08)
+(setq tooltip-hide-delay 20 ;; seconds
+      tooltip-delay 0.4
+      tooltip-short-delay 0.08)
 
 ;; TODO is this good?
-(setq mouse-wheel-progressive-speed nil) ; disable acceleration of scrolling
-(setq mouse-wheel-scroll-amount
+(setq mouse-wheel-progressive-speed nil ; disable acceleration of scrolling
+      mouse-wheel-scroll-amount
       '(1
         ((shift) . hscroll) ((meta))
         ((control meta) . global-text-scale)
         ((control) . text-scale)))
 
-(setq inhibit-mouse-button-numbers '(1 2 3))
-(setq pixel-scroll-precision-use-momentum nil)
+(setq inhibit-mouse-button-numbers '(1 2 3)
+      pixel-scroll-precision-use-momentum nil)
 
 ;;; Experiments
 
@@ -1032,7 +1032,7 @@ guarantees that the new window is selected, as in Vim."
   (interactive)
   (transient-mark-mode -1)
   ;; (when (fboundp 'evil-normal-state)
-  ;;   (evil-normal-state))
+  ;;    (evil-normal-state))
   (if (fboundp 'consult-imenu)
       (consult-imenu)
     (error "Undefined: consult-imenu")))
@@ -1041,28 +1041,28 @@ guarantees that the new window is selected, as in Vim."
 (define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 
 ;; (defun my-consult-recent-file ()
-;;   "Find recent file using `completing-read'."
-;;   (interactive)
-;;   (when (and (fboundp 'consult--read)
-;;              (fboundp 'consult--file-preview)
-;;              (fboundp 'consult--fast-abbreviate-file-name))
-;;     (let* ((selected-file (consult--read
-;;                            (or
-;;                             (mapcar #'consult--fast-abbreviate-file-name
-;;                                     (bound-and-true-p recentf-list))
-;;                             (user-error "No recent files, `recentf-mode' is %s"
-;;                                         (if recentf-mode "enabled" "disabled")))
-;;                            :prompt "Find recent file: "
-;;                            :sort nil
-;;                            :require-match t
-;;                            :category 'file
-;;                            :state (consult--file-preview)
-;;                            :history 'file-name-history))
-;;            (full-path (expand-file-name selected-file))
-;;            (existing-buffer (get-file-buffer full-path))
-;;            (bufs (if existing-buffer (list existing-buffer) nil)))
-;;       ;; t = no-new-tab
-;;       (my-jump-to-buffers-or-open bufs full-path t))))
+;;    "Find recent file using `completing-read'."
+;;    (interactive)
+;;    (when (and (fboundp 'consult--read)
+;;               (fboundp 'consult--file-preview)
+;;               (fboundp 'consult--fast-abbreviate-file-name))
+;;      (let* ((selected-file (consult--read
+;;                             (or
+;;                              (mapcar #'consult--fast-abbreviate-file-name
+;;                                      (bound-and-true-p recentf-list))
+;;                              (user-error "No recent files, `recentf-mode' is %s"
+;;                                          (if recentf-mode "enabled" "disabled")))
+;;                             :prompt "Find recent file: "
+;;                             :sort nil
+;;                             :require-match t
+;;                             :category 'file
+;;                             :state (consult--file-preview)
+;;                             :history 'file-name-history))
+;;             (full-path (expand-file-name selected-file))
+;;             (existing-buffer (get-file-buffer full-path))
+;;             (bufs (if existing-buffer (list existing-buffer) nil)))
+;;        ;; t = no-new-tab
+;;        (my-jump-to-buffers-or-open bufs full-path t))))
 
 (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 ;; (define-key evil-normal-state-map (kbd "<leader>b") 'my-consult-recent-file)
@@ -1087,21 +1087,21 @@ guarantees that the new window is selected, as in Vim."
 (define-key evil-normal-state-map (kbd "M-/") 'consult-line)
 
 ;; (lightemacs-use-package fzf
-;;   :commands fzf
-;;   ;; :bind
-;;   :config
-;;   (setq
-;;    ;; fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
-;;    ;; fzf/executable "fzf"
-;;    ;; fzf/git-grep-args "-i --line-number %s"
-;;    ;; ;; command used for `fzf-grep-*` functions
-;;    ;; ;; example usage for ripgrep:
-;;    ;; ;; fzf/grep-command "rg --no-heading -nH"
-;;    ;; fzf/grep-command "grep -nrH"
-;;    ;; ;; If nil, the fzf buffer will appear at the top of the window
-;;    fzf/position-bottom t
-;;    fzf/window-height 15)
-;;   )
+;;    :commands fzf
+;;    ;; :bind
+;;    :config
+;;    (setq
+;;     ;; fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
+;;     ;; fzf/executable "fzf"
+;;     ;; fzf/git-grep-args "-i --line-number %s"
+;;     ;; ;; command used for `fzf-grep-*` functions
+;;     ;; ;; example usage for ripgrep:
+;;     ;; ;; fzf/grep-command "rg --no-heading -nH"
+;;     ;; fzf/grep-command "grep -nrH"
+;;     ;; ;; If nil, the fzf buffer will appear at the top of the window
+;;     ;; fzf/position-bottom t
+;;     ;; fzf/window-height 15)
+;;    )
 
 ;; (define-key evil-normal-state-map (kbd "C-p") 'fzf)
 (define-key evil-normal-state-map (kbd "C-p") 'my-consult-fd-project)
@@ -1200,11 +1200,11 @@ word after the space that contains at least two uppercase characters."
 ;;; cape: complete before point
 
 ;; (defun my-cape-dabbrev-backwards ()
-;;   "Cape-dabbrev backwards."
-;;   (interactive)
-;;   (let ((dabbrev-backward-only t))
-;;     (when (fboundp 'cape-dabbrev)
-;;       (cape-dabbrev t))))
+;;    "Cape-dabbrev backwards."
+;;    (interactive)
+;;    (let ((dabbrev-backward-only t))
+;;      (when (fboundp 'cape-dabbrev)
+;;        (cape-dabbrev t))))
 ;;
 ;; (evil-define-key 'insert 'global (kbd "C-p") 'my-cape-dabbrev-backwards)
 
@@ -1326,7 +1326,7 @@ word after the space that contains at least two uppercase characters."
   "Close the minibuffer if active, then launch `shell-pop'."
   (interactive)
   ;; (let ((process-connection-type nil)) ; Use a pipe instead of a pty
-  ;;   (start-process "xdevenv-terminal" nil "xdevenv" "terminal"))
+  ;;    (start-process "xdevenv-terminal" nil "xdevenv" "terminal"))
 
   (let ((inhibit-redisplay t))
     (if (active-minibuffer-window)
@@ -1351,8 +1351,8 @@ word after the space that contains at least two uppercase characters."
   )
 
 ;; (evil-define-key '(normal visual) my-intercept-mode-map
-;;   "{" 'wizard-point-backward-to-empty-line
-;;   "}" 'wizard-point-forward-to-empty-line)
+;;    "{" 'wizard-point-backward-to-empty-line
+;;    "}" 'wizard-point-forward-to-empty-line)
 
 (evil-define-key '(normal visual) my-intercept-mode-map
   "{" 'evil-backward-paragraph
@@ -1389,20 +1389,20 @@ word after the space that contains at least two uppercase characters."
 ;; Doesn't work
 ;; (require 'le-default-keybindings)  ; `lightemacs-keymap-override-map'
 ;; (unless noninteractive
-;;   (dolist (binding '(("C--" . text-scale-decrease)
-;;                      ("C-+" . text-scale-increase)
-;;                      ("M-RET" . toggle-term-tmux)
-;;                      ("M-<enter>" . toggle-term-tmux)
-;;                      ("M-<return>" . toggle-term-tmux)
-;;                      ("M-o" . my-previous-interesting-buffer)
-;;                      ("M-i" . my-next-interesting-buffer)
-;;                      ("C-S-k" . my-tab-bar-move-tab-backward)
-;;                      ("C-S-j" . my-tab-bar-move-tab)
-;;                      ("C-k" . my-tab-previous)
-;;                      ("C-j" . my-tab-next)))
-;;     (let ((key (car binding))
-;;           (cmd (cdr binding)))
-;;       (evil-define-key* 'normal lightemacs-keymap-override-map (kbd key) cmd))))
+;;    (dolist (binding '(("C--" . text-scale-decrease)
+;;                       ("C-+" . text-scale-increase)
+;;                       ("M-RET" . toggle-term-tmux)
+;;                       ("M-<enter>" . toggle-term-tmux)
+;;                       ("M-<return>" . toggle-term-tmux)
+;;                       ("M-o" . my-previous-interesting-buffer)
+;;                       ("M-i" . my-next-interesting-buffer)
+;;                       ("C-S-k" . my-tab-bar-move-tab-backward)
+;;                       ("C-S-j" . my-tab-bar-move-tab)
+;;                       ("C-k" . my-tab-previous)
+;;                       ("C-j" . my-tab-next)))
+;;      (let ((key (car binding))
+;;            (cmd (cdr binding)))
+;;        (evil-define-key* 'normal lightemacs-keymap-override-map (kbd key) cmd))))
 
 ;;; check parens no jump
 
@@ -1487,13 +1487,13 @@ If the parentheses are balanced, the function returns t."
     (kbd "RET") nil
     (kbd "C-c C-c") 'markdown-edit-code-block)
   ;; (evil-collection-define-key 'normal 'markdown-mode-map
-  ;;   "<return>" nil
-  ;;   "RET" nil
-  ;;   [tab] nil
-  ;;   [S-tab] nil
-  ;;   ;; `evil-markdown' doesn't bind but spacemacs does.
-  ;;   ;; (kbd "RET") 'markdown-do
-  ;;   )
+  ;;    "<return>" nil
+  ;;    "RET" nil
+  ;;    [tab] nil
+  ;;    [S-tab] nil
+  ;;    ;; `evil-markdown' doesn't bind but spacemacs does.
+  ;;    ;; (kbd "RET") 'markdown-do
+  ;;    )
   )
 
 ;;; Code that replaces evil visualstar
@@ -1526,7 +1526,7 @@ search direction (default: \='forward)."
          (count 1)
          (direction (or direction 'forward))
          (bounds (unless visual-p
-                   (bounds-of-thing-at-point 'symbol)))
+                    (bounds-of-thing-at-point 'symbol)))
          ;; Fetch boundaries before evil-exit-visual-state deactivates the region
          (bnd-start (if visual-p
                         (region-beginning)
@@ -1666,9 +1666,9 @@ search direction (default: \='forward)."
   "Send the clipboard contents directly to the vterm process."
   (interactive)
   ;; (when (fboundp 'vterm-yank)
-  ;;   (let ((inhibit-message t))
-  ;;     (vterm-yank)
-  ;;     (deactivate-mark)))
+  ;;    (let ((inhibit-message t))
+  ;;      (vterm-yank)
+  ;;      (deactivate-mark)))
 
   (when (fboundp 'vterm-send-string)
     (let* ((text (current-kill 0 t))
@@ -1940,18 +1940,18 @@ truncated."
         ;;            func-change-line-visual)
         ;;          count)
         ;; (let (;; Do not ignore invisible when moving more than one line because
-        ;;       ;; the line numbers displayed by `display-line-numbers-mode' when
-        ;;       ;; display-line-numbers-type is relative doesn't ignore invisible
-        ;;       ;; lines.
-        ;;       (line-move-visual nil)
-        ;;       ;; (line-move-ignore-invisible (when (< count 2) t))
-        ;;       )
-        ;;   (if truncate-lines
-        ;;       (funcall func-change-line count)
-        ;;     (funcall (if (> count 1)
-        ;;                  func-change-line
-        ;;                func-change-line-visual)
-        ;;              count)))
+        ;;        ;; the line numbers displayed by `display-line-numbers-mode' when
+        ;;        ;; display-line-numbers-type is relative doesn't ignore invisible
+        ;;        ;; lines.
+        ;;        (line-move-visual nil)
+        ;;        ;; (line-move-ignore-invisible (when (< count 2) t))
+        ;;        )
+        ;;    (if truncate-lines
+        ;;        (funcall func-change-line count)
+        ;;      (funcall (if (> count 1)
+        ;;                   func-change-line
+        ;;                 func-change-line-visual)
+        ;;               count)))
         )
 
        ;; Absolute
@@ -1965,35 +1965,35 @@ truncated."
         (funcall func-change-line count)
 
         ;; (let ((start-line (line-number-at-pos))
-        ;;       (line-move-ignore-invisible t)
-        ;;       (line-move-visual nil)
-        ;;       (evil-respect-visual-line-mode nil)
-        ;;       (track-eol nil)
-        ;;       (evil-track-eol nil))
-        ;;   ;; TODO Patch to Emacs / evil?
-        ;;   (if (buffer-narrowed-p)
-        ;;       (goto-char
-        ;;        (save-restriction
-        ;;          (widen)
-        ;;          (goto-char (point-min))
-        ;;          (funcall func-change-line count)
-        ;;          ;; (forward-line n)
-        ;;          ;; The point is now at the absolute target line. When this
-        ;;          ;; block ends, save-restriction restores the narrowing. If
-        ;;          ;; the point is outside the restored narrowing, Emacs will
-        ;;          ;; automatically handle the display or you can manually clamp
-        ;;          ;; it.
-        ;;          (point)))
-        ;;     ;; (line-number-at-pos nil t) returns the absolute line number,
-        ;;     ;; accounting for the narrowing offset automatically.
-        ;;     ;; TODO fix this, does not support narrowing
-        ;;     ;; (funcall func-change-line (if (> n 0)
-        ;;     ;;                               ;; Previous
-        ;;     ;;                               (1+ (- count start-line))
-        ;;     ;;                             ;; Next
-        ;;     ;;                             (- count start-line)))
-        ;;     )
-        ;;   )
+        ;;        (line-move-ignore-invisible t)
+        ;;        (line-move-visual nil)
+        ;;        (evil-respect-visual-line-mode nil)
+        ;;        (track-eol nil)
+        ;;        (evil-track-eol nil))
+        ;;    ;; TODO Patch to Emacs / evil?
+        ;;    (if (buffer-narrowed-p)
+        ;;        (goto-char
+        ;;         (save-restriction
+        ;;           (widen)
+        ;;           (goto-char (point-min))
+        ;;           (funcall func-change-line count)
+        ;;           ;; (forward-line n)
+        ;;           ;; The point is now at the absolute target line. When this
+        ;;           ;; block ends, save-restriction restores the narrowing. If
+        ;;           ;; the point is outside the restored narrowing, Emacs will
+        ;;           ;; automatically handle the display or you can manually clamp
+        ;;           ;; it.
+        ;;           (point)))
+        ;;      ;; (line-number-at-pos nil t) returns the absolute line number,
+        ;;      ;; accounting for the narrowing offset automatically.
+        ;;      ;; TODO fix this, does not support narrowing
+        ;;      ;; (funcall func-change-line (if (> n 0)
+        ;;      ;;                                ;; Previous
+        ;;      ;;                                (1+ (- count start-line))
+        ;;      ;;                              ;; Next
+        ;;      ;;                              (- count start-line)))
+        ;;      )
+        ;;    )
         )
 
        (t
@@ -2057,7 +2057,7 @@ truncated."
 ;; Alternative: VISUAL
 ;; (evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
 ;; (evil-define-key 'insert 'global (kbd "M-j") #'evil-next-visual-line)
-;; (evil-define-key 'motion 'global (kbd "k") #'evil-previous-visual-line)
+;; (evil-define-key 'motion 'global (kbd "k") #'evil-previous-line)
 ;; (evil-define-key 'motion 'global (kbd "j") #'evil-next-visual-line)
 
 ;;; O: Evil Open Above
@@ -2083,27 +2083,27 @@ re-indentation after inserting the copied indentation."
 ;;; Evil search forward without jumping
 
 ;; (evil-define-motion my-evil-ex-search-forward (count)
-;;   "Start a forward search without jumping to the next item."
-;;   :jump t
-;;   :type exclusive
-;;   :repeat evil-repeat-ex-search
-;;   (save-excursion (evil-ex-search-forward count)))
+;;    "Start a forward search without jumping to the next item."
+;;    :jump t
+;;    :type exclusive
+;;    :repeat evil-repeat-ex-search
+;;    (save-excursion (evil-ex-search-forward count)))
 ;;
 ;; (evil-define-key 'normal 'global (kbd "C-/") #'my-evil-ex-search-forward)
 ;;
 ;; ;;; Evil search key mappings for cursor
 ;;
 ;; (defun evilcursor-previous-history-element-and-move-end-of-line ()
-;;   "Previous history element and move to the end of the line."
-;;   (interactive)
-;;   (previous-history-element 1)
-;;   (move-end-of-line 1))
+;;    "Previous history element and move to the end of the line."
+;;    (interactive)
+;;    (previous-history-element 1)
+;;    (move-end-of-line 1))
 ;;
 ;; (defun evilcursor-next-history-element-and-move-end-of-line ()
-;;   "Next history element and move to the end of the line."
-;;   (interactive)
-;;   (next-history-element 1)
-;;   (move-end-of-line 1))
+;;    "Next history element and move to the end of the line."
+;;    (interactive)
+;;    (next-history-element 1)
+;;    (move-end-of-line 1))
 ;;
 ;; (define-key evil-eval-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
 ;; (define-key evil-ex-completion-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
@@ -2412,9 +2412,9 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
          ("C-x C-d" . quick-fasd-find-path))
 
   :init
-  (setq quick-fasd-auto-add-on-buffer-change t)
-  (setq quick-fasd-enable-initial-prompt nil)
-  (setq quick-fasd-command-args '("-d"))
+  (setq quick-fasd-auto-add-on-buffer-change t
+        quick-fasd-enable-initial-prompt nil
+        quick-fasd-command-args '("-d"))
   (quick-fasd-mode 1))
 
 (with-eval-after-load 'evil
