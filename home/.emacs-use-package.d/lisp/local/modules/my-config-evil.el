@@ -455,8 +455,9 @@
         (message "Region evaluated!"))
     (message "No region selected!")))
 
-(evil-define-key 'normal 'global (kbd "<leader>er") 'evileval-region)
-(evil-define-key 'normal 'global (kbd "<leader>eb") 'evileval-buffer)
+(evil-define-key 'normal 'global
+  (kbd "<leader>er") 'evileval-region
+  (kbd "<leader>eb") 'evileval-buffer)
 
 ;; Goto end buffer
 (define-key evil-normal-state-map "G" 'my-goto-end-of-buffer)
@@ -526,8 +527,7 @@ ORIG-FUN is the function and ARGS the arguments."
   "Move to the previous section."
   (interactive)
   (execute-kbd-macro (read-kbd-macro "[[")))
-(evil-define-key 'normal 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
-(evil-define-key 'visual 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
+(evil-define-key '(normal visual) 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
 (when (display-graphic-p)
   ;; Only on display-graphic-p because the M-[ issue occurs because modern
   ;; terminals use "Escape sequences" beginning with the ESC [ characters (the
@@ -597,33 +597,38 @@ ORIG-FUN is the function and ARGS the arguments."
 ;; Buggy
 ;; (evil-define-key '(visual normal insert) 'global (kbd "M-p") 'my-project-switch-project)
 
-(evil-define-key 'insert 'global (kbd "M-H") 'evil-backward-word-begin)
-(evil-define-key 'insert 'global (kbd "M-L") 'evil-forward-word-begin)
+(evil-define-key 'insert 'global
+  (kbd "M-H") 'evil-backward-word-begin
+  (kbd "M-L") 'evil-forward-word-begin)
 
 (with-eval-after-load 'icomplete
-  (evil-define-key 'normal icomplete-fido-mode-map (kbd "j") 'icomplete-forward-completions)
-  (evil-define-key 'normal icomplete-fido-mode-map (kbd "k") 'icomplete-backward-completions)
-  (evil-define-key 'normal icomplete-fido-mode-map (kbd "<down>") 'icomplete-forward-completions)
-  (evil-define-key 'normal icomplete-fido-mode-map (kbd "<up>") 'icomplete-backward-completions)
-  (evil-define-key 'insert icomplete-fido-mode-map (kbd "M-j") 'icomplete-forward-completions)
-  (evil-define-key 'insert icomplete-fido-mode-map (kbd "M-k") 'icomplete-backward-completions))
+  (evil-define-key 'normal icomplete-fido-mode-map
+    (kbd "j") 'icomplete-forward-completions
+    (kbd "k") 'icomplete-backward-completions
+    (kbd "<down>") 'icomplete-forward-completions
+    (kbd "<up>") 'icomplete-backward-completions)
+  (evil-define-key 'insert icomplete-fido-mode-map
+    (kbd "M-j") 'icomplete-forward-completions
+    (kbd "M-k") 'icomplete-backward-completions))
 
 (with-eval-after-load 'eat
   ;; Causes problems
   ;; (evil-define-key 'insert eat-mode-map (kbd "C-c")
   ;;   #'eat-self-input)
-  (evil-define-key 'insert eat-mode-map (kbd "M-<left>") 'eat-self-input)
-  (evil-define-key 'insert eat-mode-map (kbd "M-<right>") 'eat-self-input)
-  (evil-define-key 'insert eat-mode-map (kbd "M-j") 'eat-self-input)
-  (evil-define-key 'insert eat-mode-map (kbd "M-k") 'eat-self-input)
-  (evil-define-key 'insert eat-mode-map (kbd "M-H") 'eat-self-input)
-  (evil-define-key 'insert eat-mode-map (kbd "M-L") 'eat-self-input))
+  (evil-define-key 'insert eat-mode-map
+    (kbd "M-<left>") 'eat-self-input
+    (kbd "M-<right>") 'eat-self-input
+    (kbd "M-j") 'eat-self-input
+    (kbd "M-k") 'eat-self-input
+    (kbd "M-H") 'eat-self-input
+    (kbd "M-L") 'eat-self-input))
 
 (with-eval-after-load 'dired
   (evil-define-key 'normal dired-mode-map (kbd "~") 'my-dired-home))
 
-(evil-define-key 'normal 'global (kbd "<leader>im") 'inhibit-mouse-mode)
-(evil-define-key 'normal 'global (kbd "<leader>ib") #'ibuffer)
+(evil-define-key 'normal 'global
+  (kbd "<leader>im") 'inhibit-mouse-mode
+  (kbd "<leader>ib") #'ibuffer)
   ;;; Automatic removal of spaces
 (add-hook 'evil-insert-state-entry-hook #'my-evil-disable-remove-spaces)
 
@@ -730,21 +735,22 @@ This enhancement prevents the cursor from moving."
 (with-eval-after-load 'vertico
   ;; Conflict with markdown-mode
   ;; (evil-define-key '(insert normal) 'global (kbd "S-<return>") 'embark-dwim)
-  (evil-define-key 'insert vertico-map (kbd "C-f") 'vertico-scroll-up)
-  (evil-define-key 'normal vertico-map (kbd "C-f") 'vertico-scroll-up)
-  (evil-define-key 'insert vertico-map (kbd "C-b") 'vertico-scroll-down)
-  (evil-define-key 'normal vertico-map (kbd "C-b") 'vertico-scroll-down)
-  (evil-define-key 'normal vertico-map (kbd "gg") 'vertico-first)
-  (evil-define-key 'normal vertico-map (kbd "G") 'vertico-last)
-  (evil-define-key 'normal vertico-map (kbd "<escape>") nil)
-  (evil-define-key 'insert vertico-map (kbd "<tab>") 'vertico-insert)
-
-  (evil-define-key 'insert vertico-map (kbd "M-k") 'vertico-previous)
-  (evil-define-key 'insert vertico-map (kbd "M-j") 'vertico-next)
+  (evil-define-key '(insert normal) vertico-map
+    (kbd "C-f") 'vertico-scroll-up
+    (kbd "C-b") 'vertico-scroll-down)
+  (evil-define-key 'normal vertico-map
+    (kbd "gg") 'vertico-first
+    (kbd "G") 'vertico-last
+    (kbd "<escape>") nil)
+  (evil-define-key 'insert vertico-map
+    (kbd "<tab>") 'vertico-insert
+    (kbd "M-k") 'vertico-previous
+    (kbd "M-j") 'vertico-next)
 
   ;; Useful for vertico-buffer
-  (evil-define-key 'normal vertico-map (kbd "M-k") 'vertico-previous)
-  (evil-define-key 'normal vertico-map (kbd "M-j") 'vertico-next)
+  (evil-define-key 'normal vertico-map
+    (kbd "M-k") 'vertico-previous
+    (kbd "M-j") 'vertico-next)
 
   ;; I do not like it
   ;; (define-key minibuffer-local-map (kbd "<up>") 'previous-history-element)
@@ -793,19 +799,22 @@ This enhancement prevents the cursor from moving."
 
   ;; (add-hook 'embark-after-export-hook #'my-grep-edit)
 
-  (evil-define-key 'normal 'global (kbd "<leader>ed") 'embark-dwim)
-  (evil-define-key 'normal 'global (kbd "<leader>ea") 'embark-act))
+  (evil-define-key 'normal 'global
+    (kbd "<leader>ed") 'embark-dwim
+    (kbd "<leader>ea") 'embark-act))
 
 (with-eval-after-load 'vterm
-  (evil-define-key 'insert vterm-mode-map (kbd "M-H") 'my-vterm--send-Alt-Shift-H)
-  (evil-define-key 'insert vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L)
+  (evil-define-key 'insert vterm-mode-map
+    (kbd "M-H") 'my-vterm--send-Alt-Shift-H
+    (kbd "M-L") 'my-vterm--send-Alt-Shift-L)
 
   (define-key vterm-mode-map (kbd "C-c C-c") 'vterm--self-insert)
 
   (define-key vterm-mode-map (kbd "M-j") 'vterm--self-insert)
   (define-key vterm-mode-map (kbd "M-k") 'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "M-j") 'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "M-k") 'vterm--self-insert)
+  (evil-define-key 'insert vterm-mode-map
+    (kbd "M-j") 'vterm--self-insert
+    (kbd "M-k") 'vterm--self-insert)
 
   ;; Tell vterm to pass C-g directly to the underlying shell
 
@@ -930,9 +939,10 @@ When FORCE-ALL is non-nil, use all functions."
   (interactive)
   (eviljump-goto-definition t))
 
-(evil-define-key 'normal 'global (kbd "gd") 'eviljump-goto-definition)
-(evil-define-key 'normal 'global (kbd "<leader>d") 'eviljump-goto-definition)
-(evil-define-key 'normal 'global (kbd "<leader>D") 'eviljump-goto-definition-force)
+(evil-define-key 'normal 'global
+  (kbd "gd") 'eviljump-goto-definition
+  (kbd "<leader>d") 'eviljump-goto-definition
+  (kbd "<leader>D") 'eviljump-goto-definition-force)
 ;; Causes bugs
 ;; (evil-define-key 'normal 'global (kbd "gd") 'eviljump-goto-definition)
 ;; (evil-define-key 'normal 'global (kbd "gD") 'eviljump-goto-definition-force)
@@ -1131,8 +1141,9 @@ DIR is the directory."
 ;; (evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-project)
 ;; (evil-define-key 'normal 'global (kbd "gR") 'my-consult-grep-dir)
 
-(evil-define-key 'normal 'global (kbd "<leader>gR") 'my-consult-grep-dir)
-(evil-define-key 'normal 'global (kbd "<leader>gr") 'my-consult-grep-project)
+(evil-define-key 'normal 'global
+  (kbd "<leader>gR") 'my-consult-grep-dir
+  (kbd "<leader>gr") 'my-consult-grep-project)
 
 ;;; evil org
 
@@ -1157,11 +1168,13 @@ word after the space that contains at least two uppercase characters."
   (evil-set-initial-state 'org-agenda-mode 'normal)
 
   (evil-define-key 'motion org-agenda-keymap (kbd "/") 'org-agenda-filter)
-  (evil-define-key '(normal) org-agenda-keymap (kbd "<leader>cd") 'org-agenda-todo)
-  (evil-define-key '(normal) org-agenda-keymap (kbd "<tab>") 'org-agenda-set-tags)
-  (evil-define-key '(normal motion) org-agenda-keymap (kbd "<leader>oo") 'org-agenda-set-tags)
-  ;; (evil-define-key '(normal motion) org-agenda-keymap (kbd "<tab>") 'org-agenda-goto)
-  (evil-define-key '(normal motion) org-agenda-keymap (kbd "C-l")
+  (evil-define-key 'normal org-agenda-keymap
+    (kbd "<leader>cd") 'org-agenda-todo
+    (kbd "<tab>") 'org-agenda-set-tags)
+  (evil-define-key '(normal motion) org-agenda-keymap
+    (kbd "<leader>oo") 'org-agenda-set-tags
+    ;; (kbd "<tab>") 'org-agenda-goto
+    (kbd "C-l")
     (lambda()
       (interactive)
       (when (fboundp 'org-agenda-filter-remove-all)
@@ -1173,14 +1186,16 @@ word after the space that contains at least two uppercase characters."
 
   ;; (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-edit-src-code)
   ;; (evil-define-key 'normal org-src-mode-map (kbd "<leader>xx") 'org-edit-src-exit)
-  (evil-define-key 'normal org-mode-map (kbd "<leader>oo") 'org-set-tags-command)
-  (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-babel-execute-maybe)
-  (evil-define-key 'normal org-mode-map (kbd "<leader>cd") 'my-org-toggle-todo))
+  (evil-define-key 'normal org-mode-map
+    (kbd "<leader>oo") 'org-set-tags-command
+    (kbd "<leader>xx") 'org-babel-execute-maybe
+    (kbd "<leader>cd") 'my-org-toggle-todo))
 
-(evil-define-key 'normal 'global (kbd "<leader>oa") 'org-agenda)
-(evil-define-key 'normal 'global (kbd "<leader>oc") 'org-capture)
-(evil-define-key 'normal 'global (kbd "<leader>os") 'org-schedule)
-(evil-define-key 'normal 'global (kbd "<leader>Z") 'my-org-agenda-switch-to-todos)
+(evil-define-key 'normal 'global
+  (kbd "<leader>oa") 'org-agenda
+  (kbd "<leader>oc") 'org-capture
+  (kbd "<leader>os") 'org-schedule
+  (kbd "<leader>Z") 'my-org-agenda-switch-to-todos)
 
 ;;; cape: complete before point
 
@@ -1205,8 +1220,9 @@ word after the space that contains at least two uppercase characters."
         (call-interactively 'cape-dabbrev))
     (call-interactively 'cape-dabbrev)))
 
-(evil-define-key 'insert 'global (kbd "C-p") 'my-cape-dabbrev)
-(evil-define-key 'insert 'global (kbd "C-n") 'my-cape-dabbrev)
+(evil-define-key 'insert 'global
+  (kbd "C-p") 'my-cape-dabbrev
+  (kbd "C-n") 'my-cape-dabbrev)
 
 ;;; cape: evil
 
@@ -1275,8 +1291,7 @@ word after the space that contains at least two uppercase characters."
   "Set up keybinding for recentering in inferior modes."
   ;; (evil-define-key 'normal 'local (kbd "M-k") 'comint-previous-input)
   ;; (evil-define-key 'normal 'local (kbd "M-j") 'comint-next-input)
-  (evil-define-key 'normal 'local (kbd "C-l") 'evilinferior-mode-clear)
-  (evil-define-key 'insert 'local (kbd "C-l") 'evilinferior-mode-clear))
+  (evil-define-key '(normal insert) 'local (kbd "C-l") 'evilinferior-mode-clear))
 
 ;; Python
 (add-hook 'inferior-python-mode-hook 'evilinferior-setup)
@@ -1288,8 +1303,9 @@ word after the space that contains at least two uppercase characters."
 (global-set-key (kbd "C-<backspace>") #'evil-delete-backward-word)
 (global-set-key (kbd "M-DEL") #'evil-delete-backward-word)
 
-(evil-define-key 'normal 'global (kbd "<leader>ep") 'evilinferior-run-python)
-(evil-define-key 'normal 'global (kbd "<leader>el") 'ielm)
+(evil-define-key 'normal 'global
+  (kbd "<leader>ep") 'evilinferior-run-python
+  (kbd "<leader>el") 'ielm)
 
 ;;; evil intercept (TODO replace with global?)
 
@@ -1466,10 +1482,10 @@ If the parentheses are balanced, the function returns t."
 
 (with-eval-after-load 'markdown-mode
   ;; Disable markdown-do, which checks/unchecks list items: - [x]
-  (evil-define-key 'normal markdown-mode-map (kbd "<return>") nil)
-  (evil-define-key 'normal markdown-mode-map (kbd "RET") nil)
-
-  (evil-define-key 'normal markdown-mode-map (kbd "C-c C-c") 'markdown-edit-code-block)
+  (evil-define-key 'normal markdown-mode-map
+    (kbd "<return>") nil
+    (kbd "RET") nil
+    (kbd "C-c C-c") 'markdown-edit-code-block)
   ;; (evil-collection-define-key 'normal 'markdown-mode-map
   ;;   "<return>" nil
   ;;   "RET" nil
@@ -1663,22 +1679,22 @@ search direction (default: \='forward)."
 ;; Evil state mappings for smooth transitions
 (with-eval-after-load 'vterm
   ;; Map common insert keys to jump to the prompt first
-  (evil-define-key 'normal vterm-mode-map "i" 'my-vterm-insert-at-prompt)
-  (evil-define-key 'normal vterm-mode-map "a" 'my-vterm-insert-at-prompt)
-  (evil-define-key 'normal vterm-mode-map "I" 'my-vterm-insert-at-prompt)
-  (evil-define-key 'normal vterm-mode-map "A" 'my-vterm-insert-at-prompt)
+  (evil-define-key 'normal vterm-mode-map
+    "i" 'my-vterm-insert-at-prompt
+    "a" 'my-vterm-insert-at-prompt
+    "I" 'my-vterm-insert-at-prompt
+    "A" 'my-vterm-insert-at-prompt)
 
   ;; Bind C-y to paste in vterm insert mode
-  (evil-define-key 'insert vterm-mode-map (kbd "C-y") 'my-vterm-direct-paste)
-
-  ;; Alternatively, bind C-S-v to paste in vterm insert mode
-  (evil-define-key 'insert vterm-mode-map (kbd "C-S-v") 'my-vterm-direct-paste)
-
-  ;; Return to insert mode easily
-  ;; Ensure C-g works to return to normal mode from insert mode
-  ;; Escape to normal state using C-c <escape> or C-c [
-  (evil-define-key 'insert vterm-mode-map (kbd "C-c <escape>") 'evil-normal-state)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-c [") 'evil-normal-state))
+  (evil-define-key 'insert vterm-mode-map
+    (kbd "C-y") 'my-vterm-direct-paste
+    ;; Alternatively, bind C-S-v to paste in vterm insert mode
+    (kbd "C-S-v") 'my-vterm-direct-paste
+    ;; Return to insert mode easily
+    ;; Ensure C-g works to return to normal mode from insert mode
+    ;; Escape to normal state using C-c <escape> or C-c [
+    (kbd "C-c <escape>") 'evil-normal-state
+    (kbd "C-c [") 'evil-normal-state))
 
 
 ;;; Silence C-f
@@ -1715,8 +1731,9 @@ of the line or the buffer; just return nil."
                            (evil-kbd-macro-suppress-motion-error)))
   (ignore-errors (evil-forward-char count crosslines noerror)))
 
-(evil-define-key 'motion 'global (kbd "l") #'evilcursor-forward-char)
-(evil-define-key 'motion 'global (kbd "h") #'evilcursor-backward-char)
+(evil-define-key 'motion 'global
+  (kbd "l") #'evilcursor-forward-char
+  (kbd "h") #'evilcursor-backward-char)
 
 ;;; Smart previous/next line
 
@@ -1999,29 +2016,37 @@ truncated."
 
 (defun my-setup-local-evilcursor-smart-next-prev-line ()
   "Setup smart next/previous line."
-  (evil-define-key 'normal 'local (kbd "k") #'evilcursor-smart-previous-line)
-  (evil-define-key 'normal 'local (kbd "j") #'evilcursor-smart-next-line)
-  (evil-define-key 'insert 'local (kbd "M-k") #'evilcursor-smart-previous-line)
-  (evil-define-key 'insert 'local (kbd "M-j") #'evilcursor-smart-next-line))
+  (evil-define-key 'normal 'local
+    (kbd "k") #'evilcursor-smart-previous-line
+    (kbd "j") #'evilcursor-smart-next-line)
+  (evil-define-key 'insert 'local
+    (kbd "M-k") #'evilcursor-smart-previous-line
+    (kbd "M-j") #'evilcursor-smart-next-line))
 
 (add-hook 'embark-collect-mode-hook #'my-setup-local-evilcursor-smart-next-prev-line)
 
 ;; Alternative: SMART
-(evil-define-key '(insert visual) 'global (kbd "M-k") #'evilcursor-smart-previous-line)
-(evil-define-key '(insert visual) 'global (kbd "M-j") #'evilcursor-smart-next-line)
-(evil-define-key 'normal 'global (kbd "k") #'evilcursor-smart-previous-line)
-(evil-define-key 'normal 'global (kbd "j") #'evilcursor-smart-next-line)
-(evil-define-key 'motion 'global (kbd "k") nil)
-(evil-define-key 'motion 'global (kbd "j") nil)
+(evil-define-key '(insert visual) 'global
+  (kbd "M-k") #'evilcursor-smart-previous-line
+  (kbd "M-j") #'evilcursor-smart-next-line)
+(evil-define-key 'normal 'global
+  (kbd "k") #'evilcursor-smart-previous-line
+  (kbd "j") #'evilcursor-smart-next-line)
+(evil-define-key 'motion 'global
+  (kbd "k") nil
+  (kbd "j") nil)
 
 ;; (evil-define-key 'insert minibuffer-local-map (kbd "M-k") #'previous-history-element)
 ;; (evil-define-key 'insert minibuffer-local-map (kbd "M-j") #'next-history-element)
-(evil-define-key 'insert evil-eval-map (kbd "M-k") #'previous-history-element)
-(evil-define-key 'insert evil-eval-map (kbd "M-j") #'next-history-element)
-(evil-define-key 'insert evil-ex-completion-map (kbd "M-k") #'previous-history-element)
-(evil-define-key 'insert evil-ex-completion-map (kbd "M-j") #'next-history-element)
-(evil-define-key 'insert evil-ex-search-keymap (kbd "M-k") #'previous-history-element)
-(evil-define-key 'insert evil-ex-search-keymap (kbd "M-j") #'next-history-element)
+(evil-define-key 'insert evil-eval-map
+  (kbd "M-k") #'previous-history-element
+  (kbd "M-j") #'next-history-element)
+(evil-define-key 'insert evil-ex-completion-map
+  (kbd "M-k") #'previous-history-element
+  (kbd "M-j") #'next-history-element)
+(evil-define-key 'insert evil-ex-search-keymap
+  (kbd "M-k") #'previous-history-element
+  (kbd "M-j") #'next-history-element)
 
 ;; Alternative: NORMAL
 ;; (evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
@@ -2154,11 +2179,11 @@ re-indentation after inserting the copied indentation."
   :type exclusive
   (ignore-errors (evil-ex-search-previous count)))
 
-(evil-define-key 'motion 'global (kbd "n") #'evilcursor-ex-search-next)
-(evil-define-key 'motion 'global (kbd "N") #'evilcursor-ex-search-previous)
-
-(evil-define-key 'motion 'global (kbd "M-N") #'evilcursor-ex-search-previous-recenter)
-(evil-define-key 'motion 'global (kbd "M-n") #'evilcursor-ex-search-next-recenter)
+(evil-define-key 'motion 'global
+  (kbd "n") #'evilcursor-ex-search-next
+  (kbd "N") #'evilcursor-ex-search-previous
+  (kbd "M-N") #'evilcursor-ex-search-previous-recenter
+  (kbd "M-n") #'evilcursor-ex-search-next-recenter)
 
 ;;; Global keys
 
@@ -2471,8 +2496,9 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   ;;; Paste with current indentation
   (global-set-key (kbd "C-v") 'wizard-paste-indented)
   (evil-define-key 'insert 'global (kbd "C-v") 'wizard-paste-indented)
-  (evil-define-key 'normal 'global (kbd "<leader>gg") 'wizard-grep)
-  (evil-define-key 'normal 'global (kbd "<leader>ll") 'wizard-reload-current-buffer)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>gg") 'wizard-grep
+    (kbd "<leader>ll") 'wizard-reload-current-buffer)
 
   ;; (defun evil-clipboard-paste-adapter (text)
   ;;   "Insert TEXT using Evil's paste mechanics.
@@ -2494,16 +2520,18 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   ;; (setq clipboard-paste-function #'evil-clipboard-paste-adapter)
 
   ;; Indirect buffer
-  (evil-define-key 'normal 'global (kbd "<leader>ec") 'wizard-clone-and-switch-to-indirect-buffer)
-  (evil-define-key 'normal 'global (kbd "<leader>eC") 'wizard-switch-to-base-buffer)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>ec") 'wizard-clone-and-switch-to-indirect-buffer
+    (kbd "<leader>eC") 'wizard-switch-to-base-buffer)
 
   ;; Rename
   (evil-define-key 'normal 'global (kbd "<leader>R") 'wizard-replace-symbol-at-point)
 
   ;; Highlight
   ;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eh") 'wizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global (kbd "<leader>eH") 'wizard-unhighlight)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>eh") 'wizard-toggle-highlight-at-point
+    (kbd "<leader>eH") 'wizard-unhighlight)
 
   (add-hook-text-editing-modes 'wizard-hl-todo-local-mode)
   (add-hook 'my-scratch-buffer-created-hook 'wizard-hl-todo-local-mode)
@@ -2612,8 +2640,9 @@ column layout, except when a point falls on the first visible line."
 
 ;;; bufferfile
 
-(evil-define-key 'normal 'global (kbd "<leader>ur") 'bufferfile-rename)
-(evil-define-key 'normal 'global (kbd "<leader>ud") 'bufferfile-delete)
+(evil-define-key 'normal 'global
+  (kbd "<leader>ur") 'bufferfile-rename
+  (kbd "<leader>ud") 'bufferfile-delete)
 
 ;;; lightemacs-dired-filter-toggle
 
@@ -2649,8 +2678,9 @@ In `prog-mode', this configures flyspell to check only comments and strings."
     (flyspell-delete-all-overlays)))
 
 (evil-define-key 'visual 'global (kbd "<leader>fs") #'my-flyspell-region)
-(evil-define-key 'normal 'global (kbd "<leader>fb") #'my-flyspell-buffer)
-(evil-define-key 'normal 'global (kbd "<leader>fc") #'my-flyspell-clear)
+(evil-define-key 'normal 'global
+  (kbd "<leader>fb") #'my-flyspell-buffer
+  (kbd "<leader>fc") #'my-flyspell-clear)
 
 ;;; Do not display Search Failed in evil-ex
 (defun my-around-evil-ex-search-update-pattern-no-echo (fn &rest args)
@@ -2793,8 +2823,9 @@ and ensures TUI apps like Vim receive an immediate exit signal."
   ;;
   ;; Since Escape is now sent to the terminal, this provides an alternative
   ;; chord to escape the Emacs-Evil state itself.
-  (evil-local-set-key 'insert (kbd "C-c ESC") 'evil-normal-state)
-  (evil-local-set-key 'insert (kbd "C-c <escape>") 'evil-normal-state)
+  (evil-local-set-key 'insert
+    (kbd "C-c ESC") 'evil-normal-state
+    (kbd "C-c <escape>") 'evil-normal-state)
 
   (setq-local transient-mark-mode nil)
 
