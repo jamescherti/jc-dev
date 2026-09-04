@@ -577,20 +577,15 @@ ORIG-FUN is the function and ARGS the arguments."
 (evil-set-leader 'normal (kbd ","))
 (evil-set-leader 'visual (kbd ","))
 (with-eval-after-load 'ibuffer
-  (evil-define-key 'normal ibuffer-mode-map (kbd ",") nil)
-
-  ;; Conflict between evil and `ibuffer-mode-map'
-  ;; For some reason, this is not enough TODO
-  ;; (define-key ibuffer-mode-map (kbd ",") nil)
-  )
-(evil-define-key 'normal 'global (kbd "<leader>q") #'ibuffer)
+  (evil-define-key 'normal ibuffer-mode-map (kbd ",") nil))
 
 (with-eval-after-load 'eldoc
   (eldoc-add-command-completions "evilcursor-"))
 
-(evil-define-key 'normal 'global (kbd "<leader>sre") 'my-bash-stdops-sre)
-
-(evil-define-key 'normal 'global (kbd "<leader>ev") 'tab-bar-switch-to-tab)
+(evil-define-key 'normal 'global
+  (kbd "<leader>q") #'ibuffer
+  (kbd "<leader>sre") 'my-bash-stdops-sre
+  (kbd "<leader>ev") 'tab-bar-switch-to-tab)
 
 (evil-define-key '(visual normal insert) 'global (kbd "M-p") 'project-switch-project)
 
@@ -2705,8 +2700,6 @@ In `prog-mode', this configures flyspell to check only comments and strings."
 
 ;;; term setup
 
-(evil-define-key 'insert term-raw-map (kbd "C-V") 'term-paste)
-
 (with-eval-after-load 'term
   ;; Allows C-s to reach the terminal (e.g., for shell history search) instead
   ;; of triggering Emacs isearch, and prevents Evil from overriding this
@@ -2715,10 +2708,11 @@ In `prog-mode', this configures flyspell to check only comments and strings."
   (evil-define-key 'insert term-raw-map (kbd "C-s") nil)
   ) ;; unbind isearch
 
-;; Forwards Alt/Meta navigation keys to the terminal process. Using vector
-;; notation prevents Emacs from interpreting Meta as an ESC prefix, which
-;; avoids "ESC ESC" delay/clashes.
 (evil-define-key 'insert term-raw-map
+  (kbd "C-V") 'term-paste
+  ;; Forwards Alt/Meta navigation keys to the terminal process. Using vector
+  ;; notation prevents Emacs from interpreting Meta as an ESC prefix, which
+  ;; avoids "ESC ESC" delay/clashes.
   (kbd "M-H") 'term-send-raw-meta
   (kbd "M-J") 'term-send-raw-meta
   (kbd "M-K") 'term-send-raw-meta
