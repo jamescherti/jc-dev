@@ -51,7 +51,6 @@
 
 (setq native-comp-jit-compilation t)
 (setq native-comp-deferred-compilation t)
-(setq package-native-compile t)
 
 ;;; Config
 
@@ -77,7 +76,8 @@
         :commit "b733d3f5f5005890f324333dd57e1f0badec5c87")
  t)
 
-(setq lightemacs-modules '(le-compile-angel
+(setq lightemacs-module-auto-compile t)
+(setq lightemacs-modules '(;; le-compile-angel
                            le-flavor-micro
                            le-pathaction
                            le-dired-filter

@@ -639,8 +639,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; buffer.
 ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose)
 
-;; (setq package-native-compile t)
-
 ;; TODO patch dumb-jump
 ;; Push the current position to the Xref marker stack right before dumb-jump
 ;; calculates a definition search. This guarantees that your original location

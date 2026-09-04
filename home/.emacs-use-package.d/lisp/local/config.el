@@ -796,7 +796,7 @@ subsequent GCC invocations."
 (setq lightemacs-saveplace-recenter-after-find-file t)
 
 (setq lightemacs-debug nil)
-(setq lightemacs-verbose nil)
+(setq lightemacs-verbose t)
 
 (when (< emacs-major-version 31)
   (setq package-install-upgrade-built-in t))
@@ -826,7 +826,7 @@ subsequent GCC invocations."
                            ;; le-kirigami ; replaced with mod-kirigami
 
                            le-yasnippet
-                           le-compile-angel
+                           ;; le-compile-angel
                            le-vim-tab-bar
                            le-theme
 
@@ -959,7 +959,7 @@ subsequent GCC invocations."
                            le-buffer-guardian
                            smartindent
                            ;; mod-lsp-mode
-                           ;; point-manager
+                           point-manager
                            ;; battery-angel
 
                            le-server
@@ -1922,6 +1922,10 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
                 (?f . evil-surround-function)))
 
 ;;; Settings
+
+(setq lightemacs-module-auto-compile t)
+
+(setq bufferfile-update-mode-on-rename t)
 
 (setq lightemacs-dired-filter-global-enabled t)
 (setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit

@@ -35,6 +35,7 @@
 (require 'lightemacs)  ; lightemacs-save-window-start
 (eval-and-compile
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
+(require 'lightemacs-module)
 (require 'sub-project)
 
 ;;; Evil config
@@ -761,7 +762,7 @@ This enhancement prevents the cursor from moving."
                   (tab-new-func-buffer-from-other-window 'embark-dwim))))
 
   (if (< emacs-major-version 31)
-      (require 'le-wgrep)
+      (lightemacs-module-load '(le-wgrep))
     (push 'wgrep-mode mod-cleanup-packages-list))
   ;; (require 'le-wgrep)
 
@@ -2642,7 +2643,7 @@ column layout, except when a point falls on the first visible line."
 ;;; lightemacs-dired-filter-toggle
 
 (with-eval-after-load 'dired
-  (require 'le-dired-filter)
+  (lightemacs-module-load '(le-dired-filter))
 
   (evil-define-key 'normal dired-mode-map (kbd "I")
     'lightemacs-dired-filter-global-toggle))

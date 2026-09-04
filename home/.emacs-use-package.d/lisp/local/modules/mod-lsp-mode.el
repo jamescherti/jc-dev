@@ -30,8 +30,10 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 (require 'my-defun)
-(require 'le-corfu)
-(require 'le-cape)
+(require 'lightemacs-module)
+
+(lightemacs-module-load '(le-corfu
+                          le-cape))
 
 ;;; use-package lsp-mode
 
