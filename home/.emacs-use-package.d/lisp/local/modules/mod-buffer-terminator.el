@@ -26,7 +26,6 @@
 
 ;;; Code:
 
-(require 'buffer-guardian)
 (require 'lightemacs)
 
 (defvar mod-buffer-terminator-keep-buffer-regexp nil)
@@ -292,6 +291,7 @@
 (defun mod-buffer-terminator-empty ()
   "Kill all buffers."
   (interactive)
+  (require 'buffer-terminator)
   ;; (when (fboundp 'eglot-shutdown-all)
   ;;   (let ((inhibit-message t))
   ;;     (eglot-shutdown-all)))
@@ -371,6 +371,7 @@
 (defun mod-buffer-terminator-kill-non-visible-buffers (&optional buffers)
   "Terminate all non visible buffers.
 BUFFERS is a buffer or a list of alive buffers."
+  (require 'buffer-terminator)
   (let* ((buffer-terminator-protect-unsaved-file-buffers nil)
          (rules `((call-function . mod-buffer-terminator-predicate)
                   ;; (call-function . mod-buffer-terminator--file-buffer)
@@ -502,7 +503,9 @@ By default, closing the last window in a tab does not close the tab."
 (defun mod-buffer-terminator-only-visible ()
   "Kill all the buffers that are not currently displayed in a window or tab."
   (interactive)
-  (buffer-guardian-save-all-buffers)
+  (if (fboundp 'buffer-guardian-save-all-buffers)
+      (buffer-guardian-save-all-buffers)
+    (user-error "Undefined: buffer-guardian-save-all-buffers"))
   (mod-buffer-terminator-kill-non-visible-buffers))
 
 ;;; Evil

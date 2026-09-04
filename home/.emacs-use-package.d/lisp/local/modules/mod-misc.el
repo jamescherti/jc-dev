@@ -2458,8 +2458,8 @@ ARGS - the arguments passed to the original function"
 
 ;; ztree
 
-(lightemacs-use-package ztree
-  :commands ztree-diff)
+;; (lightemacs-use-package ztree
+;;   :commands ztree-diff)
 
 ;;; auto revert
 
