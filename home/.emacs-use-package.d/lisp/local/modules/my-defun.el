@@ -299,7 +299,7 @@ end"))
          (with-current-buffer window-buffer
            (when (string= (buffer-name window-buffer) "*Messages*")
              (goto-char (point-max))
-             (goto-char (line-beginning-position))
+             (goto-char (pos-bol))
              (set-window-point window (point-max)))))))
    ;; Exclude the minibuffer
    nil
@@ -340,7 +340,7 @@ exit status, enabling better error handling and more robust command execution."
                 ;; Get the first line as plain text without properties
                 (let ((first-line (buffer-substring-no-properties
                                    (point)
-                                   (line-end-position))))
+                                   (pos-eol))))
                   (when (not (string-empty-p first-line))
                     (string-trim-right first-line "\n")))))))
       ;; Ensure the output buffer is killed after use

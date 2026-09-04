@@ -157,20 +157,20 @@ If no suitable indent point is found and UNINDENTED-OK is nil, fall back to
     (let ((start-column (current-column))
           indent)
       (save-excursion
-        (goto-char (line-beginning-position))
+        (goto-char (pos-bol))
         (while (and (not (bobp))
                     (progn
                       (forward-line -1)
                       (or (invisible-p (point))
                           (save-excursion
-                            (goto-char (line-beginning-position))
+                            (goto-char (pos-bol))
                             (looking-at-p "^[ \t]*$"))))))
         (cond
          ((and (derived-mode-p 'yaml-mode
                                'yaml-ts-mode)
                (looking-at "^[ \t]*-"))
           (save-excursion
-            (goto-char (line-beginning-position))
+            (goto-char (pos-bol))
             (search-forward "-" nil t)
             (setq indent (+ 1 (current-column)))))
          (t

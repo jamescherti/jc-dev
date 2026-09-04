@@ -3260,15 +3260,13 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;; (add-hook-text-editing-modes 'my-setup-diff-hl-mode)
 
-(setq
- ;; (setq-default diff-hl-reference-revision "origin/main")
- diff-hl-ask-before-revert-hunk t
- diff-hl-disable-on-remote t
- diff-hl-draw-borders nil
- diff-hl-next-previous-hunk-auto-recenter nil
- diff-hl-autohide-margin nil
- diff-hl-bmp-max-width 16
- diff-hl-global-modes '(not image-mode pdf-view-mode))
+;; (setq
+;;  ;; (setq-default diff-hl-reference-revision "origin/main")
+;;  ;; diff-hl-ask-before-revert-hunk t
+;;  ;; diff-hl-next-previous-hunk-auto-recenter nil
+;;  ;; diff-hl-autohide-margin nil
+;;  ;; diff-hl-bmp-max-width 16
+;;  )
 
 ;;; Lazy autorevert
 

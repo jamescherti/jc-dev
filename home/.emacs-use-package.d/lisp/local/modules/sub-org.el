@@ -753,7 +753,7 @@ any minor mode associated with the current `major-mode'."
 (defun my-org-capture-move-cursor-end-line ()
   "Move cursor to end line."
   (when (eq major-mode 'org-mode)
-    (goto-char (line-end-position))))
+    (goto-char (pos-eol))))
 (when (fboundp 'my-org-capture-move-cursor-end-line)
   (add-hook 'org-capture-before-finalize-hook
             #'my-org-capture-move-cursor-end-line))

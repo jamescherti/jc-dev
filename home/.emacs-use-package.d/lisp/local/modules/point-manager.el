@@ -180,7 +180,7 @@ COMMAND is the previous command."
 
       (if point-manager-ignore-invisible
           (vertical-motion 0)
-        (goto-char (line-beginning-position)))
+        (goto-char (pos-bol)))
 
       (point-manager--move-to-column point-manager--previous-column))
 
@@ -193,7 +193,7 @@ COMMAND is the previous command."
         ;; dired-movement-style 'bounded-files). However, this does not
         ;; accommodate navigation using gg or G in Evil mode (moving to the top
         ;; and bottom of the buffer).
-        (when (= (line-beginning-position) (point-min))
+        (when (= (pos-bol) (point-min))
           (forward-line 1)
           (point-manager--move-to-column point-manager--previous-column)
           ;; This is used by the next check (2 columns)

@@ -361,9 +361,9 @@
   (let* ((beg (if (use-region-p)
                   (save-excursion
                     (goto-char (region-beginning))
-                    (goto-char (line-beginning-position))
+                    (goto-char (pos-bol))
                     (point))
-                (line-beginning-position)))
+                (pos-bol)))
          (end (if (use-region-p)
                   (let ((rend (region-end)))
                     (if (eq (char-before rend) ?\n)
@@ -372,7 +372,7 @@
                 (save-excursion
                   (goto-char beg)
                   (forward-line 1)
-                  (line-end-position))))
+                  (pos-eol))))
          ;; (contents (buffer-substring-no-properties beg end))
          ;; (is-comment nil)
          (original-point nil)
@@ -406,14 +406,14 @@
         (goto-char beg)
         (save-excursion
           (forward-line 1)
-          (uncomment-region (line-beginning-position) end)))
+          (uncomment-region (pos-bol) end)))
 
       (save-excursion
         (let ((count (- end-line beg-line)))
           (goto-char beg)
           (dotimes (i count)
             (when (= (1+ i) count)
-              (goto-char (line-beginning-position)))
+              (goto-char (pos-bol)))
             (join-line 1)))))
 
     (goto-char original-point)))
@@ -513,7 +513,7 @@ ORIG-FUN is the function and ARGS the arguments."
   "Join the current line and the next one while preserving the cursor position."
   (interactive)
   (save-excursion
-    (evil-join (line-beginning-position) (line-end-position))))
+    (evil-join (pos-bol) (pos-eol))))
 (evil-define-key 'normal 'global (kbd "J") 'evilcursor-join-normal)
 (evil-define-key 'visual 'global (kbd "J") 'evil-join)
 
@@ -1147,7 +1147,7 @@ word after the space that contains at least two uppercase characters."
     (save-excursion
       (if (re-search-backward
            "^\\(*+\\)\\( +\\)\\([A-Z]\\{2,\\}\\)?\\( +\\)?"
-           (line-beginning-position) t)
+           (pos-bol) t)
           (let ((delete-start (match-end 0)))
             (delete-region delete-start cur-point))
         (evil-delete-back-to-indentation)))))
@@ -1723,7 +1723,7 @@ of the line or the buffer; just return nil."
 (defun evilcursor--get-category-at-point ()
   "Get the category at point."
   (save-excursion
-    (goto-char (line-beginning-position))
+    (goto-char (pos-bol))
     (when-let* ((prop (get-text-property
                        (point)
                        'category)))
@@ -1763,7 +1763,7 @@ of the line or the buffer; just return nil."
               (- (point) 1)
             (point))))
     (vertical-motion 0)
-    (goto-char (line-end-position))))
+    (goto-char (pos-eol))))
 
 (defun evilcursor-next-visual-line (count)
   "Move the cursor COUNT screen lines down."
@@ -2045,7 +2045,7 @@ re-indentation after inserting the copied indentation."
   :suppress-operator t
   (interactive "p")
   (let ((indentation (buffer-substring-no-properties
-                      (line-beginning-position)
+                      (pos-bol)
                       (progn (back-to-indentation) (point))))
         (electric-indent-mode nil))
     (evil-narrow-to-field

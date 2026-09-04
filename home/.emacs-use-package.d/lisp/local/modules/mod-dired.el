@@ -217,7 +217,7 @@
 ;;       (let ((inhibit-read-only t)
 ;;             (case-fold-search nil)
 ;;             (home (expand-file-name "~"))
-;;             (line-end (line-end-position)))
+;;             (line-end (pos-eol)))
 ;;         (while (search-forward home line-end t)
 ;;           (replace-match "~" t t))))))
 ;;
