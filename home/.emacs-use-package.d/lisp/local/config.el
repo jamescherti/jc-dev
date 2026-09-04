@@ -826,7 +826,7 @@ subsequent GCC invocations."
                            ;; le-kirigami ; replaced with mod-kirigami
 
                            le-yasnippet
-                           ;; le-compile-angel
+                           le-compile-angel
                            le-vim-tab-bar
                            le-theme
 
@@ -1664,12 +1664,12 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 (defun lightemacs-user-before-modules ()
   "Pre-modules."
-  (require 'benchmark-init)
-  (require 'benchmark-init-modes)
-  (when (fboundp 'benchmark-init/activate)
-    (benchmark-init/activate)
-    ;; (add-hook 'window-setup-hook 'benchmark-init/deactivate 90)
-    (add-hook 'emacs-startup-hook 'benchmark-init/deactivate 98))
+  ;; (require 'benchmark-init)
+  ;; (require 'benchmark-init-modes)
+  ;; (when (fboundp 'benchmark-init/activate)
+  ;;   (benchmark-init/activate)
+  ;;   ;; (add-hook 'window-setup-hook 'benchmark-init/deactivate 90)
+  ;;   (add-hook 'emacs-startup-hook 'benchmark-init/deactivate 98))
 
   (my-add-packages-to-load-path))
 

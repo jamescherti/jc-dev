@@ -77,7 +77,7 @@
  t)
 
 (setq lightemacs-module-auto-compile t)
-(setq lightemacs-modules '(;; le-compile-angel
+(setq lightemacs-modules '(le-compile-angel
                            le-flavor-micro
                            le-pathaction
                            le-dired-filter

@@ -1019,7 +1019,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   "This function is executed right before loading modules."
   ;; pre early init
   (setq uniquify-buffer-name-style 'reverse
-        uniquify-separator "-"
+        uniquify-separator "•"
 
         ;; I find the default prefix for smerge-mode C-c^ cumbersome so I have changed
         ;; it to C-cv

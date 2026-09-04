@@ -2818,9 +2818,8 @@ and ensures TUI apps like Vim receive an immediate exit signal."
   ;;
   ;; Since Escape is now sent to the terminal, this provides an alternative
   ;; chord to escape the Emacs-Evil state itself.
-  (evil-local-set-key 'insert
-    (kbd "C-c ESC") 'evil-normal-state
-    (kbd "C-c <escape>") 'evil-normal-state)
+  (evil-local-set-key 'insert (kbd "C-c ESC") #'evil-normal-state)
+  (evil-local-set-key 'insert (kbd "C-c <escape>") #'evil-normal-state)
 
   (setq-local transient-mark-mode nil)
 
