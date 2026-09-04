@@ -3304,23 +3304,6 @@ properly handles remote files over Tramp), applying the setting only if
   ;; (setq eldoc-message-commands-table-size 63)
   (setq eldoc-idle-delay most-positive-fixnum))
 
-;;; corfu history
-
-;; Corfu: Corfu candidate lists are typically shorter, so its default sorting is
-;; simpler. To get it to sort by recency, you must explicitly enable
-;; corfu-history-mode.
-;;
-;; Comparison with Prescient: While corfu-history sorts purely by recency (your
-;; most recent selection goes to the top), Prescient tracks both recency and
-;; frequency using an exponential decay algorithm. With corfu-history, selecting
-;; a rare candidate once will immediately place it above your most frequently
-;; used candidates. Prescient prevents this by keeping high-frequency candidates
-;; near the top even if they were not the absolute last item selected.
-;; (with-eval-after-load 'corfu
-;;   (require 'corfu-history)
-;;   (when (fboundp 'corfu-history-mode)
-;;     (corfu-history-mode 1)))
-
 ;;; pathaction
 
 (defvar vterm-shell)

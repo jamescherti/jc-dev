@@ -885,9 +885,9 @@ subsequent GCC invocations."
                            le-cape
                            mod-corfu-cape
 
-                           le-corfu-prescient
-                           le-prescient
-                           le-vertico-prescient
+                           ;; le-corfu-prescient
+                           ;; le-prescient
+                           ;; le-vertico-prescient
 
                            ;; le-magit
 
@@ -1922,6 +1922,8 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
                 (?f . evil-surround-function)))
 
 ;;; Settings
+
+(setq lightemacs-corfu-history-target-hooks '(corfu-mode-hook))
 
 (setq lightemacs-module-auto-compile t)
 
