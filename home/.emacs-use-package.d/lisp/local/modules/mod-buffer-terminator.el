@@ -239,8 +239,8 @@
   "Buffer terminator crazy."
   (interactive)
   (setq buffer-terminator-verbose nil)
-  (setq buffer-terminator-inactivity-timeout 1800)
-  (setopt buffer-terminator-interval 200))
+  (setq buffer-terminator-inactivity-timeout 1200)
+  (setopt buffer-terminator-interval 500))
 
 (mod-buffer-terminator-sane)
 

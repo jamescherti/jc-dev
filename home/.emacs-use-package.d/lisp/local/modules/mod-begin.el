@@ -134,7 +134,6 @@ ARGS are the arguments passed to the original function."
       lightemacs-flymake-target-hooks nil
       lightemacs-dtrt-indent-global-target-hooks nil
       lightemacs-dtrt-indent-local-target-hooks nil
-      lightemacs-buffer-terminator-target-hooks nil
       lightemacs-package-lint-flymake-target-hooks nil)
 
 ;;; Yasnippet
