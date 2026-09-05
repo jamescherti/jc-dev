@@ -93,7 +93,7 @@
       mode-line-position-column-line-format '("%l:%C")
       mode-line-percent-position nil)
 
-(add-hook 'lightemacs-after-init-hook #'display-time-mode)
+;; (add-hook 'lightemacs-after-init-hook #'display-time-mode)
 
 (setq display-time-mail-function #'ignore
       display-time-mail-string ""
