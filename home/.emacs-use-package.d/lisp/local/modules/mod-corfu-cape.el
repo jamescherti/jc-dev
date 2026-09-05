@@ -30,16 +30,6 @@
 
 ;;; Icons corfu
 
-(lightemacs-use-package corfu-popupinfo
-  :ensure nil ; This is part of corfu
-  :commands corfu-popupinfo-mode
-  :hook
-  (corfu-mode . corfu-popupinfo-mode)
-  :init
-  (setq corfu-popupinfo-delay '(1.25 . 0.5))
-  (setq corfu-popupinfo-max-width 80)
-  (setq corfu-popupinfo-max-height 15))
-
 ;; (lightemacs-use-package nerd-icons-completion
 ;;   :if (display-graphic-p)
 ;;   :commands nerd-icons-completion-marginalia-setup
@@ -47,19 +37,14 @@
 ;;   (with-eval-after-load 'marginalia
 ;;     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)))
 
-(lightemacs-use-package nerd-icons-corfu
-  :after corfu
-  :if (display-graphic-p)
-  :commands nerd-icons-corfu-formatter
-  :init
-  (setq nerd-icons-font-family "Symbols Nerd Font Mono")
-  ;; (setq nerd-icons-font-family "Iosevka Nerd Font Mono")
-  ;; (setq nerd-icons-font-family "Jetbrains Mono")
-  (with-eval-after-load 'corfu
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+(setq nerd-icons-font-family "Symbols Nerd Font Mono")
 
 ;;; Provide
 
 (provide 'mod-corfu-cape)
+
+;; Local variables:
+;; byte-compile-warnings: (not free-vars)
+;; End:
 
 ;;; mod-corfu-cape.el ends here

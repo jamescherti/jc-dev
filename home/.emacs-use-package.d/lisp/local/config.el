@@ -838,6 +838,8 @@ subsequent GCC invocations."
                            le-default-keybindings
                            le-gcmh
 
+                           le-evil-matchit
+
                            le-evil
                            le-evil-collection
                            le-evil-snipe
@@ -880,6 +882,8 @@ subsequent GCC invocations."
                            le-marginalia
 
                            le-corfu
+                           le-nerd-icons-corfu
+                           le-corfu-popupinfo
                            ;; mod-company
 
                            le-cape
@@ -903,7 +907,7 @@ subsequent GCC invocations."
 
                            le-recentf
                            le-savehist
-                           le-saveplace
+                           ;; le-saveplace
                            le-winner ; used by ediff
                            le-elec-pair
 
