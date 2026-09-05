@@ -907,7 +907,7 @@ subsequent GCC invocations."
 
                            le-recentf
                            le-savehist
-                           ;; le-saveplace
+                           le-saveplace
                            le-winner ; used by ediff
                            le-elec-pair
 
