@@ -79,10 +79,31 @@
   ;; how it determines if a package needs to be byte-recompiled or if its
   ;; autoloads need to be regenerated.
   ;;
-  ;; It is not strictly necessary unless you frequently edit package source code
-  ;; (either your own packages or upstream dependencies) outside of Emacs and
-  ;; rely on straight.el to automatically rebuild them on the next launch.
-  (setq straight-check-for-modifications nil)
+  ;; It is not necessary unless you frequently edit package source code (either
+  ;; your own packages or upstream dependencies) outside of Emacs and rely on
+  ;; straight.el to automatically rebuild them on the next launch.
+  ;;
+  ;; NOTE: Yes, the (setq straight-check-for-modifications nil) line is the
+  ;; exact cause of this behavior. When this variable is set to nil, straight.el
+  ;; optimizes startup time by bypassing repository state checks and recipe
+  ;; parsing.
+  ;; Here is exactly what happens under the hood:
+  ;; - Because the modification checks are skipped, straight.el loads your
+  ;;   packages purely from its build cache.
+  ;; - The in-memory registry (straight--profile-cache) gets populated with the
+  ;;   package names, which is why your hash table output showed all your
+  ;;   packages.
+  ;; - However, straight.el never processes the package recipes into
+  ;;   straight--recipe-cache, as it did not need to verify the Git repository or
+  ;;   build state.
+  ;; - straight-remove-unused-repos relies on the recipe cache to determine the
+  ;;   actual directory name (:local-repo) of each package. Since the cache is
+  ;;   empty, it finds zero associated directories and assumes every folder in
+  ;;   straight/repos is orphaned.
+  ;;
+  ;; You do not need to remove this configuration. Disabling modification checks
+  ;; provides significant startup performance improvements.
+  ;; (setq straight-check-for-modifications nil)
 
   ;; If you do actively develop Emacs packages, you can configure straight.el to
   ;; monitor modifications only when you save a file from within Emacs. This
