@@ -90,40 +90,40 @@
 
 (setq dired-confirm-shell-command t)
 
-(defvar my-dired-xdg-open-cmd nil)
-
 (with-eval-after-load 'dired
-  (when-let* ((cmd (cond
-                    ((eq system-type 'darwin)
-                     "open")
-                    ((memq system-type '(gnu gnu/linux gnu/kfreebsd
-                                             berkeley-unix))
-                     "xdg-open")
-                    ((memq system-type '(cygwin windows-nt ms-dos))
-                     "start"))))
-    (setq dired-guess-shell-alist-user
-          `((".*" ,cmd)))
-    (when cmd
-      (setq my-dired-xdg-open-cmd cmd))))
+  (defvar my-dired-xdg-open-cmd nil)
+  (with-eval-after-load 'dired
+    (when-let* ((cmd (cond
+                      ((eq system-type 'darwin)
+                       "open")
+                      ((memq system-type '(gnu gnu/linux gnu/kfreebsd
+                                               berkeley-unix))
+                       "xdg-open")
+                      ((memq system-type '(cygwin windows-nt ms-dos))
+                       "start"))))
+      (setq dired-guess-shell-alist-user
+            `((".*" ,cmd)))
+      (when cmd
+        (setq my-dired-xdg-open-cmd cmd)))))
 
-(with-eval-after-load 'dired
-  (when-let* ((cmd (cond
-                    ((eq system-type 'darwin)
-                     "open")
-                    ((memq system-type '(gnu gnu/linux gnu/kfreebsd
-                                             berkeley-unix))
-                     "xdg-open")
-                    ((memq system-type '(cygwin windows-nt ms-dos))
-                     "start"))))
-    (setq dired-guess-shell-alist-user
-          `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
-            ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
-            ("\\.\\(?:xcf\\)\\'" ,cmd)
-            ("\\.tex\\'" ,cmd)
-            ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
-            ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)))
-    (when cmd
-      (setq my-dired-xdg-open-cmd cmd))))
+;; (with-eval-after-load 'dired
+;;   (when-let* ((cmd (cond
+;;                     ((eq system-type 'darwin)
+;;                      "open")
+;;                     ((memq system-type '(gnu gnu/linux gnu/kfreebsd
+;;                                              berkeley-unix))
+;;                      "xdg-open")
+;;                     ((memq system-type '(cygwin windows-nt ms-dos))
+;;                      "start"))))
+;;     (setq dired-guess-shell-alist-user
+;;           `(("\\.\\(?:docx\\|pdf\\|odt\\|odg\\|ods\\|djvu\\|eps\\)\\'" ,cmd)
+;;             ("\\.\\(?:jpe?g\\|webp\\|png\\|gif\\|xpm\\)\\'" ,cmd)
+;;             ("\\.\\(?:xcf\\)\\'" ,cmd)
+;;             ("\\.tex\\'" ,cmd)
+;;             ("\\.\\(?:mp4\\|mkv\\|m4a\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
+;;             ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)))
+;;     (when cmd
+;;       (setq my-dired-xdg-open-cmd cmd))))
 
 ;;; Functions
 
