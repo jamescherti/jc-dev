@@ -463,6 +463,16 @@ tasks:
     remote:
       upstream: https://github.com/emacs-php/php-mode
 
+  - git: git@github.com:jamescherti/transient
+    path: forks/transient
+    remote:
+      upstream: https://github.com/magit/transient
+
+  - git: git@github.com:jamescherti/cond-let
+    path: forks/cond-let
+    remote:
+      upstream: https://github.com/tarsius/cond-let
+
   - git: git@github.com:jamescherti/Emacs-wgrep
     path: forks/Emacs-wgrep
     remote:

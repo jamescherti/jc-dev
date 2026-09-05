@@ -28,6 +28,8 @@
  ("markdown-mode" . "76cb4ffecfdf95ee769e5cb4608e04202c3c1521") ; newer than v2.8 | RSS RELEASE
  ("org" . "80c431fe0c59bb6b6c4d05ad2d4d279f34b5fcd5") ; release_9.8.10 | RSS RELEASE
  ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
+ ("cond-let" . "3b88187fe067d4ca3dec3ef8a329b0ce18bdb356")
+ ("transient" . "0cacc84ff0c7df126e194666ff8b8a1e6082e796")
 
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")

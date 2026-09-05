@@ -1253,7 +1253,6 @@ This uses an around advice to trap errors and verify file timestamps."
            .
            (;; Built-in
             (seq :type built-in)
-            (transient :type built-in)
             (let-alist :type built-in)
             (use-package :type built-in)
             (bind-key :type built-in)
@@ -1350,6 +1349,14 @@ This uses an around advice to trap errors and verify file timestamps."
             (wizard
              :type git :host github
              :repo "jamescherti/wizard.el"
+             :branch "main")
+            (cond-let
+             :type git :host github
+             :repo "jamescherti/cond-let"
+             :branch "main")
+            (transient
+             :type git :host github
+             :repo "jamescherti/transient"
              :branch "main")
             (wgrep
              :type git :host github

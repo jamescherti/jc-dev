@@ -78,6 +78,14 @@
 ;;
 ;; (add-hook 'clone-indirect-buffer-hook #'initialize-indirect-buffer-treesit-parsers)
 
+;;; Packages TODO lightemacs?
+
+(lightemacs-use-package cond-let
+  :defer t)
+
+(lightemacs-use-package transient
+  :defer t)
+
 ;;; Modeline
 
 (setq line-number-mode t
