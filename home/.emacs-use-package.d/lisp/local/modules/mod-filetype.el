@@ -532,13 +532,13 @@ only if they are not already available."
 
 ;;; Yaml-ts-mode: tab-width
 
-(defun my-setup-yaml-mode ()
-  "Config Yaml mode."
-  ;; This patch has been merged in Emacs 32
-  (when (< emacs-major-version 32)
-    (setq-local tab-width 2)))
-
-(add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode)
+;; (defun my-setup-yaml-mode ()
+;;   "Config Yaml mode."
+;;   ;; This patch has been merged in Emacs 32
+;;   (when (< emacs-major-version 32)
+;;     (setq-local tab-width 2)))
+;;
+;; (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode)
 
 ;;; Ansible: ansible-doc
 

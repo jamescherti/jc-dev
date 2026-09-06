@@ -906,10 +906,12 @@ check their base buffer's file name."
 (defun my-set-tab-width (width)
   "Set the tab width.
 WIDTH is the tab width."
-  (setq-local indent-tabs-mode nil)
-  (setq-local tab-width width)
-  (setq-local standard-indent width)
+  ;; TODO Remove this function?
+  ;; (setq-local indent-tabs-mode nil)
+  ;; (setq-local tab-width width)
+  ;; (setq-local standard-indent width)
   ;; (setq-local evil-shift-width width)
+  t
   )
 
 ;;; From Lightemacs
