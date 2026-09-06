@@ -2602,6 +2602,9 @@ ARGS - the arguments passed to the original function"
              (not compile-angel-on-load-mode))
     (compile-angel-on-load-mode 1))
 
+  ;; Auto-completion (Example for Corfu, adapt for Company if needed)
+  (setq corfu-auto-delay 0.1)
+
   ;; Fast Consult
   (setq consult-async-input-debounce 0.02
         consult-async-input-throttle 0.05
@@ -2628,6 +2631,8 @@ ARGS - the arguments passed to the original function"
   ;; (setq consult-async-input-debounce 0.1
   ;;       consult-async-input-throttle 0.2
   ;;       consult-async-refresh-delay 0.1)
+
+  (setq corfu-auto-delay 0.24)
 
   (setq consult-async-input-debounce 0.2
         consult-async-input-throttle 0.5
