@@ -34,13 +34,29 @@
 ;;; Smart previous/next line
 
 (defsubst evilcursor--get-category-at-point ()
-  "Get the category at point as an interned symbol."
+  "Get the category at point as an interned symbol.
+Defined via `defsubst' so the byte-compiler inlines the execution,
+eliminating function-call overhead (stack frames) during rapid scrolling."
+  ;; Using `pos-bol' directly avoids the heavy overhead of wrapping the check
+  ;; in a `save-excursion' block and executing a `goto-char' command.
   (let ((prop (get-text-property (pos-bol) 'category)))
     (cond
      ((stringp prop) (intern prop))
-     ((symbolp prop) (or (intern-soft prop)
-                         (intern (symbol-name prop))))
-     (t nil))))
+
+     ((symbolp prop)
+      ;; Fast path: 'intern-soft' checks if the symbol is already interned. If
+      ;; it is, it returns the symbol directly in O(1) time. This results in
+      ;; zero memory allocation, completely avoiding the garbage collection
+      ;; overhead that would occur if we created temporary strings.
+      (or (intern-soft prop)
+          ;; Slow path: If the symbol is uninterned (which can happen with
+          ;; generated text properties), 'intern-soft' returns nil. We then
+          ;; fallback to allocating a string and explicitly interning it. This
+          ;; guarantees strict pointer equality ('eq') will work downstream.
+          (intern (symbol-name prop))))
+
+     (t
+      nil))))
 
 (defsubst evilcursor--outline-invisible-p (pos)
   "Return non-nil when POS is invisible.
