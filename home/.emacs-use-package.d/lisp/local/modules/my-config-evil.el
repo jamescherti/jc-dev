@@ -1943,8 +1943,6 @@ and ensures TUI apps like Vim receive an immediate exit signal."
   ;; (setq-default bidi-paragraph-direction 'left-to-right)
   ;; (setq-default bidi-inhibit-bpa t)
 
-  (display-line-numbers-mode 0)
-
   (let ((inhibit-message t))
     (toggle-truncate-lines 1))
   (display-line-numbers-mode 0)

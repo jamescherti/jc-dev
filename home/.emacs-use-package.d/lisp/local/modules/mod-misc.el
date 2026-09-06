@@ -170,7 +170,7 @@
 
 ;;; Scroll
 
-(setq redisplay-skip-fontification-on-input nil
+(setq redisplay-skip-fontification-on-input t
       scroll-conservatively 101
       next-screen-context-lines 0
       fast-but-imprecise-scrolling nil)
@@ -1963,16 +1963,47 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (mapc (lambda (m) (add-hook m #'my-setup-display-line-numbers-mode))
       '(ibuffer-mode-hook grep-mode-hook helpful-mode-hook dired-mode-hook org-agenda-mode-hook))
 
+;; display-line-numbers-type: Set this to t (absolute line numbers). Absolute
+;; line numbers are significantly faster to render than 'relative or 'visual.
+;; The 'relative and 'visual settings force the Emacs C-level redisplay engine
+;; to recalculate numbers dynamically based on the current cursor position and
+;; visual line wrapping, which increases CPU load during vertical movement.
 ;; Use absolute numbers; 'relative and 'visual are significantly slower
+;;
 ;; t=absolute
-;; (setq-default display-line-numbers-type t)
-;; (setq-default display-line-numbers-type 'visual)
-(setq-default display-line-numbers-type 'visual)
+;; (setq-default display-line-numbers-type t) ; fast
+;; (setq-default display-line-numbers-type 'visual) ; visual is slow
+(setq-default display-line-numbers-type 'relative)
 
 (setq
  ;; t is slow. Use nil.
  ;; Scroll profiling: 7% + display-line-numbers-update-width
- display-line-numbers-grow-only nil
+ ;;
+ ;; display-line-numbers-grow-only: Ensure this remains nil (which is the
+ ;; default). If you set this to t, the minor mode adds the
+ ;; display-line-numbers-update-width function to the pre-command-hook. This
+ ;; forces Emacs to execute an extra Lisp function before every single
+ ;; keystroke, adding unnecessary overhead to the command loop.
+ ;; display-line-numbers-grow-only nil
+
+ ;; Setting display-line-numbers-current-absolute to nil can provide a
+ ;; micro-optimization, but only if you are already using relative line numbers.
+ ;;
+ ;; - What it does: When you use relative (or visual) line numbers, setting
+ ;;   display-line-numbers-current-absolute to t (the default) tells Emacs to
+ ;;   display the actual absolute line number on your current cursor line,
+ ;;   instead of a 0.
+ ;; - The performance impact: Setting it to nil saves the C-level redisplay
+ ;;   engine from having to run a conditional branch to check "is this the current
+ ;;   line?" and format it differently while rendering the margin.
+ ;; - This optimization is extremely minor. Because this variable only applies
+ ;;   when display-line-numbers-type is set to relative or visual, you are still
+ ;;   incurring the much larger performance penalty of recalculating relative
+ ;;   offsets for every other visible line on the screen.
+ ;;
+ ;; If raw vertical movement speed is your ultimate goal, setting
+ ;; display-line-numbers-type to t (absolute) remains significantly faster than
+ ;; using relative with display-line-numbers-current-absolute set to nil.
  display-line-numbers-current-absolute nil)  ;; t=line num / nil=0
 
 ;;; apheleia

@@ -42,13 +42,15 @@
 POS is the buffer position to check."
   (when (>= pos 1)
     (cond
-     ((derived-mode-p 'org-mode)
+     ((or (eq major-mode 'org-mode)
+          (derived-mode-p 'org-mode))
       (if (fboundp 'org-fold-folded-p)
           (org-fold-folded-p pos)
         (when (fboundp 'org-invisible-p)
           (org-invisible-p pos))))
 
      ((and (or (bound-and-true-p outline-minor-mode)  ; folded?
+               (eq major-mode 'outline-mode)
                (derived-mode-p 'outline-mode))
            (fboundp 'outline-invisible-p))
       (outline-invisible-p pos))
@@ -60,20 +62,17 @@ POS is the buffer position to check."
 ;; Doesn't work when an org mode line contain: *line content*
 (defun evilcursor--after-vertical-movement ()
   "Run this after a vertical movement."
-  ;; Prevent the command loop from moving the cursor after we place it
-  ;; Useless
-  ;; (setq disable-point-adjustment t)
-
-  (let ((p (point)))
-    (when (and
-           ;; Landed on an invisible line
-           (evilcursor--outline-invisible-p
-            (if (and (eolp) (not (bobp)))
-                ;; Without this, invisible-p is nil when eolp
-                (1- p)
-              p)))
-      (vertical-motion 0)
-      (goto-char (pos-eol)))))
+  (unless (input-pending-p)
+    (let ((p (point)))
+      (when (and
+             ;; Landed on an invisible line
+             (evilcursor--outline-invisible-p
+              (if (and (eolp) (not (bobp)))
+                  ;; Without this, invisible-p is nil when eolp
+                  (1- p)
+                p)))
+        (vertical-motion 0)
+        (goto-char (pos-eol))))))
 
 (defun evilcursor-next-visual-line (count)
   "Move the cursor COUNT screen lines down.
@@ -148,17 +147,16 @@ truncated."
                   (funcall func-change-line count)))))))
 
        ((eq line-number-type 'visual)
+        (funcall func-change-line-visual count))
+
+       ((eq line-number-type 'relative)
         (if (and truncate-lines
                  (= count 1))
             ;; This speeds-up scrolling because it does not take into
             ;; consideration visual things
             (progn
               (funcall func-change-line count))
-          (funcall func-change-line-visual count))
-        )
-
-       ((eq line-number-type 'relative)
-        (funcall func-change-line count))
+          (funcall func-change-line-visual count)))
 
        ((eq line-number-type t)
         ;; TODO doesn't work when count > 1
