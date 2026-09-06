@@ -597,6 +597,27 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; the truncation of long file paths and text in the embark-collect buffer.
 (setq consult-grep-max-columns nil)
 
+;; Why it is best: By default, Consult previews every candidate instantly
+;; ('any). If you hold down C-n or scroll the mouse wheel rapidly, Emacs
+;; attempts to open, read, and fontify every file or buffer you pass over. This
+;; causes severe scrolling stutter. Adding a 100ms debounce tells Consult to
+;; wait until you pause on a candidate for a fraction of a second before
+;; triggering the preview I/O, keeping navigation buttery smooth.
+(setq consult-preview-key '(:debounce 0.1 any))
+
+;; Manual trigger
+;; This prevents any background file reads, disk I/O, or syntax highlighting
+;; from occurring while you type or navigate. Previews will only load when you
+;; explicitly press M-p. This is ideal for massive monorepos where reading a
+;; file from disk to preview a consult-ripgrep match carries a heavy penalty.
+;; (setq consult-preview-key (kbd "M-p"))
+
+;;The Nuclear Option (Absolute Speed)
+;; Why it is best: This completely disables the preview framework globally.
+;; Consult will act as a standard completion engine, returning candidates
+;; instantly with zero background overhead.
+;; (setq consult-preview-key nil)
+
 ;; (add-hook 'embark-collect-mode-hook
 ;;           (lambda () (setq truncate-lines nil)))
 
