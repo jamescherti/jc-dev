@@ -39,9 +39,7 @@
 
 (defcustom gcsentinel-low-cons-threshold gc-cons-threshold
   "Baseline value of `gc-cons-threshold' restored after GC tuning.
-
 This variable records the normal threshold for garbage collection in Emacs Lisp.
-
 `gcsentinel' temporarily raises `gc-cons-threshold' (for example, while the
 minibuffer is active) to defer garbage collection during interactive operations.
 Afterward, it resets `gc-cons-threshold' to the value stored here. Customizing

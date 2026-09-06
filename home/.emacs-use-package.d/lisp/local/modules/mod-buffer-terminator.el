@@ -503,17 +503,23 @@ By default, closing the last window in a tab does not close the tab."
 (defun mod-buffer-terminator-only-visible ()
   "Kill all the buffers that are not currently displayed in a window or tab."
   (interactive)
-  (if (fboundp 'buffer-guardian-save-all-buffers)
-      (buffer-guardian-save-all-buffers)
-    (user-error "Undefined: buffer-guardian-save-all-buffers"))
-  (mod-buffer-terminator-kill-non-visible-buffers))
+  (message "Disabled.")
+  ;; (if (fboundp 'buffer-guardian-save-all-buffers)
+  ;;     (buffer-guardian-save-all-buffers)
+  ;;   (user-error "Undefined: buffer-guardian-save-all-buffers"))
+  ;; (mod-buffer-terminator-kill-non-visible-buffers)
+  )
 
 ;;; Evil
 
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "<leader>ov") #'mod-buffer-terminator-only-visible)
-  (define-key evil-normal-state-map (kbd "<leader>ey") #'mod-buffer-terminator-empty)
-  (define-key evil-normal-state-map (kbd "<leader>eY") #'mod-buffer-terminator-empty-all)
+
+  (define-key evil-normal-state-map (kbd "<leader>ey") #'ignore)
+  (define-key evil-normal-state-map (kbd "<leader>eY") #'ignore)
+  ;; (define-key evil-normal-state-map (kbd "<leader>ey") #'mod-buffer-terminator-empty)
+  ;; (define-key evil-normal-state-map (kbd "<leader>eY") #'mod-buffer-terminator-empty-all)
+
   (define-key evil-normal-state-map (kbd "C-w c")   #'mod-buffer-terminator-close-window)
   (define-key evil-normal-state-map (kbd "C-w C-c") #'mod-buffer-terminator-close-window))
 
