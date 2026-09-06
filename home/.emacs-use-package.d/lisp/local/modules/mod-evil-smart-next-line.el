@@ -33,11 +33,11 @@
 
 ;;; Smart previous/next line
 
-(defun evilcursor--get-category-at-point ()
+(defsubst evilcursor--get-category-at-point ()
   "Get the category at point."
   (get-text-property (pos-bol) 'category))
 
-(defun evilcursor--outline-invisible-p (pos)
+(defsubst evilcursor--outline-invisible-p (pos)
   "Return non-nil when POS is invisible.
 POS is the buffer position to check."
   (when (>= pos 1)
@@ -100,6 +100,11 @@ More accurate than `evil-next-line' and `evil-previous-line' when lines are not
 truncated."
   (interactive)
   (setq n (or n 1))
+
+  ;; Prevent the command loop from moving the cursor after we place it
+  ;; Skips the redundant C-level property scan since we handle it manually.
+  (setq disable-point-adjustment t)
+
   (cond
    ;; ((minibufferp)
    ;;  ;; ignore-errors fixes issues with icomplete
@@ -110,16 +115,53 @@ truncated."
 
    ;; Not Minibuffer
    (t
-    (let* ((count (abs n))
+    (let* ((gc-cons-threshold most-positive-fixnum)
            (forwardp (> n 0))
+           (count (if forwardp n (- n)))
            (line-number-type (bound-and-true-p display-line-numbers-type))
 
-           ;; (evil-respect-visual-line-mode nil)
+           ;; By default, Emacs sets line-move-visual to t, which forces the
+           ;; movement commands to query the C-level display engine. The display
+           ;; engine calculates screen pixels, font sizes, and text wrapping to
+           ;; determine where the next visual line starts.
+           ;;
+           ;; Binding (line-move-visual nil) bypasses the display engine
+           ;; entirely. Emacs will move the point strictly by counting newline
+           ;; characters in the buffer (\n), which is an O(1) buffer-position
+           ;; math operation and significantly faster.
+           ;;
+           ;; Since the visual movement functions (evilcursor-next-visual-line
+           ;; and evilcursor-previous-visual-line) explicitly handle visual
+           ;; movement anyway, forcing nil at this scope guarantees that the
+           ;; fast paths (like func-change-line) do not accidentally trigger
+           ;; expensive visual calculations.
+           (line-move-visual nil)
 
-           ;; TODO enable?
-           ;; (evil-track-eol nil)
-           ;; (track-eol nil)
-           ;; (line-move-ignore-invisible t)
+           ;; line-move-ignore-invisible: This should set this to nil (note: my
+           ;; commented code has it as t, but the Emacs default is t, so nil is
+           ;; the optimization). When set to t, Emacs scans text properties and
+           ;; overlays to determine if text is hidden, skipping over folded
+           ;; lines. This property scanning is one of the most CPU-intensive
+           ;; operations during vertical movement in folded buffers. By setting
+           ;; it to nil, Emacs calculates movement purely by counting newline
+           ;; characters (\n) in the buffer, which is extremely fast. Since I
+           ;; already implemented evilcursor--after-vertical-movement to detect
+           ;; and adjust the cursor if it lands inside an invisible block, I can
+           ;; safely disable Emacs's native invisible-line scanning.
+           (line-move-ignore-invisible nil)
+
+           ;; track-eol and evil-track-eol: I set both to nil. When these are
+           ;; enabled, if the cursor is at the end of a line, moving vertically
+           ;; forces Emacs to calculate the exact end position of the target
+           ;; line to keep the cursor at the boundary. This requires checking
+           ;; the current state (eolp) and then querying the buffer for the
+           ;; target line's length. Setting these to nil bypasses this
+           ;; EOL-tracking logic, relying solely on temporary-goal-column, which
+           ;; involves less computation.
+           (evil-track-eol nil)
+           (track-eol nil)
+
+           (evil-respect-visual-line-mode nil)
 
            (func-change-line (if forwardp
                                  #'evil-next-line

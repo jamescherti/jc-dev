@@ -173,7 +173,8 @@
 (setq redisplay-skip-fontification-on-input t
       scroll-conservatively 101
       next-screen-context-lines 0
-      fast-but-imprecise-scrolling nil)
+      ;; fast-but-imprecise-scrolling nil
+      )
 
 ;; Disable the optimization locally for dired to guarantee directory
 ;; fontification
@@ -623,6 +624,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;           (lambda () (setq truncate-lines nil)))
 
 ;;; testing
+
+;; TODO minimal emacs?
+(setq-default cursor-in-non-selected-windows nil)
 
 ;; TODO: recently removed
 ;; dired-dwim-target t  ; Propose a target for intelligent moving/copying
@@ -1945,23 +1949,22 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; Display line numbers
 
-(defun my-setup-display-line-numbers-mode ()
-  "Setup `display-line-numbers-mode'."
-  (cond
-   ((derived-mode-p 'markdown-mode
-                    'markdown-ts-mode
-                    'org-mode)
-    ;; (setq-local display-line-numbers-type 'relative)
-    (display-line-numbers-mode 1))
+;; (defun my-setup-display-line-numbers-mode ()
+;;   "Setup `display-line-numbers-mode'."
+;;   (cond
+;;    ((derived-mode-p 'markdown-mode
+;;                     'markdown-ts-mode
+;;                     'org-mode)
+;;     ;; (setq-local display-line-numbers-type 'relative)
+;;     (display-line-numbers-mode 1))
+;;
+;;    (t
+;;     ;; (setq-local display-line-numbers-type 'visual)
+;;     (display-line-numbers-mode 1))))
+;; (add-hook-text-editing-modes 'my-setup-display-line-numbers-mode)
 
-   (t
-    ;; (setq-local display-line-numbers-type 'visual)
-    (display-line-numbers-mode 1))))
-
-(add-hook-text-editing-modes 'my-setup-display-line-numbers-mode)
-(add-hook 'my-scratch-buffer-created-hook 'my-setup-display-line-numbers-mode)
-(mapc (lambda (m) (add-hook m #'my-setup-display-line-numbers-mode))
-      '(ibuffer-mode-hook grep-mode-hook helpful-mode-hook dired-mode-hook org-agenda-mode-hook))
+;; (add-hook 'my-scratch-buffer-created-hook 'my-setup-display-line-numbers-mode)
+(add-hook 'my-scratch-buffer-created-hook 'display-line-numbers-mode)
 
 ;; display-line-numbers-type: Set this to t (absolute line numbers). Absolute
 ;; line numbers are significantly faster to render than 'relative or 'visual.

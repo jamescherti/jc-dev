@@ -855,6 +855,7 @@ subsequent GCC invocations."
 
                            le-yasnippet
                            le-compile-angel
+                           le-display-line-numbers
                            le-vim-tab-bar
                            le-theme
 
