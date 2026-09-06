@@ -863,7 +863,6 @@ subsequent GCC invocations."
                            le-flymake
                            le-pathaction
                            le-default-settings
-                           le-default-keybindings
                            le-gcmh
 
                            le-evil-matchit

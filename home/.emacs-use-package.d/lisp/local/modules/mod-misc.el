@@ -170,10 +170,10 @@
 
 ;;; Scroll
 
-(setq redisplay-skip-fontification-on-input t
+(setq redisplay-skip-fontification-on-input nil
       scroll-conservatively 101
       next-screen-context-lines 0
-      fast-but-imprecise-scrolling t)
+      fast-but-imprecise-scrolling nil)
 
 ;; Disable the optimization locally for dired to guarantee directory
 ;; fontification
@@ -218,9 +218,10 @@
 ;; images. Set the following variables to prevent that:
 ;; (setq scroll-up-aggressively 0.0
 ;;       scroll-down-aggressively 0.0)
-(setq-default scroll-up-aggressively 0.01
-              scroll-down-aggressively 0.01
-              comint-scroll-to-bottom-on-input t)
+(setq-default
+ ;; scroll-up-aggressively 0.01
+ ;; scroll-down-aggressively 0.01
+ comint-scroll-to-bottom-on-input t)
 
 (setq
  ;; Prevents isearch from stubbornly freezing at the end of a buffer match before
