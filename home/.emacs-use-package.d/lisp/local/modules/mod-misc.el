@@ -385,8 +385,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; to match keywords or tags defined in matchit plugins.
 (setq evilmi-always-simple-jump t)
 
-(autoload 'apheleia-mode "apheleia" nil t)
-(autoload 'apheleia-global-mode "apheleia" nil t)
+(autoload 'global-evil-matchit-mode "evil-matchit" nil t)
+(autoload 'evil-matchit-mode "evil-matchit" nil t)
 
 (dolist (hook '(js-mode-hook
                 json-mode-hook
@@ -2578,34 +2578,37 @@ ARGS - the arguments passed to the original function"
 ;;; battery angel
 
 ;; (require 'battery-angel)
-;;
-;; (defvar battery-angel--manage-compile-angel nil)
-;;
-;; (defun setup-battery-angel-on-ac ()
-;;   "This is called on AC."
-;;   ;; (when battery-angel-verbose
-;;   ;;   (message "Applying AC parameters"))
-;;
-;;   (setq auto-revert-interval 3)
-;;
-;;   ;; Flymake
-;;   (setq flymake-start-on-flymake-mode
-;;         (when (> (num-processors) 8)
-;;           t))
-;;
-;;   (setq flymake-no-changes-timeout
-;;         (when (> (num-processors) 8)
-;;           0.8))
-;;
-;;   (when (and battery-angel--manage-compile-angel
-;;              (fboundp 'compile-angel-on-load-mode)
-;;              (not compile-angel-on-load-mode))
-;;     (compile-angel-on-load-mode 1))
-;;
-;;   ;; Fast Consult
-;;   (setq consult-async-input-debounce 0.02
-;;         consult-async-input-throttle 0.05
-;;         consult-async-refresh-delay 0.02))
+
+(defvar battery-angel--manage-compile-angel nil)
+
+(defun setup-battery-angel-on-ac ()
+  "This is called on AC."
+  ;; (when battery-angel-verbose
+  ;;   (message "Applying AC parameters"))
+
+  (setq auto-revert-interval 3)
+
+  ;; Flymake
+  (setq flymake-start-on-flymake-mode
+        (when (> (num-processors) 8)
+          t))
+
+  (setq flymake-no-changes-timeout
+        (when (> (num-processors) 8)
+          0.8))
+
+  ;; (when (and battery-angel--manage-compile-angel
+  ;;            (fboundp 'compile-angel-on-load-mode)
+  ;;            (not compile-angel-on-load-mode))
+  ;;   (compile-angel-on-load-mode 1))
+
+  ;; Fast Consult
+  (setq consult-async-input-debounce 0.02
+        consult-async-input-throttle 0.05
+        consult-async-refresh-delay 0.02))
+
+(setup-battery-angel-on-ac)
+
 ;;
 ;; (defun setup-battery-angel-on-bat ()
 ;;   "This is called on BAT."
@@ -3685,7 +3688,8 @@ function or if an invalid choice is made."
 ;;; current window only
 
 (lightemacs-use-package single-window
-  :config
+  :commands single-window-mode
+  :init
   (single-window-mode 1)
 
   ;; ediff

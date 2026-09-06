@@ -33,12 +33,6 @@
 
 ;;; Flymake defaults
 
-(setq flymake-start-on-flymake-mode (> (num-processors) 8))
-
-(setq flymake-no-changes-timeout (if (> (num-processors) 8)
-                                     0.5
-                                   1))
-
 (setq flymake-start-on-save-buffer t)
 
 ;; Suppress the display of Flymake error counters when there are no errors.
