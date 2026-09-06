@@ -2605,6 +2605,11 @@ ARGS - the arguments passed to the original function"
   ;; Auto-completion (Example for Corfu, adapt for Company if needed)
   (setq corfu-auto-delay 0.1)
 
+  (setq consult--gc-threshold (* 256 1024 1024))
+  (setq consult--process-chunk (* 4 1024 1024))
+
+  (setq consult-async-min-input 3)
+
   ;; Fast Consult
   (setq consult-async-input-debounce 0.02
         consult-async-input-throttle 0.05
@@ -2633,6 +2638,11 @@ ARGS - the arguments passed to the original function"
   ;;       consult-async-refresh-delay 0.1)
 
   (setq corfu-auto-delay 0.24)
+
+  (setq consult--gc-threshold (* 128 1024 1024))
+  (setq consult--process-chunk (* 2 1024 1024))
+
+  (setq consult-async-min-input 2)
 
   (setq consult-async-input-debounce 0.2
         consult-async-input-throttle 0.5

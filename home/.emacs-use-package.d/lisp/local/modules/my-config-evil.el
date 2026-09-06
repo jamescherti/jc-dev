@@ -885,8 +885,30 @@ guarantees that the new window is selected, as in Vim."
     (error "Undefined: consult-imenu")))
 
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
-(define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 
+;; Removed:
+;;   consult-source-buffer-register
+;;   consult-source-file-register
+(setq consult-buffer-sources
+      '(;; Active workspace (visible by default)
+        consult-source-buffer
+
+        ;; Project context (hidden; summon with 'p', 'B', 'F', 'R')
+        consult-source-project-buffer-hidden
+        consult-source-project-recent-file-hidden
+        consult-source-project-root-hidden
+
+        ;; File system history (hidden; summon with 'f', 'm', '*')
+        consult-source-recent-file
+        consult-source-modified-buffer
+        consult-source-bookmark
+
+        ;; Buffers from other frames/tabs & internal buffers (summon with 'o',
+        ;; SPC)
+        consult-source-other-buffer
+        consult-source-hidden-buffer))
+
+(define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 
 (defun my-consult-buffer ()
