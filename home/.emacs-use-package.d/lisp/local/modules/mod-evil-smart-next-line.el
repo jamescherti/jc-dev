@@ -60,29 +60,33 @@ POS is the buffer position to check."
 ;; Doesn't work when an org mode line contain: *line content*
 (defun evilcursor--after-vertical-movement ()
   "Run this after a vertical movement."
-  ;; Testing without this
-  ;; (when (and
-  ;;        ;; Landed on an invisible line
-  ;;        (evilcursor--outline-invisible-p
-  ;;         (if (and (eolp) (not (bobp)))
-  ;;             ;; Without this, invisible-p is nil when eolp
-  ;;             (- (point) 1)
-  ;;           (point))))
-  ;;   (vertical-motion 0)
-  ;;   (goto-char (pos-eol)))
-  )
+  ;; Prevent the command loop from moving the cursor after we place it
+  ;; Useless
+  ;; (setq disable-point-adjustment t)
+
+  (let ((p (point)))
+    (when (and
+           ;; Landed on an invisible line
+           (evilcursor--outline-invisible-p
+            (if (and (eolp) (not (bobp)))
+                ;; Without this, invisible-p is nil when eolp
+                (1- p)
+              p)))
+      (vertical-motion 0)
+      (goto-char (pos-eol)))))
 
 (defun evilcursor-next-visual-line (count)
-  "Move the cursor COUNT screen lines down."
+  "Move the cursor COUNT screen lines down.
+COUNT is the number of lines to move."
   (evil-next-visual-line (or count 1))
-  ;; (evilcursor--after-vertical-movement)
-  )
+  (evilcursor--after-vertical-movement))
 
 (defvar my-cpu-architecture nil
   "The native CPU architecture determined by GCC.")
 
 (defun evilcursor-previous-visual-line (count)
-  "Move the cursor COUNT screen lines up."
+  "Move the cursor COUNT screen lines up.
+COUNT is the number of lines to move."
   (let ((line-move-visual t))
     (when (and (numberp temporary-goal-column)
                (< temporary-goal-column 0))
@@ -92,6 +96,7 @@ POS is the buffer position to check."
 
 (defun evilcursor-forward-line (n)
   "Move N lines forward (backward if N is negative).
+N is the number of lines to move.
 More accurate than `evil-next-line' and `evil-previous-line' when lines are not
 truncated."
   (interactive)
@@ -150,7 +155,7 @@ truncated."
             ;; This speeds-up scrolling because it does not take into
             ;; consideration visual things
             (progn
-              (funcall func-change-line-visual count))
+              (funcall func-change-line count))
           (funcall func-change-line-visual count))
         )
 
@@ -167,6 +172,7 @@ truncated."
 
 (evil-define-motion evilcursor-smart-next-line (count)
   :type line
+  "Move smart next line down by COUNT."
   (unless count
     (setq count 1))
   (let ((inhibit-message t))
@@ -175,6 +181,7 @@ truncated."
 (evil-define-motion evilcursor-smart-previous-line (count)
   "Move smart previous line up by COUNT."
   :type line
+  "Move smart previous line up by COUNT."
   (unless count
     (setq count 1))
   (let ((inhibit-message t))
