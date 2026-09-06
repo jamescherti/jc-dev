@@ -86,23 +86,6 @@
 (setq inhibit-mouse-button-numbers '(1 2 3)
       pixel-scroll-precision-use-momentum nil)
 
-;;; Experiments
-
-;; Disable the Evil jump handler for buffer crossings. By overriding this
-;; function with `ignore', we prevent Evil from executing its frame and window
-;; iteration loops during buffer changes. As a result, native Emacs commands
-;; that switch buffers will no longer save your previous position, disabling
-;; cross-buffer navigation via the jump list (C-o and C-i).
-;;
-;; Practical example:
-;; - You are editing 'main.py' and jump to a definition in 'utils.py'.
-;; - Default behavior: Pressing 'C-o' returns you directly to 'main.py'.
-;; - With this override: 'C-o' remains confined to the jump history
-;;   within 'utils.py'. You must manually switch back using 'C-x b'.
-;; (if (fboundp 'evil--jump-handle-buffer-crossing)
-;;     (advice-add 'evil--jump-handle-buffer-crossing :override #'ignore)
-;;   (message "WARNING: evil--jump-handle-buffer-crossing is undefined."))
-
 ;;; undo
 
 ;;; Stop Visual Paste from Overwriting Your Register
@@ -113,104 +96,6 @@
 ;; garbage you just deleted. Setting this variable to nil prevents visual
 ;; replacements from touching your yank history.
 (setq evil-kill-on-visual-paste nil)
-
-;;; DISABLED: Spell checker: Jinx or Flyspell
-
-;; (defvar my-spell-checker 'ispell)
-
-;; (use-package jinx
-;;   :if (eq my-spell-checker 'jinx)
-;;   :preface
-;;
-;;   (defun my-jinx-setup ()
-;;     "Configure Jinx to ignore specific faces in programming modes."
-;;     ;; Make the variable buffer-local first
-;;     (let ((excluded-faces
-;;            (cond
-;;             ((or (derived-mode-p 'yaml-mode)
-;;                  (derived-mode-p 'yaml-ts-mode))
-;;              '(font-lock-comment-face
-;;                font-lock-string-face
-;;                ;; font-lock-doc-face
-;;                ))
-;;             ;; ((derived-mode-p 'emacs-lisp-mode)
-;;             ;;  '(;; font-lock-comment-face ; TODO?
-;;             ;;    font-lock-string-face
-;;             ;;    ))
-;;             ((derived-mode-p 'prog-mode)
-;;              '(font-lock-comment-face
-;;                font-lock-string-face
-;;                ;; font-lock-doc-face
-;;                )))))
-;;       ;; Use setf to modify or insert the specific field for the current mode
-;;       (when excluded-faces
-;;         (make-local-variable 'jinx-exclude-faces)
-;;         (setf (alist-get major-mode jinx-exclude-faces) excluded-faces))))
-;;
-;;   ;; (defun my-jinx-ignore-2-chars ()
-;;   ;;   "Jinx: Ignore 2 characters."
-;;   ;;   ;; Exclude words of 1-2 characters and common Elisp char literals
-;;   ;;   (setq-local jinx-exclude-regexps
-;;   ;;               (append jinx-exclude-regexps
-;;   ;;                       '("\\b\\w\\{1,2\\}\\b"      ;; Any 1 or 2 char word
-;;   ;;                         "\\?\\\\\\?[a-zA-Z]"))))
-;;   ;; Ignore 2-character strings/words in Elisp
-;;   ;; Catches for example "]s"
-;;   ;; (add-hook 'emacs-lisp-mode-hook #'my-jinx-ignore-2-chars)
-;;   )
-
-;; Router functions to handle the active spell checker dynamically
-;; (defun my-spell-correct ()
-;;   "Correct spelling at point."
-;;   (interactive)
-;;   (if (and (eq my-spell-checker 'jinx)
-;;            (fboundp 'jinx-correct)
-;;            (bound-and-true-p jinx-mode))
-;;       (call-interactively #'jinx-correct)
-;;     (call-interactively #'ispell-word)))
-;;
-;; (defun my-spell-next ()
-;;   "Jump to next spelling error."
-;;   (interactive)
-;;   (if (and (eq my-spell-checker 'jinx)
-;;            (fboundp 'jinx-next)
-;;            (bound-and-true-p jinx-mode))
-;;       (call-interactively #'jinx-next)
-;;     (call-interactively #'evil-next-flyspell-error)))
-;;
-;; (defun my-spell-previous ()
-;;   "Jump to previous spelling error."
-;;   (interactive)
-;;   (if (and (eq my-spell-checker 'jinx)
-;;            (fboundp 'jinx-previous)
-;;            (bound-and-true-p jinx-mode))
-;;       (call-interactively #'jinx-previous)
-;;     (call-interactively #'evil-prev-flyspell-error)))
-;;
-;; (defun my-spell-add-word ()
-;;   "Emulate Vim zg behavior for adding words."
-;;   (interactive)
-;;   (if (and (eq my-spell-checker 'jinx)
-;;            (bound-and-true-p jinx-mode))
-;;       (progn
-;;         (message "Jinx: Press '+' (personal) or '*' (local) inside the correction menu.")
-;;         (sit-for 1.5)
-;;         (when (fboundp 'jinx-correct)
-;;           (jinx-correct)))
-;;     (call-interactively #'ispell-word)))
-
-;; (with-eval-after-load 'evil
-;;   ;; Override Evil's default normal maps
-;;   (define-key evil-normal-state-map (kbd "z=") #'my-spell-correct)
-;;   (define-key evil-normal-state-map (kbd "zg") #'my-spell-add-word)
-;;
-;;   ;; Override Evil's default motion maps
-;;   (define-key evil-motion-state-map (kbd "]s") #'my-spell-next)
-;;   (define-key evil-motion-state-map (kbd "[s") #'my-spell-previous)
-;;
-;;   ;; Hook the router functions into Evil's jump list
-;;   (evil-add-command-properties #'my-spell-next :jump t)
-;;   (evil-add-command-properties #'my-spell-previous :jump t))
 
 ;;; Better evil
 
@@ -238,23 +123,9 @@
   (if truncate-lines
       ;; When the text is wrapped
       (progn
-        ;; (visual-line-mode 1)
-        ;; (setq-local my-was-visual-line-fill-column-mode
-        ;;             (and (boundp 'my-was-visual-line-fill-column-mode)
-        ;;                  my-was-visual-line-fill-column-mode))
-        ;; (when my-was-visual-line-fill-column-mode
-        ;;   (visual-line-fill-column-mode 1)
-        ;;   (setq-local my-was-visual-line-fill-column-mode nil))
         (let ((inhibit-message t))
           ;; Wrap
           (toggle-truncate-lines 0)))
-    ;; When the text is truncated
-    ;; (visual-line-mode 1)
-    ;; (when (and (boundp 'visual-line-fill-column-mode)
-    ;;            visual-line-fill-column-mode)
-    ;;   (visual-line-fill-column-mode -1)
-    ;;   (setq-local my-was-visual-line-fill-column-mode t))
-
     (let ((inhibit-message t))
       ;; Truncate
       (toggle-truncate-lines 1))))
@@ -322,16 +193,7 @@
         (unless (derived-mode-p 'embark-collect-mode)
           ;; Do not clear highlights during `embark-collect-mode' to prevent
           ;; disruptive color changes.
-          (my-clear-highlights))
-
-        ;; If the current character lacks a font-lock face, ensure the entire
-        ;; buffer is fontified. This addresses an Org mode issue where point is
-        ;; inside a source block, but the #+BEGIN_SRC line is above the window
-        ;; start and thus not yet fontified.
-        ;; (when (and (bound-and-true-p font-lock-mode)
-        ;;            (not (get-text-property (point) 'face)))
-        ;;   (font-lock-ensure))
-        )))))
+          (my-clear-highlights)))))))
 
 (defun my-evil-disable-remove-spaces ()
   "Disable automatic removal of trailing spaces in `evil-mode'."
@@ -343,16 +205,6 @@
   (unwind-protect
       (progn
         (goto-char (point-max)))
-    ;; Small customization to never be on eobp
-    ;; NOTE: this is handeled by a post-command-hook
-    ;; (when (eobp)
-    ;;   ;; Move the cursor before `eobp' (last empty line).
-    ;;   (backward-char 1))
-
-    ;; (beginning-of-visual-line)
-    ;; (move-to-column column)
-    ;; (recenter -1)
-
     (lightemacs-recenter-maybe -1 t)))
 
 ;; TODO: Article? Bug report?
@@ -486,7 +338,7 @@
   (kbd ">") 'lightemacs-evil-shift-right
   (kbd "<") 'lightemacs-evil-shift-left)
 
-;; The `evil-search-next` and `evil-search-previous` functions can sometimes
+;; The `evil-search-next' and `evil-search-previous' functions can sometimes
 ;; leave the buffer window scrolled horizontally. This advice adds an around
 ;; advice to these functions that resets the horizontal scroll position
 ;; (`set-window-hscroll`) to 0 when navigating using search, so the user is
@@ -832,7 +684,6 @@ This enhancement prevents the cursor from moving."
   ;; start doing weird things because the shell is still searching, making it
   ;; look like the terminal is completely frozen or broken.
   ;; (define-key vterm-mode-map (kbd "C-g") 'vterm--self-insert)
-
   (define-key vterm-mode-map (kbd "M-H") 'my-vterm--send-Alt-Shift-H)
   (define-key vterm-mode-map (kbd "M-L") 'my-vterm--send-Alt-Shift-L))
 
@@ -1036,34 +887,7 @@ guarantees that the new window is selected, as in Vim."
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
 (define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 
-;; (defun my-consult-recent-file ()
-;;    "Find recent file using `completing-read'."
-;;    (interactive)
-;;    (when (and (fboundp 'consult--read)
-;;               (fboundp 'consult--file-preview)
-;;               (fboundp 'consult--fast-abbreviate-file-name))
-;;      (let* ((selected-file (consult--read
-;;                             (or
-;;                              (mapcar #'consult--fast-abbreviate-file-name
-;;                                      (bound-and-true-p recentf-list))
-;;                              (user-error "No recent files, `recentf-mode' is %s"
-;;                                          (if recentf-mode "enabled" "disabled")))
-;;                             :prompt "Find recent file: "
-;;                             :sort nil
-;;                             :require-match t
-;;                             :category 'file
-;;                             :state (consult--file-preview)
-;;                             :history 'file-name-history))
-;;             (full-path (expand-file-name selected-file))
-;;             (existing-buffer (get-file-buffer full-path))
-;;             (bufs (if existing-buffer (list existing-buffer) nil)))
-;;        ;; t = no-new-tab
-;;        (my-jump-to-buffers-or-open bufs full-path t))))
-
-(define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
-;; (define-key evil-normal-state-map (kbd "<leader>b") 'my-consult-recent-file)
-;; (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
-;; (define-key evil-normal-state-map (kbd "<leadrr>B") 'switch-to-buffer)
+(define-key evil-normal-state-map (kbd "<leader>b") 'my-consult-recent-file)
 
 (defun my-consult-buffer ()
   "My consult buffer."
@@ -1082,27 +906,7 @@ guarantees that the new window is selected, as in Vim."
 (define-key evil-normal-state-map (kbd "<leader>m") 'consult-project-buffer)
 (define-key evil-normal-state-map (kbd "M-/") 'consult-line)
 
-;; (lightemacs-use-package fzf
-;;    :commands fzf
-;;    ;; :bind
-;;    :config
-;;    (setq
-;;     ;; fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
-;;     ;; fzf/executable "fzf"
-;;     ;; fzf/git-grep-args "-i --line-number %s"
-;;     ;; ;; command used for `fzf-grep-*` functions
-;;     ;; ;; example usage for ripgrep:
-;;     ;; ;; fzf/grep-command "rg --no-heading -nH"
-;;     ;; fzf/grep-command "grep -nrH"
-;;     ;; ;; If nil, the fzf buffer will appear at the top of the window
-;;     ;; fzf/position-bottom t
-;;     ;; fzf/window-height 15)
-;;    )
-
-;; (define-key evil-normal-state-map (kbd "C-p") 'fzf)
 (define-key evil-normal-state-map (kbd "C-p") 'my-consult-fd-project)
-
-;; (define-key evil-normal-state-map (kbd "C-p") 'consult-fd)
 
 (defun my-consult-grep-dir (&optional dir)
   "Execute ripgrep in the current directory, using the selection if available.
@@ -1180,8 +984,6 @@ word after the space that contains at least two uppercase characters."
 
   (evil-define-key 'insert org-mode-map (kbd "C-u") 'my-evil-delete-to-heading-star)
 
-  ;; (evil-define-key 'normal org-mode-map (kbd "<leader>xx") 'org-edit-src-code)
-  ;; (evil-define-key 'normal org-src-mode-map (kbd "<leader>xx") 'org-edit-src-exit)
   (evil-define-key 'normal org-mode-map
     (kbd "<leader>oo") 'org-set-tags-command
     (kbd "<leader>xx") 'org-babel-execute-maybe
@@ -1346,34 +1148,19 @@ word after the space that contains at least two uppercase characters."
   ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
   )
 
-;; (evil-define-key '(normal visual) my-intercept-mode-map
-;;    "{" 'wizard-point-backward-to-empty-line
-;;    "}" 'wizard-point-forward-to-empty-line)
-
 (evil-define-key '(normal visual) my-intercept-mode-map
   "{" 'evil-backward-paragraph
   "}" 'evil-forward-paragraph)
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
-  ;; (kbd "M-RET") 'toggle-term-tmux
-  ;; (kbd "M-<enter>") 'toggle-term-tmux
-  ;; (kbd "M-<return>") 'toggle-term-tmux
-
   (kbd "M-RET") 'my-shell-pop
   (kbd "M-<enter>") 'my-shell-pop
   (kbd "M-<return>") 'my-shell-pop
 
   (kbd "M-x") 'execute-extended-command
 
-  ;; (kbd "M-RET") 'vterm-toggle
-  ;; (kbd "M-<enter>") 'vterm-toggle
   (kbd "M-o") 'my-previous-interesting-buffer
   (kbd "M-i") 'my-next-interesting-buffer
-  ;; (kbd "M-=") 'global-text-scale-adjust
-
-  ;; handled by le-default-keybindings.el
-  ;; (kbd "C--") 'text-scale-decrease
-  ;; (kbd "C-+") 'text-scale-increase
 
   (kbd "C-S-k") 'my-tab-bar-move-tab-backward
   (kbd "C-S-j") 'my-tab-bar-move-tab
@@ -1382,28 +1169,7 @@ word after the space that contains at least two uppercase characters."
 
 (my-intercept-mode 1)
 
-;; Doesn't work
-;; (require 'le-default-keybindings)  ; `lightemacs-keymap-override-map'
-;; (unless noninteractive
-;;    (dolist (binding '(("C--" . text-scale-decrease)
-;;                       ("C-+" . text-scale-increase)
-;;                       ("M-RET" . toggle-term-tmux)
-;;                       ("M-<enter>" . toggle-term-tmux)
-;;                       ("M-<return>" . toggle-term-tmux)
-;;                       ("M-o" . my-previous-interesting-buffer)
-;;                       ("M-i" . my-next-interesting-buffer)
-;;                       ("C-S-k" . my-tab-bar-move-tab-backward)
-;;                       ("C-S-j" . my-tab-bar-move-tab)
-;;                       ("C-k" . my-tab-previous)
-;;                       ("C-j" . my-tab-next)))
-;;      (let ((key (car binding))
-;;            (cmd (cdr binding)))
-;;        (evil-define-key* 'normal lightemacs-keymap-override-map (kbd key) cmd))))
-
 ;;; check parens no jump
-
-(define-key evil-visual-state-map (kbd "M-j") 'wizard-move-region-down)
-(define-key evil-visual-state-map (kbd "M-k") 'wizard-move-region-up)
 
 ;; TODO: Part of smooth cursor?
 ;;-----------------------------
@@ -1481,16 +1247,7 @@ If the parentheses are balanced, the function returns t."
   (evil-define-key 'normal markdown-mode-map
     (kbd "<return>") nil
     (kbd "RET") nil
-    (kbd "C-c C-c") 'markdown-edit-code-block)
-  ;; (evil-collection-define-key 'normal 'markdown-mode-map
-  ;;    "<return>" nil
-  ;;    "RET" nil
-  ;;    [tab] nil
-  ;;    [S-tab] nil
-  ;;    ;; `evil-markdown' doesn't bind but spacemacs does.
-  ;;    ;; (kbd "RET") 'markdown-do
-  ;;    )
-  )
+    (kbd "C-c C-c") 'markdown-edit-code-block))
 
 ;;; Code that replaces evil visualstar
 
@@ -1847,44 +1604,6 @@ truncated."
                            (not (string= next-cat "embark-collect-group-button")))
                   (funcall func-change-line count)))))))
 
-       ;; ((and (or (eq major-mode 'org-mode)
-       ;;           (derived-mode-p 'org-mode))
-       ;;       (bound-and-true-p org-indent-mode))
-       ;;
-       ;;  ;; (condition-case nil
-       ;;  ;;     ;; I added org-mode here because the indentation after a
-       ;;  ;;     ;; header is not taken into consideration with a simple
-       ;;  ;;     ;; next/previous line
-       ;;  ;;     (progn
-       ;;  ;;       (funcall func-change-line-visual count)
-       ;;  ;;       t)
-       ;;  ;;   (error nil))
-       ;;
-       ;;  ;; (when (condition-case nil
-       ;;  ;;           ;; I added org-mode here because the indentation after a
-       ;;  ;;           ;; header is not taken into consideration with a simple
-       ;;  ;;           ;; next/previous line
-       ;;  ;;           (progn
-       ;;  ;;             (funcall func-change-line-visual count)
-       ;;  ;;             t)
-       ;;  ;;         (error nil))
-       ;;  ;;   ;; When the cursor is placed inside the content of a folded heading,
-       ;;  ;;   ;; it should automatically move to the end of the heading instead of
-       ;;  ;;   ;; remaining within the hidden content, as this can be inconvenient
-       ;;  ;;   ;; when the heading is expanded.
-       ;;  ;;   (when (and (fboundp 'org-on-heading-p)
-       ;;  ;;              (org-on-heading-p t)
-       ;;  ;;              (save-excursion
-       ;;  ;;                (condition-case nil
-       ;;  ;;                    (progn
-       ;;  ;;                      (outline-back-to-heading)
-       ;;  ;;                      (end-of-line)
-       ;;  ;;                      (outline-invisible-p (point)))
-       ;;  ;;                  (error nil))))
-       ;;  ;;     (outline-back-to-heading)
-       ;;  ;;     (end-of-line)))
-       ;;  )
-
        ((eq line-number-type 'visual)
         ;; (funcall func-change-line-visual count)
 
@@ -1893,104 +1612,16 @@ truncated."
             ;; This speeds-up scrolling because it does not take into
             ;; consideration visual things
             (progn
-              ;; (let ((line-move-visual t))
-              ;;   (if (> n 0)
-              ;;       (progn
-              ;;         (call-interactively 'next-line count)
-              ;;         (when (get-char-property (point) 'invisible)
-              ;;           (let ((prev-visible (previous-single-char-property-change (point) 'invisible nil (point-min))))
-              ;;             (when prev-visible
-              ;;               (goto-char prev-visible))))
-              ;;         )
-              ;;     (call-interactively 'previous-line count)))
-
-              ;; Fixes kirigami/outline/org...
-              (funcall func-change-line-visual count)
-
-              ;; (funcall func-change-line count)
-              )
+              (funcall func-change-line-visual count))
           (funcall func-change-line-visual count))
         )
 
        ((eq line-number-type 'relative)
-        (funcall func-change-line count)
+        (funcall func-change-line count))
 
-        ;; TODO patch?
-        ;; Long lines do not wrap; they disappear off the right edge of the
-        ;; window. Because there is no line wrapping, one logical line
-        ;; corresponds exactly to one vertical visual line on the screen. Using
-        ;; func-change-line (logical movement) here is faster and avoids the
-        ;; overhead of calculating visual screen lines.
-        ;; (if (or truncate-lines (truncated-partial-width-window-p))
-        ;;     (funcall func-change-line count)
-        ;;   ;; When truncate-lines is nil: Long lines wrap to the next visual
-        ;;   ;; line. To navigate these wrapped lines intuitively, you must use
-        ;;   ;; func-change-line-visual. If you used logical movement here,
-        ;;   ;; pressing down once could jump the cursor past several lines of
-        ;;   ;; wrapped text.
-        ;;   (funcall func-change-line-visual count))
-
-        ;;
-        ;; (funcall (if (> count 1)
-        ;;              func-change-line
-        ;;            func-change-line-visual)
-        ;;          count)
-        ;; (let (;; Do not ignore invisible when moving more than one line because
-        ;;        ;; the line numbers displayed by `display-line-numbers-mode' when
-        ;;        ;; display-line-numbers-type is relative doesn't ignore invisible
-        ;;        ;; lines.
-        ;;        (line-move-visual nil)
-        ;;        ;; (line-move-ignore-invisible (when (< count 2) t))
-        ;;        )
-        ;;    (if truncate-lines
-        ;;        (funcall func-change-line count)
-        ;;      (funcall (if (> count 1)
-        ;;                   func-change-line
-        ;;                 func-change-line-visual)
-        ;;               count)))
-        )
-
-       ;; Absolute
-       ;; ((eq line-number-type t)
-       ;;  (let ((line-move-visual nil))
-       ;;    ;; Force logical line movement to match absolute line numbers.
-       ;;    ;; Emacs natively handles narrowing bounds, so no widen/save-restriction is needed.
-       ;;    (funcall func-change-line count)))
        ((eq line-number-type t)
         ;; TODO doesn't work when count > 1
-        (funcall func-change-line count)
-
-        ;; (let ((start-line (line-number-at-pos))
-        ;;        (line-move-ignore-invisible t)
-        ;;        (line-move-visual nil)
-        ;;        (evil-respect-visual-line-mode nil)
-        ;;        (track-eol nil)
-        ;;        (evil-track-eol nil))
-        ;;    ;; TODO Patch to Emacs / evil?
-        ;;    (if (buffer-narrowed-p)
-        ;;        (goto-char
-        ;;         (save-restriction
-        ;;           (widen)
-        ;;           (goto-char (point-min))
-        ;;           (funcall func-change-line count)
-        ;;           ;; (forward-line n)
-        ;;           ;; The point is now at the absolute target line. When this
-        ;;           ;; block ends, save-restriction restores the narrowing. If
-        ;;           ;; the point is outside the restored narrowing, Emacs will
-        ;;           ;; automatically handle the display or you can manually clamp
-        ;;           ;; it.
-        ;;           (point)))
-        ;;      ;; (line-number-at-pos nil t) returns the absolute line number,
-        ;;      ;; accounting for the narrowing offset automatically.
-        ;;      ;; TODO fix this, does not support narrowing
-        ;;      ;; (funcall func-change-line (if (> n 0)
-        ;;      ;;                                ;; Previous
-        ;;      ;;                                (1+ (- count start-line))
-        ;;      ;;                              ;; Next
-        ;;      ;;                              (- count start-line)))
-        ;;      )
-        ;;    )
-        )
+        (funcall func-change-line count))
 
        (t
         (message
@@ -2044,18 +1675,6 @@ truncated."
   (kbd "M-k") #'previous-history-element
   (kbd "M-j") #'next-history-element)
 
-;; Alternative: NORMAL
-;; (evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
-;; (evil-define-key 'insert 'global (kbd "M-j") #'evil-next-visual-line)
-;; (evil-define-key 'motion 'global (kbd "k") #'evil-previous-line)
-;; (evil-define-key 'motion 'global (kbd "j") #'evil-next-line)
-
-;; Alternative: VISUAL
-;; (evil-define-key 'insert 'global (kbd "M-k") #'evil-previous-visual-line)
-;; (evil-define-key 'insert 'global (kbd "M-j") #'evil-next-visual-line)
-;; (evil-define-key 'motion 'global (kbd "k") #'evil-previous-line)
-;; (evil-define-key 'motion 'global (kbd "j") #'evil-next-visual-line)
-
 ;;; O: Evil Open Above
 
 (evil-define-command evilcursor-open-above (count)
@@ -2075,46 +1694,6 @@ re-indentation after inserting the copied indentation."
       (insert indentation))))
 
 (define-key evil-normal-state-map "O" 'evilcursor-open-above)
-
-;;; Evil search forward without jumping
-
-;; (evil-define-motion my-evil-ex-search-forward (count)
-;;    "Start a forward search without jumping to the next item."
-;;    :jump t
-;;    :type exclusive
-;;    :repeat evil-repeat-ex-search
-;;    (save-excursion (evil-ex-search-forward count)))
-;;
-;; (evil-define-key 'normal 'global (kbd "C-/") #'my-evil-ex-search-forward)
-;;
-;; ;;; Evil search key mappings for cursor
-;;
-;; (defun evilcursor-previous-history-element-and-move-end-of-line ()
-;;    "Previous history element and move to the end of the line."
-;;    (interactive)
-;;    (previous-history-element 1)
-;;    (move-end-of-line 1))
-;;
-;; (defun evilcursor-next-history-element-and-move-end-of-line ()
-;;    "Next history element and move to the end of the line."
-;;    (interactive)
-;;    (next-history-element 1)
-;;    (move-end-of-line 1))
-;;
-;; (define-key evil-eval-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
-;; (define-key evil-ex-completion-map [prior] 'evilcursor-previous-history-element-and-move-end-of-line)
-;; (define-key evil-ex-search-keymap "\C-p" 'evilcursor-previous-history-element-and-move-end-of-line)
-;; (define-key evil-ex-search-keymap (kbd "M-k") 'evilcursor-previous-history-element-and-move-end-of-line)
-;;
-;; (define-key evil-eval-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
-;; (define-key evil-ex-completion-map [next] 'evilcursor-next-history-element-and-move-end-of-line)
-;; (define-key evil-ex-search-keymap "\C-n" 'evilcursor-next-history-element-and-move-end-of-line)
-;; (define-key evil-ex-search-keymap (kbd "M-j") 'evilcursor-next-history-element-and-move-end-of-line)
-;;
-;; (define-key evil-eval-map (kbd "M-k") 'previous-complete-history-element)
-;; (define-key evil-ex-completion-map (kbd "M-k") 'previous-complete-history-element)
-;; (define-key evil-eval-map (kbd "M-j") 'next-complete-history-element)
-;; (define-key evil-ex-completion-map (kbd "M-j") 'next-complete-history-element)
 
 ;;; Evil search next and previous
 
@@ -2234,18 +1813,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 (define-key evil-normal-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
 (define-key evil-visual-state-map (kbd "gc") #'le-evil-toggle-comment-visual)
 
-;;; Packages
-
-;; (lightemacs-use-package tabgo
-;;   :commands tabgo
-;;   :bind (("M-z" . tabgo)
-;;          ("M-t" . tabgo)))
-;;
-;; (evil-define-key 'normal 'global (kbd "gt") #'tabgo)
-
-;; TODO: Contribute to evil-match it to add tree-sitter
-
-
 ;;; Package: quick-sdcv
 
 (defun my-setup-quick-sdcv ()
@@ -2254,15 +1821,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (my-disable-fringe-truncation-arrow)
 
   (let ((inhibit-message t))
-    (toggle-truncate-lines 0))
-
-  ;; Only show the first one
-  ;; (outline-minor-mode 1)
-  ;; (goto-char (point-min))
-  ;; (outline-hide-sublevels 1)
-  ;; (outline-hide-body)
-  ;; (outline-show-entry)
-  )
+    (toggle-truncate-lines 0)))
 
 (add-hook 'quick-sdcv-mode-hook 'my-setup-quick-sdcv)
 (add-hook 'quick-sdcv-mode-hook 'goto-address-mode)
@@ -2275,10 +1834,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 ;; (setq quick-sdcv-dictionary-prefix-symbol "►")
 
 ;; Dictionary lookup
-;; (add-hook 'quick-sdcv-mode-hook 'my-evil-quick-sdcv-search-at-point)
-;; (add-hook 'markdown-mode-hook 'my-evil-quick-sdcv-search-at-point)
-;; (add-hook 'org-mode-hook 'my-evil-quick-sdcv-search-at-point)
-;; (add-hook 'txt-file-mode-hook 'my-evil-quick-sdcv-search-at-point)
 (dolist (mode-hook '(markdown-mode-hook
                      markdown-ts-mode-hook
                      org-mode-hook
@@ -2334,125 +1889,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (add-hook 'pathaction-before-run-hook #'my-save-all-buffers))
 
 (add-hook 'ultisnips-mode-hook #'hs-minor-mode)
-
-;;; use-package wizard
-
-;; Copy with without indentation
-
-;; (defun evilclipboard-evil-yank-region-unindented ()
-;;   "Copy the region, un-indented by the length of its minimum indent.
-;; If numeric prefix argument PAD is supplied, indent the resulting
-;; text by that amount."
-;;   (interactive)
-;;   (when (and (use-region-p)
-;;              (fboundp 'wizard--unindent-string))
-;;     (evil-yank (region-beginning) (region-end))
-;;     (dolist (register '(?\" ?*))
-;;       (let ((original-contents (evil-get-register register t)))
-;;         (when original-contents
-;;           (evil-set-register
-;;            register (wizard--unindent-string
-;;                      (substring-no-properties original-contents))))))))
-
-;; (evil-define-key 'visual 'global (kbd "C") 'evilclipboard-evil-yank-region-unindented)
-(evil-define-key 'visual 'global (kbd "C") 'wizard-copy-unindented)
-
-;; (lightemacs-use-package mod-better-grep
-;;   :ensure nil
-;;   :commands mod-better-grep
-;;   :init
-;;   (with-eval-after-load 'evil
-;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
-
-;; Elpaca and the built-in package
-(lightemacs-use-package wizard
-  ;; :vc (:url "https://github.com/jamescherti/wizard.el"
-  ;;           :rev :newest)
-  :commands (wizard-clone-and-switch-to-indirect-buffer
-             wizard-unhighlight
-             wizard-toggle-highlight-at-point
-             wizard-switch-to-base-buffer
-             wizard-replace-symbol-at-point
-             wizard-hl-todo-mode
-             wizard-hl-todo-local-mode
-             wizard-paste-indented
-             wizard-grep
-             wizard-reload-current-buffer)
-  :init
-  (setq wizard-point-ignore-invisible t)
-
-  ;;; Paste with current indentation
-  (global-set-key (kbd "C-v") 'wizard-paste-indented)
-  (evil-define-key 'insert 'global (kbd "C-v") 'wizard-paste-indented)
-  (evil-define-key 'normal 'global
-    (kbd "<leader>gg") 'wizard-grep
-    (kbd "<leader>ll") 'wizard-reload-current-buffer)
-
-  ;; (defun evil-clipboard-paste-adapter (text)
-  ;;   "Insert TEXT using Evil's paste mechanics.
-  ;; Temporarily uses register 'a' to perform `evil-paste-before`, restoring
-  ;; the register's original contents afterward."
-  ;;   (let ((original-register-contents (evil-get-register ?a t)))
-  ;;     (unwind-protect
-  ;;         (progn
-  ;;           (evil-set-register ?a text)
-  ;;           ;; The core function already deletes the active region,
-  ;;           ;; so we only need to call `evil-paste-before`.
-  ;;           (evil-paste-before 1 ?a)
-  ;;           (when (bound-and-true-p evil-move-cursor-back)
-  ;;             (forward-char 1)))
-  ;;       (when original-register-contents
-  ;;         (evil-set-register ?a original-register-contents)))))
-  ;;
-  ;; ;; Assign the adapter to the global paste variable
-  ;; (setq clipboard-paste-function #'evil-clipboard-paste-adapter)
-
-  ;; Indirect buffer
-  (evil-define-key 'normal 'global
-    (kbd "<leader>ec") 'wizard-clone-and-switch-to-indirect-buffer
-    (kbd "<leader>eC") 'wizard-switch-to-base-buffer)
-
-  ;; Rename
-  (evil-define-key 'normal 'global (kbd "<leader>R") 'wizard-replace-symbol-at-point)
-
-  ;; Highlight
-  ;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global
-    (kbd "<leader>eh") 'wizard-toggle-highlight-at-point
-    (kbd "<leader>eH") 'wizard-unhighlight)
-
-  (add-hook-text-editing-modes 'wizard-hl-todo-local-mode)
-  (add-hook 'my-scratch-buffer-created-hook 'wizard-hl-todo-local-mode)
-
-  (with-eval-after-load 'consult
-    (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode))
-
-  (defun pkg-wizard-smart-rename ()
-    "Smartly decide how to rename the symbol at point."
-    (interactive)
-    (cond
-     ;; Eglot or LSP-Mode
-     ((and (not (region-active-p))
-           (or (bound-and-true-p eglot--managed-mode)
-               (bound-and-true-p lsp-managed-mode)))
-      (let* ((from-string (thing-at-point 'symbol))
-             (to-string (read-string (format "Replace '%s' with: " from-string)
-                                     from-string nil from-string)))
-        (cond
-         ((and (bound-and-true-p lsp-managed-mode)
-               (fboundp 'lsp-rename))
-          (lsp-rename to-string))
-         ((and (bound-and-true-p eglot--managed-mode)
-               (fboundp 'eglot-rename))
-          (eglot-rename to-string)))))
-
-     ;; Replace string
-     (t
-      (ignore-errors
-        (when (fboundp 'wizard-replace-symbol-at-point)
-          (wizard-replace-symbol-at-point))))))
-
-  (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename))
 
 ;;; better vc
 
@@ -2755,21 +2191,6 @@ Accepts any arguments so it can be used as advice or a hook."
 (advice-add 'evil-ex-substitute :after #'my-evil-refresh-search-highlight)
 (advice-add 'evil-execute-macro :after #'my-evil-refresh-search-highlight)
 
-;; Standard Emacs paste and undo commands
-;; (advice-add 'yank :after #'my-evil-refresh-search-highlight)
-;; (advice-add 'yank-pop :after #'my-evil-refresh-search-highlight)
-;; (advice-add 'undo :after #'my-evil-refresh-search-highlight)
-
-;; Undo-tree commands (if installed)
-;; (with-eval-after-load 'undo-tree
-;;   (advice-add 'undo-tree-undo :after #'my-evil-refresh-search-highlight)
-;;   (advice-add 'undo-tree-redo :after #'my-evil-refresh-search-highlight))
-
-;; Undo-fu commands (if installed)
-;; (with-eval-after-load 'undo-fu
-;;   (advice-add 'undo-fu-only-undo :after #'my-evil-refresh-search-highlight)
-;;   (advice-add 'undo-fu-only-redo :after #'my-evil-refresh-search-highlight))
-
 ;; Org-mode structural movements and visibility
 (with-eval-after-load 'org
   (advice-add 'org-metaleft :after #'my-evil-refresh-search-highlight)
@@ -2803,13 +2224,6 @@ Accepts any arguments so it can be used as advice or a hook."
   (advice-add 'outline-move-subtree-down :after #'my-evil-refresh-search-highlight))
 
 ;;; copy the whole buffer
-
-;; (defun my-copy-whole-buffer ()
-;;   "Copy the entire buffer to the kill-ring without moving the cursor."
-;;   (interactive)
-;;   (save-excursion
-;;     (kill-new (buffer-substring-no-properties (point-min) (point-max))))
-;;   (message "Buffer copied to kill-ring"))
 
 (defun my-copy-whole-buffer-evil ()
   "Copy the entire buffer without moving the cursor and sync with Evil registers."
@@ -2862,6 +2276,191 @@ Accepts any arguments so it can be used as advice or a hook."
 (define-key evil-motion-state-map (kbd "C-z") #'ignore)
 
 (setq evil-toggle-key "")
+
+;;; wizard
+
+;; (evil-define-key '(normal visual) my-intercept-mode-map
+;;    "{" 'wizard-point-backward-to-empty-line
+;;    "}" 'wizard-point-forward-to-empty-line)
+
+(define-key evil-visual-state-map (kbd "M-j") 'wizard-move-region-down)
+(define-key evil-visual-state-map (kbd "M-k") 'wizard-move-region-up)
+
+(evil-define-key 'visual 'global (kbd "C") 'wizard-copy-unindented)
+
+;; (lightemacs-use-package mod-better-grep
+;;   :ensure nil
+;;   :commands mod-better-grep
+;;   :init
+;;   (with-eval-after-load 'evil
+;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
+
+;; Elpaca and the built-in package
+(lightemacs-use-package wizard
+  :commands (wizard-clone-and-switch-to-indirect-buffer
+             wizard-unhighlight
+             wizard-toggle-highlight-at-point
+             wizard-switch-to-base-buffer
+             wizard-replace-symbol-at-point
+             wizard-hl-todo-mode
+             wizard-hl-todo-local-mode
+             wizard-paste-indented
+             wizard-grep
+             wizard-reload-current-buffer)
+  :init
+  (setq wizard-point-ignore-invisible t)
+
+  ;;; Paste with current indentation
+  (global-set-key (kbd "C-v") 'wizard-paste-indented)
+  (evil-define-key 'insert 'global (kbd "C-v") 'wizard-paste-indented)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>gg") 'wizard-grep
+    (kbd "<leader>ll") 'wizard-reload-current-buffer)
+
+  ;; Indirect buffer
+  (evil-define-key 'normal 'global
+    (kbd "<leader>ec") 'wizard-clone-and-switch-to-indirect-buffer
+    (kbd "<leader>eC") 'wizard-switch-to-base-buffer)
+
+  ;; Rename
+  (evil-define-key 'normal 'global (kbd "<leader>R") 'wizard-replace-symbol-at-point)
+
+  ;; Highlight
+  ;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>eh") 'wizard-toggle-highlight-at-point
+    (kbd "<leader>eH") 'wizard-unhighlight)
+
+  (add-hook-text-editing-modes 'wizard-hl-todo-local-mode)
+  (add-hook 'my-scratch-buffer-created-hook 'wizard-hl-todo-local-mode)
+
+  (with-eval-after-load 'consult
+    (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode))
+
+  (defun pkg-wizard-smart-rename ()
+    "Smartly decide how to rename the symbol at point."
+    (interactive)
+    (cond
+     ;; Eglot or LSP-Mode
+     ((and (not (region-active-p))
+           (or (bound-and-true-p eglot--managed-mode)
+               (bound-and-true-p lsp-managed-mode)))
+      (let* ((from-string (thing-at-point 'symbol))
+             (to-string (read-string (format "Replace '%s' with: " from-string)
+                                     from-string nil from-string)))
+        (cond
+         ((and (bound-and-true-p lsp-managed-mode)
+               (fboundp 'lsp-rename))
+          (lsp-rename to-string))
+         ((and (bound-and-true-p eglot--managed-mode)
+               (fboundp 'eglot-rename))
+          (eglot-rename to-string)))))
+
+     ;; Replace string
+     (t
+      (ignore-errors
+        (when (fboundp 'wizard-replace-symbol-at-point)
+          (wizard-replace-symbol-at-point))))))
+
+  (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename))
+
+;;; DISABLED: Spell checker: Jinx or Flyspell
+
+;; (defvar my-spell-checker 'ispell)
+
+;; (use-package jinx
+;;   :if (eq my-spell-checker 'jinx)
+;;   :preface
+;;
+;;   (defun my-jinx-setup ()
+;;     "Configure Jinx to ignore specific faces in programming modes."
+;;     ;; Make the variable buffer-local first
+;;     (let ((excluded-faces
+;;            (cond
+;;             ((or (derived-mode-p 'yaml-mode)
+;;                  (derived-mode-p 'yaml-ts-mode))
+;;              '(font-lock-comment-face
+;;                font-lock-string-face
+;;                ;; font-lock-doc-face
+;;                ))
+;;             ;; ((derived-mode-p 'emacs-lisp-mode)
+;;             ;;  '(;; font-lock-comment-face ; TODO?
+;;             ;;    font-lock-string-face
+;;             ;;    ))
+;;             ((derived-mode-p 'prog-mode)
+;;              '(font-lock-comment-face
+;;                font-lock-string-face
+;;                ;; font-lock-doc-face
+;;                )))))
+;;       ;; Use setf to modify or insert the specific field for the current mode
+;;       (when excluded-faces
+;;         (make-local-variable 'jinx-exclude-faces)
+;;         (setf (alist-get major-mode jinx-exclude-faces) excluded-faces))))
+;;
+;;   ;; (defun my-jinx-ignore-2-chars ()
+;;   ;;   "Jinx: Ignore 2 characters."
+;;   ;;   ;; Exclude words of 1-2 characters and common Elisp char literals
+;;   ;;   (setq-local jinx-exclude-regexps
+;;   ;;               (append jinx-exclude-regexps
+;;   ;;                       '("\\b\\w\\{1,2\\}\\b"      ;; Any 1 or 2 char word
+;;   ;;                         "\\?\\\\\\?[a-zA-Z]"))))
+;;   ;; Ignore 2-character strings/words in Elisp
+;;   ;; Catches for example "]s"
+;;   ;; (add-hook 'emacs-lisp-mode-hook #'my-jinx-ignore-2-chars)
+;;   )
+
+;; Router functions to handle the active spell checker dynamically
+;; (defun my-spell-correct ()
+;;   "Correct spelling at point."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (fboundp 'jinx-correct)
+;;            (bound-and-true-p jinx-mode))
+;;       (call-interactively #'jinx-correct)
+;;     (call-interactively #'ispell-word)))
+;;
+;; (defun my-spell-next ()
+;;   "Jump to next spelling error."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (fboundp 'jinx-next)
+;;            (bound-and-true-p jinx-mode))
+;;       (call-interactively #'jinx-next)
+;;     (call-interactively #'evil-next-flyspell-error)))
+;;
+;; (defun my-spell-previous ()
+;;   "Jump to previous spelling error."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (fboundp 'jinx-previous)
+;;            (bound-and-true-p jinx-mode))
+;;       (call-interactively #'jinx-previous)
+;;     (call-interactively #'evil-prev-flyspell-error)))
+;;
+;; (defun my-spell-add-word ()
+;;   "Emulate Vim zg behavior for adding words."
+;;   (interactive)
+;;   (if (and (eq my-spell-checker 'jinx)
+;;            (bound-and-true-p jinx-mode))
+;;       (progn
+;;         (message "Jinx: Press '+' (personal) or '*' (local) inside the correction menu.")
+;;         (sit-for 1.5)
+;;         (when (fboundp 'jinx-correct)
+;;           (jinx-correct)))
+;;     (call-interactively #'ispell-word)))
+
+;; (with-eval-after-load 'evil
+;;   ;; Override Evil's default normal maps
+;;   (define-key evil-normal-state-map (kbd "z=") #'my-spell-correct)
+;;   (define-key evil-normal-state-map (kbd "zg") #'my-spell-add-word)
+;;
+;;   ;; Override Evil's default motion maps
+;;   (define-key evil-motion-state-map (kbd "]s") #'my-spell-next)
+;;   (define-key evil-motion-state-map (kbd "[s") #'my-spell-previous)
+;;
+;;   ;; Hook the router functions into Evil's jump list
+;;   (evil-add-command-properties #'my-spell-next :jump t)
+;;   (evil-add-command-properties #'my-spell-previous :jump t))
 
 ;;; DISABLED: Only yank visible text
 
@@ -2999,6 +2598,17 @@ Accepts any arguments so it can be used as advice or a hook."
 ;;       (setq-local evil-motion-state-cursor cursor-spec)
 ;;       (setq-local evil-emacs-state-cursor cursor-spec)
 ;;       (evil-refresh-cursor))))
+
+;;; DISABLED: Packages
+
+;; (lightemacs-use-package tabgo
+;;   :commands tabgo
+;;   :bind (("M-z" . tabgo)
+;;          ("M-t" . tabgo)))
+;;
+;; (evil-define-key 'normal 'global (kbd "gt") #'tabgo)
+
+;; TODO: Contribute to evil-match it to add tree-sitter
 
 ;;; Provide
 

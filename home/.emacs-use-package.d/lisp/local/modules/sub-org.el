@@ -761,8 +761,6 @@ any minor mode associated with the current `major-mode'."
 ;;; org-ibullets
 
 (lightemacs-use-package org-ibullets
-  ;; :vc (:url "https://github.com/jamescherti/org-ibullets.el"
-  ;;           :rev :newest)
   :after org
   :commands org-ibullets-mode
   :hook (org-mode . org-ibullets-mode))

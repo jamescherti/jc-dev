@@ -42,13 +42,12 @@
 
 (setq lightemacs-native-comp-excluded-cpus 1)
 
-(setq native-comp-jit-compilation t)
+;; (setq native-comp-jit-compilation nil)
 (setq compile-angel-enable-native-compile t)
 ;; (setq compile-angel-cache-locate-file t)
 
 (setq lightemacs-load-compiled-init-files t)
 (setq lightemacs-recentf-track-switch-to-buffer t)
-
 ;; Experimental
 ;; TODO make them a default
 (setq compile-angel-cache-file-truename t)
@@ -511,13 +510,14 @@
 ;; The `enable-dir-local-variables' variable dictates whether Emacs searches for
 ;; and applies settings from .dir-locals.el files located in the directory
 ;; hierarchy of a visited file.
-(setq enable-dir-local-variables t)
+;; (setq enable-dir-local-variables t)
 
 ;; Trust buffer contents for Flymake
 (when (boundp 'trusted-content)
   (let ((dirs (list "~/src/dotfiles/jc-dev/"
                     "~/src/emacs/"
-                    "~/src/forks/")))
+                    ;; "~/src/forks/"
+                    )))
     (dolist (dir dirs)
       (when dir
         ;; Ensure the path ends with a slash so it registers as a directory
