@@ -34,8 +34,13 @@
 ;;; Smart previous/next line
 
 (defsubst evilcursor--get-category-at-point ()
-  "Get the category at point."
-  (get-text-property (pos-bol) 'category))
+  "Get the category at point as an interned symbol."
+  (let ((prop (get-text-property (pos-bol) 'category)))
+    (cond
+     ((stringp prop) (intern prop))
+     ((symbolp prop) (or (intern-soft prop)
+                         (intern (symbol-name prop))))
+     (t nil))))
 
 (defsubst evilcursor--outline-invisible-p (pos)
   "Return non-nil when POS is invisible.
@@ -166,13 +171,13 @@ truncated."
             (when (and (not (= start-point (point)))
                        previous-cat
                        current-cat
-                       (string= current-cat "embark-collect-group-button")
-                       (not (string= previous-cat "embark-collect-group-button")))
+                       (eq current-cat 'embark-collect-group-button)
+                       (not (eq previous-cat 'embark-collect-group-button)))
               (let ((next-cat (save-excursion
                                 (funcall func-change-line count)
                                 (evilcursor--get-category-at-point))))
                 (when (and next-cat
-                           (not (string= next-cat "embark-collect-group-button")))
+                           (not (eq next-cat 'embark-collect-group-button)))
                   (funcall func-change-line count)))))))
 
        ((eq line-number-type 'visual)
