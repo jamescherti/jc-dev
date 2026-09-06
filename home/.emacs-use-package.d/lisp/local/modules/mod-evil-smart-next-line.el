@@ -137,19 +137,6 @@ truncated."
            ;; expensive visual calculations.
            (line-move-visual nil)
 
-           ;; line-move-ignore-invisible: This should set this to nil (note: my
-           ;; commented code has it as t, but the Emacs default is t, so nil is
-           ;; the optimization). When set to t, Emacs scans text properties and
-           ;; overlays to determine if text is hidden, skipping over folded
-           ;; lines. This property scanning is one of the most CPU-intensive
-           ;; operations during vertical movement in folded buffers. By setting
-           ;; it to nil, Emacs calculates movement purely by counting newline
-           ;; characters (\n) in the buffer, which is extremely fast. Since I
-           ;; already implemented evilcursor--after-vertical-movement to detect
-           ;; and adjust the cursor if it lands inside an invisible block, I can
-           ;; safely disable Emacs's native invisible-line scanning.
-           (line-move-ignore-invisible nil)
-
            ;; track-eol and evil-track-eol: I set both to nil. When these are
            ;; enabled, if the cursor is at the end of a line, moving vertically
            ;; forces Emacs to calculate the exact end position of the target
