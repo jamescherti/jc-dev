@@ -2098,6 +2098,20 @@ This function records the time when `window-setup-hook' runs."
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Startup-Summary.html
 (add-hook 'window-setup-hook #'my-record-startup-time 99)
 
+;;; evil want
+
+;; Evil requires these variables to be defined before the package is loaded.
+;; Because they are loaded too late in your file, they have no effect. You must
+(setq
+ ;; Better Vim emulation
+ ;; evil-symbol-word-search t
+ evil-want-abbrev-expand-on-insert-exit nil
+ evil-want-C-g-bindings t
+ ;; evil-respect-visual-line-mode nil
+ ;; evil-want-C-u-scroll t
+ ;; evil-want-C-i-jump t
+ )
+
 ;;; Provide
 
 (provide 'config)

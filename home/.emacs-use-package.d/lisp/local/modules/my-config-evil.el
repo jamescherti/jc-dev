@@ -40,26 +40,43 @@
 
 ;;; Evil config
 
+(setq
+ ;; Suppress motion errors during keyboard macro execution in Evil
+ ;;
+ ;; Setting this to t prevents a keyboard macro from aborting prematurely when a
+ ;; motion command fails. In standard Emacs behavior, if a macro attempts to
+ ;; move past the end of a line or buffer, it immediately stops executing.
+ ;; Suppressing this error allows the macro to complete its sequence, which
+ ;; makes macros significantly more robust when applying repetitive edits to
+ ;; text blocks or data structures with irregular line lengths.
+ ;;
+ ;; Tradeoff: The primary downside is the removal of a built-in safety
+ ;; mechanism. Motion errors frequently act as a natural guardrail to stop
+ ;; runaway macros. By ignoring these errors, a misaligned macro might continue
+ ;; executing in unintended locations, resulting in corrupted text that requires
+ ;; careful inspection and multiple undo operations to fix.
+ ;; evil-kbd-macro-suppress-motion-error t
+
+ ;; Use Vim-style regular expressions in search and substitute commands,
+ ;; allowing features like \v (very magic), \zs, and \ze for precise matches
+ evil-ex-search-vim-style-regexp t
+
+ ;; Do not modify the mode line to show Evil state
+ evil-mode-line-format nil
+ )
+
 ;; Make `v$` exclude the final newline
 (setq evil-v$-excludes-newline t)
-
-;; Prevent Evil state from being echoed, preserving Eldoc display in the
-;; minibuffer (If set to t, Eldoc output in the minibuffer will be overridden)
-(setq evil-echo-state nil)
-
-;; Enable automatic horizontal split below
-(setq evil-split-window-below t)
-
-;; Enable automatic vertical split to the right
-(setq evil-vsplit-window-right t)
-
-;; Enable fine-grained undo behavior
-(setq evil-want-fine-undo t)
 
 ;; Required by evil-collection
 
 ;; Do not move cursor back when exiting insert state
-(setq evil-move-cursor-back nil)
+;;
+;; Disabling this breaks standard Vim muscle memory. Vim always moves the cursor
+;; one space left when exiting insert mode. Altering this behavior causes
+;; off-by-one errors when executing normal mode commands immediately after
+;; pressing Escape.
+(setq evil-move-cursor-back t)
 
 ;; Only complete in the current buffer
 (setq evil-complete-all-buffers nil)
@@ -503,17 +520,13 @@ This enhancement prevents the cursor from moving."
 (define-key evil-normal-state-map "gq" 'my-evil-fill-and-move-operator)
 
 ;; It seems to only work when declared as default
-(defun my-setup-evil-mode ()
-  "Removed: `git-rebase-mode' erc-mode circe-server-mode circe-chat-mode."
-  ;; circe-query-mode sauron-mode
-  (dolist (mode '(vterm-mode
-                  eat-mode
-                  ;;custom-mode
-                  ;; eshell-mode
-                  ;; term-mode
-                  ))
-    (add-to-list 'evil-emacs-state-modes mode)))
-(add-hook 'evil-mode-hook 'my-setup-evil-mode)
+
+(dolist (mode '(vterm-mode
+                eat-mode
+                ;; eshell-mode
+                ;; term-mode
+                ))
+  (add-to-list 'evil-emacs-state-modes mode))
 
 (when (daemonp)
   (global-set-key (kbd "C-x C-c") 'my-save-buffers-kill-emacs))
