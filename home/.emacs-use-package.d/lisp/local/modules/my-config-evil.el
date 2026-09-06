@@ -2307,6 +2307,32 @@ Accepts any arguments so it can be used as advice or a hook."
              wizard-paste-indented
              wizard-grep
              wizard-reload-current-buffer)
+  :preface
+  (defun pkg-wizard-smart-rename ()
+    "Smartly decide how to rename the symbol at point."
+    (interactive)
+    (cond
+     ;; Eglot or LSP-Mode
+     ((and (not (region-active-p))
+           (or (bound-and-true-p eglot--managed-mode)
+               (bound-and-true-p lsp-managed-mode)))
+      (let* ((from-string (thing-at-point 'symbol))
+             (to-string (read-string (format "Replace '%s' with: " from-string)
+                                     from-string nil from-string)))
+        (cond
+         ((and (bound-and-true-p lsp-managed-mode)
+               (fboundp 'lsp-rename))
+          (lsp-rename to-string))
+         ((and (bound-and-true-p eglot--managed-mode)
+               (fboundp 'eglot-rename))
+          (eglot-rename to-string)))))
+
+     ;; Replace string
+     (t
+      (ignore-errors
+        (when (fboundp 'wizard-replace-symbol-at-point)
+          (wizard-replace-symbol-at-point))))))
+
   :init
   (setq wizard-point-ignore-invisible t)
 
@@ -2336,31 +2362,6 @@ Accepts any arguments so it can be used as advice or a hook."
 
   (with-eval-after-load 'consult
     (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode))
-
-  (defun pkg-wizard-smart-rename ()
-    "Smartly decide how to rename the symbol at point."
-    (interactive)
-    (cond
-     ;; Eglot or LSP-Mode
-     ((and (not (region-active-p))
-           (or (bound-and-true-p eglot--managed-mode)
-               (bound-and-true-p lsp-managed-mode)))
-      (let* ((from-string (thing-at-point 'symbol))
-             (to-string (read-string (format "Replace '%s' with: " from-string)
-                                     from-string nil from-string)))
-        (cond
-         ((and (bound-and-true-p lsp-managed-mode)
-               (fboundp 'lsp-rename))
-          (lsp-rename to-string))
-         ((and (bound-and-true-p eglot--managed-mode)
-               (fboundp 'eglot-rename))
-          (eglot-rename to-string)))))
-
-     ;; Replace string
-     (t
-      (ignore-errors
-        (when (fboundp 'wizard-replace-symbol-at-point)
-          (wizard-replace-symbol-at-point))))))
 
   (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename))
 
