@@ -38,6 +38,12 @@
 (setq user-lisp-auto-scrape nil)
 (setq site-run-file nil)
 (setq inhibit-default-init t)
+(setq vc-handled-backends '(Git))
+(advice-add #'x-apply-session-resources :override #'ignore)
+(with-eval-after-load 'cus-edit
+  (advice-add 'custom-save-all :override #'ignore))
+(with-eval-after-load 'le-gcmh
+  (setq gcmh-high-cons-threshold (* 600 1024 1024)))
 
 ;; TODO remove from devemacs and my emacs and add this to lightemacs
 (with-eval-after-load 'cus-edit
@@ -81,6 +87,8 @@
                            le-flavor-micro
                            le-pathaction
                            le-dired-filter
+                           le-gcmh
+                           le-stripspace
 
                            le-markdown-mode
                            ;; le-maybe-markdown-ts

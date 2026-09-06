@@ -55,7 +55,7 @@
 (setq compile-angel-verbose t)
 (setq compile-angel-debug t)
 
-(setq buffer-terminator-verbose nil)
+(setq buffer-terminator-verbose t)
 (setq buffer-terminator-debug nil)
 
 ;; (setq compile-angel-enable-byte-compile nil)
@@ -68,8 +68,8 @@
 
 ;; Which kind of warnings and errors to report from async native compilation.
 ;; (setq native-comp-async-warnings-errors-kind 'important)
-(setq native-comp-async-warnings-errors-kind 'all)
 
+(setq native-comp-async-warnings-errors-kind 'all)
 (setq native-comp-async-report-warnings-errors t)
 
 (progn
@@ -488,6 +488,13 @@
 ;;   expected by the system or administrators, possibly causing missing
 ;;   functionality or inconsistent behavior in Emacs sessions.
 (setq site-run-file nil)
+
+;; TODO remove from devemacs and my emacs and add this to lightemacs
+;; Prevent Emacs from writing custom settings to any file
+(with-eval-after-load 'cus-edit
+  (advice-add 'custom-save-all :override #'ignore))
+
+(advice-add #'x-apply-session-resources :override #'ignore)
 
 ;; Only support Git
 (setq vc-handled-backends '(Git))
@@ -1004,8 +1011,6 @@ subsequent GCC invocations."
     (add-to-list 'default-frame-alist no-border)
     (add-to-list 'initial-frame-alist no-border))
 
-  ;; Ignore X resources
-  (advice-add #'x-apply-session-resources :override #'ignore)
   ;; (when (eq lightemacs-package-manager 'builtin-package)
   ;;   (setq use-package-compute-statistics t))
 
@@ -1038,7 +1043,7 @@ subsequent GCC invocations."
 
                       ;; .dir-locals.el is a data structure for project variables,
                       ;; not executable code. Compiling it wastes resources.
-                      "\\(?:[/\\\\]\\.my-dir-locals\\.el\\(?:\\.gz\\)?$\\)"
+                      ;; "\\(?:[/\\\\]\\.my-dir-locals\\.el\\(?:\\.gz\\)?$\\)"
 
                       ;; Emacs data directory: Exclude general data files from compilation.
                       ;; This conflicts with straight packages or elpa
@@ -1067,15 +1072,10 @@ subsequent GCC invocations."
 
 (add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
 
-;; TODO remove from devemacs and my emacs and add this to lightemacs
-(with-eval-after-load 'cus-edit
-  ;; Prevent Emacs from writing custom settings to any file
-  (advice-add 'custom-save-all :override #'ignore))
-
 ;;; Package defaults
 
 (with-eval-after-load 'le-gcmh
-  (setq gcmh-high-cons-threshold (* 1200 1024 1024)))
+  (setq gcmh-high-cons-threshold (* 2400 1024 1024)))
 
 (setq stripspace-verbose nil)
 (setq stripspace-normalize-indentation t)
