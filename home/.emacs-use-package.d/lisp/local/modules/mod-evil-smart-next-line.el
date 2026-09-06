@@ -148,9 +148,7 @@ truncated."
                   (funcall func-change-line count)))))))
 
        ((eq line-number-type 'visual)
-        ;; (funcall func-change-line-visual count)
-
-        (if (and (not truncate-lines)
+        (if (and truncate-lines
                  (= count 1))
             ;; This speeds-up scrolling because it does not take into
             ;; consideration visual things
@@ -171,21 +169,18 @@ truncated."
          "Unsupported evilcursor-smart-next-line/evilcursor-smart-previous-line.")))))))
 
 (evil-define-motion evilcursor-smart-next-line (count)
-  :type line
   "Move smart next line down by COUNT."
+  :type line
   (unless count
     (setq count 1))
-  (let ((inhibit-message t))
-    (evilcursor-forward-line count)))
+  (evilcursor-forward-line count))
 
 (evil-define-motion evilcursor-smart-previous-line (count)
   "Move smart previous line up by COUNT."
   :type line
-  "Move smart previous line up by COUNT."
   (unless count
     (setq count 1))
-  (let ((inhibit-message t))
-    (evilcursor-forward-line (* count -1))))
+  (evilcursor-forward-line (* count -1)))
 
 (defun my-setup-local-evilcursor-smart-next-prev-line ()
   "Setup smart next/previous line."
