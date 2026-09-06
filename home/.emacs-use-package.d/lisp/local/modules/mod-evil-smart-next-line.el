@@ -242,6 +242,7 @@ truncated."
 (add-hook 'embark-collect-mode-hook #'my-setup-local-evilcursor-smart-next-prev-line)
 
 ;; Alternative: SMART
+
 (evil-define-key '(insert visual) 'global
   (kbd "M-k") #'evilcursor-smart-previous-line
   (kbd "M-j") #'evilcursor-smart-next-line)
@@ -252,8 +253,6 @@ truncated."
   (kbd "k") nil
   (kbd "j") nil)
 
-;; (evil-define-key 'insert minibuffer-local-map (kbd "M-k") #'previous-history-element)
-;; (evil-define-key 'insert minibuffer-local-map (kbd "M-j") #'next-history-element)
 (evil-define-key 'insert evil-eval-map
   (kbd "M-k") #'previous-history-element
   (kbd "M-j") #'next-history-element)
