@@ -718,7 +718,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; failed). The default value is split-window-sensibly, which is
  ;; documented next.
  split-window-preferred-function nil
- eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly
  electric-quote-comment nil
  electric-quote-string nil
  diff-add-log-use-relative-names t
@@ -1165,10 +1164,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
         smerge-refine-shadow-cursor nil
         hs-hide-comments-when-hiding-all nil
         hs-isearch-open t  ;; Open both comments and code
-        eldoc-idle-delay 0.5
-        eldoc-echo-area-display-truncation-message nil
-        ;; eldoc-echo-area-prefer-doc-buffer nil
-        eldoc-echo-area-use-multiline-p nil)
+        )
 
   (unless noninteractive
     (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
@@ -3467,10 +3463,23 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; eldoc
 
+(setq
+ ;; eldoc-message-commands-table-size 63
+ eldoc-idle-delay most-positive-fixnum
+ ;; eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly
+ eldoc-documentation-strategy 'eldoc-documentation-default
+ ;; eldoc-help-at-pt t
+ ;; Prefer ElDoc's documentation buffer if it is displayed in some window.
+ eldoc-echo-area-prefer-doc-buffer t
+ ;; If non-nil, provide verbose help when a message has been truncated.
+ eldoc-echo-area-display-truncation-message nil
+ ;; eldoc-echo-area-prefer-doc-buffer nil
+ eldoc-echo-area-use-multiline-p nil)
+
 (defun my-setup-eldoc-mode ()
   "Setup eldoc mode."
   (unless (bound-and-true-p eldoc-mode)
-    (setq-local eldoc-idle-delay 0.4)
+    (setq-local eldoc-idle-delay 0.3)
     (eldoc-mode 1)))
 
 (lightemacs-use-package eldoc
@@ -3482,11 +3491,7 @@ properly handles remote files over Tramp), applying the setting only if
          (sh-mode . my-setup-eldoc-mode)
          (emacs-lisp-mode . my-setup-eldoc-mode)
          (python-mode . my-setup-eldoc-mode)
-         (python-ts-mode . my-setup-eldoc-mode))
-
-  :init
-  ;; (setq eldoc-message-commands-table-size 63)
-  (setq eldoc-idle-delay most-positive-fixnum))
+         (python-ts-mode . my-setup-eldoc-mode)))
 
 ;;; pathaction
 

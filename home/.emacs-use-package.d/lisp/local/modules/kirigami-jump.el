@@ -163,7 +163,7 @@ If ENABLE is non-nil, install hooks. Otherwise remove them."
       (setq consult-after-jump-hook nil)
       ;; NOTE: I removed recenter from consult-after-jump-hook because it
       ;; recenters even when it is not necessary.
-      ;; (add-hook 'consult-after-jump-hook 'recenter)
+      (add-hook 'consult-after-jump-hook 'recenter)
       (funcall fn 'consult-after-jump-hook #'kirigami-jump--outline-after-jump-when-not-minibuffer -80))
     ;; (add-hook 'consult-after-jump-hook #'(lambda() (message "AFTER JUMP")))
 
