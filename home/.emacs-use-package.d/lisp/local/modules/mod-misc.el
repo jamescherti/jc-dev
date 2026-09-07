@@ -599,6 +599,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(setq auto-revert-avoid-polling t)
+
 ;; TODO minimal emacs?
 (setq-default cursor-in-non-selected-windows nil)
 
@@ -1986,14 +1988,14 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (setq apheleia-formatters nil)
 
   ;; Elisp
-  (setf (alist-get 'lisp-indent apheleia-formatters)
-        'apheleia-indent-lisp-buffer)
-  (setf (alist-get 'emacs-lisp-mode apheleia-mode-alist) 'lisp-indent)
+  (progn
+    (setf (alist-get 'lisp-indent apheleia-formatters)
+          'apheleia-indent-lisp-buffer)
+    (setf (alist-get 'emacs-lisp-mode apheleia-mode-alist) 'lisp-indent))
 
   ;; Python
-  (cond
-   ((executable-find "ruff")
-    ;; Ruff
+  (progn
+    (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
 
     ;; Create one super-formatter that sorts imports (I) and fixes PEP 8 (E, W)
     (setf (alist-get 'ruff-isort apheleia-formatters)
@@ -2013,12 +2015,28 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             "--silent"                 ;; Keep Apheleia quiet
             "-"))
 
+    (setf (alist-get 'autopep8 apheleia-formatters)
+          '("autopep8"
+            "--max-line-length=79"
+            ;; --aggressive is too aggressive when it comes to max-line-length
+            ;; "--aggressive"
+            ;; "--aggressive"
+            "-")))
+
+  (cond
+   ((executable-find "ruff")
+    ;; Ruff
+
     ;; (setf (alist-get 'ruff-isort apheleia-formatters)
     ;;       '("ruff" "check" "-n" "--select" "I" "--fix" "--fix-only"
     ;;         "--stdin-filename" filepath "-"))
 
-    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format ruff-isort))
-    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort)))
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(autopep8 ruff-isort))
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(autopep8 ruff-isort))
+
+    ;; (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format ruff-isort))
+    ;; (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort))
+    )
 
    (t
     ;; Legacy
@@ -2029,8 +2047,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             ;; "--aggressive"
             ;; "--aggressive"
             "-"))
-
-    (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
 
     (setf (alist-get 'python-mode apheleia-mode-alist) '(isort autopep8))
     (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8))))
