@@ -93,7 +93,7 @@
 (setq evil-collection-calendar-want-org-bindings t)
 
 (setq tooltip-hide-delay 20 ;; seconds
-      tooltip-delay 0.4
+      tooltip-delay 0.3
       tooltip-short-delay 0.08)
 
 ;; TODO is this good?
