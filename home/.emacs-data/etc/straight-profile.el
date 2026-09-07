@@ -19,7 +19,7 @@
  ("corfu" . "4303506204bdf5df8f5e7d1457f6fca465a4da8e") ; 2.15 | RSS RELEASE
  ("cape" . "f0135abaf95a22b9fb2c951751a5d0733ce61bbd") ; 2.8 | RSS RELEASE
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
- ("gptel" . "f5ad4eb812920fba3fcfbe32042ef89f979a7e17") ; v0.9.9.5 | RSS RELEASE
+ ("gptel" . "2b02618b2eba819b996eca7f71bf4dd4b91eb532") ; v0.9.9.6 | RSS RELEASE
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("indent-bars" . "36620c5f3fba2ba8f23d7ef947e0d1d09e412bf5") ; 1.0.1 | RSS RELEASE
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")

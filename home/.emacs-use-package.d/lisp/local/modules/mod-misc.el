@@ -171,7 +171,7 @@
 ;;; Scroll
 
 (setq redisplay-skip-fontification-on-input t
-      scroll-conservatively 11
+      scroll-conservatively 9
       next-screen-context-lines 0
       ;; fast-but-imprecise-scrolling nil
       )
