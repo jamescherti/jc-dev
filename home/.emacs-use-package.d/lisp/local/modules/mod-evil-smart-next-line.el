@@ -33,10 +33,8 @@
 
 ;;; Smart previous/next line
 
-(defsubst evilcursor--get-category-at-point ()
-  "Get the category at point as an interned symbol.
-Defined via `defsubst' so the byte-compiler inlines the execution,
-eliminating function-call overhead (stack frames) during rapid scrolling."
+(defun evilcursor--get-category-at-point ()
+  "Get the category at point as an interned symbol."
   ;; Using `pos-bol' directly avoids the heavy overhead of wrapping the check
   ;; in a `save-excursion' block and executing a `goto-char' command.
   (let ((prop (get-text-property (pos-bol) 'category)))
@@ -58,7 +56,7 @@ eliminating function-call overhead (stack frames) during rapid scrolling."
      (t
       nil))))
 
-(defsubst evilcursor--outline-invisible-p (pos)
+(defun evilcursor--outline-invisible-p (pos)
   "Return non-nil when POS is invisible.
 POS is the buffer position to check."
   (when (>= pos 1)
