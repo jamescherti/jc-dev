@@ -1996,7 +1996,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     ;; Ruff
 
     ;; Create one super-formatter that sorts imports (I) and fixes PEP 8 (E, W)
-    (setf (alist-get 'ruff apheleia-formatters)
+    (setf (alist-get 'ruff-isort apheleia-formatters)
           '("ruff" "check"
             "-n"
             "--select" "I,E,W"   ;; I = isort, E/W = pycodestyle (autopep8)
@@ -2004,19 +2004,21 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             "--stdin-filename" filepath
             "-"))
 
-    ;; (setf (alist-get 'ruff apheleia-formatters)
-    ;;       '("ruff" "format"
-    ;;         "--line-length=79"         ;; Set your strict line length
-    ;;         ;; "--target-version=py311"   ;; Example: Tell Ruff your Python version
-    ;;         ;; "--skip-magic-trailing-comma" ;; Example: Another formatting tweak
-    ;;         "--silent"                 ;; Keep Apheleia quiet
-    ;;         "-"))
+    ;; Ruff: Format code (replaces autopep8/Black)
+    (setf (alist-get 'ruff-format apheleia-formatters)
+          '("ruff" "format"
+            "--line-length=79"         ;; Set your strict line length
+            ;; "--target-version=py311"   ;; Example: Tell Ruff your Python version
+            ;; "--skip-magic-trailing-comma" ;; Example: Another formatting tweak
+            "--silent"                 ;; Keep Apheleia quiet
+            "-"))
+
     ;; (setf (alist-get 'ruff-isort apheleia-formatters)
     ;;       '("ruff" "check" "-n" "--select" "I" "--fix" "--fix-only"
     ;;         "--stdin-filename" filepath "-"))
 
-    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff))
-    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff)))
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format ruff-isort))
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort)))
 
    (t
     ;; Legacy
