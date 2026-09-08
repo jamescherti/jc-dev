@@ -16,8 +16,7 @@
   :ensure nil
   :commands gcsentinel-mode
   :init
-  (add-hook 'lightemacs-emacs-startup-hook #'gcsentinel-mode 200)
-  (setq gcsentinel-low-cons-threshold minimal-emacs-gc-cons-threshold))
+  (add-hook 'lightemacs-emacs-startup-hook #'gcsentinel-mode 200))
 
 ;;; Provide
 

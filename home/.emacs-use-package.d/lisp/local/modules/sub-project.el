@@ -147,11 +147,12 @@ The selection is limited to projects already listed in the project database; see
   (when (and (fboundp 'project--ensure-read-project-list)
              (fboundp 'project--file-completion-table)
              (fboundp 'project--write-project-list))
-    (project--ensure-read-project-list)
-    (let* ((choices
-            ;; Just using this for the category (substring completion style).
-            (project--file-completion-table project--list))
-           (project--dir-history (project-known-project-roots))
+    (let* ((project--dir-history (project-known-project-roots))
+           ;; Just using this for the category (substring completion style).
+           (choices (lambda (string pred action)
+                      (if (eq action 'metadata)
+                          '(metadata (category . project))
+                        (complete-with-action action project--dir-history string pred))))
            (project-dir ""))
       (while (equal project-dir "")
         ;; If the user simply pressed RET, do this again until they don't.
@@ -170,6 +171,16 @@ The selection is limited to projects already listed in the project database; see
   "Normalize and deduplicate the global project list."
   ;; Remove trailing '/' from each project path
   (when (and project--list (not (eq project--list 'unset)))
+    ;; (setq project--list
+    ;;       (mapcar (lambda (project)
+    ;;                 (cond
+    ;;                  ((listp project)
+    ;;                   (let ((project (car project)))
+    ;;                     (list (file-name-as-directory (expand-file-name project)))))
+    ;;                  ((stringp project)
+    ;;                   (list (file-name-as-directory (expand-file-name project))))))
+    ;;               project--list))
+
     (setq project--list
           (mapcar (lambda (project)
                     (cond

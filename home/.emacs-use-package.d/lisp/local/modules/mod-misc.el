@@ -1465,24 +1465,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; Set this to nil if you want to do it on demand
   ;; (setq diff-refine nil)
 
-  (with-eval-after-load 'consult
-    (setq consult-buffer-filter
-          (append '("^\*helpful"
-                    "^\*sdcv"
-                    "^\*EGLOT"
-                    "^\*Help"
-                    "^\*scratch\*"
-                    "^\*tmux\*"
-                    "^\*Warnings\*"
-                    "^todo.org$"
-                    "^\*Native-compile-Log\*"
-                    "^\*Async-native-compile-log\*"
-                    "^tmp-"
-                    "^\*Ediff"
-                    "^\*Compile-Log\*"
-                    "^\*ansible-doc")
-                  consult-buffer-filter)))
-
   (when debug-on-error
     ;; TODO le-default config?
     (setq debug-ignored-errors
@@ -1518,30 +1500,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                     "Bad diff region number")
                   debug-ignored-errors)))
 
-  (setq consult-preview-excluded-files '("\\`/[^/|:]+:" "\\.asc\\'"
-                                         "\\`/[^/|:]+:" "\\.gpg\\'"))
   (add-hook 'embark-collect-mode-hook
             #'(lambda()
                 ;; Disable auto-hscroll in embark-collect buffers.
                 (setq-local auto-hscroll-mode nil)
                 (my-disable-fringe-truncation-arrow)))
-
-  (with-eval-after-load 'consult
-    (setq consult-fd-args
-          (concat (if lightemacs--fdfind-executable
-                      lightemacs--fdfind-executable
-                    "fd")
-                  ;; This config
-                  " --type f"
-
-                  ;; Lightemacs
-                  " --hidden --exclude .git --absolute-path"
-                  (if (memq system-type '(cygwin windows-nt ms-dos))
-                      " --path-separator=/"
-                    "")
-
-                  ;; Default
-                  " --full-path --color=never")))
 
   (add-hook 'text-mode-hook #'(lambda () (setq-local indent-tabs-mode nil)))
 
@@ -2621,10 +2584,80 @@ ARGS - the arguments passed to the original function"
 
 ;;; consult
 
+;; (with-eval-after-load 'consult
+;;   (setq consult-fd-args
+;;         (concat (if lightemacs--fdfind-executable
+;;                     lightemacs--fdfind-executable
+;;                   "fd")
+;;                 ;; This config
+;;                 " --type f"
+;;
+;;                 ;; Lightemacs
+;;                 " --hidden --exclude .git --absolute-path"
+;;                 (if (memq system-type '(cygwin windows-nt ms-dos))
+;;                     " --path-separator=/"
+;;                   "")
+;;
+;;                 ;; Default
+;;                 " --full-path --color=never")))
+
+(with-eval-after-load 'consult
+  (setq consult-buffer-filter
+        (append '("^\*helpful"
+                  "^\*sdcv"
+                  "^\*EGLOT"
+                  "^\*Help"
+                  "^\*scratch\*"
+                  "^\*tmux\*"
+                  "^\*Warnings\*"
+                  "^todo.org$"
+                  "^\*Native-compile-Log\*"
+                  "^\*Async-native-compile-log\*"
+                  "^tmp-"
+                  "^\*Ediff"
+                  "^\*Compile-Log\*"
+                  "^\*ansible-doc"
+                  ;; "^\\*forge\\(?:-[a-z]+\\)"
+                  "\\`magit\\(?:-[a-z]+\\)?:")
+                consult-buffer-filter)))
+
+
 ;; TODO lightemacs?
 ;; Disable the column limit for consult search commands to prevent
 ;; the truncation of long file paths and text in the embark-collect buffer.
+
+;; consult-preview-excluded-files: This variable already excludes remote (Tramp)
+;; and .gpg files by default. You can expand this list of regular expressions to
+;; exclude .min.js, .lock, or .sqlite files, preventing Emacs from choking if
+;; you accidentally preview a heavy, unreadable file.
+(setq consult-preview-excluded-files '("\\`/[^/|:]+:"
+                                       "\\.asc\\'"
+                                       "\\.gpg\\'"))
+
+;;This truncates long lines in grep output. Keeping this relatively low prevents
+;;Emacs from hanging when a search hits minified JavaScript or large JSON files.
+;;Ensure you do not set this to nil.
 (setq consult-grep-max-columns nil)
+
+;; TODO consult-fontify-preserve: (Default: t). When enabled, consult-line
+;; preserves syntax highlighting in the completion UI. Setting it to nil avoids
+;; the jit-lock text property copying overhead, significantly speeding up
+;; consult-line on massive buffers.
+
+;; TODO: consult-fontify-max-size: (Default: 1048576 bytes). This sets the
+;; threshold for whole-buffer fontification during commands like
+;; consult-keep-lines. Lowering this value prevents Emacs from attempting
+;; expensive syntax highlighting on large files before filtering.
+
+;; TODO: consult-preview-partial-size: (Default: 1048576 bytes). For commands
+;; like consult-find or consult-fd, Consult will only load a partial chunk of
+;; files larger than this threshold. Decreasing this value speeds up the preview
+;; mechanism when rapidly navigating through file lists.
+
+;; TODO: consult-preview-max-count: (Default: 10). This limits how many file
+;; buffers Consult keeps open temporarily during a preview session. Lowering it
+;; reduces memory consumption and background processing when scrolling quickly.
+(setq consult-preview-max-count 5)
 
 ;; Why it is best: By default, Consult previews every candidate instantly
 ;; ('any). If you hold down C-n or scroll the mouse wheel rapidly, Emacs
@@ -2633,6 +2666,25 @@ ARGS - the arguments passed to the original function"
 ;; wait until you pause on a candidate for a fraction of a second before
 ;; triggering the preview I/O, keeping navigation buttery smooth.
 (setq consult-preview-key '(:debounce 0.03 any))
+
+(setq consult-buffer-sources
+      '(;; Active workspace (visible by default)
+        consult-source-buffer
+
+        ;; Project context (hidden; summon with 'p', 'B', 'F', 'R')
+        consult-source-project-buffer-hidden
+        consult-source-project-recent-file-hidden
+        consult-source-project-root-hidden
+
+        ;; File system history (hidden; summon with 'f', 'm', '*')
+        consult-source-recent-file
+        consult-source-modified-buffer
+        consult-source-bookmark
+
+        ;; Buffers from other frames/tabs & internal buffers (summon with 'o',
+        ;; SPC)
+        consult-source-other-buffer
+        consult-source-hidden-buffer))
 
 ;; Manual trigger
 ;; This prevents any background file reads, disk I/O, or syntax highlighting
@@ -2646,6 +2698,7 @@ ARGS - the arguments passed to the original function"
 ;; Consult will act as a standard completion engine, returning candidates
 ;; instantly with zero background overhead.
 ;; (setq consult-preview-key nil)
+
 
 ;;; battery angel
 
@@ -4340,7 +4393,46 @@ Defers actual initialization to prevent blocking file loads."
 
 ;;; DISABLED: embark / vertico
 
-(setq vertico-count 20)
+;; By lowering the number of candidates Vertico displays, Marginalia has less
+;; work to do on every keystroke.
+(setq vertico-count 15)
+
+;; Marginalia computes annotations on the fly and stores them in a hash table to
+;; prevent recalculation when you scroll back and forth. The default cache size
+;; is defined as (defvar marginalia--cache-size 100). If vertico-count is high
+;; or if you scroll rapidly through M-x, Emacs will continuously evict and
+;; recompute docstrings. Increasing this limit reduces CPU cycles spent on
+;; string manipulation.
+(setq marginalia--cache-size 1024)
+
+(with-eval-after-load 'marginalia
+  ;; The marginalia-annotate-local-file function calls file-attributes
+  ;; synchronously, which hits the disk for every visible file candidate. The
+  ;; variable marginalia-remote-file-regexps prevents this for Tramp paths, but it
+  ;; does not account for slow local mounts (such as NFS, SSHFS, or WSL /mnt/
+  ;; drives). You can append your slow paths to this list to force Marginalia to
+  ;; skip disk checks for them.
+  (add-to-list 'marginalia-remote-file-regexps "\\`/mnt/")
+
+  ;; The marginalia--library-doc function executes synchronous shell commands
+  ;; (gzip -c -q -d %s | head -n1 or head -n1 %s) to parse docstrings from files
+  ;; in your load-path. If you have a large Emacs configuration or many installed
+  ;; packages, M-x find-library will freeze the UI while this cache is generated.
+  ;; If you frequently search libraries and experience hangs, disable the library
+  ;; annotator entirely:
+  (setq marginalia-annotators
+        (assq-delete-all 'library marginalia-annotators))
+
+  ;; Remove all file annotations completely (including the size, permissions,
+  ;; date, and owner).
+  (setq marginalia-annotators (assq-delete-all 'file marginalia-annotators))
+
+  ;; When searching for files in large repositories via project-find-file,
+  ;; marginalia-annotate-project-file expands the absolute path and queries file
+  ;; attributes (size, modification time, owner) for every visible file. Removing
+  ;; this specific annotator eliminates filesystem bottlenecks while keeping
+  ;; Marginalia active for buffers and commands.
+  (setq marginalia-annotators (assq-delete-all 'project-file marginalia-annotators)))
 
 ;; (lightemacs-use-package vertico-buffer
 ;;   :ensure nil

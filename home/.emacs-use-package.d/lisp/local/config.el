@@ -1074,8 +1074,9 @@ subsequent GCC invocations."
 
 ;;; Package defaults
 
-(with-eval-after-load 'le-gcmh
-  (setq gcmh-high-cons-threshold (* 2400 1024 1024)))
+(setq gcsentinel-low-cons-threshold minimal-emacs-gc-cons-threshold)
+(setq gcsentinel-high-cons-threshold (* 1200 1024 1024))
+(setq gcmh-high-cons-threshold gcsentinel-high-cons-threshold)
 
 (setq stripspace-verbose nil)
 (setq stripspace-normalize-indentation t)
