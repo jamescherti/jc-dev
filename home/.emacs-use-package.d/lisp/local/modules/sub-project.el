@@ -30,176 +30,85 @@
 (require 'le-core-defaults)
 (eval-and-compile (require 'lightemacs-use-package))
 
-(setq project-switch-commands #'project-dired)
-
-;; This is also useful for eglot
-(setq project-vc-extra-root-markers '(;; ".dir-locals.el"
-                                      ;; "requirements.txt"
-                                      ;; "autogen.sh"
-                                      "setup.py"
-                                      "pyproject.toml"
-                                      ".project"))
-
 (lightemacs-use-package project
   :ensure nil
-  :commands (;; project-try-vc
-             ;; project-remember-project
-             ;; project-current
-             ;; project-root
-             project--read-project-list
-             project-find-file
-             project-display-buffer-other-frame
-             project-list-buffers
-             project-switch-to-buffer
-             project-forget-project
-             project-recompile
-             project-shell-command
-             project-kill-buffers
-             project-any-command
-             project-or-external-find-file
-             project-forget-zombie-projects
-             project-switch-project
-             project-async-shell-command
-             project-compile
-             project-other-window-command
-             project-shell
-             project-other-frame-command
-             project-query-replace-regexp
-             project-find-regexp
-             project-other-tab-command
-             project-dired
-             project-search
-             project-eshell
-             project-or-external-find-regexp
-             project-remember-projects-under
-             project-execute-extended-command
-             project-display-buffer
-             project-forget-projects-under
-             project-find-dir
-             project-prefix-or-any-command
-             project-vc-dir)
+  :commands (project--read-project-list
+             ;; project-find-file
+             ;; project-display-buffer-other-frame
+             ;; project-list-buffers
+             ;; project-switch-to-buffer
+             ;; project-forget-project
+             ;; project-recompile
+             ;; project-shell-command
+             ;; project-kill-buffers
+             ;; project-any-command
+             ;; project-or-external-find-file
+             ;; project-forget-zombie-projects
+             ;; project-switch-project
+             ;; project-async-shell-command
+             ;; project-compile
+             ;; project-other-window-command
+             ;; project-shell
+             ;; project-other-frame-command
+             ;; project-query-replace-regexp
+             ;; project-find-regexp
+             ;; project-other-tab-command
+             ;; project-dired
+             ;; project-search
+             ;; project-eshell
+             ;; project-or-external-find-regexp
+             ;; project-remember-projects-under
+             ;; project-execute-extended-command
+             ;; project-display-buffer
+             ;; project-forget-projects-under
+             ;; project-find-dir
+             ;; project-prefix-or-any-command
+             ;; project-vc-dir
+             )
   :functions (project--ensure-read-project-list
-              project--file-completion-table))
+              project--file-completion-table)
 
-;;; auto add
+  :init
+  ;; Add this to your configuration to immediately prompt for a file within the
+  ;; selected project:
+  (setq project-switch-commands 'project-dired)
 
-;; (require 'project)
-;;
-;; (defun sub-project-auto-remember ()
-;;   "Automatically add the current project to the known projects list.
-;; Only adds the project if the root directory contains a `.project` file."
-;;   (when-let* ((proj (project-current nil))
-;;               (root (project-root proj)))
-;;     (when (file-exists-p (expand-file-name ".project" root))
-;;       (project-remember-project proj))))
-;;
-;; ;; Trigger when opening a file
-;; (add-hook 'find-file-hook #'sub-project-auto-remember)
-;;
-;; ;; Trigger when opening a directory in dired
-;; (add-hook 'dired-mode-hook #'sub-project-auto-remember)
+  ;; This is also useful for eglot
+  (setq project-vc-extra-root-markers '("setup.py"
+                                        "pyproject.toml"
+                                        ".project"))
 
-;;; Ignore
-
-(with-eval-after-load 'project
+  :config
+  ;; Exclusions
   ;; Add a predicate to exclude any project rooted in the package directory
   (setq project-list-exclude nil)
   (add-to-list 'project-list-exclude
                (lambda (project)
-                 ;; (message "COMPARE PROJECT: %s: '%s' / '%s'"
-                 ;;          (file-in-directory-p (project-root project) package-user-dir)
-                 ;;          (project-root project) package-user-dir)
                  (file-in-directory-p (project-root project) package-user-dir))))
-
-;; TODO patch Emacs?
-(defun my-project-forget-excluded-projects ()
-  "Remove projects matching `project-list-exclude' from the known projects list."
-  (interactive)
-  (when (and (fboundp 'project--find-in-directory)
-             (fboundp 'project--write-project-list))
-    (dolist (proj (project-known-project-roots))
-      (let ((pr (project--find-in-directory proj)))
-        (when (seq-some (lambda (rule)
-                          (if (functionp rule)
-                              (and pr (funcall rule pr))
-                            (string-match-p rule proj)))
-                        project-list-exclude)
-          (project-forget-project proj))))))
-
-;; TODO can this be useful somewhere?
-;; (let ((project-list-length (length project--list)))
-;;   (my-project-forget-excluded-projects)
-;;   (when (/= (length project--list) project-list-length)
-;;     (project--write-project-list)))
-
-;; TODO add to mod cleanup
-
-;;; Better project selector
-
-(defun my-project-prompt-project-dir ()
-  "Prompt the user to select a directory from the known project roots.
-This functions like the built-in `project-prompt-project-dir', but with the
-following differences:
-- Does not include the `... (choose a dir)` option.
-- Automatically reloads the project list.
-The selection is limited to projects already listed in the project database; see
-`project-list-file'."
-  (when (and (fboundp 'project--ensure-read-project-list)
-             (fboundp 'project--file-completion-table)
-             (fboundp 'project--write-project-list))
-    (let* ((project--dir-history (project-known-project-roots))
-           ;; Just using this for the category (substring completion style).
-           (choices (lambda (string pred action)
-                      (if (eq action 'metadata)
-                          '(metadata (category . project))
-                        (complete-with-action action project--dir-history string pred))))
-           (project-dir ""))
-      (while (equal project-dir "")
-        ;; If the user simply pressed RET, do this again until they don't.
-        (setq project-dir
-              (let (history-add-new-input)
-                (completing-read "Select project: " choices nil t nil
-                                 'project--dir-history))))
-      project-dir)))
-
-(unless noninteractive
-  (setq project-prompter #'my-project-prompt-project-dir))
-
-;;; Project cleanup forward slash and duplicates
-
-(defun my-project--cleanup ()
-  "Normalize and deduplicate the global project list."
-  ;; Remove trailing '/' from each project path
-  (when (and project--list (not (eq project--list 'unset)))
-    ;; (setq project--list
-    ;;       (mapcar (lambda (project)
-    ;;                 (cond
-    ;;                  ((listp project)
-    ;;                   (let ((project (car project)))
-    ;;                     (list (file-name-as-directory (expand-file-name project)))))
-    ;;                  ((stringp project)
-    ;;                   (list (file-name-as-directory (expand-file-name project))))))
-    ;;               project--list))
-
-    (setq project--list
-          (mapcar (lambda (project)
-                    (cond
-                     ((listp project)
-                      (let ((project (car project)))
-                        (if (and project (string-suffix-p "/" project))
-                            (list (substring project 0 -1))
-                          (list project))))))
-                  project--list))
-
-    ;; Remove duplicate projects
-    (setq project--list (delete-dups project--list))))
 
 ;;; Load project list
 
-(defvar my-project-list-file-auto (when (boundp 'lightemacs-var-directory)
-                                    (expand-file-name "projects-auto"
-                                                      lightemacs-var-directory))
-  "Automatically generated project list.")
+;; This code overrides the default project loading behavior in `project.el' to
+;; support merging known projects from multiple list files.
+;;
+;; It does the following:
+;; - Tracks file modification times (mtimes) to ensure project list files are
+;;   only read from disk when they have actually been modified.
+;; - Provides a mechanism to append projects from additional files (such as an
+;;   auto-generated list) into the global `project--list'. Note that loading
+;;   from the secondary file (`my-project-list-file-auto') is currently
+;;   disabled.
+;; - Sanitizes the combined project list by normalizing all directory paths
+;;   (expanding paths, appending trailing slashes, and abbreviating home dirs).
+;; - Removes any duplicate projects that might occur from merging multiple
+;; lists.
+;; - Injects this custom logic by completely overriding the standard
+;;   `project--ensure-read-project-list' function using `advice-add'.
+
+;; (defvar my-project-list-file-auto (when (boundp 'lightemacs-var-directory)
+;;                                     (expand-file-name "projects-auto"
+;;                                                       lightemacs-var-directory))
+;;   "Automatically generated project list.")
 
 ;; The project list
 ;; Already configured in mod-misc
@@ -211,6 +120,10 @@ The selection is limited to projects already listed in the project database; see
 
 (defvar project-list-file-mtime nil
   "Stores the last known modification time of the file.")
+
+(defvar my-project-name-cache nil
+  "Cache for the current project name.")
+(put 'my-project-name-cache 'risky-local-variable t)
 
 (defun my-project-append-to-project-list (file)
   "Append project list from FILE."
@@ -240,11 +153,174 @@ MTIME-VAR is a symbol storing the last known modification time."
         (my-project-append-to-project-list file)
         (set mtime-var (file-attribute-modification-time attrs))))))
 
+(defun my-project--cleanup ()
+  "Normalize, abbreviate, and deduplicate the global project list."
+  (when (and project--list (not (eq project--list 'unset)))
+    (setq project--list
+          (mapcar (lambda (project)
+                    (let* ((dir (if (listp project) (car project) project))
+                           (abbr-dir (abbreviate-file-name
+                                      (file-name-as-directory
+                                       (expand-file-name dir)))))
+                      (if (listp project)
+                          (list abbr-dir)
+                        abbr-dir)))
+                  project--list))
+
+    ;; Remove duplicate projects
+    (setq project--list (delete-dups project--list))))
+
 (defun my-project--project--ensure-read-project-list ()
   "Initialize `project--list' by loading projects."
   (my-project--maybe-append project-list-file 'project-list-file-mtime)
-  (my-project--maybe-append my-project-list-file-auto 'my-project-list-file-auto-mtime)
+  ;; Disable projects auto
+  ;; (my-project--maybe-append my-project-list-file-auto 'my-project-list-file-auto-mtime)
   (my-project--cleanup))
+
+(with-eval-after-load 'project
+  (advice-add 'project--ensure-read-project-list
+              :override #'my-project--project--ensure-read-project-list))
+
+;;; Project dir / name (Used by the modeline)
+
+(defvar my-project-name-enable-cache t
+  "Cache the project name.")
+
+(defun my-project-name ()
+  "Return the project name or nil if the project name cannot be found."
+  (if (and my-project-name-enable-cache (boundp 'my-project-name-cache) my-project-name-cache)
+      my-project-name-cache
+    (let ((project-name (let ((project-root (my-project-root-dir)))
+                          (when project-root
+                            (file-name-nondirectory project-root)))))
+      (if project-name
+          (progn
+            (setq-local my-project-name-cache project-name)
+            project-name)
+        (setq-local my-project-name-cache nil)))))
+
+;;; DISABLED: Project tab group
+
+;; (defvar-local my-project-change-tab-group-name nil)
+;;
+;; (defun my-project-change-tab-group (&rest _args)
+;;   "Change the project in the tab group."
+;;   ;; Tab bar project
+;;   (when my-project-change-tab-group-name
+;;     (let ((buffer-name (buffer-name))
+;;           (my-project-name-enable-cache nil))
+;;       (when (and (not (minibufferp))
+;;                  (fboundp 'tab-bar--current-tab)
+;;                  (fboundp 'tab-bar-change-tab-group))
+;;         (let ((project-name (my-project-name)))
+;;           (when (or (not my-project-change-tab-group-name)
+;;                     (string= my-project-change-tab-group-name ""))
+;;             (when (and (not project-name)
+;;                        (or (or (or (string-prefix-p "*" buffer-name)
+;;                                    (string-prefix-p " *" buffer-name))
+;;                                (string-prefix-p "*" buffer-name))
+;;                            (derived-mode-p 'special-mode)))
+;;               (setq project-name "Special"))
+;;
+;;             (unless project-name
+;;               (setq project-name "Misc"))
+;;
+;;             (let ((current-group (alist-get 'group (tab-bar--current-tab))))
+;;               (unless (string= current-group project-name)
+;;                 (tab-bar-change-tab-group project-name)
+;;                 (tab-bar-move-tab-to-group)
+;;                 (setq my-project-change-tab-group-name project-name)
+;;                 (force-mode-line-update)))))))))
+
+;; void variable project TODO
+;;(when my-project-change-tab-group-name
+;;  (add-hook 'window-selection-change-functions #'my-project-change-tab-group)
+;;  (add-hook 'dired-mode-hook #'my-project-change-tab-group)
+;;  (add-hook 'find-file-hook #'my-project-change-tab-group)
+;;  (add-hook 'window-buffer-change-functions #'my-project-change-tab-group))
+
+;;; DISABLED: project selector
+
+;; (defun my-project-prompt-project-dir ()
+;;   "Prompt the user to select a directory from known project roots.
+;; Displays paths without trailing slashes for a cleaner UI."
+;;   (when (and (fboundp 'project--ensure-read-project-list)
+;;              (fboundp 'project--write-project-list))
+;;     (project--ensure-read-project-list)
+;;     (let* ((roots (project-known-project-roots))
+;;            ;; Strip trailing slashes for the completion UI
+;;            (display-roots (mapcar (lambda (dir)
+;;                                     (if (string-suffix-p "/" dir)
+;;                                         (substring dir 0 -1)
+;;                                       dir))
+;;                                   roots))
+;;            ;; Pass the clean strings to the completion table
+;;            (table (lambda (string pred action)
+;;                     (if (eq action 'metadata)
+;;                         '(metadata (category . project))
+;;                       (complete-with-action action display-roots string pred))))
+;;            (project-dir ""))
+;;       (while (equal project-dir "")
+;;         (setq project-dir
+;;               (let (history-add-new-input)
+;;                 (completing-read "Select project: " table nil t))))
+;;       ;; 3. Re-add the trailing slash so project.el caches correctly
+;;       (file-name-as-directory project-dir))))
+
+;; (unless noninteractive
+;;   (setq project-prompter #'my-project-prompt-project-dir))
+
+;; (defun my-project-prompt-project-dir ()
+;;   "Prompt the user to select a directory from the known project roots.
+;; This functions like the built-in `project-prompt-project-dir', but with the
+;; following differences:
+;; - Does not include the `... (choose a dir)` option.
+;; - Automatically reloads the project list.
+;; The selection is limited to projects already listed in the project database; see
+;; `project-list-file'."
+;;   (when (and (fboundp 'project--ensure-read-project-list)
+;;              (fboundp 'project--file-completion-table)
+;;              (fboundp 'project--write-project-list))
+;;     (let* ((project--dir-history (project-known-project-roots))
+;;            ;; Just using this for the category (substring completion style).
+;;            (choices (lambda (string pred action)
+;;                       (if (eq action 'metadata)
+;;                           '(metadata (category . project))
+;;                         (complete-with-action action project--dir-history string pred))))
+;;            (project-dir ""))
+;;       (while (equal project-dir "")
+;;         ;; If the user simply pressed RET, do this again until they don't.
+;;         (setq project-dir
+;;               (let (history-add-new-input)
+;;                 (completing-read "Select project: " choices nil t nil
+;;                                  'project--dir-history))))
+;;       project-dir)))
+
+;;; DISABLED: forget excluded
+
+;; TODO patch Emacs?
+
+;; (defun my-project-forget-excluded-projects ()
+;;   "Remove projects matching `project-list-exclude' from the known projects list."
+;;   (interactive)
+;;   (when (and (fboundp 'project--find-in-directory)
+;;              (fboundp 'project--write-project-list))
+;;     (dolist (proj (project-known-project-roots))
+;;       (let ((pr (project--find-in-directory proj)))
+;;         (when (seq-some (lambda (rule)
+;;                           (if (functionp rule)
+;;                               (and pr (funcall rule pr))
+;;                             (string-match-p rule proj)))
+;;                         project-list-exclude)
+;;           (project-forget-project proj))))))
+
+;; TODO can this be useful somewhere?
+;; (let ((project-list-length (length project--list)))
+;;   (my-project-forget-excluded-projects)
+;;   (when (/= (length project--list) project-list-length)
+;;     (project--write-project-list)))
+
+;;; DISABLED: my-project--project--ensure-read-project-list
 
 ;; (defun my-project--project--ensure-read-project-list ()
 ;;   "Initialize `project--list' by loading projects."
@@ -276,27 +352,7 @@ MTIME-VAR is a symbol storing the last known modification time."
 ;;   ;; Cleanup
 ;;   (my-project--cleanup))
 
-(with-eval-after-load 'project
-  (advice-add 'project--ensure-read-project-list
-              :override #'my-project--project--ensure-read-project-list))
-
-;;; Project dir / name
-
-(defvar my-project-name-enable-cache t
-  "Cache the project name.")
-
-(defun my-project-name ()
-  "Return the project name or nil if the project name cannot be found."
-  (if (and my-project-name-enable-cache (boundp 'my-project-name-cache))
-      my-project-name-cache
-    (let ((project-name (let ((project-root (my-project-root-dir)))
-                          (when project-root
-                            (file-name-nondirectory project-root)))))
-      (if project-name
-          (progn
-            (setq-local my-project-name-cache project-name)
-            project-name)
-        (setq-local my-project-name-cache nil)))))
+;;; DISABLED: misc
 
 ;;------------------------------------------
 ;; Switch to projects
@@ -340,47 +396,24 @@ MTIME-VAR is a symbol storing the last known modification time."
 ;;       (project-forget-project root)
 ;;       (message "Forgot project: %s" root))))
 
-;;; Project tab group
+;;; DISABLED: Switch to the project
 
-(defvar-local my-project-change-tab-group-name nil)
+;; (defun my-project-switch-project (dir)
+;;   "Prompt for a project, then switch to a window/tab containing it or edit it.
+;; DIR is the project directory."
+;;   (interactive (list (funcall project-prompter)))
+;;
+;;   (let* ((proj (project-current t dir))
+;;          (root (project-root proj))
+;;          (project-bufs (project-buffers proj))
+;;          ;; Set up the environment for the fallback find-file context
+;;          (default-directory root)
+;;          (project-current-directory-override dir))
+;;
+;;     ;; Pass the project buffers and the root fallback file to the jumper
+;;     (my-jump-to-buffers-or-open project-bufs root nil)))
 
-(defun my-project-change-tab-group (&rest _args)
-  "Change the project in the tab group."
-  ;; Tab bar project
-  (when my-project-change-tab-group-name
-    (let ((buffer-name (buffer-name))
-          (my-project-name-enable-cache nil))
-      (when (and (not (minibufferp))
-                 (fboundp 'tab-bar--current-tab)
-                 (fboundp 'tab-bar-change-tab-group))
-        (let ((project-name (my-project-name)))
-          (when (or (not my-project-change-tab-group-name)
-                    (string= my-project-change-tab-group-name ""))
-            (when (and (not project-name)
-                       (or (or (or (string-prefix-p "*" buffer-name)
-                                   (string-prefix-p " *" buffer-name))
-                               (string-prefix-p "*" buffer-name))
-                           (derived-mode-p 'special-mode)))
-              (setq project-name "Special"))
-
-            (unless project-name
-              (setq project-name "Misc"))
-
-            (let ((current-group (alist-get 'group (tab-bar--current-tab))))
-              (unless (string= current-group project-name)
-                (tab-bar-change-tab-group project-name)
-                (tab-bar-move-tab-to-group)
-                (setq my-project-change-tab-group-name project-name)
-                (force-mode-line-update)))))))))
-
-;; void variable project TODO
-;;(when my-project-change-tab-group-name
-;;  (add-hook 'window-selection-change-functions #'my-project-change-tab-group)
-;;  (add-hook 'dired-mode-hook #'my-project-change-tab-group)
-;;  (add-hook 'find-file-hook #'my-project-change-tab-group)
-;;  (add-hook 'window-buffer-change-functions #'my-project-change-tab-group))
-
-;;; CANCELED: Project dabbrev
+;;; DISABLED: Project dabbrev
 
 ;; (defun my-project-dabbrev-friend-buffer (other-buffer)
 ;;   "Check if OTHER-BUFFER has the same project as the current project."
@@ -399,22 +432,23 @@ MTIME-VAR is a symbol storing the last known modification time."
 ;;
 ;; (setq dabbrev-friend-buffer-function 'my-project-dabbrev-friend-buffer)
 
-;;; Switch to the project
+;;; DISABLED: auto add
 
-;; (defun my-project-switch-project (dir)
-;;   "Prompt for a project, then switch to a window/tab containing it or edit it.
-;; DIR is the project directory."
-;;   (interactive (list (funcall project-prompter)))
+;; (require 'project)
 ;;
-;;   (let* ((proj (project-current t dir))
-;;          (root (project-root proj))
-;;          (project-bufs (project-buffers proj))
-;;          ;; Set up the environment for the fallback find-file context
-;;          (default-directory root)
-;;          (project-current-directory-override dir))
+;; (defun sub-project-auto-remember ()
+;;   "Automatically add the current project to the known projects list.
+;; Only adds the project if the root directory contains a `.project` file."
+;;   (when-let* ((proj (project-current nil))
+;;               (root (project-root proj)))
+;;     (when (file-exists-p (expand-file-name ".project" root))
+;;       (project-remember-project proj))))
 ;;
-;;     ;; Pass the project buffers and the root fallback file to the jumper
-;;     (my-jump-to-buffers-or-open project-bufs root nil)))
+;; ;; Trigger when opening a file
+;; (add-hook 'find-file-hook #'sub-project-auto-remember)
+;;
+;; ;; Trigger when opening a directory in dired
+;; (add-hook 'dired-mode-hook #'sub-project-auto-remember)
 
 ;;; Provide
 

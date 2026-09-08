@@ -896,6 +896,7 @@ subsequent GCC invocations."
                            ;; X11/Wayland forwarding)
                            ;; le-xclip
 
+                           le-package-lint
                            le-package-lint-flymake
                            le-flymake-ansible-lint
 
