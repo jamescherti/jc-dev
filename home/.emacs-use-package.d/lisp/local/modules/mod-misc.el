@@ -172,6 +172,13 @@
 
 (setq redisplay-skip-fontification-on-input t
 
+      ;; Here is exactly how (setq scroll-conservatively 9) works:
+      ;;
+      ;; Small jumps (<= 9 lines off-screen): Emacs scrolls the window just
+      ;; enough to bring the cursor back into view.
+      ;;
+      ;; Large jumps (> 9 lines off-screen): Emacs gives up on scrolling and
+      ;; recenters the window.
       scroll-conservatively 9
 
       ;; Setting scroll-conservatively to 10000: By default, when your cursor
@@ -185,6 +192,12 @@
       ;; Setting scroll-step to 1: This variable tells Emacs to scroll by
       ;; exactly one line at a time when the cursor moves off-screen.
       ;; scroll-conservatively most-positive-fixnum
+
+      ;; In modern Emacs, if using scroll-conservatively, scroll-step is
+      ;; completely redundant. Setting scroll-step 1 is a legacy holdover from
+      ;; older versions of Emacs before scroll-conservatively was fully
+      ;; implemented. You can safely delete scroll-step 1 from your
+      ;; configuration entirely.
       ;; scroll-step 10
 
       next-screen-context-lines 0
