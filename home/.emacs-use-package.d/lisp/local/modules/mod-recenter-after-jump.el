@@ -31,7 +31,7 @@
 
 ;;; Main code
 
-(defvar lightemacs-maybe-recenter-after-jump t
+(defvar lightemacs-maybe-recenter-after-jump nil
   "Non-nil enables recentering the window when the point jumps out of view.
 Recentering only occurs when `scroll-conservatively' is >= 101. The recenter
 position can be customized using `lightemacs-maybe-recenter-after-jump-value'.")
