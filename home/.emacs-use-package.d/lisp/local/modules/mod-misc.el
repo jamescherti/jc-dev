@@ -43,7 +43,17 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 (defun lightemacs--guess-indent-offset ()
   "Guess and return the indentation offset of the current major mode."
   ;; `org-mode' tab-width should remain 8
-  (unless (derived-mode-p 'org-mode)
+  (cond
+   ((derived-mode-p 'yaml-ts-mode)
+    ;; The `yaml-ts-mode' mode doesn't have an offset variable
+    2)
+
+   ((derived-mode-p 'org-mode)
+    ;; Org mode relies on a fixed tab width of 8 due to how it handles
+    ;; document structure and layout elements.
+    nil)
+
+   (t
     (let* ((mode-str (symbol-name major-mode))
            (base-name (cond ((string-suffix-p "-ts-mode" mode-str)
                              (substring mode-str 0 -8))
@@ -72,12 +82,13 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
         (when (and (boundp 'standard-indent) (numberp standard-indent))
           (throw 'found standard-indent))
 
-        nil))))
+        nil)))))
 
 (defun lightemacs--set-tab-width ()
   "Synchronize `tab-width' with the mode offset."
   (when-let* ((val (lightemacs--guess-indent-offset)))
-    (setq-local tab-width val)))
+    (when val
+      (setq-local tab-width val))))
 
 (when lightemacs-sync-tab-width
   (add-hook 'after-change-major-mode-hook #'lightemacs--set-tab-width -10))
