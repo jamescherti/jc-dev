@@ -564,6 +564,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (sort result #'string-lessp)))
 
 ;;;###autoload
+;; TODO compile angel?
 (defun compile-angel-report-functions ()
   "Create a buffer listing all loaded Elisp functions that are not native compiled."
   (interactive)
