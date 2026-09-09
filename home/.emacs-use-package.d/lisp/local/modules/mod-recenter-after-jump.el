@@ -31,7 +31,7 @@
 
 ;;; Main code
 
-(defvar lightemacs-maybe-recenter-after-jump nil
+(defvar lightemacs-maybe-recenter-after-jump t
   "Non-nil enables recentering the window when the point jumps out of view.
 Recentering only occurs when `scroll-conservatively' is >= 101. The recenter
 position can be customized using `lightemacs-maybe-recenter-after-jump-value'.")
@@ -156,6 +156,36 @@ visibility when navigation commands are executed."
                 'lightemacs-default-settings--recenter-maybe 70)
       (when xref-pulse-originally-present
         (add-hook 'xref-after-jump-hook 'xref-pulse-momentarily 71)))))
+
+;;; DISABLED: outdated code: n/N (and M-n and M-N): Search and recenter
+
+;; (evil-define-motion evilcursor-ex-search-next-recenter (count)
+;;   "Go to the next occurrence."
+;;   :type exclusive
+;;   (ignore-errors (evil-ex-search-next count))
+;;   (recenter nil))
+;;
+;; (evil-define-motion evilcursor-ex-search-previous-recenter (count)
+;;   "Go the the previous occurrence."
+;;   :type exclusive
+;;   (ignore-errors (evil-ex-search-previous count))
+;;   (recenter nil))
+;;
+;; (evil-define-motion evilcursor-ex-search-next (count)
+;;   "Go to the next occurrence."
+;;   :type exclusive
+;;   (ignore-errors (evil-ex-search-next count)))
+;;
+;; (evil-define-motion evilcursor-ex-search-previous (count)
+;;   "Go the the previous occurrence."
+;;   :type exclusive
+;;   (ignore-errors (evil-ex-search-previous count)))
+;;
+;; (evil-define-key 'motion 'global
+;;   (kbd "n") #'evilcursor-ex-search-next
+;;   (kbd "N") #'evilcursor-ex-search-previous
+;;   (kbd "M-N") #'evilcursor-ex-search-previous-recenter
+;;   (kbd "M-n") #'evilcursor-ex-search-next-recenter)
 
 ;;; Provide
 

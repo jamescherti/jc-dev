@@ -1971,6 +1971,8 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;; Force the unimpaired mode off globally
 (setq lightemacs-evil-collection-inhibit-unimpaired-mode t)
 
+(setq scroll-conservatively 101)
+
 ;;; Code folding settings
 
 (setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook

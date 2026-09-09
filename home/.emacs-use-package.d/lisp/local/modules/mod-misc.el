@@ -179,19 +179,19 @@
       ;;
       ;; Large jumps (> 9 lines off-screen): Emacs gives up on scrolling and
       ;; recenters the window.
-      scroll-conservatively 8
+      ;; scroll-conservatively 8
 
-      ;; Setting scroll-conservatively to 10000: By default, when your cursor
-      ;; moves off the screen, Emacs recenters the window so the cursor is in
-      ;; the middle. This causes a sudden visual jump that makes it easy to lose
-      ;; your place in the file. Setting scroll-conservatively to a value
-      ;; greater than 100 (like 10000) disables this recentering completely.
-      ;; Instead, Emacs will only scroll the window by the exact number of lines
-      ;; needed to bring the cursor back into view.
+      ;; Setting scroll-conservatively to most-positive-fixnum: By default, when
+      ;; your cursor moves off the screen, Emacs recenters the window so the
+      ;; cursor is in the middle. This causes a sudden visual jump that makes it
+      ;; easy to lose your place in the file. Setting scroll-conservatively to a
+      ;; value greater than 100 (like 10000) disables this recentering
+      ;; completely. Instead, Emacs will only scroll the window by the exact
+      ;; number of lines needed to bring the cursor back into view.
       ;;
       ;; Setting scroll-step to 1: This variable tells Emacs to scroll by
       ;; exactly one line at a time when the cursor moves off-screen.
-      ;; scroll-conservatively most-positive-fixnum
+      scroll-conservatively most-positive-fixnum
 
       ;; In modern Emacs, if using scroll-conservatively, scroll-step is
       ;; completely redundant. Setting scroll-step 1 is a legacy holdover from
