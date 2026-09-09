@@ -179,7 +179,7 @@
       ;;
       ;; Large jumps (> 9 lines off-screen): Emacs gives up on scrolling and
       ;; recenters the window.
-      scroll-conservatively 9
+      scroll-conservatively 8
 
       ;; Setting scroll-conservatively to 10000: By default, when your cursor
       ;; moves off the screen, Emacs recenters the window so the cursor is in
