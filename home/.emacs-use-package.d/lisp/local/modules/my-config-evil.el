@@ -1565,6 +1565,11 @@ re-indentation after inserting the copied indentation."
 
 ;;; Global keys
 
+;; In insert mode, clicking on the end of line moves the cursor to the end of
+;; line then back the to the character before the end of line
+;; TODO patch
+(setq evil-move-beyond-eol t)
+
 (evil-define-motion my-evil-end-of-line (count)
   "Move the cursor to the end of the current line.
 Never go beyond EOL.
