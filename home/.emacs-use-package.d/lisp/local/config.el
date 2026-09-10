@@ -974,6 +974,7 @@ subsequent GCC invocations."
                            le-indent-bars
                            le-stripspace
 
+                           le-eat
                            le-vterm
 
                            le-persist-text-scale

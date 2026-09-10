@@ -3014,16 +3014,16 @@ ARGS - the arguments passed to the original function"
   :config
   ;; The key sequence used to toggle the shell window.
   (setopt shell-pop-universal-key "C-c t")
-  (setopt shell-pop-shell-type '("vterm" "*vterm*"
-                                 (lambda ()
-                                   (when (fboundp 'vterm)
-                                     (let* ((vterm-shell shell-pop-term-shell))
-                                       (vterm))))))
+  ;; (setopt shell-pop-shell-type '("vterm" "*vterm*"
+  ;;                                (lambda ()
+  ;;                                  (when (fboundp 'vterm)
+  ;;                                    (let* ((vterm-shell shell-pop-term-shell))
+  ;;                                      (vterm))))))
 
-  ;; (setopt shell-pop-shell-type '("eat" "*eat*"
-  ;;                          (lambda ()
-  ;;                            (when (fboundp 'eat)
-  ;;                              (eat shell-pop-term-shell)))))
+  (setopt shell-pop-shell-type '("eat" "*eat*"
+                                 (lambda ()
+                                   (when (fboundp 'eat)
+                                     (eat shell-pop-term-shell)))))
   ;; (setopt shell-pop-shell-type '("ansi-term"
   ;;                                "*ansi-term*"
   ;;                                (lambda ()
@@ -3038,16 +3038,6 @@ ARGS - the arguments passed to the original function"
         shell-pop-term-shell "tmux-session emacs"
         shell-pop-window-size 80
         shell-pop-restore-window-configuration t))
-
-;;; shell-pop: last dir
-
-;; NOTE replaced
-(defun my-around-shell-pop (fn &rest args)
-  "FN is the advised function. ARGS are the function arguments."
-  (my-update-bash-lastdir)
-  (apply fn args))
-(with-eval-after-load 'shell-pop
-  (advice-add 'shell-pop :around #'my-around-shell-pop))
 
 ;;; shell-pop: Change the default directory to project directory
 
@@ -3072,7 +3062,58 @@ ARGS - the arguments passed to the original function"
 
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-evil-insert-state)
 
-;;; Auto update lastdir
+;;; shell-pop: shell pop per project
+
+(defun my-shell-pop-set-global-type (&rest _args)
+  "Set `shell-pop-shell-type' as a global variable for the current project."
+  (when (fboundp 'my-project-name)
+    (let* ((proj-name (or (my-project-name) "misc"))
+           (buf-name (format "*vterm:%s*" proj-name)))
+      ;; (setopt shell-pop-shell-type
+      ;;         (list "eat"
+      ;;               buf-name
+      ;;               `(lambda ()
+      ;;                  (when (fboundp 'eat)
+      ;;                    (let* ((bash-shell (executable-find "bash"))
+      ;;                           (process-environment
+      ;;                            (cons (format "SHELL=%s" bash-shell)
+      ;;                                  process-environment))
+      ;;                           (local-eat-shell
+      ;;                            (format "tmux-session emacs-%s"
+      ;;                                    (replace-regexp-in-string
+      ;;                                     "[^a-z0-9]+" "-"
+      ;;                                     (shell-quote-argument ,proj-name))))
+      ;;                           (tmux-buffer (eat local-eat-shell))))))))
+      ;; (setopt shell-pop-shell-type (list
+      ;;                               "ansi-term"
+      ;;                               buf-name
+      ;;                               `(lambda ()
+      ;;                                  (let* ((shell-cmd
+      ;;                                          (format "tmux-session emacs-%s"
+      ;;                                                  (replace-regexp-in-string
+      ;;                                                   "[^a-z0-9]+" "-"
+      ;;                                                   (shell-quote-argument ,proj-name)))))
+      ;;                                    (ansi-term shell-cmd)))))
+      (setopt shell-pop-shell-type
+              (list "vterm"
+                    buf-name
+                    `(lambda ()
+                       (let* ((bash-shell (executable-find "bash"))
+                              (process-environment
+                               (cons (format "SHELL=%s" bash-shell)
+                                     process-environment))
+                              (vterm-shell
+                               (format "tmux-session emacs-%s"
+                                       (replace-regexp-in-string
+                                        "[^a-z0-9]+" "-"
+                                        (shell-quote-argument ,proj-name))))
+                              (tmux-buffer (vterm ,buf-name))))))))))
+
+(with-eval-after-load 'shell-pop
+  ;; Apply the new global setting advice
+  (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
+
+;;; shell: Auto update lastdir
 
 (defun my-update-bash-lastdir (&rest _)
   "Update Bash lastdir."
@@ -3103,42 +3144,7 @@ ARGS - the arguments passed to the original function"
 ;; (add-hook 'find-file-hook #'my-update-bash-lastdir)
 (add-hook 'window-buffer-change-functions #'my-update-bash-lastdir)
 
-;;; shell-pop: shell pop per project
-
-(defun my-shell-pop-set-global-type (&rest _args)
-  "Set `shell-pop-shell-type' as a global variable for the current project."
-  (when (fboundp 'my-project-name)
-    (let* ((proj-name (or (my-project-name) "misc"))
-           (buf-name (format "*vterm:%s*" proj-name)))
-      ;; (setopt shell-pop-shell-type (list "ansi-term"
-      ;;                                    "*ansi-term*"
-      ;;                                    `(lambda ()
-      ;;                                       (let* ((shell-cmd
-      ;;                                               (format "tmux-session emacs-%s"
-      ;;                                                       (replace-regexp-in-string
-      ;;                                                        "[^a-z0-9]+" "-"
-      ;;                                                        (shell-quote-argument ,proj-name)))))
-      ;;                                         (ansi-term shell-cmd)))))
-      (setopt shell-pop-shell-type
-              (list "vterm"
-                    buf-name
-                    `(lambda ()
-                       (let* ((bash-shell (executable-find "bash"))
-                              (process-environment
-                               (cons (format "SHELL=%s" bash-shell)
-                                     process-environment))
-                              (vterm-shell
-                               (format "tmux-session emacs-%s"
-                                       (replace-regexp-in-string
-                                        "[^a-z0-9]+" "-"
-                                        (shell-quote-argument ,proj-name))))
-                              (tmux-buffer (vterm ,buf-name))))))))))
-
-(with-eval-after-load 'shell-pop
-  ;; Apply the new global setting advice
-  (advice-add 'shell-pop :before #'my-shell-pop-set-global-type))
-
-;;; track eol (TODO light emacs)
+;;; track eol (TODO light emacs?)
 
 (setq evil-track-eol nil)
 
@@ -3350,6 +3356,26 @@ ARGS - the arguments passed to the original function"
 ;; (when (derived-mode-p 'comint-mode)
 ;;   (add-hook 'comint-output-filter-functions #'comint-truncate-buffer nil t))
 
+;;; terminal: eat
+
+;; (setq eat-shell "/usr/bin/env bash")
+
+;; Disable shell prompt status annotations in the window margin. Prevents Eat
+;; from displaying exit code indicators (such as the default "0" or "X") beside
+;; prompts, avoiding margin misalignment on multi-line prompts, visual clutter,
+;; and the performance overhead of managing buffer overlays and correction
+;; timers.
+(setq eat-enable-shell-prompt-annotation nil)
+
+;; Use standard 'xterm-256color' instead of Eat's default 'eat-truecolor'. By
+;; default, Eat advertises custom TERM names ('eat-truecolor', 'eat-256color')
+;; which fail with "cannot initialize terminal type" errors if `eat.ti' has not
+;; been compiled via `eat-compile-terminfo', as well as across remote SSH
+;; sessions and sudo environments lacking the custom terminfo entry. Forcing
+;; 'xterm-256color' ensures universal terminal compatibility everywhere while
+;; preserving standard color capabilities and 24-bit direct color escapes.
+(setq eat-term-name "xterm-256color")
+
 ;;; terminal: Speed up
 
 ;; When a subprocess generates heavy output, rendering it sequentially freezes
@@ -3544,140 +3570,145 @@ ARGS - the arguments passed to the original function"
   (remove-hook 'pre-command-hook 'evil--jump-hook t)
   (remove-hook 'post-command-hook 'evil--jump-handle-buffer-crossing t)
 
-  ;; TODO make point manager local and disable it here
-  (let ((modes '(;; Disables helper modes that cause logic conflicts or 'ghost'
-                 ;; characters when typing inside a raw terminal subprocess.
+  (let ((inhibit-redisplay t)
+        (inhibit-message t))
+    (let ((modes '(;; Disables helper modes that cause logic conflicts or 'ghost'
+                   ;; characters when typing inside a raw terminal subprocess.
 
-                 ;; Intercepts the TAB key for snippet expansion, which breaks
-                 ;; native shell tab-completion.
-                 ;; Performance benefit: Bypasses pre/post command hooks that scan
-                 ;; text around point to check for snippet triggers, saving
-                 ;; execution time per keystroke.
-                 (yas-minor-mode . yas-minor-mode)
+                   ;; Intercepts the TAB key for snippet expansion, which breaks
+                   ;; native shell tab-completion. Performance benefit: Bypasses
+                   ;; pre/post command hooks that scan text around point to
+                   ;; check for snippet triggers, saving execution time per
+                   ;; keystroke.
+                   (yas-minor-mode . yas-minor-mode)
 
-                 ;; Forces the display engine to redraw the background of the
-                 ;; cursor's line. Causes visual lag and flickering during rapid
-                 ;; terminal output.
-                 ;; Performance benefit: Prevents the display engine from destroying
-                 ;; and recreating an overlay spanning the entire current line on
-                 ;; every cursor movement or text insertion.
-                 (hl-line-mode . hl-line-mode)
+                   ;; Forces the display engine to redraw the background of the
+                   ;; cursor's line. Causes visual lag and flickering during
+                   ;; rapid terminal output.
+                   ;; Performance benefit: Prevents the display engine from
+                   ;; destroying and recreating an overlay spanning the entire
+                   ;; current line on every cursor movement or text insertion.
+                   (hl-line-mode . hl-line-mode)
 
-                 ;; Intercepts character search keys (f, t, s). Can cause
-                 ;; duplicate character inputs or block standard shell
-                 ;; keystrokes.
-                 ;; Performance benefit: Bypasses extra keymap lookups and event
-                 ;; loop interceptions, reducing latency between keystroke and
-                 ;; terminal input.
-                 (evil-snipe-local-mode . evil-snipe-local-mode)
+                   ;; Intercepts character search keys (f, t, s). Can cause
+                   ;; duplicate character inputs or block standard shell
+                   ;; keystrokes.
+                   ;; Performance benefit: Bypasses extra keymap lookups and
+                   ;; event loop interceptions, reducing latency between
+                   ;; keystroke and terminal input.
+                   (evil-snipe-local-mode . evil-snipe-local-mode)
 
-                 ;; Automatically inserts closing quotes and brackets. This
-                 ;; results in 'ghost' characters being sent to the shell,
-                 ;; causing syntax errors in commands.
-                 ;; Performance benefit: Prevents Emacs from running syntax table
-                 ;; lookups on every typed character to decide if it should auto-insert
-                 ;; a matching bracket.
-                 (electric-pair-local-mode . electric-pair-local-mode)
+                   ;; Automatically inserts closing quotes and brackets. This
+                   ;; results in 'ghost' characters being sent to the shell,
+                   ;; causing syntax errors in commands. Performance benefit:
+                   ;; Prevents Emacs from running syntax table lookups on every
+                   ;; typed character to decide if it should auto-insert a
+                   ;; matching bracket.
+                   (electric-pair-local-mode . electric-pair-local-mode)
 
-                 ;; Attempts to automatically indent text when pressing Return.
-                 ;; Corrupts pasted text and offsets shell prompts.
-                 ;; Performance benefit: Stops Emacs from running complex regex
-                 ;; and syntax-based indentation logic every time a newline is
-                 ;; inserted, vastly speeding up paste operations.
-                 (electric-indent-local-mode . electric-indent-local-mode)
+                   ;; Attempts to automatically indent text when pressing
+                   ;; Return. Corrupts pasted text and offsets shell prompts.
+                   ;; Performance benefit: Stops Emacs from running complex
+                   ;; regex and syntax-based indentation logic every time a
+                   ;; newline is inserted, vastly speeding up paste operations.
+                   (electric-indent-local-mode . electric-indent-local-mode)
 
-                 ;; Intercepts keystrokes to manage surrounding characters. Can
-                 ;; interfere with raw terminal input and text selection in
-                 ;; vterm-copy-mode.
-                 ;; Performance benefit: Removes hook overhead and regex matching
-                 ;; used to parse surrounding delimiters, keeping the command loop fast.
-                 (evil-surround-mode . evil-surround-mode)
+                   ;; Intercepts keystrokes to manage surrounding characters.
+                   ;; Can interfere with raw terminal input and text selection
+                   ;; in vterm-copy-mode.
+                   ;; Performance benefit: Removes hook overhead and regex
+                   ;; matching used to parse surrounding delimiters, keeping the
+                   ;; command loop fast.
+                   (evil-surround-mode . evil-surround-mode)
 
-                 ;; Disable line numbers to reduce rendering overhead.
-                 ;; display-line-numbers-mode: Computing the line number margin
-                 ;; for thousands of rapidly scrolling lines severely degrades
-                 ;; display performance. Terminal output relies on scrollback,
-                 ;; not fixed line addresses.
-                 ;; Performance benefit: Bypasses the need to dynamically calculate
-                 ;; margin width and format integer strings for every visible line
-                 ;; on every redraw.
-                 (display-line-numbers-mode . display-line-numbers-mode)
+                   ;; Disable line numbers to reduce rendering overhead.
+                   ;; display-line-numbers-mode: Computing the line number
+                   ;; margin for thousands of rapidly scrolling lines severely
+                   ;; degrades display performance. Terminal output relies on
+                   ;; scrollback, not fixed line addresses.
+                   ;; Performance benefit: Bypasses the need to dynamically
+                   ;; calculate margin width and format integer strings for
+                   ;; every visible line on every redraw.
+                   (display-line-numbers-mode . display-line-numbers-mode)
 
-                 ;; Disable auto-completion and syntax checking modes.
+                   ;; Disable auto-completion and syntax checking modes.
 
-                 ;; In-buffer completion popups conflict with the shell's native
-                 ;; completion mechanism (e.g., readline or zsh
-                 ;; autosuggestions). They also waste CPU cycles attempting to
-                 ;; parse shell output as code.
-                 ;; Performance benefit: Prevents asynchronous timers and completion
-                 ;; backends from searching the buffer and allocating popup frames
-                 ;; or overlays during typing.
-                 (company-mode . company-mode)
-                 (corfu-mode . corfu-mode)
+                   ;; In-buffer completion popups conflict with the shell's
+                   ;; native completion mechanism (e.g., readline or zsh
+                   ;; autosuggestions). They also waste CPU cycles attempting to
+                   ;; parse shell output as code.
+                   ;; Performance benefit: Prevents asynchronous timers and
+                   ;; completion backends from searching the buffer and
+                   ;; allocating popup frames or overlays during typing.
+                   (company-mode . company-mode)
+                   (corfu-mode . corfu-mode)
 
-                 ;; Syntax checkers attempt to run linters against the buffer
-                 ;; content. Terminal output is arbitrary text, making linting a
-                 ;; waste of CPU resources that can freeze the editor.
-                 ;; Performance benefit: Stops background processes from launching
-                 ;; and parsing the buffer text, freeing up CPU and I/O resources.
-                 (flymake-mode . flymake-mode)
-                 (flycheck-mode . flycheck-mode)
+                   ;; Syntax checkers attempt to run linters against the buffer
+                   ;; content. Terminal output is arbitrary text, making linting
+                   ;; a waste of CPU resources that can freeze the editor.
+                   ;; Performance benefit: Stops background processes from
+                   ;; launching and parsing the buffer text, freeing up CPU and
+                   ;; I/O resources.
+                   (flymake-mode . flymake-mode)
+                   (flycheck-mode . flycheck-mode)
 
-                 ;; auto-composition-mode scans buffer text to combine multiple
-                 ;; characters into a single graphical glyph (such as font
-                 ;; ligatures like turning != into a single symbol, or complex
-                 ;; script shaping).
-                 ;;
-                 ;; Bypassing this complex text-shaping engine saves
-                 ;; significant CPU cycles, preventing Emacs from lagging when
-                 ;; the terminal outputs large blocks of text or symbols
-                 ;; rapidly.
-                 ;;
-                 ;; Tradeoff: You lose programming font ligatures in the
-                 ;; terminal. Character sequences like => will render as two
-                 ;; distinct characters instead of a merged arrow.
-                 ;;
-                 ;; Terminal emulators are primarily for monospaced
-                 ;; ASCII/ANSI output. The performance gain during rapid text
-                 ;; bursts easily outweighs the loss of decorative ligatures.
-                 ;; Performance benefit: Removes the heavy HarfBuzz or font-backend
-                 ;; lookups required to resolve character ligatures.
-                 (auto-composition-mode . auto-composition-mode)
+                   ;; auto-composition-mode scans buffer text to combine
+                   ;; multiple characters into a single graphical glyph (such as
+                   ;; font ligatures like turning != into a single symbol, or
+                   ;; complex script shaping).
+                   ;;
+                   ;; Bypassing this complex text-shaping engine saves
+                   ;; significant CPU cycles, preventing Emacs from lagging when
+                   ;; the terminal outputs large blocks of text or symbols
+                   ;; rapidly.
+                   ;;
+                   ;; Tradeoff: You lose programming font ligatures in the
+                   ;; terminal. Character sequences like => will render as two
+                   ;; distinct characters instead of a merged arrow.
+                   ;;
+                   ;; Terminal emulators are primarily for monospaced ASCII/ANSI
+                   ;; output. The performance gain during rapid text bursts
+                   ;; easily outweighs the loss of decorative ligatures.
+                   ;; Performance benefit: Removes the heavy HarfBuzz or
+                   ;; font-backend lookups required to resolve character
+                   ;; ligatures.
+                   (auto-composition-mode . auto-composition-mode)
 
-                 ;; show-paren-local-mode highlights the matching parenthesis,
-                 ;; bracket, or brace when the cursor moves over one.
-                 ;;
-                 ;; It stops Emacs from running a backward or forward search
-                 ;; across the buffer to find matching pairs every time the
-                 ;; cursor moves or new text arrives. This prevents lag spikes
-                 ;; when viewing large JSON payloads, minified code, or heavily
-                 ;; nested terminal output.
-                 ;;
-                 ;; Tradeoff: You lose visual feedback for matching brackets
-                 ;; when navigating terminal scrollback manually.
-                 ;;
-                 ;; Terminal output is often unstructured text rather than
-                 ;; well-formed code. Disabling this eliminates unnecessary
-                 ;; background searching, keeping the terminal highly
-                 ;; responsive.
-                 ;; Performance benefit: Avoids backward or forward syntax scanning
-                 ;; across the buffer on every cursor movement.
-                 (show-paren-local-mode . show-paren-local-mode)
+                   ;; show-paren-local-mode highlights the matching parenthesis,
+                   ;; bracket, or brace when the cursor moves over one.
+                   ;;
+                   ;; It stops Emacs from running a backward or forward search
+                   ;; across the buffer to find matching pairs every time the
+                   ;; cursor moves or new text arrives. This prevents lag spikes
+                   ;; when viewing large JSON payloads, minified code, or
+                   ;; heavily nested terminal output.
+                   ;;
+                   ;; Tradeoff: You lose visual feedback for matching brackets
+                   ;; when navigating terminal scrollback manually.
+                   ;;
+                   ;; Terminal output is often unstructured text rather than
+                   ;; well-formed code. Disabling this eliminates unnecessary
+                   ;; background searching, keeping the terminal highly
+                   ;; responsive.
+                   ;; Performance benefit: Avoids backward or forward syntax
+                   ;; scanning across the buffer on every cursor movement.
+                   (show-paren-local-mode . show-paren-local-mode)
 
-                 ;; Attempts to parse the word under the cursor to display
-                 ;; function signatures in the echo area. Causes unnecessary CPU
-                 ;; load and minibuffer flickering in a terminal context.
-                 ;; Performance benefit: Disables background timers that parse the
-                 ;; current line to search for documentation, eliminating timer
-                 ;; interrupts and minibuffer rendering overhead.
-                 (eldoc-mode . eldoc-mode))))
-    (dolist (mode modes)
-      (let ((mode-var (car mode))
-            (mode-func (cdr mode)))
-        (when (and (boundp mode-var)
-                   (symbol-value mode-var)
-                   (fboundp mode-func))
-          (funcall mode-func -1))))))
+                   ;; Attempts to parse the word under the cursor to display
+                   ;; function signatures in the echo area. Causes unnecessary
+                   ;; CPU load and minibuffer flickering in a terminal context.
+                   ;; Performance benefit: Disables background timers that parse
+                   ;; the current line to search for documentation, eliminating
+                   ;; timer interrupts and minibuffer rendering overhead.
+                   (eldoc-mode . eldoc-mode))))
+      (dolist (mode modes)
+        (let ((mode-var (car mode))
+              (mode-func (cdr mode)))
+          (when (and (boundp mode-var)
+                     (symbol-value mode-var)
+                     (fboundp mode-func))
+            (ignore-errors
+              (funcall mode-func -1))))))))
 
 (add-hook 'term-mode-hook 'my-speed-up-terminal-buffer t)
 (add-hook 'vterm-mode-hook 'my-speed-up-terminal-buffer t)
