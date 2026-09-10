@@ -1327,6 +1327,11 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/emacs-libvterm"
              :branch "master")
 
+            (eat
+             :type git :host github
+             :repo "jamescherti/emacs-eat"
+             :branch "master")
+
             ;; Forks of unmaintained packages
             (corfu-prescient
              :type git :host github

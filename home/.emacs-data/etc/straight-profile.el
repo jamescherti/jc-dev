@@ -71,6 +71,7 @@
 
  ;; No tags (Forked: jamescherti)
  ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
+ ("eat" . "7afdf4c983208fcddfc29e18541d3cbd78892e9f")
  ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
  ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
  ("doom-themes" . "cc7686783e5e6e4174a345c768047d524f0dd54f")
