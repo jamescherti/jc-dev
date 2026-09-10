@@ -3118,28 +3118,22 @@ ARGS - the arguments passed to the original function"
 (defun my-update-bash-lastdir (&rest _)
   "Update Bash lastdir."
   (let* ((directory (buffer-cwd))
-         (file "~/.bash_lastdir")
+         (file (expand-file-name "~/.bash_lastdir"))
          (file-lastdir (when (file-exists-p file)
-                         (let ((line (let ((coding-system-for-read 'utf-8-emacs)
-                                           (file-coding-system-alist nil))
-                                       (with-temp-buffer
-                                         (insert-file-contents file)
-                                         (thing-at-point 'line)))))
-                           (when line
-                             line)))))
-    (when (or (not file-lastdir)
-              (not (string= directory file-lastdir)))
+                         (let ((coding-system-for-read 'utf-8-emacs)
+                               (file-coding-system-alist nil))
+                           (with-temp-buffer
+                             (insert-file-contents file)
+                             (thing-at-point 'line))))))
+    (when (and directory
+               (not (equal directory file-lastdir)))
       (with-temp-buffer
-        (insert (expand-file-name default-directory))
-        ;; Force Emacs to read and write the exact internal byte representation
-        ;; of the text without attempting any implicit encoding or decoding
-        ;; conversions.
+        (insert directory)
         (let ((coding-system-for-write 'utf-8-emacs)
               (write-region-annotate-functions nil)
-              (write-region-post-annotation-function nil))
-          (let ((inhibit-quit t))
-            (write-region (point-min) (point-max) file
-                          nil 'silent)))))))
+              (write-region-post-annotation-function nil)
+              (inhibit-quit t))
+          (write-region (point-min) (point-max) file nil 'silent))))))
 
 ;; (add-hook 'find-file-hook #'my-update-bash-lastdir)
 (add-hook 'window-buffer-change-functions #'my-update-bash-lastdir)
