@@ -3115,27 +3115,43 @@ ARGS - the arguments passed to the original function"
 
 ;;; shell: Auto update lastdir
 
-(defun my-update-bash-lastdir (&rest _)
-  "Update Bash lastdir."
-  (let* ((directory (buffer-cwd))
-         (file (expand-file-name "~/.bash_lastdir"))
-         (file-lastdir (when (file-exists-p file)
-                         (let ((coding-system-for-read 'utf-8-emacs)
-                               (file-coding-system-alist nil))
-                           (with-temp-buffer
-                             (insert-file-contents file)
-                             (thing-at-point 'line))))))
-    (when (and directory
-               (not (equal directory file-lastdir)))
-      (with-temp-buffer
-        (insert directory)
-        (let ((coding-system-for-write 'utf-8-emacs)
+(defvar my--bash-lastdir-cache nil
+  "In-memory cache to prevent unnecessary disk reads.")
+
+(defvar my--bash-lastdir-file "~/.bash_lastdir")
+
+(defun my-update-bash-lastdir (window-or-frame)
+  "Update Bash lastdir, optimized to minimize disk I/O.
+WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
+  (let* ((win (if (framep window-or-frame)
+                  (frame-selected-window window-or-frame)
+                window-or-frame))
+         (directory (with-current-buffer (window-buffer win)
+                      default-directory)))
+    (when (and directory (not (file-remote-p directory)))
+      ;; If the cache is nil (e.g., on first run after startup), read the
+      ;; current value from disk to maintain idempotency and prevent redundant
+      ;; writes if the file already contains it.
+      (when (null my--bash-lastdir-cache)
+        (let ((file (expand-file-name my--bash-lastdir-file)))
+          (when (file-exists-p file)
+            (let ((coding-system-for-read 'utf-8-emacs)
+                  (file-coding-system-alist nil))
+              (with-temp-buffer
+                (insert-file-contents file)
+                (setq my--bash-lastdir-cache (buffer-string)))))))
+
+      ;; Only write to disk if the directory differs from our cache
+      (unless (equal directory my--bash-lastdir-cache)
+        (let ((file (expand-file-name my--bash-lastdir-file))
+              (coding-system-for-write 'utf-8-emacs)
               (write-region-annotate-functions nil)
               (write-region-post-annotation-function nil)
               (inhibit-quit t))
-          (write-region (point-min) (point-max) file nil 'silent))))))
 
-;; (add-hook 'find-file-hook #'my-update-bash-lastdir)
+          (write-region directory nil file nil 'silent)
+          (setq my--bash-lastdir-cache directory))))))
+
 (add-hook 'window-buffer-change-functions #'my-update-bash-lastdir)
 
 ;;; track eol (TODO light emacs?)
