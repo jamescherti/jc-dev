@@ -3321,23 +3321,22 @@ ARGS - the arguments passed to the original function"
 
 ;;; Configure any terminal
 
-(defun my-term-buffer-config ()
+(defun my-speed-up-terminal-buffer ()
   "Speed up terminal buffers."
-  (my-disable-fringe-truncation-arrow)
-  ;; By default, Emacs attempts to compute visual line wrapping when text
-  ;; exceeds the window width. Setting this to t forces Emacs to leave wrapping
-  ;; to the terminal emulator itself, saving CPU cycles during horizontal text
-  ;; dumps.
+  ;; By default, Emacs wraps lines that exceed window width, requiring the
+  ;; display engine to scan every character to compute line-wrap boundaries.
+  ;; Setting this to t stops rendering at the right window edge, preventing
+  ;; redisplay lag on long lines.
   (setq-local truncate-lines t)
 
-  ;; `scroll-margin' changes how many lines of padding Emacs enforces between
-  ;; the cursor and the top/bottom of the window. In a TUI (e.g., htop, vim),
-  ;; the application draws exactly to the screen edges. If this is > 0, moving
-  ;; the cursor to the bottom row causes Emacs to suddenly shift the entire
-  ;; buffer upward, breaking the TUI layout.
-  ;;
-  ;; Setting this to 0 is useful for TUI applications to render and navigate
-  ;; correctly without visual jarring.
+  ;; Disable the horizontal scroll margin.
+  ;; This ensures that terminal windows remain stable without premature
+  ;; horizontal panning.
+  (setq-local hscroll-margin 0)
+
+  ;; Disables vertical scroll padding between the cursor and the top/bottom of
+  ;; the window. Setting this to 0 is useful for TUI applications to render and
+  ;; navigate correctly without visual jarring.
   (setq-local scroll-margin 0)
 
   ;; Defines how many lines to scroll when the cursor moves off-screen.
@@ -3546,8 +3545,14 @@ ARGS - the arguments passed to the original function"
                    (fboundp mode-func))
           (funcall mode-func -1))))))
 
-(add-hook 'term-mode-hook 'my-term-buffer-config t)
-(add-hook 'vterm-mode-hook 'my-term-buffer-config t)
+(add-hook 'term-mode-hook 'my-speed-up-terminal-buffer t)
+(add-hook 'vterm-mode-hook 'my-speed-up-terminal-buffer t)
+(add-hook 'eat-mode-hook 'my-speed-up-terminal-buffer t)
+
+;; Disable arrow
+(add-hook 'term-mode-hook 'my-disable-fringe-truncation-arrow t)
+(add-hook 'vterm-mode-hook 'my-disable-fringe-truncation-arrow t)
+(add-hook 'eat-mode-hook 'my-disable-fringe-truncation-arrow t)
 
 ;;; ghostel
 
