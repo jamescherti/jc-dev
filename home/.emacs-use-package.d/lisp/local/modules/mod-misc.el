@@ -3140,7 +3140,7 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
                   (file-coding-system-alist nil))
               (with-temp-buffer
                 (insert-file-contents file)
-                (setq my-bash-lastdir-cache file))))))
+                (setq my-bash-lastdir-cache (buffer-string)))))))
 
       ;; Only write to disk if the directory differs from our cache
       (unless (equal directory my-bash-lastdir-cache)
@@ -3149,10 +3149,28 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
               (write-region-annotate-functions nil)
               (write-region-post-annotation-function nil)
               (inhibit-quit t))
-          (write-region (point-min) (point-max) file nil 'silent)
+          (write-region directory nil file nil 'silent)
           (setq my-bash-lastdir-cache directory))))))
 
 (add-hook 'window-buffer-change-functions #'my-bash-lastdir-update)
+
+;; Clear the cache
+(defun my-bash-lastdir--on-focus-change ()
+  "Clear the bash lastdir cache when Emacs loses focus."
+  ;; `frame-focus-state' is available in Emacs 27+. We check it to ensure
+  ;; we only clear the cache on focus out, not focus in.
+  (when (or (not (fboundp 'frame-focus-state))
+            (not (frame-focus-state)))
+    (setq my-bash-lastdir-cache nil)))
+
+;; Register the focus handler, checking for Emacs 27+ support.
+(if (boundp 'after-focus-change-function)
+    (with-no-warnings
+      (add-function :after after-focus-change-function
+                    #'my-bash-lastdir--on-focus-change))
+  ;; Emacs <= 26
+  (with-no-warnings
+    (add-hook 'focus-out-hook #'my-bash-lastdir--on-focus-change)))
 
 ;;; track eol (TODO light emacs?)
 
