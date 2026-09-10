@@ -3152,9 +3152,6 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
           (write-region directory nil file nil 'silent)
           (setq my-bash-lastdir-cache directory))))))
 
-(add-hook 'window-buffer-change-functions #'my-bash-lastdir-update)
-
-;; Clear the cache
 (defun my-bash-lastdir--on-focus-change ()
   "Clear the bash lastdir cache when Emacs loses focus."
   ;; `frame-focus-state' is available in Emacs 27+. We check it to ensure
@@ -3162,6 +3159,9 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
   (when (or (not (fboundp 'frame-focus-state))
             (not (frame-focus-state)))
     (setq my-bash-lastdir-cache nil)))
+
+;; Update lastdir
+(add-hook 'window-buffer-change-functions #'my-bash-lastdir-update)
 
 ;; Register the focus handler, checking for Emacs 27+ support.
 (if (boundp 'after-focus-change-function)
