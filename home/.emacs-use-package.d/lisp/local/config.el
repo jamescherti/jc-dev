@@ -1373,13 +1373,17 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/wizard.el"
              :branch "main")
             (cond-let
-             :type git :host github
-             :repo "jamescherti/cond-let"
-             :branch "main")
+              :type git :host github
+              :repo "jamescherti/cond-let"
+              :branch "main")
             (transient
              :type git :host github
              :repo "jamescherti/transient"
              :branch "main")
+            (benchmark-init-el
+             :type git :host github
+             :repo "jamescherti/benchmark-init-el"
+             :branch "master")
             (wgrep
              :type git :host github
              :repo "jamescherti/Emacs-wgrep"

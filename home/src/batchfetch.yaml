@@ -473,6 +473,11 @@ tasks:
     remote:
       upstream: https://github.com/tarsius/cond-let
 
+  - git: git@github.com:jamescherti/benchmark-init-el
+    path: forks/benchmark-init-el
+    remote:
+      upstream: https://github.com/dholm/benchmark-init-el
+
   - git: git@github.com:jamescherti/Emacs-wgrep
     path: forks/Emacs-wgrep
     remote:

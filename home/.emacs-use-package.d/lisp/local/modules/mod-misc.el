@@ -238,7 +238,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
       ;;
       ;; Large jumps (> 9 lines off-screen): Emacs gives up on scrolling and
       ;; recenters the window.
-      ;; scroll-conservatively 8
+      scroll-conservatively 8
 
       ;; Setting scroll-conservatively to most-positive-fixnum: By default, when
       ;; your cursor moves off the screen, Emacs recenters the window so the
@@ -250,7 +250,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
       ;;
       ;; Setting scroll-step to 1: This variable tells Emacs to scroll by
       ;; exactly one line at a time when the cursor moves off-screen.
-      scroll-conservatively most-positive-fixnum
+      ;; scroll-conservatively most-positive-fixnum
 
       ;; In modern Emacs, if using scroll-conservatively, scroll-step is
       ;; completely redundant. Setting scroll-step 1 is a legacy holdover from
@@ -3324,15 +3324,16 @@ ARGS - the arguments passed to the original function"
   "Better evil integration with `vterm'."
   (my-disable-fringe-truncation-arrow)
 
-  (setq-local line-number-mode nil
-              column-number-mode nil
-
-              ;; Define cursor shapes and colors for Evil states
-              evil-normal-state-cursor 'box
-              evil-visual-state-cursor 'box
-              evil-insert-state-cursor 'bar
-
-              cursor-type 'bar))
+  ;; (setq-local line-number-mode nil
+  ;;             column-number-mode nil
+  ;;
+  ;;             ;; Define cursor shapes and colors for Evil states
+  ;;             evil-normal-state-cursor 'box
+  ;;             evil-visual-state-cursor 'box
+  ;;             evil-insert-state-cursor 'bar
+  ;;
+  ;;             cursor-type 'bar)
+  )
 
 (add-hook 'vterm-mode-hook 'my-setup-vterm)
 

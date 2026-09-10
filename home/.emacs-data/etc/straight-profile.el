@@ -67,6 +67,7 @@
 
  ;; Maintained
  ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE
+ ("benchmark-init-el" . "54b9703389f25012e4cc20fe4a0d4ea253ce4820")
 
  ;; No tags (Forked: jamescherti)
  ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
