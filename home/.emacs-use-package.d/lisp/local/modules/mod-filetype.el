@@ -386,8 +386,10 @@ only if they are not already available."
 (with-eval-after-load 'org
   (if (and (fboundp 'treesit-language-available-p)
            (treesit-language-available-p 'yaml))
-      (push (cons "yaml" 'yaml-ts) org-src-lang-modes)
-    (push (cons "yaml" 'yaml) org-src-lang-modes)))
+      (with-eval-after-load 'org
+        (add-to-list 'org-src-lang-modes '("yaml" . yaml-ts)))
+    (with-eval-after-load 'org
+      (add-to-list 'org-src-lang-modes '("yaml" . yaml)))))
 
 (with-suppressed-warnings ((free-vars flymake-yamllint-arguments)
                            (free-vars yaml-ts-mode-yamllint-options))
@@ -591,6 +593,30 @@ invoking the original function ORIG-FUN with ARGS."
 
 (add-hook 'sh-mode-hook #'setup-sh-mode)
 (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
+
+(when (and (fboundp 'treesit-language-available-p)
+           (treesit-language-available-p 'bash))
+  (with-eval-after-load 'org-src
+    (let ((shell-langs '("ash" "shell" "screen"
+                         "sh" "bash" "jsh" "bash2" "dash" "dtksh"
+                         "ksh" "es" "rc" "itcsh" "tcsh" "jcsh"
+                         "csh" "ksh88" "oash" "pdksh" "mksh"
+                         "posix" "wksh" "wsh" "zsh" "rpm")))
+      (dolist (lang shell-langs)
+        (setf (alist-get lang org-src-lang-modes nil nil #'equal)
+              'bash-ts)))))
+
+(when (and (fboundp 'treesit-language-available-p)
+           (treesit-language-available-p 'bash))
+  (with-eval-after-load 'org-src
+    (let ((shell-langs '("ash" "shell" "screen"
+                         "sh" "bash" "jsh" "bash2" "dash" "dtksh"
+                         "ksh" "es" "rc" "itcsh" "tcsh" "jcsh"
+                         "csh" "ksh88" "oash" "pdksh" "mksh"
+                         "posix" "wksh" "wsh" "zsh" "rpm")))
+      (dolist (lang shell-langs)
+        (setf (alist-get lang org-src-lang-modes nil nil #'equal)
+              'bash-ts)))))
 
 ;; use-package sh-mode
 ;; :ensure nil
@@ -837,10 +863,14 @@ This function modifies `electric-pair-pairs' buffer-locally."
 
   (if (my-treesit-language-available-p 'php)
       (progn
+        (with-eval-after-load 'org
+          (add-to-list 'org-src-lang-modes '("php" . php-ts)))
         (my-remap-ts-mode 'php-mode 'php-ts-mode 'php)
         (my-auto-mode-ts "\\.[pP][hH][pP]\\'" 'php-ts-mode 'php-mode 'php)
         (my-auto-mode-ts "\\.[pP][hH][pP]3\\'" 'php-ts-mode 'php-mode 'php))
-    (require 'sub-php-mode))
+    (require 'sub-php-mode)
+    (with-eval-after-load 'org
+      (add-to-list 'org-src-lang-modes '("php" . php))))
 
   (my-remap-ts-mode 'shell-script-mode 'bash-ts-mode 'bash)
   (my-remap-ts-mode 'sh-mode 'bash-ts-mode 'bash)
@@ -878,6 +908,14 @@ This function modifies `electric-pair-pairs' buffer-locally."
       (mhtml-mode . sgml-name-8bit-mode)))
 
   (my-remap-ts-mode 'python-mode 'python-ts-mode 'python)
+
+  (with-eval-after-load 'org
+    (if (and (fboundp 'treesit-language-available-p)
+             (treesit-language-available-p 'python))
+        (with-eval-after-load 'org
+          (add-to-list 'org-src-lang-modes '("python" . python-ts)))
+      (with-eval-after-load 'org
+        (add-to-list 'org-src-lang-modes '("python" . python)))))
 
   (when (and (> emacs-major-version 30)
              (my-treesit-language-available-p 'markdown))
