@@ -1881,81 +1881,11 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 
 (defun my-term-setup ()
   "Configuration for term and `ansi-term' buffers."
-  ;; Prevents text from wrapping and hides line numbers to maintain visual
-  ;; parity with standard terminal behavior.
-  (let ((inhibit-message t))
-    (toggle-truncate-lines 1))
-
-  ;; Emacs attempts to calculate bidirectional (bidi) text display for every
-  ;; buffer by default, supporting right-to-left languages like Arabic and
-  ;; Hebrew. This calculation is exceptionally CPU intensive in buffers that
-  ;; update rapidly. Forcing the terminal to strictly evaluate text from left to
-  ;; right is the single biggest performance improvement you can make.
-  ;; (setq-default bidi-paragraph-direction 'left-to-right)
-  ;; (setq-default bidi-inhibit-bpa t)
-
-  (let ((inhibit-message t))
-    (toggle-truncate-lines 1))
-  (display-line-numbers-mode 0)
-
-  ;; Removes visual artifacts by disabling special character displays and
-  ;; ensuring consistent vertical character alignment.
-  (setq-local nobreak-char-display nil)
-  (setq-local line-spacing 0)
-
-  ;; Prevents the buffer from 'jumping' or scrolling prematurely, which can
-  ;; break the visual alignment of TUI interfaces like htop or Vim.
-  (setq-local scroll-margin 0)
-
-  (setq-local scroll-step 1)
-
-  (setq-local echo-keystrokes 0)
-
-  (when (fboundp 'hl-line-mode)
-    (hl-line-mode -1))
-
-  ;; Ensures smooth, immediate scrolling when new output arrives
-  ;; without recentering the cursor point.
-  (setq-local scroll-conservatively most-positive-fixnum)
-  (setq-local fast-but-imprecise-scrolling t)
-
-  ;; Maximizes screen real estate by hiding the mode-line.
-  (setq-local mode-line-format nil)
-
-  ;; Disables helper modes that cause logic conflicts or 'ghost' characters
-  ;; when typing inside a raw terminal subprocess.
-  (when (fboundp 'yas-minor-mode)
-    (yas-minor-mode -1))
-
-  (when (fboundp 'yas-minor-mode)
-    (yas-minor-mode -1))
-
-  (when (fboundp 'evil-snipe-local-mode)
-    (evil-snipe-local-mode -1))
-
-  (when (fboundp 'electric-pair-local-mode)
-    (electric-pair-mode -1))
-
-  (when (fboundp 'electric-indent-local-mode)
-    (electric-indent-local-mode -1))
-
-  (when (fboundp 'evil-surround-mode)
-    (evil-surround-mode -1))
-
   ;; Bind C-c to return to normal mode, since Escape is now consumed by the
-  ;; terminal
-  ;;
-  ;; Since Escape is now sent to the terminal, this provides an alternative
-  ;; chord to escape the Emacs-Evil state itself.
+  ;; terminal Since Escape is now sent to the terminal, this provides an
+  ;; alternative chord to escape the Emacs-Evil state itself.
   (evil-local-set-key 'insert (kbd "C-c ESC") #'evil-normal-state)
-  (evil-local-set-key 'insert (kbd "C-c <escape>") #'evil-normal-state)
-
-  (setq-local transient-mark-mode nil)
-
-  ;; ;; Disable UI elements that interfere with terminal rendering
-  ;; (display-line-numbers-mode -1)
-  ;; (hl-line-mode -1)
-  )
+  (evil-local-set-key 'insert (kbd "C-c <escape>") #'evil-normal-state))
 
 (add-hook 'term-mode-hook #'my-term-setup t)
 

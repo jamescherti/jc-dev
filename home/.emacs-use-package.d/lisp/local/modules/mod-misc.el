@@ -3319,23 +3319,235 @@ ARGS - the arguments passed to the original function"
 
 ;;; vterm
 
-;; TODO lightemacs?
-(defun my-setup-vterm ()
-  "Better evil integration with `vterm'."
+;;; Configure any terminal
+
+(defun my-term-buffer-config ()
+  "Speed up terminal buffers."
   (my-disable-fringe-truncation-arrow)
+  ;; By default, Emacs attempts to compute visual line wrapping when text
+  ;; exceeds the window width. Setting this to t forces Emacs to leave wrapping
+  ;; to the terminal emulator itself, saving CPU cycles during horizontal text
+  ;; dumps.
+  (setq-local truncate-lines t)
 
-  ;; (setq-local line-number-mode nil
-  ;;             column-number-mode nil
+  ;; `scroll-margin' changes how many lines of padding Emacs enforces between
+  ;; the cursor and the top/bottom of the window. In a TUI (e.g., htop, vim),
+  ;; the application draws exactly to the screen edges. If this is > 0, moving
+  ;; the cursor to the bottom row causes Emacs to suddenly shift the entire
+  ;; buffer upward, breaking the TUI layout.
   ;;
-  ;;             ;; Define cursor shapes and colors for Evil states
-  ;;             evil-normal-state-cursor 'box
-  ;;             evil-visual-state-cursor 'box
-  ;;             evil-insert-state-cursor 'bar
-  ;;
-  ;;             cursor-type 'bar)
-  )
+  ;; Setting this to 0 is useful for TUI applications to render and navigate
+  ;; correctly without visual jarring.
+  (setq-local scroll-margin 0)
 
-(add-hook 'vterm-mode-hook 'my-setup-vterm)
+  ;; Defines how many lines to scroll when the cursor moves off-screen.
+  ;; Setting it to 1 forces smooth, single-line scrolling.
+  ;;
+  ;; If you scroll rapidly, single-line rendering might require more frequent
+  ;; redraws compared to jumping half a screen.
+  ;;
+  ;; Since we are already use `scroll-conservatively', this is slightly
+  ;; redundant, but it acts as a reliable fallback for consistent vertical
+  ;; scrolling in environments where `scroll-conservatively' might be bypassed.
+  (setq-local scroll-step 1)
+
+  ;; By default, Emacs highlights non-breaking spaces and soft hyphens
+  ;; (often rendering them with a distinct face or escape box) so developers can
+  ;; spot them. TUI applications and shell outputs often use these characters
+  ;; for formatting. Disabling this stops Emacs from overlaying ugly highlight
+  ;; boxes on top of terminal output.
+  ;;
+  ;; Tradeoff: You will not be able to visually distinguish a regular space from
+  ;; a non-breaking space in terminal output.
+  ;;
+  ;; The visual artifacts created by Emacs trying to highlight these
+  ;; characters heavily degrade terminal readability. It should be disabled.
+  (setq-local nobreak-char-display nil)
+
+  ;; TUI applications use box-drawing characters (e.g., ┌, ─, │) to create
+  ;; window borders. These characters are designed to connect from one line to
+  ;; the next. If `line-spacing' is greater than 0, Emacs inserts vertical pixel
+  ;; gaps between the lines, causing borders to appear dashed or broken.
+  ;;
+  ;; Tradeoff: Text in the terminal will not have any extra vertical padding,
+  ;; which might look slightly dense if you prefer widely spaced text globally.
+  ;;
+  ;; Setting this to 0 ensures pixel-perfect vertical alignment for
+  ;; TUI borders and progress bars.
+  (setq-local line-spacing 0)
+
+  (setq-local transient-mark-mode nil)
+
+  ;; Setting `echo-keystrokes' to 0 disables the echoing of unfinished
+  ;; keystrokes in the minibuffer.
+  ;;
+  ;; Terminal buffers require immediate input handling. The overhead of updating
+  ;; the minibuffer for every partial keypress is unnecessary when interacting
+  ;; directly with a shell.
+  (setq-local echo-keystrokes 0)
+
+  ;; Emacs scans text by default to determine if it should be rendered
+  ;; right-to-left. Forcing left-to-right and disabling the Bidirectional
+  ;; Parentheses Algorithm (BPA) bypasses this expensive C-level text scanning,
+  ;; significantly reducing CPU load during rapid terminal output.
+  ;;
+  ;; Unless you frequently work with right-to-left text in your shell, disabling
+  ;; bidi scanning is an effective way to improve display performance.
+  (setq-local bidi-paragraph-direction 'left-to-right)
+  (setq-local bidi-inhibit-bpa t)
+
+  ;; Hiding the mode-line stops Emacs from constantly re-evaluating mode-line
+  ;; constructs (which often check Git status, line numbers, or active modes) on
+  ;; every buffer update. It also provides more vertical space.
+  ;;
+  ;; Tradeoff: You lose standard Emacs buffer information, such as the buffer
+  ;; name, major mode, and status indicators.
+  ;;
+  ;; Terminal emulators and shells usually provide their own status lines (like
+  ;; tmux or complex zsh prompts). Removing the Emacs mode-line eliminates
+  ;; redundant processing overhead.
+  (setq-local mode-line-format nil)
+
+  ;; These variables optimize how Emacs handles large bursts of text.
+  ;; `scroll-conservatively' prevents the screen from jarringly recentering when
+  ;; output hits the bottom. `fast-but-imprecise-scrolling' and
+  ;; `redisplay-skip-fontification-on-input' tell the display engine to skip
+  ;; expensive line counting and rendering calculations while the terminal is
+  ;; actively receiving data.
+  ;;
+  ;; Tradeoff: Fast scrolling might momentarily display unstyled text or feel
+  ;; slightly less precise in terms of exact pixel alignment.
+  ;;
+  ;; The Emacs display engine can freeze when a terminal dumps large amounts of
+  ;; text (e.g., viewing a large log file). These settings prioritize
+  ;; responsiveness and input processing over perfect, synchronous rendering.
+  (setq-local scroll-conservatively most-positive-fixnum)
+  (setq-local fast-but-imprecise-scrolling t)
+  (setq-local redisplay-skip-fontification-on-input t)
+
+  ;; Prevents Evil from calculating and storing jump list entries on every
+  ;; single command. This reduces CPU overhead and input latency, which is
+  ;; especially beneficial in terminal buffers that process rapid input.
+  ;;
+  ;; Tradeoff: Evil's jump list (C-o and C-i) will no longer track cursor
+  ;; movements within this buffer, meaning you cannot use those binds to jump
+  ;; back to previous locations inside the terminal.
+  ;;
+  ;; For standard terminal use, storing jump history is unnecessary since the
+  ;; shell or CLI application manages navigation. However, for users who
+  ;; frequently enter Evil normal state or `vterm-copy-mode` to search and
+  ;; navigate terminal scrollback, disabling this removes the ability to use C-o
+  ;; to return to a previous cursor position after a search. Despite this, the
+  ;; performance gain during rapid output usually outweighs the loss of local
+  ;; jump history.
+  (remove-hook 'pre-command-hook 'evil--jump-hook t)
+  (remove-hook 'post-command-hook 'evil--jump-handle-buffer-crossing t)
+
+  ;; TODO make point manager local and disable it here
+  (let ((modes '(;; Disables helper modes that cause logic conflicts or 'ghost'
+                 ;; characters when typing inside a raw terminal subprocess.
+
+                 ;; Intercepts the TAB key for snippet expansion, which breaks
+                 ;; native shell tab-completion.
+                 (yas-minor-mode . yas-minor-mode)
+
+                 ;; Forces the display engine to redraw the background of the
+                 ;; cursor's line. Causes visual lag and flickering during rapid
+                 ;; terminal output.
+                 (hl-line-mode . hl-line-mode)
+
+                 ;; Intercepts character search keys (f, t, s). Can cause
+                 ;; duplicate character inputs or block standard shell
+                 ;; keystrokes.
+                 (evil-snipe-local-mode . evil-snipe-local-mode)
+
+                 ;; Automatically inserts closing quotes and brackets. This
+                 ;; results in 'ghost' characters being sent to the shell,
+                 ;; causing syntax errors in commands.
+                 (electric-pair-local-mode . electric-pair-local-mode)
+
+                 ;; Attempts to automatically indent text when pressing Return.
+                 ;; Corrupts pasted text and offsets shell prompts.
+                 (electric-indent-local-mode . electric-indent-local-mode)
+
+                 ;; Intercepts keystrokes to manage surrounding characters. Can
+                 ;; interfere with raw terminal input and text selection in
+                 ;; vterm-copy-mode.
+                 (evil-surround-mode . evil-surround-mode)
+
+                 ;; Disable line numbers to reduce rendering overhead.
+                 ;; display-line-numbers-mode: Computing the line number margin
+                 ;; for thousands of rapidly scrolling lines severely degrades
+                 ;; display performance. Terminal output relies on scrollback,
+                 ;; not fixed line addresses.
+                 (display-line-numbers-mode . display-line-numbers-mode)
+
+                 ;; Disable auto-completion and syntax checking modes.
+
+                 ;; In-buffer completion popups conflict with the shell's native
+                 ;; completion mechanism (e.g., readline or zsh
+                 ;; autosuggestions). They also waste CPU cycles attempting to
+                 ;; parse shell output as code.
+                 (company-mode . company-mode)
+                 (corfu-mode . corfu-mode)
+
+                 ;; Syntax checkers attempt to run linters against the buffer
+                 ;; content. Terminal output is arbitrary text, making linting a
+                 ;; waste of CPU resources that can freeze the editor.
+                 (flymake-mode . flymake-mode)
+                 (flycheck-mode . flycheck-mode)
+
+                 ;; auto-composition-mode scans buffer text to combine multiple
+                 ;; characters into a single graphical glyph (such as font
+                 ;; ligatures like turning != into a single symbol, or complex
+                 ;; script shaping).
+                 ;;
+                 ;; Bypassing this complex text-shaping engine saves
+                 ;; significant CPU cycles, preventing Emacs from lagging when
+                 ;; the terminal outputs large blocks of text or symbols
+                 ;; rapidly.
+                 ;;
+                 ;; Tradeoff: You lose programming font ligatures in the
+                 ;; terminal. Character sequences like => will render as two
+                 ;; distinct characters instead of a merged arrow.
+                 ;;
+                 ;; Terminal emulators are primarily for monospaced
+                 ;; ASCII/ANSI output. The performance gain during rapid text
+                 ;; bursts easily outweighs the loss of decorative ligatures.
+                 (auto-composition-mode . auto-composition-mode)
+
+                 ;; show-paren-local-mode highlights the matching parenthesis,
+                 ;; bracket, or brace when the cursor moves over one.
+                 ;;
+                 ;; It stops Emacs from running a backward or forward search
+                 ;; across the buffer to find matching pairs every time the
+                 ;; cursor moves or new text arrives. This prevents lag spikes
+                 ;; when viewing large JSON payloads, minified code, or heavily
+                 ;; nested terminal output.
+                 ;;
+                 ;; Tradeoff: You lose visual feedback for matching brackets
+                 ;; when navigating terminal scrollback manually.
+                 ;;
+                 ;; Terminal output is often unstructured text rather than
+                 ;; well-formed code. Disabling this eliminates unnecessary
+                 ;; background searching, keeping the terminal highly
+                 ;; responsive.
+                 (show-paren-local-mode . show-paren-local-mode)
+
+                 ;; Attempts to parse the word under the cursor to display
+                 ;; function signatures in the echo area. Causes unnecessary CPU
+                 ;; load and minibuffer flickering in a terminal context.
+                 (eldoc-mode . eldoc-mode))))
+    (dolist (mode modes)
+      (let ((mode-var (car mode))
+            (mode-func (cdr mode)))
+        (when (and (boundp mode-var)
+                   (symbol-value mode-var)
+                   (fboundp mode-func))
+          (funcall mode-func -1))))))
+
+(add-hook 'term-mode-hook 'my-term-buffer-config t)
+(add-hook 'vterm-mode-hook 'my-term-buffer-config t)
 
 ;;; ghostel
 
