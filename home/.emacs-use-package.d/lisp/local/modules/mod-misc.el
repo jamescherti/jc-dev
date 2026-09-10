@@ -3319,17 +3319,6 @@ ARGS - the arguments passed to the original function"
 
 ;;; vterm
 
-(with-eval-after-load 'le-vterm
-  (setq vterm-timer-delay 0.001))
-(setq vterm-max-scrollback 1
-      vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y")
-      vterm-disable-inverse-video t
-
-      ;; To stop vterm from asking for confirmation and force it to compile the
-      ;; module automatically, you need to set the vterm-always-compile-module
-      ;; variable to t.
-      vterm-always-compile-module t)
-
 ;; TODO lightemacs?
 (defun my-setup-vterm ()
   "Better evil integration with `vterm'."

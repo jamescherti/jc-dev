@@ -903,7 +903,7 @@ check their base buffer's file name."
 
 ;;; tab width
 
-(defun my-set-tab-width (width)
+(defun my-set-tab-width (_width)
   "Set the tab width.
 WIDTH is the tab width."
   ;; TODO Remove this function?

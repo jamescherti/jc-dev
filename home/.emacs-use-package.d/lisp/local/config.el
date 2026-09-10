@@ -905,7 +905,6 @@ subsequent GCC invocations."
                            le-consult
                            le-embark
                            le-embark-consult
-                           le-embark
                            le-vertico
                            le-orderless
                            le-marginalia
@@ -1956,6 +1955,17 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
                 (?f . evil-surround-function)))
 
 ;;; Settings
+
+(with-eval-after-load 'le-vterm
+  (setq vterm-timer-delay 0.001))
+(setq vterm-max-scrollback 1
+      vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y")
+      vterm-disable-inverse-video t
+
+      ;; To stop vterm from asking for confirmation and force it to compile the
+      ;; module automatically, you need to set the vterm-always-compile-module
+      ;; variable to t.
+      vterm-always-compile-module t)
 
 (setq lightemacs-corfu-history-target-hooks '(corfu-mode-hook))
 
