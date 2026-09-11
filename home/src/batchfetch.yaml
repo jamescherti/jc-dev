@@ -600,6 +600,11 @@ tasks:
     remote:
       upstream: https://codeberg.org/ideasman42/emacs-elisp-autofmt
 
+  - git: git@github.com:jamescherti/nerd-icons-dired
+    path: forks/nerd-icons-dired
+    remote:
+      upstream: https://github.com/rainstormstudio/nerd-icons-dired
+
   - git: git@github.com:jamescherti/nerd-icons-corfu
     path: forks/nerd-icons-corfu
     remote:

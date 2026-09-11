@@ -70,6 +70,7 @@
  ("benchmark-init-el" . "54b9703389f25012e4cc20fe4a0d4ea253ce4820")
 
  ;; No tags (Forked: jamescherti)
+ ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
  ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
  ("eat" . "7afdf4c983208fcddfc29e18541d3cbd78892e9f")
  ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
@@ -115,7 +116,6 @@
 
  ;; No tags
  ;; ("nerd-icons-completion" . "45b585d972192a3eaeb239e15e55de7f46f8920a")
- ;; ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
 
  ;; Repositories
  ("nongnu-elpa" . "2e12d173f9e329f1a37c07a4a84fdbaaff12d245")

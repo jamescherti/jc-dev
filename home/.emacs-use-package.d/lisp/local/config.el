@@ -911,6 +911,7 @@ subsequent GCC invocations."
 
                            le-corfu
                            le-nerd-icons-corfu
+                           le-nerd-icons-dired
                            le-corfu-popupinfo
                            ;; mod-company
 
@@ -1379,9 +1380,9 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/wizard.el"
              :branch "main")
             (cond-let
-              :type git :host github
-              :repo "jamescherti/cond-let"
-              :branch "main")
+             :type git :host github
+             :repo "jamescherti/cond-let"
+             :branch "main")
             (transient
              :type git :host github
              :repo "jamescherti/transient"
@@ -1494,10 +1495,18 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jamescherti/emacs-elisp-autofmt"
              :branch "main")
+            (nerd-icons
+             :type git :host github
+             :repo "jamescherti/nerd-icons.el"
+             :branch "main")
             (nerd-icons-corfu
              :type git :host github
              :repo "jamescherti/nerd-icons-corfu"
              :branch "master")
+            (nerd-icons-dired
+             :type git :host github
+             :repo "jamescherti/nerd-icons-dired"
+             :branch "main")
             (melpa
              :type git :host github
              :repo "jamescherti/melpa"
@@ -1573,10 +1582,6 @@ This uses an around advice to trap errors and verify file timestamps."
             (compat
              :type git :host github
              :repo "jamescherti/compat"
-             :branch "main")
-            (nerd-icons
-             :type git :host github
-             :repo "jamescherti/nerd-icons.el"
              :branch "main")
             (basic-mode
              :type git :host github

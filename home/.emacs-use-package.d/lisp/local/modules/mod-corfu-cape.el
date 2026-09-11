@@ -38,6 +38,7 @@
 ;;     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)))
 
 (setq nerd-icons-font-family "Symbols Nerd Font Mono")
+(setq nerd-icons-dired-infix-string "  ")
 
 ;;; Provide
 

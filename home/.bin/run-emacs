@@ -102,6 +102,12 @@ main() {
   fi
 
   if [[ "${XDG_SESSION_TYPE:-}" = wayland ]]; then
+    # Fix: Debugger entered--Lisp error: (error "Cannot connect to display
+    # server :0")
+    if [[ -v DISPLAY ]]; then
+      unset DISPLAY
+    fi
+
     # By default, GTK applications try to guess the best backend to use. If you
     # want to guarantee that Emacs runs natively as a Wayland client and does
     # not fall back to XWayland, you should explicitly set the backend.

@@ -119,20 +119,14 @@
 ;;   ;; instead
 ;;   (advice-add 'dired-find-file :override #'my-dired-open-with-external-command))
 
-;;; DISABLED: Icons dired
-
-;; (lightemacs-use-package nerd-icons-dired
-;;   :if (display-graphic-p)
-;;   ;;:diminish nerd-icons-dired-mode
-;;   :commands nerd-icons-dired-mode
-;;   ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
-;;   ;; aligned properly)
-;;   :hook
-;;   (dired-mode . nerd-icons-dired-mode))
-
-;; Local variables:
-;; byte-compile-warnings: (not free-vars)
-;; End:
+(lightemacs-use-package nerd-icons-dired
+  :if (display-graphic-p)
+  ;;:diminish nerd-icons-dired-mode
+  :commands nerd-icons-dired-mode
+  ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
+  ;; aligned properly)
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
 
 ;;; DISABLED: Abbreviate dired headers
 
@@ -164,5 +158,9 @@
 ;;; Provide
 
 (provide 'mod-dired)
+
+;; Local variables:
+;; byte-compile-warnings: (not free-vars)
+;; End:
 
 ;;; mod-dired.el ends here
