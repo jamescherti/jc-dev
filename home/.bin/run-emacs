@@ -31,7 +31,7 @@ EMACS_ARGS_DICT=(
   # startup file loadup.el. This file normally initializes a large portion of
   # the core environment. Using this option therefore has significant side
   # effects.
-  # --no-loadup
+  --no-loadup
 )
 EMACS_EDIT_TIMEOUT="${EMACS_EDIT_TIMEOUT:-3}"
 EMACS_D="${EMACS_D:-}"

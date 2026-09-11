@@ -2817,9 +2817,9 @@ ARGS - the arguments passed to the original function"
   (setq consult-async-min-input 3)
 
   ;; Fast Consult
-  (setq consult-async-input-debounce 0.02
-        consult-async-input-throttle 0.05
-        consult-async-refresh-delay 0.02))
+  (setq consult-async-input-debounce 0.05
+        consult-async-input-throttle 0.13
+        consult-async-refresh-delay 0.05))
 
 (defun setup-battery-angel-on-bat ()
   "This is called on BAT."

@@ -24,14 +24,7 @@ if [[ $EMACS_BIN = "" ]]; then
 fi
 
 # This have to be defined after sourcing profile and bashrc
-# set -euf -o pipefail
-set -e
-set -u
-
-# # EMACS_BIN="$HOME/.bin/run-emacs-30"
-# EMACS_BIN="$HOME/.bin/run-emacs-master"
-# EMACS_BIN="$HOME/.bin/run-emacs-straight"
-# EMACS_BIN="$HOME/.bin/run-emacs-elpaca"
+set -euf -o pipefail
 
 is_wayland() {
   [[ $XDG_SESSION_TYPE = wayland ]] || return 1
@@ -46,8 +39,6 @@ has_run_or_raise() {
 }
 
 bg_run() {
-  # nohup
-  # --chdir "$HOME" <- breaks ./apps in a different directory
   "$@" &
   disown
 }
@@ -99,7 +90,7 @@ start-or-raise-emacs() {
 # TODO should this be added back
 # cleanup-emacs() {
 #     if [[ -d ~/.emacs.d/eln-cache/ ]]; then
-#         rm -fr ~/.emacs.d/eln-cache/
+#         rm -fr ~/.emacs.d/eln-cache/ &
 #     fi
 #
 #     if [[ -d ~/.emacs.d/elpa/ ]]; then
@@ -109,7 +100,9 @@ start-or-raise-emacs() {
 # }
 
 main() {
+  # TODO
   # cleanup-emacs
+
   # Check if Emacs server is running
   cd
   start-or-raise-emacs
