@@ -584,6 +584,7 @@ invoking the original function ORIG-FUN with ARGS."
 ;;; Bash
 
 (setq sh-basic-offset 2)
+
 (defun setup-sh-mode ()
   "Setup `sh-mode'."
   (display-fill-column-indicator-mode)
@@ -618,13 +619,6 @@ invoking the original function ORIG-FUN with ARGS."
         (setf (alist-get lang org-src-lang-modes nil nil #'equal)
               'bash-ts)))))
 
-;; use-package sh-mode
-;; :ensure nil
-;; :commands shell-script-mode
-;; :mode (("\\.sh\\'" . shell-script-mode)
-;;        ("\\.bash\\'" . shell-script-mode)
-;;        ("\\.pbs\\'" . shell-script-mode))
-;; :custom
 (with-eval-after-load 'sh-script
   (when (fboundp 'sh-indent-supported)
     (sh-indent-supported (append sh-indent-supported '((bash . sh))))))
@@ -665,15 +659,8 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; Python
 
-(defun setup-python-mode ()
-  "Setup `python-mode'."
-  (display-fill-column-indicator-mode)
-  (my-set-tab-width 4)
-  (setq-local fill-column 79))
-
-(when (fboundp 'setup-python-mode)
-  (add-hook 'python-mode-hook #'setup-python-mode)
-  (add-hook 'python-ts-mode-hook #'setup-python-mode))
+(add-hook 'python-mode-hook #'display-fill-column-indicator-mode)
+(add-hook 'python-ts-mode-hook #'display-fill-column-indicator-mode)
 
 ;;; jinja2-mode and csv-mode
 
