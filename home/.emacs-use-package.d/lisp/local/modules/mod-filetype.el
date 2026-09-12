@@ -82,11 +82,11 @@ or fallback to `sh'."
 ;; Enable native Tree-sitter mode redirection globally for Emacs 31+
 ;; We use `setopt' instead of `setq' because this variable
 ;; requires its custom `:set' function to execute the actual remaps.
-;; (with-eval-after-load 'treesit
-;;   (when (>= emacs-major-version 31)
-;;     (if (fboundp 'setopt)
-;;         (setopt treesit-enabled-modes t)
-;;       (customize-set-variable 'treesit-enabled-modes t))))
+(with-eval-after-load 'treesit
+  (when (>= emacs-major-version 31)
+    (if (fboundp 'setopt)
+        (setopt treesit-enabled-modes t)
+      (customize-set-variable 'treesit-enabled-modes t))))
 
 ;; (with-eval-after-load 'markdown-ts-mode-maybe
 ;;   (defun markdown-ts-mode-maybe ()
@@ -110,7 +110,8 @@ or fallback to `sh'."
 
 (defun my-remap-ts-mode (base-mode ts-mode lang)
   "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
-  (when (and (< emacs-major-version 31)
+  (when (and (not (bound-and-true-p treesit-enabled-modes))
+             (< emacs-major-version 31)
              (mod-filetype--ts-lang-available-p lang))
     (push (cons base-mode ts-mode) major-mode-remap-alist)))
 
@@ -769,6 +770,9 @@ This function modifies `electric-pair-pairs' buffer-locally."
 (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
 
+(add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
+(add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)
+
 (setq markdown-nested-imenu-heading-index nil)
 
 ;; Uncomment this if you use Roam, Obsidian, or Logseq, as it enables proper
@@ -849,39 +853,45 @@ This function modifies `electric-pair-pairs' buffer-locally."
 
 ;;; Deferred Fallbacks Loader
 
+;;; Deferred Fallbacks Loader
+
 (defun my-load-treesit-fallbacks ()
   "Initialize tree-sitter mode remaps and fallbacks after UI is drawn."
-  (my-remap-ts-mode 'c-mode 'c-ts-mode 'c)
-  (my-remap-ts-mode 'c++-mode 'c++-ts-mode 'cpp)
-  (my-remap-ts-mode 'js-json-mode 'json-ts-mode 'json)
-  (my-remap-ts-mode 'conf-toml-mode 'toml-ts-mode 'toml)
+  (when (and (not (bound-and-true-p treesit-enabled-modes))
+             (< emacs-major-version 31))
+    (my-remap-ts-mode 'c-mode 'c-ts-mode 'c)
+    (my-remap-ts-mode 'c++-mode 'c++-ts-mode 'cpp)
+    (my-remap-ts-mode 'js-json-mode 'json-ts-mode 'json)
+    (my-remap-ts-mode 'conf-toml-mode 'toml-ts-mode 'toml)
+    (my-remap-ts-mode 'css-mode 'css-ts-mode 'css)
+    (my-remap-ts-mode 'shell-script-mode 'bash-ts-mode 'bash)
+    (my-remap-ts-mode 'sh-mode 'bash-ts-mode 'bash)
+    (my-remap-ts-mode 'js2-mode 'js-ts-mode 'javascript)
+    (my-remap-ts-mode 'js-mode 'js-ts-mode 'javascript)
+    (my-remap-ts-mode 'python-mode 'python-ts-mode 'python)
+    )
 
   (if (my-treesit-language-available-p 'php)
       (progn
         (my-remap-ts-mode 'php-mode 'php-ts-mode 'php)
-        (my-auto-mode-ts "\\.[pP][hH][pP]\\'" 'php-ts-mode 'php-mode 'php)
-        (my-auto-mode-ts "\\.[pP][hH][pP]3\\'" 'php-ts-mode 'php-mode 'php))
-    (require 'sub-php-mode))
+        ;; (my-auto-mode-ts "\\.[pP][hH][pP]\\'" 'php-ts-mode 'php-mode 'php)
+        ;; (my-auto-mode-ts "\\.[pP][hH][pP]3\\'" 'php-ts-mode 'php-mode 'php)
+        )
+    ;; Added nil t to prevent fatal file-missing errors
+    (require 'sub-php-mode nil t))
 
-  (my-remap-ts-mode 'shell-script-mode 'bash-ts-mode 'bash)
-  (my-remap-ts-mode 'sh-mode 'bash-ts-mode 'bash)
   (my-auto-mode-ts "/make\\.conf\\'" 'bash-ts-mode 'sh-mode 'bash)
-
-  (my-remap-ts-mode 'css-mode 'css-ts-mode 'css)
-
-  (my-remap-ts-mode 'js2-mode 'js-ts-mode 'javascript)
-  (my-remap-ts-mode 'js-mode 'js-ts-mode 'javascript)
   (my-auto-mode-ts "\\.[jJ][sS]\\'" 'js-ts-mode 'js-mode 'javascript)
   (my-auto-mode-ts "/\\.ipynb\\'" 'json-ts-mode 'js-json-mode 'json)
+  (my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+  (my-auto-mode-ts "/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+  (my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
 
   (if (my-treesit-language-available-p 'lua)
       (progn
         (my-auto-mode-ts "\\.[lL][uU][aA]\\'" 'lua-ts-mode nil 'lua))
-    (require 'sub-lua-mode))
-
-  (my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR]\\'" 'dockerfile-ts-mode nil 'dockerfile)
-  (my-auto-mode-ts "/[Cc][Oo][Nn][Tt][Aa][Ii][Nn][Rr][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
-  (my-auto-mode-ts "/[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE]\\'" 'dockerfile-ts-mode nil 'dockerfile)
+    ;; Added nil t to prevent fatal file-missing errors
+    (require 'sub-lua-mode nil t))
 
   (if (my-treesit-language-available-p 'html)
       (progn
@@ -896,14 +906,12 @@ This function modifies `electric-pair-pairs' buffer-locally."
       (html-mode . sgml-electric-tag-pair-mode)
       (mhtml-mode . sgml-electric-tag-pair-mode)
       (html-mode . sgml-name-8bit-mode)
-      (mhtml-mode . sgml-name-8bit-mode)))
+      (mhtml-mode . sgml-name-8bit-mode))))
 
-  (my-remap-ts-mode 'python-mode 'python-ts-mode 'python)
-
-  (when (and (> emacs-major-version 30)
-             (my-treesit-language-available-p 'markdown))
-    (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
-    (add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)))
+;; Execute immediately if Emacs is already initialized, otherwise use the hook
+(if after-init-time
+    (my-load-treesit-fallbacks)
+  (add-hook 'after-init-hook #'my-load-treesit-fallbacks))
 
 (add-hook 'after-init-hook #'my-load-treesit-fallbacks)
 
