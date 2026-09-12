@@ -911,7 +911,7 @@ subsequent GCC invocations."
 
                            le-corfu
                            le-nerd-icons-corfu
-                           le-nerd-icons-dired
+                           ;; le-nerd-icons-dired
                            le-corfu-popupinfo
                            ;; mod-company
 
