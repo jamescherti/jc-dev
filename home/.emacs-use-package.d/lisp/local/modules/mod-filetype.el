@@ -79,14 +79,10 @@ or fallback to `sh'."
 
 ;;; Tree-sitter Fallback Helpers
 
-;; Enable native Tree-sitter mode redirection globally for Emacs 31+
-;; We use `setopt' instead of `setq' because this variable
-;; requires its custom `:set' function to execute the actual remaps.
-(with-eval-after-load 'treesit
-  (when (>= emacs-major-version 31)
-    (if (fboundp 'setopt)
-        (setopt treesit-enabled-modes t)
-      (customize-set-variable 'treesit-enabled-modes t))))
+;; Enable tree-sitter based major modes globally for Emacs 31+
+(when (>= emacs-major-version 31)
+  (with-eval-after-load 'treesit
+    (setopt treesit-enabled-modes t)))
 
 ;; (with-eval-after-load 'markdown-ts-mode-maybe
 ;;   (defun markdown-ts-mode-maybe ()
@@ -109,7 +105,11 @@ or fallback to `sh'."
         available))))
 
 (defun my-remap-ts-mode (base-mode ts-mode lang)
-  "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available."
+  "Remap BASE-MODE to TS-MODE if Tree-sitter LANG is available.
+
+BASE-MODE is the major mode to remap from.
+TS-MODE is the tree-sitter major mode to remap to.
+LANG is the tree-sitter language symbol to check for availability."
   (when (and (not (bound-and-true-p treesit-enabled-modes))
              (< emacs-major-version 31)
              (mod-filetype--ts-lang-available-p lang))
@@ -757,6 +757,9 @@ invoking the original function ORIG-FUN with ARGS."
   (let ((inhibit-message t))
     (toggle-truncate-lines 0)))
 
+(add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
+(add-hook 'markdown-ts-mode-hook 'my-setup-markdown-mode)
+
 ;;; Setup markdown mode
 
 (defun my-markdown-electric-pairs ()
@@ -767,11 +770,9 @@ This function modifies `electric-pair-pairs' buffer-locally."
 (add-hook 'markdown-mode-hook #'my-markdown-electric-pairs)
 (add-hook 'markdown-ts-mode-hook #'my-markdown-electric-pairs)
 
-(add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (push '("\\.md\\.asc\\'" . markdown-mode) auto-mode-alist)
 
 (add-hook 'markdown-ts-mode-hook 'outline-minor-mode)
-(add-hook 'markdown-ts-mode-hook #'my-setup-markdown-mode)
 
 (setq markdown-nested-imenu-heading-index nil)
 
