@@ -621,16 +621,17 @@ invoking the original function ORIG-FUN with ARGS."
 (defun setup-sh-mode ()
   "Setup `sh-mode'."
   (display-fill-column-indicator-mode)
-  (unless (string-suffix-p ".ebuild" (buffer-file-name (buffer-base-buffer)))
-    (my-set-tab-width sh-basic-offset)
-    (setq-local fill-column 80)))
+  (let ((file-name (buffer-file-name (buffer-base-buffer))))
+    (unless (and file-name (string-suffix-p ".ebuild" file-name))
+      (my-set-tab-width sh-basic-offset)
+      (setq-local fill-column 80))))
 
 (add-hook 'sh-mode-hook #'setup-sh-mode)
 (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
 
 (with-eval-after-load 'sh-script
-  (when (fboundp 'sh-indent-supported)
-    (sh-indent-supported (append sh-indent-supported '((bash . sh))))))
+  (when (boundp 'sh-indent-supported)
+    (setq sh-indent-supported (append sh-indent-supported '((bash . sh))))))
 
 ;;; css
 
