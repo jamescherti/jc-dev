@@ -568,24 +568,13 @@ only if they are not already available."
 (add-hook 'yaml-ts-mode-hook #'my-ansible-detect-and-enable-ansible-mode)
 (add-hook 'yaml-mode-hook #'my-ansible-detect-and-enable-ansible-mode)
 
-;;; Yaml-ts-mode: tab-width
-
-;; (defun my-setup-yaml-mode ()
-;;   "Config Yaml mode."
-;;   ;; This patch has been merged in Emacs 32
-;;   (when (< emacs-major-version 32)
-;;     (setq-local tab-width 2)))
-;;
-;; (add-hook 'yaml-ts-mode-hook #'my-setup-yaml-mode)
-
 ;;; Ansible: ansible-doc
 
 (lightemacs-use-package ansible-doc
   :commands ansible-doc
-  :init
-  ;; (add-to-list 'display-buffer-alist '("\\*ansible-doc"
-  ;;                                      (display-buffer-same-window)))
-  (push '("\\*ansible-doc" (display-buffer-same-window)) display-buffer-alist))
+  ;; :init
+  ;; (push '("\\*ansible-doc" (display-buffer-same-window)) display-buffer-alist)
+  )
 
 
 (progn
