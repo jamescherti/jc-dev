@@ -115,9 +115,14 @@ or fallback to `sh'."
     (push (cons base-mode ts-mode) major-mode-remap-alist)))
 
 (defun my-auto-mode-ts (regex ts-mode fallback-mode lang)
-  "Map REGEX to TS-MODE if Tree-sitter LANG is available, else use FALLBACK-MODE."
+  "Map REGEX to TS-MODE if Tree-sitter LANG is available, or use FALLBACK-MODE.
+REGEX is a string representing the regular expression to match file names.
+TS-MODE is the tree-sitter major mode symbol.
+FALLBACK-MODE is the traditional major mode symbol to use if tree-sitter is
+unavailable.
+LANG is the tree-sitter language symbol to check for availability."
   (if (mod-filetype--ts-lang-available-p lang)
-      (if (and fallback-mode treesit-enabled-modes)
+      (if (and fallback-mode (bound-and-true-p treesit-enabled-modes))
           (push (cons regex fallback-mode) auto-mode-alist)
         (push (cons regex ts-mode) auto-mode-alist))
     (when fallback-mode
