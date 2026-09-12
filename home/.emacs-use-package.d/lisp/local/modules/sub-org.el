@@ -675,14 +675,6 @@ at the same level."
 (unless noninteractive
   (define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit))
 
-;; (with-eval-after-load 'org-src
-;;   (add-to-list 'org-src-lang-modes '("md" . markdown)))
-
-;; (setq org-src-lang-modes '(("python" . python)
-;;                            ("sh" . sh)
-;;                            ("bash" . sh)
-;;                            ("elisp" . emacs-lisp)))
-
 ;; Enforce zero indentation for code within Org source blocks. This prevents Org
 ;; mode from adding artificial leading spaces, ensuring that code copied
 ;; directly from the file remains correctly aligned and syntactically valid.

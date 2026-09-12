@@ -32,6 +32,51 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 
+;;; org-src automation
+
+;; TODO article
+(defun mod-filetype-automate-org-src (mappings shell-langs)
+  "Automate tree-sitter mappings for `org-src-lang-modes'.
+
+MAPPINGS is a list of lists, where each inner list contains three
+elements: the Org language string, the Tree-sitter mode symbol, and
+the Tree-sitter language symbol to check for availability.
+
+SHELL-LANGS is a list of strings representing shell-related block
+names that should map to `bash-ts' (if bash tree-sitter is available)
+or fallback to `sh'."
+  (with-eval-after-load 'org-src
+    (dolist (map mappings)
+      (let ((org-lang (nth 0 map))
+            (ts-mode (nth 1 map))
+            (ts-lang (nth 2 map)))
+        (setf (alist-get org-lang org-src-lang-modes nil nil #'equal)
+              (if (mod-filetype--ts-lang-available-p ts-lang)
+                  ts-mode
+                (intern org-lang)))))
+
+    (let ((sh-mode (if (mod-filetype--ts-lang-available-p 'bash)
+                       'bash-ts
+                     'sh)))
+      (dolist (lang shell-langs)
+        (setf (alist-get lang org-src-lang-modes nil nil #'equal) sh-mode)))))
+
+;; Execute the automation for all required languages
+(with-eval-after-load 'org-src
+  (mod-filetype-automate-org-src
+   '(("yaml"   yaml-ts   yaml)
+     ("python" python-ts python)
+     ("php"    php-ts    php)
+     ("js"     js-ts     javascript)
+     ("json"   json-ts   json)
+     ("css"    css-ts    css)
+     ("html"   html-ts   html)
+     ("c"      c-ts      c)
+     ("cpp"    c++-ts    cpp))
+   '("ash" "shell" "screen" "sh" "bash" "jsh" "bash2" "dash" "dtksh"
+     "ksh" "es" "rc" "itcsh" "tcsh" "jcsh" "csh" "ksh88" "oash"
+     "pdksh" "mksh" "posix" "wksh" "wsh" "zsh" "rpm")))
+
 ;;; Tree-sitter Fallback Helpers
 
 ;; Enable native Tree-sitter mode redirection globally for Emacs 31+
@@ -382,15 +427,6 @@ only if they are not already available."
 
 (defvar treesit-yaml-available (my-treesit-language-available-p 'yaml))
 
-;; Must be evaluated before Org is loaded
-(with-eval-after-load 'org
-  (if (and (fboundp 'treesit-language-available-p)
-           (treesit-language-available-p 'yaml))
-      (with-eval-after-load 'org
-        (add-to-list 'org-src-lang-modes '("yaml" . yaml-ts)))
-    (with-eval-after-load 'org
-      (add-to-list 'org-src-lang-modes '("yaml" . yaml)))))
-
 (with-suppressed-warnings ((free-vars flymake-yamllint-arguments)
                            (free-vars yaml-ts-mode-yamllint-options))
   (setq flymake-yamllint-arguments
@@ -594,30 +630,6 @@ invoking the original function ORIG-FUN with ARGS."
 
 (add-hook 'sh-mode-hook #'setup-sh-mode)
 (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
-
-(when (and (fboundp 'treesit-language-available-p)
-           (treesit-language-available-p 'bash))
-  (with-eval-after-load 'org-src
-    (let ((shell-langs '("ash" "shell" "screen"
-                         "sh" "bash" "jsh" "bash2" "dash" "dtksh"
-                         "ksh" "es" "rc" "itcsh" "tcsh" "jcsh"
-                         "csh" "ksh88" "oash" "pdksh" "mksh"
-                         "posix" "wksh" "wsh" "zsh" "rpm")))
-      (dolist (lang shell-langs)
-        (setf (alist-get lang org-src-lang-modes nil nil #'equal)
-              'bash-ts)))))
-
-(when (and (fboundp 'treesit-language-available-p)
-           (treesit-language-available-p 'bash))
-  (with-eval-after-load 'org-src
-    (let ((shell-langs '("ash" "shell" "screen"
-                         "sh" "bash" "jsh" "bash2" "dash" "dtksh"
-                         "ksh" "es" "rc" "itcsh" "tcsh" "jcsh"
-                         "csh" "ksh88" "oash" "pdksh" "mksh"
-                         "posix" "wksh" "wsh" "zsh" "rpm")))
-      (dolist (lang shell-langs)
-        (setf (alist-get lang org-src-lang-modes nil nil #'equal)
-              'bash-ts)))))
 
 (with-eval-after-load 'sh-script
   (when (fboundp 'sh-indent-supported)
@@ -850,14 +862,10 @@ This function modifies `electric-pair-pairs' buffer-locally."
 
   (if (my-treesit-language-available-p 'php)
       (progn
-        (with-eval-after-load 'org
-          (add-to-list 'org-src-lang-modes '("php" . php-ts)))
         (my-remap-ts-mode 'php-mode 'php-ts-mode 'php)
         (my-auto-mode-ts "\\.[pP][hH][pP]\\'" 'php-ts-mode 'php-mode 'php)
         (my-auto-mode-ts "\\.[pP][hH][pP]3\\'" 'php-ts-mode 'php-mode 'php))
-    (require 'sub-php-mode)
-    (with-eval-after-load 'org
-      (add-to-list 'org-src-lang-modes '("php" . php))))
+    (require 'sub-php-mode))
 
   (my-remap-ts-mode 'shell-script-mode 'bash-ts-mode 'bash)
   (my-remap-ts-mode 'sh-mode 'bash-ts-mode 'bash)
@@ -895,14 +903,6 @@ This function modifies `electric-pair-pairs' buffer-locally."
       (mhtml-mode . sgml-name-8bit-mode)))
 
   (my-remap-ts-mode 'python-mode 'python-ts-mode 'python)
-
-  (with-eval-after-load 'org
-    (if (and (fboundp 'treesit-language-available-p)
-             (treesit-language-available-p 'python))
-        (with-eval-after-load 'org
-          (add-to-list 'org-src-lang-modes '("python" . python-ts)))
-      (with-eval-after-load 'org
-        (add-to-list 'org-src-lang-modes '("python" . python)))))
 
   (when (and (> emacs-major-version 30)
              (my-treesit-language-available-p 'markdown))
