@@ -357,7 +357,9 @@ only if they are not already available."
           (funcall install-fn)
         (dolist (key keys)
           (unless (treesit-language-available-p key)
-            (treesit-install-language-grammar key)))))))
+            (treesit-install-language-grammar key))))
+      ;; Clear cache so newly installed grammars are recognized immediately
+      (setq mod-filetype--ts-lang-cache nil))))
 
 (defun my-treesit-update-language-grammar ()
   "Update language grammar."
