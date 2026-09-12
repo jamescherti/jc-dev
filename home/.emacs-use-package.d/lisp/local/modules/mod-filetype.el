@@ -629,10 +629,6 @@ invoking the original function ORIG-FUN with ARGS."
 (add-hook 'sh-mode-hook #'setup-sh-mode)
 (add-hook 'bash-ts-mode-hook #'setup-sh-mode)
 
-(with-eval-after-load 'sh-script
-  (when (boundp 'sh-indent-supported)
-    (setq sh-indent-supported (append sh-indent-supported '((bash . sh))))))
-
 ;;; css
 
 ;; (push '("\.[Cc][sS][sS]\\'" . css-ts-mode) auto-mode-alist)
