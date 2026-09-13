@@ -3487,6 +3487,8 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
                    electric-indent-local-mode
                    evil-surround-mode
                    display-line-numbers-mode
+                   display-fill-column-indicator-mode
+                   hl-line-mode
                    company-mode
                    corfu-mode
                    flymake-mode
