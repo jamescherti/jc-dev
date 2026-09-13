@@ -3482,13 +3482,14 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     ;; Disable modes
     (let ((inhibit-redisplay t)
           (inhibit-message t)
-          (modes '(evil-snipe-local-mode
-                   electric-pair-local-mode
+          (modes '(electric-pair-local-mode
                    electric-indent-local-mode
-                   evil-surround-mode
                    display-line-numbers-mode
                    display-fill-column-indicator-mode
                    hl-line-mode
+                   ;; Third-party packages
+                   evil-surround-mode
+                   evil-snipe-local-mode
                    company-mode
                    corfu-mode
                    flymake-mode
