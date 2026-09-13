@@ -173,7 +173,9 @@
 (setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
-      "-DCMAKE_C_FLAGS='-O3 -march=native -mtune=native' -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' -DUSE_SYSTEM_LIBVTERM=yes")
+      (concat "-DCMAKE_C_FLAGS='-O3 -march=native -mtune=native' "
+              "-DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' "
+              "-DUSE_SYSTEM_LIBVTERM=yes"))
 
 ;; `native-comp-compiler-options' specifies flags passed directly to the C
 ;; compiler (for example, GCC or Clang) when compiling the Lisp-to-C output
