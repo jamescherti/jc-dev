@@ -1,13 +1,15 @@
 (;;-----------------------------------------------------------------------------
  ;; Forks
  ;;-----------------------------------------------------------------------------
+ ;; RSS commits of maintained packages
+ ("evil" . "6a3e1ddd04ac504a016590940d0af2a3361b9efd") ; RSS COMMITS
+ ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37") ; RSS COMMITS
+
  ;; @jamescherti forks of maintained packages
  ("straight.el" . "ff4f9b1a658fef4edcaf44a0be0326f1e609dc9a")
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
  ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO add to RSS
- ("evil" . "3b678a221ee99cc6a95b01d7a3129ce5efc4c3da") ; TODO add to RSS
- ("evil-collection" . "162183159dde328336bf2c92cef66b4151df26cf") ; TODO add to RSS
- ("yasnippet" . "c1e6ff23e9af16b856c88dfaab9d3ad7b746ad37") ; TODO add to RSS
+ ("evil-collection" . "783c96b9901417cb8b6df63ab606387fa72dc922") ; 3.0.3 add to RSS
  ("embark" . "79531fc6aab311acf6874679082f336de4a91789") ; 1.2 | RSS RELEASE
  ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
  ("apheleia" . "d97806bf2b5b72f1e3df01e9a045a4d242906b65") ; v4.6.0 | RSS RELEASE
@@ -15,19 +17,19 @@
  ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
  ("ef-themes" . "e1f617607a5f0692b398365dcd8412ba1e98ccb3") ; 2.2.1 | RSS RELEASE
  ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
- ("vertico" . "493ac505168006b008b0504366614ee17c63d844")  ; 2.12 | RSS RELEASE
- ("corfu" . "4303506204bdf5df8f5e7d1457f6fca465a4da8e") ; 2.15 | RSS RELEASE
+ ("vertico" . "a9998a777f1d92348f84d091bb15b87df933a7a2")  ; 2.15 | RSS RELEASE
+ ("corfu" . "b468efac023dda39332acc943edc9895c80b5a6f") ; 2.16 | RSS RELEASE
  ("cape" . "f0135abaf95a22b9fb2c951751a5d0733ce61bbd") ; 2.8 | RSS RELEASE
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
  ("gptel" . "2b02618b2eba819b996eca7f71bf4dd4b91eb532") ; v0.9.9.6 | RSS RELEASE
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("indent-bars" . "36620c5f3fba2ba8f23d7ef947e0d1d09e412bf5") ; 1.0.1 | RSS RELEASE
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
- ("consult" . "788735b54e5ad9d33137613aebae055443e3e05e") ; 3.8 | RSS RELEASE
+ ("consult" . "b7558f65374b733b749147b2c299b93d7b939483") ; 3.9 | RSS RELEASE
  ("marginalia" . "7ec0b70afb43a756ecd45a958c6ebe797717fc91") ; 2.11 | RSS RELEASE
  ("markdown-mode" . "76cb4ffecfdf95ee769e5cb4608e04202c3c1521") ; newer than v2.8 | RSS RELEASE
  ("org" . "80c431fe0c59bb6b6c4d05ad2d4d279f34b5fcd5") ; release_9.8.10 | RSS RELEASE
- ("compat" . "df03e91f1fc47503ca71e11dd507ed18ca8b5ab0") ; Version 31.0.0.2 | RSS RELEASE
+ ("compat" . "90880f81419577e1d3f68424d2a3adf31e6d663e") ; Version 31.1.0.0 | RSS RELEASE
  ("cond-let" . "3b88187fe067d4ca3dec3ef8a329b0ce18bdb356")
  ("transient" . "0cacc84ff0c7df126e194666ff8b8a1e6082e796")
 
