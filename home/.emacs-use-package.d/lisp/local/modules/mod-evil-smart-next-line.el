@@ -197,18 +197,18 @@ truncated."
        ((eq line-number-type 'visual)
         (funcall func-change-line-visual count))
 
-       ((eq line-number-type 'relative)
-        (if (and truncate-lines
-                 (= count 1))
+       ;; TODO absolute doesn't work when count > 1
+       ((or (eq line-number-type 'relative)
+            (eq line-number-type t))
+        (if (= count 1)
+            (funcall func-change-line-visual count)
+          ;; Do not ignore invisible lines because relative line numbers are
+          ;; based on their actual position relative to the current line,
+          ;; including invisible lines.
+          (let ((line-move-ignore-invisible nil))
             ;; This speeds-up scrolling because it does not take into
             ;; consideration visual things
-            (progn
-              (funcall func-change-line count))
-          (funcall func-change-line-visual count)))
-
-       ((eq line-number-type t)
-        ;; TODO doesn't work when count > 1
-        (funcall func-change-line count))
+            (funcall func-change-line count))))
 
        (t
         (message
