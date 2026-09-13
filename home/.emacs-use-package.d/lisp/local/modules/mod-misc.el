@@ -3381,13 +3381,6 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;; (setq eat-shell "/usr/bin/env bash")
 
-;; Disable shell prompt status annotations in the window margin. Prevents Eat
-;; from displaying exit code indicators (such as the default "0" or "X") beside
-;; prompts, avoiding margin misalignment on multi-line prompts, visual clutter,
-;; and the performance overhead of managing buffer overlays and correction
-;; timers.
-(setq eat-enable-shell-prompt-annotation nil)
-
 ;; Use standard 'xterm-256color' instead of Eat's default 'eat-truecolor'. By
 ;; default, Eat advertises custom TERM names ('eat-truecolor', 'eat-256color')
 ;; which fail with "cannot initialize terminal type" errors if `eat.ti' has not
@@ -3421,8 +3414,7 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 ;; to the maximum allowed (100000) unless absolutely necessary, as it will
 ;; heavily degrade speed over time.
 ;; (setq vterm-max-scrollback 1000)
-(setq vterm-max-scrollback 0
-      vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y")
+(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y")
       ;; vterm-disable-inverse-video t
       )
 
@@ -3444,10 +3436,36 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 (setq vterm-ignore-blink-cursor t)
 
 (with-eval-after-load 'le-vterm
-  (setq vterm-timer-delay 0.02))
-(setq ghostel-timer-delay 0.02)
+  (setq vterm-timer-delay 0.01))
+(setq ghostel-timer-delay 0.01)
 
-(setq ghostel-max-scrollback (* 1 1024 1024)) ;; Reduce to 1MB
+;; Tune redraw latency for heavy throughput. During massive output bursts,
+;; increasing maximum latency slightly allows Eat to batch more data before
+;; triggering an expensive Elisp redraw pass.
+(setq eat-minimum-latency 0.01)
+(setq eat-maximum-latency 0.05)
+
+(setq vterm-max-scrollback 1000)
+(setq ghostel-max-scrollback (* 1024 1024)) ;; Reduce to 1MB
+(setq eat-term-scrollback-size (* 1024 1024)) ;;  Reduce to 1MB
+
+;; Disable shell prompt status annotations in the window margin. Prevents Eat
+;; from displaying exit code indicators (such as the default "0" or "X") beside
+;; prompts, avoiding margin misalignment on multi-line prompts, visual clutter,
+;; and the performance overhead of managing buffer overlays and correction
+;; timers.
+(setq eat-enable-shell-prompt-annotation nil)
+
+;; If you do not view images in the terminal, disable Sixel rendering.
+;; Generating SVGs, XPMs, or text properties in Elisp for image data consumes
+;; heavy CPU.
+(setq eat-sixel-render-formats '(none))
+
+;; Prevent Emacs from aggressively resizing the terminal window when
+;; minibuffers (like M-x or consult) open and close. This stops TUIs from
+;; redrawing/flickering twice every time you use a minibuffer command.
+(setq window-adjust-process-window-size-function
+      #'window-adjust-process-window-size-smallest)
 
 (defun my-speed-up-terminal-buffer ()
   "Reduce unnecessary Emacs features in terminal buffers."
@@ -3461,11 +3479,17 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     (setq-local scroll-margin 0)
     (setq-local scroll-step 0)
     (setq-local hscroll-step 0)
+    (setq-local auto-hscroll-mode nil)
 
     (setq-local truncate-lines t)
     (setq-local nobreak-char-display nil)
     (setq-local bidi-paragraph-direction 'left-to-right)
     (setq-local bidi-inhibit-bpa t)
+
+    (setq-local process-adaptive-read-buffering nil)
+    (let ((output-max (* 1024 1024)))
+      (when (< read-process-output-max output-max)
+        (setq-local read-process-output-max output-max)))
 
     (buffer-disable-undo)
     (setq-local echo-keystrokes 0)
@@ -3495,11 +3519,12 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
                    flymake-mode
                    flycheck-mode
                    show-paren-local-mode)))
-      ;; Ghostel registers a function in eldoc-documentation-functions to
-      ;; display target URLs and file under point.
+      ;; ghostel-comint, ghostel-compile, and ghostel-links register a function
+      ;; in eldoc-documentation-functions to display target URLs and file under
+      ;; point.
       ;;
-      ;; Disabling auto-composition-mode this breaks multi-codepoint grapheme
-      ;; clusters and emojis on graphical frames.
+      ;; Ghostel uses auto-composition-mode in the sync tty composition
+      ;; function.
       (unless ghostel-buffer
         (push 'eldoc-mode modes)
         (push 'auto-composition-mode modes))
