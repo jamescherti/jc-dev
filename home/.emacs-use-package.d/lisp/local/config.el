@@ -1953,6 +1953,12 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 
 ;;; evil
 
+;; Bug eshell? TODO
+;; https://github.com/emacs-evil/evil-collection/issues/905
+(setq evil-collection-binding-overrides
+      '((repl-submit  :state insert)
+        (repl-newline :state normal)))
+
 (setq-default evil-surround-pairs-alist
               '((?\( . ("(" . ")"))
                 (?\[ . ("[" . "]"))

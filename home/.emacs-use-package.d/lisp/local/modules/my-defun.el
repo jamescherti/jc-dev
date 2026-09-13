@@ -462,16 +462,17 @@ CWD is the current working directory."
   "Open the current file or directory in a new tab."
   (interactive)
   ;; (tab-bar-duplicate-tab)
-  (let ((buffer-list (window-prev-buffers nil))
-        (buffer (current-buffer))
-        (point (point))
-        (window-start (window-start)))
-    (tab-bar-new-tab)
-    (set-window-buffer nil buffer)
-    (set-window-prev-buffers nil buffer-list)
-    (with-current-buffer buffer
-      (goto-char point)
-      (set-window-start nil window-start t))))
+  (let ((inhibit-redisplay t))
+    (let ((buffer-list (window-prev-buffers nil))
+          (buffer (current-buffer))
+          (point (point))
+          (window-start (window-start)))
+      (tab-bar-new-tab)
+      (set-window-buffer nil buffer)
+      (set-window-prev-buffers nil buffer-list)
+      (with-current-buffer buffer
+        (goto-char point)
+        (set-window-start nil window-start t)))))
 
 ;;; Text editing buffers: Exclude
 

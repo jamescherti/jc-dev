@@ -229,39 +229,40 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 
 ;;; Scroll
 
-(setq redisplay-skip-fontification-on-input t
+(setq
+ ;; redisplay-skip-fontification-on-input nil
 
-      ;; Here is exactly how (setq scroll-conservatively 9) works:
-      ;;
-      ;; Small jumps (<= 9 lines off-screen): Emacs scrolls the window just
-      ;; enough to bring the cursor back into view.
-      ;;
-      ;; Large jumps (> 9 lines off-screen): Emacs gives up on scrolling and
-      ;; recenters the window.
-      ;; scroll-conservatively 8
+ ;; Here is exactly how (setq scroll-conservatively 9) works:
+ ;;
+ ;; Small jumps (<= 9 lines off-screen): Emacs scrolls the window just
+ ;; enough to bring the cursor back into view.
+ ;;
+ ;; Large jumps (> 9 lines off-screen): Emacs gives up on scrolling and
+ ;; recenters the window.
+ ;; scroll-conservatively 8
 
-      ;; Setting scroll-conservatively to most-positive-fixnum: By default, when
-      ;; your cursor moves off the screen, Emacs recenters the window so the
-      ;; cursor is in the middle. This causes a sudden visual jump that makes it
-      ;; easy to lose your place in the file. Setting scroll-conservatively to a
-      ;; value greater than 100 (like 10000) disables this recentering
-      ;; completely. Instead, Emacs will only scroll the window by the exact
-      ;; number of lines needed to bring the cursor back into view.
-      ;;
-      ;; Setting scroll-step to 1: This variable tells Emacs to scroll by
-      ;; exactly one line at a time when the cursor moves off-screen.
-      scroll-conservatively most-positive-fixnum
+ ;; Setting scroll-conservatively to most-positive-fixnum: By default, when
+ ;; your cursor moves off the screen, Emacs recenters the window so the
+ ;; cursor is in the middle. This causes a sudden visual jump that makes it
+ ;; easy to lose your place in the file. Setting scroll-conservatively to a
+ ;; value greater than 100 (like 10000) disables this recentering
+ ;; completely. Instead, Emacs will only scroll the window by the exact
+ ;; number of lines needed to bring the cursor back into view.
+ ;;
+ ;; Setting scroll-step to 1: This variable tells Emacs to scroll by
+ ;; exactly one line at a time when the cursor moves off-screen.
+ scroll-conservatively most-positive-fixnum
 
-      ;; In modern Emacs, if using scroll-conservatively, scroll-step is
-      ;; completely redundant. Setting scroll-step 1 is a legacy holdover from
-      ;; older versions of Emacs before scroll-conservatively was fully
-      ;; implemented. You can safely delete scroll-step 1 from your
-      ;; configuration entirely.
-      ;; scroll-step 10
+ ;; In modern Emacs, if using scroll-conservatively, scroll-step is
+ ;; completely redundant. Setting scroll-step 1 is a legacy holdover from
+ ;; older versions of Emacs before scroll-conservatively was fully
+ ;; implemented. You can safely delete scroll-step 1 from your
+ ;; configuration entirely.
+ ;; scroll-step 10
 
-      next-screen-context-lines 0
-      ;; fast-but-imprecise-scrolling nil
-      )
+ next-screen-context-lines 0
+ ;; fast-but-imprecise-scrolling nil
+ )
 
 ;; Disable the optimization locally for dired to guarantee directory
 ;; fontification
@@ -306,10 +307,6 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 ;; images. Set the following variables to prevent that:
 ;; (setq scroll-up-aggressively 0.0
 ;;       scroll-down-aggressively 0.0)
-(setq-default
- ;; scroll-up-aggressively 0.01
- ;; scroll-down-aggressively 0.01
- comint-scroll-to-bottom-on-input t)
 
 (setq
  ;; Prevents isearch from stubbornly freezing at the end of a buffer match before
@@ -341,12 +338,6 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 ;; 100% visible because there is always a buffer line below it.
 ;; (setq scroll-margin 1)
 
-;; (setq compilation-scroll-output nil)
-
-;; (setq-default comint-scroll-to-bottom-on-output nil)
-
-;; (setq-default comint-scroll-to-bottom-on-input t)
-;; (setq-default comint-scroll-to-bottom-on-output nil)
 
 ;; Apply the following settings if you also want scrolling with an ordinary
 ;; mouse to be almost as smooth as scrolling with a touchpad, on systems other
@@ -687,10 +678,15 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-(setq auto-revert-avoid-polling t)
+;; Fix bug caused by double buffering in daemon mode
+;; TODO patch?
+(when (daemonp)
+  (add-to-list 'default-frame-alist '(inhibit-double-buffering . t)))
 
-;; TODO minimal emacs?
-(setq-default cursor-in-non-selected-windows nil)
+;; Whether to use the toolkit to display tooltips.
+(setq x-gtk-use-system-tooltips nil)
+
+(setq auto-revert-avoid-polling t)
 
 ;; TODO: recently removed
 ;; dired-dwim-target t  ; Propose a target for intelligent moving/copying
@@ -734,15 +730,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (with-eval-after-load 'recentf
   (add-to-list 'recentf-filename-handlers #'substring-no-properties -80))
 
-;; If you spend any time on a Windows machine, the default file I/O layer is
-;; punishing. Turning off true file attributes and boosting the pipe buffer size
-;; dramatically increases responsiveness for sub-processes like Git, compilers,
-;; and LSPs.
-(when IS-WINDOWS
-  (setq w32-get-true-file-attributes nil
-        w32-pipe-read-delay 0
-        w32-pipe-buffer-size (* 64 1024)))
-
 ;; The benefit of visual-order-cursor-movement t is that when editing text
 ;; containing both left-to-right and right-to-left scripts, cursor
 ;; movement aligns with how the text is visually presented on the screen.
@@ -771,7 +758,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
  ;; Automatically enable ANSI color support in compilation buffers
  ;; by parsing and applying ANSI escape sequences during output filtering.
- ansi-color-for-compilation-mode t
+ ;; TODO compare with the minimal-emacs hook
+ ;; ansi-color-for-compilation-mode t
 
  ;; This variable specifies a function for splitting a window, in order
  ;; to make a new window for displaying a buffer. It is used by the
@@ -781,7 +769,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; display the desired buffer) or nil (which means the splitting
  ;; failed). The default value is split-window-sensibly, which is
  ;; documented next.
- split-window-preferred-function nil
+ ;; split-window-preferred-function nil
+
  electric-quote-comment nil
  electric-quote-string nil
  diff-add-log-use-relative-names t
@@ -802,15 +791,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;
 ;;   ;; Set the truncated line indicator to a Unicode rightwards arrow (→).
 ;;   (set-display-table-slot standard-display-table 'truncation ?\u2192))
-
-;; Alternatively, explicitly add the ANSI color filter to the compilation filter hook
-;; to apply colors immediately during compilation output processing.
-;; This is equivalent to the above `setq`, but does not depend on `compilation-mode` being loaded.
-;; (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
-
-;; (setq compilation-context-lines 10)  ; not good
-;; (setq compilation-skip-threshold 2)
-;; (setq compilation-window-height 100)
 
 ;; TODO minimal-emacs?
 ;; (setq bookmark-watch-bookmark-file 'silent)
@@ -853,17 +833,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Auto-scroll to bottom only when you type, not when output arrives
 
-;; Expands history commands like !! or !$ before execution
-(setq-default comint-input-autoexpand 'input)
-
 (setq
- ;; Prevent duplicates in your shell history
- comint-input-ignoredups t
-
  ;; Leaves the cursor at the end of the newly duplicated text block.
  ;; both are Emacs 29
- duplicate-line-final-position -1
- duplicate-region-final-position -1
+ ;; duplicate-line-final-position -1
+ ;; duplicate-region-final-position -1
 
  ;; NOTE disabled recently
  ;;
@@ -988,11 +962,50 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; Disabled defaults
 
-;; Truncate the compilation buffer to avoid excessive memory use by limiting its
-;; size. It removes lines from the beginning of the buffer when it exceeds
-;; `comint-buffer-maximum-size'.
-(autoload 'comint-truncate-buffer "comint" nil t)
-(add-hook 'compilation-filter-hook #'comint-truncate-buffer)
+;; Truncate the compilation buffer to avoid excessive memory use by limiting
+;; its size.
+;; TODO minimal emacs.d
+
+(add-to-list 'compilation-environment "TERM=xterm-256color")
+(setq compilation-skip-visited t)
+(setq compilation-window-height 12)
+(with-eval-after-load 'savehist
+  (add-to-list 'savehist-additional-variables 'compile-history))
+
+(unless noninteractive
+  ;; Explicitly tell Emacs to split the window at the bottom for compilation
+  (add-to-list 'display-buffer-alist
+               '("^\\*compilation\\*$"
+                 (display-buffer-in-direction)
+                 (direction . bottom)
+                 (window-height . 0.2))))
+
+(setq compile-command "pathaction -t install .")
+
+(setq comint-input-ring-size 600)
+
+;; Expands history commands like !! or !$ before execution
+(setq-default comint-input-autoexpand 'input)
+
+;; Prevent duplicates in your shell history
+(setq comint-input-ignoredups t)
+
+;; init.el sets (setq comint-buffer-maximum-size 4096), but it does not actually
+;; enable the truncation mechanism. If your terminal buffer is based on comint
+;; (like M-x shell), an infinitely growing buffer will eventually freeze the
+;; editor. Add this conditional logic to the bottom of your function:
+
+;; `init.el` sets a maximum comint buffer size, but the truncation hook must
+;; be explicitly added to enforce it.
+;; Performance benefit: Prevents the buffer from growing infinitely. Keeping
+;; the line count strictly below 4096 ensures the display engine and garbage
+;; collector never have to parse massive, monolithic blocks of terminal history.
+;; TODO
+;; (when (derived-mode-p 'comint-mode)
+;;   (add-hook 'comint-output-filter-functions #'comint-truncate-buffer nil t))
+
+;; (autoload 'comint-truncate-buffer "comint" nil t)
+;; (add-hook 'compilation-filter-hook 'comint-truncate-buffer)
 
 ;; (setq comint-completion-autolist t)
 ;; (setq comint-input-ignoredups t)
@@ -1002,9 +1015,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; prompt strictly to files belonging to the current project root.
 ;; TODO
 ;; (setq save-some-buffers-default-predicate #'save-some-buffers-root)
-
-;; Show unprettified symbol under cursor (when in `prettify-symbols-mode')
-(setq prettify-symbols-unprettify-at-point 'right-edge)
 
 ;; (setq completions-sort (if (>= emacs-major-version 30) 'historical 'alphabetical))
 ;; (setq completions-sort nil)
@@ -3361,22 +3371,6 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 (add-hook 'vterm-mode-hook 'my-better-terminal-buffer t)
 (add-hook 'eat-mode-hook 'my-better-terminal-buffer t)
 
-;;; vterm settings
-
-;; init.el sets (setq comint-buffer-maximum-size 4096), but it does not actually
-;; enable the truncation mechanism. If your terminal buffer is based on comint
-;; (like M-x shell), an infinitely growing buffer will eventually freeze the
-;; editor. Add this conditional logic to the bottom of your function:
-
-;; `init.el` sets a maximum comint buffer size, but the truncation hook must
-;; be explicitly added to enforce it.
-;; Performance benefit: Prevents the buffer from growing infinitely. Keeping
-;; the line count strictly below 4096 ensures the display engine and garbage
-;; collector never have to parse massive, monolithic blocks of terminal history.
-;; TODO
-;; (when (derived-mode-p 'comint-mode)
-;;   (add-hook 'comint-output-filter-functions #'comint-truncate-buffer nil t))
-
 ;;; terminal: eat
 
 ;; (setq eat-shell "/usr/bin/env bash")
@@ -3480,6 +3474,10 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     (setq-local scroll-step 0)
     (setq-local hscroll-step 0)
     (setq-local auto-hscroll-mode nil)
+
+    ;; Uncomment to disable scroll bars to save redisplay cycles
+    ;; (setq-local vertical-scroll-bar nil)
+    ;; (setq-local horizontal-scroll-bar nil)
 
     (setq-local truncate-lines t)
     (setq-local nobreak-char-display nil)
@@ -3833,6 +3831,7 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 (add-hook 'vterm-mode-hook 'my-speed-up-terminal-buffer t)
 (add-hook 'eat-mode-hook 'my-speed-up-terminal-buffer t)
 (add-hook 'ghostel-mode-hook 'my-speed-up-terminal-buffer t)
+(add-hook 'compilation-mode-hook 'my-speed-up-terminal-buffer t)
 
 ;;; terminal: Disable arrow
 
