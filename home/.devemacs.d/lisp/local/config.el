@@ -269,9 +269,26 @@
   (global-eldoc-mode -1))
 (setq-default global-eldoc-mode nil)
 
-(when (bound-and-true-p show-paren-mode)
-  (show-paren-mode -1))
-(setq-default show-paren-mode nil)
+;; Disable glyph composition globally to maximize redisplay performance and
+;; prevent editor freezes on excessively long lines. This disables programming
+;; ligatures and complex text shaping (e.g., Arabic, multi-part emojis), which
+;; is an acceptable tradeoff for standard Python, Elisp, and Bash development.
+(progn
+  ;; Nullify the callback function used by the C display engine.
+  ;; The C engine checks this variable before attempting any glyph composition.
+  ;; Change the default value for all future buffers
+  (setq-default auto-composition-mode nil)
+  ;; (global-auto-composition-mode -1)
+
+  ;; Forcefully disable the minor mode whenever a new major mode loads.
+  ;; This prevents modes from implicitly re-enabling it.
+  ;; (add-hook 'after-change-major-mode-hook
+  ;;           (lambda () (auto-composition-mode -1)))
+
+  (setq-default auto-composition-function nil)
+  (when (bound-and-true-p show-paren-mode)
+    (show-paren-mode -1))
+  (setq-default show-paren-mode nil))
 
 ;; Disable Remote File Checks if Not Needed
 (setq-default tramp-mode nil)

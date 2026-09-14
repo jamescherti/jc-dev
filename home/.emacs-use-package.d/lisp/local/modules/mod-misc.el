@@ -3208,40 +3208,67 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;;; so long
 
-;; TODO minimal-emacs.d
-(unless (featurep 'native-compile)
-  (setq so-long-threshold 6000))
+;; (setq so-long-threshold 10000)
 
 (add-hook 'lightemacs-on-first-file-hook 'global-so-long-mode)
 
 ;; TODO lightemacs
 (with-eval-after-load 'so-long
+  ;; Apply so-long mitigations to configuration and plain text files, which
+  ;; occasionally contain excessively long single lines
   (add-to-list 'so-long-target-modes 'conf-mode)
   (add-to-list 'so-long-target-modes 'text-mode)
 
-  (add-to-list 'so-long-variable-overrides '(font-lock-maximum-decoration . 1))
+  ;; Prevent Emacs from attempting to restore the cursor position in files with
+  ;; extremely long lines, avoiding significant loading delays.
   (add-to-list 'so-long-variable-overrides '(save-place-alist . nil))
+
+  ;; Ensure the buffer remains writable when so-long triggers, overriding the
+  ;; default behavior that locks the buffer as read-only.
   (setf (alist-get 'buffer-read-only so-long-variable-overrides nil t) nil)
 
+  ;; Define the specific functions to execute when enabling or disabling the
+  ;; so-long mitigations, ensuring the minor mode is toggled cleanly.
   (setq so-long-revert-function 'turn-off-so-long-minor-mode
         so-long-function 'turn-on-so-long-minor-mode)
 
-  (dolist (mode '(font-lock-mode
-                  display-line-numbers-mode))
-    (setq so-long-minor-modes (delq mode so-long-minor-modes)))
+  ;; Keep syntax highlighting and reduce it. Limit font-lock to the minimum
+  ;; decoration level to save CPU cycles, and remove it from the disable list so
+  ;; basic highlighting remains active.
+  (add-to-list 'so-long-variable-overrides '(font-lock-maximum-decoration . 1))
+  (setq so-long-minor-modes (delq 'font-lock-mode so-long-minor-modes))
 
-  (setq so-long-minor-modes (append so-long-minor-modes
-                                    '(auto-composition-mode
-                                      better-jumper-local-mode
-                                      eldoc-mode
-                                      flycheck-mode
-                                      highlight-indent-guides-mode
-                                      hl-fill-column-mode
-                                      smartparens-mode
-                                      smartparens-strict-mode
-                                      spell-fu-mode
-                                      undo-tree-mode
-                                      ws-butler-mode))))
+  ;; Retain line numbers for usability by preventing so-long from disabling the
+  ;; mode.
+  (setq so-long-minor-modes (delq 'display-line-numbers-mode so-long-minor-modes))
+
+  ;; TODO
+  ;; company-mode
+  ;; corfu-mode
+  ;; ;; eglot?
+  ;; flymake-mode
+  ;; hl-line-mode
+  ;; lsp-lens-mode
+  ;; lsp-mode
+  ;; show-paren-mode
+  ;; Disable performance-intensive minor modes when long lines are detected.
+  ;; This prevents structural editing, linting, and formatting tools from
+  ;; freezing the editor while trying to parse massive ASTs or strings.
+  (dolist (mode '(auto-composition-mode
+                  better-jumper-local-mode
+                  eldoc-mode
+                  flycheck-mode
+                  highlight-indent-guides-mode
+                  hl-fill-column-mode
+                  smartparens-mode
+                  smartparens-strict-mode
+                  spell-fu-mode
+                  undo-tree-mode
+                  ws-butler-mode
+                  diff-hl-mode
+                  git-gutter-mode
+                  ))
+    (add-to-list 'so-long-minor-modes mode t)))
 
 ;; (setq so-long-threshold 10000)
 ;; (add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
