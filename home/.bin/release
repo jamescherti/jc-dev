@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
-
 """Release a new version."""
 
 import os
@@ -93,7 +92,8 @@ class Release:
                 print(f"Error: New version {new_version} must be "
                       f"higher than {old_version}")
                 continue
-            break
+            else:
+                break
 
         print("Modifying...")
         python_project: bool = (self.git_root / "pyproject.toml").is_file() \

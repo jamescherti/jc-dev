@@ -3208,6 +3208,41 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;;; so long
 
+;; TODO minimal-emacs.d
+(unless (featurep 'native-compile)
+  (setq so-long-threshold 6000))
+
+(add-hook 'lightemacs-on-first-file-hook 'global-so-long-mode)
+
+;; TODO lightemacs
+(with-eval-after-load 'so-long
+  (add-to-list 'so-long-target-modes 'conf-mode)
+  (add-to-list 'so-long-target-modes 'text-mode)
+
+  (add-to-list 'so-long-variable-overrides '(font-lock-maximum-decoration . 1))
+  (add-to-list 'so-long-variable-overrides '(save-place-alist . nil))
+  (setf (alist-get 'buffer-read-only so-long-variable-overrides nil t) nil)
+
+  (setq so-long-revert-function 'turn-off-so-long-minor-mode
+        so-long-function 'turn-on-so-long-minor-mode)
+
+  (dolist (mode '(font-lock-mode
+                  display-line-numbers-mode))
+    (setq so-long-minor-modes (delq mode so-long-minor-modes)))
+
+  (setq so-long-minor-modes (append so-long-minor-modes
+                                    '(auto-composition-mode
+                                      better-jumper-local-mode
+                                      eldoc-mode
+                                      flycheck-mode
+                                      highlight-indent-guides-mode
+                                      hl-fill-column-mode
+                                      smartparens-mode
+                                      smartparens-strict-mode
+                                      spell-fu-mode
+                                      undo-tree-mode
+                                      ws-butler-mode))))
+
 ;; (setq so-long-threshold 10000)
 ;; (add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
 
@@ -3509,14 +3544,16 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
                    display-line-numbers-mode
                    display-fill-column-indicator-mode
                    hl-line-mode
+                   show-paren-local-mode
+                   flymake-mode
                    ;; Third-party packages
+                   ;; NOTE: Add more modes here
+                   yas-minor-mode
                    evil-surround-mode
                    evil-snipe-local-mode
                    company-mode
                    corfu-mode
-                   flymake-mode
-                   flycheck-mode
-                   show-paren-local-mode)))
+                   flycheck-mode)))
       ;; ghostel-comint, ghostel-compile, and ghostel-links register a function
       ;; in eldoc-documentation-functions to display target URLs and file under
       ;; point.
