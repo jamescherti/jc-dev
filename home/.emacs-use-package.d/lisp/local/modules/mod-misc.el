@@ -3506,9 +3506,9 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 (setq eat-minimum-latency 0.01)
 (setq eat-maximum-latency 0.05)
 
-(setq vterm-max-scrollback 1000)
-(setq ghostel-max-scrollback (* 1024 1024)) ;; Reduce to 1MB
-(setq eat-term-scrollback-size (* 1024 1024)) ;;  Reduce to 1MB
+(setq vterm-max-scrollback 500)
+(setq ghostel-max-scrollback (* 1024 1024)
+      (setq eat-term-scrollback-size (* 64 1024)))
 
 ;; Disable shell prompt status annotations in the window margin. Prevents Eat
 ;; from displaying exit code indicators (such as the default "0" or "X") beside
