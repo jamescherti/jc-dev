@@ -202,6 +202,7 @@ ARGS are the arguments passed to the original function."
 
 ;; Disable Remote File Checks if Not Needed
 (setq-default tramp-mode nil)
+
 (when (bound-and-true-p windmove-mode)
   (windmove-mode -1))
 (setq-default windmove-mode nil)
