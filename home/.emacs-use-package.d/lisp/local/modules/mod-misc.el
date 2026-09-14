@@ -3542,10 +3542,6 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     (setq-local hscroll-step 0)
     (setq-local auto-hscroll-mode nil)
 
-    ;; TODO
-    ;; (setq-local left-fringe-width 0)
-    ;; (setq-local right-fringe-width 0)
-
     ;; Uncomment to disable scroll bars to save redisplay cycles
     ;; (setq-local vertical-scroll-bar nil)
     ;; (setq-local horizontal-scroll-bar nil)
