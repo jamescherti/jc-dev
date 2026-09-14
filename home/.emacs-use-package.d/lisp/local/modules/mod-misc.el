@@ -678,6 +678,11 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; PERFORMANCE: If 0, then fontification is only deferred while there is input
+;; pending.
+;; 0 = Fontification deferred while there is input
+(setq jit-lock-defer-time 0)
+
 ;; Fix bug caused by double buffering in daemon mode
 ;; TODO patch?
 (when (daemonp)
@@ -3545,6 +3550,8 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     (setq-local nobreak-char-display nil)
     (setq-local bidi-paragraph-direction 'left-to-right)
     (setq-local bidi-inhibit-bpa t)
+    ;; TODO
+    ;; (setq-default bidi-display-reordering nil)
 
     (setq-local process-adaptive-read-buffering nil)
     (let ((output-max (* 1024 1024)))
@@ -5384,9 +5391,6 @@ Standard save hooks handle persistence when the buffer is modified."
 ;; JIT Lock Defer Time
 ;; -------------------
 ;; NOTE: This adds timers, for some reason...
-;; In addition to that, it causes issues with dired
-;; (setq jit-lock-defer-time 0)  ; 0 = Fontification deferred while there is input
-
 ;; (setq jit-lock-defer-time 0.04)
 ;; (setq jit-lock-defer-time 0.1)
 ;; (setq jit-lock-defer-time 0)
