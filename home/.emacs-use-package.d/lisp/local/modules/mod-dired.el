@@ -119,15 +119,6 @@
 ;;   ;; instead
 ;;   (advice-add 'dired-find-file :override #'my-dired-open-with-external-command))
 
-(lightemacs-use-package nerd-icons-dired
-  :if (display-graphic-p)
-  ;;:diminish nerd-icons-dired-mode
-  :commands nerd-icons-dired-mode
-  ;; Cause bugs sometimes (e.g., when a file is deleted, the icons are not
-  ;; aligned properly)
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
-
 ;;; DISABLED: Abbreviate dired headers
 
 ;; --------------------------------------------------------------------------
