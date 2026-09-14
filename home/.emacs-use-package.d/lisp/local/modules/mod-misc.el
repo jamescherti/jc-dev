@@ -3552,18 +3552,19 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     (setq-local bidi-paragraph-direction 'left-to-right)
     (setq-local bidi-inhibit-bpa t)
 
+    ;; Ghostel coordinates row height calculations via ghostel-line-spacing
+    (unless ghostel-buffer
+      (setq-local line-spacing 0)
+      (setq-local mode-line-format nil))
+
+    (setq-local echo-keystrokes 0)
+
     (setq-local process-adaptive-read-buffering nil)
     (let ((output-max (* 1024 1024)))
       (when (< read-process-output-max output-max)
         (setq-local read-process-output-max output-max)))
 
     (buffer-disable-undo)
-    (setq-local echo-keystrokes 0)
-
-    ;; Ghostel coordinates row height calculations via ghostel-line-spacing
-    (unless ghostel-buffer
-      (setq-local line-spacing 0)
-      (setq-local mode-line-format nil))
 
     ;; Evil users
     (remove-hook 'pre-command-hook 'evil--jump-hook t)
@@ -3581,12 +3582,12 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
                    flymake-mode
                    ;; Third-party packages
                    ;; NOTE: Add more modes here
-                   yas-minor-mode
+                   flycheck-mode
                    evil-surround-mode
                    evil-snipe-local-mode
+                   yas-minor-mode
                    company-mode
-                   corfu-mode
-                   flycheck-mode)))
+                   corfu-mode)))
       ;; ghostel-comint, ghostel-compile, and ghostel-links register a function
       ;; in eldoc-documentation-functions to display target URLs and file under
       ;; point.
@@ -3603,6 +3604,11 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
                    (fboundp mode))
           (ignore-errors
             (funcall mode -1)))))))
+
+(add-hook 'term-mode-hook 'my-speed-up-terminal-buffer t)
+(add-hook 'vterm-mode-hook 'my-speed-up-terminal-buffer t)
+(add-hook 'eat-mode-hook 'my-speed-up-terminal-buffer t)
+(add-hook 'ghostel-mode-hook 'my-speed-up-terminal-buffer t)
 
 ;; (defun my-speed-up-terminal-buffer ()
 ;;   "Reduce unnecessary Emacs features in terminal buffers."
