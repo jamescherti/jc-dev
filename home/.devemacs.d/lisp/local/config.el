@@ -269,26 +269,20 @@
   (global-eldoc-mode -1))
 (setq-default global-eldoc-mode nil)
 
-;; Disable glyph composition globally to maximize redisplay performance and
-;; prevent editor freezes on excessively long lines. This disables programming
-;; ligatures and complex text shaping (e.g., Arabic, multi-part emojis), which
-;; is an acceptable tradeoff for standard Python, Elisp, and Bash development.
+;; Disable automatic glyph composition globally to reduce redisplay work. This
+;; disables automatic composition such as programming ligatures and Unicode
+;; character compositions that rely on `auto-composition-mode'.
 (progn
-  ;; Nullify the callback function used by the C display engine.
-  ;; The C engine checks this variable before attempting any glyph composition.
-  ;; Change the default value for all future buffers
-  (setq-default auto-composition-mode nil)
-  ;; (global-auto-composition-mode -1)
+  ;; Fix buffers created during early startup (e.g., *scratch*, *Messages*). Due
+  ;; to `permanent-local', they will not inherit the new default otherwise.
+  ;; Iterate over every buffer currently existing in the Emacs instance.
+  (dolist (buf (buffer-list))
+    (when (local-variable-p 'auto-composition-mode buf)
+      (with-current-buffer buf
+        (auto-composition-mode -1))))
 
-  ;; Forcefully disable the minor mode whenever a new major mode loads.
-  ;; This prevents modes from implicitly re-enabling it.
-  ;; (add-hook 'after-change-major-mode-hook
-  ;;           (lambda () (auto-composition-mode -1)))
-
-  (setq-default auto-composition-function nil)
-  (when (bound-and-true-p show-paren-mode)
-    (show-paren-mode -1))
-  (setq-default show-paren-mode nil))
+  ;; Set the default for buffers created from this point forward.
+  (setq-default auto-composition-mode nil))
 
 ;; Disable Remote File Checks if Not Needed
 (setq-default tramp-mode nil)
