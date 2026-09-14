@@ -3542,6 +3542,10 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     (setq-local hscroll-step 0)
     (setq-local auto-hscroll-mode nil)
 
+    ;; TODO
+    ;; (setq-local left-fringe-width 0)
+    ;; (setq-local right-fringe-width 0)
+
     ;; Uncomment to disable scroll bars to save redisplay cycles
     ;; (setq-local vertical-scroll-bar nil)
     ;; (setq-local horizontal-scroll-bar nil)
@@ -3550,8 +3554,6 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
     (setq-local nobreak-char-display nil)
     (setq-local bidi-paragraph-direction 'left-to-right)
     (setq-local bidi-inhibit-bpa t)
-    ;; TODO
-    ;; (setq-default bidi-display-reordering nil)
 
     (setq-local process-adaptive-read-buffering nil)
     (let ((output-max (* 1024 1024)))

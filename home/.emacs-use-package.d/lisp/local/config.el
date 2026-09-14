@@ -1010,17 +1010,6 @@ subsequent GCC invocations."
 
 (defun lightemacs-user-post-early-init ()
   "Post early init."
-  ;; Setting 'bidi-display-reordering' to nil completely disables the
-  ;; bidirectional text rendering algorithm. This provides a performance
-  ;; improvement during screen redraws, especially in files with long lines,
-  ;; because it bypasses the expensive character-by-character directional scan.
-  ;; In contrast, setting it to 'left-to-right is simply evaluated as a non-nil
-  ;; value; this forces the C engine to execute the full algorithmic layout pass
-  ;; anyway, offering zero performance gain over 't'. Note: Setting this to nil
-  ;; breaks rendering for right-to-left languages and is officially intended for
-  ;; debugging display code only.
-  (setq-default bidi-display-reordering nil)
-
   ;; TODO: Lightemacs?
   (let ((no-border '(internal-border-width . 0)))
     (add-to-list 'default-frame-alist no-border)
