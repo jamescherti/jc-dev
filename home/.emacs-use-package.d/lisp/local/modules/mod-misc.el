@@ -3910,38 +3910,38 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;;; ghostel
 
-(lightemacs-use-package ghostel
-  :bind (("C-c g" . ghostel)
-         ("C-c p" . ghostel-project)
-         ("C-c o" . ghostel-other))
-  :commands (ghostel-project
-             ghostel-other
-             ghostel)
-  ;; :custom
-  ;; (ghostel-term "xterm-ghostty")
-  ;; (ghostel-scroll-on-input t)
-  ;; (ghostel-enable-url-detection t)
-  ;; (ghostel-enable-file-detection t)
-  ;; (ghostel-query-before-killing 'auto)
-  ;; (ghostel-max-scrollback (* 5 1024 1024))
-  ;; (ghostel-module-directory "~/.config/emacs/ghostel-bin/")
-  ;; (ghostel-module-auto-install nil)
-  ;; :config
-  ;; (setq ghostel-shell-integration t)
-  ;; (ghostel-sync-theme)
-
-  ;; (with-eval-after-load 'project
-  ;;   (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t))
-  ;;
-  ;; (use-package ghostel-compile
-  ;;   :bind (("C-c c" . ghostel-compile)
-  ;;          ("C-c r" . ghostel-recompile)))
-
-  ;; (use-package ghostel-eshell
-  ;;   :after eshell
-  ;;   :config
-  ;;   (add-hook 'eshell-load-hook #'ghostel-eshell-visual-command-mode))
-  )
+;; (lightemacs-use-package ghostel
+;;   :bind (("C-c g" . ghostel)
+;;          ("C-c p" . ghostel-project)
+;;          ("C-c o" . ghostel-other))
+;;   :commands (ghostel-project
+;;              ghostel-other
+;;              ghostel)
+;;   ;; :custom
+;;   ;; (ghostel-term "xterm-ghostty")
+;;   ;; (ghostel-scroll-on-input t)
+;;   ;; (ghostel-enable-url-detection t)
+;;   ;; (ghostel-enable-file-detection t)
+;;   ;; (ghostel-query-before-killing 'auto)
+;;   ;; (ghostel-max-scrollback (* 5 1024 1024))
+;;   ;; (ghostel-module-directory "~/.config/emacs/ghostel-bin/")
+;;   ;; (ghostel-module-auto-install nil)
+;;   ;; :config
+;;   ;; (setq ghostel-shell-integration t)
+;;   ;; (ghostel-sync-theme)
+;;
+;;   ;; (with-eval-after-load 'project
+;;   ;;   (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t))
+;;   ;;
+;;   ;; (use-package ghostel-compile
+;;   ;;   :bind (("C-c c" . ghostel-compile)
+;;   ;;          ("C-c r" . ghostel-recompile)))
+;;
+;;   ;; (use-package ghostel-eshell
+;;   ;;   :after eshell
+;;   ;;   :config
+;;   ;;   (add-hook 'eshell-load-hook #'ghostel-eshell-visual-command-mode))
+;;   )
 
 ;; Evil-mode integration for tracking terminal state transitions
 ;; (lightemacs-use-package evil-ghostel
