@@ -183,17 +183,18 @@ ARGS are the arguments passed to the original function."
 (setq-default global-eldoc-mode nil)
 
 ;; Change the default value for all future buffers
-(setq-default auto-composition-mode nil)
-;; (global-auto-composition-mode -1)
+(progn
+  (setq-default auto-composition-mode nil)
+  ;; (global-auto-composition-mode -1)
 
-;; Forcefully disable the minor mode whenever a new major mode loads.
-;; This prevents modes from implicitly re-enabling it.
-;; (add-hook 'after-change-major-mode-hook
-;;           (lambda () (auto-composition-mode -1)))
+  ;; Forcefully disable the minor mode whenever a new major mode loads.
+  ;; This prevents modes from implicitly re-enabling it.
+  ;; (add-hook 'after-change-major-mode-hook
+  ;;           (lambda () (auto-composition-mode -1)))
 
-;; Nullify the callback function used by the C display engine.
-;; The C engine checks this variable before attempting any glyph composition.
-(setq-default auto-composition-function nil)
+  ;; Nullify the callback function used by the C display engine.
+  ;; The C engine checks this variable before attempting any glyph composition.
+  (setq-default auto-composition-function nil))
 
 (when (bound-and-true-p show-paren-mode)
   (show-paren-mode -1))
