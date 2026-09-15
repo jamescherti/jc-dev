@@ -80,7 +80,7 @@
 ;; one space left when exiting insert mode. Altering this behavior causes
 ;; off-by-one errors when executing normal mode commands immediately after
 ;; pressing Escape.
-(setq evil-move-cursor-back t)
+(setq evil-move-cursor-back nil)
 
 ;; Only complete in the current buffer
 (setq evil-complete-all-buffers nil)
