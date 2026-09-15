@@ -525,6 +525,7 @@
 (when (boundp 'trusted-content)
   (let ((dirs (list "~/src/dotfiles/jc-dev/"
                     "~/src/emacs/"
+                    "~/src/wip/"
                     ;; "~/src/forks/"
                     )))
     (dolist (dir dirs)
