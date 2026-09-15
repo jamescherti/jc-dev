@@ -994,7 +994,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; its size.
 ;; TODO minimal emacs.d
 
-(add-to-list 'compilation-environment "TERM=xterm-256color")
+(with-eval-after-load 'compile
+  (add-to-list 'compilation-environment "TERM=xterm-256color"))
 (setq compilation-skip-visited t)
 (setq compilation-window-height 12)
 (with-eval-after-load 'savehist
@@ -3264,32 +3265,17 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
   ;; mode.
   (setq so-long-minor-modes (delq 'display-line-numbers-mode so-long-minor-modes))
 
-  ;; TODO
-  ;; company-mode
-  ;; corfu-mode
-  ;; ;; eglot?
-  ;; flymake-mode
-  ;; hl-line-mode
-  ;; lsp-lens-mode
-  ;; lsp-mode
-  ;; show-paren-mode
-  ;; Disable performance-intensive minor modes when long lines are detected.
-  ;; This prevents structural editing, linting, and formatting tools from
-  ;; freezing the editor while trying to parse massive ASTs or strings.
   (dolist (mode '(auto-composition-mode
                   better-jumper-local-mode
                   eldoc-mode
                   flycheck-mode
                   highlight-indent-guides-mode
                   hl-fill-column-mode
-                  smartparens-mode
-                  smartparens-strict-mode
                   spell-fu-mode
                   undo-tree-mode
                   ws-butler-mode
                   diff-hl-mode
-                  git-gutter-mode
-                  ))
+                  git-gutter-mode))
     (add-to-list 'so-long-minor-modes mode t)))
 
 ;; (setq so-long-threshold 10000)
@@ -3606,7 +3592,15 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;; TODO lightemacs?
 (with-eval-after-load 'lightemacs
-  (push 'auto-composition-mode lightemacs-terminal-disabled-modes))
+  ;; If you use Evil, terminal buffers are generally best left in Emacs state
+  ;; or Insert state so the shell can process input natively. Modes like
+  ;; evil-snipe-local-mode can intercept keys like 's' or 'f' and prevent you
+  ;; from typing them in the shell.
+  ;; TODO?
+  ;; evil-surround-mode
+  ;; evil-snipe-local-mode
+
+  (add-to-list 'lightemacs-all-terminals-disabled-modes 'auto-composition-mode))
 
 (add-hook 'term-mode-hook 'my-speed-up-terminal-buffer t)
 (add-hook 'vterm-mode-hook 'my-speed-up-terminal-buffer t)
