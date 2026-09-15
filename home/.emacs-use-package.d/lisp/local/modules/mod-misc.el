@@ -3586,16 +3586,9 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
   ;;   ;; when the cursor approaches the left or right edges of the window.
   ;;   (setq-local hscroll-margin 0))
 
-  ;; Prevent Emacs from prompting "Buffer has a running process; kill it?"
-  ;; when closing the buffer or exiting the editor by silently disabling the
-  ;; query-on-exit flag for the underlying shell process.
-  ;; (when vterm-p
-  ;;   (let ((proc (get-buffer-process (current-buffer))))
-  ;;     (when proc
-  ;;       (set-process-query-on-exit-flag proc nil))))
-
-  ;; Suppress prompts for terminating active processes when closing
-  ;; (setq-local confirm-kill-processes nil)
+  ;; (when (or eat-p term-p)
+  ;;   ;; Suppress prompts for terminating active processes when closing
+  ;;   (setq-local confirm-kill-processes nil))
 
   ;; Uncomment to disable scroll bars to save redisplay cycles
   (setq-local vertical-scroll-bar nil)
