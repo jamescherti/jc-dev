@@ -147,19 +147,9 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 
 ;;; Modeline
 
-(setq line-number-mode t
-      column-number-mode t
-      mode-line-position-column-line-format '("%l:%C")
-      mode-line-percent-position nil)
+;; (setq mode-line-percent-position nil)
 
 ;; (add-hook 'lightemacs-after-init-hook #'display-time-mode)
-
-(setq display-time-mail-function #'ignore
-      display-time-mail-string ""
-      display-time-mail-directory nil
-      display-time-use-mail-icon nil
-      display-time-mail-face nil
-      display-time-format " %Y-%m-%d  %I:%M %p")
 
 (defun mode-line-right ()
   "Render the `mode-line-right-format'."
@@ -182,37 +172,45 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
                     ((= gc-cons-threshold most-positive-fixnum) "∞")
                     (t (format "%sM" (/ gc-cons-threshold 1000000))))))
 
-(setq-default mode-line-format
-              '("%e"
-                mode-line-front-space
-                mode-line-modified
-                "  |  "
-                mode-line-buffer-identification
-                "  |  "
-                (vc-mode vc-mode)
-                (:eval
-                 (if (fboundp 'my-project-name)
-                     (let ((project-name (my-project-name)))
-                       (if project-name
-                           (format "  |  Project:%s" project-name)
-                         (format "  |  Dir:%s"
-                                 (abbreviate-file-name (buffer-cwd)))))
-                   "")
-                 )
-                "  |  "
-                mode-line-position
-                ;; Inclusion of major and minor modes
-                ;; "  |  "
-                ;; mode-line-modes
-                (:eval
-                 (let ((ref (bound-and-true-p diff-hl-reference-revision)))
-                   (when (and (bound-and-true-p diff-hl-mode) ref)
-                     (format "  |  diff-hl-ref:%s" ref))))
-                "  |  "
-                (:eval (my-gc-cons-threshold-mode-line))
-                ;; mode-line-modes
-                ;; Slow eval
-                (:eval (mode-line-right))))
+(unless noninteractive
+  (setq display-time-mail-function #'ignore
+        display-time-mail-string ""
+        display-time-mail-directory nil
+        display-time-use-mail-icon nil
+        display-time-mail-face nil
+        display-time-format " %Y-%m-%d  %I:%M %p")
+
+  (setq-default mode-line-format
+                '("%e"
+                  mode-line-front-space
+                  mode-line-modified
+                  "  |  "
+                  mode-line-buffer-identification
+                  "  |  "
+                  (vc-mode vc-mode)
+                  (:eval
+                   (if (fboundp 'my-project-name)
+                       (let ((project-name (my-project-name)))
+                         (if project-name
+                             (format "  |  Project:%s" project-name)
+                           (format "  |  Dir:%s"
+                                   (abbreviate-file-name (buffer-cwd)))))
+                     "")
+                   )
+                  "  |  "
+                  mode-line-position
+                  ;; Inclusion of major and minor modes
+                  ;; "  |  "
+                  ;; mode-line-modes
+                  (:eval
+                   (let ((ref (bound-and-true-p diff-hl-reference-revision)))
+                     (when (and (bound-and-true-p diff-hl-mode) ref)
+                       (format "  |  diff-hl-ref:%s" ref))))
+                  "  |  "
+                  (:eval (my-gc-cons-threshold-mode-line))
+                  ;; mode-line-modes
+                  ;; Slow eval
+                  (:eval (mode-line-right)))))
 
 ;;; Fringe
 
@@ -1480,13 +1478,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
    ;; (setq-default case-fold-search nil)
 
    persist-text-scale-autosave-interval (* 15 60)
-   persist-text-scale-handle-file-renames t
-
-   eat-enable-yank-to-terminal t
-   eat-enable-directory-tracking t
-   eat-enable-shell-command-history t
-   eat-enable-shell-prompt-annotation t
-   eat-term-scrollback-size nil)
+   persist-text-scale-handle-file-renames t)
 
   (setq-default case-fold-search nil)
 
@@ -3467,28 +3459,7 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;; (setq eat-shell "/usr/bin/env bash")
 
-;; Use standard 'xterm-256color' instead of Eat's default 'eat-truecolor'. By
-;; default, Eat advertises custom TERM names ('eat-truecolor', 'eat-256color')
-;; which fail with "cannot initialize terminal type" errors if `eat.ti' has not
-;; been compiled via `eat-compile-terminfo', as well as across remote SSH
-;; sessions and sudo environments lacking the custom terminfo entry. Forcing
-;; 'xterm-256color' ensures universal terminal compatibility everywhere while
-;; preserving standard color capabilities and 24-bit direct color escapes.
-(setq eat-term-name "xterm-256color")
-
 ;;; terminal: Speed up
-
-;; When a subprocess generates heavy output, rendering it sequentially freezes
-;; Emacs. vterm uses a timer to batch output and throttle screen redraws.
-;; Why it speeds things up: Instead of forcing Emacs to parse and draw every
-;; character as it arrives, this variable queues the output and redraws the
-;; buffer on an interval.
-;; Recommendation: The default is 0.1 seconds. If you deal with massive bursts
-;; of text (like compiling huge projects or cating large logs), increasing this
-;; to 0.2 or 0.3 will make Emacs much more responsive during the output. Never
-;; set this to nil if performance is your goal, as doing so forces synchronous,
-;; unbatched redraws.
-;; (setq vterm-timer-delay 0.1)
 
 ;; The Emacs display engine slows down as buffers grow massive, even with line
 ;; truncation enabled.
@@ -3501,28 +3472,38 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 ;; heavily degrade speed over time.
 ;; (setq vterm-max-scrollback 1000)
 (setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y")
-      ;; vterm-disable-inverse-video t
+
+      ;; If you prioritize pure speed over terminal aesthetics, you can instruct
+      ;; vterm to skip rendering complex text properties. Why it speeds things
+      ;; up: When vterm receives formatting escape sequences, it has to map them
+      ;; to Emacs faces and apply text properties across regions of the buffer.
+      ;; By disabling these, you bypass the C-to-Lisp face mapping calculations,
+      ;; saving CPU cycles during rapid output.
+      vterm-disable-bold-font nil
+      vterm-disable-underline t
+      vterm-disable-inverse-video t
+
+      ;; Prevent Cursor Blinking Overhead Why it speeds things up: A blinking
+      ;; cursor requires Emacs to trigger a timer and redraw the cursor's glyph
+      ;; twice a second. vterm sets this to t by default to ignore requests from
+      ;; terminal applications to toggle blinking. Ensure you leave this set to
+      ;; t.
+      vterm-ignore-blink-cursor t
+
+      ;; When a subprocess generates heavy output, rendering it sequentially freezes
+      ;; Emacs. vterm uses a timer to batch output and throttle screen redraws.
+      ;; Why it speeds things up: Instead of forcing Emacs to parse and draw every
+      ;; character as it arrives, this variable queues the output and redraws the
+      ;; buffer on an interval.
+      ;; Recommendation: The default is 0.1 seconds. If you deal with massive bursts
+      ;; of text (like compiling huge projects or cating large logs), increasing this
+      ;; to 0.2 or 0.3 will make Emacs much more responsive during the output. Never
+      ;; set this to nil if performance is your goal, as doing so forces synchronous,
+      ;; unbatched redraws.
+      ;; vterm-timer-delay 0.1
       )
 
-;; If you prioritize pure speed over terminal aesthetics, you can instruct vterm
-;; to skip rendering complex text properties.
-;; Why it speeds things up: When vterm receives formatting escape sequences, it
-;; has to map them to Emacs faces and apply text properties across regions of
-;; the buffer. By disabling these, you bypass the C-to-Lisp face mapping
-;; calculations, saving CPU cycles during rapid output.
-(setq vterm-disable-bold-font nil
-      vterm-disable-underline t
-      vterm-disable-inverse-video t)
-
-;; Prevent Cursor Blinking Overhead
-;; Why it speeds things up: A blinking cursor requires Emacs to trigger a timer
-;; and redraw the cursor's glyph twice a second. vterm sets this to t by default
-;; to ignore requests from terminal applications to toggle blinking. Ensure you
-;; leave this set to t.
-(setq vterm-ignore-blink-cursor t)
-
 ;; (with-eval-after-load 'le-vterm
-;;   (setq vterm-timer-delay 0.01))
 ;; (setq ghostel-timer-delay 0.01)
 
 ;; Tune redraw latency for heavy throughput. During massive output bursts,
@@ -3531,22 +3512,11 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 ;; (setq eat-minimum-latency 0.01)
 ;; (setq eat-maximum-latency 0.05)
 
-;;; TODO
-;; (setq vterm-max-scrollback 500)
-(setq ghostel-max-scrollback (* 1024 1024)
-      eat-term-scrollback-size (* 64 1024))
-
-;; Disable shell prompt status annotations in the window margin. Prevents Eat
-;; from displaying exit code indicators (such as the default "0" or "X") beside
-;; prompts, avoiding margin misalignment on multi-line prompts, visual clutter,
-;; and the performance overhead of managing buffer overlays and correction
-;; timers.
-(setq eat-enable-shell-prompt-annotation nil)
-
-;; If you do not view images in the terminal, disable Sixel rendering.
-;; Generating SVGs, XPMs, or text properties in Elisp for image data consumes
-;; heavy CPU.
-(setq eat-sixel-render-formats '(none))
+(setq
+ ;; eat-enable-yank-to-terminal t
+ ;; eat-enable-directory-tracking t
+ ;; eat-term-scrollback-size nil
+ )
 
 ;; Prevent Emacs from aggressively resizing the terminal window when
 ;; minibuffers (like M-x or consult) open and close. This stops TUIs from
@@ -3561,17 +3531,78 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 ;; will completely ignore scroll-step anyway. It is dead code.
 ;; (setq-local hscroll-step 0)
 
+;;; TODO
+;; (setq vterm-max-scrollback 500)
+(setq
+ ;; eat-term-scrollback-size (* 64 1024)
+ ghostel-max-scrollback (* 1024 1024))
+
+;; TODO test this
+;; (setq-local fringe-mode 0)
+
+(setq
+ ;; Use standard 'xterm-256color' instead of Eat's default 'eat-truecolor'. By
+ ;; default, Eat advertises custom TERM names ('eat-truecolor', 'eat-256color')
+ ;; which fail with "cannot initialize terminal type" errors if `eat.ti' has not
+ ;; been compiled via `eat-compile-terminfo', as well as across remote SSH
+ ;; sessions and sudo environments lacking the custom terminfo entry. Forcing
+ ;; 'xterm-256color' ensures universal terminal compatibility everywhere while
+ ;; preserving standard color capabilities and 24-bit direct color escapes.
+ eat-term-name "xterm-256color"
+
+ ;; Disable shell prompt status annotations in the window margin. Prevents Eat
+ ;; from displaying exit code indicators (such as the default "0" or "X") beside
+ ;; prompts, avoiding margin misalignment on multi-line prompts, visual clutter,
+ ;; and the performance overhead of managing buffer overlays and correction
+ ;; timers.
+ ;; TODO lightemacs?
+ eat-enable-shell-prompt-annotation nil
+
+ ;; TODO lightemacs?
+ ;; TODO article?
+ eat-enable-shell-command-history nil
+
+ ;; If you do not view images in the terminal, disable Sixel rendering.
+ ;; Generating SVGs, XPMs, or text properties in Elisp for image data consumes
+ ;; heavy CPU.
+ eat-sixel-render-formats '(none))
+
 ;; USELESS: (setq-local scroll-margin 0)
 (defun my-speed-up-terminal-buffer ()
   "Reduce unnecessary Emacs features in terminal buffers."
-  (setq-local font-lock-defaults '(nil t))
+  ;; TODO enable?
+  ;; (buffer-disable-undo)
+
+  ;; Hide the mode-line
+  ;; (setq mode-line-format nil)
+
+  ;; You are already setting truncate-lines to t. If you also set
+  ;; auto-hscroll-mode to nil, Emacs will not automatically pan the window
+  ;; horizontally when the cursor moves past the right edge of the screen.
+  ;; Instead, the cursor will simply disappear out of bounds. To most users,
+  ;; typing into a terminal and watching their cursor vanish feels like a bug.
+  ;; (when term-p
+  ;;   ;; Disable `hscroll-margin' in shell buffers to prevent visual jumping
+  ;;   ;; when the cursor approaches the left or right edges of the window.
+  ;;   (setq-local hscroll-margin 0))
+
+  ;; Prevent Emacs from prompting "Buffer has a running process; kill it?"
+  ;; when closing the buffer or exiting the editor by silently disabling the
+  ;; query-on-exit flag for the underlying shell process.
+  ;; (when vterm-p
+  ;;   (let ((proc (get-buffer-process (current-buffer))))
+  ;;     (when proc
+  ;;       (set-process-query-on-exit-flag proc nil))))
+
+  ;; Suppress prompts for terminating active processes when closing
+  ;; (setq-local confirm-kill-processes nil)
 
   ;; Uncomment to disable scroll bars to save redisplay cycles
   (setq-local vertical-scroll-bar nil)
   (setq-local horizontal-scroll-bar nil)
 
-  (setq-local bidi-paragraph-direction 'left-to-right)
-  (setq-local bidi-inhibit-bpa t)
+  ;; (setq-local bidi-paragraph-direction 'left-to-right)
+  ;; (setq-local bidi-inhibit-bpa t)
 
   ;; Evil users
   (remove-hook 'pre-command-hook 'evil--jump-hook t)
