@@ -157,36 +157,6 @@ visibility when navigation commands are executed."
       (when xref-pulse-originally-present
         (add-hook 'xref-after-jump-hook 'xref-pulse-momentarily 71)))))
 
-;;; DISABLED: outdated code: n/N (and M-n and M-N): Search and recenter
-
-;; (evil-define-motion evilcursor-ex-search-next-recenter (count)
-;;   "Go to the next occurrence."
-;;   :type exclusive
-;;   (ignore-errors (evil-ex-search-next count))
-;;   (recenter nil))
-;;
-;; (evil-define-motion evilcursor-ex-search-previous-recenter (count)
-;;   "Go the the previous occurrence."
-;;   :type exclusive
-;;   (ignore-errors (evil-ex-search-previous count))
-;;   (recenter nil))
-;;
-;; (evil-define-motion evilcursor-ex-search-next (count)
-;;   "Go to the next occurrence."
-;;   :type exclusive
-;;   (ignore-errors (evil-ex-search-next count)))
-;;
-;; (evil-define-motion evilcursor-ex-search-previous (count)
-;;   "Go the the previous occurrence."
-;;   :type exclusive
-;;   (ignore-errors (evil-ex-search-previous count)))
-;;
-;; (evil-define-key 'motion 'global
-;;   (kbd "n") #'evilcursor-ex-search-next
-;;   (kbd "N") #'evilcursor-ex-search-previous
-;;   (kbd "M-N") #'evilcursor-ex-search-previous-recenter
-;;   (kbd "M-n") #'evilcursor-ex-search-next-recenter)
-
 ;;; Provide
 
 (provide 'mod-recenter-after-jump)

@@ -3471,7 +3471,9 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 ;; to the maximum allowed (100000) unless absolutely necessary, as it will
 ;; heavily degrade speed over time.
 ;; (setq vterm-max-scrollback 1000)
-(setq vterm-keymap-exceptions '("C-w" "M-RET" "C-x" "C-c" "M-x" "M-o" "C-y" "M-y")
+;;
+;; Removed: ("C-u" "C-g" "C-h" "C-l")
+(setq vterm-keymap-exceptions '("C-w" "C-c" "C-x" "M-RET" "M-x" "M-o" "C-y" "M-y")
 
       ;; If you prioritize pure speed over terminal aesthetics, you can instruct
       ;; vterm to skip rendering complex text properties. Why it speeds things
@@ -3574,7 +3576,8 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
   ;; (buffer-disable-undo)
 
   ;; Hide the mode-line
-  ;; (setq mode-line-format nil)
+  ;; TODO lightemacs?
+  (setq mode-line-format nil)
 
   ;; You are already setting truncate-lines to t. If you also set
   ;; auto-hscroll-mode to nil, Emacs will not automatically pan the window

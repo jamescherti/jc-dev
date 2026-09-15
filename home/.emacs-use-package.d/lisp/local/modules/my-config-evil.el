@@ -528,8 +528,7 @@ This enhancement prevents the cursor from moving."
 (dolist (mode '(vterm-mode
                 eat-mode
                 ;; eshell-mode
-                ;; term-mode
-                ))
+                term-mode))
   (add-to-list 'evil-emacs-state-modes mode))
 
 (when (daemonp)
@@ -2100,6 +2099,24 @@ Accepts any arguments so it can be used as advice or a hook."
     (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode))
 
   (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename))
+
+;;; n/N (and M-n and M-N): Search and recenter
+
+(evil-define-motion evilcursor-ex-search-next-recenter (count)
+  "Go to the next occurrence."
+  :type exclusive
+  (evil-ex-search-next count)
+  (recenter nil))
+
+(evil-define-motion evilcursor-ex-search-previous-recenter (count)
+  "Go the the previous occurrence."
+  :type exclusive
+  (evil-ex-search-previous count)
+  (recenter nil))
+
+(evil-define-key 'motion 'global
+  (kbd "M-N") #'evilcursor-ex-search-previous-recenter
+  (kbd "M-n") #'evilcursor-ex-search-next-recenter)
 
 ;;; DISABLED: Spell checker: Jinx or Flyspell
 
