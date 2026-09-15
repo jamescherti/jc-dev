@@ -807,9 +807,9 @@ subsequent GCC invocations."
 
 (setq lightemacs-easysession-load-session-on-startup t)
 
-(setq lightemacs-dtrt-indent-excluded-modes '(emacs-lisp-mode
-                                              python-mode
-                                              python-ts-mode))
+;; (setq lightemacs-dtrt-indent-excluded-modes '(emacs-lisp-mode
+;;                                               python-mode
+;;                                               python-ts-mode))
 
 ;; Define your preferred font name here
 ;; (setq lightemacs-theme-default-font "Iosevka Term")
