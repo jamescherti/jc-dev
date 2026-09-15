@@ -678,9 +678,34 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; PERFORMANCE: If 0, then fontification is only deferred while there is input
-;; pending.
-;; 0 = Fontification deferred while there is input
+;; 1. `jit-lock-defer-time' set to 0 (Elisp level)
+;;    - What it does: Normally, Emacs applies colors and text properties
+;;      (fontification) the exact moment text is inserted. Setting this to 0
+;;      tells Emacs to wait until it finishes processing your current
+;;      keystrokes and enters a brief idle state before applying those colors.
+;;    - Impact: It decouples the raw text insertion from the expensive coloring
+;;      logic. This prevents the user interface from locking up when a terminal
+;;      command dumps a massive amount of output all at once.
+;;
+;; 2. `redisplay-skip-fontification-on-input' set to t (C Engine level)
+;;    - What it does: When Emacs updates the screen (redisplay), it usually
+;;      runs syntax highlighting functions for whatever text is visible. This
+;;      setting tells the display engine to check if you are currently typing.
+;;      If you are, it completely skips the coloring step for that frame.
+;;    - Impact: It ensures that your typing and scrolling remain fast and fluid
+;;      by dropping visual updates on busy frames.
+;;
+;; 3. Why they are useful (and why font-lock should stay enabled):
+;;    - You should NOT disable `font-lock-mode' in most terminal buffers.
+;;    - Many modern Emacs terminal emulators (like vterm and Eat) hook directly
+;;      into the Emacs font-lock engine. They use it to lazily parse ANSI escape
+;;      sequences and apply terminal colors only to the text you can currently
+;;      see on your screen, which saves memory and processing cycles.
+;;    - If you disable font-lock, you break the lazy rendering mechanism these
+;;      terminals rely on to display colors correctly.
+;;    - By keeping `font-lock-mode' enabled and turning on these two settings,
+;;      you get the best of both worlds: the terminal can render colors lazily,
+;;      but heavy output floods will not freeze your keyboard input.
 (setq jit-lock-defer-time 0)
 
 ;; Fix bug caused by double buffering in daemon mode
@@ -3529,18 +3554,21 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 (setq window-adjust-process-window-size-function
       #'window-adjust-process-window-size-smallest)
 
+;; (setq-local scroll-step 0)
+
 (defun my-speed-up-terminal-buffer ()
   "Reduce unnecessary Emacs features in terminal buffers."
   (let ((ghostel-buffer (derived-mode-p 'ghostel-mode)))
     (setq-local font-lock-defaults '(nil t))
 
-    (setq-local fast-but-imprecise-scrolling t)
-    (setq-local redisplay-skip-fontification-on-input t)
     (setq-local scroll-conservatively most-positive-fixnum)
     (setq-local hscroll-margin 0)
     (setq-local scroll-margin 0)
-    (setq-local scroll-step 0)
-    (setq-local hscroll-step 0)
+
+    ;; This is Emacs's default value. Furthermore, because the script also sets
+    ;; scroll-conservatively to most-positive-fixnum, Emacs's display engine
+    ;; will completely ignore scroll-step anyway. It is dead code.
+    ;; (setq-local hscroll-step 0)
     (setq-local auto-hscroll-mode nil)
 
     ;; Uncomment to disable scroll bars to save redisplay cycles
