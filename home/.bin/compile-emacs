@@ -31,6 +31,8 @@ set -euf
 # 1 to automatically handle the 2-step process: generate profile, then use it
 HANDLE_FPROFILE=1
 
+FPROFILE_INTERACTIVE=0
+
 FPROFILE_GENERATE=1
 
 # 1 to use Clang on Arch Linux
@@ -1157,16 +1159,19 @@ main() {
 
     if [[ $FPROFILE_GENERATE -ne 0 ]]; then
       run_build "fprofile-generate" 1
-      echo ""
-      echo ">>> ACTION REQUIRED: Emacs has been built with profiling enabled."
-      echo ">>> Open another terminal, run Emacs" \
-        "($EMACS_INSTALL_PREFIX/bin/emacs), and perform typical tasks."
-      echo ">>> Close Emacs gracefully to dump the profile data," \
-        "then return here."
-      read -r -p "Proceed with fprofile-use? [y,n] " ANSWER
-      if [[ "$ANSWER" != "y" ]]; then
-        echo "Interrupted." >&2
-        exit 1
+
+      if [[ $FPROFILE_INTERACTIVE -ne 0 ]]; then
+        echo ""
+        echo ">>> ACTION REQUIRED: Emacs has been built with profiling enabled."
+        echo ">>> Open another terminal, run Emacs" \
+          "($EMACS_INSTALL_PREFIX/bin/emacs), and perform typical tasks."
+        echo ">>> Close Emacs gracefully to dump the profile data," \
+          "then return here."
+        read -r -p "Proceed with fprofile-use? [y,n] " ANSWER
+        if [[ "$ANSWER" != "y" ]]; then
+          echo "Interrupted." >&2
+          exit 1
+        fi
       fi
     fi
 
