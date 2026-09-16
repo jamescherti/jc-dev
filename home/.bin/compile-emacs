@@ -29,7 +29,7 @@ fi
 set -euf
 
 # 1 to automatically handle the 2-step process: generate profile, then use it
-HANDLE_FPROFILE=0
+HANDLE_FPROFILE=1
 
 FPROFILE_GENERATE=1
 
@@ -39,7 +39,7 @@ USE_CLANG=0
 SOFTWARE_NAME="emacs"
 NUM_PROC=$(nproc --ignore=1)
 
-CC_OPTIMIZE="2"
+CC_OPTIMIZE="3"
 
 # Emacs will be installed under the following path:
 #   $EMACS_INSTALL_PREFIX/<OS>/<EMACS_VERSION>

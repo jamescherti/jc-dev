@@ -34,6 +34,52 @@
   (require 'lightemacs-use-package))
 (require 'seq)
 
+;;; Patches
+
+(with-eval-after-load 'php-ts-mode
+  (defun php-ts-mode--parent-html-heuristic (node parent bol &rest _)
+    "Return position based on html indentation.
+
+  Return 0 if the NODE is after the </html>.  If
+  `php-ts-mode-html-relative-indent' is not nil return the indentation
+  point of the last word before the NODE, plus the indentation offset,
+  otherwise return only the indentation point.  If there is no HTML tag,
+  it returns the beginning of the parent.  When NODE is nil it behaves
+  like \"prev-siblings\" of `treesit-simple-indent-presets'.  It can be
+  used when you want to indent PHP code relative to the HTML.  PARENT is
+  NODE's parent, BOL is the beginning of non-whitespace characters of
+  the current line."
+    (save-excursion
+      (cond
+       ((eq php-ts-mode-html-relative-indent 'ignore) (line-beginning-position))
+       ((let ((bound (treesit-node-start parent)))
+          (and bound
+               ;; Prevent "Invalid search bound (wrong side of
+               ;; point)" errors.  Structural editing commands (e.g.,
+               ;; `open-line' or `evil-open-above') can temporarily
+               ;; place the point before the start of the parent
+               ;; node.
+               (>= (point) bound)
+               (search-backward "</html>" bound t 1)))
+        (line-beginning-position))
+       ((null node) (apply (alist-get 'prev-sibling treesit-simple-indent-presets) node parent bol nil))
+       (t (when-let* ((html-node (treesit-search-forward
+                                  node
+                                  (lambda (node)
+                                    (equal (treesit-node-type node) "text"))
+                                  t))
+                      (end-html (treesit-node-end html-node)))
+            (goto-char end-html)
+            ;; go to the start of the last tag
+            ;; of the "text" node
+            (backward-word)
+            (back-to-indentation)
+            (cond
+             ;; shebang or comment before <?php
+             ((string-equal (treesit-node-type (treesit-node-at (point) 'html)) "text") (point))
+             (php-ts-mode-html-relative-indent (+ (point) php-ts-html-indent-offset))
+             (t (point)))))))))
+
 ;;; tab bar history
 
 ;; Replaces `winner-mode'
