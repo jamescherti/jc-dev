@@ -3492,9 +3492,9 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
       ;; to Emacs faces and apply text properties across regions of the buffer.
       ;; By disabling these, you bypass the C-to-Lisp face mapping calculations,
       ;; saving CPU cycles during rapid output.
-      vterm-disable-bold-font nil
-      vterm-disable-underline t
-      vterm-disable-inverse-video t
+      vterm-disable-bold nil
+      vterm-disable-underline nil
+      vterm-disable-inverse-video nil
 
       ;; Prevent Cursor Blinking Overhead Why it speeds things up: A blinking
       ;; cursor requires Emacs to trigger a timer and redraw the cursor's glyph

@@ -165,8 +165,8 @@ config-lightvim() {
   mkdir -p ~/.config/nvim
   rm -f ~/.vimrc
   rm -f ~/.config/nvim/init.vim
-  cp "$HOME/src/dotfiles/lightvim/lightvim.vim" ~/.vimrc
-  cp "$HOME/src/dotfiles/lightvim/lightvim.vim" ~/.config/nvim/init.vim
+  cp -u "$HOME/src/dotfiles/lightvim/lightvim.vim" ~/.vimrc
+  cp -u "$HOME/src/dotfiles/lightvim/lightvim.vim" ~/.config/nvim/init.vim
   # cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.vimrc
   # cp "$GIT_CLONE_DIR/lightvim/lightvim.vim" ~/.config/nvim/init.vim
 }
@@ -209,7 +209,7 @@ config-files() {
   secure_dir ~/.bash_history
   secure_dir ~/
 
-  cp "$SCRIPT_DIR/.default_pathaction.yaml" "$HOME/.pathaction.yaml"
+  cp -u "$SCRIPT_DIR/.default_pathaction.yaml" "$HOME/.pathaction.yaml"
 
   mkdir -p ~/.git-templates
   if ! [[ -L ~/.git-templates/hooks ]]; then
@@ -224,7 +224,7 @@ config_gpg() {
   chmod 700 "$HOME/.ssh/"
 
   # ln -sf ~/.git
-  cp "$SCRIPT_DIR/.gpg-agent.conf" ~/.gnupg/gpg-agent.conf
+  cp -u "$SCRIPT_DIR/.gpg-agent.conf" ~/.gnupg/gpg-agent.conf
 
   local pinentry_bin
   if [[ $XDG_CURRENT_DESKTOP = GNOME ]] \

@@ -162,7 +162,7 @@ config-fonts() {
     if [[ -f "$source_conf" ]] \
       && { [[ ! -f "$conf_file" ]] \
         || [[ "$source_conf" -nt "$conf_file" ]]; }; then
-      if cp "$source_conf" "${conf_file}"; then
+      if cp -u "$source_conf" "${conf_file}"; then
         echo "[FONTS] Fontconfig file created or updated at: ${conf_file}"
         fc_cache_update=1
       fi
@@ -174,7 +174,7 @@ config-fonts() {
   if [[ -f "$source_conf" ]] \
     && { [[ ! -f "$conf_file" ]] \
       || [[ "$source_conf" -nt "$conf_file" ]]; }; then
-    if cp "$source_conf" "${conf_file}"; then
+    if cp -u "$source_conf" "${conf_file}"; then
       echo "[FONTS] Fontconfig file created or updated at: ${conf_file}"
       fc_cache_update=1
     fi

@@ -65,8 +65,8 @@ actions:
       - "{{ cwd }}/tools/efasd"
     tags: install
     list_commands:
-      - "cp tools/efasd/fasd {{ '~/src/dotfiles/jc-dev/home/.bin/fasd' | expanduser | quote }}"
-      - "cp tools/efasd/fasd {{ '~/.bin/fasd' | expanduser | quote }}"
+      - "cp -u tools/efasd/fasd {{ '~/src/dotfiles/jc-dev/home/.bin/fasd' | expanduser | quote }}"
+      - "cp -u tools/efasd/fasd {{ '~/.bin/fasd' | expanduser | quote }}"
 
   - path_match:
       - "*/update-iptables.sh"
@@ -90,8 +90,8 @@ actions:
     tags: install
     list_commands:
       - rm -f ~/.vimrc ~/.config/nvim/init.vim
-      - cp dotfiles/lightvim/lightvim.vim ~/.vimrc
-      - cp dotfiles/lightvim/lightvim.vim ~/.config/nvim/init.vim
+      - cp -u dotfiles/lightvim/lightvim.vim ~/.vimrc
+      - cp -u dotfiles/lightvim/lightvim.vim ~/.config/nvim/init.vim
 
   - path_match:
       - "*/minimal-emacs.d/*"

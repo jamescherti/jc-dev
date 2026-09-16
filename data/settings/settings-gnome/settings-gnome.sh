@@ -50,7 +50,7 @@ if [[ $MODIFY_BACKGROUND ]]; then
   GNOME_BACKGROUND_DIR="$HOME/.backgrounds"
   mkdir -p "$GNOME_BACKGROUND_DIR"
   GNOME_BACKGROUND_PATH="$GNOME_BACKGROUND_DIR/background.png"
-  cp "files-settings-gnome/background.png" "$GNOME_BACKGROUND_PATH"
+  cp -u "files-settings-gnome/background.png" "$GNOME_BACKGROUND_PATH"
 fi
 
 if [[ $MODIFY_BACKGROUND -ne 0 ]]; then
