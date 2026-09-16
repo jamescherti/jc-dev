@@ -37,7 +37,7 @@
 ;;; tab bar history
 
 ;; Replaces `winner-mode'
-(add-hook 'lightemacs-after-init-hook #'tab-bar-history-mode)
+;; (add-hook 'lightemacs-after-init-hook #'tab-bar-history-mode)
 
 ;;; guess tab width
 
