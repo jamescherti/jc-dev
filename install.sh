@@ -250,9 +250,12 @@ config_uutils() {
           # source=$(realpath "$source")
           filename="${source##*/uu-}"
           dest="$dest_dir/$filename"
-          echo "$source $dest"
-          # ln -sf "$source" "$dest"
-          ln -sf "$source" "$dest"
+
+          if [[ ! -e "$dest" && ! -L "$dest" ]]; then
+            echo "$source $dest"
+            # ln -sf "$source" "$dest"
+            ln -s "$source" "$dest"
+          fi
         done
     fi
   fi
