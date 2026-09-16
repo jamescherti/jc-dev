@@ -173,7 +173,8 @@
 (setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
-      (concat "-DCMAKE_C_FLAGS='-O3 -march=native -mtune=native' "
+      (concat "-DCMAKE_BUILD_TYPE=Release "
+              "-DCMAKE_C_FLAGS='-O3 -march=native -mtune=native' "
               "-DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' "
               "-DUSE_SYSTEM_LIBVTERM=yes"))
 
