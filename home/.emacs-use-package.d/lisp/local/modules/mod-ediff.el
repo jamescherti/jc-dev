@@ -187,14 +187,22 @@ vertical split."
 
 (defvar mod-ediff--inhibit-winner-undo nil)
 
+(defvar mod-ediff--saved-window-configuration nil
+  "Stores the window configuration before Ediff starts.")
+
+(defun mod-ediff-save-window-config ()
+  "Save the current window configuration to `mod-ediff--saved-window-configuration`."
+  (setq mod-ediff--saved-window-configuration (current-window-configuration)))
+
+(add-hook 'ediff-before-setup-hook #'mod-ediff-save-window-config)
+
 ;; Conditionally trigger `winner-undo` only if the layout remains unmutated
 (defun mod-ediff-winner-undo ()
   "Ediff winner undo.
 Restores the window configuration while ensuring point position is preserved
 for the compared buffers."
   (when (and (not mod-ediff--inhibit-winner-undo)
-             (bound-and-true-p winner-mode)
-             (fboundp 'winner-undo))
+             (window-configuration-p mod-ediff--saved-window-configuration))
     (let ((buf-points
            (delq nil
                  (mapcar (lambda (buf)
@@ -203,7 +211,8 @@ for the compared buffers."
                          (list (and (boundp 'ediff-buffer-A) ediff-buffer-A)
                                (and (boundp 'ediff-buffer-B) ediff-buffer-B)
                                (and (boundp 'ediff-buffer-C) ediff-buffer-C))))))
-      (winner-undo)
+      (set-window-configuration mod-ediff--saved-window-configuration)
+      (setq mod-ediff--saved-window-configuration nil)
       (dolist (bp buf-points)
         (let ((buf (car bp))
               (pt (cdr bp)))
