@@ -940,7 +940,10 @@ subsequent GCC invocations."
                            le-recentf
                            le-savehist
                            le-saveplace
-                           le-winner ; used by ediff
+
+                           ;; TODO replace with tab-bar-history-mode
+                           ;; le-winner ; used by ediff
+
                            le-elec-pair
 
                            ;; le-which-key
