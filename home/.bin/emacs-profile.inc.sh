@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
-OSFAMILY=$(~/.local/bin/osid 2>/dev/null || echo "unknown")
+OSFAMILY=$(
+  # shellcheck disable=SC1091
+  [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
+  echo "${ID:-unknown}"
+)
 
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
   # export RUN_EMACS_BIN="/usr/bin/emacs"

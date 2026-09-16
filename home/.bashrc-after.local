@@ -640,3 +640,22 @@ fi
 export _FASD_IGNORE_DUPS=1
 
 export _FASD_IGNORE_TMP_DIRS=1
+
+# TODO move this to profile-after
+if ! type -P osid >/dev/null 2>&1; then
+  if [[ -f /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    OSFAMILY=$(source /etc/os-release && echo "$ID")
+  fi
+else
+  OSFAMILY=$(osid 2>/dev/null)
+fi
+
+OS_BIN_DIR="$HOME/.local-$OSFAMILY/bin"
+
+if [[ -n "$OSFAMILY" && -d "$OS_BIN_DIR" ]]; then
+  case ":$PATH:" in
+  *":$OS_BIN_DIR:"*) ;;
+  *) export PATH="$OS_BIN_DIR:$PATH" ;;
+  esac
+fi

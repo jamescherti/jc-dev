@@ -240,16 +240,18 @@ config_gpg() {
 
 config_uutils() {
   if [[ $OSFAMILY = gentoo ]] || [[ $OSFAMILY = arch ]]; then
+    local dest_dir="$HOME/.local-$OSFAMILY/bin"
+
     # Install uutils
-    local dest
-    dest="$HOME/.local-$OSFAMILY"
-    if [[ ! -f "$dest/bin/ls" ]]; then
-      mkdir -p "$dest/bin"
+    if [[ ! -f "$dest_dir/ls" ]]; then
+      mkdir -p "$dest_dir"
       find /usr/bin -maxdepth 1 \( -type f -o -type l \) -name 'uu-*' -print0 \
         | while IFS= read -r -d '' source; do
+          # source=$(realpath "$source")
           filename="${source##*/uu-}"
-          dest="$dest/bin/$filename"
+          dest="$dest_dir/$filename"
           echo "$source $dest"
+          # ln -sf "$source" "$dest"
           ln -sf "$source" "$dest"
         done
     fi
@@ -257,8 +259,12 @@ config_uutils() {
 }
 
 main() {
-  source /etc/os-release
-  OSFAMILY="$ID"
+  # shellcheck disable=SC1091
+  OSFAMILY=$(
+    # shellcheck disable=SC1091
+    [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
+    echo "${ID:-unknown}"
+  )
 
   init
   confirm
