@@ -241,16 +241,16 @@ config_gpg() {
 config_uutils() {
   if [[ $OSFAMILY = gentoo ]] || [[ $OSFAMILY = arch ]]; then
     # Install uutils
-    if [[ -f "$HOME/.local/bin/ls" ]]; then
-      mkdir -p "$HOME/.local/bin"
+    local dest
+    dest="$HOME/.local-$OSFAMILY"
+    if [[ ! -f "$dest/bin/ls" ]]; then
+      mkdir -p "$dest/bin"
       find /usr/bin -maxdepth 1 \( -type f -o -type l \) -name 'uu-*' -print0 \
         | while IFS= read -r -d '' source; do
-          # source=$(realpath "$source")
           filename="${source##*/uu-}"
-          dest="$HOME/.local/bin/$filename"
+          dest="$dest/bin/$filename"
           echo "$source $dest"
-          # ln -sf "$source" "$dest"
-          rm -f "$dest"
+          ln -sf "$source" "$dest"
         done
     fi
   fi
@@ -265,6 +265,7 @@ main() {
 
   rm -f ~/.gitignore_global
 
+  config_uutils
   copy_dotfiles
   config-jc-dotfiles
   config_gpg
