@@ -27,6 +27,7 @@
 ;;; Debug on error
 
 (setq debug-on-error t)
+(setq comp-libgccjit-reproducer t)
 
 ;;; Profiling
 
@@ -39,6 +40,10 @@
 
 ;; (setq lightemacs-ui-features '(dialogs menu-bar tooltips context-menu))
 ;; (setq lightemacs-ui-features '(dialogs tool-bar menu-bar tooltips context-menu))
+
+;; TODO minimal-emacs.d?
+(setq native-comp-verbose (if init-file-debug 1 0)
+      native-comp-debug (if init-file-debug 1 0))
 
 (setq lightemacs-native-comp-excluded-cpus 1)
 
@@ -170,7 +175,7 @@
 ;; Risk Level: Because it actively alters Lisp semantics, speed 3 is considered
 ;; "unsafe." Heavily dynamic code that relies on advising or redefining
 ;; functions on the fly might break or behave unpredictably.
-(setq native-comp-speed 2)
+(setq native-comp-speed 3)
 
 (setq vterm-module-cmake-args
       (concat "-DCMAKE_BUILD_TYPE=Release "
@@ -222,7 +227,7 @@
                                      ;; through native-comp-compiler-options is
                                      ;; redundant and bypasses the native
                                      ;; compiler's built-in logic.
-                                     "-O2"
+                                     "-O3"
 
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which
