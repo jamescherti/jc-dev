@@ -897,7 +897,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; freeze or a package fails silently, a limit of 16384 ensures the error trace
  ;; from three hours ago is still there for you to read. It turns your log into a
  ;; reliable diagnostic tool instead of a fleeting ticker.
- message-log-max 16384
+ ;;
+ ;; Set by minimal-emacs.d
+ ;; message-log-max 16384
 
  ;; Emacs drops a mark in the global ring every time you jump across files, such
  ;; as when using xref-find-definitions to trace Python or Elisp functions.
@@ -908,7 +910,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; "back button" for your entire project. You can pop the mark continuously to
  ;; retrace your steps and return to your exact starting point, regardless of how
  ;; many files you visited.
- global-mark-ring-max 512
+ global-mark-ring-max 256
 
  ;; In Emacs, almost every deletion command (such as killing a word, killing a
  ;; line, or deleting a sentence) saves the text to the clipboard history.
@@ -919,7 +921,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; prevents this data loss. It allows you to use completion frameworks to search
  ;; for text you cut hours ago, treating your clipboard as a safe, long-term
  ;; scratchpad rather than a fragile queue.
- kill-ring-max 1024
+ kill-ring-max 240
  mark-ring-max 32
 
  ;; If this variable is t, splitting a window tries to get the space
@@ -1573,7 +1575,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
         ;; (if (fboundp 'fringe-mode) (fringe-mode '20))
 
-        ;; TODO try
         ;; (setq-default fringes-outside-margins t)
 
         ;; Use reliable file-based syntax highlighting when available and hunk-based
@@ -1587,8 +1588,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
         ;; highlighting (like Python or Elisp keywords) inside the diff hunk itself,
         ;; blending the diff colors with your code colors perfectly.
         ;;
-        ;; TODO add to minimal-emacs.d
-        diff-font-lock-syntax 'hunk-also)
+        ;; TODO add to minimal-emacs.d?
+        ;; diff-font-lock-syntax 'hunk-also
+        )
 
   ;; (setq diff-advance-after-apply-hunk t)
 
@@ -1641,11 +1643,12 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   (add-hook 'text-mode-hook #'(lambda () (setq-local indent-tabs-mode nil)))
 
-  (setq read-process-output-max (* 32 1024 1024))
-
-  (when (and (not (daemonp))
-             (not (display-graphic-p)))
-    (xterm-mouse-mode 1))
+  ;; TODO try this
+  ;; (when (and (not (daemonp))
+  ;;            (not (display-graphic-p)))
+  ;;   (xterm-mouse-mode 1))
+  ;; (when (< emacs-major-version 31)
+  ;;   (add-hook 'tty-setup-hook #'xterm-mouse-mode))
 
   (unless noninteractive
     ;; (windmove-default-keybindings)
@@ -2013,7 +2016,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  save-place-forget-unreadable-files nil
 
  ;; Keep the alist bounded to prevent parsing slowdowns
- save-place-limit 300)
+ save-place-limit 500)
 
 ;;; Display line numbers
 
@@ -3250,52 +3253,12 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;;; so long
 
-;; (setq so-long-threshold 10000)
-
-(add-hook 'lightemacs-on-first-file-hook 'global-so-long-mode)
-
 ;; TODO lightemacs
-(with-eval-after-load 'so-long
-  ;; Apply so-long mitigations to configuration and plain text files, which
-  ;; occasionally contain excessively long single lines
-  (add-to-list 'so-long-target-modes 'conf-mode)
-  (add-to-list 'so-long-target-modes 'text-mode)
-
-  ;; Prevent Emacs from attempting to restore the cursor position in files with
-  ;; extremely long lines, avoiding significant loading delays.
-  (add-to-list 'so-long-variable-overrides '(save-place-alist . nil))
-
-  ;; Ensure the buffer remains writable when so-long triggers, overriding the
-  ;; default behavior that locks the buffer as read-only.
-  (setf (alist-get 'buffer-read-only so-long-variable-overrides nil t) nil)
-
-  ;; Define the specific functions to execute when enabling or disabling the
-  ;; so-long mitigations, ensuring the minor mode is toggled cleanly.
-  (setq so-long-revert-function 'turn-off-so-long-minor-mode
-        so-long-function 'turn-on-so-long-minor-mode)
-
-  ;; Keep syntax highlighting and reduce it. Limit font-lock to the minimum
-  ;; decoration level to save CPU cycles, and remove it from the disable list so
-  ;; basic highlighting remains active.
-  (add-to-list 'so-long-variable-overrides '(font-lock-maximum-decoration . 1))
-  (setq so-long-minor-modes (delq 'font-lock-mode so-long-minor-modes))
-
-  ;; Retain line numbers for usability by preventing so-long from disabling the
-  ;; mode.
-  (setq so-long-minor-modes (delq 'display-line-numbers-mode so-long-minor-modes))
-
-  (dolist (mode '(auto-composition-mode
-                  better-jumper-local-mode
-                  eldoc-mode
-                  flycheck-mode
-                  highlight-indent-guides-mode
-                  hl-fill-column-mode
-                  spell-fu-mode
-                  undo-tree-mode
-                  ws-butler-mode
-                  diff-hl-mode
-                  git-gutter-mode))
-    (add-to-list 'so-long-minor-modes mode t)))
+;; (with-eval-after-load 'so-long
+;;   ;; Define the specific functions to execute when enabling or disabling the
+;;   ;; so-long mitigations, ensuring the minor mode is toggled cleanly.
+;;   (setq so-long-revert-function 'turn-off-so-long-minor-mode
+;;         so-long-function 'turn-on-so-long-minor-mode))
 
 ;; (setq so-long-threshold 10000)
 ;; (add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
@@ -4014,6 +3977,7 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;; Ignore large, commonly untracked directories (like node_modules) in VC
 ;; operations to improve performance.
+;; TODO lightemacs?
 (with-eval-after-load 'tramp
   (setq vc-ignore-dir-regexp (format "%s\\|%s\\|%s"
                                      vc-ignore-dir-regexp
@@ -4266,14 +4230,6 @@ function or if an invalid choice is made."
 ;;; Flyspell and ispell Optimizations
 
 (setq
- ;; Setting flyspell-check-changes to a non-nil value causes Flyspell to check
- ;; only words that have been typed or edited, instead of also checking words
- ;; that point moves across. This can reduce spell-checking activity when
- ;; navigating through existing text. The tradeoff is that existing misspellings
- ;; are not checked merely because point moves across them, so they may remain
- ;; undetected until the text is edited or checked explicitly.
- flyspell-check-changes t
-
  ;; Setting flyspell-mark-duplications-flag to nil prevents Flyspell from
  ;; reporting repeated words as errors. This eliminates duplicate-word detection,
  ;; so accidental repetitions such as "the the" are no longer reported.
@@ -4286,10 +4242,6 @@ function or if an invalid choice is made."
  ;; TODO minimal emacs?
  flyspell-delay 1
 
- ;; Force Flyspell to run spell-checks using idle timers rather than blocking via
- ;; sit-for. This prevents brief input delays while typing.
- flyspell-delay-use-timer t
-
  ;;; Sync dictionary
 
  ;; Set the ispell program name to aspell
@@ -4298,9 +4250,6 @@ function or if an invalid choice is made."
 
  ;; Set the global default dictionary for the Ispell process.
  ispell-dictionary "en_US"
-
- ;; Reduce unnecessary messages when checking individual words.
- ispell-quietly t
 
  ;; Configure Aspell's suggestion mode to "ultra", which favors very close
  ;; spelling and phonetic matches when generating suggestions.
