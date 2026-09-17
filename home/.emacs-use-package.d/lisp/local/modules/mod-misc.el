@@ -726,6 +726,20 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(with-eval-after-load 'so-long
+  ;; Emacs 29+ display engine is highly optimized for truncated lines.
+  ;; Override so-long's legacy default which forces expensive line wrapping.
+  (setf (alist-get 'truncate-lines so-long-variable-overrides nil t) t)
+  (setf (alist-get 'line-move-visual so-long-variable-overrides nil t) nil)
+
+  ;; Prevent massive, externally updated files (like production logs) from locking
+  ;; up the editor when they auto-refresh.
+  (add-to-list 'so-long-minor-modes 'auto-revert-mode t))
+
+;; Lower the threshold to catch minified files earlier. The default is 10,000
+;; bytes, but external linters and parsers can choke much earlier.
+(setq so-long-threshold 5000)
+
 ;; (setq jit-lock-defer-time 0)
 
 ;; Fix bug caused by double buffering in daemon mode
