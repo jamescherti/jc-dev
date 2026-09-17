@@ -730,8 +730,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Fix bug caused by double buffering in daemon mode
 ;; TODO patch?
-(when (daemonp)
-  (add-to-list 'default-frame-alist '(inhibit-double-buffering . t)))
+;; (when (daemonp)
+;;   (add-to-list 'default-frame-alist '(inhibit-double-buffering . t)))
 
 ;; Whether to use the toolkit to display tooltips.
 (setq x-gtk-use-system-tooltips nil)
