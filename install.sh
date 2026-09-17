@@ -197,7 +197,7 @@ config-bash-stdops() {
 
 config-files() {
   # Secure dirs
-  chmod 700 "$HOME"
+  secure_dir "$HOME"
   secure_dir ~/.gnupg
   secure_dir ~/.ssh
   secure_dir ~/Documents
