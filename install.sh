@@ -131,6 +131,7 @@ copy_dotfiles() {
 
   # rsync without delete
   echo "[RUN-RSYNC]" home/ '->' "$HOME/"
+  chmod 700 "$SCRIPT_DIR/home/"
   rsync "${rsync_opts[@]}" "$SCRIPT_DIR/home/" "$HOME/"
 }
 
@@ -304,6 +305,7 @@ main() {
   update-emacs-templates
 
   echo "[INFO] Install desktop files"
+  chmod 700 "$SCRIPT_DIR/data/dist/desktop/"
   rsync -a "$SCRIPT_DIR/data/dist/desktop/" "$HOME/"
 
   echo
