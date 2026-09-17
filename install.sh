@@ -208,6 +208,10 @@ config-files() {
   secure_dir ~/.vim
   secure_dir ~/.vim_bundle
   secure_dir ~/.bash_history
+  secure_dir ~/.cache
+  secure_dir ~/.config
+  secure_dir ~/Pictures
+  secure_dir ~/Media
 
   cp -u "$SCRIPT_DIR/.default_pathaction.yaml" "$HOME/.pathaction.yaml"
 
