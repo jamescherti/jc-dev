@@ -98,11 +98,7 @@
 
 ;; TODO is this good?
 (setq mouse-wheel-progressive-speed nil ; disable acceleration of scrolling
-      mouse-wheel-scroll-amount
-      '(1
-        ((shift) . hscroll) ((meta))
-        ((control meta) . global-text-scale)
-        ((control) . text-scale)))
+      )
 
 (setq inhibit-mouse-button-numbers '(1 2 3)
       pixel-scroll-precision-use-momentum nil)

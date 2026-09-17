@@ -726,9 +726,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
-;; TODO minimal-emacs.d?
-(setq-default next-error-find-buffer-function #'next-error-buffer-unnavigated-current)
-
 ;; (setq jit-lock-defer-time 0)
 
 ;; Fix bug caused by double buffering in daemon mode
@@ -778,11 +775,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (setq icomplete-vertical-selected-prefix-indicator   " @ ")
 ;; (setq icomplete-vertical-unselected-prefix-indicator "   ")
 
-;; Text properties inflate the size of recentf's files, and there is no purpose
-;; in persisting them.
-(with-eval-after-load 'recentf
-  (add-to-list 'recentf-filename-handlers #'substring-no-properties -80))
-
 ;; The benefit of visual-order-cursor-movement t is that when editing text
 ;; containing both left-to-right and right-to-left scripts, cursor
 ;; movement aligns with how the text is visually presented on the screen.
@@ -806,7 +798,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; weird invisible spacing bugs or non-ASCII quotes (like ' vs '), it helps.
  ;; Otherwise, it just adds verbosity to the echo line.
  what-cursor-show-names t
- help-clean-buttons t
+
+ ;; TODO lightemacs?
+ ;; Test it first
  help-enable-variable-value-editing t
 
  ;; Automatically enable ANSI color support in compilation buffers

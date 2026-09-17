@@ -36,4 +36,4 @@ else
   exit 1
 fi
 
-exec run-emacs -nw --init-directory "$EMACS_D" "$@"
+exec run-emacs --init-directory "$EMACS_D" "$@"
