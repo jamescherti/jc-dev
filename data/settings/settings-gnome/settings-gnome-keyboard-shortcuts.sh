@@ -45,19 +45,13 @@ shortcut() {
   local shortcut_name="'$1'"
   local shortcut="'$2'"
   local shortcut_cmd="'$3'"
-  echo "Shortcut: $@"
 
   local uri="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom$SHORTCUT_INDEX/"
   gsettings set "$uri" name "$shortcut_name" >/dev/null
   gsettings set "$uri" binding "$shortcut" >/dev/null
   gsettings set "$uri" command "$shortcut_cmd" >/dev/null
 
-  # printf "Changing shortcut: %s %s %s\n" "$1" "$2" "$3"
-
-  # if [[ $SHORTCUT_STRING != "" ]]; then
-  #   SHORTCUT_STRING="${SHORTCUT_STRING},"
-  # fi
-  # SHORTCUT_STRING="${SHORTCUT_STRING}'/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom${SHORTCUT_INDEX}/'"
+  printf "Changing shortcut: %s %s %s\n" "$1" "$2" "$3"
 
   SHORTCUT_INDEX=$((SHORTCUT_INDEX + 1))
 }
@@ -85,17 +79,17 @@ gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Control><Alt>c'
 # dconf write /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/binding "''"
 
 if type -P xdevenv &>/dev/null; then
-  shortcut "xocrshot" "<Primary><Alt>O" "$HOME/.bin/xdevenv xocrshot"
-  # shortcut "Screenshot" "<Primary><Alt>C" "$HOME/.bin/xdevenv screenshot"
-  shortcut "Editor" "<Primary><Alt>V" "$HOME/.bin/xdevenv editor"
-  shortcut "Terminal" "<Primary><Alt>R" "$HOME/.bin/xdevenv terminal"
-  shortcut "Web Browser" "<Primary><Alt>F" "$HOME/.bin/xdevenv web-browser"
-  shortcut "Pwd Manager" "<Primary><Alt>S" "$HOME/.bin/xdevenv pwd-manager"
-  shortcut "Mail Client" "<Primary><Alt>Q" "$HOME/.bin/xdevenv mail-client"
+  shortcut "xocrshot" "<Primary><Alt>o" "$HOME/.bin/xdevenv xocrshot"
+  # shortcut "Screenshot" "<Primary><Alt>c" "$HOME/.bin/xdevenv screenshot"
+  shortcut "Editor" "<Primary><Alt>v" "$HOME/.bin/xdevenv editor"
+  shortcut "Terminal" "<Primary><Alt>r" "$HOME/.bin/xdevenv terminal"
+  shortcut "Web Browser" "<Primary><Alt>f" "$HOME/.bin/xdevenv web-browser"
+  shortcut "Pwd Manager" "<Primary><Alt>s" "$HOME/.bin/xdevenv pwd-manager"
+  shortcut "Mail Client" "<Primary><Alt>q" "$HOME/.bin/xdevenv mail-client"
   shortcut "Suspend" "<Primary>F12" "dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Suspend boolean:true"
-  shortcut "File Explorer" "<Primary><Alt>E" "$HOME/.bin/xdevenv file-explorer"
-  shortcut "Firefox Profiles" "<Primary><Alt>P" "$HOME/.bin/xdevenv web-browser-profiles"
-  shortcut "Changer user" "<Primary><Alt>U" "$HOME/.bin/xdevenv gdm-change-user"
-  shortcut "Light" "<Primary><Alt>M" "$HOME/.bin/xdevenv light"
-  shortcut "Night" "<Primary><Alt>N" "$HOME/.bin/xdevenv night"
+  shortcut "File Explorer" "<Primary><Alt>e" "$HOME/.bin/xdevenv file-explorer"
+  shortcut "Firefox Profiles" "<Primary><Alt>p" "$HOME/.bin/xdevenv web-browser-profiles"
+  shortcut "Changer user" "<Primary><Alt>u" "$HOME/.bin/xdevenv gdm-change-user"
+  shortcut "Light" "<Primary><Alt>m" "$HOME/.bin/xdevenv light"
+  shortcut "Night" "<Primary><Alt>n" "$HOME/.bin/xdevenv night"
 fi
