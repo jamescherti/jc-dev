@@ -197,6 +197,7 @@ config-bash-stdops() {
 
 config-files() {
   # Secure dirs
+  chmod 700 "$HOME"
   secure_dir ~/.gnupg
   secure_dir ~/.ssh
   secure_dir ~/Documents
@@ -207,7 +208,6 @@ config-files() {
   secure_dir ~/.vim
   secure_dir ~/.vim_bundle
   secure_dir ~/.bash_history
-  secure_dir ~/
 
   cp -u "$SCRIPT_DIR/.default_pathaction.yaml" "$HOME/.pathaction.yaml"
 

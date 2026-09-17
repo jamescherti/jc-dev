@@ -738,7 +738,15 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Lower the threshold to catch minified files earlier. The default is 10,000
 ;; bytes, but external linters and parsers can choke much earlier.
-(setq so-long-threshold 5000)
+(setq so-long-threshold 6000)
+
+;; Autocompletion & Snippets
+;; corfu-mode
+;; corfu-popupinfo-mode
+;; yas-minor-mode
+(dolist (mode '(;; Structural Editing and Parenthesis Matching
+                wizard-hl-todo-local-mode))
+  (add-to-list 'so-long-minor-modes mode t))
 
 ;; (setq jit-lock-defer-time 0)
 

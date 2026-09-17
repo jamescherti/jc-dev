@@ -75,11 +75,19 @@ set -o errtrace
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 cd "$SCRIPT_DIR"
 
-echo "Updateing GNOME shortcuts..."
+echo "Updating GNOME shortcuts..."
+
+#!/usr/bin/env bash
+
+# Set the GNOME shell screenshot UI keybinding
+gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Control><Alt>c']"
+
+# Modify the custom keybinding binding via dconf
+# dconf write /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/binding "''"
 
 if type -P xdevenv &>/dev/null; then
   shortcut "xocrshot" "<Primary><Alt>O" "$HOME/.bin/xdevenv xocrshot"
-  shortcut "Screenshot" "<Primary><Alt>C" "$HOME/.bin/xdevenv screenshot"
+  # shortcut "Screenshot" "<Primary><Alt>C" "$HOME/.bin/xdevenv screenshot"
   shortcut "Editor" "<Primary><Alt>V" "$HOME/.bin/xdevenv editor"
   shortcut "Terminal" "<Primary><Alt>R" "$HOME/.bin/xdevenv terminal"
   shortcut "Web Browser" "<Primary><Alt>F" "$HOME/.bin/xdevenv web-browser"
