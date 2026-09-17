@@ -196,8 +196,8 @@ config-bash-stdops() {
 # }
 
 config-files() {
-  # Secure dirs
   secure_dir "$HOME"
+  # Secure dirs
   secure_dir ~/.gnupg
   secure_dir ~/.ssh
   secure_dir ~/Documents

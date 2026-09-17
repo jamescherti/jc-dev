@@ -45,6 +45,7 @@ shortcut() {
   local shortcut_name="'$1'"
   local shortcut="'$2'"
   local shortcut_cmd="'$3'"
+  echo "Shortcut: $@"
 
   local uri="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom$SHORTCUT_INDEX/"
   gsettings set "$uri" name "$shortcut_name" >/dev/null
@@ -76,8 +77,6 @@ SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 cd "$SCRIPT_DIR"
 
 echo "Updating GNOME shortcuts..."
-
-#!/usr/bin/env bash
 
 # Set the GNOME shell screenshot UI keybinding
 gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Control><Alt>c']"
