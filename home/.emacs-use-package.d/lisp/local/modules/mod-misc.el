@@ -3227,42 +3227,6 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
   (with-no-warnings
     (add-hook 'focus-out-hook #'my-bash-lastdir--on-focus-change)))
 
-;;; track eol (TODO light emacs?)
-
-(setq evil-track-eol nil)
-
-;; When navigating vertically with visual line movement commands such as
-;; previous-visual-line or next-visual-line (or evil-previous-visual-line and
-;; evil-next-visual-line when using Evil), the cursor may enter invisible text
-;; if folded regions are present.
-;;
-;; This behavior occurs under the following conditions:
-;; - End-of-line tracking is enabled and the cursor originates from a longer
-;;   line. During vertical movement, the cursor attempts to preserve its
-;;   logical column position, which can correspond to a location inside hidden
-;;   content on the target line.
-;; - line-move-ignore-invisible is set to nil, causing Emacs to include hidden
-;;   or folded text during vertical movement rather than skipping it.
-;;
-;; The following ensures that vertical navigation never lands in invisible
-;; text within folded regions, add the following to your configuration:
-(setq track-eol nil)
-
-;; (setq evil-track-eol track-eol)
-;; (setq line-move-ignore-invisible t)
-
-;;; so long
-
-;; TODO lightemacs
-;; (with-eval-after-load 'so-long
-;;   ;; Define the specific functions to execute when enabling or disabling the
-;;   ;; so-long mitigations, ensuring the minor mode is toggled cleanly.
-;;   (setq so-long-revert-function 'turn-off-so-long-minor-mode
-;;         so-long-function 'turn-on-so-long-minor-mode))
-
-;; (setq so-long-threshold 10000)
-;; (add-hook 'lightemacs-after-init-hook #'global-so-long-mode)
-
 ;;; Term kill
 
 ;; Automatically close the buffer when the terminal session ends
@@ -5690,6 +5654,27 @@ on text following the cursor."
 ;;
 ;;   (when my-rg-exists
 ;;     (setq-default projectile-generic-command my-projectile-rg-command)))
+
+;;; DISABLED: track eol
+
+;; (setq evil-track-eol nil)
+
+;; When navigating vertically with visual line movement commands such as
+;; previous-visual-line or next-visual-line (or evil-previous-visual-line and
+;; evil-next-visual-line when using Evil), the cursor may enter invisible text
+;; if folded regions are present.
+;;
+;; This behavior occurs under the following conditions:
+;; - End-of-line tracking is enabled and the cursor originates from a longer
+;;   line. During vertical movement, the cursor attempts to preserve its
+;;   logical column position, which can correspond to a location inside hidden
+;;   content on the target line.
+;; - line-move-ignore-invisible is set to nil, causing Emacs to include hidden
+;;   or folded text during vertical movement rather than skipping it.
+;;
+;; The following ensures that vertical navigation never lands in invisible
+;; text within folded regions, add the following to your configuration:
+;; (setq track-eol nil)
 
 ;;; Provide
 
