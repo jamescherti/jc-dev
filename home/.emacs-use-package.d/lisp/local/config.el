@@ -1296,6 +1296,13 @@ This uses an around advice to trap errors and verify file timestamps."
 
             ;; (modus-themes :type built-in)
 
+            (benchmark-init
+             :type built-in)
+            ;; (benchmark-init
+            ;;  :type git :host github
+            ;;  :repo "jamescherti/benchmark-init-el"
+            ;;  :branch "master")
+
             ;; TODO fix this
             (ef-themes
              :type git :host github
@@ -1400,10 +1407,6 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jamescherti/transient"
              :branch "main")
-            (benchmark-init
-             :type git :host github
-             :repo "jamescherti/benchmark-init-el"
-             :branch "master")
             (wgrep
              :type git :host github
              :repo "jamescherti/Emacs-wgrep"
