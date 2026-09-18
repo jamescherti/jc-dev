@@ -125,17 +125,14 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 
 (defun my-apply-custom-dir-variables ()
   "Apply directory-specific variables from `my-custom-dir-variables'."
-  (let ((path (or (buffer-file-name (buffer-base-buffer)) default-directory)))
-    (when path
-      (catch 'break
-        (dolist (entry my-custom-dir-variables)
-          (let ((dir (expand-file-name (car entry)))
-                (vars (cdr entry)))
-            (when (file-in-directory-p path dir)
-              (dolist (var-val vars)
-                ;; This is the programmatic runtime equivalent of `setq-local`
-                (set (make-local-variable (car var-val)) (cdr var-val)))
-              (throw 'break t))))))))
+  (when-let* ((path (or (buffer-file-name (buffer-base-buffer)) default-directory)))
+    (catch 'break
+      (dolist (entry my-custom-dir-variables)
+        (when (file-in-directory-p path (expand-file-name (car entry)))
+          (dolist (var-val (cdr entry))
+            ;; This is the programmatic runtime equivalent of `setq-local`
+            (set (make-local-variable (car var-val)) (cdr var-val)))
+          (throw 'break t))))))
 
 ;;; .my-dir-locals.el
 
@@ -192,14 +189,13 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
   "Files where modes like Flymake and Apheleia are disabled."
   (when-let* ((buffer (my-code-checker-get-buffer))
               (file-name (buffer-file-name buffer))
-              (base-name (when file-name
-                           (file-name-nondirectory file-name))))
+              (base-name (file-name-nondirectory file-name)))
     (or (string= base-name "make.conf") ; Gentoo
         (string= base-name "PKGBUILD")
         (string= base-name ".dir-locals.el")
         (string= base-name ".my-dir-locals.el")
         (string= base-name "straight-profile.el")
-        (string-suffix-p ".ebuild" file-name))))
+        (string-suffix-p ".ebuild" base-name))))
 
 ;; Evaluate .my-dir-locals.el
 
