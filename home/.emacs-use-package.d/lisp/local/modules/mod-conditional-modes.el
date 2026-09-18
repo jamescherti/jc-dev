@@ -144,30 +144,27 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 
 ;;; dir-locals-trigger
 
-(require 'dir-locals-trigger)
-(dir-locals-trigger-mode 1)
-
 ;;; env- vars
 
-(dir-locals-trigger-defvar env-deny-all nil
+(defvar env-deny-all nil
   "Deny all the allowed modes.")
 
-(dir-locals-trigger-defvar env-allow-syntax-checker-package-lint nil
+(defvar env-allow-syntax-checker-package-lint nil
   "Allow the `package-lint' syntax checker.")
 
-(dir-locals-trigger-defvar env-allow-syntax-checkers nil
+(defvar env-allow-syntax-checkers nil
   "Allow syntax checkers such as Flymake.")
 
-(dir-locals-trigger-defvar env-allow-language-servers nil
+(defvar env-allow-language-servers nil
   "Allow language server via dir-locals.")
 
-(dir-locals-trigger-defvar env-allow-whitespace-cleanup nil
+(defvar env-allow-whitespace-cleanup nil
   "Allow deleting whitespace via dir-locals.")
 
-(dir-locals-trigger-defvar env-allow-reformatters nil
+(defvar env-allow-reformatters nil
   "Non-nil allows directory-local configuration of code reformatters.")
 
-(dir-locals-trigger-defvar env-allow-lsp nil
+(defvar env-allow-lsp nil
   "Non-nil allows directory-local configuration of code reformatters.")
 
 ;;; Conditional code checker/reformatter
@@ -204,14 +201,6 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
         (string= base-name "straight-profile.el")
         (string-suffix-p ".ebuild" file-name))))
 
-;;; dir-config
-
-;; (lightemacs-use-package dir-config
-;;   :init
-;;   (setq dir-config-file-names '(".dir-settings.el"))
-;;   (setq dir-config-allowed-directories '("~/src"))
-;;   (dir-config-mode 1))
-
 ;; Evaluate .my-dir-locals.el
 
 ;; Write the manual logic
@@ -223,6 +212,8 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
     (when (and
            (not (or
                  (bound-and-true-p so-long-detected-p)
+                 (derived-mode-p 'so-long-mode)
+                 (bound-and-true-p so-long-minor-mode)
                  ;; (bound-and-true-p so-long--active)
                  ;; (and (boundp 'so-long-predicate)
                  ;;      (functionp so-long-predicate)
@@ -285,8 +276,9 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                    (fboundp 'stripspace-local-mode))
           (stripspace-local-mode 1))))))
 
-;; Attach your logic to the trigger hook
-(add-hook 'dir-locals-trigger-hook #'my-evaluate-dir-locals)
+;; Attach your logic to the trigger hook with a depth of 100
+;; so that it runs after global-so-long-mode processes the buffer.
+(add-hook 'after-change-major-mode-hook #'my-evaluate-dir-locals 100)
 
 ;;; Provide
 

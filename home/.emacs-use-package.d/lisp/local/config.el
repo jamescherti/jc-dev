@@ -175,7 +175,7 @@
 ;; Risk Level: Because it actively alters Lisp semantics, speed 3 is considered
 ;; "unsafe." Heavily dynamic code that relies on advising or redefining
 ;; functions on the fly might break or behave unpredictably.
-(setq native-comp-speed 3)
+(setq native-comp-speed 2)
 
 (setq vterm-module-cmake-args
       (concat "-DCMAKE_BUILD_TYPE=Release "
