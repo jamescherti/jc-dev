@@ -1400,7 +1400,7 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jamescherti/transient"
              :branch "main")
-            (benchmark-init-el
+            (benchmark-init
              :type git :host github
              :repo "jamescherti/benchmark-init-el"
              :branch "master")
@@ -1725,12 +1725,12 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 
 (defun lightemacs-user-before-modules ()
   "Pre-modules."
-  ;; (require 'benchmark-init)
-  ;; (require 'benchmark-init-modes)
-  ;; (when (fboundp 'benchmark-init/activate)
-  ;;   (benchmark-init/activate)
-  ;;   ;; (add-hook 'window-setup-hook 'benchmark-init/deactivate 90)
-  ;;   (add-hook 'emacs-startup-hook 'benchmark-init/deactivate 98))
+  (require 'benchmark-init)
+  (require 'benchmark-init-modes)
+  (when (fboundp 'benchmark-init/activate)
+    (benchmark-init/activate)
+    ;; (add-hook 'window-setup-hook 'benchmark-init/deactivate 90)
+    (add-hook 'emacs-startup-hook 'benchmark-init/deactivate 98))
 
   (my-add-packages-to-load-path))
 

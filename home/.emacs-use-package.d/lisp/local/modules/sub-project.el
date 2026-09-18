@@ -115,6 +115,9 @@
 ;; (setq project-list-file (when (boundp 'lightemacs-var-directory)
 ;;                           (expand-file-name "projects" lightemacs-var-directory)))
 
+;; (setq project-list-file (when (boundp 'lightemacs-var-directory)
+;;                           (expand-file-name "projects-auto" lightemacs-var-directory)))
+
 (defvar my-project-list-file-auto-mtime nil
   "Stores the last known modification time of the file.")
 
@@ -172,9 +175,9 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 (defun my-project--project--ensure-read-project-list ()
   "Initialize `project--list' by loading projects."
-  (my-project--maybe-append project-list-file 'project-list-file-mtime)
+  ;; (my-project--maybe-append project-list-file 'project-list-file-mtime)
   ;; Disable projects auto
-  ;; (my-project--maybe-append my-project-list-file-auto 'my-project-list-file-auto-mtime)
+  (my-project--maybe-append my-project-list-file-auto 'my-project-list-file-auto-mtime)
   (my-project--cleanup))
 
 (with-eval-after-load 'project

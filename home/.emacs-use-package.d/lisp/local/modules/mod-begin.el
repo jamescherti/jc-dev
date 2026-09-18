@@ -443,13 +443,13 @@ Opens a split window showing the added and removed features."
 ;;; Themes
 
 (lightemacs-use-package modus-themes
-  :no-require t)
+  :defer t)
 (lightemacs-use-package ef-themes
-  :no-require t)
+  :defer t)
 (lightemacs-use-package doom-themes
-  :no-require t)
+  :defer t)
 (lightemacs-use-package tomorrow-night-deepblue-theme
-  :no-require t)
+  :defer t)
 
 (with-eval-after-load 'le-theme
   (when (fboundp 'lightemacs-theme-create-loader)
