@@ -1714,7 +1714,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
    ;; Shows all options when running apropos. For more info,
    calendar-week-start-day 1
 
-   echo-keystrokes 0  ;; Do not show keystrokes in the mini buffer
+   echo-keystrokes nil  ;; Do not show keystrokes in the mini buffer
    delete-pair-blink-delay 0
 
    ;; Other things

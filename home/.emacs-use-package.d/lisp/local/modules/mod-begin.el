@@ -308,83 +308,73 @@ any new ones."
 ;; For file-path-todo
 (require 'mod-defun nil t)
 
-;; (lightemacs-use-package lazy-loader
-;;   :ensure nil
-;;   :commands lazy-loader-mode
-;;   :hook (lightemacs-after-init . lazy-loader-mode)
-;;   :init
-;;   (setq lazy-loader-verbose 'inhibit-message)
-;;   (setq lazy-loader-files (delq nil
-;;                                 (list (when (bound-and-true-p file-path-todo)
-;;                                         file-path-todo))))
-;;   (setq lazy-loader-modules '(aggressive-indent
-;;                               apheleia
-;;                               compile-angel
-;;                               buffer-terminator
-;;                               consult
-;;                               corfu
-;;                               ;; evil-snipe
-;;                               shell-pop
-;;                               vertico
-;;                               ;; sh-script
-;;                               ;; smie
-;;                               ;; avy
-;;                               diff-hl
-;;                               dired
-;;                               dired-filter
-;;                               embark
-;;                               embark-consult
-;;                               enhanced-evil-paredit
-;;                               evil
-;;                               evil-collection
-;;                               inhibit-mouse
-;;                               kirigami
-;;                               kirigami-evil
-;;                               kirigami-jump
-;;                               lazy-autorevert
-;;                               org
-;;                               org-capture
-;;                               org-compat
-;;                               org-cycle
-;;                               org-element
-;;                               org-element-ast
-;;                               org-entities
-;;                               org-faces
-;;                               org-fold
-;;                               org-fold-core
-;;                               org-footnote
-;;                               org-ibullets
-;;                               org-ibullets-autoloads
-;;                               org-id
-;;                               org-indent
-;;                               org-keys
-;;                               org-list
-;;                               org-loaddefs
-;;                               org-macro
-;;                               org-macs
-;;                               org-pcomplete
-;;                               org-persist
-;;                               org-refile
-;;                               org-src
-;;                               org-table
-;;                               org-version
-;;                               outline
-;;                               outline-indent
-;;                               vterm
-;;                               yasnippet
-;;                               persist-text-scale))
-;;   ;; (lazy-loader-buffers
-;;   ;;  '(("*tmux*" .
-;;   ;;     (lambda ()
-;;   ;;       (let ((buf (get-buffer-create "*tmux*")))
-;;   ;;         (with-current-buffer buf
-;;   ;;           (vterm-mode)
-;;   ;;
-;;   ;;           (vterm-send-string "tmux-session -l emacs")
-;;   ;;           (vterm-send-string "\n")
-;;   ;;           (vterm-send-return))
-;;   ;;         buf)))))
-;;   )
+(lightemacs-use-package lazy-loader
+  :ensure nil
+  :commands lazy-loader-mode
+  :hook (lightemacs-after-init . lazy-loader-mode)
+  :init
+  (setq lazy-loader-verbose 'inhibit-message)
+  (setq lazy-loader-files (delq nil
+                                (list (when (bound-and-true-p file-path-todo)
+                                        file-path-todo))))
+  (setq lazy-loader-modules '(aggressive-indent
+                              apheleia
+                              consult
+                              corfu
+                              shell-pop
+                              diff-hl
+                              dired
+                              dired-filter
+                              embark
+                              embark-consult
+                              paredit
+                              enhanced-evil-paredit
+                              kirigami
+                              kirigami-evil
+                              org
+                              vterm
+                              persist-text-scale
+                              ;; yasnippet
+                              ;; org-capture
+                              ;; org-compat
+                              ;; org-cycle
+                              ;; org-element
+                              ;; org-element-ast
+                              ;; org-entities
+                              ;; org-faces
+                              ;; org-fold
+                              ;; org-fold-core
+                              ;; org-footnote
+                              ;; org-ibullets
+                              ;; org-ibullets-autoloads
+                              ;; org-id
+                              ;; org-indent
+                              ;; org-keys
+                              ;; org-list
+                              ;; org-loaddefs
+                              ;; org-macro
+                              ;; org-macs
+                              ;; org-pcomplete
+                              ;; org-persist
+                              ;; org-refile
+                              ;; org-src
+                              ;; org-table
+                              ;; org-version
+                              ;; outline
+                              ;; outline-indent
+                              ))
+  ;; (lazy-loader-buffers
+  ;;  '(("*tmux*" .
+  ;;     (lambda ()
+  ;;       (let ((buf (get-buffer-create "*tmux*")))
+  ;;         (with-current-buffer buf
+  ;;           (vterm-mode)
+  ;;
+  ;;           (vterm-send-string "tmux-session -l emacs")
+  ;;           (vterm-send-string "\n")
+  ;;           (vterm-send-return))
+  ;;         buf)))))
+  )
 
 ;; Lazy loader report for new features
 

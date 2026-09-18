@@ -199,7 +199,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 
 ;; Evaluate .my-dir-locals.el
 
-(defvar my-conditional-modes-verbose t)
+(defvar my-conditional-modes-verbose nil)
 
 (defvar-local my-conditional-modes--checked nil)
 
