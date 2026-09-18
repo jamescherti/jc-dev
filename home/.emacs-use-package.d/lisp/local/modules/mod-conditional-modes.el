@@ -220,9 +220,17 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
   (my-apply-custom-dir-variables)
 
   (let ((buffer-name (buffer-name)))
-    (when (and (not env-deny-all)
-               (not (or (string-prefix-p " " buffer-name)
-                        (string-prefix-p "*" buffer-name))))
+    (when (and
+           (not (or
+                 (bound-and-true-p so-long-detected-p)
+                 ;; (bound-and-true-p so-long--active)
+                 ;; (and (boundp 'so-long-predicate)
+                 ;;      (functionp so-long-predicate)
+                 ;;      (funcall so-long-predicate))
+                 ))
+           (not env-deny-all)
+           (not (or (string-prefix-p " " buffer-name)
+                    (string-prefix-p "*" buffer-name))))
       (when-let* ((file-name (buffer-file-name (buffer-base-buffer)))
                   (base-name (when file-name
                                (file-name-nondirectory file-name))))
