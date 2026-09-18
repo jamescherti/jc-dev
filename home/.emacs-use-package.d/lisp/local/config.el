@@ -862,6 +862,7 @@ subsequent GCC invocations."
                            mod-kirigami  ;; requires yasnippet
                            ;; le-kirigami ; replaced with mod-kirigami
 
+                           le-so-long
                            le-yasnippet
                            le-compile-angel
                            le-display-line-numbers

@@ -212,9 +212,9 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
     (let* ((buf-name (buffer-name))
            (file-name (or buffer-file-name
                           (buffer-file-name (buffer-base-buffer)))))
-      (when (and (or (derived-mode-p 'special-mode)
-                     (string-prefix-p " " buf-name)
-                     (string-prefix-p "*" buf-name))
+      (when (and (not (or (derived-mode-p 'special-mode)
+                          (string-prefix-p " " buf-name)
+                          (string-prefix-p "*" buf-name)))
                  file-name)
         (when my-conditional-modes-verbose
           (message "[CONDITIONAL-MODES] Check %S (%S)" file-name major-mode))
