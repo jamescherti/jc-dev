@@ -726,17 +726,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(setq message-truncate-lines t)
+
 (with-eval-after-load 'so-long
-  ;; Emacs 29+ display engine is highly optimized for truncated lines.
-  ;; Override so-long's legacy default which forces expensive line wrapping.
-  ;; (setf (alist-get 'truncate-lines so-long-variable-overrides nil t) t)
-  ;; (setf (alist-get 'line-move-visual so-long-variable-overrides nil t) nil)
-
-  ;; Prevent massive, externally updated files (like production logs) from locking
-  ;; up the editor when they auto-refresh.
-  (add-to-list 'so-long-minor-modes 'auto-revert-mode t)
-
-
   ;; Autocompletion & Snippets
   ;; corfu-mode
   ;; corfu-popupinfo-mode

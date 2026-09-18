@@ -80,9 +80,10 @@ or fallback to `sh'."
 ;;; Tree-sitter Fallback Helpers
 
 ;; Enable tree-sitter based major modes globally for Emacs 31+
-(when (>= emacs-major-version 31)
-  (with-eval-after-load 'treesit
-    (setopt treesit-enabled-modes t)))
+;; TODO fix js-ts-mode
+;; (when (>= emacs-major-version 31)
+;;   (with-eval-after-load 'treesit
+;;     (setopt treesit-enabled-modes t)))
 
 ;; (with-eval-after-load 'markdown-ts-mode-maybe
 ;;   (defun markdown-ts-mode-maybe ()
