@@ -223,10 +223,9 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                  (not (bound-and-true-p so-long-detected-p))
                  (boundp 'so-long-target-modes)
                  (or (eq so-long-target-modes t)
-                     (let ((modes (if (listp so-long-target-modes)
-                                      so-long-target-modes
-                                    (list so-long-target-modes))))
-                       (apply #'derived-mode-p modes)))
+                     (if (listp so-long-target-modes)
+                         (apply #'derived-mode-p so-long-target-modes)
+                       (derived-mode-p so-long-target-modes)))
                  (boundp 'so-long-predicate)
                  (fboundp so-long-predicate))
         (save-match-data
