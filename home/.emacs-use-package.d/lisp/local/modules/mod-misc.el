@@ -222,6 +222,8 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
                     ((= gc-cons-threshold most-positive-fixnum) "∞")
                     (t (format "%sM" (/ gc-cons-threshold 1000000))))))
 
+(setq-default mode-line-position '(" %l:%c (%p)"))
+
 (unless noninteractive
   (setq display-time-mail-function #'ignore
         display-time-mail-string ""
