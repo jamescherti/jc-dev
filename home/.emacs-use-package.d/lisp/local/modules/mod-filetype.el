@@ -112,7 +112,7 @@ BASE-MODE is the major mode to remap from.
 TS-MODE is the tree-sitter major mode to remap to.
 LANG is the tree-sitter language symbol to check for availability."
   (when (and (not (bound-and-true-p treesit-enabled-modes))
-             (< emacs-major-version 31)
+             ;; (< emacs-major-version 31)
              (mod-filetype--ts-lang-available-p lang))
     (push (cons base-mode ts-mode) major-mode-remap-alist)))
 
@@ -124,7 +124,8 @@ FALLBACK-MODE is the traditional major mode symbol to use if tree-sitter is
 unavailable.
 LANG is the tree-sitter language symbol to check for availability."
   (if (mod-filetype--ts-lang-available-p lang)
-      (if (and fallback-mode (bound-and-true-p treesit-enabled-modes))
+      (if (and fallback-mode
+               (bound-and-true-p treesit-enabled-modes))
           (push (cons regex fallback-mode) auto-mode-alist)
         (push (cons regex ts-mode) auto-mode-alist))
     (when fallback-mode
@@ -867,7 +868,8 @@ This function modifies `electric-pair-pairs' buffer-locally."
 (defun my-load-treesit-fallbacks ()
   "Initialize tree-sitter mode remaps and fallbacks after UI is drawn."
   (when (and (not (bound-and-true-p treesit-enabled-modes))
-             (< emacs-major-version 31))
+             ;; (< emacs-major-version 31)
+             )
     (my-remap-ts-mode 'c-mode 'c-ts-mode 'c)
     (my-remap-ts-mode 'c++-mode 'c++-ts-mode 'cpp)
     (my-remap-ts-mode 'js-json-mode 'json-ts-mode 'json)
@@ -920,9 +922,7 @@ This function modifies `electric-pair-pairs' buffer-locally."
 ;; Execute immediately if Emacs is already initialized, otherwise use the hook
 (if after-init-time
     (my-load-treesit-fallbacks)
-  (add-hook 'after-init-hook #'my-load-treesit-fallbacks))
-
-(add-hook 'after-init-hook #'my-load-treesit-fallbacks)
+  (add-hook 'lightemacs-after-init-hook #'my-load-treesit-fallbacks))
 
 ;;; Provide
 
