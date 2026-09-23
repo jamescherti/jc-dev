@@ -49,6 +49,7 @@ if [ "$OS" = "arch" ]; then
     python \
     openssh # cronie python-pip
 elif [ "$OS" = "debian" ]; then
+  echo "Apt::Install-Recommends 0;" >>tetc/apt/apt.conf.d/local-recommends
   apt-get update
   apt-get install -y \
     sudo \
