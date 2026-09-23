@@ -155,6 +155,9 @@
     ;; when (yes-or-no-p "Are you sure you want to erase the buffer?")
     (erase-buffer)
 
+    (when (equal (buffer-name) "*scratch*")
+      (set-buffer-modified-p nil))
+
     (cond
      ((string-prefix-p "*Ollama" buffer-name)
       (cond
