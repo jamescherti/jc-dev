@@ -32,15 +32,6 @@ useradd --system --home-dir /var/lib/ansible -g ansible ansible
 chown -R ansible:ansible /var/lib/ansible/
 chmod 700 /var/lib/ansible/
 
-# Work
-groupadd --gid 1000 work
-# Added -m to ensure the home directory is actually created
-useradd --uid 1000 --home-dir /home/work -m -g work work
-
-# Replace interactive vim with echo to automate file creation
-echo "work ALL=(ALL) ALL" >/etc/sudoers.d/02-user_work
-chmod 440 /etc/sudoers.d/02-user_work
-
 echo "ansible ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/04-ansible
 chmod 440 /etc/sudoers.d/04-ansible
 
