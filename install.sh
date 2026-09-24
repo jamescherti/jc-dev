@@ -31,9 +31,6 @@
 # shellcheck disable=SC2269
 set -euf -o pipefail
 
-# TODO remove
-# GIT_CLONE_DIR="$HOME/.jc-dev"
-
 # shellcheck disable=SC2317
 error_handler() {
   local errno="$?"
