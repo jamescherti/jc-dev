@@ -90,10 +90,6 @@ This excludes buffers whose names begin with an asterisk (*)."
 (defvar point-manager--pre-command-buffer nil
   "The buffer current before the current command.")
 
-(defvar-local point-manager--previous-column nil
-  "Column position before the current command.")
-(defvar-local point-manager--previous-point nil
-  "Point position before the current command.")
 (defvar-local point-manager--buffer-type nil
   "Type of the current buffer (e.g., `file' or `dired').")
 (defvar-local point-manager--inhibit t
@@ -136,16 +132,17 @@ This excludes buffers whose names begin with an asterisk (*)."
   (setq point-manager--initialized nil))
 
 (defun point-manager--pre-command-hook (&rest _)
-  "Save point and column position."
+  "Save point and column position.
+The argument _ is ignored."
   (unless point-manager--initialized
     (point-manager--initialize-buffer))
 
   ;; (setq point-manager--pre-command this-command)
   (unless point-manager--inhibit
     (setq point-manager--pre-command-window (selected-window)
-          point-manager--pre-command-buffer (current-buffer)
-          point-manager--previous-point (point)
-          point-manager--previous-column (current-column))))
+          point-manager--pre-command-buffer (current-buffer))
+    (set-window-parameter nil 'point-manager--previous-point (point))
+    (set-window-parameter nil 'point-manager--previous-column (current-column))))
 
 (defun point-manager--move-to-column (column)
   "Move to COLUMN and update the temporary goal column."
@@ -154,55 +151,57 @@ This excludes buffers whose names begin with an asterisk (*)."
 
 (defun point-manager--post-command-hook (&optional _command)
   "Maintain cursor constraints in normal state.
-COMMAND is the previous command."
-  (when (and (not point-manager--inhibit)
-             (eq (selected-window) point-manager--pre-command-window)
-             (eq (current-buffer) point-manager--pre-command-buffer)
-             point-manager--previous-point
-             (/= (point) point-manager--previous-point)
-             (or (not (boundp 'evil-state))
-                 (eq evil-state 'normal))
-             (not (minibufferp))
-             (not (region-active-p)))
-    ;; DELETE: Restore the column after deleting
-    ;; NOTE: this fails when using corfu completionm, for some reason
-    ;; (setq point-manager--region-active-p (region-active-p))
-    ;; (when (and (not point-manager--region-active-p)
-    ;;            point-manager-restore-column-after-commands
-    ;;            (memq point-manager--pre-command
-    ;;                  point-manager-restore-column-after-commands))
-    ;;   (point-manager--move-to-column point-manager--previous-column))
+The argument _COMMAND is the previous command (ignored)."
+  (let ((prev-pt (window-parameter nil 'point-manager--previous-point))
+        (prev-col (window-parameter nil 'point-manager--previous-column)))
+    (when (and (not point-manager--inhibit)
+               (eq (selected-window) point-manager--pre-command-window)
+               (eq (current-buffer) point-manager--pre-command-buffer)
+               prev-pt
+               (/= (point) prev-pt)
+               (or (not (boundp 'evil-state))
+                   (eq evil-state 'normal))
+               (not (minibufferp))
+               (not (region-active-p)))
+      ;; DELETE: Restore the column after deleting
+      ;; NOTE: this fails when using corfu completionm, for some reason
+      ;; (setq point-manager--region-active-p (region-active-p))
+      ;; (when (and (not point-manager--region-active-p)
+      ;;            point-manager-restore-column-after-commands
+      ;;            (memq point-manager--pre-command
+      ;;                  point-manager-restore-column-after-commands))
+      ;;   (point-manager--move-to-column prev-col))
 
-    ;; END OF FILE
-    (when (and (eobp)
-               (not (bobp)))
-      (forward-char -1)
+      ;; END OF FILE
+      (when (and (eobp)
+                 (not (bobp)))
+        (forward-char -1)
 
-      (if point-manager-ignore-invisible
-          (vertical-motion 0)
-        (goto-char (pos-bol)))
+        (if point-manager-ignore-invisible
+            (vertical-motion 0)
+          (goto-char (pos-bol)))
 
-      (point-manager--move-to-column point-manager--previous-column))
+        (point-manager--move-to-column prev-col))
 
-    ;; DIRED: Handle dired-mode header line and column constraints
-    (when (eq point-manager--buffer-type 'dired)
-      (let ((column (current-column)))
-        ;; DIRED: First line
-        ;; Prevent the cursor from moving to the first line containing the
-        ;; directory header. An alternative approach is available via (setq
-        ;; dired-movement-style 'bounded-files). However, this does not
-        ;; accommodate navigation using gg or G in Evil mode (moving to the top
-        ;; and bottom of the buffer).
-        (when (= (pos-bol) (point-min))
-          (forward-line 1)
-          (point-manager--move-to-column point-manager--previous-column)
-          ;; This is used by the next check (2 columns)
-          (setq column point-manager--previous-column))
+      ;; DIRED: Handle dired-mode header line and column constraints
+      (when (eq point-manager--buffer-type 'dired)
+        (let ((column (current-column)))
+          ;; DIRED: First line
+          ;; Prevent the cursor from moving to the first line containing the
+          ;; directory header. An alternative approach is available via (setq
+          ;; dired-movement-style 'bounded-files). However, this does not
+          ;; accommodate navigation using gg or G in Evil mode (moving to the top
+          ;; and bottom of the buffer).
+          (when (= (pos-bol) (point-min))
+            (forward-line 1)
+            (point-manager--move-to-column prev-col)
+            ;; This is used by the next check (2 columns)
+            (setq column prev-col))
 
-        ;; DIRED: First two columns
-        (when (and point-manager-dired-min-column
-                   (< column point-manager-dired-min-column))
-          (point-manager--move-to-column point-manager-dired-min-column))))))
+          ;; DIRED: First two columns
+          (when (and point-manager-dired-min-column
+                     (< column point-manager-dired-min-column))
+            (point-manager--move-to-column point-manager-dired-min-column)))))))
 
 ;;;###autoload
 (define-minor-mode point-manager-mode
