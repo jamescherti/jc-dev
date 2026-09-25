@@ -515,10 +515,10 @@ By default, closing the last window in a tab does not close the tab."
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "<leader>ov") #'mod-buffer-terminator-only-visible)
 
-  (define-key evil-normal-state-map (kbd "<leader>ey") #'ignore)
-  (define-key evil-normal-state-map (kbd "<leader>eY") #'ignore)
-  ;; (define-key evil-normal-state-map (kbd "<leader>ey") #'mod-buffer-terminator-empty)
-  ;; (define-key evil-normal-state-map (kbd "<leader>eY") #'mod-buffer-terminator-empty-all)
+  ;; (define-key evil-normal-state-map (kbd "<leader>ey") #'ignore)
+  ;; (define-key evil-normal-state-map (kbd "<leader>eY") #'ignore)
+  (define-key evil-normal-state-map (kbd "<leader>ey") #'mod-buffer-terminator-empty)
+  (define-key evil-normal-state-map (kbd "<leader>eY") #'mod-buffer-terminator-empty-all)
 
   (define-key evil-normal-state-map (kbd "C-w c")   #'mod-buffer-terminator-close-window)
   (define-key evil-normal-state-map (kbd "C-w C-c") #'mod-buffer-terminator-close-window))
