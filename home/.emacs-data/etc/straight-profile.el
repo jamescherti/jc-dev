@@ -25,8 +25,8 @@
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("indent-bars" . "36620c5f3fba2ba8f23d7ef947e0d1d09e412bf5") ; 1.0.1 | RSS RELEASE
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
- ("consult" . "b7558f65374b733b749147b2c299b93d7b939483") ; 3.9 | RSS RELEASE
- ("marginalia" . "7ec0b70afb43a756ecd45a958c6ebe797717fc91") ; 2.11 | RSS RELEASE
+ ("consult" . "3c64214db5cd61a8f8186e4dce89c0e04be1652c") ; 3.10 | RSS RELEASE
+ ("marginalia" . "42eafcfddbe88d92ed96521a00a5a90a49bac4dd") ; 2.13 | RSS RELEASE
  ("markdown-mode" . "76cb4ffecfdf95ee769e5cb4608e04202c3c1521") ; newer than v2.8 | RSS RELEASE
  ("org" . "80c431fe0c59bb6b6c4d05ad2d4d279f34b5fcd5") ; release_9.8.10 | RSS RELEASE
  ("compat" . "90880f81419577e1d3f68424d2a3adf31e6d663e") ; Version 31.1.0.0 | RSS RELEASE
@@ -35,15 +35,17 @@
 
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
- ("ztree" . "b99966d37e3197ac48454780f02278ba4ed5ed51")
- ("yaml-mode" . "96ef0201101a7cd591febd5886633154dae8834c")
+ ("ztree" . "48f17807ac6c765a66cf29b2fcdd08f1aa7da7d6")
+ ("yaml-mode" . "93dba98c050e9abfc623ec66aa499dbbb46b2fe1")
  ("nerd-icons-corfu" . "e1197d6c1db673f4ec7ee20cb2c4297f479420e7") ; v1.1.0 | RSS RELEASE
+ ("nerd-icons.el" . "17faac7977242b470732efd417d3bcc8eb5a830e")
+
+ ;; Recently unmaintained
  ("groovy-emacs-modes" . "fb296e62a0856d9b293dc29f5471a6d7c7d447ea")
  ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
  ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")
- ("nerd-icons.el" . "d7742c5e8fba5d601633dd46f4cd7b34928f1185")
 
- ;; Unmaintained (Forked: jamescherti)
+ ;; Unmaintained
  ("avy" . "73d7be17850136097d1dd16626a0b3eb051bd0dd")
  ("basic-mode" . "1dc1a635d6d80668c8a583b974205e49ff0fc3ce")
  ("flymake-yamllint" . "020d2a33568c8069801db9dd6992b8961a58de8d")
