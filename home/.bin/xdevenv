@@ -374,16 +374,16 @@ xdevenv-terminal() {
         show_window_maximized_devilspie konsole "$win_name"
         konsole "${TERMINAL_OPTS[@]}" -e "${TMUX_CMD_LIST[@]}"
       )
-    elif type -P tilix; then
-      TERMINAL_OPTS=(--window-style=borderless)
-      local win_name="tilix.Tilix"
-      TERMINAL_CMD=(show_window_maximized_devilspie tilix "$win_name" tilix "${TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
     elif type -P xfce4-terminal >/dev/null 2>&1; then
       XFCE_TERMINAL_OPTS=(--hide-menubar --hide-scrollbar) # --hide-borders
       # XFCE_TERMINAL_OPTS+=(--maximize)
       # XFCE_TERMINAL_OPTS+=(--fullscreen)
       local win_name="xfce4-terminal.Xfce4-terminal"
       TERMINAL_CMD=(show_window_maximized_devilspie xfce4-terminal "$win_name" xfce4-terminal "${XFCE_TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
+    elif type -P tilix; then
+      TERMINAL_OPTS=(--window-style=borderless)
+      local win_name="tilix.Tilix"
+      TERMINAL_CMD=(show_window_maximized_devilspie tilix "$win_name" tilix "${TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
     fi
 
     ERRNO=0

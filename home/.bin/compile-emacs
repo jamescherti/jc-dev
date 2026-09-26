@@ -560,15 +560,15 @@ CONFIGURE_ARGS=(
   # --with-xdbe
   # --with-x-toolkit=lucid
 
-  # --without-xdbe
-  # --with-x-toolkit=gtk3
-  # --without-toolkit-scroll-bars
-  # --without-pgtk
-
-  --without-x
   --without-xdbe
-  --with-toolkit-scroll-bars
-  --with-pgtk
+  --with-x-toolkit=gtk3
+  --without-toolkit-scroll-bars
+  --without-pgtk
+
+  # --without-x
+  # --without-xdbe
+  # --with-toolkit-scroll-bars
+  # --with-pgtk
 
   # Important if using X11 and multiple input methods: X Input Method (XIM) is
   # an interface for input methods, which is essential for languages like

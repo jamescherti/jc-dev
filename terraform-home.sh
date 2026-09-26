@@ -41,8 +41,8 @@ config-firefox() {
 config-xfce() {
   # JC-XFCE-SETTINGS
   if [[ "${XDG_CURRENT_DESKTOP:-}" = XFCE ]]; then
-    cd ~/src/dotfiles/jc-xfce-settings
-    ./jc-xfce-settings.sh
+    ~/src/dotfiles/jc-xfce-settings/jc-xfce-settings.sh
+    cd
 
     # Local XFCE settings
     "$SCRIPT_DIR/data/settings/settings-xfce4/settings-xfce4.sh"

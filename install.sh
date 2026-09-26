@@ -226,12 +226,15 @@ config_gpg() {
   chmod 700 "$HOME/.ssh/"
 
   # ln -sf ~/.git
-  cp -u "$SCRIPT_DIR/.gpg-agent.conf" ~/.gnupg/gpg-agent.conf
+  # removed -u
+  cp "$SCRIPT_DIR/.gpg-agent.conf" ~/.gnupg/gpg-agent.conf
 
   local pinentry_bin
   if [[ $XDG_CURRENT_DESKTOP = GNOME ]] \
     && pinentry_bin=$(type -P pinentry-gnome3) &>/dev/null; then
     echo "pinentry-program ${pinentry_bin}" >>~/.gnupg/gpg-agent.conf
+  elif [[ $OSTYPE =~ linux ]] && pinentry_bin=$(type -P pinentry-tty); then
+    echo "pinentry-program $pinentry_bin" >>~/.gnupg/gpg-agent.conf
   elif [[ $OSTYPE =~ linux ]] && pinentry_bin=$(type -P pinentry-curses); then
     # Linux specific. I added this condition because pinentry-curses does not
     # work on macOS.
