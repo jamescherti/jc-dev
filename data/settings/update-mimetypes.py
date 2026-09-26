@@ -57,8 +57,10 @@ def add_mime(app_id: str, mime_type: str) -> None:
 
     print(f"[DEBUG] app_id:{app_id} mime_type:{mime_type}")
     desktop_file: Path = Path(f"/usr/share/applications/{app_id}.desktop")
-    desktop_file2: Path = Path(f"~/.local/share/applications/{app_id}.desktop").expanduser()
-    print(f"[DEBUG] desktop_file1:{desktop_file} desktop_file2:{desktop_file2}")
+    desktop_file2: Path = Path(
+        f"~/.local/share/applications/{app_id}.desktop").expanduser()
+    print(
+        f"[DEBUG] desktop_file1:{desktop_file} desktop_file2:{desktop_file2}")
 
     if not desktop_file.is_file() and not desktop_file2.is_file():
         print(f"Error: '{desktop_file}' does not exist.", file=sys.stderr)
@@ -173,6 +175,8 @@ def main() -> None:
         app_pdf = "org.gnome.Evince"
     elif which("papers"):
         app_pdf = "org.gnome.Papers"
+    elif which("atril"):
+        app_pdf = "atril"
     else:
         print("Error: None of the supported document viewers were "
               "found (evince, paper).", file=sys.stderr)
