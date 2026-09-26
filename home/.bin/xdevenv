@@ -246,15 +246,15 @@ show_window_maximized() {
   return 0
 }
 
-# show_window_maximized_devilspie() {
-#   if pgrep -x devilspie2 &>/dev/null; then
-#     show_window "$@" || return 1
-#     return 0
-#   fi
-#
-#   show_window_maximized "$@" || return 1
-#   return 0
-# }
+show_window_maximized_devilspie() {
+  if pgrep -x devilspie2 &>/dev/null; then
+    show_window "$@" || return 1
+    return 0
+  fi
+
+  show_window_maximized "$@" || return 1
+  return 0
+}
 
 # show_window_fullscreen() {
 #   local win_name="$1"
