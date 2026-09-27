@@ -701,7 +701,7 @@ CONFIGURE_ARGS=(
   # desktop environments for communication between applications. Disabling
   # DBus will remove certain integration features, such as notifications or
   # communication with other applications.
-  --without-dbus
+  --with-dbus
 
   # You should absolutely not add --without-libgmp. Adding that flag will
   # actually destroy your Emacs performance.
