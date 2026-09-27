@@ -1761,20 +1761,15 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; Clipboard
 
-;; (setq
-;;  ;; (setq suggest-key-bindings t)
-;;  ;; Many X desktop environments support a feature called the clipboard manager.
-;;  ;; If you exit Emacs while it is the current 'owner' of the clipboard data, and
-;;  ;; there is a clipboard manager running, Emacs transfers the clipboard data to
-;;  ;; the clipboard manager so that it is not lost. In some circumstances, this may
-;;  ;; cause a delay when exiting Emacs; if you wish to prevent Emacs from
-;;  ;; transferring data to the clipboard manager, change the variable
-;;  ;; x-select-enable-clipboard-manager to nil.
-;;  x-select-enable-clipboard-manager nil
-;;
-;;  ;; select-enable-clipboard t
-;;  ;; select-enable-primary nil
-;;  )
+(setq
+ ;; Many X desktop environments support a feature called the clipboard manager.
+ ;; If you exit Emacs while it is the current 'owner' of the clipboard data, and
+ ;; there is a clipboard manager running, Emacs transfers the clipboard data to
+ ;; the clipboard manager so that it is not lost. In some circumstances, this
+ ;; may cause a delay when exiting Emacs; if you wish to prevent Emacs from
+ ;; transferring data to the clipboard manager, change the variable
+ ;; x-select-enable-clipboard-manager to nil.
+ x-select-enable-clipboard-manager nil)
 
 ;; Plain Text Pasting (Fixing "Org-Mode Bleed")
 ;;
