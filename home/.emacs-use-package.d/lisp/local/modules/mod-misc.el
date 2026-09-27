@@ -2866,34 +2866,32 @@ ARGS - the arguments passed to the original function"
 
 ;;; battery angel
 
-;; (require 'battery-angel)
-
 (defvar battery-angel--manage-compile-angel nil)
 
 (defun setup-battery-angel-on-ac ()
   "This is called on AC."
   (interactive)
-  ;; (when battery-angel-verbose
-  ;;   (message "Applying AC parameters"))
-
   (setopt auto-revert-interval 3)
 
-  ;; Flymake
-  (setq flymake-start-on-flymake-mode
-        (when (> (num-processors) 8)
-          t))
+  ;; Smooth scrolling
+  ;; TODO handle if it is managed
+  ;; (when (bound-and-true-p pixel-scroll-precision-mode)
+  ;;   (pixel-scroll-precision-mode -1))
 
-  (setq flymake-no-changes-timeout
-        (when (> (num-processors) 3)
-          0.8))
+  ;; Flymake
+  (setq flymake-no-changes-timeout (when (> (num-processors) 3) 0.8))
+  (setq flymake-start-on-flymake-mode (when (> (num-processors) 8) t))
 
   (when (and battery-angel--manage-compile-angel
              (fboundp 'compile-angel-on-load-mode)
              (not compile-angel-on-load-mode))
     (compile-angel-on-load-mode 1))
 
-  ;; Auto-completion (Example for Corfu, adapt for Company if needed)
   (setq corfu-auto-delay 0.1)
+
+  (setq show-paren-delay 0.125)
+
+  (setq eglot-send-changes-idle-time 0.5)
 
   (setq consult--gc-threshold (* 256 1024 1024))
   (setq consult--process-chunk (* 4 1024 1024))
@@ -2910,22 +2908,26 @@ ARGS - the arguments passed to the original function"
   (interactive)
   (setopt auto-revert-interval 10)
 
+  ;; Smooth scrolling
+  ;; TODO handle if it is managed
+  ;; (when (bound-and-true-p pixel-scroll-precision-mode)
+  ;;   (pixel-scroll-precision-mode -1))
+
   ;; Flymake
-  (setq flymake-start-on-flymake-mode nil)
   (setq flymake-no-changes-timeout nil)
+  (setq flymake-start-on-flymake-mode nil)
 
   (when (and battery-angel--manage-compile-angel
              (fboundp 'compile-angel-on-load-mode)
              compile-angel-on-load-mode)
-    ;; (setq battery-angel--manage-compile-angel t)
+    (setq battery-angel--manage-compile-angel t)
     (compile-angel-on-load-mode -1))
 
-  ;; Default consult parameters
-  ;; (setq consult-async-input-debounce 0.1
-  ;;       consult-async-input-throttle 0.2
-  ;;       consult-async-refresh-delay 0.1)
-
   (setq corfu-auto-delay 0.24)
+
+  (setq show-paren-delay 0.1)
+
+  (setq eglot-send-changes-idle-time 1)
 
   (setq consult--gc-threshold (* 128 1024 1024))
   (setq consult--process-chunk (* 2 1024 1024))
@@ -2938,10 +2940,11 @@ ARGS - the arguments passed to the original function"
 
 (setup-battery-angel-on-ac)
 
-;; (setq battery-angel-verbose nil)
-;; (add-hook 'lightemacs-emacs-startup-hook #'battery-angel-mode 90)
-;; (add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
-;; (add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
+(require 'battery-angel)
+(setq battery-angel-verbose t)
+(add-hook 'lightemacs-emacs-startup-hook #'battery-angel-mode 90)
+(add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
+(add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
 
 ;;; Rainbow
 
