@@ -2872,10 +2872,11 @@ ARGS - the arguments passed to the original function"
 
 (defun setup-battery-angel-on-ac ()
   "This is called on AC."
+  (interactive)
   ;; (when battery-angel-verbose
   ;;   (message "Applying AC parameters"))
 
-  (setq auto-revert-interval 3)
+  (setopt auto-revert-interval 3)
 
   ;; Flymake
   (setq flymake-start-on-flymake-mode
@@ -2897,7 +2898,7 @@ ARGS - the arguments passed to the original function"
   (setq consult--gc-threshold (* 256 1024 1024))
   (setq consult--process-chunk (* 4 1024 1024))
 
-  (setq consult-async-min-input 3)
+  (setq consult-async-min-input 2)
 
   ;; Fast Consult
   (setq consult-async-input-debounce 0.05
@@ -2906,10 +2907,8 @@ ARGS - the arguments passed to the original function"
 
 (defun setup-battery-angel-on-bat ()
   "This is called on BAT."
-  ;; (when battery-angel-verbose
-  ;;   (message "Applying BAT parameters"))
-
-  (setq auto-revert-interval 10)
+  (interactive)
+  (setopt auto-revert-interval 10)
 
   ;; Flymake
   (setq flymake-start-on-flymake-mode nil)
@@ -2931,7 +2930,7 @@ ARGS - the arguments passed to the original function"
   (setq consult--gc-threshold (* 128 1024 1024))
   (setq consult--process-chunk (* 2 1024 1024))
 
-  (setq consult-async-min-input 2)
+  (setq consult-async-min-input 3)
 
   (setq consult-async-input-debounce 0.2
         consult-async-input-throttle 0.5
