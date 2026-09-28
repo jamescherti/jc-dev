@@ -318,7 +318,8 @@ clean-fly-files() {
   fi
 
   local matching_files
-  mapfile -t matching_files < <(fd --type f --hidden --no-ignore "^fly(make|check)_" "$target_dir")
+  mapfile -t matching_files < <(fd --type f --hidden --no-ignore \
+    "^fly(make|check)_" "$target_dir")
 
   if [[ ${#matching_files[@]} -eq 0 ]]; then
     echo "No flymake or flycheck temporary files found in $target_dir."
@@ -333,7 +334,14 @@ clean-fly-files() {
 
   echo ""
   local user_input
-  read -r -p "Do you want to delete these files? [y/N]: " user_input
+
+  # Check if standard input is attached to a terminal. If it is an interactive
+  # session, it will prompt for confirmation.
+  if [[ -t 0 ]]; then
+    read -r -p "Do you want to delete these files? [y/N]: " user_input
+  else
+    echo "Non-interactive session detected. Proceeding with deletion."
+  fi
 
   case "$user_input" in
   [yY] | [yY][eE][sS])
