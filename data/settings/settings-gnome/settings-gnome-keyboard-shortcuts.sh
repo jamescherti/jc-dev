@@ -31,16 +31,6 @@ set -euf -o pipefail
 SHORTCUT_INDEX=0
 SHORTCUT_STRING=""
 
-# run() {
-#   printf "%s\n" "$*"
-#   "$@" || return 1
-# }
-#
-# gset() {
-#   gsettings set "$@" || return 1
-#   return 0
-# }
-
 shortcut() {
   local shortcut_name="'$1'"
   local shortcut="'$2'"
@@ -93,3 +83,7 @@ if type -P xdevenv &>/dev/null; then
   shortcut "Light" "<Primary><Alt>m" "$HOME/.bin/xdevenv light"
   shortcut "Night" "<Primary><Alt>n" "$HOME/.bin/xdevenv night"
 fi
+
+# Set volume control keybindings
+# gsettings set org.gnome.settings-daemon.plugins.media-keys volume-down "['AudioLowerVolume']"
+# gsettings set org.gnome.settings-daemon.plugins.media-keys volume-up "['AudioRaiseVolume']"
