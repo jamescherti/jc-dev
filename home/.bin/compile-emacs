@@ -560,16 +560,6 @@ CONFIGURE_ARGS=(
   # --with-xdbe
   # --with-x-toolkit=lucid
 
-  --without-xdbe
-  --with-x-toolkit=gtk3
-  --without-toolkit-scroll-bars
-  --without-pgtk
-
-  # --without-x
-  # --without-xdbe
-  # --with-toolkit-scroll-bars
-  # --with-pgtk
-
   # Important if using X11 and multiple input methods: X Input Method (XIM) is
   # an interface for input methods, which is essential for languages like
   # Chinese, Japanese, or Korean. Disabling XIM can affect text input in those
@@ -784,6 +774,18 @@ CONFIGURE_ARGS=(
   # limitation if you ever need to view large log files or database dumps.
   # --disable-largefile
 )
+
+if [[ "${XDG_SESSION_TYPE:-}" == "wayland" ]]; then
+  CONFIGURE_ARGS+=(--without-x)
+  CONFIGURE_ARGS+=(--without-xdbe)
+  CONFIGURE_ARGS+=(--with-toolkit-scroll-bars)
+  CONFIGURE_ARGS+=(--with-pgtk)
+else
+  CONFIGURE_ARGS+=(--without-xdbe)
+  CONFIGURE_ARGS+=(--with-x-toolkit=gtk3)
+  CONFIGURE_ARGS+=(--without-toolkit-scroll-bars)
+  CONFIGURE_ARGS+=(--without-pgtk)
+fi
 
 #
 # Prefix

@@ -304,9 +304,56 @@ config-gnome() {
   fi
 }
 
+clean-fly-files() {
+  local target_dir="${1:-$HOME/src}"
+
+  if ! command -v fd >/dev/null 2>&1; then
+    echo "Error: fd is not installed or not in your PATH."
+    return 1
+  fi
+
+  if [[ ! -d "$target_dir" ]]; then
+    echo "Error: Directory $target_dir does not exist."
+    return 1
+  fi
+
+  local matching_files
+  mapfile -t matching_files < <(fd --type f --hidden --no-ignore "^fly(make|check)_" "$target_dir")
+
+  if [[ ${#matching_files[@]} -eq 0 ]]; then
+    echo "No flymake or flycheck temporary files found in $target_dir."
+    return 0
+  fi
+
+  echo "Warning: Found ${#matching_files[@]} temporary files:"
+  local file
+  for file in "${matching_files[@]}"; do
+    echo "- $file"
+  done
+
+  echo ""
+  local user_input
+  read -r -p "Do you want to delete these files? [y/N]: " user_input
+
+  case "$user_input" in
+  [yY] | [yY][eE][sS])
+    for file in "${matching_files[@]}"; do
+      rm -f "$file"
+    done
+    echo "Files deleted."
+    ;;
+  *)
+    echo "Operation cancelled. No files were deleted."
+    return 0
+    ;;
+  esac
+}
+
 main() {
   # shellcheck disable=SC1091
   source /etc/os-release
+
+  clean-fly-files
 
   install_python_deps
 
