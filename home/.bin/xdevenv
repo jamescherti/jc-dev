@@ -491,6 +491,11 @@ xdevenv-startup-apps() {
       redshift -x
       redshift -o
     fi
+
+    # https://www.reddit.com/r/xfce/comments/q9vmw9/how_do_i_disable_the_xfce_beep_sound/
+    if type -P xset &>/dev/null; then
+      xset b off
+    fi
   fi
 
   if type -P keepassxc &>/dev/null; then
