@@ -32,20 +32,14 @@ from packaging import version
 
 
 class PyReleaseError(Exception):
-    """
-    Exception raised by the release script.
-    """
+    """Exception raised by the release script."""
 
 
 class Release:
-    """
-    Handle the release process for a project.
-    """
+    """Handle the release process for a project."""
 
     def __init__(self) -> None:
-        """
-        Initialize the release process and run the workflow.
-        """
+        """Initialize the release process and run the workflow."""
         self.env: dict[str, str] = os.environ.copy()
         self.env["LC_ALL"] = "C"
 
@@ -72,13 +66,13 @@ class Release:
         print("---------------")
         # Ignore pre-commit config when grepping for versions
         subprocess.call(["git", "grep", "[0-9]\\.[0-9]\\.[0-9]",
-                        "--", ":(exclude).pre-commit-config.yaml"])
+                         "--", ":(exclude).pre-commit-config.yaml"])
         print()
 
         # Prompt the user to enter the old version
         while True:
             old_version: str = self.get_version("Old version: ", True)
-            if old_version not in self.tags:
+            if old_version not in self.all_tag_variants:
                 print(
                     f"Error: {old_version} is not part of the project",
                     file=sys.stderr)
@@ -121,9 +115,7 @@ class Release:
             self.execute_release(new_version, new_num, python_project)
 
     def chdir_git_toplevel(self):
-        """
-        Change the current directory to the Git toplevel directory.
-        """
+        """Change the current directory to the Git toplevel directory."""
         try:
             self.git_root: Path = self.git_top_level()
         except PyReleaseError as err:
@@ -172,8 +164,7 @@ class Release:
         while True:
             try:
                 ver: str = prompt_text(prompt, self.tags).strip()
-                if not exist_ok and (
-                        ver in self.tags or f"v{ver}" in self.tags):
+                if not exist_ok and ver in self.all_tag_variants:
                     print(
                         f"Error: Version {ver} exists already.",
                         file=sys.stderr)
@@ -183,18 +174,19 @@ class Release:
                 sys.exit(1)
 
     def load_git_tags(self) -> None:
-        """
-        Load tags from the git repository.
-        """
+        """Load tags from the git repository."""
         self.tags = []
+        self.all_tag_variants = []
         for tag in self.quick_run(["git", "tag"]):
             if tag and tag not in self.tags:
                 self.tags.append(tag)
-                self.all_tag_variants.append(tag)
-                self.all_tag_variants.append(re.sub("^v", "", tag))
+                stripped_tag = re.sub("^v", "", tag)
+                self.all_tag_variants.append(stripped_tag)
+                self.all_tag_variants.append(f"v{stripped_tag}")
 
         if not self.tags:
             self.tags = ["0.9.5", "0.9.9"]
+            self.all_tag_variants = ["0.9.5", "0.9.9", "v0.9.5", "v0.9.9"]
 
     def tag_version_to_number_version(self, tag_version: str) -> str:
         """
