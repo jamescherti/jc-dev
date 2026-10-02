@@ -29,6 +29,12 @@
 (defconst IS-MAC (eq system-type 'darwin))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
+(defsubst my-end-of-line ()
+  "Move point to the end of the current line."
+  (if (fboundp 'pos-eol)
+      (goto-char (pos-eol))
+    (goto-char (line-end-position))))
+
 (defun my-default-font ()
   "Display the default font."
   (interactive)

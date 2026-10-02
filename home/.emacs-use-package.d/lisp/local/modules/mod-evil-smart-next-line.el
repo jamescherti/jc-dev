@@ -27,6 +27,7 @@
 
 ;;; Require
 
+(require 'my-defun)
 (require 'evil)
 
 ;;; Main code
@@ -91,7 +92,7 @@ POS is the buffer position to check."
                   (1- p)
                 p)))
         (vertical-motion 0)
-        (goto-char (pos-eol))))))
+        (my-end-of-line)))))
 
 (defun evilcursor-next-visual-line (count)
   "Move the cursor COUNT screen lines down.

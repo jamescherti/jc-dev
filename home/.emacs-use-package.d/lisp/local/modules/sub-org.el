@@ -30,6 +30,7 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 
+(require 'my-defun)
 (require 'org)
 
 ;;; TODO lightemacs
@@ -745,7 +746,7 @@ any minor mode associated with the current `major-mode'."
 (defun my-org-capture-move-cursor-end-line ()
   "Move cursor to end line."
   (when (eq major-mode 'org-mode)
-    (goto-char (pos-eol))))
+    (my-end-of-line)))
 (when (fboundp 'my-org-capture-move-cursor-end-line)
   (add-hook 'org-capture-before-finalize-hook
             #'my-org-capture-move-cursor-end-line))
