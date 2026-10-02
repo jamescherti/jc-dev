@@ -51,8 +51,6 @@
   (interactive)
   (message "%s" (frame-parameter nil 'font)))
 
-(defvar inhibit-interaction)
-
 (defvar-local buffer-guardian-ignore-save-prompt nil
   "If non-nil, do not prompt to save this buffer even if the file does not exist.")
 
@@ -84,17 +82,9 @@ each buffer."
                              (buffer-name))))
                 (when proceed-to-save
                   (let ((inhibit-message (not (bound-and-true-p buffer-guardian-verbose)))
-                        (save-silently (not (bound-and-true-p buffer-guardian-verbose)))
-                        (inhibit-interaction t))
+                        (save-silently (not (bound-and-true-p buffer-guardian-verbose))))
                     (condition-case err
                         (save-buffer)
-                      (inhibited-interaction
-                       (message
-                        (concat
-                         "Error: 'save-buffer' attempted an "
-                         "interactive prompt in buffer '%s'. It is expected to "
-                         "be non-interactive.")
-                        (buffer-name)))
                       (error
                        (when (bound-and-true-p buffer-guardian-verbose)
                          (message "Failed to save '%s': %s"
