@@ -559,7 +559,7 @@ xdevenv-file-explorer() {
   elif type -P nautilus &>/dev/null; then
     if has_run_or_raise && is_gnome && is_wayland; then
       OSID=$(~/.local/bin/osid)
-      if [[ $OSID = arch ]]; then
+      if [[ $OSID = gentoo ]] || [[ $OSID = arch ]]; then
         NAUTILUS_DESKTOP_NAME=org.gnome.Nautilus
       else
         NAUTILUS_DESKTOP_NAME=nautilus
