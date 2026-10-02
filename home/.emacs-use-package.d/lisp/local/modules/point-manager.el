@@ -37,6 +37,8 @@
 
 ;;; Code:
 
+(require 'my-defun) ; `my-pos-bol'
+
 (defgroup point-manager nil
   "Point manager."
   :group 'point-manager
@@ -179,7 +181,7 @@ The argument _COMMAND is the previous command (ignored)."
 
         (if point-manager-ignore-invisible
             (vertical-motion 0)
-          (goto-char (pos-bol)))
+          (goto-char (my-pos-bol)))
 
         (point-manager--move-to-column prev-col))
 
@@ -192,7 +194,7 @@ The argument _COMMAND is the previous command (ignored)."
           ;; dired-movement-style 'bounded-files). However, this does not
           ;; accommodate navigation using gg or G in Evil mode (moving to the top
           ;; and bottom of the buffer).
-          (when (= (pos-bol) (point-min))
+          (when (= (my-pos-bol) (point-min))
             (forward-line 1)
             (point-manager--move-to-column prev-col)
             ;; This is used by the next check (2 columns)

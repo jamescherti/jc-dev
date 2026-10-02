@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'my-defun)
+
 ;;; Indent style
 
 ;; Bind the RET key to `comment-indent-new-line'. This ensures that pressing
@@ -157,20 +159,20 @@ If no suitable indent point is found and UNINDENTED-OK is nil, fall back to
     (let ((start-column (current-column))
           indent)
       (save-excursion
-        (goto-char (pos-bol))
+        (my-beginning-of-line)
         (while (and (not (bobp))
                     (progn
                       (forward-line -1)
                       (or (invisible-p (point))
                           (save-excursion
-                            (goto-char (pos-bol))
+                            (my-beginning-of-line)
                             (looking-at-p "^[ \t]*$"))))))
         (cond
          ((and (derived-mode-p 'yaml-mode
                                'yaml-ts-mode)
                (looking-at "^[ \t]*-"))
           (save-excursion
-            (goto-char (pos-bol))
+            (my-beginning-of-line)
             (search-forward "-" nil t)
             (setq indent (+ 1 (current-column)))))
          (t

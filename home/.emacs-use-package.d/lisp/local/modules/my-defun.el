@@ -29,11 +29,22 @@
 (defconst IS-MAC (eq system-type 'darwin))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
+(declare-function pos-eol nil)
+(declare-function pos-bol nil)
+
+(defalias 'my-pos-bol
+  (if (fboundp 'pos-bol) #'pos-bol #'line-beginning-position))
+
+(defalias 'my-pos-eol
+  (if (fboundp 'pos-eol) #'pos-eol #'line-end-position))
+
 (defsubst my-end-of-line ()
   "Move point to the end of the current line."
-  (if (fboundp 'pos-eol)
-      (goto-char (pos-eol))
-    (goto-char (line-end-position))))
+  (goto-char (my-pos-eol)))
+
+(defsubst my-beginning-of-line ()
+  "Move point to the end of the current line."
+  (goto-char (my-pos-bol)))
 
 (defun my-default-font ()
   "Display the default font."

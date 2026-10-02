@@ -38,7 +38,7 @@
   "Get the category at point as an interned symbol."
   ;; Using `pos-bol' directly avoids the heavy overhead of wrapping the check
   ;; in a `save-excursion' block and executing a `goto-char' command.
-  (let ((prop (get-text-property (pos-bol) 'category)))
+  (let ((prop (get-text-property (my-pos-bol) 'category)))
     (cond
      ((stringp prop) (intern prop))
 
