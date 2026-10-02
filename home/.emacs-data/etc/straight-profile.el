@@ -16,7 +16,7 @@
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
  ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
  ("ef-themes" . "e1f617607a5f0692b398365dcd8412ba1e98ccb3") ; 2.2.1 | RSS RELEASE
- ("orderless" . "0ffd9d6903714c1f6d8fcbb6a20941fb33dd7ae5") ; 1.7 | RSS RELEASE
+ ("orderless" . "3d2c2e6468ddf51e69c78e8212e5fd9006d2ce8a") ; 1.8 | RSS RELEASE
  ("vertico" . "a9998a777f1d92348f84d091bb15b87df933a7a2")  ; 2.15 | RSS RELEASE
  ("corfu" . "b468efac023dda39332acc943edc9895c80b5a6f") ; 2.16 | RSS RELEASE
  ("cape" . "f0135abaf95a22b9fb2c951751a5d0733ce61bbd") ; 2.8 | RSS RELEASE
