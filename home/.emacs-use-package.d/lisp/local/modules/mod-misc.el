@@ -36,6 +36,56 @@
 
 ;;; Patches
 
+(with-eval-after-load 'php-ts-mode
+  (when (fboundp 'treesit-node-at)
+    (defun php-ts-mode--parent-html-heuristic (node parent bol &rest _)
+      "Return position based on html indentation.
+
+NODE is the tree-sitter node being indented.
+PARENT is the parent of NODE.
+BOL is the beginning of non-whitespace characters of the current line.
+_ captures any remaining arguments passed by the indentation engine.
+
+Return 0 if the NODE is after the </html>.  If
+`php-ts-mode-html-relative-indent' is not nil return the indentation
+point of the last word before the NODE, plus the indentation offset,
+otherwise return only the indentation point.  If there is no HTML tag,
+it returns 0 as a fallback.  When NODE is nil it behaves
+like \"prev-siblings\" of `treesit-simple-indent-presets'.  It can be
+used when you want to indent PHP code relative to the HTML."
+      (save-excursion
+        (cond
+         ((eq php-ts-mode-html-relative-indent 'ignore) (line-beginning-position))
+         ((let ((node-start (treesit-node-start parent)))
+            (and node-start
+                 ;; Prevent "Invalid search bound (wrong side of point)"
+                 ;; errors when `point' is positioned before the start of
+                 ;; the tree-sitter parent node (e.g., during indentation
+                 ;; with `indent-for-tab-command' after `open-line').
+                 (>= (point) node-start)
+                 (search-backward "</html>" node-start t 1)))
+          (line-beginning-position))
+         ((null node) (apply (alist-get 'prev-sibling treesit-simple-indent-presets) node parent bol nil))
+         (t (if-let* ((html-node (treesit-search-forward
+                                  node
+                                  (lambda (n)
+                                    (and (equal (treesit-node-type n) "text")
+                                         (treesit-node-eq (treesit-node-parent n) parent)))
+                                  t))
+                      (end-html (treesit-node-end html-node)))
+                (progn
+                  (goto-char end-html)
+                  ;; go to the start of the last tag
+                  ;; of the "text" node
+                  (backward-word)
+                  (back-to-indentation)
+                  (cond
+                   ;; shebang or comment before <?php
+                   ((string-equal (treesit-node-type (treesit-node-at (point) 'html)) "text") (point))
+                   (php-ts-mode-html-relative-indent (+ (point) php-ts-html-indent-offset))
+                   (t (point))))
+              0)))))))
+
 ;; (with-eval-after-load 'php-ts-mode
 ;;   (defun php-ts-mode--parent-html-heuristic (node parent bol &rest _)
 ;;     "Return position based on html indentation.
