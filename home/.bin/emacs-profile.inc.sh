@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
@@ -8,17 +9,17 @@ OSFAMILY=$(
 )
 
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-  # export RUN_EMACS_BIN="/usr/bin/emacs"
   export \
-    RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+    RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
   if [[ $EMACS_D = "" ]]; then
     EMACS_D="$HOME/.emacs-straight.d/"
   fi
 fi
 
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
+  # export RUN_EMACS_BIN="/usr/bin/emacs"
   export \
-    RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+    RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
   if [[ $EMACS_D = "" ]]; then
     EMACS_D="$HOME/.emacs-straight.d/"
   fi
