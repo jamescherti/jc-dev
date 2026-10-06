@@ -1137,6 +1137,9 @@ subsequent GCC invocations."
 ;; the Emacs event loop.
 (setq pgtk-use-im-context-on-new-connection nil)
 
+;; For PGTK builds, you can disable the input method context directly in Elisp:
+(setq pgtk-use-im-context nil)
+
 (setq buffer-guardian-override-save-some-buffers t)
 (setq buffer-guardian-verbose nil)
 (setq buffer-guardian-save-all-buffers-interval (* 60 30))

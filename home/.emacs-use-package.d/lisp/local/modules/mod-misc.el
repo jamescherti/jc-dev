@@ -778,6 +778,13 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; Apply to all future frames, including emacsclient frames
+(add-to-list 'default-frame-alist '(wait-for-wm . nil))
+
+;; Apply immediately to the startup frame if a GUI frame exists
+(when (display-graphic-p)
+  (modify-frame-parameters nil '((wait-for-wm . nil))))
+
 (setq message-truncate-lines t)
 
 (with-eval-after-load 'so-long
@@ -1819,7 +1826,12 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; may cause a delay when exiting Emacs; if you wish to prevent Emacs from
  ;; transferring data to the clipboard manager, change the variable
  ;; x-select-enable-clipboard-manager to nil.
- x-select-enable-clipboard-manager nil)
+ x-select-enable-clipboard-manager nil
+
+ ;; TODO light or minimal emacs?
+ select-active-regions nil
+ x-selection-timeout 100
+ )
 
 ;; Plain Text Pasting (Fixing "Org-Mode Bleed")
 ;;
@@ -4014,14 +4026,13 @@ properly handles remote files over Tramp), applying the setting only if
  ;; (available since Emacs 31).
  vc-dir-hide-up-to-date-on-revert t)
 
-;; Ignore large, commonly untracked directories (like node_modules) in VC
-;; operations to improve performance.
 ;; TODO lightemacs?
 (with-eval-after-load 'tramp
-  (setq vc-ignore-dir-regexp (format "%s\\|%s\\|%s"
-                                     vc-ignore-dir-regexp
-                                     tramp-file-name-regexp
-                                     "[/\\\\]node_modules")))
+  (with-eval-after-load 'vc-hooks
+    (setq vc-ignore-dir-regexp (format "%s\\|%s\\|%s"
+                                       vc-ignore-dir-regexp
+                                       tramp-file-name-regexp
+                                       "[/\\\\]node_modules"))))
 
 ;;; sub-org
 
