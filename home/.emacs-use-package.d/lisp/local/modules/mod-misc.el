@@ -2920,7 +2920,6 @@ ARGS - the arguments passed to the original function"
 ;; instantly with zero background overhead.
 ;; (setq consult-preview-key nil)
 
-
 ;;; battery angel
 
 (defvar battery-angel--manage-compile-angel nil)
