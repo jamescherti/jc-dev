@@ -4028,6 +4028,13 @@ properly handles remote files over Tramp), applying the setting only if
 ;; TODO lightemacs?
 (with-eval-after-load 'tramp
   (with-eval-after-load 'vc-hooks
+    ;; Disable version control checks in directories where they are slow or
+    ;; unnecessary. The regular expression combines three parts to match the
+    ;; following cases:
+    ;; 1. vc-ignore-dir-regexp: The default matches for network mounts (/net,
+    ;;   /afs, SMB).
+    ;; 2. tramp-file-name-regexp: Matches remote file paths accessed via TRAMP.
+    ;; 3. "[/\\\\]node_modules": Matches third-party dependency directories.
     (setq vc-ignore-dir-regexp (format "%s\\|%s\\|%s"
                                        vc-ignore-dir-regexp
                                        tramp-file-name-regexp
