@@ -196,20 +196,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 ;;; Fix indirect buffers bug
 
 ;; URL: https://lists.gnu.org/archive/html/bug-gnu-emacs/2026-08/msg00904.html
-;;
-;; As of Emacs 31/32, indirect buffers no longer share tree-sitter
-;; parsers with the base buffer to avoid issues when the buffers
-;; have different narrowing.
-;;
-;; Because the major mode function is not run when cloning an
-;; indirect buffer, no parser is created for it, resulting in a
-;; total loss of syntax highlighting.
-;;
-;; This workaround implements Yuan's suggestion to automatically
-;; create the parser if the buffer is an indirect buffer. By
-;; iterating over the base buffer's parser list, it also supports
-;; modes that rely on multiple parsers (like php or markdown) as
-;; pointed out by Marks.
+;; Article: https://www.jamescherti.com/restore-emacs-tree-sitter-syntax-highlighting-in-indirect-buffers/
 
 (defun initialize-indirect-buffer-treesit-parsers ()
   "Initialize tree-sitter parsers in indirect buffers based on the base buffer."
@@ -217,25 +204,30 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
              (fboundp 'treesit-parser-list)
              (fboundp 'treesit-parser-create))
     (let* ((base (buffer-base-buffer))
+           ;; If this is an indirect buffer, switch context to the base buffer
+           ;; to retrieve its active parsers.
            (parser-list (and base
                              (with-current-buffer base
                                (treesit-parser-list)))))
       (when parser-list
-        ;; Instantiate identical parsers exclusively for this
-        ;; indirect buffer
+        ;; Instantiate identical parsers for this indirect buffer. This ensures
+        ;; that all required parsers are duplicated, maintaining support for
+        ;; complex multi-language modes.
         (dolist (parser parser-list)
           (treesit-parser-create (treesit-parser-language parser)))
 
-        ;; Re-wire tree-sitter (font-lock, indentation) using the
-        ;; inherited variables This safely bypasses
-        ;; kill-all-local-variables
+        ;; Activate tree-sitter features (such as font-lock and indentation).
+        ;; Because indirect buffers inherit local variables from the base
+        ;; buffer, calling treesit-major-mode-setup directly allows us to use
+        ;; that existing configuration.
         (treesit-major-mode-setup)
 
         ;; Force an immediate font-lock refresh
         (when (fboundp 'font-lock-flush)
           (font-lock-flush))))))
 
-(add-hook 'clone-indirect-buffer-hook #'initialize-indirect-buffer-treesit-parsers)
+(when (>= emacs-major-version 31)
+  (add-hook 'clone-indirect-buffer-hook #'initialize-indirect-buffer-treesit-parsers))
 
 ;;; Packages TODO lightemacs?
 
