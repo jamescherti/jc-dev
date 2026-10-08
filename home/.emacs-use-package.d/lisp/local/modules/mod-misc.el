@@ -204,34 +204,29 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 
 (defun initialize-indirect-buffer-treesit-parsers ()
   "Initialize tree-sitter parsers in indirect buffers based on the base buffer."
-  ;; (when (and (fboundp 'treesit-major-mode-setup)
-  ;;            (fboundp 'treesit-parser-list)
-  ;;            (fboundp 'treesit-parser-create))
-  ;;   (let* ((base (buffer-base-buffer))
-  ;;          ;; If this is an indirect buffer, switch context to the base buffer
-  ;;          ;; to retrieve its active parsers.
-  ;;          (parser-list (and base
-  ;;                            (with-current-buffer base
-  ;;                              (treesit-parser-list)))))
-  ;;     (when parser-list
-  ;;       ;; Instantiate identical parsers for this indirect buffer. This ensures
-  ;;       ;; that all required parsers are duplicated, maintaining support for
-  ;;       ;; complex multi-language modes.
-  ;;       (dolist (parser parser-list)
-  ;;         (treesit-parser-create (treesit-parser-language parser)))
-  ;;
-  ;;       ;; Activate tree-sitter features (such as font-lock and indentation).
-  ;;       ;; Because indirect buffers inherit local variables from the base
-  ;;       ;; buffer, calling treesit-major-mode-setup directly allows us to use
-  ;;       ;; that existing configuration.
-  ;;       (treesit-major-mode-setup)
-  ;;
-  ;;       ;; Force an immediate font-lock refresh
-  ;;       (when (fboundp 'font-lock-flush)
-  ;;         (font-lock-flush)))))
-  )
+  (when (and (fboundp 'treesit-major-mode-setup)
+             (fboundp 'treesit-parser-list)
+             (fboundp 'treesit-parser-create))
+    (let* ((base (buffer-base-buffer))
+           ;; If this is an indirect buffer, switch context to the base buffer
+           ;; to retrieve its active parsers.
+           (parser-list (and base
+                             (with-current-buffer base
+                               (treesit-parser-list)))))
+      (when parser-list
+        ;; Instantiate identical parsers for this indirect buffer.
+        (dolist (parser parser-list)
+          (treesit-parser-create (treesit-parser-language parser)))
 
-(add-hook 'clone-indirect-buffer-hook #'initialize-indirect-buffer-treesit-parsers)
+        ;; Activate tree-sitter features (such as font-lock and indentation).
+        (treesit-major-mode-setup)
+
+        ;; Force an immediate font-lock refresh
+        (when (fboundp 'font-lock-flush)
+          (font-lock-flush))))))
+
+(when (>= emacs-major-version 31)
+  (add-hook 'clone-indirect-buffer-hook #'initialize-indirect-buffer-treesit-parsers))
 
 ;;; Packages TODO lightemacs?
 
