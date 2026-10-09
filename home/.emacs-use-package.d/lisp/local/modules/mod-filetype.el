@@ -761,13 +761,13 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; Markdown hide markup
 
-(defun my-markdown-ts-mode-hide-markup ()
-  "Docstring."
-  (when (and (not markdown-ts-hide-markup)
-             (fboundp 'markdown-ts-toggle-hide-markup))
-    (markdown-ts-toggle-hide-markup)))
-
-(add-hook 'markdown-ts-mode-hook #'my-markdown-ts-mode-hide-markup)
+;; (defun my-markdown-ts-mode-hide-markup ()
+;;   "Docstring."
+;;   (when (and (not markdown-ts-hide-markup)
+;;              (fboundp 'markdown-ts-toggle-hide-markup))
+;;     (markdown-ts-toggle-hide-markup)))
+;;
+;; (add-hook 'markdown-ts-mode-hook #'my-markdown-ts-mode-hide-markup)
 
 ;;; Setup markdown mode
 
