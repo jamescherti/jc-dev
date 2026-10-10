@@ -27,7 +27,7 @@
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
  ("consult" . "3c64214db5cd61a8f8186e4dce89c0e04be1652c") ; 3.10 | RSS RELEASE
  ("marginalia" . "42eafcfddbe88d92ed96521a00a5a90a49bac4dd") ; 2.13 | RSS RELEASE
- ("markdown-mode" . "76cb4ffecfdf95ee769e5cb4608e04202c3c1521") ; newer than v2.8 | RSS RELEASE
+ ("markdown-mode" . "1d22840d588be29aa57eca36f28a32bede331550") ; newer than v2.8 | RSS RELEASE
  ("org" . "80c431fe0c59bb6b6c4d05ad2d4d279f34b5fcd5") ; release_9.8.10 | RSS RELEASE
  ("compat" . "90880f81419577e1d3f68424d2a3adf31e6d663e") ; Version 31.1.0.0 | RSS RELEASE
  ("cond-let" . "3b88187fe067d4ca3dec3ef8a329b0ce18bdb356")
