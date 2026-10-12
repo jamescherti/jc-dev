@@ -20,21 +20,20 @@
 #
 """Use readline to complete using a list."""
 
-
 import readline
-from typing import Any, List, Union
+from typing import Any
 
 
 class ReadlineCompleter:
     """A readline completer."""
 
-    def __init__(self, options: List[str]):
+    def __init__(self, options: list[str]) -> None:
         """Store the options = ['word1', 'word2']."""
-        readline.set_completer_delims('')
-        self.options = options
-        self.matches: List[str] = []
+        readline.set_completer_delims("")
+        self.options: Any = options
+        self.matches: list[str] = []
 
-    def complete(self, _, state):
+    def complete(self, _: str, state: int) -> str | None:
         """Complete a readline sentence."""
         if state == 0:
             origline = readline.get_line_buffer()
@@ -56,8 +55,9 @@ class ReadlineCompleter:
                     if being_completed:
                         # Match options with portion of input
                         # being completed
-                        self.matches = [w for w in matches
-                                        if w.startswith(being_completed)]
+                        self.matches = [
+                            w for w in matches if w.startswith(being_completed)
+                        ]
                     else:
                         # Matching empty string so use all candidates
                         self.matches = matches
@@ -65,13 +65,16 @@ class ReadlineCompleter:
                     self.matches = []
 
         try:
-            return self.matches[state]
+            return str(self.matches[state])
         except IndexError:
             return None
 
 
-def prompt_text(prompt: Any,
-                list_options: Union[None, List[str]] = None):
+def prompt_text(
+    prompt: Any,
+    list_options: list[str] | None = None,
+    initial_text: str | None = None,
+) -> str:
     """Read a string from standard input and complete against 'list_options'.
 
     The trailing newline is stripped. The prompt string is printed to
@@ -81,15 +84,18 @@ def prompt_text(prompt: Any,
     EOFError. On *nix systems, readline is used if available.
 
     """
-    readline.parse_and_bind('tab: complete')
+    readline.parse_and_bind("tab: complete")
     if list_options is None:
         list_options = []
 
     save_completer = readline.get_completer()
     try:
-        readline.set_completer(
-            ReadlineCompleter(list_options).complete
-        )
+        if initial_text:
+            readline.set_startup_hook(
+                lambda: readline.insert_text(initial_text)
+            )
+        readline.set_completer(ReadlineCompleter(list_options).complete)
         return input(prompt)
     finally:
+        readline.set_startup_hook(None)
         readline.set_completer(save_completer)
