@@ -11,10 +11,10 @@
  ("diff-hl" . "a97bc4f554700212e60edced640620a3d9924e66") ; TODO add to RSS
  ("evil-collection" . "783c96b9901417cb8b6df63ab606387fa72dc922") ; 3.0.3 add to RSS
  ("embark" . "79531fc6aab311acf6874679082f336de4a91789") ; 1.2 | RSS RELEASE
- ("evil-matchit" . "8d0bca76ed9958fc5ad460e6085175c83695bbdb") ; 4.1.0 | RSS RELEASE
+ ("evil-matchit" . "5dc85e7e624b65efe0b57f1c1ffc4695d6154e5d") ; 4.1.1 | RSS RELEASE
  ("apheleia" . "d97806bf2b5b72f1e3df01e9a045a4d242906b65") ; v4.6.0 | RSS RELEASE
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
- ("modus-themes" . "2d044ac89f3bca7011fa2bfda003cf80ce115f70") ; 5.3.0 | RSS RELEASE
+ ("modus-themes" . "aedb41742ff326fa4884136300155ca21a0bd628") ; 5.3.0 | RSS RELEASE
  ("ef-themes" . "e1f617607a5f0692b398365dcd8412ba1e98ccb3") ; 2.2.1 | RSS RELEASE
  ("orderless" . "3d2c2e6468ddf51e69c78e8212e5fd9006d2ce8a") ; 1.8 | RSS RELEASE
  ("vertico" . "a9998a777f1d92348f84d091bb15b87df933a7a2")  ; 2.15 | RSS RELEASE
@@ -33,14 +33,27 @@
  ("cond-let" . "3b88187fe067d4ca3dec3ef8a329b0ce18bdb356")
  ("transient" . "0cacc84ff0c7df126e194666ff8b8a1e6082e796")
 
+ ;; Maintained
+ ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE
+
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
  ("ztree" . "48f17807ac6c765a66cf29b2fcdd08f1aa7da7d6")
  ("yaml-mode" . "93dba98c050e9abfc623ec66aa499dbbb46b2fe1")
  ("nerd-icons-corfu" . "e1197d6c1db673f4ec7ee20cb2c4297f479420e7") ; v1.1.0 | RSS RELEASE
- ("nerd-icons.el" . "17faac7977242b470732efd417d3bcc8eb5a830e")
+ ("nerd-icons.el" . "87ae84981ddeb4446586ba65cb30cec6e6ccfdb0")
+
+ ;; No tags (Forked: jamescherti)
+ ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
+ ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
+ ("eat" . "7afdf4c983208fcddfc29e18541d3cbd78892e9f")
+ ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
+ ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
+ ("doom-themes" . "a59202912ad55014e53a685eee6cd94130bdd4fd")
+ ("emacs-elisp-autofmt" . "fdae9054c55804def507cf7045c8460573d876a9")
 
  ;; Recently unmaintained
+ ("benchmark-init-el" . "54b9703389f25012e4cc20fe4a0d4ea253ce4820")
  ("groovy-emacs-modes" . "fb296e62a0856d9b293dc29f5471a6d7c7d447ea")
  ("jenkinsfile-mode". "568865ee419e0592de0dd0717d6769a66d9df111")
  ("jinja2-mode". "4e2be5498130c22ee51487001ff16a5bb1500392")
@@ -68,19 +81,6 @@
  ("org-appear" . "77d23efec5f5c25fc0798364d2b51a3ce3d8d518")
  ("paredit" . "57c9f26c51e2e33ad70c45d2c393b1e458e95685")
  ("vimrc-mode" . "42c23497381d5f8a3417aa592c74370a181b820c")
-
- ;; Maintained
- ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE
- ("benchmark-init-el" . "54b9703389f25012e4cc20fe4a0d4ea253ce4820")
-
- ;; No tags (Forked: jamescherti)
- ("nerd-icons-dired" . "104acd8879528b8115589f35f1bbcbe231ad732f")
- ("emacs-libvterm" . "9a32a4afce25647282bc8a8792468e41bc64adf4")
- ("eat" . "7afdf4c983208fcddfc29e18541d3cbd78892e9f")
- ("emacs-undo-fu" . "5684ef2aef5f60176472916b21869cf221e018cc")
- ("emacs-undo-fu-session" . "92d733a5b162a70c572fac17b9f9e872426df547")
- ("doom-themes" . "cc7686783e5e6e4174a345c768047d524f0dd54f")
- ("emacs-elisp-autofmt" . "fdae9054c55804def507cf7045c8460573d876a9")
 
  ;; My packages
  ("org-ibullets.el" . "933d5989124a57e83de3eadf82bb194f5e308b98")
