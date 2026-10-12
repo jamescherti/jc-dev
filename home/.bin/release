@@ -30,6 +30,11 @@ from pathlib import Path
 from jc_helpers.prompt import prompt_text
 from packaging import version
 
+VERSION_REGEX = re.compile(
+    r"v?\d+(?:\.\d+)+(?:[-._]?(?:a|b|rc|alpha|beta|post|dev)\d*)?",
+    re.IGNORECASE,
+)
+
 
 class PyReleaseError(Exception):
     """Exception raised by the release script."""
@@ -65,8 +70,8 @@ class Release:
         print("Versions found:")
         print("---------------")
         # Ignore pre-commit config when grepping for versions
-        subprocess.call(["git", "grep", "[0-9]\\.[0-9]\\.[0-9]",
-                         "--", ":(exclude).pre-commit-config.yaml"])
+        for item in self.tags:
+            print(item)
         print()
 
         # Prompt the user to enter the old version
@@ -75,7 +80,8 @@ class Release:
             if old_version not in self.all_tag_variants:
                 print(
                     f"Error: {old_version} is not part of the project",
-                    file=sys.stderr)
+                    file=sys.stderr,
+                )
             else:
                 break
 
@@ -83,15 +89,18 @@ class Release:
         while True:
             new_version: str = self.get_version("New version: ", False)
             if version.parse(new_version) <= version.parse(old_version):
-                print(f"Error: New version {new_version} must be "
-                      f"higher than {old_version}")
+                print(
+                    f"Error: New version {new_version} must be "
+                    f"higher than {old_version}"
+                )
                 continue
             else:
                 break
 
         print("Modifying...")
-        python_project: bool = (self.git_root / "pyproject.toml").is_file() \
-            or (self.git_root / "setup.py").is_file()
+        python_project: bool = (
+            self.git_root / "pyproject.toml"
+        ).is_file() or (self.git_root / "setup.py").is_file()
 
         if python_project:
             dist_dir: Path = self.git_root / "dist"
@@ -114,7 +123,7 @@ class Release:
         if self.confirm("Apply?"):
             self.execute_release(new_version, new_num, python_project)
 
-    def chdir_git_toplevel(self):
+    def chdir_git_toplevel(self) -> None:
         """Change the current directory to the Git toplevel directory."""
         try:
             self.git_root: Path = self.git_top_level()
@@ -131,10 +140,13 @@ class Release:
         :raises PyReleaseError: If the branch is not main or master.
         """
         branch: str = self.run_get_firstline(
-            ["git", "branch", "--show-current"]).strip()
+            ["git", "branch", "--show-current"]
+        ).strip()
         if branch not in ["main", "master"]:
-            raise PyReleaseError(f"Current branch is '{branch}'. Releases "
-                                 "must be made from main or master.")
+            raise PyReleaseError(
+                f"Current branch is '{branch}'. Releases "
+                "must be made from main or master."
+            )
 
     def confirm(self, string: str) -> bool:
         """
@@ -167,26 +179,42 @@ class Release:
                 if not exist_ok and ver in self.all_tag_variants:
                     print(
                         f"Error: Version {ver} exists already.",
-                        file=sys.stderr)
+                        file=sys.stderr,
+                    )
                     continue
                 return ver
             except (KeyboardInterrupt, EOFError):
                 sys.exit(1)
+
+    def _add_version_candidate(self, candidate: str) -> None:
+        """
+        Add a tag or version candidate to the internal tag lists.
+
+        :param candidate: The tag or version string to register.
+        """
+        candidate = candidate.strip()
+        if not candidate:
+            return
+
+        if candidate not in self.tags:
+            self.tags.append(candidate)
+
+        stripped_tag: str = re.sub("^v", "", candidate)
+        for variant in (candidate, stripped_tag, f"v{stripped_tag}"):
+            if variant not in self.all_tag_variants:
+                self.all_tag_variants.append(variant)
 
     def load_git_tags(self) -> None:
         """Load tags from the git repository."""
         self.tags = []
         self.all_tag_variants = []
         for tag in self.quick_run(["git", "tag"]):
-            if tag and tag not in self.tags:
-                self.tags.append(tag)
-                stripped_tag = re.sub("^v", "", tag)
-                self.all_tag_variants.append(stripped_tag)
-                self.all_tag_variants.append(f"v{stripped_tag}")
-
-        if not self.tags:
-            self.tags = ["0.9.5", "0.9.9"]
-            self.all_tag_variants = ["0.9.5", "0.9.9", "v0.9.5", "v0.9.9"]
+            if not tag:
+                continue
+            self._add_version_candidate(tag)
+            for match in VERSION_REGEX.findall(tag):
+                self._add_version_candidate(match)
+                self._add_version_candidate(re.sub("^v", "", match))
 
     def tag_version_to_number_version(self, tag_version: str) -> str:
         """
@@ -206,11 +234,13 @@ class Release:
         """
         try:
             line: str = self.run_get_firstline(
-                ["git", "rev-parse", "--show-toplevel"])
+                ["git", "rev-parse", "--show-toplevel"]
+            )
             return Path(line)
         except (subprocess.CalledProcessError, IndexError) as err:
-            raise PyReleaseError("The Git top level has not been found") \
-                from err
+            raise PyReleaseError(
+                "The Git top level has not been found"
+            ) from err
 
     def quick_run(self, cmd: list[str]) -> list[str]:
         """
@@ -220,7 +250,8 @@ class Release:
         :returns: List of output lines.
         """
         output: str = subprocess.check_output(
-            cmd, env=self.env, timeout=60, text=True)
+            cmd, env=self.env, timeout=60, text=True
+        )
         return output.splitlines()
 
     def run_get_firstline(self, cmd: list[str]) -> str:
@@ -233,8 +264,9 @@ class Release:
         lines: list[str] = self.quick_run(cmd)
         return lines[0] if lines else ""
 
-    def git_replace_string(self, previous_string: str,
-                           replacement_string: str) -> None:
+    def git_replace_string(
+        self, previous_string: str, replacement_string: str
+    ) -> None:
         """
         Replace a string across the repository using 'sre'.
 
@@ -243,21 +275,29 @@ class Release:
         """
         # Ensure sre excludes the pre-commit config if the tool supports it,
         # or we manually revert it via git checkout.
-        cmd: list[str] = ["sre", "-E", previous_string,
-                          replacement_string, str(self.git_root)]
+        cmd: list[str] = [
+            "sre",
+            "-E",
+            previous_string,
+            replacement_string,
+            str(self.git_root),
+        ]
         print("[CMD]", cmd)
         subprocess.check_call(cmd)
 
         # Revert changes to sensitive files that should not be bumped
         files_to_revert: list[str] = [
-            "CHANGELOG.md", ".pre-commit-config.yaml"]
+            "CHANGELOG.md",
+            ".pre-commit-config.yaml",
+        ]
         for filename in files_to_revert:
             path: Path = self.git_root / filename
             if path.is_file():
                 subprocess.check_call(["git", "checkout", str(path)])
 
-    def execute_release(self, new_version: str, new_num: str,
-                        is_python: bool) -> None:
+    def execute_release(
+        self, new_version: str, new_num: str, is_python: bool
+    ) -> None:
         """
         Perform the git commit, tagging, building, and pushing.
 
@@ -267,31 +307,35 @@ class Release:
         """
         subprocess.check_call(["git", "fetch"])
         subprocess.check_call(
-            ["git", "commit", "-a", "-m", f"Release: {new_num}"])
+            ["git", "commit", "-a", "-m", f"Release: {new_num}"]
+        )
         subprocess.check_call(
-            ["git", "tag", "-s", new_version, "-m", new_version])
+            ["git", "tag", "-s", new_version, "-m", new_version]
+        )
 
         if is_python:
             subprocess.check_call(
-                ["python", "-m", "build", "--no-isolation", "."])
+                ["python", "-m", "build", "--no-isolation", "."]
+            )
             while True:
                 try:
                     subprocess.check_call(
-                        "python -m twine upload --verbose dist/*", shell=True)
+                        "python -m twine upload --verbose dist/*", shell=True
+                    )
                     break
                 except subprocess.CalledProcessError:
                     if not self.confirm("Twine upload failed. Try again?"):
                         break
 
-        for push_cmd in (("git", "push"),
-                         ("git", "push", "--tags")):
+        for push_cmd in (("git", "push"), ("git", "push", "--tags")):
             while True:
                 try:
                     subprocess.check_call(push_cmd)
                     break
                 except subprocess.CalledProcessError:
                     if not self.confirm(
-                            f"{' '.join(push_cmd)} failed. Try again?"):
+                        f"{' '.join(push_cmd)} failed. Try again?"
+                    ):
                         break
 
 
