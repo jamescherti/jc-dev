@@ -60,6 +60,7 @@ class Release:
         self.tags: list[str] = []
         self.all_tag_variants: list[str] = []
         self.load_git_tags()
+        self.latest_version: str = self.get_latest_version()
 
         self.git_root = self.git_top_level()
 
@@ -165,6 +166,24 @@ class Release:
             if answer in ["y", "n"]:
                 return answer == "y"
 
+    def get_latest_version(self) -> str:
+        """
+        Get the latest version from the loaded git tags.
+
+        :returns: The latest version string, or an empty string if none found.
+        """
+        latest_ver_str: str = ""
+        latest_ver_obj: version.Version | None = None
+        for tag in self.tags:
+            try:
+                parsed: version.Version = version.parse(tag)
+            except version.InvalidVersion:
+                continue
+            if latest_ver_obj is None or parsed > latest_ver_obj:
+                latest_ver_obj = parsed
+                latest_ver_str = tag
+        return latest_ver_str
+
     def get_version(self, prompt: str, exist_ok: bool) -> str:
         """
         Get a version string from the user.
@@ -175,7 +194,11 @@ class Release:
         """
         while True:
             try:
-                ver: str = prompt_text(prompt, self.tags).strip()
+                ver: str = prompt_text(
+                    prompt,
+                    self.tags,
+                    initial_text=self.latest_version,
+                ).strip()
                 if not exist_ok and ver in self.all_tag_variants:
                     print(
                         f"Error: Version {ver} exists already.",
