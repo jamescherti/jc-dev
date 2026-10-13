@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+if [ -s "$HOME/.projects" ]; then
+  # Print each directory with a massive rank and the current unix timestamp.
+  # The 'NF' condition ensures empty lines are ignored.
+  sort "$HOME/.projects" | awk -v t="$(date +%s)" 'NF {print $0 "|9999999|" t}'
+fi

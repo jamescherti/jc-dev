@@ -1009,7 +1009,9 @@ word after the space that contains at least two uppercase characters."
 
 (evil-define-key 'normal 'global
   (kbd "<leader>oa") 'org-agenda
+  (kbd "<leader>ol") 'org-agenda-list
   (kbd "<leader>oc") 'org-capture
+  (kbd "<leader>od") 'org-deadline
   (kbd "<leader>os") 'org-schedule
   (kbd "<leader>Z") 'my-org-agenda-switch-to-todos)
 

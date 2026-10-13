@@ -624,11 +624,13 @@ export _FASD_ONLY_VCS=0
 # Reduce the maximum size of the fasd database.
 # A smaller database reduces the parsing overhead incurred by awk
 # when rewriting the file during prompt evaluation.
-export _FASD_MAX=500
+export _FASD_MAX=2000
 
 # Disable symlink resolution. This prevents the script from spawning
 # sub-processes to run 'xargs' and 'readlink'.
 export _FASD_RESOLVE_SYMLINKS=0
+
+export _FASD_BACKENDS="native fasd-projects"
 
 # The GNU awk (gawk) implementation is standard on many systems, but mawk is a
 # bytecode-compiled implementation that is significantly faster.
@@ -637,9 +639,9 @@ if type -P mawk &>/dev/null; then
   alias awk=mawk
 fi
 
-export _FASD_IGNORE_DUPS=1
+# export _FASD_IGNORE_DUPS=1
 
-export _FASD_IGNORE_TMP_DIRS=1
+# export _FASD_IGNORE_TMP_DIRS=1
 
 # TODO move this to profile-after
 if ! type -P osid >/dev/null 2>&1; then
