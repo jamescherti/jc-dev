@@ -237,7 +237,6 @@ class Release:
             self._add_version_candidate(tag)
             for match in VERSION_REGEX.findall(tag):
                 self._add_version_candidate(match)
-                # self._add_version_candidate(re.sub("^v", "", match))
 
     def tag_version_to_number_version(self, tag_version: str) -> str:
         """
