@@ -2609,21 +2609,23 @@ generally one of the lines that are folded."
 
 (defun my-enable-smerge-maybe ()
   "Enable `smerge'."
-  (when (and buffer-file-name
-             (vc-backend buffer-file-name))
-    (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward "^<<<<<<< " nil t)
-        (smerge-mode +1)))))
+  ;; (when (and buffer-file-name
+  ;;            (vc-backend buffer-file-name))
+  ;;   (save-excursion
+  ;;     (goto-char (point-min))
+  ;;     (when (re-search-forward "^<<<<<<< " nil t)
+  ;;       (smerge-mode +1))))
+  )
 
 (add-hook 'find-file-hook #'my-enable-smerge-maybe)
 
 ;; Switch to `fundamental-mode' when `smerge-mode' is activated.
 (defun my-smerge-to-fundamental-mode ()
   "Switch to `fundamental-mode' when `smerge-mode' is activated."
-  (when (and smerge-mode (not (eq major-mode 'fundamental-mode)))
-    (fundamental-mode)
-    (smerge-mode 1)))
+  ;; (when (and smerge-mode (not (eq major-mode 'fundamental-mode)))
+  ;;   (text-mode)
+  ;;   (smerge-mode 1))
+  )
 (add-hook 'smerge-mode-hook #'my-smerge-to-fundamental-mode)
 
 ;;; DISABLED: Disable `smerge' mode paredit

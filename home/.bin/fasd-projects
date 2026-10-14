@@ -26,9 +26,15 @@
 # SOFTWARE.
 #
 
+set -u
+set -e
+
 if [ -s "$HOME/.projects" ]; then
-  awk -v t="$(date +%s)" -v home="$HOME" 'NF {
-    rank = ($0 == home "/src/forks/emacs") ? 99999999 : 9999999;
+  {
+    echo "$HOME/src/wip/ansible"
+    cat "$HOME/.projects"
+  } | awk -v t="$(date +%s)" -v home="$HOME" 'NF {
+    rank = ($0 == home "/src/forks/emacs" || $0 == home "/src/wip/ansible") ? 99999999 : 9999998;
     print $0 "|" rank "|" t
-   }' <"$HOME/.projects"
+  }'
 fi
