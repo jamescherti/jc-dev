@@ -105,6 +105,7 @@ tasks:
 
   - git: git@github.com:jamescherti/efasd
     path: tools/efasd
+    revision: develop
 
   - git: git@github.com:jamescherti/pdfcipher
     path: tools/pdfcipher
@@ -271,6 +272,7 @@ tasks:
 
   - git: git@github.com:jamescherti/fasd
     path: forks/fasd
+    delete: true
     revision: master
     remote:
       upstream: https://github.com/whjvenyl/fasd
