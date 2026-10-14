@@ -2024,7 +2024,6 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook
                                                      yaml-ts-mode-hook
                                                      python-mode-hook
-                                                     python-ts-mode-hook
                                                      haskell-mode-hook
                                                      ;; My preference
                                                      sh-mode-hook
@@ -2047,6 +2046,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
                                                    rust-ts-mode-hook
                                                    go-ts-mode-hook
                                                    ruby-ts-mode-hook
+                                                   python-ts-mode-hook
                                                    php-ts-mode-hook
                                                    csharp-ts-mode-hook
                                                    go-mod-ts-mode-hook
