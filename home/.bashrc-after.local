@@ -621,11 +621,6 @@ alias ccf=cbcopy-files
 # Disabling this prevents disk I/O overhead on every command execution.
 export _FASD_ONLY_VCS=0
 
-# Reduce the maximum size of the fasd database.
-# A smaller database reduces the parsing overhead incurred by awk
-# when rewriting the file during prompt evaluation.
-export _FASD_MAX=2000
-
 # Disable symlink resolution. This prevents the script from spawning
 # sub-processes to run 'xargs' and 'readlink'.
 export _FASD_RESOLVE_SYMLINKS=0
