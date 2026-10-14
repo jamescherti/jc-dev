@@ -190,11 +190,7 @@
 
         ;; Update font lock to clear new highlights after functions are
         ;; evaluated
-        (when (bound-and-true-p font-lock-mode)
-          (if (fboundp 'font-lock-flush)
-              (font-lock-flush)
-            (with-no-warnings
-              (font-lock-fontify-buffer))))))))
+        (font-lock-flush)))))
 
 (defun evilbuffer-clear-highlights ()
   "Clear."
