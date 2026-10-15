@@ -43,14 +43,18 @@ run_ai_ls() {
       echo "File: ${target_file}"
       echo '```'
 
-      # Print the file content
-      cat "$target_file"
+      if path-is "$target_file" binary >/dev/null 2>&1; then
+        echo "$0: Warning: Binary file skipped: $target_file" >&2
+      else
+        # Print the file content
+        cat "$target_file"
 
-      # Ensure a trailing newline exists so the closing backticks do not get
-      # appended to the last line of the file's content.
-      if [[ -s "$target_file" &&
-        $(tail -c 1 "$target_file" | wc -l) -eq 0 ]]; then
-        echo
+        # Ensure a trailing newline exists so the closing backticks do not get
+        # appended to the last line of the file's content.
+        if [[ -s "$target_file" &&
+          $(tail -c 1 "$target_file" | wc -l) -eq 0 ]]; then
+          echo
+        fi
       fi
 
       echo
