@@ -29,172 +29,189 @@
 (require 'lightemacs)
 
 (defvar mod-buffer-terminator-keep-buffer-regexp nil)
-(setq mod-buffer-terminator-keep-buffer-regexp '("\\`\\(?: \\)?\\*eldoc for .*\\*\\'"
-                                                 "\\`\\(?: \\)?\\*EGLOT .*\\*\\'"
-                                                 "\\`\\(?: \\)?\\*straight.*\\*\\'"
-                                                 "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
-                                                 "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
+;; Can also be handled with the
+;; process rule
+;; "\\`\\(?: \\)?\\*EGLOT .*\\*\\'"
+;; "\\`\\*vterm:" ; shell-pop
+;; Keep Corfu popups
+;; "\\` \\*corfu"
+;; Keep Eldoc buffers (including contextual ones)
+;; "\\`\\(?: \\)?\\*eldoc.*\\*\\'"
+;; Keep Help buffers
+;; "\\`\\*Help.*\\*\\'"
+(setq mod-buffer-terminator-keep-buffer-regexp
+      '(;; When you position the cursor on a symbol and eldoc describes it in
+        ;; the minibuffer
+        ;; "\\`\\(?: \\)?\\*eldoc for .*\\*\\'"
+        ;;
+        ;; "\\`\\(?: \\)?\\*straight-.*\\*\\'"
+        ;; "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
+        ;; "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
 
-                                                 ;; [buffer-terminator]
-                                                 ;; Terminated the buffer: '
-                                                 ;; *tar-data *temp*-79904*'
-                                                 ;; (fundamental-mode)
-                                                 "\\` \\*tar-data "
+        ;; `vc'
+        ;; "\\`\\*vc-"
 
-                                                 ;; ' *diff-hl* '
-                                                 ;; ' *diff-hl-reference* '
-                                                 "\\` \\*diff-hl"
+        ;; '*ediff-errors*' (fundamental-mode)
+        ;; '*ediff-fine-diff*' (fundamental-mode)
+        ;; ' *ediff-tmp*' (fundamental-mode)
+        ;; "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
+        ;; "\\`\\*buffer-terminator:" ; shell-pop
 
-                                                 ;; `vc'
-                                                 "\\`\\*vc-"
-
-                                                 ;; '*ediff-errors*' (fundamental-mode)
-                                                 ;; '*ediff-fine-diff*' (fundamental-mode)
-                                                 ;; ' *ediff-tmp*' (fundamental-mode)
-                                                 "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
-                                                 "\\`\\*vterm:" ; shell-pop
-                                                 "\\`\\*buffer-terminator:" ; shell-pop
-                                                 "\\` \\*Minibuf-[0-9]+\\*\\'"
-                                                 ;; "\\` \\*Compiler Input\\*-"
-
-                                                 ;; *stderr of elisp-flymake-byte-compile*
-                                                 "\\` \\*stderr of "
-
-                                                 ;; ' *http melpa.org:443*' (fundamental-mode)
-                                                 "\\` \\*http "
-
-                                                 ;; "\\`\\*gptel"
-                                                 ;; "\\` \\*flymake-.*\\*\\'"
-                                                 ;; "\\` \\*Preview:.*\\*\\'"
-                                                 ;; "\\` \\*Old buffer "  ; tab-bar
-                                                 ;; "\\` \\*wgrep "
-                                                 ;; "\\` \\*Org "
-                                                 "\\` \\*markdown-code-fontification:.*\\*\\'"
-                                                 "\\` \\*org-src-" ; org-src-fontification
-                                                 "\\` \\*Echo Area [0-9]+\\*\\'"
-                                                 ))
+        ;; Already handled by the predicate
+        ;; "\\` \\*http "
+        ;;
+        ;; "\\` \\*markdown-code-fontification:.*\\*\\'"
+        ;; "\\` \\*org-src-" ; org-src-fontification
+        ;; "\\` \\*Echo Area [0-9]+\\*\\'"
+        ;;
+        ;; ;; Keep minibuffers These are the C-level structures Emacs uses to show
+        ;; ;; you messages at the bottom of the screen and prompt you for input.
+        ;; ;; Killing them can break the command loop. Keep your regex for these
+        ;; ;; active.
+        ;; "\\` \\*Minibuf-[0-9]+\\*\\'"
+        ;;
+        ;; ;; Keep all backend Flymake buffers
+        ;; "\\` \\*flymake-"
+        ;; "\\` \\*.*-flymake\\*\\'"
+        ;; *stderr of
+        ;; *elisp-flymake-byte-compile*
+        ;; "\\` \\*stderr of "
+        ;; "\\` \\*diff-hl"
+        ))
 
 (defvar mod-buffer-terminator-always-keep nil)
+
+;; Handled by the process rule
+;; "*tmux*"
+;; "*pylsp*"
+;; "*pylsp::stderr*"
+;; " *elisp-flymake-byte-compile*"
+;; " *consult-async*"
+;; " *consult-async-stderr*"
+;; "*Help*"
+
+;; "*Ollama*"
+;; "*Non-Native-Compiled*"
+;; '*Org Agenda*' (org-agenda-mode)
+;; "*Org Agenda*"
+
 (setq mod-buffer-terminator-always-keep '("*Messages*"
-                                          "*tmux*"
                                           "*scratch*"
-                                          "*Flymake log*"
-                                          "*Compile-Log*"
-                                          "*Warnings*"
-                                          "*compile-angel:debug*"
-                                          "*vc*"
-                                          ;; "*Help*"
 
-                                          ;; "*Ollama*"
-                                          ;; "*Non-Native-Compiled*"
-                                          ;; '*Org Agenda*' (org-agenda-mode)
-                                          ;; "*Org Agenda*"
+                                          ;; "*Flymake log*"
+                                          ;; "*Compile-Log*"
+                                          ;; "*Warnings*"
+                                          ;; "*compile-angel:debug*"
+                                          ;; "*vc*"
+                                          ;;
+                                          ;; "*Shell Command Output*"
+                                          ;;
+                                          ;; ;; Internal ediff buffers
+                                          ;; "*Ediff Registry*"
+                                          ;;
+                                          ;; "*Flymake log*"
+                                          ;; "*Async-native-compile-log*"
+                                          ;; "*Native-compile-Log*"
+                                          ;; "*Backtrace*"
+                                          ;;
+                                          ;; "*lsp-log*"
+                                          ;;
+                                          ;; "*Org string width*"
+                                          ;; "*Async-native-compile-log*"
 
-                                          ;; [buffer-terminator] Terminated the
-                                          ;; buffer: ' *flymake-shellcheck*'
-                                          ;; (fundamental-mode)
-                                          " *flymake-shellcheck*"
-                                          ;; [buffer-terminator] Terminated the
-                                          ;; buffer: '
-                                          ;; *flymake-bashate-backend-flymake*'
-                                          ;; (fundamental-mode)
-                                          " *flymake-bashate-backend-flymake*"
-
-                                          ;; [buffer-terminator] Terminated the
-                                          ;; buffer: ' *work*'
-                                          ;; (fundamental-mode)
-                                          " *work*"
-
-                                          "*Shell Command Output*"
-
-                                          ;; Internal ediff buffers
-                                          "*Ediff Registry*"
-
-                                          "*Flymake log*"
-                                          "*Async-native-compile-log*"
-                                          "*Native-compile-Log*"
-                                          "*Backtrace*"
-
-                                          "*lsp-log*"
-                                          "*pylsp*"
-                                          "*pylsp::stderr*"
-
-                                          ;; [buffer-terminator] Terminated the
-                                          ;; buffer: ' *server*'
-                                          ;; (fundamental-mode)
-                                          " *server*"
-
-                                          ;; " *counsel*"
-                                          " *eldoc*"
-                                          " *code-converting-work*"
-                                          " *code-conversion-work*"
-                                          " *Compiler Input*"
-                                          " *jka-compr-wr-temp*"
-                                          " *elisp-flymake-byte-compile*"
-                                          " *consult-async*"
-                                          " *consult-async-stderr*"
-                                          "*Org string width*"
-                                          "*Async-native-compile-log*"))
+                                          ;; Already handled by the predicate
+                                          ;; ;; This buffer holds the daemon
+                                          ;; ;; process. If you kill it,
+                                          ;; ;; emacsclient will stop working, and
+                                          ;; ;; you won't be able to open files
+                                          ;; ;; from your terminal into your
+                                          ;; ;; current Emacs session.
+                                          ;; " *server*"
+                                          ;;
+                                          ;; ;; **jka-compr-wr-temp*, *Compiler
+                                          ;; ;; *Input*
+                                          ;; " *eldoc*"
+                                          ;; " *code-converting-work*"
+                                          ;; " *code-conversion-work*"
+                                          ;; " *jka-compr-wr-temp*"
+                                          ;; " *Compiler Input*"
+                                          ;;
+                                          ;; ;; [buffer-terminator] Terminated the
+                                          ;; ;; buffer: ' *flymake-shellcheck*'
+                                          ;; ;; (fundamental-mode)
+                                          ;; " *flymake-shellcheck*"
+                                          ;;
+                                          ;; ;; [buffer-terminator] Terminated the
+                                          ;; ;; buffer: '
+                                          ;; ;; *flymake-bashate-backend-flymake*'
+                                          ;; ;; (fundamental-mode)
+                                          ;; " *flymake-bashate-backend-flymake*"
+                                          ;;
+                                          ;; ;; [buffer-terminator] Terminated the
+                                          ;; ;; buffer: ' *work*'
+                                          ;; ;; (fundamental-mode)
+                                          ;; " *work*"
+                                          ))
 
 (defvar-local mod-buffer-terminator--keep nil)
 ;; (defvar-local my-buffer-terminator--track-buffers--list-buffers nil)
 
 (defun mod-buffer-terminator-predicate ()
   "Return :kill, :keep, or nil."
-  (let* ((buffer-name (buffer-name))
-         (file-name (buffer-file-name (buffer-base-buffer)))
-         (base-name (when file-name
-                      (file-name-nondirectory file-name))))
-    (cond
-     ;; ((and buffer-name
-     ;;       (string-prefix-p " " buffer-name))
-     ;;  :keep)
+  ;; let* ((buffer-name (buffer-name))
+  ;;       (file-name (buffer-file-name (buffer-base-buffer)))
+  ;;       (base-name (when file-name
+  ;;                    (file-name-nondirectory file-name))))
+  (cond
+   ;; ((and buffer-name
+   ;;       (string-prefix-p " " buffer-name))
+   ;;  :keep)
 
-     ((and base-name
-           (string= base-name "todo.org"))
-      :keep)
+   ;; ((and base-name
+   ;;       (string= base-name "todo.org"))
+   ;;  :keep)
 
-     (mod-buffer-terminator--keep
-      :keep)
+   (mod-buffer-terminator--keep
+    :keep)
 
-     ;; ((and (eq my-track-buffers--buffer-type 'overlay)
-     ;;       (buffer-live-p my-track-buffers--other-buffer))
-     ;;  ;; The buffer should never be killed if the other buffer is still alive
-     ;;  :keep)
+   ;; ((and (eq my-track-buffers--buffer-type 'overlay)
+   ;;       (buffer-live-p my-track-buffers--other-buffer))
+   ;;  ;; The buffer should never be killed if the other buffer is still alive
+   ;;  :keep)
 
-     ;; ((and (or (eq my-track-buffers--buffer-type 'overlay)
-     ;;           (eq my-track-buffers--buffer-type 'original))
-     ;;       (or (not (buffer-live-p buffer))
-     ;;           (buffer-terminator--buffer-visible-p)
-     ;;           (not (buffer-live-p my-track-buffers--other-buffer))
-     ;;           (with-current-buffer my-track-buffers--other-buffer
-     ;;             (buffer-terminator--buffer-visible-p))))
-     ;;  ;; One of the two buffers is one of them is still visible.
-     ;;  :keep)
+   ;; ((and (or (eq my-track-buffers--buffer-type 'overlay)
+   ;;           (eq my-track-buffers--buffer-type 'original))
+   ;;       (or (not (buffer-live-p buffer))
+   ;;           (buffer-terminator--buffer-visible-p)
+   ;;           (not (buffer-live-p my-track-buffers--other-buffer))
+   ;;           (with-current-buffer my-track-buffers--other-buffer
+   ;;             (buffer-terminator--buffer-visible-p))))
+   ;;  ;; One of the two buffers is one of them is still visible.
+   ;;  :keep)
 
-     ;; ((and (= (length comp-files-queue) 0)
-     ;;       (or (string= (buffer-name) "*Async-native-compile-log*")
-     ;;           (string= (buffer-name) "*Compile-Log*")))
-     ;;  :kill)
+   ;; ((and (= (length comp-files-queue) 0)
+   ;;       (or (string= (buffer-name) "*Async-native-compile-log*")
+   ;;           (string= (buffer-name) "*Compile-Log*")))
+   ;;  :kill)
 
-     ;; Previous buffer to the buffer in the current window
-     ;; NOTE: minibuffer issue (It says I cannot switch to another buffer)
-     ;; ((and (not (minibufferp buffer))
-     ;;       (eq buffer (save-window-excursion
-     ;;                    (previous-buffer)
-     ;;                    buffer)))
-     ;;  :keep)
+   ;; Previous buffer to the buffer in the current window
+   ;; NOTE: minibuffer issue (It says I cannot switch to another buffer)
+   ;; ((and (not (minibufferp buffer))
+   ;;       (eq buffer (save-window-excursion
+   ;;                    (previous-buffer)
+   ;;                    buffer)))
+   ;;  :keep)
 
-     (t
-      (let ((buffer-name (buffer-name)))
-        (cond
-         ((and (string-prefix-p " " buffer-name))
-          :keep)
+   (t
+    ;; Hidden buffers
+    (let ((buffer-name (buffer-name)))
+      (cond
+       ((and (string-prefix-p " " buffer-name))
+        :keep)
 
-         ;; Let buffer terminator decide
-         ;; (t
-         ;;  nil)
-         ))))))
+       ;; Let buffer terminator decide
+       (t
+        nil))))))
 
 (setq buffer-terminator-rules-alist
       `(
@@ -207,7 +224,7 @@
 
         ;; Keep process buffers.
         ;; (Process buffers are buffers where an active process is running.)
-        ;; (keep-buffer-property . process)
+        (keep-buffer-property . process)
 
         ;; (kill-buffer-name . ("*Warnings*"
         ;;                      "*Compile-Log*"
@@ -292,6 +309,7 @@
   "Kill all buffers."
   (interactive)
   (require 'buffer-terminator)
+
   ;; (when (fboundp 'eglot-shutdown-all)
   ;;   (let ((inhibit-message t))
   ;;     (eglot-shutdown-all)))
@@ -300,10 +318,13 @@
       (easysession-reset))
 
   ;; (mod-buffer-terminator-only)
-  (when-let* ((scratch-buffer (get-scratch-buffer-create)))
-    (with-current-buffer scratch-buffer
-      (erase-buffer))
 
+  ;; Ensure scratch exists and is selected so it becomes protected
+  ;; as the 'current buffer' during the kill sweep.
+  (when-let* ((scratch-buffer (get-scratch-buffer-create)))
+    (when (buffer-live-p scratch-buffer)
+      (with-current-buffer scratch-buffer
+        (erase-buffer)))
     (set-window-buffer nil scratch-buffer))
 
   ;; Kill hidden buffers too
@@ -372,7 +393,8 @@
   "Terminate all non visible buffers.
 BUFFERS is a buffer or a list of alive buffers."
   (require 'buffer-terminator)
-  (let* ((buffer-terminator-protect-unsaved-file-buffers nil)
+  (let* (;; Removed because there is a risk of data loss
+         ;; (buffer-terminator-protect-unsaved-file-buffers nil)
          (rules `((call-function . mod-buffer-terminator-predicate)
                   ;; (call-function . mod-buffer-terminator--file-buffer)
                   (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)

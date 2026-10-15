@@ -1901,6 +1901,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; Prevent long file names from wrapping when using olivetti
  ibuffer-truncate-lines t)
 
+(setq ibuffer-default-display-maybe-show-predicates t)
+
 (with-eval-after-load 'ibuffer
 
   (progn

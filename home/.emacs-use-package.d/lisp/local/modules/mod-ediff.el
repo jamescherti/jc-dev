@@ -297,7 +297,7 @@ Searches `ediff-session-registry' to locate the control buffer associated
 with the current buffer, bypassing frame or window visibility limitations."
   (let ((current-buf (current-buffer))
         matched-buffers)
-    (message "[EDIFF] Registry: %s" ediff-session-registry)
+    ;; (message "[EDIFF] Registry: %s" ediff-session-registry)
     (when (boundp 'ediff-session-registry)
       (catch 'found
         (dolist (session ediff-session-registry)
@@ -350,10 +350,10 @@ session ends."
 (defun mod-ediff--ediff-teardown-auto-text-scale ()
   "Remove text scale synchronization hooks when an Ediff session ends.
 This function executes within the Ediff Control Buffer."
-  (message "[EDIFF] BEGIN: Teardown auto text scale")
+  ;; (message "[EDIFF] BEGIN: Teardown auto text scale")
   (let ((bufs (mod-ediff--ediff-buffers-from-control-panel)))
     (dolist (buf bufs)
-      (message "[EDIFF] Teardown auto text scale: %s" buf)
+      ;; (message "[EDIFF] Teardown auto text scale: %s" buf)
       (when (buffer-live-p buf)
         (with-current-buffer buf
           (with-no-warnings
@@ -451,28 +451,28 @@ DEC is the amount to decrease the text scale."
 (defun mod-ediff--ediff-disable-minor-modes ()
   "Disable specific minor modes in Ediff buffers and record them for restoration.
 This function is intended to be added to `ediff-prepare-buffer-hook'."
-  (message "[EDIFF] BEGIN: Disable minor modes")
+  ;; (message "[EDIFF] BEGIN: Disable minor modes")
   (setq mod-ediff--ediff-restorable-minor-modes nil)
   (dolist (mode mod-ediff-ediff-disabled-minor-modes)
     (when (and (fboundp mode)
                (boundp mode)
                (symbol-value mode))
       (push mode mod-ediff--ediff-restorable-minor-modes)
-      (message "[EDIFF] Disable: %s" mode)
+      ;; (message "[EDIFF] Disable: %s" mode)
       (funcall mode -1))))
 
 (defun mod-ediff--ediff-restore-minor-modes ()
   "Restore minor modes that were disabled during the Ediff session.
 This function executes within the Ediff Control Buffer."
-  (message "[EDIFF] BEGIN: Restore minor modes")
+  ;; (message "[EDIFF] BEGIN: Restore minor modes")
   (let ((bufs (mod-ediff--ediff-buffers-from-control-panel)))
     (dolist (buf bufs)
-      (message "[EDIFF] Check modes that should be restored: %s" buf)
+      ;; (message "[EDIFF] Check modes that should be restored: %s" buf)
       (when (buffer-live-p buf)
         (with-current-buffer buf
           (dolist (mode mod-ediff--ediff-restorable-minor-modes)
             (when (fboundp mode)
-              (message "[EDIFF] Enable: %s" mode)
+              ;; (message "[EDIFF] Enable: %s" mode)
               (funcall mode 1)))
           (setq mod-ediff--ediff-restorable-minor-modes nil))))))
 
