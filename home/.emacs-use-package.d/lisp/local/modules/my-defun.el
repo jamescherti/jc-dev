@@ -989,7 +989,7 @@ WIDTH is the tab width."
 ;; execute, and the remaining elements are the arguments for the command."
 ;;   (let* ((output (my-get-command-output args))
 ;;          (first-line (if output (car (split-string output "\n" t)) "")))
-;;     (when (and output (string-match "^[0-9]+$" first-line))
+;;     (when (and output (string-match-p "^[0-9]+$" first-line))
 ;;       (string-to-number first-line))))
 
 ;;; Linux distribution
