@@ -26,181 +26,24 @@
 
 ;;; Code:
 
+;;; Mod buffer terminator
+
 (require 'lightemacs)
 
 (defvar mod-buffer-terminator-keep-buffer-regexp nil)
-;; Can also be handled with the
-;; process rule
-;; "\\`\\(?: \\)?\\*EGLOT .*\\*\\'"
-;; "\\`\\*vterm:" ; shell-pop
-;; Keep Corfu popups
-;; "\\` \\*corfu"
-;; Keep Eldoc buffers (including contextual ones)
-;; "\\`\\(?: \\)?\\*eldoc.*\\*\\'"
-;; Keep Help buffers
-;; "\\`\\*Help.*\\*\\'"
-(setq mod-buffer-terminator-keep-buffer-regexp
-      '(;; When you position the cursor on a symbol and eldoc describes it in
-        ;; the minibuffer
-        ;; "\\`\\(?: \\)?\\*eldoc for .*\\*\\'"
-        ;;
-        ;; "\\`\\(?: \\)?\\*straight-.*\\*\\'"
-        ;; "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
-        ;; "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
 
-        ;; `vc'
-        ;; "\\`\\*vc-"
-
-        ;; '*ediff-errors*' (fundamental-mode)
-        ;; '*ediff-fine-diff*' (fundamental-mode)
-        ;; ' *ediff-tmp*' (fundamental-mode)
-        ;; "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
-        ;; "\\`\\*buffer-terminator:" ; shell-pop
-
-        ;; Already handled by the predicate
-        ;; "\\` \\*http "
-        ;;
-        ;; "\\` \\*markdown-code-fontification:.*\\*\\'"
-        ;; "\\` \\*org-src-" ; org-src-fontification
-        ;; "\\` \\*Echo Area [0-9]+\\*\\'"
-        ;;
-        ;; ;; Keep minibuffers These are the C-level structures Emacs uses to show
-        ;; ;; you messages at the bottom of the screen and prompt you for input.
-        ;; ;; Killing them can break the command loop. Keep your regex for these
-        ;; ;; active.
-        ;; "\\` \\*Minibuf-[0-9]+\\*\\'"
-        ;;
-        ;; ;; Keep all backend Flymake buffers
-        ;; "\\` \\*flymake-"
-        ;; "\\` \\*.*-flymake\\*\\'"
-        ;; *stderr of
-        ;; *elisp-flymake-byte-compile*
-        ;; "\\` \\*stderr of "
-        ;; "\\` \\*diff-hl"
-        ))
-
-(defvar mod-buffer-terminator-always-keep nil)
-
-;; Handled by the process rule
-;; "*tmux*"
-;; "*pylsp*"
-;; "*pylsp::stderr*"
-;; " *elisp-flymake-byte-compile*"
-;; " *consult-async*"
-;; " *consult-async-stderr*"
-;; "*Help*"
-
-;; "*Ollama*"
-;; "*Non-Native-Compiled*"
-;; '*Org Agenda*' (org-agenda-mode)
-;; "*Org Agenda*"
-
-(setq mod-buffer-terminator-always-keep '("*Messages*"
-                                          "*scratch*"
-
-                                          ;; "*Flymake log*"
-                                          ;; "*Compile-Log*"
-                                          ;; "*Warnings*"
-                                          ;; "*compile-angel:debug*"
-                                          ;; "*vc*"
-                                          ;;
-                                          ;; "*Shell Command Output*"
-                                          ;;
-                                          ;; ;; Internal ediff buffers
-                                          ;; "*Ediff Registry*"
-                                          ;;
-                                          ;; "*Flymake log*"
-                                          ;; "*Async-native-compile-log*"
-                                          ;; "*Native-compile-Log*"
-                                          ;; "*Backtrace*"
-                                          ;;
-                                          ;; "*lsp-log*"
-                                          ;;
-                                          ;; "*Org string width*"
-                                          ;; "*Async-native-compile-log*"
-
-                                          ;; Already handled by the predicate
-                                          ;; ;; This buffer holds the daemon
-                                          ;; ;; process. If you kill it,
-                                          ;; ;; emacsclient will stop working, and
-                                          ;; ;; you won't be able to open files
-                                          ;; ;; from your terminal into your
-                                          ;; ;; current Emacs session.
-                                          ;; " *server*"
-                                          ;;
-                                          ;; ;; **jka-compr-wr-temp*, *Compiler
-                                          ;; ;; *Input*
-                                          ;; " *eldoc*"
-                                          ;; " *code-converting-work*"
-                                          ;; " *code-conversion-work*"
-                                          ;; " *jka-compr-wr-temp*"
-                                          ;; " *Compiler Input*"
-                                          ;;
-                                          ;; ;; [buffer-terminator] Terminated the
-                                          ;; ;; buffer: ' *flymake-shellcheck*'
-                                          ;; ;; (fundamental-mode)
-                                          ;; " *flymake-shellcheck*"
-                                          ;;
-                                          ;; ;; [buffer-terminator] Terminated the
-                                          ;; ;; buffer: '
-                                          ;; ;; *flymake-bashate-backend-flymake*'
-                                          ;; ;; (fundamental-mode)
-                                          ;; " *flymake-bashate-backend-flymake*"
-                                          ;;
-                                          ;; ;; [buffer-terminator] Terminated the
-                                          ;; ;; buffer: ' *work*'
-                                          ;; ;; (fundamental-mode)
-                                          ;; " *work*"
-                                          ))
+(defvar mod-buffer-terminator-always-keep '("*Messages*"
+                                            "*scratch*"
+                                            "*compile-angel:debug*"
+                                            "*Async-native-compile-log*"))
 
 (defvar-local mod-buffer-terminator--keep nil)
-;; (defvar-local my-buffer-terminator--track-buffers--list-buffers nil)
 
 (defun mod-buffer-terminator-predicate ()
   "Return :kill, :keep, or nil."
-  ;; let* ((buffer-name (buffer-name))
-  ;;       (file-name (buffer-file-name (buffer-base-buffer)))
-  ;;       (base-name (when file-name
-  ;;                    (file-name-nondirectory file-name))))
   (cond
-   ;; ((and buffer-name
-   ;;       (string-prefix-p " " buffer-name))
-   ;;  :keep)
-
-   ;; ((and base-name
-   ;;       (string= base-name "todo.org"))
-   ;;  :keep)
-
    (mod-buffer-terminator--keep
     :keep)
-
-   ;; ((and (eq my-track-buffers--buffer-type 'overlay)
-   ;;       (buffer-live-p my-track-buffers--other-buffer))
-   ;;  ;; The buffer should never be killed if the other buffer is still alive
-   ;;  :keep)
-
-   ;; ((and (or (eq my-track-buffers--buffer-type 'overlay)
-   ;;           (eq my-track-buffers--buffer-type 'original))
-   ;;       (or (not (buffer-live-p buffer))
-   ;;           (buffer-terminator--buffer-visible-p)
-   ;;           (not (buffer-live-p my-track-buffers--other-buffer))
-   ;;           (with-current-buffer my-track-buffers--other-buffer
-   ;;             (buffer-terminator--buffer-visible-p))))
-   ;;  ;; One of the two buffers is one of them is still visible.
-   ;;  :keep)
-
-   ;; ((and (= (length comp-files-queue) 0)
-   ;;       (or (string= (buffer-name) "*Async-native-compile-log*")
-   ;;           (string= (buffer-name) "*Compile-Log*")))
-   ;;  :kill)
-
-   ;; Previous buffer to the buffer in the current window
-   ;; NOTE: minibuffer issue (It says I cannot switch to another buffer)
-   ;; ((and (not (minibufferp buffer))
-   ;;       (eq buffer (save-window-excursion
-   ;;                    (previous-buffer)
-   ;;                    buffer)))
-   ;;  :keep)
 
    (t
     ;; Hidden buffers
@@ -263,61 +106,15 @@
 
 (setq buffer-terminator-verbose 'inhibit-message)
 
-;; (defvar my-buffer-rename-list nil
-;;   "List of buffer renames as cons cells (old-name . new-name).")
-;;
-;; (defvar my-buffer-rename nil
-;;   "List of buffer renames as cons cells (old-name . new-name).")
-;;
-;; (defun my-record-buffer-rename (orig-fun &rest args)
-;;   "Advise `rename-buffer` to record renames in `my-buffer-rename`."
-;;   (let ((old-name (buffer-name)))
-;;     (apply orig-fun args)
-;;     (let ((new-name (buffer-name)))
-;;       (unless (equal old-name new-name)
-;;         (push (cons old-name new-name) my-buffer-rename)
-;;         (unless (memq old-name my-buffer-rename-list)
-;;           (push old-name my-buffer-rename-list))
-;;         (unless (memq new-name my-buffer-rename-list)
-;;           (push new-name my-buffer-rename-list))
-;;
-;;         ))))
-;;
-;; (advice-add 'rename-buffer :around #'my-record-buffer-rename)
-
-;; Fix the ubiquity issue
-;; (defun my-record-buffer-rename (orig-fun &rest args)
-;;   "Advise `rename-buffer` to record renames in `my-buffer-rename`."
-;;   (apply orig-fun args)
-;;   (buffer-terminator--update-buffer-last-view-time))
-;;
-;; (advice-add 'rename-buffer :around #'my-record-buffer-rename)
-
 ;;; Functions
-
-;; (defun mod-buffer-terminator-only ()
-;;   "Kill all the other buffers."
-;;   (interactive)
-;;   (buffer-guardian-save-all-buffers)
-;;   (when (and (bound-and-true-p tab-bar-mode)
-;;              (fboundp 'tab-bar-close-other-tabs))
-;;     (tab-bar-close-other-tabs))
-;;   (delete-other-windows)
-;;   (mod-buffer-terminator-kill-all-buffers))
 
 (defun mod-buffer-terminator-empty ()
   "Kill all buffers."
   (interactive)
   (require 'buffer-terminator)
 
-  ;; (when (fboundp 'eglot-shutdown-all)
-  ;;   (let ((inhibit-message t))
-  ;;     (eglot-shutdown-all)))
-
   (if (fboundp 'easysession-reset)
       (easysession-reset))
-
-  ;; (mod-buffer-terminator-only)
 
   ;; Ensure scratch exists and is selected so it becomes protected
   ;; as the 'current buffer' during the kill sweep.
@@ -337,15 +134,6 @@
   (if mod-buffer-terminator--keep
       (message "Always keep: %s" (buffer-name))
     (message "Do not always keep: %s" (buffer-name))))
-
-;; Helper functions
-;; (defun buffer-is-visible (buffer)
-;;   "Wrapper around `buffer-terminator--buffer-visible-p'.
-;; BUFFER is the buffer."
-;;   (interactive)
-;;   (if (fboundp 'buffer-terminator--buffer-visible-p)
-;;       (buffer-terminator--buffer-visible-p buffer)
-;;     (error "Undeclared: buffer-terminator--buffer-visible-p")))
 
 (defun mod-buffer-terminator-empty-all ()
   "Kill all buffers."
@@ -368,19 +156,6 @@
 
 ;;; buffer terminator II
 
-;; (defun mod-buffer-terminator--file-buffer ()
-;;   "Kill file buffers that do not exist."
-;;   (let ((file-name (buffer-file-name (buffer-base-buffer))))
-;;     (when (and file-name
-;;                (buffer-modified-p)
-;;                (not (file-exists-p file-name)))
-;;       ;; TODO add to buffer-terminator?
-;;       (unwind-protect
-;;           (when (and (not buffer-terminator-protect-unsaved-file-buffers)
-;;                      (buffer-modified-p))
-;;             (set-buffer-modified-p nil))
-;;         :kill))))
-
 (defun mod-buffer-terminator--non-file-buffer-name-starts-with-space ()
   "Return :keep the non file-visiting buffers whose name start with a space."
   (let ((buffer-name (buffer-name)))
@@ -398,9 +173,9 @@ BUFFERS is a buffer or a list of alive buffers."
          (rules `((call-function . mod-buffer-terminator-predicate)
                   ;; (call-function . mod-buffer-terminator--file-buffer)
                   (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
-                  ;; (keep-buffer-property . process)
-                  ;; (keep-buffer-property . special)
-                  ;; (keep-buffer-name . ,mod-buffer-terminator-always-keep)
+                  (keep-buffer-property . process)
+                  (keep-buffer-property . special)
+                  (keep-buffer-name . ,mod-buffer-terminator-always-keep)
                   (keep-buffer-name-regexp . ,mod-buffer-terminator-keep-buffer-regexp)
                   (keep-buffer-property . visible)
                   (return . :kill)))
@@ -408,7 +183,6 @@ BUFFERS is a buffer or a list of alive buffers."
                    (buffer-terminator-apply-rules rules buffers))))
     (let ((inhibit-message t))
       (dolist (buffer-info result)
-        ;; (message "[MOD-BUFFER-TERMINATOR] Killed non visible: %s" pair)
         (let* ((buffer-name (cdr (assq 'buffer-name buffer-info)))
                (major-mode (cdr (assq 'major-mode buffer-info)))
                (file-name (cdr (assq 'file-name buffer-info))))
@@ -423,8 +197,6 @@ BUFFERS is a buffer or a list of alive buffers."
 BUFFERS is a buffer or a list of alive buffers."
   (let ((rules '((call-function . mod-buffer-terminator-predicate)
                  (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
-                 ;; (keep-buffer-property . process)
-                 ;; (keep-buffer-property . special)
                  (return . :kill))))
     (if (fboundp 'buffer-terminator-apply-rules)
         (buffer-terminator-apply-rules rules buffers)
@@ -436,9 +208,6 @@ BUFFERS is a buffer or a list of alive buffers."
   (let* ((buffer (or (buffer-base-buffer)
                      (current-buffer)))
          (file-name (buffer-file-name buffer)))
-    ;; (let ((flymake-on-save-buffer nil)
-    ;;       (save-silently t))
-    ;;   (save-buffer buffer))
     (unless file-name
       (setq file-name default-directory))
     (when-let* ((buffer (find-file-noselect (file-name-directory file-name))))
@@ -547,9 +316,9 @@ By default, closing the last window in a tab does not close the tab."
 
 ;; Adding this remapping ensures that the source buffer is not accidentally
 ;; abandoned. By default, closing a window or killing a buffer in Emacs may
-;; leave the underlying org-src process in a "stale" state, where the
-;; temporary buffer exists but is no longer visible, or worse, changes are
-;; lost because the sync back to the parent file never triggered.
+;; leave the underlying org-src process in a "stale" state, where the temporary
+;; buffer exists but is no longer visible, or worse, changes are lost because
+;; the sync back to the parent file never triggered.
 (with-eval-after-load 'org-src
   (define-key org-src-mode-map [remap mod-buffer-terminator-close-window]
               'org-edit-src-exit))
@@ -557,6 +326,226 @@ By default, closing the last window in a tab does not close the tab."
 (with-eval-after-load 'edit-indirect
   (define-key edit-indirect-mode-map [remap mod-buffer-terminator-close-window]
               'edit-indirect-commit))
+
+;;; Disabled
+
+;; Helper functions
+;; (defun buffer-is-visible (buffer)
+;;   "Wrapper around `buffer-terminator--buffer-visible-p'.
+;; BUFFER is the buffer."
+;;   (interactive)
+;;   (if (fboundp 'buffer-terminator--buffer-visible-p)
+;;       (buffer-terminator--buffer-visible-p buffer)
+;;     (error "Undeclared: buffer-terminator--buffer-visible-p")))
+
+;; (defvar-local my-buffer-terminator--track-buffers--list-buffers nil)
+
+;; ((and buffer-name
+;;       (string-prefix-p " " buffer-name))
+;;  :keep)
+
+;; ((and base-name
+;;       (string= base-name "todo.org"))
+;;  :keep)
+
+;; ((and (eq my-track-buffers--buffer-type 'overlay)
+;;       (buffer-live-p my-track-buffers--other-buffer))
+;;  ;; The buffer should never be killed if the other buffer is still alive
+;;  :keep)
+
+;; ((and (or (eq my-track-buffers--buffer-type 'overlay)
+;;           (eq my-track-buffers--buffer-type 'original))
+;;       (or (not (buffer-live-p buffer))
+;;           (buffer-terminator--buffer-visible-p)
+;;           (not (buffer-live-p my-track-buffers--other-buffer))
+;;           (with-current-buffer my-track-buffers--other-buffer
+;;             (buffer-terminator--buffer-visible-p))))
+;;  ;; One of the two buffers is one of them is still visible.
+;;  :keep)
+
+;; ((and (= (length comp-files-queue) 0)
+;;       (or (string= (buffer-name) "*Async-native-compile-log*")
+;;           (string= (buffer-name) "*Compile-Log*")))
+;;  :kill)
+
+;; Previous buffer to the buffer in the current window
+;; NOTE: minibuffer issue (It says I cannot switch to another buffer)
+;; ((and (not (minibufferp buffer))
+;;       (eq buffer (save-window-excursion
+;;                    (previous-buffer)
+;;                    buffer)))
+;;  :keep)
+
+;; (defvar my-buffer-rename-list nil
+;;   "List of buffer renames as cons cells (old-name . new-name).")
+;;
+;; (defvar my-buffer-rename nil
+;;   "List of buffer renames as cons cells (old-name . new-name).")
+;;
+;; (defun my-record-buffer-rename (orig-fun &rest args)
+;;   "Advise `rename-buffer` to record renames in `my-buffer-rename`."
+;;   (let ((old-name (buffer-name)))
+;;     (apply orig-fun args)
+;;     (let ((new-name (buffer-name)))
+;;       (unless (equal old-name new-name)
+;;         (push (cons old-name new-name) my-buffer-rename)
+;;         (unless (memq old-name my-buffer-rename-list)
+;;           (push old-name my-buffer-rename-list))
+;;         (unless (memq new-name my-buffer-rename-list)
+;;           (push new-name my-buffer-rename-list))
+;;
+;;         ))))
+;;
+;; (advice-add 'rename-buffer :around #'my-record-buffer-rename)
+
+;; Fix the ubiquity issue
+;; (defun my-record-buffer-rename (orig-fun &rest args)
+;;   "Advise `rename-buffer` to record renames in `my-buffer-rename`."
+;;   (apply orig-fun args)
+;;   (buffer-terminator--update-buffer-last-view-time))
+;;
+;; (advice-add 'rename-buffer :around #'my-record-buffer-rename)
+
+;; (defun mod-buffer-terminator-only ()
+;;   "Kill all the other buffers."
+;;   (interactive)
+;;   (buffer-guardian-save-all-buffers)
+;;   (when (and (bound-and-true-p tab-bar-mode)
+;;              (fboundp 'tab-bar-close-other-tabs))
+;;     (tab-bar-close-other-tabs))
+;;   (delete-other-windows)
+;;   (mod-buffer-terminator-kill-all-buffers))
+
+;; (defun mod-buffer-terminator--file-buffer ()
+;;   "Kill file buffers that do not exist."
+;;   (let ((file-name (buffer-file-name (buffer-base-buffer))))
+;;     (when (and file-name
+;;                (buffer-modified-p)
+;;                (not (file-exists-p file-name)))
+;;       ;; TODO add to buffer-terminator?
+;;       (unwind-protect
+;;           (when (and (not buffer-terminator-protect-unsaved-file-buffers)
+;;                      (buffer-modified-p))
+;;             (set-buffer-modified-p nil))
+;;         :kill))))
+
+;;; DISABLED: regexps
+
+;; Can also be handled with the
+;; process rule
+;; "\\`\\(?: \\)?\\*EGLOT .*\\*\\'"
+;; "\\`\\*vterm:" ; shell-pop
+;; Keep Corfu popups
+;; "\\` \\*corfu"
+;; Keep Eldoc buffers (including contextual ones)
+;; "\\`\\(?: \\)?\\*eldoc.*\\*\\'"
+;; Keep Help buffers
+;; "\\`\\*Help.*\\*\\'"
+;; When you position the cursor on a symbol and eldoc describes it in
+;; the minibuffer
+;; "\\`\\(?: \\)?\\*eldoc for .*\\*\\'"
+;;
+;; "\\`\\(?: \\)?\\*straight-.*\\*\\'"
+;; "\\`\\(?: \\)?\\*apheleia-.*\\*\\'"
+;; "\\`\\(?: \\)?\\*elpaca.*\\*\\'"
+
+;; `vc'
+;; "\\`\\*vc-"
+
+;; '*ediff-errors*' (fundamental-mode)
+;; '*ediff-fine-diff*' (fundamental-mode)
+;; ' *ediff-tmp*' (fundamental-mode)
+;; "\\`\\(?: \\)?\\*ediff-.*\\*\\'"
+;; "\\`\\*buffer-terminator:" ; shell-pop
+
+;; Already handled by the predicate
+;; "\\` \\*http "
+;;
+;; "\\` \\*markdown-code-fontification:.*\\*\\'"
+;; "\\` \\*org-src-" ; org-src-fontification
+;; "\\` \\*Echo Area [0-9]+\\*\\'"
+;;
+;; ;; Keep minibuffers These are the C-level structures Emacs uses to show
+;; ;; you messages at the bottom of the screen and prompt you for input.
+;; ;; Killing them can break the command loop. Keep your regex for these
+;; ;; active.
+;; "\\` \\*Minibuf-[0-9]+\\*\\'"
+;;
+;; ;; Keep all backend Flymake buffers
+;; "\\` \\*flymake-"
+;; "\\` \\*.*-flymake\\*\\'"
+;; *stderr of
+;; *elisp-flymake-byte-compile*
+;; "\\` \\*stderr of "
+;; "\\` \\*diff-hl"
+
+;; Handled by the process rule
+;; "*tmux*"
+;; "*pylsp*"
+;; "*pylsp::stderr*"
+;; " *elisp-flymake-byte-compile*"
+;; " *consult-async*"
+;; " *consult-async-stderr*"
+;; "*Help*"
+
+;; "*Ollama*"
+;; "*Non-Native-Compiled*"
+;; '*Org Agenda*' (org-agenda-mode)
+;; "*Org Agenda*"
+
+;; "*Compile-Log*"
+;; "*Native-compile-Log*"
+
+;; "*Flymake log*"
+;; "*Warnings*"
+;; "*vc*"
+;;
+;; "*Shell Command Output*"
+;;
+;; ;; Internal ediff buffers
+;; "*Ediff Registry*"
+;;
+;; "*Flymake log*"
+;; "*Backtrace*"
+;;
+;; "*lsp-log*"
+;;
+;; "*Org string width*"
+
+;; Already handled by the predicate
+;; ;; This buffer holds the daemon
+;; ;; process. If you kill it,
+;; ;; emacsclient will stop working, and
+;; ;; you won't be able to open files
+;; ;; from your terminal into your
+;; ;; current Emacs session.
+;; " *server*"
+;;
+;; ;; **jka-compr-wr-temp*, *Compiler
+;; ;; *Input*
+;; " *eldoc*"
+;; " *code-converting-work*"
+;; " *code-conversion-work*"
+;; " *jka-compr-wr-temp*"
+;; " *Compiler Input*"
+;;
+;; ;; [buffer-terminator] Terminated the
+;; ;; buffer: ' *flymake-shellcheck*'
+;; ;; (fundamental-mode)
+;; " *flymake-shellcheck*"
+;;
+;; ;; [buffer-terminator] Terminated the
+;; ;; buffer: '
+;; ;; *flymake-bashate-backend-flymake*'
+;; ;; (fundamental-mode)
+;; " *flymake-bashate-backend-flymake*"
+;;
+;; ;; [buffer-terminator] Terminated the
+;; ;; buffer: ' *work*'
+;; ;; (fundamental-mode)
+;; " *work*"
+
+;;; Provide
 
 (provide 'mod-buffer-terminator)
 
