@@ -58,7 +58,7 @@
 (setq compile-angel-cache-file-truename t)
 
 (setq compile-angel-verbose t)
-(setq compile-angel-debug t)
+(setq compile-angel-debug nil)
 
 (setq buffer-terminator-verbose t)
 (setq buffer-terminator-debug nil)
@@ -510,7 +510,11 @@
 ;;; Load ~/config.el
 
 ;; (message "LOADING config.el")
-(load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix)
+(let ((config-file (expand-file-name "~/.config.el")))
+  (with-eval-after-load 'compile-angel
+    (when (fboundp 'compile-angel-exclude-file)
+      (compile-angel-exclude-file config-file)))
+  (load (expand-file-name "~/.config.el") :no-error :no-message :nosuffix))
 
 ;;; Hardening: network
 
@@ -2010,9 +2014,11 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (setq bufferfile-update-mode-on-rename t)
 
 (setq lightemacs-dired-filter-global-enabled t)
-(setq lightemacs-dired-filter-setup-hook '(dired-filter-by-omit
-                                           dired-filter-by-git-ignored
-                                           dired-filter-by-dot-files))
+(setq lightemacs-dired-filter-setup-hook
+      '(dired-filter-by-omit
+        ;; dired-filter-by-git-ignored ; slow in the Emacs directory
+        ;; TODO blacklist some directories
+        dired-filter-by-dot-files))
 
 ;; Force the unimpaired mode off globally
 (setq lightemacs-evil-collection-inhibit-unimpaired-mode t)
