@@ -36,25 +36,37 @@ if [[ $# -eq 0 ]]; then
   exit 1
 fi
 
+# shellcheck disable=SC2317
+error_handler() {
+  local errno="$?"
+  echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+    "(${BASH_COMMAND} exited with status $errno)" >&2
+  exit "${errno}"
+}
+
+trap "error_handler" ERR
+set -o errtrace
+
 run_ai_ls() {
   for target_file in "$@"; do
     # Check if the argument is a regular file and is readable
     if [[ -f "$target_file" && -r "$target_file" ]]; then
+      if path-is "$target_file" binary >/dev/null 2>&1; then
+        echo "Warning: Binary file skipped: $target_file" >&2
+        continue
+      fi
+
       echo "File: ${target_file}"
       echo '```'
 
-      if path-is "$target_file" binary >/dev/null 2>&1; then
-        echo "$0: Warning: Binary file skipped: $target_file" >&2
-      else
-        # Print the file content
-        cat "$target_file"
+      # Print the file content
+      cat "$target_file"
 
-        # Ensure a trailing newline exists so the closing backticks do not get
-        # appended to the last line of the file's content.
-        if [[ -s "$target_file" &&
-          $(tail -c 1 "$target_file" | wc -l) -eq 0 ]]; then
-          echo
-        fi
+      # Ensure a trailing newline exists so the closing backticks do not get
+      # appended to the last line of the file's content.
+      if [[ -s "$target_file" &&
+        $(tail -c 1 "$target_file" | wc -l) -eq 0 ]]; then
+        echo
       fi
 
       echo
@@ -78,7 +90,28 @@ run_checks() {
   done
 }
 
-run_checks "$@"
+ATEXIT_DONE=0
+# shellcheck disable=SC2329
+atexit() {
+  trap - EXIT INT TERM
+  local errno="$?"
+  if [[ "$ATEXIT_DONE" -eq 0 ]]; then
+    rm -f "$TMP_FILE"
+    ATEXIT_DONE=1
+  fi
+  exit "$errno"
+}
 
-run_ai_ls "$@"
-run_ai_ls "$@" | cbcopy
+main() {
+  run_checks "$@"
+
+  TMP_FILE=$(mktemp)
+  trap 'atexit' INT TERM EXIT
+
+  run_ai_ls "$@" >"$TMP_FILE"
+
+  cbcopy <"$TMP_FILE"
+  cat "$TMP_FILE"
+}
+
+main "$@"
