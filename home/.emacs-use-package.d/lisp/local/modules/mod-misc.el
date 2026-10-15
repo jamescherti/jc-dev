@@ -47,6 +47,7 @@ ARGS are the arguments passed to the original function."
     (apply orig-fun args)))
 
 (with-eval-after-load 'dired-filter
+  ;; TODO lightemacs?
   (advice-add 'dired-filter--update :around #'my-inhibit-dired-filter-in-minibuffer-a))
 
 ;;; Patches

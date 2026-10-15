@@ -81,14 +81,14 @@
                                           "*Flymake log*"
                                           "*Compile-Log*"
                                           "*Warnings*"
-                                          ;; "*Ollama*"
-                                          ;; "*Non-Native-Compiled*"
                                           "*compile-angel:debug*"
                                           "*vc*"
-                                          "*Help*"
+                                          ;; "*Help*"
 
+                                          ;; "*Ollama*"
+                                          ;; "*Non-Native-Compiled*"
                                           ;; '*Org Agenda*' (org-agenda-mode)
-                                          "*Org Agenda*"
+                                          ;; "*Org Agenda*"
 
                                           ;; [buffer-terminator] Terminated the
                                           ;; buffer: ' *flymake-shellcheck*'
