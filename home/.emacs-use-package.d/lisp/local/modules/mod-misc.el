@@ -4041,29 +4041,30 @@ properly handles remote files over Tramp), applying the setting only if
 VARS is ([(INTERFACE)] SYMS...)
 Honor `eglot-strict-mode'."
     (declare (indent 2) (debug (sexp form &rest form)))
-    (let ((interface-name (if (consp (car vars))
-                              (car (pop vars))))
-          (object-once (make-symbol "object-once"))
-          (fn-once (make-symbol "fn-once")))
-      (cond (interface-name
-             (eglot--check-dspec interface-name vars)
-             `(let ((,object-once ,object))
-                (when (equal ,object-once []) (setq ,object-once nil))
-                (when ,object-once
-                  (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
-                    (eglot--check-object ',interface-name ,object-once
-                                         (memq 'enforce-required-keys eglot-strict-mode)
-                                         (memq 'disallow-non-standard-keys eglot-strict-mode)
-                                         (memq 'check-types eglot-strict-mode))
-                    ,@body))))
-            (t
-             `(let ((,object-once ,object)
-                    (,fn-once (lambda (,@vars) ,@body)))
-                (if (memq 'disallow-non-standard-keys eglot-strict-mode)
-                    (cl-destructuring-bind (&key ,@vars) ,object-once
-                      (funcall ,fn-once ,@vars))
-                  (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
-                    (funcall ,fn-once ,@vars)))))))))
+    (when (fboundp 'eglot--check-dspec)
+      (let ((interface-name (if (consp (car vars))
+                                (car (pop vars))))
+            (object-once (make-symbol "object-once"))
+            (fn-once (make-symbol "fn-once")))
+        (cond (interface-name
+               (eglot--check-dspec interface-name vars)
+               `(let ((,object-once ,object))
+                  (when (equal ,object-once []) (setq ,object-once nil))
+                  (when ,object-once
+                    (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
+                      (eglot--check-object ',interface-name ,object-once
+                                           (memq 'enforce-required-keys eglot-strict-mode)
+                                           (memq 'disallow-non-standard-keys eglot-strict-mode)
+                                           (memq 'check-types eglot-strict-mode))
+                      ,@body))))
+              (t
+               `(let ((,object-once ,object)
+                      (,fn-once (lambda (,@vars) ,@body)))
+                  (if (memq 'disallow-non-standard-keys eglot-strict-mode)
+                      (cl-destructuring-bind (&key ,@vars) ,object-once
+                        (funcall ,fn-once ,@vars))
+                    (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
+                      (funcall ,fn-once ,@vars))))))))))
 
 ;;; Papyrus Help
 
