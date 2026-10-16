@@ -2159,7 +2159,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     ;; Ruff: Format code (replaces autopep8/Black)
     (setf (alist-get 'ruff-format apheleia-formatters)
           '("ruff" "format"
-            "--line-length=79"         ;; Set your strict line length
+            ;; "--line-length=88"         ;; Set your strict line length
             ;; "--target-version=py311"   ;; Example: Tell Ruff your Python version
             ;; "--skip-magic-trailing-comma" ;; Example: Another formatting tweak
             "--silent"                 ;; Keep Apheleia quiet
@@ -2167,7 +2167,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
     (setf (alist-get 'autopep8 apheleia-formatters)
           '("autopep8"
-            "--max-line-length=79"
+            "--max-line-length=88"
             ;; --aggressive is too aggressive when it comes to max-line-length
             ;; "--aggressive"
             ;; "--aggressive"
@@ -2181,18 +2181,18 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     ;;       '("ruff" "check" "-n" "--select" "I" "--fix" "--fix-only"
     ;;         "--stdin-filename" filepath "-"))
 
-    (setf (alist-get 'python-mode apheleia-mode-alist) '(autopep8 ruff-isort))
-    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(autopep8 ruff-isort))
+    ;; (setf (alist-get 'python-mode apheleia-mode-alist) '(autopep8 ruff-isort))
+    ;; (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(autopep8 ruff-isort))
 
-    ;; (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format ruff-isort))
-    ;; (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort))
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format ruff-isort))
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort))
     )
 
    (t
     ;; Legacy
     (setf (alist-get 'autopep8 apheleia-formatters)
           '("autopep8"
-            "--max-line-length=79"
+            "--max-line-length=88"
             ;; --aggressive is too aggressive when it comes to max-line-length
             ;; "--aggressive"
             ;; "--aggressive"

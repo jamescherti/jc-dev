@@ -2016,9 +2016,9 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 (setq lightemacs-dired-filter-global-enabled t)
 (setq lightemacs-dired-filter-setup-hook
       '(dired-filter-by-omit
-        ;; dired-filter-by-git-ignored ; slow in the Emacs directory
         ;; TODO blacklist some directories
-        dired-filter-by-dot-files))
+        dired-filter-by-dot-files
+        dired-filter-by-git-ignored))
 
 ;; Force the unimpaired mode off globally
 (setq lightemacs-evil-collection-inhibit-unimpaired-mode t)

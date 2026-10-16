@@ -373,7 +373,7 @@
  ;; Core
  lsp-pylsp-plugins-ruff-enabled t
  ;; lsp-pylsp-plugins-ruff-format-enabled nil ; Use Apheleia
- lsp-pylsp-plugins-ruff-line-length 79
+ lsp-pylsp-plugins-ruff-line-length 88
 
  ;; Rule Selection
  ;; By default, Ruff only checks 'E' and 'F'
@@ -430,7 +430,7 @@
  lsp-pylsp-plugins-pycodestyle-enabled nil
  ;; This is also executed by flake8
  lsp-pylsp-plugins-pycodestyle-match "(?!test_).*\\.py"
- lsp-pylsp-plugins-pycodestyle-max-line-length 79
+ lsp-pylsp-plugins-pycodestyle-max-line-length 88
  lsp-pylsp-plugins-pycodestyle-convention "pep257"
  lsp-pylsp-plugins-pycodestyle-ignore ["W293"]
  lsp-pylsp-plugins-pycodestyle-hang-closing nil
