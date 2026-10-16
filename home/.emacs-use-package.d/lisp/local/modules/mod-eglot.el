@@ -348,7 +348,7 @@
 
                     ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
                     ;; and 'D' (pydocstyle).
-                    :extendSelect ["W" "UP" "D"]
+                    ;; :extendSelect ["W" "UP" "D"]
 
                     ;; Ignore specific rules
                     ;;   D213: Multi-line docstring summary should start on
