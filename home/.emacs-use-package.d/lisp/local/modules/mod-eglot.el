@@ -326,6 +326,7 @@
 
 ;;; Eglot: quiet
 
+;; TODO Lightemacs?
 (defun my-eglot--message-filter (orig-fun format &rest args)
   "Suppress selected Eglot messages from the minibuffer.
 ORIG-FUN is the original `eglot--message` function.
