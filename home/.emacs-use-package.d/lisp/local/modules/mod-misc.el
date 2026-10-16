@@ -4022,6 +4022,49 @@ properly handles remote files over Tramp), applying the setting only if
              (native-comp-available-p))
   (warn "Native compilation is *not* available"))
 
+;;; Fix bug eglot
+
+(with-eval-after-load 'eglot
+  (cl-defmacro eglot--lambda (cl-lambda-list &body body)
+    "Function of args CL-LAMBDA-LIST for processing INTERFACE objects.
+  Honor `eglot-strict-mode'.
+  CL-LAMBDA-LIST is the destructuring lambda list.
+  BODY contains the forms to execute."
+    (declare (indent 1) (debug (sexp &rest form)))
+    (let ((e (gensym "jsonrpc-lambda-elem")))
+      `(lambda (,e)
+         (let ((,e (if (equal ,e []) nil ,e)))
+           (cl-block nil (eglot--dbind ,cl-lambda-list ,e ,@body))))))
+
+  (cl-defmacro eglot--dbind (vars object &body body)
+    "Destructure OBJECT, binding VARS in BODY.
+VARS is ([(INTERFACE)] SYMS...)
+Honor `eglot-strict-mode'."
+    (declare (indent 2) (debug (sexp form &rest form)))
+    (let ((interface-name (if (consp (car vars))
+                              (car (pop vars))))
+          (object-once (make-symbol "object-once"))
+          (fn-once (make-symbol "fn-once")))
+      (cond (interface-name
+             (eglot--check-dspec interface-name vars)
+             `(let ((,object-once ,object))
+                (when (equal ,object-once []) (setq ,object-once nil))
+                (when ,object-once
+                  (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
+                    (eglot--check-object ',interface-name ,object-once
+                                         (memq 'enforce-required-keys eglot-strict-mode)
+                                         (memq 'disallow-non-standard-keys eglot-strict-mode)
+                                         (memq 'check-types eglot-strict-mode))
+                    ,@body))))
+            (t
+             `(let ((,object-once ,object)
+                    (,fn-once (lambda (,@vars) ,@body)))
+                (if (memq 'disallow-non-standard-keys eglot-strict-mode)
+                    (cl-destructuring-bind (&key ,@vars) ,object-once
+                      (funcall ,fn-once ,@vars))
+                  (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
+                    (funcall ,fn-once ,@vars)))))))))
+
 ;;; Papyrus Help
 
 (defvar papyrus-help-hook nil
