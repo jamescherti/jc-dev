@@ -99,9 +99,9 @@ class Release:
                 break
 
         print("Modifying...")
-        python_project: bool = (
-            self.git_root / "pyproject.toml"
-        ).is_file() or (self.git_root / "setup.py").is_file()
+        python_project: bool = (self.git_root / "pyproject.toml").is_file() or (
+            self.git_root / "setup.py"
+        ).is_file()
 
         if python_project:
             dist_dir: Path = self.git_root / "dist"
@@ -255,14 +255,10 @@ class Release:
         :raises PyReleaseError: If not in a git repository.
         """
         try:
-            line: str = self.run_get_firstline(
-                ["git", "rev-parse", "--show-toplevel"]
-            )
+            line: str = self.run_get_firstline(["git", "rev-parse", "--show-toplevel"])
             return Path(line)
         except (subprocess.CalledProcessError, IndexError) as err:
-            raise PyReleaseError(
-                "The Git top level has not been found"
-            ) from err
+            raise PyReleaseError("The Git top level has not been found") from err
 
     def quick_run(self, cmd: list[str]) -> list[str]:
         """
@@ -271,9 +267,7 @@ class Release:
         :param cmd: The command to run.
         :returns: List of output lines.
         """
-        output: str = subprocess.check_output(
-            cmd, env=self.env, timeout=60, text=True
-        )
+        output: str = subprocess.check_output(cmd, env=self.env, timeout=60, text=True)
         return output.splitlines()
 
     def run_get_firstline(self, cmd: list[str]) -> str:
@@ -286,9 +280,7 @@ class Release:
         lines: list[str] = self.quick_run(cmd)
         return lines[0] if lines else ""
 
-    def git_replace_string(
-        self, previous_string: str, replacement_string: str
-    ) -> None:
+    def git_replace_string(self, previous_string: str, replacement_string: str) -> None:
         """
         Replace a string across the repository using 'sre'.
 
@@ -317,9 +309,7 @@ class Release:
             if path.is_file():
                 subprocess.check_call(["git", "checkout", str(path)])
 
-    def execute_release(
-        self, new_version: str, new_num: str, is_python: bool
-    ) -> None:
+    def execute_release(self, new_version: str, new_num: str, is_python: bool) -> None:
         """
         Perform the git commit, tagging, building, and pushing.
 
@@ -328,17 +318,11 @@ class Release:
         :param is_python: Whether to run Python build/upload steps.
         """
         subprocess.check_call(["git", "fetch"])
-        subprocess.check_call(
-            ["git", "commit", "-a", "-m", f"Release: {new_num}"]
-        )
-        subprocess.check_call(
-            ["git", "tag", "-s", new_version, "-m", new_version]
-        )
+        subprocess.check_call(["git", "commit", "-a", "-m", f"Release: {new_num}"])
+        subprocess.check_call(["git", "tag", "-s", new_version, "-m", new_version])
 
         if is_python:
-            subprocess.check_call(
-                ["python", "-m", "build", "--no-isolation", "."]
-            )
+            subprocess.check_call(["python", "-m", "build", "--no-isolation", "."])
             while True:
                 try:
                     subprocess.check_call(
@@ -355,9 +339,7 @@ class Release:
                     subprocess.check_call(push_cmd)
                     break
                 except subprocess.CalledProcessError:
-                    if not self.confirm(
-                        f"{' '.join(push_cmd)} failed. Try again?"
-                    ):
+                    if not self.confirm(f"{' '.join(push_cmd)} failed. Try again?"):
                         break
 
 
