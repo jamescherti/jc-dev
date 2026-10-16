@@ -484,9 +484,6 @@
  ;; should be resolved?
  ;; lsp-pylsp-plugins-jedi-completion-resolve-at-most 40
 
- ;; NOTE: Removed because it causes on Arch:
- ;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
- ;;
  ;; Enables or disables the preloading of
  ;; specified Python modules when the language
  ;; server starts. When enabled, the preload

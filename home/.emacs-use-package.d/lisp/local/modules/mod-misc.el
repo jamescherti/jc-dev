@@ -4024,47 +4024,82 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; Fix bug eglot
 
-(with-eval-after-load 'eglot
-  (cl-defmacro eglot--lambda (cl-lambda-list &body body)
-    "Function of args CL-LAMBDA-LIST for processing INTERFACE objects.
-  Honor `eglot-strict-mode'.
-  CL-LAMBDA-LIST is the destructuring lambda list.
-  BODY contains the forms to execute."
-    (declare (indent 1) (debug (sexp &rest form)))
-    (let ((e (gensym "jsonrpc-lambda-elem")))
-      `(lambda (,e)
-         (let ((,e (if (equal ,e []) nil ,e)))
-           (cl-block nil (eglot--dbind ,cl-lambda-list ,e ,@body))))))
+;; bug
+;; Debugger entered--Lisp error: (wrong-type-argument plistp [])
+;; plist-member([] :signatures)
+;; #f(compiled-function (jsonrpc-lambda-elem60) #<bytecode 0x18aa22ce94328fe6>)([])
+;; apply(#f(compiled-function (jsonrpc-lambda-elem60) #<bytecode 0x18aa22ce94328fe6>) [])
+;; #f(compiled-function (&rest args) #<bytecode -0xa6f0a72b5b6a9e6>)([])
+;; jsonrpc--continue(#<eglot-lsp-server 10225dd2958d> (:local 46) (46 :textDocument/signatureHelp #f(compiled-function (&rest args) #<bytecode -0xa6f0a72b5b6a9e6>) #f(compiled-function (&rest args) #<bytecode 0x1888edcc420d31ab>) [nil 27345 33443 195038 nil #f(compiled-function () #<bytecode 0xd327e4ae85c53ab>) nil nil 888000 nil]) [] nil)
+;; jsonrpc-connection-receive(#<eglot-lsp-server 10225dd2958d> (:jsonrpc "2.0" :id 46 :result []))
+;; #f(compiled-function (conn msg) #<bytecode 0x3e5847037d9dbd2>)(#<eglot-lsp-server 10225dd2958d> (:jsonrpc "2.0" :id 46 :result []))
+;; apply(#f(compiled-function (conn msg) #<bytecode 0x3e5847037d9dbd2>) (#<eglot-lsp-server 10225dd2958d> (:jsonrpc "2.0" :id 46 :result [])))
+;; timer-event-handler([t 27345 33433 258006 nil #f(compiled-function (conn msg) #<bytecode 0x3e5847037d9dbd2>) (#<eglot-lsp-server 10225dd2958d> (:jsonrpc "2.0" :id 46 :result [])) nil 72000 nil])
 
-  (cl-defmacro eglot--dbind (vars object &body body)
-    "Destructure OBJECT, binding VARS in BODY.
-VARS is ([(INTERFACE)] SYMS...)
-Honor `eglot-strict-mode'."
-    (declare (indent 2) (debug (sexp form &rest form)))
-    (when (fboundp 'eglot--check-dspec)
-      (let ((interface-name (if (consp (car vars))
-                                (car (pop vars))))
-            (object-once (make-symbol "object-once"))
-            (fn-once (make-symbol "fn-once")))
-        (cond (interface-name
-               (eglot--check-dspec interface-name vars)
-               `(let ((,object-once ,object))
-                  (when (equal ,object-once []) (setq ,object-once nil))
-                  (when ,object-once
-                    (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
-                      (eglot--check-object ',interface-name ,object-once
-                                           (memq 'enforce-required-keys eglot-strict-mode)
-                                           (memq 'disallow-non-standard-keys eglot-strict-mode)
-                                           (memq 'check-types eglot-strict-mode))
-                      ,@body))))
-              (t
-               `(let ((,object-once ,object)
-                      (,fn-once (lambda (,@vars) ,@body)))
-                  (if (memq 'disallow-non-standard-keys eglot-strict-mode)
-                      (cl-destructuring-bind (&key ,@vars) ,object-once
-                        (funcall ,fn-once ,@vars))
-                    (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
-                      (funcall ,fn-once ,@vars))))))))))
+;; (with-eval-after-load 'eglot
+;;   ;; (defun eglot-hover-eldoc-function (cb &rest _ignored)
+;;   ;;   "A member of `eldoc-documentation-functions', for hover.
+;;   ;; CB is the callback function provided by ElDoc to display the documentation.
+;;   ;; _IGNORED absorbs unused extra arguments from the hook."
+;;   ;;   (when (eglot-server-capable :hoverProvider)
+;;   ;;     (let ((buf (current-buffer)))
+;;   ;;       (eglot--async-request
+;;   ;;        (eglot--current-server-or-lose)
+;;   ;;        :textDocument/hover (eglot--TextDocumentPositionParams)
+;;   ;;        :success-fn (lambda (res)
+;;   ;;                      (eglot--when-buffer-window buf
+;;   ;;                        (if (or (null res) (vectorp res))
+;;   ;;                            (funcall cb nil)
+;;   ;;                          (eglot--dbind ((Hover) contents range) res
+;;   ;;                            (let* ((info (unless (seq-empty-p contents)
+;;   ;;                                           (eglot--hover-info contents range)))
+;;   ;;                                   (pos (and info (string-match "\n" info))))
+;;   ;;                              (while (and pos (get-text-property pos 'invisible info))
+;;   ;;                                (setq pos (string-match "\n" info (1+ pos))))
+;;   ;;                              (funcall cb info :echo pos))))))
+;;   ;;        :hint :textDocument/hover))
+;;   ;;     t))
+;;
+;;   (cl-defmacro eglot--lambda (cl-lambda-list &body body)
+;;     "Function of args CL-LAMBDA-LIST for processing INTERFACE objects.
+;;   Honor `eglot-strict-mode'.
+;;   CL-LAMBDA-LIST is the destructuring lambda list.
+;;   BODY contains the forms to execute."
+;;     (declare (indent 1) (debug (sexp &rest form)))
+;;     (let ((e (gensym "jsonrpc-lambda-elem")))
+;;       `(lambda (,e)
+;;          (let ((,e (if (equal ,e []) nil ,e)))
+;;            (cl-block nil (eglot--dbind ,cl-lambda-list ,e ,@body))))))
+;;
+;;   (cl-defmacro eglot--dbind (vars object &body body)
+;;     "Destructure OBJECT, binding VARS in BODY.
+;;   VARS is ([(INTERFACE)] SYMS...)
+;;   Honor `eglot-strict-mode'."
+;;     (declare (indent 2) (debug (sexp form &rest form)))
+;;     (when (fboundp 'eglot--check-dspec)
+;;       (let ((interface-name (if (consp (car vars))
+;;                                 (car (pop vars))))
+;;             (object-once (make-symbol "object-once"))
+;;             (fn-once (make-symbol "fn-once")))
+;;         (cond (interface-name
+;;                (eglot--check-dspec interface-name vars)
+;;                `(let ((,object-once ,object))
+;;                   (when (equal ,object-once []) (setq ,object-once nil))
+;;                   (when ,object-once
+;;                     (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
+;;                       (eglot--check-object ',interface-name ,object-once
+;;                                            (memq 'enforce-required-keys eglot-strict-mode)
+;;                                            (memq 'disallow-non-standard-keys eglot-strict-mode)
+;;                                            (memq 'check-types eglot-strict-mode))
+;;                       ,@body))))
+;;               (t
+;;                `(let ((,object-once ,object)
+;;                       (,fn-once (lambda (,@vars) ,@body)))
+;;                   (if (memq 'disallow-non-standard-keys eglot-strict-mode)
+;;                       (cl-destructuring-bind (&key ,@vars) ,object-once
+;;                         (funcall ,fn-once ,@vars))
+;;                     (cl-destructuring-bind (&key ,@vars &allow-other-keys) ,object-once
+;;                       (funcall ,fn-once ,@vars))))))))))
 
 ;;; Papyrus Help
 
