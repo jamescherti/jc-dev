@@ -295,12 +295,11 @@ By default, closing the last window in a tab does not close the tab."
 (defun mod-buffer-terminator-only-visible ()
   "Kill all the buffers that are not currently displayed in a window or tab."
   (interactive)
-  (message "Disabled.")
-  ;; (if (fboundp 'buffer-guardian-save-all-buffers)
-  ;;     (buffer-guardian-save-all-buffers)
-  ;;   (user-error "Undefined: buffer-guardian-save-all-buffers"))
-  ;; (mod-buffer-terminator-kill-non-visible-buffers)
-  )
+  ;; (message "Disabled.")
+  (if (fboundp 'buffer-guardian-save-all-buffers)
+      (buffer-guardian-save-all-buffers)
+    (user-error "Undefined: buffer-guardian-save-all-buffers"))
+  (mod-buffer-terminator-kill-non-visible-buffers))
 
 ;;; Evil
 

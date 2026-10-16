@@ -679,8 +679,8 @@ invoking the original function ORIG-FUN with ARGS."
   "Update `fill-column'."
   (setq-local fill-column 88))
 
-(add-hook 'python-mode-hook #'my-python-fill-column-setup)
-(add-hook 'python-ts-mode-hook #'my-python-fill-column-setup)
+(add-hook 'python-mode-hook #'my-python-fill-column-setup -90)
+(add-hook 'python-ts-mode-hook #'my-python-fill-column-setup -90)
 
 ;;; jinja2-mode and csv-mode
 

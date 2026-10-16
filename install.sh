@@ -266,6 +266,22 @@ config_uutils() {
   fi
 }
 
+copy_unified_files() {
+  cd "$SCRIPT_DIR"
+
+  if [[ -f ~/src/tools/batchfetch/.dir-locals.el ]]; then
+    cp -uv \
+      misc/unified-files/unified-dir-locals.el \
+      ~/src/tools/batchfetch/.dir-locals.el
+  fi
+
+  if [[ -f ~/src/tools/batchfetch/.ruff.toml ]]; then
+    cp -uv \
+      misc/unified-files/unified-ruff.toml \
+      ~/src/tools/batchfetch/.ruff.toml
+  fi
+}
+
 main() {
   # shellcheck disable=SC1091
   OSFAMILY=$(
@@ -326,6 +342,8 @@ main() {
   if BASH_PATH="$(type -P bash)"; then
     echo "set -g default-shell $BASH_PATH" >>"$HOME/.tmux.conf"
   fi
+
+  copy_unified_files
 
   echo
   echo Success.

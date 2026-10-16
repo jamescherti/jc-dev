@@ -533,11 +533,28 @@
 
 ;; Trust buffer contents for Flymake
 (when (boundp 'trusted-content)
-  (let ((dirs (list "~/src/dotfiles/jc-dev/"
-                    "~/src/emacs/"
-                    "~/src/wip/"
-                    ;; "~/src/forks/"
-                    )))
+  (let ((dirs (list
+               ;; "~/src/dotfiles/jc-dev/"
+               ;; "~/src/emacs/"
+               ;; "~/src/wip/"
+               ;; "~/src/tools/"
+
+               "~/src/ansible/"
+               "~/src/dotfiles/"
+               "~/src/emacs/"
+               "~/src/git/"
+               "~/src/home-settings/"
+               "~/src/jamescherti/"
+               "~/src/linux/"
+               "~/src/notes/"
+               "~/src/other/"
+               "~/src/tools/"
+               "~/src/vim/"
+               "~/src/wip/"
+
+               ;; "~/src/local"
+               ;; "~/src/forks/"
+               )))
     (dolist (dir dirs)
       (when dir
         ;; Ensure the path ends with a slash so it registers as a directory
