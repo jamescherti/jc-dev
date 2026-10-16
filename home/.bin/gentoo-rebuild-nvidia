@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+#
+# Rebuilds out-of-tree modules and initramfs for all installed kernels.
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euo pipefail
+
+if [[ "${EUID}" -ne 0 ]]; then
+  echo "This script must be run as root." >&2
+  exit 1
+fi
+
+# Save the current active kernel symlink to restore it upon completion
+current_kernel=$(readlink /usr/src/linux || echo "")
+
+cd /usr/src
+for kernel_dir in linux-*/; do
+  # Remove trailing slash from the directory name
+  kernel_name="${kernel_dir%/}"
+
+  # Skip if it is not a directory or globbing fails
+  [[ -d "${kernel_name}" ]] || continue
+
+  # Extract the version string expected by dracut (e.g., 7.2.5-gentoo-dist)
+  kver="${kernel_name#linux-}"
+
+  echo "============================================================"
+  echo "Processing kernel: ${kver}"
+  echo "============================================================"
+
+  # Point Portage to the target kernel headers
+  eselect kernel set "${kernel_name}"
+
+  # Rebuild all out-of-tree modules for this specific kernel
+  emerge -v1 @module-rebuild
+
+  # Bake the newly compiled drivers into the initramfs
+  dracut --kver "${kver}" --force
+done
+
+# Restore the original system symlink
+if [[ -n "${current_kernel}" ]]; then
+  echo "Restoring original kernel symlink: ${current_kernel}"
+  eselect kernel set "${current_kernel#/usr/src/}"
+fi
+
+echo "Module rebuild and initramfs generation complete."
