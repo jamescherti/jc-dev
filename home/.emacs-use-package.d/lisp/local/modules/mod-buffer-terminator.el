@@ -30,7 +30,8 @@
 
 (require 'lightemacs)
 
-(defvar mod-buffer-terminator-keep-buffer-regexp nil)
+(defvar mod-buffer-terminator-keep-buffer-regexp
+  '("\\`\\(?: \\)?\\*EGLOT .*\\*\\'"))
 
 (defvar mod-buffer-terminator-always-keep '("*Messages*"
                                             "*scratch*"
@@ -433,7 +434,6 @@ By default, closing the last window in a tab does not close the tab."
 
 ;; Can also be handled with the
 ;; process rule
-;; "\\`\\(?: \\)?\\*EGLOT .*\\*\\'"
 ;; "\\`\\*vterm:" ; shell-pop
 ;; Keep Corfu popups
 ;; "\\` \\*corfu"
