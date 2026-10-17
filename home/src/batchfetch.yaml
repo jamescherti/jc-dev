@@ -123,6 +123,7 @@ tasks:
 
   - git: git@github.com:jamescherti/pathaction
     path: tools/pathaction
+    revision: develop
 
   - git: git@github.com:jamescherti/update-iptables
     path: tools/update-iptables
