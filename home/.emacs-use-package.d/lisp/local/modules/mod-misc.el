@@ -2185,8 +2185,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     ;; (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(autopep8 ruff-isort))
 
     (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format ruff-isort))
-    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort))
-    )
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort)))
 
    (t
     ;; Legacy

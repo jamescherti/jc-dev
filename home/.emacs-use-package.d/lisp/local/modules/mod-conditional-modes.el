@@ -203,6 +203,19 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 
 (defvar-local my-conditional-modes--checked nil)
 
+(defun my-setup-eglot-format-on-save (enable)
+  "Configure eglot to format the current buffer on save.
+
+ENABLE is a boolean that determines whether to enable or disable
+the format-on-save behavior. When ENABLE is non-nil, this turns off
+`apheleia-mode' locally and registers `eglot-format-buffer' in the
+`before-save-hook'."
+  (when (fboundp 'eglot-format-buffer)
+    (if enable
+        (progn
+          (add-hook 'before-save-hook #'eglot-format-buffer nil t))
+      (remove-hook 'before-save-hook #'eglot-format-buffer t))))
+
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
   "Manually check variables and enable modes."
@@ -245,64 +258,69 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                      so-long-active)
             (message "[CONDITIONAL-MODES] DETECTED SO-LONG: %S" buf-name))
 
-          (when (and (not so-long-active)
-                     (not env-deny-all)
-                     file-name)
+          (let ((eglot-enabled nil))
+            (when (and (not so-long-active)
+                       (not env-deny-all)
+                       file-name)
+              (when (and (fboundp 'dtrt-indent-mode)
+                         (file-in-directory-p file-name "~/src/forks"))
+                (dtrt-indent-mode 1))
 
-            (when (and (fboundp 'dtrt-indent-mode)
-                       (file-in-directory-p file-name "~/src/forks"))
-              (dtrt-indent-mode 1))
+              (when env-allow-lsp
+                ;; All modes
+                (when (and (fboundp 'eglot-ensure)
+                           (derived-mode-p 'python-mode 'python-ts-mode))
+                  (when (treesit-parser-list)
+                    ;; This is to avoid redundant semantic highlighting, disabling
+                    ;; Eglot's :semanticTokensProvider is reasonable when
+                    ;; Tree-sitter is already providing semantic fontification.
+                    (make-local-variable 'eglot-ignored-server-capabilities)
+                    (add-to-list 'eglot-ignored-server-capabilities
+                                 :semanticTokensProvider))
+                  (setq eglot-enabled t)
+                  (eglot-ensure)))
 
-            (when env-allow-lsp
-              ;; All modes
-              (when (and (fboundp 'eglot-ensure)
-                         (derived-mode-p 'python-mode 'python-ts-mode))
-                (when (treesit-parser-list)
-                  ;; This is to avoid redundant semantic highlighting, disabling
-                  ;; Eglot's :semanticTokensProvider is reasonable when
-                  ;; Tree-sitter is already providing semantic fontification.
-                  (make-local-variable 'eglot-ignored-server-capabilities)
-                  (add-to-list 'eglot-ignored-server-capabilities
-                               :semanticTokensProvider))
-                (eglot-ensure)))
+              ;; Formatters
+              (when env-allow-reformatters
+                ;; All modes
+                (when (and (fboundp 'apheleia-mode)
+                           (derived-mode-p 'python-mode
+                                           'python-ts-mode
+                                           'bash-ts-mode
+                                           'sh-mode
+                                           'yaml-mode
+                                           'yaml-ts-mode))
+                  (if (and eglot-enabled
+                           (or (derived-mode-p 'python-mode)
+                               (derived-mode-p 'python-ts-mode)))
+                      (my-setup-eglot-format-on-save t)
+                    (apheleia-mode 1)))
 
-            ;; Formatters
-            (when env-allow-reformatters
-              ;; All modes
-              (when (and (fboundp 'apheleia-mode)
-                         (derived-mode-p 'python-mode
-                                         'python-ts-mode
-                                         'bash-ts-mode
-                                         'sh-mode
-                                         'yaml-mode
-                                         'yaml-ts-mode))
-                (apheleia-mode 1))
+                ;; Elisp
+                (when (and (derived-mode-p 'emacs-lisp-mode)
+                           (fboundp 'aggressive-indent-mode))
+                  (aggressive-indent-mode 1)))
 
-              ;; Elisp
-              (when (and (derived-mode-p 'emacs-lisp-mode)
-                         (fboundp 'aggressive-indent-mode))
-                (aggressive-indent-mode 1)))
+              ;; Flymake
+              (let ((base-name (when file-name
+                                 (file-name-nondirectory file-name))))
+                (when (and (fboundp 'flymake-mode)
+                           (not (my-code-checker-and-reformatter-ignore-p)))
+                  (when (and env-allow-syntax-checker-package-lint
+                             ;; TODO add exceptions like these to the
+                             ;; .my-dir-locals.el
+                             (not (or (file-in-directory-p file-name "~/src/emacs/lightemacs")
+                                      (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
+                                      (string= base-name "init.el")
+                                      (string= base-name "early-init.el"))))
+                    (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
 
-            ;; Flymake
-            (let ((base-name (when file-name
-                               (file-name-nondirectory file-name))))
-              (when (and (fboundp 'flymake-mode)
-                         (not (my-code-checker-and-reformatter-ignore-p)))
-                (when (and env-allow-syntax-checker-package-lint
-                           ;; TODO add exceptions like these to the
-                           ;; .my-dir-locals.el
-                           (not (or (file-in-directory-p file-name "~/src/emacs/lightemacs")
-                                    (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
-                                    (string= base-name "init.el")
-                                    (string= base-name "early-init.el"))))
-                  (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
+                  (flymake-mode 1)))
 
-                (flymake-mode 1)))
-
-            ;; Stripspace
-            (when (and (bound-and-true-p env-allow-whitespace-cleanup)
-                       (fboundp 'stripspace-local-mode))
-              (stripspace-local-mode 1))))))))
+              ;; Stripspace
+              (when (and (bound-and-true-p env-allow-whitespace-cleanup)
+                         (fboundp 'stripspace-local-mode))
+                (stripspace-local-mode 1)))))))))
 
 ;; Attach your logic to the trigger hook
 (add-hook 'after-change-major-mode-hook #'my-evaluate-dir-locals 80)
