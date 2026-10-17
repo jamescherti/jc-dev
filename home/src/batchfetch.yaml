@@ -119,6 +119,7 @@ tasks:
 
   - git: git@github.com:jamescherti/batchfetch
     path: tools/batchfetch
+    revision: develop
 
   - git: git@github.com:jamescherti/pathaction
     path: tools/pathaction
