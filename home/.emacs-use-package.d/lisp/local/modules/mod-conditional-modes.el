@@ -203,18 +203,9 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 
 (defvar-local my-conditional-modes--checked nil)
 
-(defun my-setup-eglot-format-on-save (enable)
-  "Configure eglot to format the current buffer on save.
-
-ENABLE is a boolean that determines whether to enable or disable
-the format-on-save behavior. When ENABLE is non-nil, this turns off
-`apheleia-mode' locally and registers `eglot-format-buffer' in the
-`before-save-hook'."
-  (when (fboundp 'eglot-format-buffer)
-    (if enable
-        (progn
-          (add-hook 'before-save-hook #'eglot-format-buffer nil t))
-      (remove-hook 'before-save-hook #'eglot-format-buffer t))))
+(defun my-setup-eglot-format-on-save ()
+  "Add `eglot-format-buffer' to the local `before-save-hook'."
+  (add-hook 'before-save-hook 'eglot-format-buffer -10 t))
 
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
@@ -270,15 +261,17 @@ the format-on-save behavior. When ENABLE is non-nil, this turns off
                 ;; All modes
                 (when (and (fboundp 'eglot-ensure)
                            (derived-mode-p 'python-mode 'python-ts-mode))
+                  (setq eglot-enabled t)
+                  (eglot-ensure)
+
                   (when (treesit-parser-list)
-                    ;; This is to avoid redundant semantic highlighting, disabling
-                    ;; Eglot's :semanticTokensProvider is reasonable when
-                    ;; Tree-sitter is already providing semantic fontification.
+                    ;; This is to avoid redundant semantic highlighting,
+                    ;; disabling Eglot's :semanticTokensProvider is reasonable
+                    ;; when Tree-sitter is already providing semantic
+                    ;; fontification.
                     (make-local-variable 'eglot-ignored-server-capabilities)
                     (add-to-list 'eglot-ignored-server-capabilities
-                                 :semanticTokensProvider))
-                  (setq eglot-enabled t)
-                  (eglot-ensure)))
+                                 :semanticTokensProvider))))
 
               ;; Formatters
               (when env-allow-reformatters
@@ -293,7 +286,7 @@ the format-on-save behavior. When ENABLE is non-nil, this turns off
                   (if (and eglot-enabled
                            (or (derived-mode-p 'python-mode)
                                (derived-mode-p 'python-ts-mode)))
-                      (my-setup-eglot-format-on-save t)
+                      (my-setup-eglot-format-on-save)
                     (apheleia-mode 1)))
 
                 ;; Elisp
