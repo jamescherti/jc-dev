@@ -275,6 +275,7 @@ copy_unified_python_project() {
     "unified-python-dir-locals.el:.dir-locals.el"
     "unified-python-ruff.toml:.ruff.toml"
     "unified-python-gitignore:.gitignore"
+    "unified-python-pylintrc:.pylintrc"
   )
 
   local entry src_rel dest_rel dest_path
@@ -283,9 +284,7 @@ copy_unified_python_project() {
     dest_rel="${entry##*:}"
     dest_path="$target_dir/$dest_rel"
 
-    if [[ -f "$dest_path" ]]; then
-      cp -uv "$unified_dir/$src_rel" "$dest_path"
-    fi
+    cp -uv "$unified_dir/$src_rel" "$dest_path"
   done
 }
 
@@ -293,6 +292,7 @@ copy_unified_files() {
   cd "$SCRIPT_DIR" || return 1
 
   copy_unified_python_project "$HOME/src/tools/batchfetch"
+  copy_unified_python_project "$HOME/src/tools/pathaction"
 }
 
 main() {
