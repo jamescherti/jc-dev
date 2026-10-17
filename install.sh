@@ -266,20 +266,33 @@ config_uutils() {
   fi
 }
 
+copy_unified_python_project() {
+  local target_dir="${1:?Target directory required}"
+  target_dir="${target_dir/#\~/$HOME}"
+
+  local unified_dir="$SCRIPT_DIR/misc/unified-files"
+  local -a file_map=(
+    "unified-python-dir-locals.el:.dir-locals.el"
+    "unified-python-ruff.toml:.ruff.toml"
+    "unified-python-gitignore:.gitignore"
+  )
+
+  local entry src_rel dest_rel dest_path
+  for entry in "${file_map[@]}"; do
+    src_rel="${entry%%:*}"
+    dest_rel="${entry##*:}"
+    dest_path="$target_dir/$dest_rel"
+
+    if [[ -f "$dest_path" ]]; then
+      cp -uv "$unified_dir/$src_rel" "$dest_path"
+    fi
+  done
+}
+
 copy_unified_files() {
-  cd "$SCRIPT_DIR"
+  cd "$SCRIPT_DIR" || return 1
 
-  if [[ -f ~/src/tools/batchfetch/.dir-locals.el ]]; then
-    cp -uv \
-      misc/unified-files/unified-dir-locals.el \
-      ~/src/tools/batchfetch/.dir-locals.el
-  fi
-
-  if [[ -f ~/src/tools/batchfetch/.ruff.toml ]]; then
-    cp -uv \
-      misc/unified-files/unified-ruff.toml \
-      ~/src/tools/batchfetch/.ruff.toml
-  fi
+  copy_unified_python_project "$HOME/src/tools/batchfetch"
 }
 
 main() {

@@ -203,9 +203,23 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 
 (defvar-local my-conditional-modes--checked nil)
 
+;; (defun my-setup-eglot-format-on-save ()
+;;   "Add `eglot-format-buffer' to the local `before-save-hook'."
+;;   (add-hook 'before-save-hook 'eglot-format-buffer -10 t))
+
 (defun my-setup-eglot-format-on-save ()
-  "Add `eglot-format-buffer' to the local `before-save-hook'."
-  (add-hook 'before-save-hook 'eglot-format-buffer -10 t))
+  "Enable format-on-save for Eglot managed buffers.
+
+Add `eglot-format-buffer' to the buffer-local `before-save-hook' when Eglot
+manages the current buffer. Otherwise, remove it. Run formatting at depth -10,
+before hooks at the default depth."
+  (when (fboundp 'eglot-format-buffer)
+    (if (and (fboundp 'eglot-managed-p)
+             (eglot-managed-p))
+        (add-hook 'before-save-hook #'eglot-format-buffer -10 t)
+      (remove-hook 'before-save-hook #'eglot-format-buffer t))))
+
+(add-hook 'eglot-managed-mode-hook #'my-setup-eglot-format-on-save)
 
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
@@ -286,7 +300,8 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                   (if (and eglot-enabled
                            (or (derived-mode-p 'python-mode)
                                (derived-mode-p 'python-ts-mode)))
-                      (my-setup-eglot-format-on-save)
+                      nil
+                    ;; (my-setup-eglot-format-on-save)
                     (apheleia-mode 1)))
 
                 ;; Elisp
