@@ -199,7 +199,6 @@
 (defvar my-eglot-python-workspace nil
   "Cached Eglot workspace configuration for Python.")
 
-
 (defun my-python-eglot-config ()
   "Set buffer-local eglot configuration for Python.
 
@@ -211,14 +210,17 @@ This function takes no arguments."
                   (;; Formatter to use for reformatting signatures in docstrings.
                    :signature
                    (;; Signature
-                    :formatter "ruff"
+                    ;; :formatter has to be "ruff", "black", or nil
+                    :formatter nil
+                    ;; ,(if has-ruff
+                    ;;      "ruff"
+                    ;;    "black")
                     :include_docstring t
                     :line_length 88)
                    :plugins
                    (;; Plugin: https://github.com/python-lsp/python-lsp-ruff
                     :ruff (;; Ruff configuration
                            :enabled ,(if has-ruff t :json-false)
-
                            :formatEnabled ,(if has-ruff t :json-false)
 
                            ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),

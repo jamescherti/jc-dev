@@ -35,8 +35,15 @@ MY_PIP_PACKAGES=(pathaction git-rexec pdfcipher watch-xfce-xfconf
 PIP_PACKAGES=()
 # PySocks trash-cli
 # Removed: types-PyYAML
-PIP_PACKAGES+=(mypy ipython cookiecutter
-  yamllint ansible ansible-lint molecule coverage)
+PIP_PACKAGES+=(
+  cookiecutter
+  yamllint
+  ansible
+  ansible-lint
+  coverage
+  # ipython
+  # molecule
+)
 PIP_PACKAGES+=(twine build wheel keyrings.cryptfile)
 PIP_PACKAGES+=(jedi pydantic prompt-toolkit Pygments Jinja2
   requests psutil libtmux colorama html2text)
@@ -44,11 +51,26 @@ PIP_PACKAGES+=(pdfminer)
 PIP_PACKAGES+=(pandas odfpy openpyxl xlsxwriter lxml Zstandard matplotlib
   pandas-datareader numexpr Bottleneck python-dateutil pytz)
 # PIP_PACKAGES+=(sh rope)
-PIP_PACKAGES+=(codestyle pyflakes pylint)
 # PIP_PACKAGES+=(vim-vint)
 PIP_PACKAGES+=(pytest-mock)
-PIP_PACKAGES+=(vulture yapf bandit pyre-check black autopep8 flake8
-  pydocstyle isort pylint mccabe)
+PIP_PACKAGES+=(
+  pylint
+  ruff
+  pylint
+  mypy
+  # codestyle
+  # pyflakes
+  # vulture
+  # yapf
+  # bandit
+  # pyre-check
+  # black
+  # autopep8
+  # flake8
+  # pydocstyle
+  # isort
+  # mccabe
+)
 
 PIP_PACKAGES+=(python-lsp-server pylsp-mypy python-lsp-isort)
 
