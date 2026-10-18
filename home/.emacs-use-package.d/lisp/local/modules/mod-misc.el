@@ -1474,7 +1474,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
    outline-blank-line t
 
    vim-tab-bar-update-group-name-function #'(lambda(name) (concat " [" name "] "))
-   vim-tab-bar-show-groups nil
+   vim-tab-bar-show-groups t
 
    bufferfile-use-vc t
    ;; bufferfile-delete-switch-to 'previous-buffer

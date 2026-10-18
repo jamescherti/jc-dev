@@ -117,16 +117,19 @@ tasks:
   - git: git@github.com:jamescherti/watch-xfce-xfconf
     path: tools/watch-xfce-xfconf
 
+  - git: git@github.com:jamescherti/update-iptables
+    path: tools/update-iptables
+
+  # ----------------------------------------------------------------------------
+  # Python
+  # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/batchfetch
-    path: tools/batchfetch
+    path: python/batchfetch
     revision: develop
 
   - git: git@github.com:jamescherti/pathaction
-    path: tools/pathaction
+    path: python/pathaction
     revision: develop
-
-  - git: git@github.com:jamescherti/update-iptables
-    path: tools/update-iptables
 
   # ----------------------------------------------------------------------------
   # Git

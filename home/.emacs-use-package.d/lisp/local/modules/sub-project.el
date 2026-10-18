@@ -204,43 +204,43 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 ;;; DISABLED: Project tab group
 
-;; (defvar-local my-project-change-tab-group-name nil)
-;;
-;; (defun my-project-change-tab-group (&rest _args)
-;;   "Change the project in the tab group."
-;;   ;; Tab bar project
-;;   (when my-project-change-tab-group-name
-;;     (let ((buffer-name (buffer-name))
-;;           (my-project-name-enable-cache nil))
-;;       (when (and (not (minibufferp))
-;;                  (fboundp 'tab-bar--current-tab)
-;;                  (fboundp 'tab-bar-change-tab-group))
-;;         (let ((project-name (my-project-name)))
-;;           (when (or (not my-project-change-tab-group-name)
-;;                     (string= my-project-change-tab-group-name ""))
-;;             (when (and (not project-name)
-;;                        (or (or (or (string-prefix-p "*" buffer-name)
-;;                                    (string-prefix-p " *" buffer-name))
-;;                                (string-prefix-p "*" buffer-name))
-;;                            (derived-mode-p 'special-mode)))
-;;               (setq project-name "Special"))
-;;
-;;             (unless project-name
-;;               (setq project-name "Misc"))
-;;
-;;             (let ((current-group (alist-get 'group (tab-bar--current-tab))))
-;;               (unless (string= current-group project-name)
-;;                 (tab-bar-change-tab-group project-name)
-;;                 (tab-bar-move-tab-to-group)
-;;                 (setq my-project-change-tab-group-name project-name)
-;;                 (force-mode-line-update)))))))))
+(defvar my-project-change-tab-group-name t)
+
+(defun my-project-change-tab-group (&rest _args)
+  "Change the project in the tab group."
+  ;; Tab bar project
+  (when my-project-change-tab-group-name
+    (let ((buffer-name (buffer-name))
+          (my-project-name-enable-cache nil))
+      (when (and (not (minibufferp))
+                 (fboundp 'tab-bar--current-tab)
+                 (fboundp 'tab-bar-change-tab-group))
+        (let ((project-name (my-project-name)))
+          (when (or (not my-project-change-tab-group-name)
+                    (string= my-project-change-tab-group-name ""))
+            (when (and (not project-name)
+                       (or (or (or (string-prefix-p "*" buffer-name)
+                                   (string-prefix-p " *" buffer-name))
+                               (string-prefix-p "*" buffer-name))
+                           (derived-mode-p 'special-mode)))
+              (setq project-name "Special"))
+
+            (unless project-name
+              (setq project-name "Misc"))
+
+            (let ((current-group (alist-get 'group (tab-bar--current-tab))))
+              (unless (string= current-group project-name)
+                (tab-bar-change-tab-group project-name)
+                (tab-bar-move-tab-to-group)
+                (setq my-project-change-tab-group-name project-name)
+                (force-mode-line-update)))))))))
 
 ;; void variable project TODO
-;;(when my-project-change-tab-group-name
-;;  (add-hook 'window-selection-change-functions #'my-project-change-tab-group)
-;;  (add-hook 'dired-mode-hook #'my-project-change-tab-group)
-;;  (add-hook 'find-file-hook #'my-project-change-tab-group)
-;;  (add-hook 'window-buffer-change-functions #'my-project-change-tab-group))
+(when my-project-change-tab-group-name
+  (add-hook 'window-selection-change-functions #'my-project-change-tab-group)
+  (add-hook 'dired-mode-hook #'my-project-change-tab-group)
+  (add-hook 'find-file-hook #'my-project-change-tab-group)
+  (add-hook 'window-buffer-change-functions #'my-project-change-tab-group))
 
 ;;; DISABLED: project selector
 
