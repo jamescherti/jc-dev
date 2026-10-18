@@ -299,7 +299,7 @@ copy_unified_files() {
   copy_unified_python_project "$HOME/src/python/git-rexec"
   copy_unified_python_project "$HOME/src/python/pathaction"
   copy_unified_python_project "$HOME/src/python/pdfcipher"
-  copy_unified_python_project "$HOME/src/python/smartmv"
+  copy_unified_python_project "$HOME/src/python/git-smartmv"
   copy_unified_python_project "$HOME/src/python/ultyas"
   copy_unified_python_project "$HOME/src/python/vim-client"
 
