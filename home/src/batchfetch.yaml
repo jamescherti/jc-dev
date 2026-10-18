@@ -114,21 +114,34 @@ tasks:
   # Python
   # emacs/elispcomp emacs/ultyas git/git-commitflow git/git-smartmv tools/caffeine-aw tools/watch-xfce-xfconf vim/vim-client
   # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/git-smartpull
+    path: python/git-smartpull
+    revision: develop
+
   - git: git@github.com:jamescherti/pdfcipher
     path: python/pdfcipher
+    revision: develop
 
   - git: git@github.com:jamescherti/vim-client
     path: python/vim-client
+    revision: develop
 
   - git: git@github.com:jamescherti/watch-xfce-xfconf
     path: python/watch-xfce-xfconf
+    revision: develop
 
   - git: git@github.com:jamescherti/caffeine-aw
     path: python/caffeine-aw
     git_update: false
+    revision: develop
 
   - git: git@github.com:jamescherti/git-smartmv
     path: python/git-smartmv
+    revision: develop
+
+  - git: git@github.com:jamescherti/ansible-cleanup
+    path: python/ansible-cleanup
+    revision: develop
 
   - git: git@github.com:jamescherti/ultyas
     path: python/ultyas
@@ -137,9 +150,6 @@ tasks:
   - git: git@github.com:jamescherti/elispcomp
     path: python/elispcomp
     revision: develop
-
-  - git: git@github.com:jamescherti/ansible-cleanup
-    path: python/ansible-cleanup
 
   - git: git@github.com:jamescherti/batchfetch
     path: python/batchfetch
@@ -151,9 +161,7 @@ tasks:
 
   - git: git@github.com:jamescherti/git-commitflow
     path: python/git-commitflow
-
-  - git: git@github.com:jamescherti/git-smartpull
-    path: python/git-smartpull
+    revision: develop
 
   - git: git@github.com:jamescherti/git-rexec
     path: python/git-rexec

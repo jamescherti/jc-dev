@@ -294,6 +294,13 @@ copy_unified_files() {
   copy_unified_python_project "$HOME/src/python/batchfetch"
   copy_unified_python_project "$HOME/src/python/pathaction"
   copy_unified_python_project "$HOME/src/python/git-rexec"
+  copy_unified_python_project "$HOME/src/python/watch-xfce-xfconf"
+  copy_unified_python_project "$HOME/src/python/ultyas"
+  copy_unified_python_project "$HOME/src/python/git-commitflow"
+  copy_unified_python_project "$HOME/src/python/smartmv"
+  copy_unified_python_project "$HOME/src/python/ansible-cleanup"
+  copy_unified_python_project "$HOME/src/python/elispcomp"
+  copy_unified_python_project "$HOME/src/python/vim-client"
 }
 
 main() {
