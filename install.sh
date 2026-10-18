@@ -291,8 +291,8 @@ copy_unified_python_project() {
 copy_unified_files() {
   cd "$SCRIPT_DIR" || return 1
 
-  copy_unified_python_project "$HOME/src/tools/batchfetch"
-  copy_unified_python_project "$HOME/src/tools/pathaction"
+  copy_unified_python_project "$HOME/src/python/batchfetch"
+  copy_unified_python_project "$HOME/src/python/pathaction"
 }
 
 main() {

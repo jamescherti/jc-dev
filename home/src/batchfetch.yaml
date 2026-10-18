@@ -107,22 +107,40 @@ tasks:
     path: tools/efasd
     revision: develop
 
-  - git: git@github.com:jamescherti/pdfcipher
-    path: tools/pdfcipher
-
-  - git: git@github.com:jamescherti/caffeine-aw
-    path: tools/caffeine-aw
-    git_update: false
-
-  - git: git@github.com:jamescherti/watch-xfce-xfconf
-    path: tools/watch-xfce-xfconf
-
   - git: git@github.com:jamescherti/update-iptables
     path: tools/update-iptables
 
   # ----------------------------------------------------------------------------
   # Python
+  # emacs/elispcomp emacs/ultyas git/git-commitflow git/git-smartmv tools/caffeine-aw tools/watch-xfce-xfconf vim/vim-client
   # ----------------------------------------------------------------------------
+  - git: git@github.com:jamescherti/pdfcipher
+    path: python/pdfcipher
+
+  - git: git@github.com:jamescherti/vim-client
+    path: python/vim-client
+
+  - git: git@github.com:jamescherti/watch-xfce-xfconf
+    path: python/watch-xfce-xfconf
+
+  - git: git@github.com:jamescherti/caffeine-aw
+    path: python/caffeine-aw
+    git_update: false
+
+  - git: git@github.com:jamescherti/git-smartmv
+    path: python/git-smartmv
+
+  - git: git@github.com:jamescherti/ultyas
+    path: python/ultyas
+    revision: develop
+
+  - git: git@github.com:jamescherti/elispcomp
+    path: python/elispcomp
+    revision: develop
+
+  - git: git@github.com:jamescherti/ansible-cleanup
+    path: python/ansible-cleanup
+
   - git: git@github.com:jamescherti/batchfetch
     path: python/batchfetch
     revision: develop
@@ -131,27 +149,20 @@ tasks:
     path: python/pathaction
     revision: develop
 
-  # ----------------------------------------------------------------------------
-  # Git
-  # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/git-commitflow
-    path: git/git-commitflow
+    path: python/git-commitflow
 
   - git: git@github.com:jamescherti/git-smartpull
+    path: python/git-smartpull
     path: git/git-smartpull
 
-  - git: git@github.com:jamescherti/git-smartmv
-    path: git/git-smartmv
-
   - git: git@github.com:jamescherti/git-rexec
+    path: python/git-rexec
     path: git/git-rexec
 
   # ----------------------------------------------------------------------------
   # Ansible
   # ----------------------------------------------------------------------------
-  - git: git@github.com:jamescherti/ansible-cleanup
-    path: ansible/ansible-cleanup
-
   - git: git@github.com:jamescherti/ansible-role-ofbiz
     path: ansible/ansible-role-ofbiz
 
@@ -737,9 +748,6 @@ tasks:
   - git: git@github.com:jamescherti/vim-easysession
     path: vim/vim-easysession
 
-  - git: git@github.com:jamescherti/vim-client
-    path: vim/vim-client
-
   - git: git@github.com:jamescherti/vim-hjklmode
     path: vim/vim-hjklmode
 
@@ -763,10 +771,6 @@ tasks:
 
   - git: git@github.com:jamescherti/ultisnips-mode.el
     path: emacs/ultisnips-mode.el
-    revision: develop
-
-  - git: git@github.com:jamescherti/ultyas
-    path: emacs/ultyas
     revision: develop
 
   - git: git@github.com:jamescherti/pathaction.el
@@ -835,10 +839,6 @@ tasks:
 
   - git: git@github.com:jamescherti/outline-indent.el
     path: emacs/outline-indent.el
-    revision: develop
-
-  - git: git@github.com:jamescherti/elispcomp
-    path: emacs/elispcomp
     revision: develop
 
   - git: git@github.com:jamescherti/dir-config.el
