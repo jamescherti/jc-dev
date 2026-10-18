@@ -157,6 +157,7 @@ tasks:
 
   - git: git@github.com:jamescherti/git-rexec
     path: python/git-rexec
+    revision: develop
 
   # ----------------------------------------------------------------------------
   # Ansible

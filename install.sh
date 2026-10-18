@@ -293,6 +293,7 @@ copy_unified_files() {
 
   copy_unified_python_project "$HOME/src/python/batchfetch"
   copy_unified_python_project "$HOME/src/python/pathaction"
+  copy_unified_python_project "$HOME/src/python/git-rexec"
 }
 
 main() {
