@@ -65,8 +65,12 @@ update-repos() {
       "$GIT_PULL_MY_REPO"
 
     git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/emacs" \
-      --exclude "$HOME/src/forks" \
-      --exclude "$HOME/src/local" \
+      --parallel \
+      --if-exec git-is-clean \
+      -- \
+      sh -c "git checkout develop && git pull --rebase && git push"
+
+    git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/python" \
       --parallel \
       --if-exec git-is-clean \
       -- \

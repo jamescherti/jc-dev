@@ -49,61 +49,104 @@ config-xfce() {
   fi
 }
 
+MY_PYTHON_PACKAGES_PATH="$HOME/src/python"
 config-pip-packages() {
-  run_every 172800 \
-    ~/.cache/jc-dev.pip-upgrade \
-    enable-upgrade-pip-packages
+  # run_every 172800 \
+  #   ~/.cache/jc-dev.pip-upgrade \
+  #   enable-upgrade-pip-packages
+  #
+  # # PIP
+  # MY_PIP_PACKAGES=()
+  # if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+  #   || ! type -P pathaction &>/dev/null; then
+  #   MY_PIP_PACKAGES+=(pathaction)
+  # fi
+  #
+  # if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+  #   || ! type -P ultyas &>/dev/null; then
+  #   MY_PIP_PACKAGES+=(ultyas)
+  # fi
+  #
+  # if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+  #   || ! type -P git-rexec &>/dev/null; then
+  #   MY_PIP_PACKAGES+=(git-rexec)
+  # fi
+  #
+  # if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+  #   || ! type -P git-commitflow &>/dev/null; then
+  #   MY_PIP_PACKAGES+=(git-commitflow)
+  # fi
+  #
+  # if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+  #   || ! type -P batchfetch &>/dev/null; then
+  #   MY_PIP_PACKAGES+=(batchfetch)
+  # fi
+  #
+  # if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
+  #   || ! type -P git-smartmv &>/dev/null; then
+  #   MY_PIP_PACKAGES+=(git-smartmv)
+  # fi
+  #
+  # local opts=()
+  #
+  # if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]]; then
+  #   opts+=(--upgrade)
+  # fi
+  #
+  # if [[ "${#MY_PIP_PACKAGES[@]}" -gt 1 ]]; then
+  #   if [[ "${VIRTUAL_ENV:-}" ]]; then
+  #     printf "[PIP INSTALL] %s\n" "pip install --upgrade pip"
+  #     pip install --upgrade pip
+  #
+  #     printf "[PIP INSTALL] %s\n" "pip install ${MY_PIP_PACKAGES[*]}"
+  #     pip install "${opts[@]}" "${MY_PIP_PACKAGES[@]}"
+  #   else
+  #     printf "[PIP INSTALL] %s\n" "pip install --user ${MY_PIP_PACKAGES[*]}"
+  #     pip install "${opts[@]}" --user "${MY_PIP_PACKAGES[@]}"
+  #   fi
+  # fi
 
-  # PIP
-  MY_PIP_PACKAGES=()
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
-    || ! type -P pathaction &>/dev/null; then
-    MY_PIP_PACKAGES+=(pathaction)
+  local pip_opts=()
+
+  if [[ "${VIRTUAL_ENV:-}" ]]; then
+    true
+  else
+    pip_opts+=(--user)
   fi
 
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
-    || ! type -P ultyas &>/dev/null; then
-    MY_PIP_PACKAGES+=(ultyas)
-  fi
-
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
-    || ! type -P git-rexec &>/dev/null; then
-    MY_PIP_PACKAGES+=(git-rexec)
-  fi
-
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
-    || ! type -P git-commitflow &>/dev/null; then
-    MY_PIP_PACKAGES+=(git-commitflow)
-  fi
-
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
-    || ! type -P batchfetch &>/dev/null; then
-    MY_PIP_PACKAGES+=(batchfetch)
-  fi
-
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]] \
-    || ! type -P git-smartmv &>/dev/null; then
-    MY_PIP_PACKAGES+=(git-smartmv)
-  fi
-
-  local opts=()
-
-  if [[ $UPGRADE_PIP_PACKAGES -ne 0 ]]; then
-    opts+=(--upgrade)
-  fi
-
-  if [[ "${#MY_PIP_PACKAGES[@]}" -gt 1 ]]; then
-    if [[ "${VIRTUAL_ENV:-}" ]]; then
-      printf "[PIP INSTALL] %s\n" "pip install --upgrade pip"
-      pip install --upgrade pip
-
-      printf "[PIP INSTALL] %s\n" "pip install ${MY_PIP_PACKAGES[*]}"
-      pip install "${opts[@]}" "${MY_PIP_PACKAGES[@]}"
-    else
-      printf "[PIP INSTALL] %s\n" "pip install --user ${MY_PIP_PACKAGES[*]}"
-      pip install "${opts[@]}" --user "${MY_PIP_PACKAGES[@]}"
-    fi
-  fi
+  # -e: Once you install with -e, you rarely need to run pip install again. Pip
+  # writes a link (a .pth file or editable finder hook) into your user
+  # site-packages that points directly to your git repository. When you modify
+  # Python files in git_smartmv/, ultyas/, or any of the other repositories, the
+  # changes take effect immediately when you execute the CLI tool. You only need
+  # to re-run the command if: You add, delete, or rename commands under
+  # [project.scripts]. You add or modify package metadata or package-data
+  # declarations. You restructure directories or add new top-level packages.
+  #
+  # --no-build-isolation: This tells pip to use the build backend (setuptools)
+  # already installed in your host Python environment instead of building an
+  # isolated temporary virtualenv on every invocation. It saves several seconds
+  # per package. It works reliably as long as your host Python environment
+  # already has setuptools>=77.0.0 installed to parse the PEP 639 license
+  # syntax. If you run this in an environment where setuptools is missing or
+  # below version 77, the build will fail immediately.
+  #
+  # --no-deps: Causes pip to skip resolving and verifying dependencies
+  # altogether.
+  pip install "${pip_opts[@]}" --no-build-isolation --no-deps \
+    "$MY_PYTHON_PACKAGES_PATH/pathaction" \
+    "$MY_PYTHON_PACKAGES_PATH/ultyas" \
+    "$MY_PYTHON_PACKAGES_PATH/git-rexec" \
+    "$MY_PYTHON_PACKAGES_PATH/git-commitflow" \
+    "$MY_PYTHON_PACKAGES_PATH/batchfetch" \
+    "$MY_PYTHON_PACKAGES_PATH/git-smartmv" \
+    "$MY_PYTHON_PACKAGES_PATH/ansible-cleanup"
+  # "$MY_PYTHON_PACKAGES_PATH/caffeine-aw" \
+  # "$MY_PYTHON_PACKAGES_PATH/elispcomp"
+  # "$MY_PYTHON_PACKAGES_PATH/git-smartpull"
+  # "$MY_PYTHON_PACKAGES_PATH/pdfcipher"
+  # "$MY_PYTHON_PACKAGES_PATH/vim-client"
+  # "$MY_PYTHON_PACKAGES_PATH/watch-xfce-xfconf"
 }
 
 install_python_deps() {

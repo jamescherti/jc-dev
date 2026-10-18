@@ -291,16 +291,20 @@ copy_unified_python_project() {
 copy_unified_files() {
   cd "$SCRIPT_DIR" || return 1
 
-  copy_unified_python_project "$HOME/src/python/batchfetch"
-  copy_unified_python_project "$HOME/src/python/pathaction"
-  copy_unified_python_project "$HOME/src/python/git-rexec"
-  copy_unified_python_project "$HOME/src/python/watch-xfce-xfconf"
-  copy_unified_python_project "$HOME/src/python/ultyas"
-  copy_unified_python_project "$HOME/src/python/git-commitflow"
-  copy_unified_python_project "$HOME/src/python/smartmv"
   copy_unified_python_project "$HOME/src/python/ansible-cleanup"
+  copy_unified_python_project "$HOME/src/python/batchfetch"
+  # cafe
   copy_unified_python_project "$HOME/src/python/elispcomp"
+  copy_unified_python_project "$HOME/src/python/git-commitflow"
+  copy_unified_python_project "$HOME/src/python/git-rexec"
+  copy_unified_python_project "$HOME/src/python/pathaction"
+  copy_unified_python_project "$HOME/src/python/pdfcipher"
+  copy_unified_python_project "$HOME/src/python/smartmv"
+  copy_unified_python_project "$HOME/src/python/ultyas"
   copy_unified_python_project "$HOME/src/python/vim-client"
+
+  copy_unified_python_project "$HOME/src/python/watch-xfce-xfconf"
+  copy_unified_python_project "$HOME/src/python/git-smartpull"
 }
 
 main() {
