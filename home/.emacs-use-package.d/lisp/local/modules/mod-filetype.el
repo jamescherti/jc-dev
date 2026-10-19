@@ -667,9 +667,6 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; Python
 
-(add-hook 'python-mode-hook #'display-fill-column-indicator-mode)
-(add-hook 'python-ts-mode-hook #'display-fill-column-indicator-mode)
-
 ;; By default, Emacs `python-mode' and `python-ts-mode' set tab-width to 8. PEP
 ;; 8 specifies a standard indentation level of 4 spaces for Python code. Setting
 ;; `tab-width' to `python-indent-offset' ensures correct visual alignment and
@@ -679,8 +676,11 @@ invoking the original function ORIG-FUN with ARGS."
   "Update `fill-column'."
   (setq-local fill-column 88))
 
-(add-hook 'python-mode-hook #'my-python-fill-column-setup -90)
-(add-hook 'python-ts-mode-hook #'my-python-fill-column-setup -90)
+(add-hook 'python-mode-hook #'my-python-fill-column-setup 80)
+(add-hook 'python-ts-mode-hook #'my-python-fill-column-setup 80)
+
+(add-hook 'python-mode-hook #'display-fill-column-indicator-mode 81)
+(add-hook 'python-ts-mode-hook #'display-fill-column-indicator-mode 81)
 
 ;;; jinja2-mode and csv-mode
 
