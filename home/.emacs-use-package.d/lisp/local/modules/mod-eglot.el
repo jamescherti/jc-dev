@@ -320,6 +320,19 @@ FORMAT and ARGS are the message format string and its arguments."
                                           "source.fixAll" nil))
         (eglot-execute server action)))))
 
+(defun my-setup-eglot-ruff-fix-on-save ()
+  "Enable Ruff fix-on-save for Eglot managed buffers.
+
+Add `my-eglot-ruff-fix-and-format-before-save' to the buffer-local
+`before-save-hook' when Eglot manages the current buffer. Otherwise, remove it.
+Run formatting at depth -10, before hooks at the default depth."
+  (if (and (fboundp 'eglot-managed-p)
+           (eglot-managed-p))
+      (add-hook 'before-save-hook #'my-eglot-ruff-fix-and-format-before-save -20 t)
+    (remove-hook 'before-save-hook #'my-eglot-ruff-fix-and-format-before-save t)))
+
+(add-hook 'eglot-managed-mode-hook #'my-setup-eglot-ruff-fix-on-save)
+
 ;; (add-hook 'before-save-hook #'my-eglot-ruff-fix-and-format-before-save)
 
 ;; Description: Configure Emacs Eglot to auto format code on save.
