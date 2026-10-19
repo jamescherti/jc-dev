@@ -297,6 +297,39 @@ FORMAT and ARGS are the message format string and its arguments."
 
 (advice-add 'eglot--message :around #'my-eglot--message-filter)
 
+;;; Eglot: Fix all
+
+(defun my-eglot-fix-all-and-organize-imports-before-save ()
+  "Apply available LSP fix-all and import-organization actions before saving."
+  (when (and (fboundp 'eglot-managed-p)
+             (eglot-managed-p)
+             (fboundp 'eglot-server-capable)
+             (eglot-server-capable :codeActionProvider)
+             (fboundp 'eglot-current-server)
+             (fboundp 'eglot-code-actions)
+             (fboundp 'eglot-execute))
+    (when-let* ((server (eglot-current-server)))
+      (save-restriction
+        (widen)
+        (dolist (action-kind '("source.fixAll" "source.organizeImports"))
+          (dolist (action (eglot-code-actions (point-min) (point-max)
+                                              action-kind nil))
+            (eglot-execute server action)))))))
+
+(defun my-setup-eglot-fix-on-save ()
+  "Enable automatic LSP fixes in buffers managed by Eglot.
+
+Add `my-eglot-fix-all-and-organize-imports-before-save' to the buffer-local
+`before-save-hook' when Eglot manages the current buffer. Otherwise, remove it."
+  (if (and (fboundp 'eglot-managed-p)
+           (eglot-managed-p))
+      (add-hook 'before-save-hook
+                #'my-eglot-fix-all-and-organize-imports-before-save -20 t)
+    (remove-hook 'before-save-hook
+                 #'my-eglot-fix-all-and-organize-imports-before-save t)))
+
+(add-hook 'eglot-managed-mode-hook #'my-setup-eglot-fix-on-save)
+
 ;;; Eglot: Format
 
 ;; Removed:
@@ -304,34 +337,6 @@ FORMAT and ARGS are the message format string and its arguments."
 ;; (dolist (action (eglot-code-actions (point-min) (point-max)
 ;;                                     "source.organizeImports" nil))
 ;;   (eglot-execute server action))
-
-(defun my-eglot-ruff-fix-and-format-before-save ()
-  "Programmatically run Ruff fixes, import sorting, and formatting on save."
-  (when (and (derived-mode-p 'python-base-mode)
-             (fboundp 'eglot-managed-p)
-             (eglot-managed-p)
-             (fboundp 'eglot-server-capable)
-             (eglot-server-capable :codeActionProvider)
-             (fboundp 'eglot-current-server)
-             (fboundp 'eglot-code-actions))
-    (when-let* ((server (eglot-current-server)))
-      ;; Verify the server supports code actions broadly
-      (dolist (action (eglot-code-actions (point-min) (point-max)
-                                          "source.fixAll" nil))
-        (eglot-execute server action)))))
-
-(defun my-setup-eglot-ruff-fix-on-save ()
-  "Enable Ruff fix-on-save for Eglot managed buffers.
-
-Add `my-eglot-ruff-fix-and-format-before-save' to the buffer-local
-`before-save-hook' when Eglot manages the current buffer. Otherwise, remove it.
-Run formatting at depth -10, before hooks at the default depth."
-  (if (and (fboundp 'eglot-managed-p)
-           (eglot-managed-p))
-      (add-hook 'before-save-hook #'my-eglot-ruff-fix-and-format-before-save -20 t)
-    (remove-hook 'before-save-hook #'my-eglot-ruff-fix-and-format-before-save t)))
-
-(add-hook 'eglot-managed-mode-hook #'my-setup-eglot-ruff-fix-on-save)
 
 ;; (add-hook 'before-save-hook #'my-eglot-ruff-fix-and-format-before-save)
 
