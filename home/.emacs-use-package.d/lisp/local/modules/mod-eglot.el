@@ -305,29 +305,22 @@ FORMAT and ARGS are the message format string and its arguments."
 ;;                                     "source.organizeImports" nil))
 ;;   (eglot-execute server action))
 
-(defun my/eglot-ruff-fix-and-format-before-save ()
+(defun my-eglot-ruff-fix-and-format-before-save ()
   "Programmatically run Ruff fixes, import sorting, and formatting on save."
   (when (and (derived-mode-p 'python-base-mode)
              (fboundp 'eglot-managed-p)
              (eglot-managed-p)
+             (fboundp 'eglot-server-capable)
+             (eglot-server-capable :codeActionProvider)
              (fboundp 'eglot-current-server)
              (fboundp 'eglot-code-actions))
     (when-let* ((server (eglot-current-server)))
+      ;; Verify the server supports code actions broadly
+      (dolist (action (eglot-code-actions (point-min) (point-max)
+                                          "source.fixAll" nil))
+        (eglot-execute server action)))))
 
-      ;; 1. Verify the server supports code actions broadly
-      (when (eglot-server-capable :codeActionProvider)
-        (dolist (action (eglot-code-actions (point-min) (point-max)
-                                            "source.fixAll" nil))
-          (eglot-execute server action)))
-
-      ;; 2. Verify the server supports formatting before executing
-      ;; (Remove this block if you only want linting/sorting but not formatting)
-      (when (and (fboundp 'eglot-format-buffer)
-                 (eglot-server-capable :documentFormattingProvider))
-        (eglot-format-buffer))
-      )))
-
-;; (add-hook 'before-save-hook #'my/eglot-ruff-fix-and-format-before-save)
+;; (add-hook 'before-save-hook #'my-eglot-ruff-fix-and-format-before-save)
 
 ;; Description: Configure Emacs Eglot to auto format code on save.
 ;; Author: James Cherti
