@@ -334,19 +334,26 @@ FORMAT and ARGS are the message format string and its arguments."
 ;; License: MIT
 ;; URL: https://www.jamescherti.com/emacs-eglot-auto-format-buffer-on-save/
 
+(defun my-eglot-format-buffer-safely ()
+  "Run formatting safely to avoid blocking saves."
+  (when (and (fboundp 'eglot-managed-p)
+             (eglot-managed-p)
+             (fboundp 'eglot-server-capable)
+             (eglot-server-capable :documentFormattingProvider)
+             (fboundp 'eglot-format-buffer))
+    (ignore-errors
+      (eglot-format-buffer))))
+
 (defun my-setup-eglot-format-on-save ()
   "Enable format-on-save for Eglot managed buffers.
 
 Add `eglot-format-buffer' to the buffer-local `before-save-hook' when Eglot
 manages the current buffer. Otherwise, remove it. Run formatting at depth -10,
 before hooks at the default depth."
-  (when (fboundp 'eglot-format-buffer)
-    (if (and (fboundp 'eglot-managed-p)
-             (eglot-managed-p)
-             (fboundp 'eglot-server-capable)
-             (eglot-server-capable :documentFormattingProvider))
-        (add-hook 'before-save-hook #'eglot-format-buffer -10 t)
-      (remove-hook 'before-save-hook #'eglot-format-buffer t))))
+  (if (and (fboundp 'eglot-managed-p)
+           (eglot-managed-p))
+      (add-hook 'before-save-hook #'my-eglot-format-buffer-safely -10 t)
+    (remove-hook 'before-save-hook #'my-eglot-format-buffer-safely t)))
 
 (add-hook 'eglot-managed-mode-hook #'my-setup-eglot-format-on-save)
 
