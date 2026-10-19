@@ -105,7 +105,7 @@
 (setq eglot-connect-timeout 40)
 (setq eglot-max-file-watches 5000)
 
-;;; Python Eglot
+;;; Python Eglot: Global Configuration
 
 ;; Use ruff when it is available because it is fast (written in Rust). When ruff
 ;; is not available, fall back to flake8 and its individual underlying tools.
@@ -278,26 +278,7 @@ This function takes no arguments."
     (let ((inhibit-message t))
       (eglot-format-buffer))))
 
-;;; Eglot: quiet
-
-;; TODO Lightemacs?
-(defun my-eglot--message-filter (orig-fun format &rest args)
-  "Suppress selected Eglot messages from the minibuffer.
-ORIG-FUN is the original `eglot--message` function.
-FORMAT and ARGS are the message format string and its arguments."
-  (let ((message-string (apply #'format format args)))
-    (let ((inhibit-message (or (string-prefix-p "Connected" message-string)
-                               (string-prefix-p "Waiting" message-string)
-                               (string-prefix-p "Reconnected" message-string)
-                               ;; [eglot] Asking EGLOT
-                               ;; (ansible-cleanup/(python-mode python-ts-mode))
-                               ;; politely to terminate
-                               (string-suffix-p "politely to terminate" message-string))))
-      (apply orig-fun format args))))
-
-(advice-add 'eglot--message :around #'my-eglot--message-filter)
-
-;;; Eglot: Fix all
+;;; Eglot: Code Actions: Auto Code Actions (fixes)
 
 (defun my-eglot-fix-all-and-organize-imports-before-save ()
   "Apply available LSP fix-all and import-organization actions before saving."
@@ -368,10 +349,27 @@ before hooks at the default depth."
 
 (add-hook 'eglot-managed-mode-hook #'my-setup-eglot-format-on-save)
 
+;;; Eglot: quiet
+
+;; TODO Lightemacs?
+(defun my-eglot--message-filter (orig-fun format &rest args)
+  "Suppress selected Eglot messages from the minibuffer.
+ORIG-FUN is the original `eglot--message` function.
+FORMAT and ARGS are the message format string and its arguments."
+  (let ((message-string (apply #'format format args)))
+    (let ((inhibit-message (or (string-prefix-p "Connected" message-string)
+                               (string-prefix-p "Waiting" message-string)
+                               (string-prefix-p "Reconnected" message-string)
+                               (string-suffix-p "politely to terminate" message-string))))
+      (apply orig-fun format args))))
+
+(advice-add 'eglot--message :around #'my-eglot--message-filter)
+
 ;;; Cape
 
 ;; Configure buffer-local completion backend settings when Eglot manages a
 ;; buffer.
+;;
 ;; 1. Unhooks `python-completion-at-point' to avoid conflicts with LSP
 ;; completion.
 ;; 2. Replaces standard `eglot-completion-at-point' with a cache-busted variant
