@@ -15,20 +15,21 @@ select = [
   "SIM", # flake8-simplify
   "RUF", # Ruff-specific rules
   "PL",  # Pylint rules
-  "A",   # flake8-builtins
-  "S",   # flake8-bandit
-  "RET", # flake8-return
-  "TRY", # tryceratops
-  "PT",  # flake8-pytest-style
-  "TCH", # flake8-type-checking
 ]
 
 ignore = [
-  "ISC001",  # Prevent conflicts with the Ruff formatter
-  "PLW2901", # For loop variable `pattern` overwritten by assignment target
-  "PLR0915", # Pylint rules: Too many statements
-  "PLR0912", # Pylint rules: Too many branches
+  "ISC001", # Prevent conflicts with the Ruff formatter
+  "PLW2901", # `for` loop variable `pattern` overwritten by assignment target
+  "PLR0915", # PLR0915 Too many statements
+  "PLR0912", # PLR0912 Too many branches
 ]
+
+fixable = ["ALL"]
+unfixable = []
 
 [lint.pydocstyle]
 convention = "pep257"
+
+[format]
+quote-style = "double"
+indent-style = "space"

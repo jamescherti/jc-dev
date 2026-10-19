@@ -207,20 +207,6 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 ;;   "Add `eglot-format-buffer' to the local `before-save-hook'."
 ;;   (add-hook 'before-save-hook 'eglot-format-buffer -10 t))
 
-(defun my-setup-eglot-format-on-save ()
-  "Enable format-on-save for Eglot managed buffers.
-
-Add `eglot-format-buffer' to the buffer-local `before-save-hook' when Eglot
-manages the current buffer. Otherwise, remove it. Run formatting at depth -10,
-before hooks at the default depth."
-  (when (fboundp 'eglot-format-buffer)
-    (if (and (fboundp 'eglot-managed-p)
-             (eglot-managed-p))
-        (add-hook 'before-save-hook #'eglot-format-buffer -10 t)
-      (remove-hook 'before-save-hook #'eglot-format-buffer t))))
-
-(add-hook 'eglot-managed-mode-hook #'my-setup-eglot-format-on-save)
-
 ;; Write the manual logic
 (defun my-evaluate-dir-locals ()
   "Manually check variables and enable modes."

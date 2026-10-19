@@ -105,80 +105,7 @@
 (setq eglot-connect-timeout 40)
 (setq eglot-max-file-watches 5000)
 
-;;; Disable Eglot capabilities
-
-;; (setq eglot-ignored-server-capabilities
-;;       '(;; Delegating code formatting to dedicated tools such as Apheleia can
-;;         ;; separate formatting from the language server and provide asynchronous
-;;         ;; formatting workflows. The tradeoff is additional formatter
-;;         ;; configuration and the loss of the language server's built-in
-;;         ;; formatting:
-;;         :documentOnTypeFormattingProvider
-;;
-;;         ;; Inlay hints (eglot-inlay-hints-mode) insert automatically determined
-;;         ;; types and parameter names directly into the buffer. Disabling them
-;;         ;; removes the associated visual annotations and any work required to
-;;         ;; maintain them:
-;;         :inlayHintProvider
-;;
-;;         ;; When the cursor rests on a symbol, the LSP server can highlight other
-;;         ;; occurrences of that symbol (eglot-highlight-eldoc-function).
-;;         ;; Disabling it will stop Eglot from highlighting other occurrences of
-;;         ;; the symbol under the cursor:
-;;         :documentHighlightProvider
-;;
-;;         ;; eldoc
-;;         ;; Sends textDocument/hover to fetch documentation for the symbol at
-;;         ;; point. Eglot parses the returned Markdown and renders it for the echo
-;;         ;; area or ElDoc buffer.
-;;         :hoverProvider
-;;
-;;         ;; eldoc
-;;         ;; Sends textDocument/codeAction strictly to check if actions are
-;;         ;; available (like refactors or quickfixes). Eglot uses this to draw the
-;;         ;; lightbulb icon in the mode-line, fringes, or margins.
-;;         :codeActionProvider
-;;
-;;         ;; Eglot implements this via eglot-semantic-tokens-mode, which disables
-;;         ;; Emacs's default regex-based font-lock and delegates syntax
-;;         ;; highlighting to the LSP server. When the buffer changes, Eglot issues
-;;         ;; a textDocument/semanticTokens/full/delta request.
-;;         ;;
-;;         ;; The server responds with large arrays of integers representing token
-;;         ;; coordinates. In eglot--semtok-font-lock-1, Eglot iterates through
-;;         ;; this array (for i from 0 below (length data) by 5). For every token,
-;;         ;; it must convert LSP line/character coordinates to Emacs buffer
-;;         ;; positions using eglot-move-to-linepos-function (which calculates
-;;         ;; UTF-16 code units), and then apply eglot--semtok-names and
-;;         ;; eglot--semtok-faces text properties. This creates significant Elisp
-;;         ;; execution overhead, garbage collection pressure from heavy JSON
-;;         ;; payloads, and blocking UI work during scrolling and editing.
-;;         ;; :semanticTokensProvider
-;;
-;;         ;; eldoc
-;;         ;; Sends textDocument/signatureHelp to parse the surrounding function
-;;         ;; call and identify the active parameter.
-;;         ;; :signatureHelpProvider
-;;
-;;         ;; Flymake
-;;         ;; If the server supports "pull" diagnostics, Eglot actively polls the
-;;         ;; server (textDocument/diagnostic) whenever the Flymake idle timer
-;;         ;; triggers (typically after 0.5 seconds of inactivity). Disabling it
-;;         ;; stops Eglot from polling for diagnostics. (Note: Many servers also
-;;         ;; push diagnostics asynchronously; disabling this only stops the
-;;         ;; explicit pull requests).
-;;         ;; :diagnosticProvider
-;;
-;;         ;; Eglot itself does not call this in the background, but if you use an
-;;         ;; external auto-completion framework (like company-mode or corfu), that
-;;         ;; framework will invoke Eglot's completion backend on a very short idle
-;;         ;; timer or as you type. This results in heavy textDocument/completion
-;;         ;; traffic. Disabling it stops Eglot from participating in
-;;         ;; auto-completion entirely.
-;;         ;; :completionProvider
-;;         ))
-
-;;; DISABLED: Python Eglot
+;;; Python Eglot
 
 ;; Use ruff when it is available because it is fast (written in Rust). When ruff
 ;; is not available, fall back to flake8 and its individual underlying tools.
@@ -211,10 +138,9 @@ This function takes no arguments."
                    :signature
                    (;; Signature
                     ;; :formatter has to be "ruff", "black", or nil
-                    :formatter nil
-                    ;; ,(if has-ruff
-                    ;;      "ruff"
-                    ;;    "black")
+                    :formatter ,(if has-ruff
+                                    "ruff"
+                                  "black")
                     :include_docstring t
                     :line_length 88)
                    :plugins
@@ -334,133 +260,12 @@ This function takes no arguments."
 (add-hook 'python-mode-hook #'my-python-eglot-config -60)
 (add-hook 'python-ts-mode-hook #'my-python-eglot-config -60)
 
-;;; DISABLED: Article Python Eglot
+;;; Remove eglot from the modeline
 
-;; Use ruff when it is available because it is fast (written in Rust). When ruff
-;; is not available, fall back to flake8 and its individual underlying tools.
-;;
-;; URL: https://www.jamescherti.com/emacs-python-dev-using-eglot-pylsp-ruff-pylint-flake8/
-;;
-;; To sup up:
-;; - When ruff is available: Ruff, and Pylint.
-;; - When Ruff is not available: Flake8, isort, and Pylint.
-;;
-;; Documentation:
-;; https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
-;; https://github.com/python-lsp/python-lsp-ruff
-;; https://github.com/chantera/python-lsp-isort
-
-;; (with-eval-after-load 'eglot
-;;   (let* ((has-ruff (executable-find "ruff"))
-;;          (has-flake8 (executable-find "flake8")))
-;;     ;; Target ONLY the 'pylsp key in the global configuration alist safely
-;;     (setf (alist-get :pylsp (default-value 'eglot-workspace-configuration))
-;;           `(:plugins
-;;             (;; Plugin: https://github.com/python-lsp/python-lsp-ruff
-;;              :ruff (;; Ruff configuration
-;;                     :enabled ,(if has-ruff t :json-false)
-;;
-;;                     :formatEnabled ,(if has-ruff t :json-false)
-;;
-;;                     ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
-;;                     ;; and 'D' (pydocstyle).
-;;                     ;; :extendSelect ["W" "UP" "D"]
-;;
-;;                     ;; Ignore specific rules
-;;                     ;;   D213: Multi-line docstring summary should start on
-;;                     ;;         the second line.
-;;                     ;;   D202: No blank lines allowed after function
-;;                     ;;         docstring.
-;;                     ;; :ignore ["D213" "D202"]
-;;                     )
-;;
-;;              ;; Pylint remains enabled regardless of whether Ruff
-;;              ;; or Flake8 is active because it serves
-;;              ;; complementary role.
-;;              :pylint (:enabled ,(if (not has-ruff)
-;;                                     t
-;;                                   :json-false))
-;;
-;;              ;; Flake8 is a wrapper tool that bundles pyflakes,
-;;              ;; pycodestyle, and mccabe.
-;;              :flake8 (:enabled ,(if (and (not has-ruff) has-flake8)
-;;                                     t
-;;                                   :json-false))
-;;
-;;              ;; When Flake8 or Ruff runs, they execute these under
-;;              ;; the hood. If we enable either, we must explicitly
-;;              ;; disable the individual pylsp plugins for them,
-;;              ;; otherwise the language server will run the exact
-;;              ;; same checks twice and duplicate all editor
-;;              ;; diagnostics.
-;;              :mccabe (:enabled ,(if (or has-ruff has-flake8)
-;;                                     :json-false
-;;                                   t))
-;;              :pyflakes (;; pyflakes catches logical errors
-;;                         ;; (unused imports, undefined names...)
-;;                         :enabled ,(if (or has-ruff has-flake8)
-;;                                       :json-false
-;;                                     t))
-;;
-;;              :pycodestyle (;; pycodestyle catches style/formatting
-;;                            ;; violations (PEP 8)
-;;                            :enabled ,(if (or has-ruff has-flake8)
-;;                                          :json-false
-;;                                        t)
-;;
-;;                            ;; Ignore specific rules
-;;                            ;; :ignore ["W293"]
-;;                            )
-;;
-;;              :pydocstyle (;; pydocstyle enforces PEP 257 docstring
-;;                           ;; conventions
-;;                           :enabled ,(if (or has-ruff has-flake8)
-;;                                         ;; Use flake8-docstrings
-;;                                         ;; https://github.com/pycqa/flake8-docstrings
-;;                                         :json-false
-;;                                       t)
-;;
-;;                           ;; Ignore specific rules
-;;                           ;;   D213 Multi-line docstring summary should start on
-;;                           ;;        the second line.
-;;                           ;;   D202 No blank lines allowed after function
-;;                           ;;        docstring.
-;;                           ;; :ignore ["D213" "D202"]
-;;                           )
-;;
-;;              ;; Formatting: isort
-;;              ;; https://github.com/chantera/python-lsp-isort
-;;              :isort (:enabled ,(if has-ruff :json-false t))
-;;
-;;              ;; Formatting: autopep8
-;;              :autopep8 (:enabled ,(if has-ruff :json-false t))
-;;              :yapf (:enabled :json-false)
-;;
-;;              ;; Code completion
-;;              :jedi_completion (;; jedi configuration
-;;                                :enabled t
-;;
-;;                                ;; Disable resolving documentation details eagerly
-;;                                ;; :eager t
-;;
-;;                                ;; Add class objects as a separate completion item
-;;                                ;; :include_class_objects t
-;;
-;;                                ;; Add function objects as a separate completion item
-;;                                ;; :include_function_objects t
-;;
-;;                                ;; Auto-complete methods and classes for each parameter
-;;                                ;; :include_params t
-;;
-;;                                ;; Fuzzy matching for typos/abbreviations
-;;                                ;; :fuzzy t
-;;
-;;                                ;; Modules for which labels and snippets should be cached.
-;;                                ;; :cache_for ["pandas", "numpy", "tensorflow", "matplotlib"]
-;;
-;;                                ;; How many labels and snippets should be resolved?
-;;                                ;; :resolve_at_most 25
-;;                                ))))))
+;; Remove eglot from the modeline
+(with-eval-after-load 'eglot
+  (setq mode-line-misc-info
+        (assq-delete-all 'eglot--managed-mode mode-line-misc-info)))
 
 ;;; Function: my-eglot-format-buffer
 
@@ -472,13 +277,6 @@ This function takes no arguments."
              (fboundp 'eglot-format-buffer))
     (let ((inhibit-message t))
       (eglot-format-buffer))))
-
-;;; Remove eglot from the modeline
-
-;; Remove eglot from the modeline
-(with-eval-after-load 'eglot
-  (setq mode-line-misc-info
-        (assq-delete-all 'eglot--managed-mode mode-line-misc-info)))
 
 ;;; Eglot: quiet
 
@@ -498,6 +296,59 @@ FORMAT and ARGS are the message format string and its arguments."
       (apply orig-fun format args))))
 
 (advice-add 'eglot--message :around #'my-eglot--message-filter)
+
+;;; Eglot: Format
+
+;; Removed:
+;; Sort imports (matches "source.organizeImports.ruff")
+;; (dolist (action (eglot-code-actions (point-min) (point-max)
+;;                                     "source.organizeImports" nil))
+;;   (eglot-execute server action))
+
+(defun my/eglot-ruff-fix-and-format-before-save ()
+  "Programmatically run Ruff fixes, import sorting, and formatting on save."
+  (when (and (derived-mode-p 'python-base-mode)
+             (fboundp 'eglot-managed-p)
+             (eglot-managed-p)
+             (fboundp 'eglot-current-server)
+             (fboundp 'eglot-code-actions))
+    (when-let* ((server (eglot-current-server)))
+
+      ;; 1. Verify the server supports code actions broadly
+      (when (eglot-server-capable :codeActionProvider)
+        (dolist (action (eglot-code-actions (point-min) (point-max)
+                                            "source.fixAll" nil))
+          (eglot-execute server action)))
+
+      ;; 2. Verify the server supports formatting before executing
+      ;; (Remove this block if you only want linting/sorting but not formatting)
+      (when (and (fboundp 'eglot-format-buffer)
+                 (eglot-server-capable :documentFormattingProvider))
+        (eglot-format-buffer))
+      )))
+
+;; (add-hook 'before-save-hook #'my/eglot-ruff-fix-and-format-before-save)
+
+;; Description: Configure Emacs Eglot to auto format code on save.
+;; Author: James Cherti
+;; License: MIT
+;; URL: https://www.jamescherti.com/emacs-eglot-auto-format-buffer-on-save/
+
+(defun my-setup-eglot-format-on-save ()
+  "Enable format-on-save for Eglot managed buffers.
+
+Add `eglot-format-buffer' to the buffer-local `before-save-hook' when Eglot
+manages the current buffer. Otherwise, remove it. Run formatting at depth -10,
+before hooks at the default depth."
+  (when (fboundp 'eglot-format-buffer)
+    (if (and (fboundp 'eglot-managed-p)
+             (eglot-managed-p)
+             (fboundp 'eglot-server-capable)
+             (eglot-server-capable :documentFormattingProvider))
+        (add-hook 'before-save-hook #'eglot-format-buffer -10 t)
+      (remove-hook 'before-save-hook #'eglot-format-buffer t))))
+
+(add-hook 'eglot-managed-mode-hook #'my-setup-eglot-format-on-save)
 
 ;;; Cape
 
@@ -527,6 +378,79 @@ FORMAT and ARGS are the message format string and its arguments."
       (error "Undefined: cape-capf-buster"))))
 
 (add-hook 'eglot-managed-mode-hook #'my-eglot-capf-cleanup)
+
+;;; Disable Eglot capabilities
+
+;; (setq eglot-ignored-server-capabilities
+;;       '(;; Delegating code formatting to dedicated tools such as Apheleia can
+;;         ;; separate formatting from the language server and provide asynchronous
+;;         ;; formatting workflows. The tradeoff is additional formatter
+;;         ;; configuration and the loss of the language server's built-in
+;;         ;; formatting:
+;;         :documentOnTypeFormattingProvider
+;;
+;;         ;; Inlay hints (eglot-inlay-hints-mode) insert automatically determined
+;;         ;; types and parameter names directly into the buffer. Disabling them
+;;         ;; removes the associated visual annotations and any work required to
+;;         ;; maintain them:
+;;         :inlayHintProvider
+;;
+;;         ;; When the cursor rests on a symbol, the LSP server can highlight other
+;;         ;; occurrences of that symbol (eglot-highlight-eldoc-function).
+;;         ;; Disabling it will stop Eglot from highlighting other occurrences of
+;;         ;; the symbol under the cursor:
+;;         :documentHighlightProvider
+;;
+;;         ;; eldoc
+;;         ;; Sends textDocument/hover to fetch documentation for the symbol at
+;;         ;; point. Eglot parses the returned Markdown and renders it for the echo
+;;         ;; area or ElDoc buffer.
+;;         :hoverProvider
+;;
+;;         ;; eldoc
+;;         ;; Sends textDocument/codeAction strictly to check if actions are
+;;         ;; available (like refactors or quickfixes). Eglot uses this to draw the
+;;         ;; lightbulb icon in the mode-line, fringes, or margins.
+;;         :codeActionProvider
+;;
+;;         ;; Eglot implements this via eglot-semantic-tokens-mode, which disables
+;;         ;; Emacs's default regex-based font-lock and delegates syntax
+;;         ;; highlighting to the LSP server. When the buffer changes, Eglot issues
+;;         ;; a textDocument/semanticTokens/full/delta request.
+;;         ;;
+;;         ;; The server responds with large arrays of integers representing token
+;;         ;; coordinates. In eglot--semtok-font-lock-1, Eglot iterates through
+;;         ;; this array (for i from 0 below (length data) by 5). For every token,
+;;         ;; it must convert LSP line/character coordinates to Emacs buffer
+;;         ;; positions using eglot-move-to-linepos-function (which calculates
+;;         ;; UTF-16 code units), and then apply eglot--semtok-names and
+;;         ;; eglot--semtok-faces text properties. This creates significant Elisp
+;;         ;; execution overhead, garbage collection pressure from heavy JSON
+;;         ;; payloads, and blocking UI work during scrolling and editing.
+;;         ;; :semanticTokensProvider
+;;
+;;         ;; eldoc
+;;         ;; Sends textDocument/signatureHelp to parse the surrounding function
+;;         ;; call and identify the active parameter.
+;;         ;; :signatureHelpProvider
+;;
+;;         ;; Flymake
+;;         ;; If the server supports "pull" diagnostics, Eglot actively polls the
+;;         ;; server (textDocument/diagnostic) whenever the Flymake idle timer
+;;         ;; triggers (typically after 0.5 seconds of inactivity). Disabling it
+;;         ;; stops Eglot from polling for diagnostics. (Note: Many servers also
+;;         ;; push diagnostics asynchronously; disabling this only stops the
+;;         ;; explicit pull requests).
+;;         ;; :diagnosticProvider
+;;
+;;         ;; Eglot itself does not call this in the background, but if you use an
+;;         ;; external auto-completion framework (like company-mode or corfu), that
+;;         ;; framework will invoke Eglot's completion backend on a very short idle
+;;         ;; timer or as you type. This results in heavy textDocument/completion
+;;         ;; traffic. Disabling it stops Eglot from participating in
+;;         ;; auto-completion entirely.
+;;         ;; :completionProvider
+;;         ))
 
 ;;; DISABLED: Python: Remove flymake
 
