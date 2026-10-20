@@ -81,7 +81,11 @@ post-save processing is complete."
   (when (or (not (overlayp restore-column--virtual-overlay))
             (not (eq (overlay-buffer restore-column--virtual-overlay) (current-buffer)))
             (not (eq (point) (overlay-start restore-column--virtual-overlay)))
-            (eq this-command 'keyboard-quit))
+            (memq this-command '(keyboard-quit
+                                 backward-char left-char
+                                 forward-char right-char
+                                 move-beginning-of-line
+                                 move-end-of-line)))
     (restore-column--clear-virtual-state)))
 
 (defun restore-column--shared-buffer-p ()
