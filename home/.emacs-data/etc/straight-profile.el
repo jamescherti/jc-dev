@@ -8,7 +8,7 @@
  ;; @jamescherti forks of maintained packages
  ("straight.el" . "ff4f9b1a658fef4edcaf44a0be0326f1e609dc9a")
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
- ("diff-hl" . "c9ecc496e6638552be7a52c690e5ff62565130c8a97bc4f554700212e60edced640620a3d9924e66") ; TODO add to RSS
+ ("diff-hl" . "9ecc496e6638552be7a52c690e5ff62565130c8") ; TODO add to RSS
  ("evil-collection" . "783c96b9901417cb8b6df63ab606387fa72dc922") ; 3.0.3 add to RSS
  ("embark" . "79531fc6aab311acf6874679082f336de4a91789") ; 1.2 | RSS RELEASE
  ("evil-matchit" . "4cb8dd3d811ecb2abd774b491223ac5460dcdd5e") ; 5.0.0 | RSS RELEASE
