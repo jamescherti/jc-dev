@@ -55,61 +55,29 @@ post-save processing is complete."
 (defvar-local restore-column--virtual-overlay nil
   "Overlay used to display virtual whitespace.")
 
-(defsubst restore-column--pos-bol ()
-  "Return the position of the first character on the current line."
-  (if (fboundp 'pos-bol)
-      (pos-bol)
-    (let ((inhibit-field-text-motion t))
-      (line-beginning-position))))
-
-(defsubst restore-column--pos-eol ()
-  "Return the position of the last character on the current line."
-  (if (fboundp 'pos-eol)
-      (pos-eol)
-    (let ((inhibit-field-text-motion t))
-      (line-end-position))))
-
 (defun restore-column--clear-virtual-state ()
   "Clean up virtual overlay and hooks."
   (when (overlayp restore-column--virtual-overlay)
     (delete-overlay restore-column--virtual-overlay))
   (setq restore-column--virtual-overlay nil)
-  (remove-hook 'pre-command-hook #'restore-column--pre-command t)
-  (remove-hook 'post-command-hook #'restore-column--post-command t))
+  (remove-hook 'pre-command-hook #'restore-column--pre-command-handler t))
 
-(defun restore-column--pre-command ()
-  "Clear the virtual overlay before commands that should not preserve it."
-  (when (overlayp restore-column--virtual-overlay)
-    (unless (memq this-command
-                  '(save-buffer
-                    save-some-buffers
-                    ignore
-                    mwheel-scroll
-                    pixel-scroll-precision))
-      (restore-column--clear-virtual-state))))
-
-(defun restore-column--post-command ()
-  "Discard virtual spaces if point moves away from the overlay position."
-  (let ((ov restore-column--virtual-overlay))
-    (when (overlayp ov)
-      (let ((ov-pos (overlay-start ov)))
-        (when (or (null ov-pos)
-                  (/= (point) ov-pos)
-                  (< ov-pos (restore-column--pos-bol))
-                  (> ov-pos (restore-column--pos-eol)))
-          (restore-column--clear-virtual-state))))))
+(defun restore-column--pre-command-handler ()
+  "Convert virtual spaces to real spaces if typing, then clear overlay."
+  (when (and (eq this-command 'self-insert-command)
+             (overlayp restore-column--virtual-overlay))
+    (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
+      (when (stringp disp)
+        (let ((missing (1- (length disp))))
+          (when (> missing 0)
+            (insert (make-string missing ?\s)))))))
+  (restore-column--clear-virtual-state))
 
 (defun restore-column--before-save-hook ()
   "Save the current cursor column position.
 This function is intended to be added to `before-save-hook'."
   (when (bound-and-true-p restore-column-local-mode)
-    (let ((ov restore-column--virtual-overlay))
-      (setq restore-column--saved-column
-            (+ (current-column)
-               (if (and (overlayp ov)
-                        (eq (overlay-start ov) (point)))
-                   (or (overlay-get ov 'restore-column-cursor-offset) 0)
-                 0))))))
+    (setq restore-column--saved-column (current-column))))
 
 (defun restore-column--after-save-hook ()
   "Restore the cursor to the previously saved column.
@@ -128,10 +96,9 @@ This function is intended to be added to `after-save-hook'."
                                                (propertize " " 'cursor t)))
                        (ov (make-overlay (point) (point) nil nil nil)))
                   (overlay-put ov 'after-string display-spaces)
-                  (overlay-put ov 'restore-column-cursor-offset missing)
                   (setq restore-column--virtual-overlay ov)
-                  (add-hook 'pre-command-hook #'restore-column--pre-command nil t)
-                  (add-hook 'post-command-hook #'restore-column--post-command nil t))))))
+                  (add-hook 'pre-command-hook
+                            #'restore-column--pre-command-handler nil t))))))
       (setq restore-column--saved-column nil))))
 
 ;;;###autoload
@@ -156,10 +123,14 @@ This function is intended to be added to `after-save-hook'."
     (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
     (remove-hook 'after-save-hook #'restore-column--after-save-hook t)))
 
+(defun restore-column--enable ()
+  "Turn on `restore-column-mode' for the current buffer."
+  (restore-column-local-mode 1))
+
 ;;;###autoload
 (define-globalized-minor-mode restore-column-global-mode
   restore-column-local-mode
-  (restore-column-local-mode 1))
+  restore-column--enable)
 
 (provide 'restore-column)
 ;;; restore-column.el ends here
