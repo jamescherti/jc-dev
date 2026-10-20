@@ -99,7 +99,6 @@ This function is intended to be added to `after-save-hook'."
                     (let ((display-spaces (make-string (1+ missing) ?\s)))
                       (put-text-property missing (1+ missing) 'cursor t display-spaces)
                       (let ((ov (make-overlay (point) (point) (current-buffer) t nil)))
-                        (overlay-put ov 'evaporate t)
                         (overlay-put ov 'after-string display-spaces)
                         (setq restore-column--virtual-overlay ov)
                         (add-hook 'pre-command-hook
