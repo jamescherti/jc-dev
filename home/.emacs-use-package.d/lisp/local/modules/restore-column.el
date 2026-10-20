@@ -76,60 +76,72 @@ post-save processing is complete."
                                  move-end-of-line)))
     (restore-column--clear-virtual-state)))
 
+(defun restore-column--active-buffer ()
+  "Return the selected window's buffer if it shares text with the buffer being saved.
+This correctly handles Emacs's behavior of switching to the base buffer when
+saving an indirect buffer."
+  (let* ((win-buf (window-buffer (selected-window)))
+         (win-base (or (buffer-base-buffer win-buf) win-buf))
+         (cur-base (or (buffer-base-buffer (current-buffer)) (current-buffer))))
+    (when (eq cur-base win-base)
+      win-buf)))
+
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving.
 This function is intended to be added to `before-save-hook'."
-  (when (and (bound-and-true-p restore-column-local-mode)
-             ;; CRITICAL FIX: Only run if the buffer being saved is the one
-             ;; actively displayed in the currently selected window. This fixes
-             ;; background saves (save-some-buffers) and indirect buffer overlap.
-             (eq (current-buffer) (window-buffer (selected-window))))
-    (let ((col (current-column)))
-      ;; If the virtual overlay is active, the user's visual cursor is further
-      ;; ahead than `point'. Calculate the visual column.
-      (when (and (overlayp restore-column--virtual-overlay)
-                 (overlay-buffer restore-column--virtual-overlay))
-        (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
-          (when (stringp disp)
-            ;; Subtract 1 because the display string includes the propertized
-            ;; cursor character at the end.
-            (setq col (+ col (1- (length disp))))))
-        (restore-column--clear-virtual-state))
-
-      ;; Save the column
-      (setq restore-column--saved-column col))))
+  (let ((target-buf (restore-column--active-buffer)))
+    (when target-buf
+      (with-current-buffer target-buf
+        (when (bound-and-true-p restore-column-local-mode)
+          (let ((col (current-column)))
+            ;; If the virtual overlay is active, the user's visual cursor is further
+            ;; ahead than `point'. Calculate the visual column.
+            (when (and (overlayp restore-column--virtual-overlay)
+                       (overlay-buffer restore-column--virtual-overlay))
+              (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
+                (when (stringp disp)
+                  ;; Subtract 1 because the display string includes the propertized
+                  ;; cursor character at the end.
+                  (setq col (+ col (1- (length disp))))))
+              (restore-column--clear-virtual-state))
+            ;; Save the column
+            (setq restore-column--saved-column col)))))))
 
 (defun restore-column--after-save-hook ()
   "Restore the cursor to the previously saved column using an overlay.
 This function is intended to be added to `after-save-hook'."
-  (when (and (bound-and-true-p restore-column-local-mode)
-             restore-column--saved-column)
-    (unwind-protect
-        (when (/= (current-column) restore-column--saved-column)
-          (restore-column--clear-virtual-state)
-          ;; Pass nil for FORCE so move-to-column never inserts spaces
-          (move-to-column restore-column--saved-column nil)
-          (let ((missing-spaces (- restore-column--saved-column
-                                   (current-column))))
-            (when (> missing-spaces 0)
-              (let ((display-spaces (make-string (1+ missing-spaces) ?\s)))
-                (put-text-property missing-spaces (1+ missing-spaces) 'cursor
-                                   t display-spaces)
-                ;; Create a zero-length overlay at `point' in the current buffer
-                ;; where insertions at `point' stay before the overlay.
-                (let ((ov (make-overlay (point) (point) (current-buffer) t nil)))
-                  (overlay-put ov 'window (selected-window))
-                  (overlay-put ov 'after-string display-spaces)
-                  ;; Self-destruct if the underlying text is modified from ANY
-                  ;; buffer (including base buffers modifying shared text).
-                  (overlay-put ov 'modification-hooks (list #'restore-column--clear-virtual-state))
-                  (overlay-put ov 'insert-in-front-hooks (list #'restore-column--clear-virtual-state))
-                  (overlay-put ov 'insert-behind-hooks (list #'restore-column--clear-virtual-state))
-                  (setq restore-column--virtual-overlay ov)
-                  (setq restore-column--overlay-point (point))
-                  (add-hook 'post-command-hook
-                            #'restore-column--post-command-handler nil t))))))
-      (setq restore-column--saved-column nil))))
+  (let ((target-buf (restore-column--active-buffer)))
+    (when target-buf
+      (with-current-buffer target-buf
+        (when (and (bound-and-true-p restore-column-local-mode)
+                   restore-column--saved-column)
+          (unwind-protect
+              (when (/= (current-column) restore-column--saved-column)
+                (restore-column--clear-virtual-state)
+                ;; Pass nil for FORCE so move-to-column never inserts spaces
+                (move-to-column restore-column--saved-column nil)
+                (let ((missing-spaces (- restore-column--saved-column
+                                         (current-column))))
+                  (when (> missing-spaces 0)
+                    (let ((display-spaces (make-string (1+ missing-spaces) ?\s)))
+                      (put-text-property missing-spaces (1+ missing-spaces) 'cursor
+                                         t display-spaces)
+                      ;; Create a zero-length overlay at `point' in the current buffer
+                      ;; where insertions at `point' stay before the overlay.
+                      (let ((ov (make-overlay (point) (point) (current-buffer) t nil)))
+                        ;; Scopes the virtual cursor overlay to the active window so
+                        ;; if the user has the same buffer open in two side-by-side
+                        ;; splits, the fake cursor spacing doesn't distort the inactive split.
+                        (overlay-put ov 'window (selected-window))
+                        (overlay-put ov 'after-string display-spaces)
+                        (overlay-put ov 'modification-hooks (list #'restore-column--clear-virtual-state))
+                        (overlay-put ov 'insert-in-front-hooks (list #'restore-column--clear-virtual-state))
+                        (overlay-put ov 'insert-behind-hooks (list #'restore-column--clear-virtual-state))
+                        (setq restore-column--virtual-overlay ov)
+                        (setq restore-column--overlay-point (point))
+                        (add-hook 'post-command-hook
+                                  #'restore-column--post-command-handler nil t))))))
+            (setq restore-column--saved-column nil)))))))
 
 (defun restore-column--enable ()
   "Turn on `restore-column-local-mode' for the current buffer."
