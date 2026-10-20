@@ -109,11 +109,13 @@ post-save processing is complete."
       ;; Check whether an active virtual overlay exists in the current buffer.
       (when (and (overlayp restore-column--virtual-overlay)
                  (overlay-buffer restore-column--virtual-overlay))
-        ;; Extract the virtual text assigned to the overlay 'after-string property.
+        ;; Extract the virtual text assigned to the overlay 'after-string
+        ;; property.
         (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
           (when (stringp disp)
-            ;; Add the width of the virtual whitespace to the base column.
-            ;; (1- (length disp)) discounts the extra character used for cursor placement.
+            ;; Add the width of the virtual whitespace to the base column. (1-
+            ;; (length disp)) discounts the extra character used for cursor
+            ;; placement.
             (setq col (+ col (1- (length disp))))))
         ;; Delete the existing overlay before the buffer save operation runs.
         (restore-column--clear-virtual-state))
@@ -131,24 +133,29 @@ post-save processing is complete."
           (let ((missing-spaces (- restore-column--saved-column
                                    (current-column))))
             (when (> missing-spaces 0)
-              ;; Build a virtual string containing padding spaces plus one space for cursor positioning.
+              ;; Build a virtual string containing padding spaces plus one space
+              ;; for cursor positioning.
               (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
-                    ;; Instantiate a zero-width overlay at point in the current buffer.
-                    ;; front-advance is t (insertions at start move it forward).
-                    ;; rear-advance is nil (insertions at end do not extend it).
+                    ;; Instantiate a zero-width overlay at point in the current
+                    ;; buffer. front-advance is t (insertions at start move it
+                    ;; forward). rear-advance is nil (insertions at end do not
+                    ;; extend it).
                     (ov (make-overlay (point) (point) nil t nil)))
-                ;; Attach the 'cursor text property to the final character of the virtual string.
-                ;; This tells the display engine to render the cursor glyph at that visual column.
+                ;; Attach the 'cursor text property to the final character of
+                ;; the virtual string. This tells the display engine to render
+                ;; the cursor glyph at that visual column.
                 (put-text-property missing-spaces (1+ missing-spaces)
                                    'cursor t display-spaces)
                 ;; Restrict the overlay display to the currently active window.
                 (overlay-put ov 'window (selected-window))
-                ;; Set the overlay 'after-string property to display the virtual spaces visually
-                ;; without modifying the underlying buffer text.
+                ;; Set the overlay 'after-string property to display the virtual
+                ;; spaces visually without modifying the underlying buffer text.
                 (overlay-put ov 'after-string display-spaces)
-                ;; Store the overlay reference in the buffer-local variable for tracking.
+                ;; Store the overlay reference in the buffer-local variable for
+                ;; tracking.
                 (setq restore-column--virtual-overlay ov)
-                ;; Register buffer-local post-command-hook to tear down the overlay on user action.
+                ;; Register buffer-local post-command-hook to tear down the
+                ;; overlay on user action.
                 (add-hook 'post-command-hook
                           #'restore-column--post-command-handler nil t)))))
       (setq restore-column--saved-column nil))))
@@ -188,7 +195,8 @@ buffer (if indirect); otherwise, remove them."
   :group 'restore-column
   (if restore-column-local-mode
       (restore-column--setup-hooks t)
-    ;; Delete overlay and detach post-command listener when the mode is disabled.
+    ;; Delete overlay and detach post-command listener when the mode is
+    ;; disabled.
     (restore-column--clear-virtual-state)
     (setq restore-column--saved-column nil)
     (restore-column--setup-hooks nil)))
