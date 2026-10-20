@@ -61,7 +61,7 @@ post-save processing is complete."
     (restore-column--clear-virtual-state)))
 
 (defun restore-column--shared-buffer-p ()
-  "Return non-nil if the selected window's buffer shares text with `current-buffer'."
+  "Return non-nil if the window's buffer shares text with `current-buffer'."
   (let* ((win-buf (window-buffer (selected-window)))
          (win-base (or (buffer-base-buffer win-buf) win-buf))
          (cur-base (or (buffer-base-buffer (current-buffer)) (current-buffer))))
@@ -73,7 +73,7 @@ post-save processing is complete."
     ;; Operate directly in the selected window so `point' and `current-column'
     ;; reflect the indirect buffer currently shown in the window.
     (with-selected-window (selected-window)
-      (when restore-column-local-mode
+      (when (bound-and-true-p restore-column-local-mode)
         (let ((col (current-column)))
           (when (and (overlayp restore-column--virtual-overlay)
                      (overlay-buffer restore-column--virtual-overlay))
