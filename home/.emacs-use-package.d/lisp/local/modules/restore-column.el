@@ -3,7 +3,7 @@
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
 ;; Package-Requires: ((emacs "24.3"))
-;; Keywords: maint
+;; Keywords: convenience
 ;; Version: 0.0.9
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -87,54 +87,58 @@ post-save processing is complete."
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
-  (when (eq (current-buffer) (window-buffer (selected-window)))
-    ;; Operate directly in the selected window so `point' and `current-column'
-    ;; reflect the indirect buffer currently shown in the window.
-    ;; Check whether an active virtual overlay exists in the current buffer.
-    ;; Extract the virtual text assigned to the overlay 'after-string
-    ;; property.
-    ;; Add the width of the virtual whitespace to the base column. (1-
-    ;; (length disp)) discounts the extra character used for cursor
-    ;; placement.
-    ;; Delete the existing overlay before the buffer save operation runs.
-    (let ((col (or restore-column--saved-column (current-column))))
-      (restore-column--clear-virtual-state)
-      (setq restore-column--saved-column col))))
+  (let ((win-buf (window-buffer (selected-window))))
+    (when (eq (current-buffer) (or (buffer-base-buffer win-buf)
+                                   win-buf))
+      ;; Operate in `win-buf' so `point', `current-column', and buffer-local
+      ;; variables reflect the indirect or base buffer shown in the window.
+      (with-current-buffer win-buf
+        ;; If a virtual overlay is already active from a previous save, preserve
+        ;; `restore-column--saved-column' before clearing state.
+        (let ((col (or restore-column--saved-column (current-column))))
+          (restore-column--clear-virtual-state)
+          (setq restore-column--saved-column col))))))
 
 (defun restore-column--after-save-hook ()
   "Restore the cursor to the previously saved column using a virtual overlay."
-  (when (and (eq (current-buffer) (window-buffer (selected-window)))
-             restore-column--saved-column)
-    ;; nil for FORCE guarantees real spaces are NEVER inserted
-    (move-to-column restore-column--saved-column)
-    (let ((missing-spaces (- restore-column--saved-column (current-column))))
-      (if (> missing-spaces 0)
-          ;; Build a virtual string containing padding spaces plus one space
-          ;; for cursor positioning.
-          (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
-                ;; Instantiate a zero-width overlay at point in the current
-                ;; buffer. front-advance is t (insertions at start move it
-                ;; forward). rear-advance is nil (insertions at end do not
-                ;; extend it).
-                (ov (make-overlay (point) (point) nil t)))
-            ;; Attach the 'cursor text property to the final character of
-            ;; the virtual string. This tells the display engine to render
-            ;; the cursor glyph at that visual column.
-            (put-text-property missing-spaces (1+ missing-spaces)
-                               'cursor t display-spaces)
-            ;; Restrict the overlay display to the currently active window.
-            (overlay-put ov 'window (selected-window))
-            ;; Set the overlay 'after-string property to display the virtual
-            ;; spaces visually without modifying the underlying buffer text.
-            (overlay-put ov 'after-string display-spaces)
-            ;; Store the overlay reference in the buffer-local variable for
-            ;; tracking.
-            (setq restore-column--virtual-overlay ov)
-            ;; Register buffer-local post-command-hook to tear down the
-            ;; overlay on user action.
-            (add-hook 'post-command-hook
-                      #'restore-column--post-command-handler nil t))
-        (setq restore-column--saved-column nil)))))
+  (let ((win-buf (window-buffer (selected-window))))
+    (when (eq (current-buffer)
+              (or (buffer-base-buffer win-buf) win-buf))
+      (with-current-buffer win-buf
+        (when restore-column--saved-column
+          ;; nil for FORCE guarantees real spaces are NEVER inserted
+          (move-to-column restore-column--saved-column)
+          (let ((missing-spaces (- restore-column--saved-column
+                                   (current-column))))
+            (if (> missing-spaces 0)
+                ;; Build a virtual string containing padding spaces plus one
+                ;; space for cursor positioning.
+                (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
+                      ;; Instantiate a zero-width overlay at point in the
+                      ;; current buffer. front-advance is t (insertions at start
+                      ;; move it forward). rear-advance is nil (insertions at
+                      ;; end do not extend it).
+                      (ov (make-overlay (point) (point) nil t)))
+                  ;; Attach the 'cursor text property to the final character of
+                  ;; the virtual string. This tells the display engine to render
+                  ;; the cursor glyph at that visual column.
+                  (put-text-property missing-spaces (1+ missing-spaces)
+                                     'cursor t display-spaces)
+                  ;; Restrict the overlay display to the currently active
+                  ;; window.
+                  (overlay-put ov 'window (selected-window))
+                  ;; Set the overlay 'after-string property to display the
+                  ;; virtual spaces visually without modifying the underlying
+                  ;; buffer text.
+                  (overlay-put ov 'after-string display-spaces)
+                  ;; Store the overlay reference in the buffer-local variable
+                  ;; for tracking.
+                  (setq restore-column--virtual-overlay ov)
+                  ;; Register buffer-local post-command-hook to tear down the
+                  ;; overlay on user action.
+                  (add-hook 'post-command-hook
+                            #'restore-column--post-command-handler nil t))
+              (setq restore-column--saved-column nil))))))))
 
 (defun restore-column--enable ()
   "Turn on `restore-column-local-mode' for the current buffer."
