@@ -69,43 +69,41 @@ post-save processing is complete."
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
-  (when (restore-column--shared-buffer-p)
+  (when (and (bound-and-true-p restore-column-local-mode)
+             (restore-column--shared-buffer-p))
     ;; Operate directly in the selected window so `point' and `current-column'
     ;; reflect the indirect buffer currently shown in the window.
-    (with-selected-window (selected-window)
-      (when (bound-and-true-p restore-column-local-mode)
-        (let ((col (current-column)))
-          (when (and (overlayp restore-column--virtual-overlay)
-                     (overlay-buffer restore-column--virtual-overlay))
-            (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
-              (when (stringp disp)
-                (setq col (+ col (1- (length disp))))))
-            (restore-column--clear-virtual-state))
-          (setq restore-column--saved-column col))))))
+    (let ((col (current-column)))
+      (when (and (overlayp restore-column--virtual-overlay)
+                 (overlay-buffer restore-column--virtual-overlay))
+        (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
+          (when (stringp disp)
+            (setq col (+ col (1- (length disp))))))
+        (restore-column--clear-virtual-state))
+      (setq restore-column--saved-column col))))
 
 (defun restore-column--after-save-hook ()
   "Restore the cursor to the previously saved column using a virtual overlay."
-  (when (restore-column--shared-buffer-p)
-    (with-selected-window (selected-window)
-      (when (and (bound-and-true-p restore-column-local-mode)
-                 restore-column--saved-column)
-        (unwind-protect
-            (when (/= (current-column) restore-column--saved-column)
-              ;; nil for FORCE guarantees real spaces are NEVER inserted
-              (move-to-column restore-column--saved-column nil)
-              (let ((missing-spaces (- restore-column--saved-column
-                                       (current-column))))
-                (when (> missing-spaces 0)
-                  (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
-                        (ov (make-overlay (point) (point) (current-buffer) t nil)))
-                    (put-text-property missing-spaces (1+ missing-spaces)
-                                       'cursor t display-spaces)
-                    (overlay-put ov 'window (selected-window))
-                    (overlay-put ov 'after-string display-spaces)
-                    (setq restore-column--virtual-overlay ov)
-                    (add-hook 'post-command-hook
-                              #'restore-column--post-command-handler nil t)))))
-          (setq restore-column--saved-column nil))))))
+  (when (and (restore-column--shared-buffer-p)
+             (bound-and-true-p restore-column-local-mode)
+             restore-column--saved-column)
+    (unwind-protect
+        (when (/= (current-column) restore-column--saved-column)
+          ;; nil for FORCE guarantees real spaces are NEVER inserted
+          (move-to-column restore-column--saved-column nil)
+          (let ((missing-spaces (- restore-column--saved-column
+                                   (current-column))))
+            (when (> missing-spaces 0)
+              (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
+                    (ov (make-overlay (point) (point) (current-buffer) t nil)))
+                (put-text-property missing-spaces (1+ missing-spaces)
+                                   'cursor t display-spaces)
+                (overlay-put ov 'window (selected-window))
+                (overlay-put ov 'after-string display-spaces)
+                (setq restore-column--virtual-overlay ov)
+                (add-hook 'post-command-hook
+                          #'restore-column--post-command-handler nil t)))))
+      (setq restore-column--saved-column nil))))
 
 (defun restore-column--setup-hooks (enable)
   "Add or remove save hooks.
