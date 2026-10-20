@@ -58,25 +58,32 @@ post-save processing is complete."
 (defvar-local restore-column--overlay-point nil
   "The buffer position where the virtual overlay was created.")
 
-(defun restore-column--clear-virtual-state ()
+(defun restore-column--clear-virtual-state (&rest _)
   "Clean up virtual overlay and hooks without modifying the buffer."
   (when (overlayp restore-column--virtual-overlay)
     (delete-overlay restore-column--virtual-overlay)
     (setq restore-column--virtual-overlay nil))
-  (remove-hook 'post-command-hook #'restore-column--post-command-handler t)
-  ;; Clean up old pre-command hooks if reloading the package
-  (remove-hook 'pre-command-hook #'restore-column--clear-virtual-state t)
-  (remove-hook 'pre-command-hook 'restore-column--pre-command-handler t))
+  (setq restore-column--overlay-point nil)
+  (remove-hook 'post-command-hook #'restore-column--post-command-handler t))
 
 (defun restore-column--post-command-handler ()
-  "Clear the virtual overlay if point has moved."
-  (unless (eq (point) restore-column--overlay-point)
+  "Clear the virtual overlay if point moved or user cancelled/moved."
+  (when (or (not (eq (point) restore-column--overlay-point))
+            (memq this-command '(keyboard-quit
+                                 backward-char left-char
+                                 forward-char right-char
+                                 move-beginning-of-line
+                                 move-end-of-line)))
     (restore-column--clear-virtual-state)))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving.
 This function is intended to be added to `before-save-hook'."
-  (when (bound-and-true-p restore-column-local-mode)
+  (when (and (bound-and-true-p restore-column-local-mode)
+             ;; CRITICAL FIX: Only run if the buffer being saved is the one
+             ;; actively displayed in the currently selected window. This fixes
+             ;; background saves (save-some-buffers) and indirect buffer overlap.
+             (eq (current-buffer) (window-buffer (selected-window))))
     (let ((col (current-column)))
       ;; If the virtual overlay is active, the user's visual cursor is further
       ;; ahead than `point'. Calculate the visual column.
@@ -111,7 +118,13 @@ This function is intended to be added to `after-save-hook'."
                 ;; Create a zero-length overlay at `point' in the current buffer
                 ;; where insertions at `point' stay before the overlay.
                 (let ((ov (make-overlay (point) (point) (current-buffer) t nil)))
+                  (overlay-put ov 'window (selected-window))
                   (overlay-put ov 'after-string display-spaces)
+                  ;; Self-destruct if the underlying text is modified from ANY
+                  ;; buffer (including base buffers modifying shared text).
+                  (overlay-put ov 'modification-hooks (list #'restore-column--clear-virtual-state))
+                  (overlay-put ov 'insert-in-front-hooks (list #'restore-column--clear-virtual-state))
+                  (overlay-put ov 'insert-behind-hooks (list #'restore-column--clear-virtual-state))
                   (setq restore-column--virtual-overlay ov)
                   (setq restore-column--overlay-point (point))
                   (add-hook 'post-command-hook
