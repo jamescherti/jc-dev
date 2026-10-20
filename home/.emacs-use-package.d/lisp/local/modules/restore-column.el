@@ -55,16 +55,23 @@ post-save processing is complete."
 (defvar-local restore-column--virtual-overlay nil
   "Overlay used to display virtual whitespace.")
 
+(defvar-local restore-column--overlay-point nil
+  "The buffer position where the virtual overlay was created.")
+
 (defun restore-column--clear-virtual-state ()
   "Clean up virtual overlay and hooks without modifying the buffer."
-  ;; Verify that `restore-column--virtual-overlay' holds an overlay object.
   (when (overlayp restore-column--virtual-overlay)
-    ;; Detach the overlay from its buffer and destroy its visual display.
     (delete-overlay restore-column--virtual-overlay)
     (setq restore-column--virtual-overlay nil))
+  (remove-hook 'post-command-hook #'restore-column--post-command-handler t)
+  ;; Clean up old pre-command hooks if reloading the package
   (remove-hook 'pre-command-hook #'restore-column--clear-virtual-state t)
-  ;; Ensure any lingering hook from previous versions is also removed
   (remove-hook 'pre-command-hook 'restore-column--pre-command-handler t))
+
+(defun restore-column--post-command-handler ()
+  "Clear the virtual overlay if point has moved."
+  (unless (eq (point) restore-column--overlay-point)
+    (restore-column--clear-virtual-state)))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving.
@@ -72,15 +79,9 @@ This function is intended to be added to `before-save-hook'."
   (when (bound-and-true-p restore-column-local-mode)
     (let ((col (current-column)))
       ;; If the virtual overlay is active, the user's visual cursor is further
-      ;; ahead than `point'. We must calculate the visual column. Verify the
-      ;; variable is an overlay and `overlay-buffer' confirms it is still
-      ;; attached to a live buffer (not deleted).
+      ;; ahead than `point'. Calculate the visual column.
       (when (and (overlayp restore-column--virtual-overlay)
-                 ;; Return the buffer OVERLAY belongs to.
-                 ;; Return nil if OVERLAY has been deleted.
                  (overlay-buffer restore-column--virtual-overlay))
-        ;; Retrieve the virtual whitespace string stored in the overlay's
-        ;; `after-string' property.
         (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
           (when (stringp disp)
             ;; Subtract 1 because the display string includes the propertized
@@ -101,17 +102,20 @@ This function is intended to be added to `after-save-hook'."
           (restore-column--clear-virtual-state)
           ;; Pass nil for FORCE so move-to-column never inserts spaces
           (move-to-column restore-column--saved-column nil)
-          (let ((missing (- restore-column--saved-column (current-column))))
-            (when (> missing 0)
-              (let ((display-spaces (make-string (1+ missing) ?\s)))
-                (put-text-property missing (1+ missing) 'cursor t display-spaces)
-                ;; Create a zero-length overlay at `point' in the current
-                ;; buffer where insertions at `point' stay before the overlay.
+          (let ((missing-spaces (- restore-column--saved-column
+                                   (current-column))))
+            (when (> missing-spaces 0)
+              (let ((display-spaces (make-string (1+ missing-spaces) ?\s)))
+                (put-text-property missing-spaces (1+ missing-spaces) 'cursor
+                                   t display-spaces)
+                ;; Create a zero-length overlay at `point' in the current buffer
+                ;; where insertions at `point' stay before the overlay.
                 (let ((ov (make-overlay (point) (point) (current-buffer) t nil)))
                   (overlay-put ov 'after-string display-spaces)
                   (setq restore-column--virtual-overlay ov)
-                  (add-hook 'pre-command-hook
-                            #'restore-column--clear-virtual-state nil t))))))
+                  (setq restore-column--overlay-point (point))
+                  (add-hook 'post-command-hook
+                            #'restore-column--post-command-handler nil t))))))
       (setq restore-column--saved-column nil))))
 
 (defun restore-column--enable ()
