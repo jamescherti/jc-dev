@@ -145,6 +145,7 @@ post-save processing is complete."
 (define-minor-mode restore-column-local-mode
   "Minor mode to restore the cursor column after saving."
   :lighter " RCol"
+  :group 'restore-column
   (if restore-column-local-mode
       (progn
         (add-hook 'before-save-hook #'restore-column--before-save-hook
