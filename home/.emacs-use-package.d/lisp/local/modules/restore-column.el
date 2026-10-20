@@ -94,14 +94,14 @@ This function is intended to be added to `before-save-hook'."
       (with-current-buffer target-buf
         (when (bound-and-true-p restore-column-local-mode)
           (let ((col (current-column)))
-            ;; If the virtual overlay is active, the user's visual cursor is further
-            ;; ahead than `point'. Calculate the visual column.
+            ;; If the virtual overlay is active, the user's visual cursor is
+            ;; further ahead than `point'. Calculate the visual column.
             (when (and (overlayp restore-column--virtual-overlay)
                        (overlay-buffer restore-column--virtual-overlay))
               (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
                 (when (stringp disp)
-                  ;; Subtract 1 because the display string includes the propertized
-                  ;; cursor character at the end.
+                  ;; Subtract 1 because the display string includes the
+                  ;; propertized cursor character at the end.
                   (setq col (+ col (1- (length disp))))))
               (restore-column--clear-virtual-state))
             ;; Save the column
@@ -126,12 +126,14 @@ This function is intended to be added to `after-save-hook'."
                     (let ((display-spaces (make-string (1+ missing-spaces) ?\s)))
                       (put-text-property missing-spaces (1+ missing-spaces) 'cursor
                                          t display-spaces)
-                      ;; Create a zero-length overlay at `point' in the current buffer
-                      ;; where insertions at `point' stay before the overlay.
+                      ;; Create a zero-length overlay at `point' in the current
+                      ;; buffer where insertions at `point' stay before the
+                      ;; overlay.
                       (let ((ov (make-overlay (point) (point) (current-buffer) t nil)))
-                        ;; Scopes the virtual cursor overlay to the active window so
-                        ;; if the user has the same buffer open in two side-by-side
-                        ;; splits, the fake cursor spacing doesn't distort the inactive split.
+                        ;; Scopes the virtual cursor overlay to the active
+                        ;; window so if the user has the same buffer open in two
+                        ;; side-by-side splits, the fake cursor spacing doesn't
+                        ;; distort the inactive split.
                         (overlay-put ov 'window (selected-window))
                         (overlay-put ov 'after-string display-spaces)
                         (overlay-put ov 'modification-hooks (list #'restore-column--clear-virtual-state))
