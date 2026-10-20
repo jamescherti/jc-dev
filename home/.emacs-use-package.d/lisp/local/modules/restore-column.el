@@ -87,7 +87,7 @@ post-save processing is complete."
   "Restore the cursor to the previously saved column using a virtual overlay."
   (when (restore-column--shared-buffer-p)
     (with-selected-window (selected-window)
-      (when (and restore-column-local-mode
+      (when (and (bound-and-true-p restore-column-local-mode)
                  restore-column--saved-column)
         (unwind-protect
             (when (/= (current-column) restore-column--saved-column)
@@ -108,7 +108,9 @@ post-save processing is complete."
           (setq restore-column--saved-column nil))))))
 
 (defun restore-column--setup-hooks (enable)
-  "Add or remove save hooks in the current buffer (and base buffer if indirect)."
+  "Add or remove save hooks.
+If ENABLE is non-nil, add the save hooks to the current buffer and its base
+buffer (if indirect); otherwise, remove them."
   (let ((before-depth (if (>= emacs-major-version 27)
                           restore-column-before-save-hook-depth
                         nil))
