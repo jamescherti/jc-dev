@@ -33,8 +33,7 @@
 ;; Features:
 ;; - Maintains the exact cursor column without modifying the underlying buffer
 ;;   text.
-;; - Uses display properties to simulate spaces instead of inserting literal
-;;   characters.
+;; - Uses virtual overlay strings to render the cursor position.
 ;; - Overlays automatically clear on cursor movement or buffer modification.
 ;; - Operates correctly across base buffers and indirect buffers.
 ;;
