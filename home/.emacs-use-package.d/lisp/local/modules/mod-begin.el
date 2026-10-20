@@ -32,6 +32,16 @@
   (require 'lightemacs-use-package))
 (require 'my-defun)
 
+;;; Restore column
+
+(lightemacs-use-package restore-column
+  :commands (restore-column-global-mode
+             restore-column-local-mode)
+  :ensure nil
+  :config
+  (setq stripspace-restore-column nil) ;; TODO Integrate
+  (restore-column-global-mode 1))
+
 ;;; scratch
 
 (defvar my-scratch-buffer-created-hook nil

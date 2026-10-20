@@ -1292,16 +1292,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; (customize-set-variable 'completion-category-overrides
 ;;                         '((file (styles . (partial-completion)))))
 
-;;; restore column
-
-(lightemacs-use-package restore-column
-  :commands (restore-column-global-mode
-             restore-column-local-mode)
-  :ensure nil
-  :config
-  (setq stripspace-restore-column nil) ;; TODO Integrate
-  (restore-column-global-mode 1))
-
 ;;; Misc (previously part of mod-same-window, but not useful for it)
 
 ;; (defun lightemacs-user-post-init ()
