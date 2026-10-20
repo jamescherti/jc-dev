@@ -41,21 +41,17 @@ post-save processing is complete."
 (defvar-local restore-column--virtual-overlay nil
   "Overlay used to display virtual whitespace.")
 
-(defun restore-column--clear-virtual-state (&optional ov &rest _)
-  "Clean up virtual overlay and hooks without modifying the buffer.
-If OV is provided (called from an overlay modification hook), ensure cleanup
-runs in that overlay's buffer."
-  (let ((buf (if (overlayp ov) (overlay-buffer ov) (current-buffer))))
-    (when (buffer-live-p buf)
-      (with-current-buffer buf
-        (when (overlayp restore-column--virtual-overlay)
-          (delete-overlay restore-column--virtual-overlay)
-          (setq restore-column--virtual-overlay nil))
-        (remove-hook 'post-command-hook #'restore-column--post-command-handler t)))))
+(defun restore-column--clear-virtual-state ()
+  "Clean up virtual overlay and hooks without modifying the buffer."
+  (when (overlayp restore-column--virtual-overlay)
+    (delete-overlay restore-column--virtual-overlay)
+    (setq restore-column--virtual-overlay nil))
+  (remove-hook 'post-command-hook #'restore-column--post-command-handler t))
 
 (defun restore-column--post-command-handler ()
   "Clear the virtual overlay if point moved or user cancelled/moved."
   (when (or (not (overlayp restore-column--virtual-overlay))
+            (not (eq (overlay-buffer restore-column--virtual-overlay) (current-buffer)))
             (not (eq (point) (overlay-start restore-column--virtual-overlay)))
             (memq this-command '(keyboard-quit
                                  backward-char left-char
@@ -64,56 +60,72 @@ runs in that overlay's buffer."
                                  move-end-of-line)))
     (restore-column--clear-virtual-state)))
 
-(defun restore-column--active-buffer ()
-  "Return the selected window's buffer if it shares text with the buffer being saved."
+(defun restore-column--shared-buffer-p ()
+  "Return non-nil if the selected window's buffer shares text with `current-buffer'."
   (let* ((win-buf (window-buffer (selected-window)))
          (win-base (or (buffer-base-buffer win-buf) win-buf))
          (cur-base (or (buffer-base-buffer (current-buffer)) (current-buffer))))
-    (when (eq cur-base win-base)
-      win-buf)))
+    (eq cur-base win-base)))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
-  (let ((target-buf (restore-column--active-buffer)))
-    (when target-buf
-      (with-current-buffer target-buf
-        (when restore-column-local-mode
-          (let ((col (current-column)))
-            (when (and (overlayp restore-column--virtual-overlay)
-                       (overlay-buffer restore-column--virtual-overlay))
-              (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
-                (when (stringp disp)
-                  (setq col (+ col (1- (length disp))))))
-              (restore-column--clear-virtual-state))
-            (setq restore-column--saved-column col)))))))
+  (when (restore-column--shared-buffer-p)
+    ;; Operate directly in the selected window so `point' and `current-column'
+    ;; reflect the indirect buffer currently shown in the window.
+    (with-selected-window (selected-window)
+      (when restore-column-local-mode
+        (let ((col (current-column)))
+          (when (and (overlayp restore-column--virtual-overlay)
+                     (overlay-buffer restore-column--virtual-overlay))
+            (let ((disp (overlay-get restore-column--virtual-overlay 'after-string)))
+              (when (stringp disp)
+                (setq col (+ col (1- (length disp))))))
+            (restore-column--clear-virtual-state))
+          (setq restore-column--saved-column col))))))
 
 (defun restore-column--after-save-hook ()
-  "Restore the cursor to the previously saved column using an overlay."
-  (let ((target-buf (restore-column--active-buffer)))
-    (when target-buf
-      (with-current-buffer target-buf
-        (when (and restore-column-local-mode
-                   restore-column--saved-column)
-          (unwind-protect
-              (when (/= (current-column) restore-column--saved-column)
-                (move-to-column restore-column--saved-column nil)
-                (let ((missing-spaces (- restore-column--saved-column
-                                         (current-column))))
-                  (when (> missing-spaces 0)
-                    (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
-                          (ov (make-overlay (point) (point) (current-buffer) t nil)))
-                      (put-text-property missing-spaces (1+ missing-spaces)
-                                         'cursor t display-spaces)
-                      (overlay-put ov 'window (selected-window))
-                      (overlay-put ov 'after-string display-spaces)
-                      (overlay-put ov 'modification-hooks
-                                   (list #'restore-column--clear-virtual-state))
-                      (overlay-put ov 'insert-in-front-hooks
-                                   (list #'restore-column--clear-virtual-state))
-                      (setq restore-column--virtual-overlay ov)
-                      (add-hook 'post-command-hook
-                                #'restore-column--post-command-handler nil t)))))
-            (setq restore-column--saved-column nil)))))))
+  "Restore the cursor to the previously saved column using a virtual overlay."
+  (when (restore-column--shared-buffer-p)
+    (with-selected-window (selected-window)
+      (when (and restore-column-local-mode
+                 restore-column--saved-column)
+        (unwind-protect
+            (when (/= (current-column) restore-column--saved-column)
+              ;; nil for FORCE guarantees real spaces are NEVER inserted
+              (move-to-column restore-column--saved-column nil)
+              (let ((missing-spaces (- restore-column--saved-column
+                                       (current-column))))
+                (when (> missing-spaces 0)
+                  (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
+                        (ov (make-overlay (point) (point) (current-buffer) t nil)))
+                    (put-text-property missing-spaces (1+ missing-spaces)
+                                       'cursor t display-spaces)
+                    (overlay-put ov 'window (selected-window))
+                    (overlay-put ov 'after-string display-spaces)
+                    (setq restore-column--virtual-overlay ov)
+                    (add-hook 'post-command-hook
+                              #'restore-column--post-command-handler nil t)))))
+          (setq restore-column--saved-column nil))))))
+
+(defun restore-column--setup-hooks (enable)
+  "Add or remove save hooks in the current buffer (and base buffer if indirect)."
+  (let ((before-depth (if (>= emacs-major-version 27)
+                          restore-column-before-save-hook-depth
+                        nil))
+        (after-depth (if (>= emacs-major-version 27)
+                         restore-column-after-save-hook-depth
+                       t))
+        (base-buf (buffer-base-buffer)))
+    (if enable
+        (progn
+          (add-hook 'before-save-hook #'restore-column--before-save-hook before-depth t)
+          (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t)
+          (when (buffer-live-p base-buf)
+            (with-current-buffer base-buf
+              (add-hook 'before-save-hook #'restore-column--before-save-hook before-depth t)
+              (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t))))
+      (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
+      (remove-hook 'after-save-hook #'restore-column--after-save-hook t))))
 
 (defun restore-column--enable ()
   "Turn on `restore-column-local-mode' for the current buffer."
@@ -127,21 +139,10 @@ runs in that overlay's buffer."
   :lighter " RCol"
   :group 'restore-column
   (if restore-column-local-mode
-      (progn
-        (add-hook 'before-save-hook #'restore-column--before-save-hook
-                  (if (>= emacs-major-version 27)
-                      restore-column-before-save-hook-depth
-                    nil)
-                  t)
-        (add-hook 'after-save-hook #'restore-column--after-save-hook
-                  (if (>= emacs-major-version 27)
-                      restore-column-after-save-hook-depth
-                    t)
-                  t))
+      (restore-column--setup-hooks t)
     (restore-column--clear-virtual-state)
     (setq restore-column--saved-column nil)
-    (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
-    (remove-hook 'after-save-hook #'restore-column--after-save-hook t)))
+    (restore-column--setup-hooks nil)))
 
 ;;;###autoload
 (define-globalized-minor-mode restore-column-global-mode
