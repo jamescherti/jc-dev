@@ -9,10 +9,20 @@
 
 ;;; Commentary:
 
-;; This package provides a minor mode that saves the cursor column position
-;; before a buffer is saved and restores it afterward. It uses a virtual overlay
-;; to display the cursor position if restoring the column would require
-;; inserting trailing spaces.
+;; This package provides a mode that automatically saves the cursor's column
+;; position immediately before a buffer is saved, and restores it afterward.
+;;
+;; When restoring the cursor requires placing it beyond the current end of a
+;; line, inserting whitespace would pollute the file with unwanted trailing
+;; spaces. To prevent this, the package uses a virtual overlay to visually
+;; render the cursor at the desired column position without modifying the
+;; actual buffer text. Once you move the cursor or edit the buffer, the
+;; virtual overlay automatically disappears.
+;;
+;; Features:
+;; - Restores the cursor column using virtual overlays
+;; - Fast
+;; - Supports base buffers and indirect buffers
 
 ;;; Code:
 
