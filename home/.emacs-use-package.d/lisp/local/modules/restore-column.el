@@ -2,7 +2,7 @@
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
-;; Package-Requires: ((emacs "29.1"))
+;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: maint
 ;; Version: 0.0.9
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -56,11 +56,13 @@ post-save processing is complete."
   "Overlay used to display virtual whitespace.")
 
 (defun restore-column--clear-virtual-state ()
-  "Clean up virtual overlay and hooks."
+  "Clean up virtual overlay and hooks without modifying the buffer."
   (when (overlayp restore-column--virtual-overlay)
     (delete-overlay restore-column--virtual-overlay)
     (setq restore-column--virtual-overlay nil))
-  (remove-hook 'pre-command-hook #'restore-column--clear-virtual-state t))
+  (remove-hook 'pre-command-hook #'restore-column--clear-virtual-state t)
+  ;; Ensure any lingering hook from previous versions is also removed
+  (remove-hook 'pre-command-hook 'restore-column--pre-command-handler t))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving.
@@ -80,22 +82,31 @@ This function is intended to be added to `before-save-hook'."
       (setq restore-column--saved-column col))))
 
 (defun restore-column--after-save-hook ()
-  "Restore the cursor to the previously saved column.
+  "Restore the cursor to the previously saved column using an overlay.
 This function is intended to be added to `after-save-hook'."
   (when (and (bound-and-true-p restore-column-local-mode)
              restore-column--saved-column)
     (unwind-protect
-        (when (/= (current-column) restore-column--saved-column)
-          (move-to-column restore-column--saved-column)
-          (let ((missing (- restore-column--saved-column (current-column))))
-            (when (> missing 0)
-              (let ((display-spaces (make-string (1+ missing) ?\s))
-                    (ov (make-overlay (point) (point))))
-                (put-text-property missing (1+ missing) 'cursor t display-spaces)
-                (overlay-put ov 'after-string display-spaces)
-                (setq restore-column--virtual-overlay ov)
-                (add-hook 'pre-command-hook
-                          #'restore-column--clear-virtual-state nil t)))))
+        (let ((modified (buffer-modified-p))
+              (inhibit-modification-hooks t))
+          (unwind-protect
+              (when (/= (current-column) restore-column--saved-column)
+                (restore-column--clear-virtual-state)
+                ;; Pass nil for FORCE so move-to-column never inserts spaces
+                (move-to-column restore-column--saved-column nil)
+                (let ((missing (- restore-column--saved-column (current-column))))
+                  (when (> missing 0)
+                    (let ((display-spaces (make-string (1+ missing) ?\s)))
+                      (put-text-property missing (1+ missing) 'cursor t display-spaces)
+                      (let ((ov (make-overlay (point) (point) (current-buffer) t nil)))
+                        (overlay-put ov 'evaporate t)
+                        (overlay-put ov 'after-string display-spaces)
+                        (setq restore-column--virtual-overlay ov)
+                        (add-hook 'pre-command-hook
+                                  #'restore-column--clear-virtual-state nil t))))))
+            ;; Guarantee the buffer modification state is never altered
+            (unless modified
+              (restore-buffer-modified-p nil))))
       (setq restore-column--saved-column nil))))
 
 (defun restore-column--enable ()
@@ -112,9 +123,15 @@ This function is intended to be added to `after-save-hook'."
   (if restore-column-local-mode
       (progn
         (add-hook 'before-save-hook #'restore-column--before-save-hook
-                  restore-column-before-save-hook-depth t)
+                  (if (>= emacs-major-version 27)
+                      restore-column-before-save-hook-depth
+                    nil)
+                  t)
         (add-hook 'after-save-hook #'restore-column--after-save-hook
-                  restore-column-after-save-hook-depth t))
+                  (if (>= emacs-major-version 27)
+                      restore-column-after-save-hook-depth
+                    t)
+                  t))
     (restore-column--clear-virtual-state)
     (setq restore-column--saved-column nil)
     (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
