@@ -90,12 +90,15 @@ post-save processing is complete."
 
 (defun restore-column--shared-buffer-p ()
   "Return non-nil if the window's buffer shares text with `current-buffer'."
-  (eq (or (buffer-base-buffer (window-buffer)) (window-buffer))
-      (or (buffer-base-buffer) (current-buffer))))
+  (let* ((win-buf (window-buffer (selected-window)))
+         (win-base (or (buffer-base-buffer win-buf) win-buf))
+         (cur-base (or (buffer-base-buffer (current-buffer)) (current-buffer))))
+    (eq cur-base win-base)))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
-  (when (restore-column--shared-buffer-p)
+  (when (and (bound-and-true-p restore-column-local-mode)
+             (restore-column--shared-buffer-p))
     ;; Operate directly in the selected window so `point' and `current-column'
     ;; reflect the indirect buffer currently shown in the window.
     (let ((col (current-column)))
@@ -110,6 +113,7 @@ post-save processing is complete."
 (defun restore-column--after-save-hook ()
   "Restore the cursor to the previously saved column using a virtual overlay."
   (when (and (restore-column--shared-buffer-p)
+             (bound-and-true-p restore-column-local-mode)
              restore-column--saved-column)
     (unwind-protect
         (when (/= (current-column) restore-column--saved-column)
@@ -133,21 +137,23 @@ post-save processing is complete."
   "Add or remove save hooks depending on ENABLE.
 If ENABLE is non-nil, add the save hooks to the current buffer and its base
 buffer (if indirect); otherwise, remove them."
-  (let ((before-depth (and (>= emacs-major-version 27)
-                           restore-column-before-save-hook-depth))
+  (let ((before-depth (if (>= emacs-major-version 27)
+                          restore-column-before-save-hook-depth
+                        nil))
         (after-depth (if (>= emacs-major-version 27)
                          restore-column-after-save-hook-depth
                        t))
-        (buffers (delete-dups (delq nil (list (current-buffer)
-                                              (buffer-base-buffer))))))
-    (dolist (buf buffers)
-      (with-current-buffer buf
-        (if enable
-            (progn
+        (base-buf (buffer-base-buffer)))
+    (if enable
+        (progn
+          (add-hook 'before-save-hook #'restore-column--before-save-hook before-depth t)
+          (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t)
+          (when (buffer-live-p base-buf)
+            (with-current-buffer base-buf
               (add-hook 'before-save-hook #'restore-column--before-save-hook before-depth t)
-              (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t))
-          (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
-          (remove-hook 'after-save-hook #'restore-column--after-save-hook t))))))
+              (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t))))
+      (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
+      (remove-hook 'after-save-hook #'restore-column--after-save-hook t))))
 
 (defun restore-column--enable ()
   "Turn on `restore-column-local-mode' for the current buffer."
