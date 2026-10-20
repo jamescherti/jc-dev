@@ -9,20 +9,38 @@
 
 ;;; Commentary:
 
-;; This package provides a mode that automatically saves the cursor's column
-;; position immediately before a buffer is saved, and restores it afterward.
+;; The restore-column package provides a mode that records the exact cursor
+;; column position immediately before a buffer is saved and restores it
+;; afterward.
 ;;
-;; When restoring the cursor requires placing it beyond the current end of a
-;; line, inserting whitespace would pollute the file with unwanted trailing
-;; spaces. To prevent this, the package uses a virtual overlay to visually
-;; render the cursor at the desired column position without modifying the
-;; actual buffer text. Once you move the cursor or edit the buffer, the
-;; virtual overlay automatically disappears.
+;; The problem: Save hooks (such as `delete-trailing-whitespace' or
+;; `eglot-format-buffer') often truncate trailing spaces, which can force the
+;; cursor back to the last non-whitespace character and disrupt the editing
+;; workflow. This package ensures the cursor remains exactly where it was before
+;; the save operation.
+;;
+;; This package doesn't modify your buffer. When restoring the cursor requires
+;; placing it beyond the current physical end of a line, inserting real
+;; whitespace would pollute the file with unwanted trailing spaces. To prevent
+;; this, the restore-column dynamically applies a virtual overlay, which
+;; visually renders the cursor at the correct column without modifying the
+;; actual buffer text.
+;;
+;; The virtual overlay is ephemeral. Once the user moves the cursor, types, or
+;; triggers another command, the overlay is automatically cleared via
+;; `post-command-hook'.
 ;;
 ;; Features:
-;; - Restores the cursor column using virtual overlays
-;; - Fast
-;; - Supports base buffers and indirect buffers
+;; - Maintains the exact cursor column without modifying the underlying buffer
+;;   text.
+;; - Uses display properties to simulate spaces instead of inserting literal
+;;   characters.
+;; - Overlays automatically clear on cursor movement or buffer modification.
+;; - Operates correctly across base buffers and indirect buffers.
+;;
+;; Usage:
+;; Enable locally via `restore-column-local-mode', or globally via
+;; `restore-column-global-mode'.
 
 ;;; Code:
 
@@ -72,10 +90,8 @@ post-save processing is complete."
 
 (defun restore-column--shared-buffer-p ()
   "Return non-nil if the window's buffer shares text with `current-buffer'."
-  (let* ((win-buf (window-buffer (selected-window)))
-         (win-base (or (buffer-base-buffer win-buf) win-buf))
-         (cur-base (or (buffer-base-buffer (current-buffer)) (current-buffer))))
-    (eq cur-base win-base)))
+  (eq (or (buffer-base-buffer (window-buffer)) (window-buffer))
+      (or (buffer-base-buffer) (current-buffer))))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
@@ -105,7 +121,7 @@ post-save processing is complete."
                                    (current-column))))
             (when (> missing-spaces 0)
               (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
-                    (ov (make-overlay (point) (point) (current-buffer) t nil)))
+                    (ov (make-overlay (point) (point) nil t nil)))
                 (put-text-property missing-spaces (1+ missing-spaces)
                                    'cursor t display-spaces)
                 (overlay-put ov 'window (selected-window))
@@ -116,26 +132,24 @@ post-save processing is complete."
       (setq restore-column--saved-column nil))))
 
 (defun restore-column--setup-hooks (enable)
-  "Add or remove save hooks.
+  "Add or remove save hooks depending on ENABLE.
 If ENABLE is non-nil, add the save hooks to the current buffer and its base
 buffer (if indirect); otherwise, remove them."
-  (let ((before-depth (if (>= emacs-major-version 27)
-                          restore-column-before-save-hook-depth
-                        nil))
+  (let ((before-depth (and (>= emacs-major-version 27)
+                           restore-column-before-save-hook-depth))
         (after-depth (if (>= emacs-major-version 27)
                          restore-column-after-save-hook-depth
                        t))
-        (base-buf (buffer-base-buffer)))
-    (if enable
-        (progn
-          (add-hook 'before-save-hook #'restore-column--before-save-hook before-depth t)
-          (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t)
-          (when (buffer-live-p base-buf)
-            (with-current-buffer base-buf
+        (buffers (delete-dups (delq nil (list (current-buffer)
+                                              (buffer-base-buffer))))))
+    (dolist (buf buffers)
+      (with-current-buffer buf
+        (if enable
+            (progn
               (add-hook 'before-save-hook #'restore-column--before-save-hook before-depth t)
-              (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t))))
-      (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
-      (remove-hook 'after-save-hook #'restore-column--after-save-hook t))))
+              (add-hook 'after-save-hook #'restore-column--after-save-hook after-depth t))
+          (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
+          (remove-hook 'after-save-hook #'restore-column--after-save-hook t))))))
 
 (defun restore-column--enable ()
   "Turn on `restore-column-local-mode' for the current buffer."
