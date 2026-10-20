@@ -81,11 +81,7 @@ post-save processing is complete."
   (when (or (not (overlayp restore-column--virtual-overlay))
             (not (eq (overlay-buffer restore-column--virtual-overlay) (current-buffer)))
             (not (eq (point) (overlay-start restore-column--virtual-overlay)))
-            (memq this-command '(keyboard-quit
-                                 backward-char left-char
-                                 forward-char right-char
-                                 move-beginning-of-line
-                                 move-end-of-line)))
+            (eq this-command 'keyboard-quit))
     (restore-column--clear-virtual-state)))
 
 (defun restore-column--shared-buffer-p ()
@@ -95,8 +91,7 @@ post-save processing is complete."
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
-  (when (and (bound-and-true-p restore-column-local-mode)
-             (restore-column--shared-buffer-p))
+  (when (restore-column--shared-buffer-p)
     ;; Operate directly in the selected window so `point' and `current-column'
     ;; reflect the indirect buffer currently shown in the window.
     (let ((col (current-column)))
@@ -111,7 +106,6 @@ post-save processing is complete."
 (defun restore-column--after-save-hook ()
   "Restore the cursor to the previously saved column using a virtual overlay."
   (when (and (restore-column--shared-buffer-p)
-             (bound-and-true-p restore-column-local-mode)
              restore-column--saved-column)
     (unwind-protect
         (when (/= (current-column) restore-column--saved-column)
