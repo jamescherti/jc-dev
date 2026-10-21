@@ -463,7 +463,7 @@ esac
 endsnippet
 
 snippet trace2
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 bash_traceback() {
   local lasterr="$?"
   local code="-1"
@@ -488,7 +488,7 @@ set -o errtrace
 endsnippet
 
 snippet trace
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 error_handler() {
 	local errno="$?"
 	echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
