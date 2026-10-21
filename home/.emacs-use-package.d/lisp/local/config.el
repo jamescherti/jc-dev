@@ -2045,14 +2045,11 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;;; Code folding settings
 
 (setq lightemacs-outline-indent-minor-target-hooks '(yaml-mode-hook
-                                                     yaml-ts-mode-hook
                                                      python-mode-hook
                                                      haskell-mode-hook
                                                      ;; My preference
                                                      sh-mode-hook
-                                                     bash-ts-mode-hook
                                                      php-mode-hook
-                                                     php-ts-mode-hook
                                                      txt-file-mode-hook))
 
 (setq lightemacs-outline-minor-target-hooks '(emacs-lisp-mode-hook
@@ -2065,6 +2062,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 
 (setq lightemacs-treesit-fold-local-target-hooks '(c-ts-mode-hook
                                                    c++-ts-mode-hook
+                                                   yaml-ts-mode-hook
                                                    java-ts-mode-hook
                                                    rust-ts-mode-hook
                                                    go-ts-mode-hook
@@ -2081,7 +2079,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
                                                    html-ts-mode-hook
                                                    heex-ts-mode-hook
                                                    xml-ts-mode-hook
-                                                   ;; bash-ts-mode-hook
+                                                   bash-ts-mode-hook
                                                    cmake-ts-mode-hook
                                                    dockerfile-ts-mode-hook
                                                    awk-ts-mode-hook
