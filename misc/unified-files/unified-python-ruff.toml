@@ -19,9 +19,10 @@ select = [
 
 ignore = [
   "ISC001", # Prevent conflicts with the Ruff formatter
-  "PLW2901", # `for` loop variable `pattern` overwritten by assignment target
-  "PLR0915", # PLR0915 Too many statements
-  "PLR0912", # PLR0912 Too many branches
+  "PLW2901", # For loop variable pattern overwritten by assignment target
+  "PLR0915", # Too many statements
+  "PLR0912", # Too many branches
+  "PLR0911", # Too many return statements
 ]
 
 fixable = ["ALL"]
