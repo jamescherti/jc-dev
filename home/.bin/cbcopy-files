@@ -51,7 +51,7 @@ print_backticks() {
   printf '%s\n' "$(printf '`%.0s' {1..10})"
 }
 
-run_ai_ls() {
+run_markdown_ls() {
   for target_file in "$@"; do
     if [[ -d "$target_file" ]]; then
       echo "Warning: skipped (not a file): $target_file" >&2
@@ -121,7 +121,7 @@ main() {
   TMP_FILE=$(mktemp)
   trap 'atexit' INT TERM EXIT
 
-  run_ai_ls "$@" >"$TMP_FILE"
+  run_markdown_ls "$@" >"$TMP_FILE"
 
   # -s: sanitize UTF-8
   # -c: clipboard checks
