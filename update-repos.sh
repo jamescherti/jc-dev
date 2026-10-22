@@ -98,10 +98,9 @@ main() {
   # shellcheck disable=SC1091
   source .jc-dev.inc.sh
 
+  set -x
   cd "$SRC_DIR/dotfiles/jc-dev"
-  git pull
-
-  install-pip-packages
+  git pull --ff-only
 
   # This has to be launched first because it ensures all missing repositories
   # are present
@@ -109,6 +108,17 @@ main() {
   rsync -a \
     "$SCRIPT_DIR/home/src/batchfetch.yaml" \
     "$SRC_DIR/batchfetch.yaml"
+
+  git -C ~/src/python/batchfetch/ fetch
+  git -C ~/src/python/batchfetch/ checkout develop
+  git -C ~/src/python/batchfetch/ pull --ff-only
+  git -C ~/src/python/git-rexec/ fetch
+  git -C ~/src/python/git-rexec/ checkout develop
+  git -C ~/src/python/git-rexec/ pull --ff-only
+
+  exit
+
+  install-pip-packages
 
   update-repos
 
