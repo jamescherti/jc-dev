@@ -46,10 +46,6 @@ update-repos() {
   # Go to script dir
   # cd "$SCRIPT_DIR"
 
-  if [[ -d "$SRC_DIR" ]]; then
-    return
-  fi
-
   if ! [[ -f "$GIT_PULL_MY_REPO" ]]; then
     echo "Error: The script doesn't exist: $GIT_PULL_MY_REPO" >&2
     exit 1
