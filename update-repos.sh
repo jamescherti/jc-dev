@@ -31,6 +31,9 @@ set -euo pipefail
 MAX_WORKERS=6
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
+SRC_DIR="$HOME/src"
+GIT_PULL_MY_REPO="$SCRIPT_DIR/.bin/git-pull-my-repo"
+
 GIT_REXEC_EXCLUDES=(
   "--exclude" "$HOME/src/forks"
   "--exclude" "$HOME/src/local"
@@ -60,10 +63,6 @@ update-repos() {
   if [[ -d "$SRC_DIR" ]]; then
     return
   fi
-
-  # Variables
-  SRC_DIR="$HOME/src"
-  GIT_PULL_MY_REPO="$SCRIPT_DIR/.bin/git-pull-my-repo"
 
   if ! [[ -f "$GIT_PULL_MY_REPO" ]]; then
     echo "Error: The script doesn't exist: $GIT_PULL_MY_REPO" >&2
