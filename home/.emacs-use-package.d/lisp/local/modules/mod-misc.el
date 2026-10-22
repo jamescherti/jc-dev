@@ -4570,6 +4570,17 @@ Defers actual initialization to prevent blocking file loads."
 ;; (add-hook 'bash-ts-mode-hook #'my-ispell-perl-mode-setup)
 ;; (add-hook 'sh-mode-hook #'my-ispell-perl-mode-setup)
 
+;;; Aspell quiet
+
+;; TODO lightemacs
+
+(define-advice ispell-init-process (:around (orig-fn &rest args) quiet)
+  "Run `ispell-init-process' with the variable `inhibit-message' bound to t.
+ORIG-FN is the original `ispell-init-process' function.
+ARGS are the arguments passed to ORIG-FN."
+  (let ((inhibit-message t))
+    (apply orig-fn args)))
+
 ;;; benchmark init
 
 ;; (lightemacs-use-package benchmark-init
