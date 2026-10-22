@@ -136,9 +136,7 @@ config-pip-packages() {
   pip install "${pip_opts[@]}" --no-build-isolation --no-deps \
     "$MY_PYTHON_PACKAGES_PATH/pathaction" \
     "$MY_PYTHON_PACKAGES_PATH/ultyas" \
-    "$MY_PYTHON_PACKAGES_PATH/git-rexec" \
     "$MY_PYTHON_PACKAGES_PATH/git-commitflow" \
-    "$MY_PYTHON_PACKAGES_PATH/batchfetch" \
     "$MY_PYTHON_PACKAGES_PATH/git-smartmv" \
     "$MY_PYTHON_PACKAGES_PATH/ansible-cleanup"
   # "$MY_PYTHON_PACKAGES_PATH/caffeine-aw" \

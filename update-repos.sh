@@ -31,6 +31,17 @@ set -euo pipefail
 MAX_WORKERS=6
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
+GIT_REXEC_EXCLUDES=(
+  "--exclude" "$HOME/src/forks"
+  "--exclude" "$HOME/src/local"
+)
+
+GIT_REXEC_OPTS=(
+  "--exclude" "$HOME/src/forks"
+  "--exclude" "$HOME/src/local"
+  "--if-exec" "git-is-clean"
+  "--parallel")
+
 # shellcheck disable=SC2317
 error_handler() {
   local errno="$?"
@@ -44,7 +55,11 @@ set -o errtrace
 
 update-repos() {
   # Go to script dir
-  cd "$SCRIPT_DIR"
+  # cd "$SCRIPT_DIR"
+
+  if [[ -d "$SRC_DIR" ]]; then
+    return
+  fi
 
   # Variables
   SRC_DIR="$HOME/src"
@@ -55,38 +70,24 @@ update-repos() {
     exit 1
   fi
 
-  if [[ -d "$SRC_DIR" ]]; then
-    # other than emacs projects
-    # git-rexec -C "$SRC_DIR" \
-    # --exclude ~/src/forks \
-    # --exclude ~/src/local \
-    #   --if-exec git-is-clean \
-    #   --parallel 'sh -c "git checkout-default && git pull --ff-only"'
+  # TODO
+  # cd "$SRC_DIR"
+  # batchfetch
 
-    # cd "$SRC_DIR"
-    # batchfetch
+  echo "[INFO] git pull repositories"
 
-    echo "[INFO] git pull repos"
-    git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR" \
-      --exclude "$HOME/src/forks" \
-      --exclude "$HOME/src/local" \
-      --parallel \
-      --if-exec git-is-clean \
-      -- \
-      "$GIT_PULL_MY_REPO"
+  git-rexec -C "$SRC_DIR" \
+    "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout-default && git pull --ff-only && '$GIT_PULL_MY_REPO'"
 
-    git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/emacs" \
-      --parallel \
-      --if-exec git-is-clean \
-      -- \
-      sh -c "git checkout develop && git pull --rebase && git push"
+  # TODO pass multiple paths
+  git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/emacs" \
+    "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout develop && git pull --rebase && git push"
 
-    git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/python" \
-      --parallel \
-      --if-exec git-is-clean \
-      -- \
-      sh -c "git checkout develop && git pull --rebase && git push"
-  fi
+  git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/python" \
+    "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout develop && git pull --rebase && git push"
 }
 
 config-project-list() {
@@ -95,26 +96,38 @@ config-project-list() {
   fi
 }
 
+install-pip-packages() {
+  local pip_opts=()
+
+  if ! [[ "${VIRTUAL_ENV:-}" ]]; then
+    pip_opts+=(--user)
+  fi
+
+  pip install "${pip_opts[@]}" --no-build-isolation --no-deps \
+    "$MY_PYTHON_PACKAGES_PATH/git-rexec" \
+    "$MY_PYTHON_PACKAGES_PATH/batchfetch"
+}
+
 main() {
-  cd ~/src/dotfiles/jc-dev
+  cd "$SRC_DIR/dotfiles/jc-dev"
   git pull
 
-  update-repos
+  install-pip-packages
 
   # This has to be launched first because it ensures all missing repositories
   # are present
-  cd ~/src
-  rsync -a ~/src/dotfiles/jc-dev/home/src/batchfetch.yaml ~/src/batchfetch.yaml
+  cd "$SRC_DIR"
+  rsync -a \
+    "$SCRIPT_DIR/home/src/batchfetch.yaml" \
+    "$SRC_DIR/batchfetch.yaml"
 
-  # TODO clone only
-  # batchfetch
+  update-repos
 
   config-project-list
 
-  git rexec --parallel -C ~/src/ \
-    --exclude-dir ~/src/local/ \
-    --exclude-dir ~/src/forks/ \
-    -- git check-gpg
+  git rexec --parallel -C $SRC_DIR/ \
+    "${GIT_REXEC_EXCLUDES[@]}" -- \
+    git-check-gpg
 }
 
 main "$@"
