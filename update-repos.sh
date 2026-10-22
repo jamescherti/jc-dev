@@ -93,28 +93,41 @@ install-pip-packages() {
     "$MY_PYTHON_PACKAGES_PATH/batchfetch"
 }
 
+prepare-dependencies() {
+  set -x
+  rsync -a \
+    "$SCRIPT_DIR/home/src/batchfetch.yaml" \
+    "$SRC_DIR/batchfetch.yaml"
+
+  git -C ~/src/python/batchfetch/ fetch &
+  git -C ~/src/python/git-rexec/ fetch &
+  fg &>/dev/null || true
+
+  git -C ~/src/python/batchfetch/ checkout develop
+  git -C ~/src/python/batchfetch/ branch
+  git -C ~/src/python/batchfetch/ pull --rebase origin develop
+
+  git -C ~/src/python/git-rexec/ checkout develop
+  git -C ~/src/python/git-rexec/ branch
+  git -C ~/src/python/git-rexec/ pull --rebase origin develop
+
+  set +x
+}
+
 main() {
   cd "$SCRIPT_DIR"
   # shellcheck disable=SC1091
   source .jc-dev.inc.sh
 
-  set -x
+  # This has to be launched first because it ensures all missing repositories
+  # are present
+  mkdir -p "$SRC_DIR"
+  cd "$SRC_DIR"
+
   cd "$SRC_DIR/dotfiles/jc-dev"
   git pull --ff-only
 
-  # This has to be launched first because it ensures all missing repositories
-  # are present
-  cd "$SRC_DIR"
-  rsync -a \
-    "$SCRIPT_DIR/home/src/batchfetch.yaml" \
-    "$SRC_DIR/batchfetch.yaml"
-
-  git -C ~/src/python/batchfetch/ fetch
-  git -C ~/src/python/batchfetch/ checkout develop
-  git -C ~/src/python/batchfetch/ pull --ff-only
-  git -C ~/src/python/git-rexec/ fetch
-  git -C ~/src/python/git-rexec/ checkout develop
-  git -C ~/src/python/git-rexec/ pull --ff-only
+  prepare-dependencies
 
   exit
 
