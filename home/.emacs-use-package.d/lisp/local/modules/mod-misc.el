@@ -4576,6 +4576,11 @@ Defers actual initialization to prevent blocking file loads."
 
 (define-advice ispell-init-process (:around (orig-fn &rest args) quiet)
   "Run `ispell-init-process' with the variable `inhibit-message' bound to t.
+
+This prevents messages such as
+'Starting new Ispell process aspell with en_US dictionary...done'
+from appearing in the echo area.
+
 ORIG-FN is the original `ispell-init-process' function.
 ARGS are the arguments passed to ORIG-FN."
   (let ((inhibit-message t))
