@@ -448,6 +448,17 @@ tasks:
 
   # ----------------------------------------------------------------------------
   # START: Forks
+
+  - git: git@github.com:jamescherti/setup-cask
+    path: forks/setup-cask
+    remote:
+      upstream: https://github.com/cask/setup-cask
+
+  - git: git@github.com:jamescherti/setup-emacs.el
+    path: forks/setup-emacs.el
+    remote:
+      upstream: https://github.com/purcell/setup-emacs
+
   - git: git@github.com:jamescherti/prescient.el
     path: forks/prescient.el
     remote:
