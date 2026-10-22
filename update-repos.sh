@@ -31,6 +31,17 @@ set -euo pipefail
 MAX_WORKERS=6
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
+# shellcheck disable=SC2317
+error_handler() {
+  local errno="$?"
+  echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+    "(${BASH_COMMAND} exited with status $errno)" >&2
+  exit "${errno}"
+}
+
+trap "error_handler" ERR
+set -o errtrace
+
 update-repos() {
   # Go to script dir
   cd "$SCRIPT_DIR"
@@ -98,12 +109,12 @@ main() {
   # TODO clone only
   # batchfetch
 
+  config-project-list
+
   git rexec --parallel -C ~/src/ \
     --exclude-dir ~/src/local/ \
     --exclude-dir ~/src/forks/ \
     -- git check-gpg
-
-  config-project-list
 }
 
 main "$@"
