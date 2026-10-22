@@ -96,6 +96,12 @@ install-pip-packages() {
 prepare-dependencies() {
   set -x
 
+  if ! [[ -d "$SRC_DIR/python/batchfetch/" ]]; then
+    git clone \
+      "git@github.com:jamescherti/batchfetch" \
+      "$SRC_DIR/python/batchfetch/"
+  fi
+
   rsync -a \
     "$SCRIPT_DIR/home/src/batchfetch.yaml" \
     "$SRC_DIR/batchfetch.yaml"
@@ -126,7 +132,7 @@ main() {
 
   config-project-list
 
-  git rexec --parallel -C $SRC_DIR/ \
+  git rexec --parallel -C "$SRC_DIR/" \
     "${GIT_REXEC_EXCLUDES[@]}" -- \
     git-check-gpg
 }
