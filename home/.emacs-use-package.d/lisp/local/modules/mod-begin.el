@@ -344,7 +344,12 @@ any new ones."
                               org
                               vterm
                               persist-text-scale
-                              ;; yasnippet
+                              yasnippet
+                              outline
+                              outline-indent
+                              python-ts-mode
+                              bash-ts-mode
+                              elisp-mode
                               ;; org-capture
                               ;; org-compat
                               ;; org-cycle
@@ -370,8 +375,6 @@ any new ones."
                               ;; org-src
                               ;; org-table
                               ;; org-version
-                              ;; outline
-                              ;; outline-indent
                               ))
   ;; (lazy-loader-buffers
   ;;  '(("*tmux*" .
