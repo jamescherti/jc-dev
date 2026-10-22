@@ -370,6 +370,11 @@ main() {
 
   copy_unified_files
 
+  if [[ -f ~/src/home-settings/install.sh ]]; then
+    cd ~/src/home-settings/
+    ./install.sh
+  fi
+
   echo
   echo Success.
 }
