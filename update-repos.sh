@@ -28,22 +28,8 @@
 
 set -euo pipefail
 
-MAX_WORKERS=6
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-
-SRC_DIR="$HOME/src"
 GIT_PULL_MY_REPO="$SCRIPT_DIR/.bin/git-pull-my-repo"
-
-GIT_REXEC_EXCLUDES=(
-  "--exclude" "$HOME/src/forks"
-  "--exclude" "$HOME/src/local"
-)
-
-GIT_REXEC_OPTS=(
-  "--exclude" "$HOME/src/forks"
-  "--exclude" "$HOME/src/local"
-  "--if-exec" "git-is-clean"
-  "--parallel")
 
 # shellcheck disable=SC2317
 error_handler() {
@@ -80,11 +66,11 @@ update-repos() {
     sh -c "git checkout-default && git pull --ff-only && '$GIT_PULL_MY_REPO'"
 
   # TODO pass multiple paths
-  git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/emacs" \
+  git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/emacs" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
 
-  git-rexec -j "$MAX_WORKERS" -C "$SRC_DIR/python" \
+  git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/python" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
 }
@@ -108,6 +94,10 @@ install-pip-packages() {
 }
 
 main() {
+  cd "$SCRIPT_DIR"
+  # shellcheck disable=SC1091
+  source .jc-dev.inc.sh
+
   cd "$SRC_DIR/dotfiles/jc-dev"
   git pull
 

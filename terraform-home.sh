@@ -49,7 +49,12 @@ config-xfce() {
   fi
 }
 
-MY_PYTHON_PACKAGES_PATH="$HOME/src/python"
+# UPGRADE_PIP_PACKAGES=0
+# enable-upgrade-pip-packages() {
+#   # shellcheck disable=SC2317
+#   UPGRADE_PIP_PACKAGES=1
+# }
+
 config-pip-packages() {
   # run_every 172800 \
   #   ~/.cache/jc-dev.pip-upgrade \
@@ -154,12 +159,6 @@ install_python_deps() {
   else
     ./deps-python-pyenv.sh
   fi
-}
-
-UPGRADE_PIP_PACKAGES=0
-enable-upgrade-pip-packages() {
-  # shellcheck disable=SC2317
-  UPGRADE_PIP_PACKAGES=1
 }
 
 config-fonts() {
@@ -399,10 +398,15 @@ clean-fly-files() {
 }
 
 main() {
+  cd "$SCRIPT_DIR"
+
+  # shellcheck disable=SC1091
+  source .jc-dev.inc.sh
+
   # shellcheck disable=SC1091
   source /etc/os-release
 
-  clean-fly-files
+  clean-fly-files "$@"
 
   install_python_deps
 
