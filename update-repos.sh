@@ -95,21 +95,25 @@ install-pip-packages() {
 
 prepare-dependencies() {
   set -x
+
   rsync -a \
     "$SCRIPT_DIR/home/src/batchfetch.yaml" \
     "$SRC_DIR/batchfetch.yaml"
 
-  git -C ~/src/python/batchfetch/ fetch &
-  git -C ~/src/python/git-rexec/ fetch &
-  fg &>/dev/null || true
+  batchfetch \
+    "$SRC_DIR/dotfiles/jc-dev" \
+    "$SRC_DIR/python/batchfetch/" \
+    "$SRC_DIR/python/git-rexec/"
 
-  git -C ~/src/python/batchfetch/ checkout develop
-  git -C ~/src/python/batchfetch/ branch
-  git -C ~/src/python/batchfetch/ pull --rebase origin develop
-
-  git -C ~/src/python/git-rexec/ checkout develop
-  git -C ~/src/python/git-rexec/ branch
-  git -C ~/src/python/git-rexec/ pull --rebase origin develop
+  # git -C ~/src/python/batchfetch/ fetch &
+  # git -C ~/src/python/git-rexec/ fetch &
+  # fg &>/dev/null || true
+  #
+  # git -C ~/src/python/batchfetch/ checkout develop
+  # git -C ~/src/python/batchfetch/ pull --rebase origin develop
+  #
+  # git -C ~/src/python/git-rexec/ checkout develop
+  # git -C ~/src/python/git-rexec/ pull --rebase origin develop
 
   set +x
 }
@@ -124,8 +128,8 @@ main() {
   mkdir -p "$SRC_DIR"
   cd "$SRC_DIR"
 
-  cd "$SRC_DIR/dotfiles/jc-dev"
-  git pull --ff-only
+  # cd "$SRC_DIR/dotfiles/jc-dev"
+  # git pull --ff-only
 
   prepare-dependencies
 
