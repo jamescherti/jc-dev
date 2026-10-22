@@ -29,7 +29,6 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-GIT_PULL_MY_REPO="$SCRIPT_DIR/.bin/git-pull-my-repo"
 
 # shellcheck disable=SC2317
 error_handler() {
@@ -46,8 +45,11 @@ update-repos() {
   # Go to script dir
   # cd "$SCRIPT_DIR"
 
-  if ! [[ -f "$GIT_PULL_MY_REPO" ]]; then
-    echo "Error: The script doesn't exist: $GIT_PULL_MY_REPO" >&2
+  # Git checkout to default branch and git pull --ff-only
+  local git_pull_my_repo="$SCRIPT_DIR/.bin/git-pull-my-repo"
+
+  if ! [[ -f "$git_pull_my_repo" ]]; then
+    echo "Error: The script doesn't exist: $git_pull_my_repo" >&2
     exit 1
   fi
 
@@ -59,7 +61,7 @@ update-repos() {
 
   git-rexec -C "$SRC_DIR" \
     "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout-default && git pull --ff-only && '$GIT_PULL_MY_REPO'"
+    sh -c "git checkout-default && '$git_pull_my_repo'"
 
   # TODO pass multiple paths
   git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/emacs" \
