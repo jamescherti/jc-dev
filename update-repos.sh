@@ -71,6 +71,11 @@ update-repos() {
   git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/python" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
+
+  git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/dotfiles" \
+    --exclude "$HOME/src/dotfiles/jc-dev"
+  "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout develop && git pull --rebase && git push"
 }
 
 config-project-list() {
