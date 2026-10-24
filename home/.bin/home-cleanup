@@ -28,7 +28,92 @@
 
 set -euf -o pipefail
 
+MODIFIED_DAYS="+90"
+# TOTAL_CLEANUPS=0
 MTIME="+15"
+
+ATEXIT_DONE=0
+atexit() {
+  trap - EXIT INT TERM HUP QUIT
+  local errno="$?"
+  if [[ "$ATEXIT_DONE" -eq 0 ]]; then
+    # if [[ $TOTAL_CLEANUPS -eq 0 ]]; then
+    #   echo "Nothing to do."
+    # fi
+    ATEXIT_DONE=1
+  fi
+  exit "$errno"
+}
+
+trap 'atexit' EXIT INT TERM HUP QUIT
+
+cleanup_files() {
+  local path="$1"
+  local glob="$2"
+  local filetype="$3" # f, d
+  local modified_days="$4"
+  local title="${filetype}: ${glob} in ${path}:"
+
+  #
+  # Commands
+  #
+  local cmd_find
+  cmd_find=(find "$path" -type "$filetype" -name "$glob" -not -path '*/\.git/*')
+  local cmd_find_total
+  cmd_find_total=("${cmd_find[@]}")
+
+  [[ $modified_days != "" ]] && cmd_find+=(-mtime "$modified_days")
+
+  #
+  # Find the files
+  #
+  readarray -t list_files < <("${cmd_find[@]}" 2>/dev/null)
+  if [[ ${#list_files[@]} -le 0 ]]; then
+    return
+  fi
+
+  #
+  # Show infos
+  #
+
+  # shellcheck disable=SC2001
+  echo "$title" | sed -e 's/./-/g'
+  echo "$title"
+  # shellcheck disable=SC2001
+  echo "$title" | sed -e 's/./-/g'
+
+  local item
+  local counter=0
+  echo "Command:" "${cmd_find[@]}"
+  echo "Files:"
+  # shellcheck disable=SC1073
+  for item in "${list_files[@]}"; do
+    echo "  $item"
+    counter=$((counter + 1))
+    [[ $counter -gt 5 ]] && echo "  (more...)" && break
+  done
+  echo -n "The files that will be deleted:" "${#list_files[@]}" "/ "
+  "${cmd_find_total[@]}" 2>/dev/null | wc -l || true
+  echo -n "Size: "
+  du --human-readable --summarize --total "${list_files[@]}" | tail -n 1 | sed -e 's/total//' || true
+
+  #
+  # Delete
+  #
+  echo
+  local ANSWER=''
+  read -r -p "Delete? [y,n] " ANSWER
+  if [[ "$ANSWER" = "y" ]]; then
+    for item in "${list_files[@]}"; do
+      echo "DELETE: $item"
+      rm -fr "$item"
+    done
+  fi
+
+  echo
+
+  # TOTAL_CLEANUPS=$((TOTAL_CLEANUPS + 1))
+}
 
 cleanup_dir() {
   local dir="$1"
@@ -62,3 +147,10 @@ cleanup_dir "$HOME/.emacs-data/var/backup"
 cleanup_dir "$HOME/.emacs-data/var/undo-fu-session"
 cleanup_dir "$HOME/.emacs-data/var/tmp-files.d"
 cleanup_dir "$HOME/.emacs-data/var/elisp-autofmt-cache"
+
+cleanup_files "$HOME/.cache/thumbnails" '*.png' f "$MODIFIED_DAYS"
+cleanup_files "$HOME/.vim_bundle/backup" '*' f "$MODIFIED_DAYS"
+cleanup_files "$HOME/.vim_bundle/undo" '*' f "$MODIFIED_DAYS"
+cleanup_files "$HOME" '.DS_Store' f "$MODIFIED_DAYS"
+cleanup_files "$HOME" '.comments' d ""
+cleanup_files "$HOME" '__pycache__' d ""
