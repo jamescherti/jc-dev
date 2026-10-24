@@ -196,6 +196,7 @@ tasks:
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/jc-dev
     path: dotfiles/jc-dev
+    revision: develop
 
   - git: git@github.com:jamescherti/jc-gentoo-portage
     path: dotfiles/jc-gentoo-portage
