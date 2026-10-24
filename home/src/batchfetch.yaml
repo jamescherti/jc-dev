@@ -199,24 +199,31 @@ tasks:
 
   - git: git@github.com:jamescherti/jc-gentoo-portage
     path: dotfiles/jc-gentoo-portage
+    revision: develop
 
   - git: git@github.com:jamescherti/bash-stdops
     path: dotfiles/bash-stdops
+    revision: develop
 
   - git: git@github.com:jamescherti/jc-firefox-settings
     path: dotfiles/jc-firefox-settings
+    revision: develop
 
   - git: git@github.com:jamescherti/jc-dotfiles
     path: dotfiles/jc-dotfiles
+    revision: develop
 
   - git: git@github.com:jamescherti/jc-xfce-settings
     path: dotfiles/jc-xfce-settings
+    revision: develop
 
   - git: git@github.com:jamescherti/jc-gnome-settings
     path: dotfiles/jc-gnome-settings
+    revision: develop
 
   - git: git@github.com:jamescherti/lightvim
     path: dotfiles/lightvim
+    revision: develop
 
   # Forks: Ansible
   - git: git@github.com:jamescherti/ansible-collection-hardening
