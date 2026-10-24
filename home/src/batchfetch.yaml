@@ -454,7 +454,7 @@ tasks:
     remote:
       upstream: https://github.com/cask/setup-cask
 
-  - git: git@github.com:jamescherti/setup-emacs.el
+  - git: git@github.com:jamescherti/setup-emacs
     path: forks/setup-emacs.el
     remote:
       upstream: https://github.com/purcell/setup-emacs
