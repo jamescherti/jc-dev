@@ -742,6 +742,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+(setq hs-show-indicators t
+      hs-indicator-type 'fringe)
+
 ;; Apply to all future frames, including emacsclient frames
 (add-to-list 'default-frame-alist '(wait-for-wm . nil))
 
