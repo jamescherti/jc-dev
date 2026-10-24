@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'seq)
+
 ;;; Require
 
 (require 'my-defun)
@@ -672,15 +674,57 @@ invoking the original function ORIG-FUN with ARGS."
 ;; `tab-width' to `python-indent-offset' ensures correct visual alignment and
 ;; consistency with standard Python indentation rules.
 ;; TODO Send a patch to Emacs
-(defun my-python-fill-column-setup ()
-  "Update `fill-column'."
+(defun my-python-fill-misc-setup ()
+  "Update `fill-column' and other Python settings."
   (setq-local fill-column 88))
 
-(add-hook 'python-mode-hook #'my-python-fill-column-setup 80)
-(add-hook 'python-ts-mode-hook #'my-python-fill-column-setup 80)
+;; Configure `fill-column'
+(add-hook 'python-mode-hook #'my-python-fill-misc-setup 80)
+(add-hook 'python-ts-mode-hook #'my-python-fill-misc-setup 80)
 
+;; Display fill column
 (add-hook 'python-mode-hook #'display-fill-column-indicator-mode 81)
 (add-hook 'python-ts-mode-hook #'display-fill-column-indicator-mode 81)
+
+;;; PHP and Python consult imenu
+
+;; Exclude variables, modules, namespaces, properties... from consult-imenu
+;; TODO: Enhance this code
+
+(defvar my-consult-imenu-excluded-prefixes
+  '("variable" "variables" "module" "modules"
+    "namespace" "namespaces" "property" "properties"
+    "field" "fields" "constant" "constants")
+  "List of lowercase Imenu category prefixes or suffixes to exclude.")
+
+(defun my-consult-imenu-excluded-item-p (item)
+  "Check if flattened `consult-imenu' ITEM belongs to an excluded category.
+ITEM is a cons cell of the form (KEY . PAYLOAD) produced by
+`consult-imenu--flatten'."
+  (when (consp item)
+    (let* ((key (substring-no-properties (car item)))
+           (down (downcase key)))
+      (seq-some
+       (lambda (ex)
+         (or
+          ;; Matches top-level or nested categories: "Variables foo" or
+          ;; "Class/Variables/foo"
+          (string-match-p
+           (concat "\\(?:\\`\\|/\\)" (regexp-quote ex) "\\(?:/\\| \\)")
+           down)
+          ;; Matches Eglot or python-mode suffix format: "foo (Variable)"
+          (string-suffix-p (concat " (" ex ")") down)))
+       my-consult-imenu-excluded-prefixes))))
+
+(defun my-consult-imenu-filter-compute (items)
+  "Filter unwanted categories from `consult-imenu--compute' result ITEMS.
+ITEMS is the flattened list of Imenu candidates."
+  (if (derived-mode-p 'python-base-mode 'php-ts-mode 'php-mode)
+      (seq-remove #'my-consult-imenu-excluded-item-p items)
+    items))
+
+(with-eval-after-load 'consult-imenu
+  (advice-add 'consult-imenu--compute :filter-return #'my-consult-imenu-filter-compute))
 
 ;;; jinja2-mode and csv-mode
 

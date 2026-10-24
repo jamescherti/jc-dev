@@ -742,6 +742,9 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; TODO light?
+(setq-default eldoc-documentation-function 'eldoc-documentation-compose)
+
 (setq hs-show-indicators t
       hs-indicator-type 'fringe)
 
@@ -5039,16 +5042,6 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;                 #'my-save-buffer-savefold-advice)
 ;;     (advice-add 'buffer-guardian-save-buffer-maybe :before
 ;;                 #'my-save-buffer-savefold-advice)))
-
-;;; DISABLED: Emacs Consult / Vertico
-
-;; (setq consult-imenu-config
-;;       '((emacs-lisp-mode :toplevel "Functions"
-;;                          :types ((?f "Functions" font-lock-function-name-face)
-;;                                  (?m "Macros"    font-lock-function-name-face)
-;;                                  (?p "Packages"  font-lock-constant-face)
-;;                                  (?t "Types"     font-lock-type-face)
-;;                                  (?v "Variables" font-lock-variable-name-face)))))
 
 ;;; DISABLED: consult flymake
 

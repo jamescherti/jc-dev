@@ -135,6 +135,12 @@ actions:
     tags: install
     command: "cd dotfiles/bash-stdops && PREFIX=~/.local ./install.sh"
 
+  - path_match: "*/git-rexec/*"
+    shell: true
+    command: "cd python/git-rexec && ./run_tests.sh"
+    tags:
+      - main
+
   - path_match: "*"
     command:
       - smart-install

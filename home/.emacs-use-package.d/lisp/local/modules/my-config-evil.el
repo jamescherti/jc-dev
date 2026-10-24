@@ -891,7 +891,7 @@ guarantees that the new window is selected, as in Vim."
 (defun my-consult-imenu ()
   "Call `consult-imenu'."
   (interactive)
-  (transient-mark-mode -1)
+  ;; (transient-mark-mode -1)
   ;; (when (fboundp 'evil-normal-state)
   ;;    (evil-normal-state))
   (if (fboundp 'consult-imenu)
@@ -899,9 +899,6 @@ guarantees that the new window is selected, as in Vim."
     (error "Undefined: consult-imenu")))
 
 (define-key evil-normal-state-map (kbd "<leader>ff") 'my-consult-imenu)
-;; Removed:
-;;   consult-source-buffer-register
-;;   consult-source-file-register
 
 (define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
