@@ -70,9 +70,6 @@ cleanup_dir() {
 
 cleanup_dir "$HOME/.cache/pip"
 cleanup_dir "$HOME/.cache/thumbnails"
-cleanup_dir "$HOME/.cache/python_cache"
-cleanup_dir "$HOME/.cache/python_cache_egg"
-cleanup_dir "$HOME/.cache/python_cache_mypy"
 cleanup_dir "$HOME/.cache/pylint"
 cleanup_dir "$HOME/.vim_bundle/undo"
 cleanup_dir "$HOME/.vim_bundle/swp"
@@ -83,6 +80,17 @@ cleanup_dir "$HOME/.emacs-data/var/backup"
 cleanup_dir "$HOME/.emacs-data/var/undo-fu-session"
 cleanup_dir "$HOME/.emacs-data/var/tmp-files.d"
 cleanup_dir "$HOME/.emacs-data/var/elisp-autofmt-cache"
+
+# Python & Dev tools
+cleanup_dir "$HOME/.cache/ruff"
+cleanup_dir "$HOME/.cache/python_cache"
+cleanup_dir "$HOME/.cache/python_cache_egg"
+cleanup_dir "$HOME/.cache/python_cache_mypy"
+
+# System, Desktop & Misc
+cleanup_dir "$HOME/.cache/fontconfig"
+cleanup_dir "$HOME/.cache/mesa_shader_cache"
+cleanup_dir "$HOME/.cache/gstreamer-1.0"
 
 # TODO Step 2?
 #
