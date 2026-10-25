@@ -196,7 +196,7 @@ tasks:
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/jc-dev
     path: dotfiles/jc-dev
-    revision: develop
+    revision: main
 
   - git: git@github.com:jamescherti/jc-gentoo-portage
     path: dotfiles/jc-gentoo-portage
@@ -377,11 +377,6 @@ tasks:
   - git: git@github.com:jamescherti/modeline-region.el
     path: forks/modeline-region.el
     delete: true
-
-  - git: git@github.com:jamescherti/cherrybuckle
-    path: forks/cherrybuckle
-    remote:
-      upstream: https://github.com/zevv/bucklespring
 
   - git: git@github.com:jamescherti/markdown-mode
     path: forks/markdown-mode
