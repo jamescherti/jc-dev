@@ -95,6 +95,15 @@ install-pip-packages() {
     "$MY_PYTHON_PACKAGES_PATH/batchfetch"
 }
 
+bf-or-git() {
+  if [[ -f "$1" ]]; then
+    batchfetch "$1"
+  else
+    git -C "$1" checkout develop
+    git -C "$1" pull
+  fi
+}
+
 prepare-dependencies() {
   set -x
 
@@ -108,10 +117,9 @@ prepare-dependencies() {
     "$SCRIPT_DIR/home/src/batchfetch.yaml" \
     "$SRC_DIR/batchfetch.yaml"
 
-  batchfetch \
-    "$SRC_DIR/dotfiles/jc-dev" \
-    "$SRC_DIR/python/batchfetch/" \
-    "$SRC_DIR/python/git-rexec/"
+  bf-or-git "$SRC_DIR/dotfiles/jc-dev"
+  bf-or-git "$SRC_DIR/python/batchfetch/"
+  bf-or-git "$SRC_DIR/python/git-rexec/"
 
   set +x
 }
