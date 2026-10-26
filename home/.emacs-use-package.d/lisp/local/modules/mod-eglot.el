@@ -397,76 +397,76 @@ FORMAT and ARGS are the message format string and its arguments."
 
 ;;; Disable Eglot capabilities
 
-;; (setq eglot-ignored-server-capabilities
-;;       '(;; Delegating code formatting to dedicated tools such as Apheleia can
-;;         ;; separate formatting from the language server and provide asynchronous
-;;         ;; formatting workflows. The tradeoff is additional formatter
-;;         ;; configuration and the loss of the language server's built-in
-;;         ;; formatting:
-;;         :documentOnTypeFormattingProvider
-;;
-;;         ;; Inlay hints (eglot-inlay-hints-mode) insert automatically determined
-;;         ;; types and parameter names directly into the buffer. Disabling them
-;;         ;; removes the associated visual annotations and any work required to
-;;         ;; maintain them:
-;;         :inlayHintProvider
-;;
-;;         ;; When the cursor rests on a symbol, the LSP server can highlight other
-;;         ;; occurrences of that symbol (eglot-highlight-eldoc-function).
-;;         ;; Disabling it will stop Eglot from highlighting other occurrences of
-;;         ;; the symbol under the cursor:
-;;         :documentHighlightProvider
-;;
-;;         ;; eldoc
-;;         ;; Sends textDocument/hover to fetch documentation for the symbol at
-;;         ;; point. Eglot parses the returned Markdown and renders it for the echo
-;;         ;; area or ElDoc buffer.
-;;         :hoverProvider
-;;
-;;         ;; eldoc
-;;         ;; Sends textDocument/codeAction strictly to check if actions are
-;;         ;; available (like refactors or quickfixes). Eglot uses this to draw the
-;;         ;; lightbulb icon in the mode-line, fringes, or margins.
-;;         :codeActionProvider
-;;
-;;         ;; Eglot implements this via eglot-semantic-tokens-mode, which disables
-;;         ;; Emacs's default regex-based font-lock and delegates syntax
-;;         ;; highlighting to the LSP server. When the buffer changes, Eglot issues
-;;         ;; a textDocument/semanticTokens/full/delta request.
-;;         ;;
-;;         ;; The server responds with large arrays of integers representing token
-;;         ;; coordinates. In eglot--semtok-font-lock-1, Eglot iterates through
-;;         ;; this array (for i from 0 below (length data) by 5). For every token,
-;;         ;; it must convert LSP line/character coordinates to Emacs buffer
-;;         ;; positions using eglot-move-to-linepos-function (which calculates
-;;         ;; UTF-16 code units), and then apply eglot--semtok-names and
-;;         ;; eglot--semtok-faces text properties. This creates significant Elisp
-;;         ;; execution overhead, garbage collection pressure from heavy JSON
-;;         ;; payloads, and blocking UI work during scrolling and editing.
-;;         ;; :semanticTokensProvider
-;;
-;;         ;; eldoc
-;;         ;; Sends textDocument/signatureHelp to parse the surrounding function
-;;         ;; call and identify the active parameter.
-;;         ;; :signatureHelpProvider
-;;
-;;         ;; Flymake
-;;         ;; If the server supports "pull" diagnostics, Eglot actively polls the
-;;         ;; server (textDocument/diagnostic) whenever the Flymake idle timer
-;;         ;; triggers (typically after 0.5 seconds of inactivity). Disabling it
-;;         ;; stops Eglot from polling for diagnostics. (Note: Many servers also
-;;         ;; push diagnostics asynchronously; disabling this only stops the
-;;         ;; explicit pull requests).
-;;         ;; :diagnosticProvider
-;;
-;;         ;; Eglot itself does not call this in the background, but if you use an
-;;         ;; external auto-completion framework (like company-mode or corfu), that
-;;         ;; framework will invoke Eglot's completion backend on a very short idle
-;;         ;; timer or as you type. This results in heavy textDocument/completion
-;;         ;; traffic. Disabling it stops Eglot from participating in
-;;         ;; auto-completion entirely.
-;;         ;; :completionProvider
-;;         ))
+(setq eglot-ignored-server-capabilities
+      '(;; Delegating code formatting to dedicated tools such as Apheleia can
+        ;; separate formatting from the language server and provide asynchronous
+        ;; formatting workflows. The tradeoff is additional formatter
+        ;; configuration and the loss of the language server's built-in
+        ;; formatting:
+        ;; :documentOnTypeFormattingProvider
+
+        ;; Inlay hints (eglot-inlay-hints-mode) insert automatically determined
+        ;; types and parameter names directly into the buffer. Disabling them
+        ;; removes the associated visual annotations and any work required to
+        ;; maintain them:
+        ;; :inlayHintProvider
+
+        ;; When the cursor rests on a symbol, the LSP server can highlight other
+        ;; occurrences of that symbol (eglot-highlight-eldoc-function).
+        ;; Disabling it will stop Eglot from highlighting other occurrences of
+        ;; the symbol under the cursor:
+        :documentHighlightProvider
+
+        ;; eldoc
+        ;; Sends textDocument/hover to fetch documentation for the symbol at
+        ;; point. Eglot parses the returned Markdown and renders it for the echo
+        ;; area or ElDoc buffer.
+        ;; :hoverProvider
+
+        ;; eldoc
+        ;; Sends textDocument/codeAction strictly to check if actions are
+        ;; available (like refactors or quickfixes). Eglot uses this to draw the
+        ;; lightbulb icon in the mode-line, fringes, or margins.
+        ;; :codeActionProvider
+
+        ;; Eglot implements this via eglot-semantic-tokens-mode, which disables
+        ;; Emacs's default regex-based font-lock and delegates syntax
+        ;; highlighting to the LSP server. When the buffer changes, Eglot issues
+        ;; a textDocument/semanticTokens/full/delta request.
+        ;;
+        ;; The server responds with large arrays of integers representing token
+        ;; coordinates. In eglot--semtok-font-lock-1, Eglot iterates through
+        ;; this array (for i from 0 below (length data) by 5). For every token,
+        ;; it must convert LSP line/character coordinates to Emacs buffer
+        ;; positions using eglot-move-to-linepos-function (which calculates
+        ;; UTF-16 code units), and then apply eglot--semtok-names and
+        ;; eglot--semtok-faces text properties. This creates significant Elisp
+        ;; execution overhead, garbage collection pressure from heavy JSON
+        ;; payloads, and blocking UI work during scrolling and editing.
+        ;; :semanticTokensProvider
+
+        ;; eldoc
+        ;; Sends textDocument/signatureHelp to parse the surrounding function
+        ;; call and identify the active parameter.
+        ;; :signatureHelpProvider
+
+        ;; Flymake
+        ;; If the server supports "pull" diagnostics, Eglot actively polls the
+        ;; server (textDocument/diagnostic) whenever the Flymake idle timer
+        ;; triggers (typically after 0.5 seconds of inactivity). Disabling it
+        ;; stops Eglot from polling for diagnostics. (Note: Many servers also
+        ;; push diagnostics asynchronously; disabling this only stops the
+        ;; explicit pull requests).
+        ;; :diagnosticProvider
+
+        ;; Eglot itself does not call this in the background, but if you use an
+        ;; external auto-completion framework (like company-mode or corfu), that
+        ;; framework will invoke Eglot's completion backend on a very short idle
+        ;; timer or as you type. This results in heavy textDocument/completion
+        ;; traffic. Disabling it stops Eglot from participating in
+        ;; auto-completion entirely.
+        ;; :completionProvider
+        ))
 
 ;;; DISABLED: Python: Remove flymake
 
