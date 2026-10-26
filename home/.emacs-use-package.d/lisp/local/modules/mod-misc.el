@@ -3180,6 +3180,7 @@ ARGS - the arguments passed to the original function"
 
 (defun my-shell-pop-set-global-type (&rest _args)
   "Set `shell-pop-shell-type' as a global variable for the current project."
+  (setq my-bash-lastdir-cache nil)
   (when (fboundp 'my-project-name)
     (let* ((proj-name (or (my-project-name) "misc"))
            (buf-name (format "*vterm:%s*" proj-name)))
@@ -4584,7 +4585,7 @@ Defers actual initialization to prevent blocking file loads."
   "Run `ispell-init-process' with the variable `inhibit-message' bound to t.
 
 This prevents messages such as
-'Starting new Ispell process aspell with en_US dictionary...done'
+\='Starting new Ispell process aspell with en_US dictionary...done\='
 from appearing in the echo area.
 
 ORIG-FN is the original `ispell-init-process' function.
