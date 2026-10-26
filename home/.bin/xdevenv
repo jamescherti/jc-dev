@@ -606,7 +606,7 @@ init() {
   [[ -z ${XDEVENV_ALWAYS_MAXIMIZE+x} ]] && XDEVENV_ALWAYS_MAXIMIZE=0
 
   if is_wayland; then
-    export QT_QPA_PLATFORM=wayland
+    export QT_QPA_PLATFORM='wayland;xcb'
   fi
 
   local cmd_name
