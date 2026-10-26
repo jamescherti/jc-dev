@@ -108,6 +108,8 @@
   ;; You do not need to remove this configuration. Disabling modification checks
   ;; provides significant startup performance improvements.
   ;; (setq straight-check-for-modifications nil)
+  (setq straight-check-for-modifications
+        '(watch-files find-when-checking))
 
   ;; If you do actively develop Emacs packages, you can configure straight.el to
   ;; monitor modifications only when you save a file from within Emacs. This
@@ -1653,6 +1655,26 @@ This uses an around advice to trap errors and verify file timestamps."
           (message "Unpinned packages: %s"
                    (mapconcat #'identity (sort unpinned-packages #'string-lessp) ", "))
         (message "All local packages are accounted for in the profile lockfiles.")))))
+
+;;; Straight fix: gptel: dirty worktree
+
+(defun my/straight-fix-gptel-submodule (&rest _)
+  "Restore the gptel test submodule before thawing straight packages."
+  (let ((default-directory
+         (expand-file-name
+          "straight/repos/gptel/"
+          (or (bound-and-true-p straight-base-dir)
+              user-emacs-directory))))
+    (when (file-directory-p default-directory)
+      (unless (zerop
+               (process-file "git" nil nil nil
+                             "submodule" "update"
+                             "--init" "--force" "--checkout"
+                             "--" "test"))
+        (error "Failed to restore gptel test submodule")))))
+
+(advice-add 'straight-thaw-versions
+            :before #'my/straight-fix-gptel-submodule)
 
 ;;; Add my packages to load path
 
