@@ -419,9 +419,10 @@ Positive COUNT moves backward, negative COUNT moves forward."
   (let ((cnt (or count 1)))
     (if (and (fboundp 'treesit-parser-list)
              (treesit-parser-list))
-        (my-evil-nav-treesit-move-defun (- cnt))
-      (evil-signal-at-bob-or-eob cnt)
-      (evil-forward-beginning 'evil-defun cnt))
+        (progn
+          (evil-signal-at-bob-or-eob (- (or count 1)))
+          (my-evil-nav-treesit-move-defun (- cnt)))
+      (evil-forward-section-end count))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 
@@ -432,13 +433,15 @@ Positive COUNT moves backward, negative COUNT moves forward."
   (let ((cnt (or count 1)))
     (if (and (fboundp 'treesit-parser-list)
              (treesit-parser-list))
-        (my-evil-nav-treesit-move-defun cnt)
-      (evil-signal-at-bob-or-eob (- cnt))
-      (evil-backward-beginning 'evil-defun cnt))
+        (progn
+          (evil-signal-at-bob-or-eob (- (or count 1)))
+          (my-evil-nav-treesit-move-defun cnt))
+      (evil-backward-section-end count))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 
-(when (display-graphic-p)
+(when (or (display-graphic-p)
+          (daemonp))
   ;; Only on display-graphic-p because the M-[ issue occurs because modern
   ;; terminals use "Escape sequences" beginning with the ESC [ characters (the
   ;; byte-level equivalent of M-[) to communicate complex input like mouse
@@ -1211,8 +1214,8 @@ word after the space that contains at least two uppercase characters."
 ;;   "}" 'evil-forward-paragraph)
 
 (evil-define-key '(motion) my-intercept-mode-map
-  (kbd "[") 'my-evil-nav-backward-section
-  (kbd "]") 'my-evil-nav-forward-section
+  (kbd "[[") 'my-evil-nav-backward-section
+  (kbd "]]") 'my-evil-nav-forward-section
 
   (kbd "{") 'evil-backward-paragraph
   (kbd "}") 'evil-forward-paragraph)
