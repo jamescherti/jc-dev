@@ -5662,7 +5662,7 @@ on text following the cursor."
 ;;; DISABLED: combobulate
 
 ;; TODO lightemacs
-(use-package combobulate
+(lightemacs-use-package combobulate
   :commands combobulate
   ;; :init
   ;; (with-eval-after-load 'evil

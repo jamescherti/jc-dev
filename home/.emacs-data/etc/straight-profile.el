@@ -35,6 +35,7 @@
 
  ;; Maintained
  ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE
+ ("combobulate" . "f7ea37b7ed5a463781a4b7122e4563f1c0fdc90f")
 
  ;; Outdated tag
  ("s.el" . "7393fa6fa305403e628058c0ec78c35d610fab05")
