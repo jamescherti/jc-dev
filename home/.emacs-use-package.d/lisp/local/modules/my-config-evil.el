@@ -195,7 +195,6 @@
 (defun evilbuffer-clear-highlights ()
   "Clear."
   (interactive)
-
   (save-window-excursion
     (save-excursion
       (cond
@@ -209,7 +208,8 @@
         (unless (derived-mode-p 'embark-collect-mode)
           ;; Do not clear highlights during `embark-collect-mode' to prevent
           ;; disruptive color changes.
-          (my-clear-highlights)))))))
+          (my-clear-highlights))))))
+  (pulse-momentary-highlight-one-line (point)))
 
 (defun my-evil-disable-remove-spaces ()
   "Disable automatic removal of trailing spaces in `evil-mode'."
@@ -417,12 +417,12 @@ Positive COUNT moves backward, negative COUNT moves forward."
   :jump t
   :type exclusive
   (let ((cnt (or count 1)))
+    (evil-signal-at-bob-or-eob (- (or count 1)))
     (if (and (fboundp 'treesit-parser-list)
              (treesit-parser-list))
         (progn
-          (evil-signal-at-bob-or-eob (- (or count 1)))
           (my-evil-nav-treesit-move-defun (- cnt)))
-      (evil-forward-section-begin count))
+      (evil-forward-beginning 'evil-defun count))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 
@@ -431,12 +431,12 @@ Positive COUNT moves backward, negative COUNT moves forward."
   :jump t
   :type exclusive
   (let ((cnt (or count 1)))
+    (evil-signal-at-bob-or-eob (- (or count 1)))
     (if (and (fboundp 'treesit-parser-list)
              (treesit-parser-list))
         (progn
-          (evil-signal-at-bob-or-eob (- (or count 1)))
           (my-evil-nav-treesit-move-defun cnt))
-      (evil-backward-section-begin count))
+      (evil-backward-beginning 'evil-defun count))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 
