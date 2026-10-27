@@ -688,7 +688,7 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; Python navigation
 
-(defun py-ts-prev-defun (&optional arg)
+(defun my-ts-prev-defun (&optional arg)
   "Move backward to the start of the previous function or class.
 ARG specifies the number of definitions to move backward. It defaults to 1."
   (interactive "p")
@@ -696,26 +696,13 @@ ARG specifies the number of definitions to move backward. It defaults to 1."
     (treesit-beginning-of-defun (or arg 1)))
   (lightemacs-recenter-maybe))
 
-(defun py-ts-next-defun (&optional arg)
+(defun my-ts-next-defun (&optional arg)
   "Move forward to the start of the next function or class.
 ARG specifies the number of definitions to move forward. It defaults to 1."
   (interactive "p")
   (when (fboundp 'treesit-beginning-of-defun)
     (treesit-beginning-of-defun (- (or arg 1))))
   (lightemacs-recenter-maybe))
-
-;; Standard Emacs keybindings
-(with-eval-after-load 'python
-  (define-key python-ts-mode-map (kbd "[ [") #'py-ts-prev-defun)
-  (define-key python-ts-mode-map (kbd "] ]") #'py-ts-next-defun))
-
-;; Evil mode normal state bindings
-(with-eval-after-load 'evil
-  (with-eval-after-load 'python
-    (if (fboundp 'evil-define-key*)
-        (evil-define-key* 'normal python-ts-mode-map
-          (kbd "[[") #'py-ts-prev-defun
-          (kbd "]]") #'py-ts-next-defun))))
 
 ;;; PHP and Python consult imenu
 

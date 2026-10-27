@@ -391,11 +391,25 @@ ORIG-FUN is the function and ARGS the arguments."
 (defun my-evil-forward-section-end ()
   "Move to the next section."
   (interactive)
-  (execute-kbd-macro (read-kbd-macro "]]")))
+  (if (and (fboundp 'treesit-parser-list)
+           (treesit-parser-list)
+           (fboundp 'treesit-beginning-of-defun))
+      (progn
+        (treesit-beginning-of-defun 1)
+        (lightemacs-recenter-maybe))
+    (execute-kbd-macro (read-kbd-macro "]]"))))
+
 (defun my-evil-backward-section-end ()
   "Move to the previous section."
   (interactive)
-  (execute-kbd-macro (read-kbd-macro "[[")))
+  (if (and (fboundp 'treesit-parser-list)
+           (treesit-parser-list)
+           (fboundp 'treesit-beginning-of-defun))
+      (progn
+        (treesit-beginning-of-defun -1)
+        (lightemacs-recenter-maybe))
+    (execute-kbd-macro (read-kbd-macro "[["))))
+
 (evil-define-key '(normal visual) 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
 (when (display-graphic-p)
   ;; Only on display-graphic-p because the M-[ issue occurs because modern
