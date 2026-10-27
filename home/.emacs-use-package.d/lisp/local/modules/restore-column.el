@@ -19,22 +19,24 @@
 ;; workflow. This package ensures the cursor remains exactly where it was before
 ;; the save operation.
 ;;
-;; This package doesn't modify your buffer. When restoring the cursor requires
-;; placing it beyond the current physical end of a line, inserting real
+;; This package doesn't modify your buffer on save. When restoring the cursor
+;; requires placing it beyond the current physical end of a line, inserting real
 ;; whitespace would pollute the file with unwanted trailing spaces. To prevent
 ;; this, the restore-column dynamically applies a virtual overlay, which
 ;; visually renders the cursor at the correct column without modifying the
 ;; actual buffer text.
 ;;
-;; The virtual overlay is ephemeral. Once the user moves the cursor, types, or
-;; triggers another command, the overlay is automatically cleared via
-;; `post-command-hook'.
+;; The virtual overlay is ephemeral. Once the user moves the cursor or triggers
+;; another command, the overlay is automatically cleared via `pre-command-hook'.
+;; If the user inserts a character while at the virtual column, the missing
+;; whitespace is materialized before the character is inserted.
 ;;
 ;; Features:
-;; - Maintains the exact cursor column without modifying the underlying buffer
-;;   text.
+;; - Maintains the exact cursor column on save without modifying the underlying
+;;   buffer text.
 ;; - Uses virtual overlay strings to render the cursor position.
-;; - Overlays automatically clear on cursor movement or buffer modification.
+;; - Materializes whitespace only when the user types at the restored column.
+;; - Overlays automatically clear on cursor movement or other commands.
 ;; - Operates correctly across base buffers and indirect buffers.
 ;;
 ;; Usage:
@@ -80,19 +82,18 @@ post-save processing is complete."
 
 (defun restore-column--pre-command-handler ()
   "Materialize virtual spaces on self-insert or clear the virtual overlay."
-  (when (and (overlayp restore-column--virtual-overlay)
-             restore-column--saved-column
-             (memq this-command '(self-insert-command
-                                  org-self-insert-command
-                                  quoted-insert)))
-    (let ((ov-start (overlay-start restore-column--virtual-overlay)))
-      (when (and ov-start (eq (point) ov-start) (eolp))
-        (let ((missing-spaces (- restore-column--saved-column
-                                 (current-column))))
-          (when (> missing-spaces 0)
-            (insert (make-string missing-spaces ?\s)))))))
-  ;; Clean up overlay and unregister the hook.
-  (restore-column--clear-virtual-state))
+  (unwind-protect
+      (when (and (not buffer-read-only)
+                 (overlayp restore-column--virtual-overlay)
+                 restore-column--saved-column
+                 (memq this-command '(self-insert-command
+                                      org-self-insert-command
+                                      quoted-insert)))
+        (let ((ov-start (overlay-start restore-column--virtual-overlay)))
+          (when (and ov-start (eq (point) ov-start) (eolp))
+            (move-to-column restore-column--saved-column t))))
+    ;; Clean up overlay and unregister the hook.
+    (restore-column--clear-virtual-state)))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
@@ -124,9 +125,8 @@ post-save processing is complete."
                 ;; space for cursor positioning.
                 (let ((display-spaces (make-string (1+ missing-spaces) ?\s))
                       ;; Instantiate a zero-width overlay at point in the
-                      ;; current buffer. front-advance is t (insertions at start
-                      ;; move it forward). rear-advance is nil (insertions at
-                      ;; end do not extend it).
+                      ;; current buffer. Both front-advance and rear-advance are
+                      ;; nil so insertions at point do not shift overlay-start.
                       (ov (make-overlay (point) (point))))
                   ;; Attach the 'cursor text property to the final character of
                   ;; the virtual string. This tells the display engine to render
@@ -143,8 +143,8 @@ post-save processing is complete."
                   ;; Store the overlay reference in the buffer-local variable
                   ;; for tracking.
                   (setq restore-column--virtual-overlay ov)
-                  ;; Register buffer-local post-command-hook to tear down the
-                  ;; overlay on user action.
+                  ;; Register buffer-local pre-command-hook to tear down the
+                  ;; overlay or materialize spaces on user action.
                   (add-hook 'pre-command-hook
                             #'restore-column--pre-command-handler nil t))
               (setq restore-column--saved-column nil))))))))
@@ -165,7 +165,7 @@ post-save processing is complete."
                   restore-column-before-save-hook-depth t)
         (add-hook 'after-save-hook #'restore-column--after-save-hook
                   restore-column-after-save-hook-depth t))
-    ;; Delete overlay and detach post-command listener when the mode is
+    ;; Delete overlay and detach pre-command listener when the mode is
     ;; disabled.
     (restore-column--clear-virtual-state)
     (remove-hook 'before-save-hook #'restore-column--before-save-hook t)
