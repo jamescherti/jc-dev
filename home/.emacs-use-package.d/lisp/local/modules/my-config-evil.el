@@ -287,6 +287,8 @@
 
     (goto-char original-point)))
 
+(evil-define-key '(normal visual) 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
+
 ;; TODO lightemacs?
 (defun my-bash-stdops-sre ()
   "Call sre."
@@ -388,29 +390,34 @@ ORIG-FUN is the function and ARGS the arguments."
 (evil-define-key 'visual 'global (kbd "J") 'evil-join)
 
 ;; M-[ and M-]: Previous and next section
-(defun my-evil-forward-section-end ()
-  "Move to the next section."
-  (interactive)
-  (if (and (fboundp 'treesit-parser-list)
-           (treesit-parser-list)
-           (fboundp 'treesit-beginning-of-defun))
-      (progn
-        (treesit-beginning-of-defun 1)
-        (lightemacs-recenter-maybe))
-    (execute-kbd-macro (read-kbd-macro "]]"))))
+(evil-define-motion my-evil-forward-section-begin (count)
+  "Move the cursor to the beginning of the COUNT-th next section."
+  :jump t
+  :type exclusive
+  (let ((cnt (or count 1)))
+    (if (and (fboundp 'treesit-parser-list)
+             (treesit-parser-list)
+             (fboundp 'treesit-beginning-of-defun))
+        (treesit-beginning-of-defun (- cnt))
+      (evil-signal-at-bob-or-eob cnt)
+      (evil-forward-beginning 'evil-defun cnt))
+    (unless (evil-operator-state-p)
+      (lightemacs-recenter-maybe))))
 
-(defun my-evil-backward-section-end ()
-  "Move to the previous section."
-  (interactive)
-  (if (and (fboundp 'treesit-parser-list)
-           (treesit-parser-list)
-           (fboundp 'treesit-beginning-of-defun))
-      (progn
-        (treesit-beginning-of-defun -1)
-        (lightemacs-recenter-maybe))
-    (execute-kbd-macro (read-kbd-macro "[["))))
+(evil-define-motion my-evil-backward-section-begin (count)
+  "Move the cursor to the beginning of the COUNT-th previous section."
+  :jump t
+  :type exclusive
+  (let ((cnt (or count 1)))
+    (if (and (fboundp 'treesit-parser-list)
+             (treesit-parser-list)
+             (fboundp 'treesit-beginning-of-defun))
+        (treesit-beginning-of-defun cnt)
+      (evil-signal-at-bob-or-eob (- cnt))
+      (evil-backward-beginning 'evil-defun cnt))
+    (unless (evil-operator-state-p)
+      (lightemacs-recenter-maybe))))
 
-(evil-define-key '(normal visual) 'global (kbd "<leader>j") 'my-uncomment-and-join-region)
 (when (display-graphic-p)
   ;; Only on display-graphic-p because the M-[ issue occurs because modern
   ;; terminals use "Escape sequences" beginning with the ESC [ characters (the
@@ -427,6 +434,7 @@ ORIG-FUN is the function and ARGS the arguments."
   ;; prefix?
   (evil-define-key '(insert motion) 'global (kbd "M-[")
     'my-evil-backward-section-end))
+
 (evil-define-key '(insert motion) 'global (kbd "M-]")
   'my-evil-forward-section-end)
 
