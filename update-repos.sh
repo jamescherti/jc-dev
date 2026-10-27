@@ -124,6 +124,52 @@ prepare-dependencies() {
   set +x
 }
 
+git_maintenance() {
+  # The git fsck --full command is used to verify the integrity of a Git
+  # repository. Here's a detailed breakdown of what it does:
+  #
+  # The git fsck --full command is a comprehensive utility for verifying the
+  # integrity of a Git repository. By performing a thorough examination of all
+  # objects and references within the repository, it ensures that all data is
+  # correctly linked and free from corruption. This command checks the
+  # consistency of blobs, trees, commits, and tags, as well as the validity of
+  # branch and tag references. The --full option makes the check more
+  # exhaustive, identifying any discrepancies or damaged objects and providing
+  # detailed reports on potential issues. It is especially useful for diagnosing
+  # repository problems after unexpected failures or for routine maintenance to
+  # ensure ongoing repository health.
+  # git find git fsck --full
+
+  # git gc: Runs garbage collection, which cleans up unnecessary files and
+  # optimizes the local repository.
+  #
+  # --aggressive: This option makes the garbage collection process more
+  # --thorough,
+  #
+  # --resulting in better compression of objects and a more optimized
+  # --repository.
+  #
+  # --However, it can be significantly slower and more resource-intensive than
+  # --the
+
+  # --default garbage collection.
+  #
+  # --prune=now: This option tells Git to remove all objects that are not
+  # --reachable from any reference, including those that are less than two weeks
+  # --old, which is the default. Using now removes all such objects immediately.
+  # git find git gc --aggressive --prune=now
+
+  if [[ -d "$SRC_DIR" ]]; then
+    # shellcheck disable=SC2016
+    git-rexec \
+      -C "$SRC_DIR" \
+      --if-exec git-is-clean \
+      --parallel \
+      -- \
+      "$SCRIPT_DIR/home/.bin/git-regular-maintenance"
+  fi
+}
+
 main() {
   cd "$SCRIPT_DIR"
   # shellcheck disable=SC1091
@@ -145,6 +191,9 @@ main() {
   git rexec --parallel -C "$SRC_DIR/" \
     "${GIT_REXEC_EXCLUDES[@]}" -- \
     git-check-gpg
+
+  # TODO Run once a day
+  git_maintenance
 }
 
 main "$@"
