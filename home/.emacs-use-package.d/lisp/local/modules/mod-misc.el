@@ -5661,13 +5661,14 @@ on text following the cursor."
 
 ;;; DISABLED: combobulate
 
-;; (use-package combobulate
-;;   :defer t
-;;   :commands combobulate
-;;   :init
-;;   (with-eval-after-load 'evil
-;;     (evil-define-key 'normal 'global (kbd "<leader>co") #'combobulate)))
-;; (eldoc-add-command-completions "combobulate-")
+;; TODO lightemacs
+(use-package combobulate
+  :commands combobulate
+  ;; :init
+  ;; (with-eval-after-load 'evil
+  ;;   (evil-define-key 'normal 'global (kbd "<leader>co") #'combobulate))
+  :init
+  (eldoc-add-command-completions "combobulate-"))
 
 ;;; DISABLED: desktop
 

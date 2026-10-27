@@ -568,6 +568,12 @@ tasks:
     remote:
       upstream: https://github.com/karlotness/flymake-quickdef
 
+  - git: git@github.com:jamescherti/combobulate
+    path: forks/combobulate
+    revision: master
+    remote:
+      upstream: https://github.com/mickeynp/combobulate
+
   - git: git@github.com:jamescherti/gcmh
     path: forks/gcmh
     revision: master

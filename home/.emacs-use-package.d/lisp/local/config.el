@@ -1473,6 +1473,10 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jamescherti/flymake-quickdef"
              :branch "master")
+            (combobulate
+             :type git :host github
+             :repo "jamescherti/combobulate"
+             :branch "master")
             (gcmh
              :type git :host github
              :repo "jamescherti/gcmh"
