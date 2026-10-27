@@ -99,7 +99,7 @@ bf-or-git() {
   if [[ -f "$1" ]]; then
     batchfetch "$1"
   else
-    git -C "$1" checkout develop
+    git -C "$1" checkout "$BF_OR_GIT_BRANCH"
     git -C "$1" pull
   fi
 }
@@ -117,7 +117,9 @@ prepare-dependencies() {
     "$SCRIPT_DIR/home/src/batchfetch.yaml" \
     "$SRC_DIR/batchfetch.yaml"
 
+  BF_OR_GIT_BRANCH=develop
   bf-or-git "$SRC_DIR/dotfiles/jc-dev"
+  BF_OR_GIT_BRANCH=main
   bf-or-git "$SRC_DIR/python/batchfetch/"
   bf-or-git "$SRC_DIR/python/git-rexec/"
 
