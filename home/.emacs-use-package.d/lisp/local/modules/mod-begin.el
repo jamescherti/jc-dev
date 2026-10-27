@@ -40,12 +40,12 @@
 (setq stripspace-use-virtual-overlay nil)
 ;; (setq stripspace-restore-column nil) ;; TODO Integrate
 
-(lightemacs-use-package ghostcolumn
+(lightemacs-use-package ghostcursor
   :demand t
-  :functions ghostcolumn-global-mode
+  :functions ghostcursor-global-mode
   :ensure nil
   :config
-  (ghostcolumn-global-mode 1))
+  (ghostcursor-global-mode 1))
 
 ;;; scratch
 

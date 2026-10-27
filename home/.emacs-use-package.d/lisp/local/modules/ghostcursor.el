@@ -1,4 +1,4 @@
-;;; ghostcolumn.el --- Restore cursor column after save hooks -*- lexical-binding: t; -*-
+;;; ghostcursor.el --- Restore cursor column after save hooks -*- lexical-binding: t; -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -9,7 +9,7 @@
 
 ;;; Commentary:
 
-;; The ghostcolumn package provides a mode that records the exact cursor
+;; The ghostcursor package provides a mode that records the exact cursor
 ;; column position immediately before a buffer is saved and restores it
 ;; afterward.
 ;;
@@ -22,7 +22,7 @@
 ;; This package doesn't modify your buffer on save. When restoring the cursor
 ;; requires placing it beyond the current physical end of a line, inserting real
 ;; whitespace would pollute the file with unwanted trailing spaces. To prevent
-;; this, the ghostcolumn dynamically applies a virtual overlay, which
+;; this, the ghostcursor dynamically applies a virtual overlay, which
 ;; visually renders the cursor at the correct column without modifying the
 ;; actual buffer text.
 ;;
@@ -40,62 +40,62 @@
 ;; - Operates correctly across base buffers and indirect buffers.
 ;;
 ;; Usage:
-;; Enable locally via `ghostcolumn-local-mode', or globally via
-;; `ghostcolumn-global-mode'.
+;; Enable locally via `ghostcursor-local-mode', or globally via
+;; `ghostcursor-global-mode'.
 
 ;;; Code:
 
-(defgroup ghostcolumn nil
+(defgroup ghostcursor nil
   "Restore the cursor column after save hooks."
   :group 'convenience
-  :prefix "ghostcolumn-")
+  :prefix "ghostcursor-")
 
-(defcustom ghostcolumn-before-save-hook-depth -99
-  "Depth for `ghostcolumn--before-save-hook' in `before-save-hook'.
+(defcustom ghostcursor-before-save-hook-depth -99
+  "Depth for `ghostcursor--before-save-hook' in `before-save-hook'.
 A negative depth ensures it runs early to save the column before other
 modifications occur."
   :type 'integer
-  :group 'ghostcolumn)
+  :group 'ghostcursor)
 
-(defcustom ghostcolumn-after-save-hook-depth 99
-  "Depth for `ghostcolumn--after-save-hook' in `after-save-hook'.
+(defcustom ghostcursor-after-save-hook-depth 99
+  "Depth for `ghostcursor--after-save-hook' in `after-save-hook'.
 A positive depth ensures it runs late to restore the column after all other
 post-save processing is complete."
   :type 'integer
-  :group 'ghostcolumn)
+  :group 'ghostcursor)
 
-(defvar-local ghostcolumn--saved-column nil
+(defvar-local ghostcursor--saved-column nil
   "Internal variable to store the column position before saving.")
 
-(defvar-local ghostcolumn--virtual-overlay nil
+(defvar-local ghostcursor--virtual-overlay nil
   "Overlay used to display virtual whitespace.")
 
-(defun ghostcolumn--clear-virtual-state ()
+(defun ghostcursor--clear-virtual-state ()
   "Clean up virtual overlay and hooks without modifying the buffer."
   ;; Check if the variable holds a valid overlay descriptor.
-  (when (overlayp ghostcolumn--virtual-overlay)
+  (when (overlayp ghostcursor--virtual-overlay)
     ;; Remove the overlay from the buffer display list to stop rendering it.
-    (delete-overlay ghostcolumn--virtual-overlay)
-    (setq ghostcolumn--virtual-overlay nil))
-  (setq ghostcolumn--saved-column nil)
-  (remove-hook 'pre-command-hook #'ghostcolumn--pre-command-handler t))
+    (delete-overlay ghostcursor--virtual-overlay)
+    (setq ghostcursor--virtual-overlay nil))
+  (setq ghostcursor--saved-column nil)
+  (remove-hook 'pre-command-hook #'ghostcursor--pre-command-handler t))
 
-(defun ghostcolumn--pre-command-handler ()
+(defun ghostcursor--pre-command-handler ()
   "Materialize virtual spaces on self-insert or clear the virtual overlay."
   (unwind-protect
       (when (and (not buffer-read-only)
-                 (overlayp ghostcolumn--virtual-overlay)
-                 ghostcolumn--saved-column
+                 (overlayp ghostcursor--virtual-overlay)
+                 ghostcursor--saved-column
                  (memq this-command '(self-insert-command
                                       org-self-insert-command
                                       quoted-insert)))
-        (let ((ov-start (overlay-start ghostcolumn--virtual-overlay)))
+        (let ((ov-start (overlay-start ghostcursor--virtual-overlay)))
           (when (and ov-start (eq (point) ov-start) (eolp))
-            (move-to-column ghostcolumn--saved-column t))))
+            (move-to-column ghostcursor--saved-column t))))
     ;; Clean up overlay and unregister the hook.
-    (ghostcolumn--clear-virtual-state)))
+    (ghostcursor--clear-virtual-state)))
 
-(defun ghostcolumn--before-save-hook ()
+(defun ghostcursor--before-save-hook ()
   "Save the current visual column position before saving."
   (let ((win-buf (window-buffer (selected-window))))
     (when (eq (current-buffer) (or (buffer-base-buffer win-buf)
@@ -104,21 +104,21 @@ post-save processing is complete."
       ;; variables reflect the indirect or base buffer shown in the window.
       (with-current-buffer win-buf
         ;; If a virtual overlay is already active from a previous save, preserve
-        ;; `ghostcolumn--saved-column' before clearing state.
-        (let ((col ghostcolumn--saved-column))
-          (ghostcolumn--clear-virtual-state)
-          (setq ghostcolumn--saved-column (or col (current-column))))))))
+        ;; `ghostcursor--saved-column' before clearing state.
+        (let ((col ghostcursor--saved-column))
+          (ghostcursor--clear-virtual-state)
+          (setq ghostcursor--saved-column (or col (current-column))))))))
 
-(defun ghostcolumn--after-save-hook ()
+(defun ghostcursor--after-save-hook ()
   "Restore the cursor to the previously saved column using a virtual overlay."
   (let ((win-buf (window-buffer (selected-window))))
     (when (eq (current-buffer)
               (or (buffer-base-buffer win-buf) win-buf))
       (with-current-buffer win-buf
-        (when ghostcolumn--saved-column
+        (when ghostcursor--saved-column
           ;; nil for FORCE guarantees real spaces are NEVER inserted
-          (move-to-column ghostcolumn--saved-column)
-          (let ((missing-spaces (- ghostcolumn--saved-column
+          (move-to-column ghostcursor--saved-column)
+          (let ((missing-spaces (- ghostcursor--saved-column
                                    (current-column))))
             (if (> missing-spaces 0)
                 ;; Build a virtual string containing padding spaces plus one
@@ -142,40 +142,40 @@ post-save processing is complete."
                   (overlay-put ov 'after-string display-spaces)
                   ;; Store the overlay reference in the buffer-local variable
                   ;; for tracking.
-                  (setq ghostcolumn--virtual-overlay ov)
+                  (setq ghostcursor--virtual-overlay ov)
                   ;; Register buffer-local pre-command-hook to tear down the
                   ;; overlay or materialize spaces on user action.
                   (add-hook 'pre-command-hook
-                            #'ghostcolumn--pre-command-handler nil t))
-              (setq ghostcolumn--saved-column nil))))))))
+                            #'ghostcursor--pre-command-handler nil t))
+              (setq ghostcursor--saved-column nil))))))))
 
-(defun ghostcolumn--enable ()
-  "Turn on `ghostcolumn-local-mode' for the current buffer."
+(defun ghostcursor--enable ()
+  "Turn on `ghostcursor-local-mode' for the current buffer."
   (unless (minibufferp)
-    (ghostcolumn-local-mode 1)))
+    (ghostcursor-local-mode 1)))
 
 ;;;###autoload
-(define-minor-mode ghostcolumn-local-mode
+(define-minor-mode ghostcursor-local-mode
   "Minor mode to restore the cursor column after saving."
   :lighter " RCol"
-  :group 'ghostcolumn
-  (if ghostcolumn-local-mode
+  :group 'ghostcursor
+  (if ghostcursor-local-mode
       (progn
-        (add-hook 'before-save-hook #'ghostcolumn--before-save-hook
-                  ghostcolumn-before-save-hook-depth t)
-        (add-hook 'after-save-hook #'ghostcolumn--after-save-hook
-                  ghostcolumn-after-save-hook-depth t))
+        (add-hook 'before-save-hook #'ghostcursor--before-save-hook
+                  ghostcursor-before-save-hook-depth t)
+        (add-hook 'after-save-hook #'ghostcursor--after-save-hook
+                  ghostcursor-after-save-hook-depth t))
     ;; Delete overlay and detach pre-command listener when the mode is
     ;; disabled.
-    (ghostcolumn--clear-virtual-state)
-    (remove-hook 'before-save-hook #'ghostcolumn--before-save-hook t)
-    (remove-hook 'after-save-hook #'ghostcolumn--after-save-hook t)))
+    (ghostcursor--clear-virtual-state)
+    (remove-hook 'before-save-hook #'ghostcursor--before-save-hook t)
+    (remove-hook 'after-save-hook #'ghostcursor--after-save-hook t)))
 
 ;;;###autoload
-(define-globalized-minor-mode ghostcolumn-global-mode
-  ghostcolumn-local-mode
-  ghostcolumn--enable
-  :group 'ghostcolumn)
+(define-globalized-minor-mode ghostcursor-global-mode
+  ghostcursor-local-mode
+  ghostcursor--enable
+  :group 'ghostcursor)
 
-(provide 'ghostcolumn)
-;;; ghostcolumn.el ends here
+(provide 'ghostcursor)
+;;; ghostcursor.el ends here
