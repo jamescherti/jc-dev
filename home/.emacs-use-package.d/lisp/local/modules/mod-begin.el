@@ -34,16 +34,17 @@
 
 ;;; Restore column
 
+(setq stripspace-verbose nil)
+(setq stripspace-normalize-indentation t)
+(setq stripspace-only-if-initially-clean nil)
+(setq stripspace-use-virtual-overlay nil)
+(setq stripspace-restore-column nil) ;; TODO Integrate
+
 (lightemacs-use-package restore-column
-  :commands (restore-column-global-mode
-             restore-column-local-mode)
+  :demand t
+  :functions restore-column-global-mode
   :ensure nil
   :config
-  (setq stripspace-verbose nil)
-  (setq stripspace-normalize-indentation t)
-  (setq stripspace-only-if-initially-clean nil)
-  (setq stripspace-use-virtual-overlay nil)
-  (setq stripspace-restore-column nil) ;; TODO Integrate
   (restore-column-global-mode 1))
 
 ;;; scratch

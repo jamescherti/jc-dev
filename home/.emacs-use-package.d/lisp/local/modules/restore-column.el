@@ -76,34 +76,23 @@ post-save processing is complete."
     (delete-overlay restore-column--virtual-overlay)
     (setq restore-column--virtual-overlay nil))
   (setq restore-column--saved-column nil)
-  (remove-hook 'post-command-hook #'restore-column--post-command-handler t))
+  (remove-hook 'pre-command-hook #'restore-column--pre-command-handler t))
 
-(defun restore-column--post-command-handler ()
-  "Clear the virtual overlay if point moved or user cancelled/moved."
-  (if (overlayp restore-column--virtual-overlay)
-      (let ((ov-start (overlay-start restore-column--virtual-overlay)))
-        (unless (and ov-start
-                     (eq (point) ov-start)
-                     (eolp))
-          (when (and ov-start
-                     restore-column--saved-column
-                     (> (point) ov-start)
-                     (save-excursion
-                       (goto-char ov-start)
-                       (not (eolp))))
-            (let ((pt-marker (copy-marker (point) t)))
-              (unwind-protect
-                  (progn
-                    (goto-char ov-start)
-                    (let ((missing-spaces (- restore-column--saved-column
-                                             (current-column))))
-                      (when (> missing-spaces 0)
-                        (insert (make-string missing-spaces ?\s)))))
-                (goto-char pt-marker)
-                (set-marker pt-marker nil))))
-          ;; Clean up overlay and unregister the hook.
-          (restore-column--clear-virtual-state)))
-    (restore-column--clear-virtual-state)))
+(defun restore-column--pre-command-handler ()
+  "Materialize virtual spaces on self-insert or clear the virtual overlay."
+  (when (and (overlayp restore-column--virtual-overlay)
+             restore-column--saved-column
+             (memq this-command '(self-insert-command
+                                  org-self-insert-command
+                                  quoted-insert)))
+    (let ((ov-start (overlay-start restore-column--virtual-overlay)))
+      (when (and ov-start (eq (point) ov-start) (eolp))
+        (let ((missing-spaces (- restore-column--saved-column
+                                 (current-column))))
+          (when (> missing-spaces 0)
+            (insert (make-string missing-spaces ?\s)))))))
+  ;; Clean up overlay and unregister the hook.
+  (restore-column--clear-virtual-state))
 
 (defun restore-column--before-save-hook ()
   "Save the current visual column position before saving."
@@ -156,8 +145,8 @@ post-save processing is complete."
                   (setq restore-column--virtual-overlay ov)
                   ;; Register buffer-local post-command-hook to tear down the
                   ;; overlay on user action.
-                  (add-hook 'post-command-hook
-                            #'restore-column--post-command-handler nil t))
+                  (add-hook 'pre-command-hook
+                            #'restore-column--pre-command-handler nil t))
               (setq restore-column--saved-column nil))))))))
 
 (defun restore-column--enable ()
