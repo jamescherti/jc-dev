@@ -38,14 +38,14 @@
 (setq stripspace-normalize-indentation t)
 (setq stripspace-only-if-initially-clean nil)
 (setq stripspace-use-virtual-overlay nil)
-(setq stripspace-restore-column nil) ;; TODO Integrate
+;; (setq stripspace-restore-column nil) ;; TODO Integrate
 
-(lightemacs-use-package restore-column
+(lightemacs-use-package ghostcolumn
   :demand t
-  :functions restore-column-global-mode
+  :functions ghostcolumn-global-mode
   :ensure nil
   :config
-  (restore-column-global-mode 1))
+  (ghostcolumn-global-mode 1))
 
 ;;; scratch
 
