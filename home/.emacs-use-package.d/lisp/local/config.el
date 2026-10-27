@@ -1741,6 +1741,7 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
            (buffer-terminator . "~/src/emacs/buffer-terminator.el")
            (bufferfile . "~/src/emacs/bufferfile.el")
            (compile-angel . "~/src/emacs/compile-angel.el")
+           (ghostcursor . "~/src/emacs/ghostcursor.el")
            ;; (cursorcolumn . "~/src/emacs/cursorcolumn.el")
            (dir-config . "~/src/emacs/dir-config.el")
            (easysession . "~/src/emacs/easysession.el")

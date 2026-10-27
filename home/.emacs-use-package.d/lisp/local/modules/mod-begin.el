@@ -43,7 +43,6 @@
 (lightemacs-use-package ghostcursor
   :demand t
   :functions ghostcursor-global-mode
-  :ensure nil
   :config
   (ghostcursor-global-mode 1))
 
