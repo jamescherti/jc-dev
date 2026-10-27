@@ -95,9 +95,9 @@ post-save processing is complete."
       (with-current-buffer win-buf
         ;; If a virtual overlay is already active from a previous save, preserve
         ;; `restore-column--saved-column' before clearing state.
-        (let ((col (or restore-column--saved-column (current-column))))
+        (let ((col restore-column--saved-column))
           (restore-column--clear-virtual-state)
-          (setq restore-column--saved-column col))))))
+          (setq restore-column--saved-column (or col (current-column))))))))
 
 (defun restore-column--after-save-hook ()
   "Restore the cursor to the previously saved column using a virtual overlay."
@@ -118,7 +118,7 @@ post-save processing is complete."
                       ;; current buffer. front-advance is t (insertions at start
                       ;; move it forward). rear-advance is nil (insertions at
                       ;; end do not extend it).
-                      (ov (make-overlay (point) (point) nil t)))
+                      (ov (make-overlay (point) (point))))
                   ;; Attach the 'cursor text property to the final character of
                   ;; the virtual string. This tells the display engine to render
                   ;; the cursor glyph at that visual column.
