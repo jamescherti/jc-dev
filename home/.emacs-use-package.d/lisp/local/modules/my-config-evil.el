@@ -458,11 +458,6 @@ Positive COUNT moves backward, negative COUNT moves forward."
 (evil-define-key '(insert motion) 'global (kbd "M-]")
   'my-evil-nav-forward-section)
 
-(evil-define-key '(motion) 'global (kbd "[ [")
-  'my-evil-nav-backward-section)
-(evil-define-key '(motion) 'global (kbd "] ]")
-  'my-evil-nav-forward-section)
-
 ;; Do not fail when the kill-ring is empty
 ;; To prevent the p command in Evil mode from failing when the paste ring
 ;; (akin to the clipboard in Vim) is empty, you can redefine the paste
@@ -1211,9 +1206,16 @@ word after the space that contains at least two uppercase characters."
   ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
   )
 
-(evil-define-key '(normal visual) my-intercept-mode-map
-  "{" 'evil-backward-paragraph
-  "}" 'evil-forward-paragraph)
+;; (evil-define-key '(normal visual) my-intercept-mode-map
+;;   "{" 'evil-backward-paragraph
+;;   "}" 'evil-forward-paragraph)
+
+(evil-define-key '(motion) my-intercept-mode-map
+  (kbd "[") 'my-evil-nav-backward-section
+  (kbd "]") 'my-evil-nav-forward-section
+
+  (kbd "{") 'evil-backward-paragraph
+  (kbd "}") 'evil-forward-paragraph)
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
   (kbd "M-RET") 'my-shell-pop

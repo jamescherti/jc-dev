@@ -338,13 +338,15 @@ LANG is the tree-sitter language symbol to check for availability."
 
 ;;; Functions
 
-(defun mod-filetype-install (package lang-keys &optional install-fn)
+(defun mod-filetype-install (package lang-keys &optional install-fn force)
   "Load PACKAGE and prepare the tree-sitter sources for LANG-KEYS.
 LANG-KEYS can be a single symbol or a list of symbols.
 INSTALL-FN is an optional function to call to install the parsers.
+When FORCE is non-nil, reinstall the grammars even if they are already
+available.
 It adds the configuration from `mod-filetype--treesit-language-source-alist'
 to `treesit-language-source-alist' if missing, then installs the grammars
-only if they are not already available."
+only if they are not already available or FORCE is non-nil."
   (when package
     (require package nil t))
   (let ((keys (if (listp lang-keys) lang-keys (list lang-keys)))
@@ -357,11 +359,11 @@ only if they are not already available."
       ;; Flag if at least one grammar from the list needs installation
       (unless (treesit-language-available-p key)
         (setq missing-grammar t)))
-    (when missing-grammar
+    (when (or force missing-grammar)
       (if (and install-fn (fboundp install-fn))
           (funcall install-fn)
         (dolist (key keys)
-          (unless (treesit-language-available-p key)
+          (when (or force (not (treesit-language-available-p key)))
             (treesit-install-language-grammar key))))
       ;; Clear cache so newly installed grammars are recognized immediately
       (setq mod-filetype--ts-lang-cache nil))))
@@ -369,23 +371,23 @@ only if they are not already available."
 (defun my-treesit-update-language-grammar (&optional force)
   "Update language grammar.
 When FORCE is non-nil, force installing them."
-  (interactive)
+  (interactive "P")
   ;; (mod-filetype-install PACKAGE lang-key)
   (mod-filetype-install 'markdown-mode '(markdown markdown-inline)
-                        'markdown-ts-mode-install-parsers)
+                        'markdown-ts-mode-install-parsers force)
 
-  (mod-filetype-install 'js-ts-mode 'javascript)
-  (mod-filetype-install 'typescript-ts-mode 'typescript)
-  (mod-filetype-install 'json-ts-mode 'json)
+  (mod-filetype-install 'js-ts-mode 'javascript nil force)
+  (mod-filetype-install 'typescript-ts-mode 'typescript nil force)
+  (mod-filetype-install 'json-ts-mode 'json nil force)
 
-  (mod-filetype-install 'php-ts-mode 'php 'php-ts-mode-install-parsers)
-  (mod-filetype-install 'css-ts-mode 'css)
+  (mod-filetype-install 'php-ts-mode 'php 'php-ts-mode-install-parsers force)
+  (mod-filetype-install 'css-ts-mode 'css nil force)
 
   ;; html-ts-mode: Designed strictly for parsing standard HTML. It uses only the
   ;; tree-sitter-html grammar. If you have <style> or <script> tags, the code
   ;; inside them will only receive basic HTML highlighting rather than
   ;; language-specific formatting.
-  (mod-filetype-install 'html-ts-mode 'html)
+  (mod-filetype-install 'html-ts-mode 'html nil force)
 
   ;; mhtml-ts-mode ("Multiple HTML"): Designed for mixed-language web
   ;; development. It leverages multiple Tree-sitter parsers (html, javascript,
@@ -393,17 +395,17 @@ When FORCE is non-nil, force installing them."
   ;; indentation, code completion, and exact syntax highlighting for JavaScript
   ;; and CSS code blocks nested right inside the HTML.
   (mod-filetype-install 'mhtml-ts-mode 'html
-                        'mhtml-ts-mode-install-parsers)
+                        'mhtml-ts-mode-install-parsers force)
 
-  (mod-filetype-install 'toml-ts-mode 'toml)
-  (mod-filetype-install 'python-ts-mode 'python)
+  (mod-filetype-install 'toml-ts-mode 'toml nil force)
+  (mod-filetype-install 'python-ts-mode 'python nil force)
 
-  (mod-filetype-install 'yaml-ts-mode 'yaml)
-  (mod-filetype-install 'bash-ts-mode 'bash)
-  (mod-filetype-install 'lua-ts-mode 'lua)
-  (mod-filetype-install 'c-ts-mode 'c)
-  (mod-filetype-install 'c-ts-mode 'cpp)
-  (mod-filetype-install 'dockerfile-ts-mode 'dockerfile))
+  (mod-filetype-install 'yaml-ts-mode 'yaml nil force)
+  (mod-filetype-install 'bash-ts-mode 'bash nil force)
+  (mod-filetype-install 'lua-ts-mode 'lua nil force)
+  (mod-filetype-install 'c-ts-mode 'c nil force)
+  (mod-filetype-install 'c-ts-mode 'cpp nil force)
+  (mod-filetype-install 'dockerfile-ts-mode 'dockerfile nil force))
 
 ;;; jinja2
 
