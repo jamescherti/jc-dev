@@ -422,7 +422,7 @@ Positive COUNT moves backward, negative COUNT moves forward."
         (progn
           (evil-signal-at-bob-or-eob (- (or count 1)))
           (my-evil-nav-treesit-move-defun (- cnt)))
-      (evil-forward-section-end count))
+      (evil-forward-section-begin count))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 
@@ -436,7 +436,7 @@ Positive COUNT moves backward, negative COUNT moves forward."
         (progn
           (evil-signal-at-bob-or-eob (- (or count 1)))
           (my-evil-nav-treesit-move-defun cnt))
-      (evil-backward-section-end count))
+      (evil-backward-section-begin count))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 
@@ -1212,6 +1212,13 @@ word after the space that contains at least two uppercase characters."
 ;; (evil-define-key '(normal visual) my-intercept-mode-map
 ;;   "{" 'evil-backward-paragraph
 ;;   "}" 'evil-forward-paragraph)
+
+(evil-define-key '(normal) my-intercept-mode-map
+  (kbd "[[") 'my-evil-nav-backward-section
+  (kbd "]]") 'my-evil-nav-forward-section
+
+  (kbd "{") 'evil-backward-paragraph
+  (kbd "}") 'evil-forward-paragraph)
 
 (evil-define-key '(motion) my-intercept-mode-map
   (kbd "[[") 'my-evil-nav-backward-section
