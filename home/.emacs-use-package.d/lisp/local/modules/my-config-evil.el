@@ -390,33 +390,53 @@ ORIG-FUN is the function and ARGS the arguments."
 (evil-define-key 'visual 'global (kbd "J") 'evil-join)
 
 ;; M-[ and M-]: Previous and next section
-(evil-define-motion my-evil-forward-section-begin (count)
+(defun my-evil-nav-treesit-move-defun (count)
+  "Move COUNT defuns using tree-sitter, falling back to buffer boundaries.
+Positive COUNT moves backward, negative COUNT moves forward."
+  (when (fboundp 'treesit-beginning-of-defun)
+    (let ((start-pt (point)))
+      (evil-signal-at-bob-or-eob (- count))
+      (unless (and (treesit-beginning-of-defun count)
+                   (/= (point) start-pt))
+        (if (< count 0)
+            (goto-char (point-max))
+          (goto-char (point-min)))))))
+
+(defun my-evil-nav-post-jump ()
+  "Open folds, recenter window, and pulse the line after an interactive jump."
+  (unless (evil-operator-state-p)
+    ;; (when (and (invisible-p (point))
+    ;;            (fboundp 'evil-open-fold-rec))
+    ;;   (ignore-errors (evil-open-fold-rec)))
+    (lightemacs-recenter-maybe)
+    (when (fboundp 'pulse-momentary-highlight-one-line)
+      (pulse-momentary-highlight-one-line (point)))))
+
+(evil-define-motion my-evil-nav-forward-section (count)
   "Move the cursor to the beginning of the COUNT-th next section."
   :jump t
   :type exclusive
   (let ((cnt (or count 1)))
     (if (and (fboundp 'treesit-parser-list)
-             (treesit-parser-list)
-             (fboundp 'treesit-beginning-of-defun))
-        (treesit-beginning-of-defun (- cnt))
+             (treesit-parser-list))
+        (my-evil-nav-treesit-move-defun (- cnt))
       (evil-signal-at-bob-or-eob cnt)
       (evil-forward-beginning 'evil-defun cnt))
     (unless (evil-operator-state-p)
-      (lightemacs-recenter-maybe))))
+      (my-evil-nav-post-jump))))
 
-(evil-define-motion my-evil-backward-section-begin (count)
+(evil-define-motion my-evil-nav-backward-section (count)
   "Move the cursor to the beginning of the COUNT-th previous section."
   :jump t
   :type exclusive
   (let ((cnt (or count 1)))
     (if (and (fboundp 'treesit-parser-list)
-             (treesit-parser-list)
-             (fboundp 'treesit-beginning-of-defun))
-        (treesit-beginning-of-defun cnt)
+             (treesit-parser-list))
+        (my-evil-nav-treesit-move-defun cnt)
       (evil-signal-at-bob-or-eob (- cnt))
       (evil-backward-beginning 'evil-defun cnt))
     (unless (evil-operator-state-p)
-      (lightemacs-recenter-maybe))))
+      (my-evil-nav-post-jump))))
 
 (when (display-graphic-p)
   ;; Only on display-graphic-p because the M-[ issue occurs because modern
@@ -433,10 +453,15 @@ ORIG-FUN is the function and ARGS the arguments."
   ;; snippet to identify exactly which command is currently "stealing" that M-[
   ;; prefix?
   (evil-define-key '(insert motion) 'global (kbd "M-[")
-    'my-evil-backward-section-end))
+    'my-evil-nav-backward-section))
 
 (evil-define-key '(insert motion) 'global (kbd "M-]")
-  'my-evil-forward-section-end)
+  'my-evil-nav-forward-section)
+
+(evil-define-key '(motion) 'global (kbd "[ [")
+  'my-evil-nav-backward-section)
+(evil-define-key '(motion) 'global (kbd "] ]")
+  'my-evil-nav-forward-section)
 
 ;; Do not fail when the kill-ring is empty
 ;; To prevent the p command in Evil mode from failing when the paste ring

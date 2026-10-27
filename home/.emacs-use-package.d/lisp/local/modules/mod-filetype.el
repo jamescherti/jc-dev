@@ -366,8 +366,9 @@ only if they are not already available."
       ;; Clear cache so newly installed grammars are recognized immediately
       (setq mod-filetype--ts-lang-cache nil))))
 
-(defun my-treesit-update-language-grammar ()
-  "Update language grammar."
+(defun my-treesit-update-language-grammar (&optional force)
+  "Update language grammar.
+When FORCE is non-nil, force installing them."
   (interactive)
   ;; (mod-filetype-install PACKAGE lang-key)
   (mod-filetype-install 'markdown-mode '(markdown markdown-inline)
