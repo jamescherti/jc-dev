@@ -80,9 +80,29 @@ post-save processing is complete."
 
 (defun restore-column--post-command-handler ()
   "Clear the virtual overlay if point moved or user cancelled/moved."
-  (unless (and (overlayp restore-column--virtual-overlay)
-               (eq (point) (overlay-start restore-column--virtual-overlay)))
-    ;; Clean up overlay and unregister the hook.
+  (if (overlayp restore-column--virtual-overlay)
+      (let ((ov-start (overlay-start restore-column--virtual-overlay)))
+        (unless (and ov-start
+                     (eq (point) ov-start)
+                     (eolp))
+          (when (and ov-start
+                     restore-column--saved-column
+                     (> (point) ov-start)
+                     (save-excursion
+                       (goto-char ov-start)
+                       (not (eolp))))
+            (let ((pt-marker (copy-marker (point) t)))
+              (unwind-protect
+                  (progn
+                    (goto-char ov-start)
+                    (let ((missing-spaces (- restore-column--saved-column
+                                             (current-column))))
+                      (when (> missing-spaces 0)
+                        (insert (make-string missing-spaces ?\s)))))
+                (goto-char pt-marker)
+                (set-marker pt-marker nil))))
+          ;; Clean up overlay and unregister the hook.
+          (restore-column--clear-virtual-state)))
     (restore-column--clear-virtual-state)))
 
 (defun restore-column--before-save-hook ()
