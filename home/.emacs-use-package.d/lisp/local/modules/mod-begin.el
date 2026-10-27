@@ -39,6 +39,10 @@
              restore-column-local-mode)
   :ensure nil
   :config
+  (setq stripspace-verbose nil)
+  (setq stripspace-normalize-indentation t)
+  (setq stripspace-only-if-initially-clean nil)
+  (setq stripspace-use-virtual-overlay nil)
   (setq stripspace-restore-column nil) ;; TODO Integrate
   (restore-column-global-mode 1))
 

@@ -1116,12 +1116,6 @@ subsequent GCC invocations."
 (setq gcsentinel-high-cons-threshold (* 1200 1024 1024))
 (setq gcmh-high-cons-threshold gcsentinel-high-cons-threshold)
 
-(setq stripspace-verbose nil)
-(setq stripspace-normalize-indentation t)
-(setq stripspace-restore-column t)
-(setq stripspace-only-if-initially-clean nil)
-(setq stripspace-use-virtual-overlay nil)
-
 ;; If you want the lowest possible latency and do not care about system-level
 ;; Compose keys, or if you are willing to map them entirely within Emacs using
 ;; iso-transl, you can tell Emacs to rip out the GTK input context completely.
