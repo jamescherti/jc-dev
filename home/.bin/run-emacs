@@ -75,11 +75,11 @@ main() {
   # shellcheck disable=SC1091
   source "$SCRIPT_DIR/emacs-profile.inc.sh"
 
-  EMACS_ARGS_DICT+=("--init-directory")
   if [[ $EMACS_D = "" ]]; then
     echo "Error: \$EMACS_D is empty." >&2
     exit 1
   fi
+  EMACS_ARGS_DICT+=("--init-directory")
   EMACS_ARGS_DICT+=("$EMACS_D")
 
   # Unset variables

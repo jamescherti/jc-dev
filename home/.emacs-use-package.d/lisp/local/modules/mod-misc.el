@@ -2983,13 +2983,13 @@ ARGS - the arguments passed to the original function"
 
 ;;; easysession scratch
 
-(defvar lightemacs-easysession-save-scratch t
-  "Make EasySession also save and restore the scratch buffer.")
+(require 'easysession-scratch)
+(when (fboundp 'easysession-scratch-mode)
+  (easysession-scratch-mode 1))
 
-(when lightemacs-easysession-save-scratch
-  (require 'easysession-scratch)
-  (when (fboundp 'easysession-scratch-mode)
-    (easysession-scratch-mode 1)))
+(require 'easysession-eshell)
+(when (fboundp 'easysession-eshell-mode)
+  (easysession-eshell-mode 1))
 
 ;;; git-timemachine
 
