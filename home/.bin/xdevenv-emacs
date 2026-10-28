@@ -19,6 +19,8 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
+set -x
+
 if [[ $EMACS_BIN = "" ]]; then
   EMACS_BIN="$HOME/.bin/run-emacs"
 fi
@@ -74,7 +76,7 @@ start-or-raise-emacs() {
         gdbus call --session --dest org.gnome.Shell \
           --object-path /org/gnome/Shell/Extensions/RunOrRaise \
           --method org.gnome.Shell.Extensions.RunOrRaise.Call \
-          ",${EMACS_BIN},,/Lightemacs$/"
+          ",${EMACS_BIN},,/[eE]macs$/"
       else
         bg_run "$EMACS_BIN"
       fi
