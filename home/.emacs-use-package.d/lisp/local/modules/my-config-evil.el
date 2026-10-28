@@ -208,8 +208,7 @@
         (unless (derived-mode-p 'embark-collect-mode)
           ;; Do not clear highlights during `embark-collect-mode' to prevent
           ;; disruptive color changes.
-          (my-clear-highlights))))))
-  (pulse-momentary-highlight-one-line (point)))
+          (my-clear-highlights)))))))
 
 (defun my-evil-disable-remove-spaces ()
   "Disable automatic removal of trailing spaces in `evil-mode'."
