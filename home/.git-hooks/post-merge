@@ -45,9 +45,9 @@ echo "[HOOK] post-merge"
 # done
 #
 # if [[ $UPDATE_CFG -eq 1 ]]; then
-#   pushd . &>/dev/null
+#   pushd . >/dev/null
 #   cd TEST
 #   echo "Updating home-settings dotfiles..."
 #   ./install.sh >/dev/null || echo "Error."
-#   popd &>/dev/null
+#   popd
 # fi

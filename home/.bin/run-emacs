@@ -38,7 +38,7 @@ EMACS_D="${EMACS_D:-}"
 
 # shellcheck disable=SC1090
 # In case .profile or .bashrc modify the current directory
-pushd . &>/dev/null
+pushd . >/dev/null
 
 if [[ -f ~/.profile ]]; then
   # shellcheck disable=SC1090
@@ -51,7 +51,7 @@ if [[ -f ~/.bashrc ]]; then
 fi
 
 # In case .profile or .bashrc modify the current directory
-popd &>/dev/null
+popd >/dev/null
 
 set -euf -o pipefail
 
@@ -84,10 +84,6 @@ main() {
 
   # Unset variables
   local emacs_bin="${RUN_EMACS_BIN:-}"
-  local emacs_force="$RUN_EMACS_FORCE"
-  unset EMACS_D
-  unset RUN_EMACS_FORCE
-  unset RUN_EMACS_BIN
 
   if [[ $emacs_bin == "" ]]; then
     echo "Error: \$emacs_bin is not set or empty." >&2
@@ -143,7 +139,7 @@ main() {
     EMACS_ARGS_DICT+=(--chdir "${PWD}")
   fi
 
-  if [[ "$emacs_force" -eq 0 ]] && is-emacs-server-running; then
+  if [[ "$RUN_EMACS_FORCE" -eq 0 ]] && is-emacs-server-running; then
     EMACS_DAEMON=$(run-emacsclient-nowait -e '(daemonp)' || :)
 
     if [[ $EMACS_DAEMON == "t" ]]; then

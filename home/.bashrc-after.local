@@ -268,11 +268,11 @@ alias release='so esa ssh-add-exec release'
 
 release-twine() {
   errno=0
-  pushd . &>/dev/null
+  pushd . >/dev/null
   cd "$(command git rev-parse --show-toplevel)" || return 1
   python -m build --no-isolation .
   so twine upload dist/* || errno=1
-  popd &>/dev/null || return 1
+  popd >/dev/null || return 1
   return "${errno}"
 }
 

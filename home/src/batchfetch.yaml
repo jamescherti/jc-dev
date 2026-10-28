@@ -892,6 +892,10 @@ tasks:
     path: emacs/ghostcursor.el
     revision: develop
 
+  - git: git@github.com:jamescherti/ghostcursor.el
+    path: emacs/ghostcursor.el
+    revision: develop
+
   - git: git@github.com:jamescherti/compile-angel.el
     path: emacs/compile-angel.el
     revision: develop
