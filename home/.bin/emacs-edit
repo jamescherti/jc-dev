@@ -84,14 +84,14 @@ main() {
   done
 
   # Edit
-  xdevenv-emacs &>/dev/null &
-  disown
-
   if is_emacs_server_running; then
     load_easysession_session
     emacs_open_file "$@" || :
     # run_emacsclient "$@" || :
   else
+    xdevenv-emacs &>/dev/null &
+    disown
+
     local wait_cycles=0
     local max_cycles=$((EMACS_EDIT_WAIT_SECONDS * 10))
     local after_emacs_init
