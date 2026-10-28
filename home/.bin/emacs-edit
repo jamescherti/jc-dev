@@ -76,18 +76,16 @@ load_easysession_session() {
 
 main() {
   # Requirements
-  for CMD in "$EMACS_EDIT_EMACS_BIN" emacsclient; do
+  for CMD in "$EMACS_EDIT_EMACS_BIN" xdevenv-emacs emacsclient; do
     if ! type -P "$CMD" &>/dev/null; then
       echo "Error: $CMD not found in \$PATH" >&2
       exit 1
     fi
   done
 
-  # Edit
   if is_emacs_server_running; then
     load_easysession_session
     emacs_open_file "$@" || :
-    # run_emacsclient "$@" || :
   else
     xdevenv-emacs &>/dev/null &
     disown
