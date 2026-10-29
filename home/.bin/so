@@ -72,7 +72,6 @@ if [[ "${SO_WRAPPER_ENABLED:-}" != "1" ]]; then
     # fi
   fi
 
-  set -x
   exec esa ssh-add-exec "${OPTS[@]}" "$@"
   exit 1
 fi

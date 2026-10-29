@@ -967,7 +967,7 @@ subsequent GCC invocations."
 
                            ;; le-autorevert
 
-                           le-recentf
+                           ;; le-recentf
                            le-savehist
                            le-saveplace
 
