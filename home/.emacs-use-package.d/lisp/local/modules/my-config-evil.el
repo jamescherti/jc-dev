@@ -946,7 +946,15 @@ guarantees that the new window is selected, as in Vim."
 
 (define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 ;; (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
-(define-key evil-normal-state-map (kbd "<leader>b") 'quick-fasd-find-path)
+
+;; TODO add to quick-fasd
+(defun quick-fasd-find-files ()
+  "Find files."
+  (interactive)
+  (when (fboundp 'quick-fasd-find-path)
+    (quick-fasd-find-path -1)))
+
+(define-key evil-normal-state-map (kbd "<leader>b") 'quick-fasd-find-files)
 
 (defun my-consult-buffer ()
   "My consult buffer."
