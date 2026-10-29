@@ -533,11 +533,14 @@ alias c=cd
 
 alias ca=wcalc
 
-alias s='esa ssh-add-exec ssh'
 alias home-update="so esa ssh-add-exec home-update"
 alias hup=home-update
-alias scp="esa ssh-add-exec scp"
 alias si="so smart-install"
+
+alias scp="so esa ssh-add-exec scp"
+alias ssh="so esa ssh-add-exec ssh"
+alias ssh-keyscan="so esa ssh-add-exec ssh"
+alias s='ssh'
 
 if type -P rg >/dev/null 2>&1; then
   alias gr='rg'
