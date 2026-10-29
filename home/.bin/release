@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Author: James Cherti
 # URL: https://github.com/jamescherti/jc-dev
@@ -95,8 +95,7 @@ class Release:
                     f"higher than {old_version}"
                 )
                 continue
-            else:
-                break
+            break
 
         print("Modifying...")
         python_project: bool = (self.git_root / "pyproject.toml").is_file() or (
@@ -237,6 +236,9 @@ class Release:
             self._add_version_candidate(tag)
             for match in VERSION_REGEX.findall(tag):
                 self._add_version_candidate(match)
+
+        if not self.tags:
+            self._add_version_candidate("0.9.9")
 
     def tag_version_to_number_version(self, tag_version: str) -> str:
         """
