@@ -207,8 +207,11 @@ MTIME-VAR is a symbol storing the last known modification time."
 
 ;;; DISABLED: Project tab group
 
-(defvar my-project-change-tab-group-name t
+(defvar my-project-change-tab-group-name nil
   "Enable automatically changing the project tab group.")
+
+(when my-project-change-tab-group-name
+  (setq vim-tab-bar-show-groups t))
 
 (defun my-project-change-tab-group (&rest _args)
   "Change the project in the tab group.

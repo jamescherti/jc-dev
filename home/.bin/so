@@ -62,7 +62,10 @@ if [[ "${ALL_PROXY:-}" = "" ]]; then
 
       exec esa ssh-add-exec "$@"
     else
-      if type -P tsocks &>/dev/null && [[ -f "$TSOCKS_CONF_FILE" ]]; then
+      if type -P proxychains &>/dev/null && [[ -f ~/.proxychains/proxychains.conf ]]; then
+        exec esa ssh-add-exec proxychains "$@"
+        exit 1
+      elif type -P tsocks &>/dev/null && [[ -f "$TSOCKS_CONF_FILE" ]]; then
         exec esa ssh-add-exec tsocks "$@"
         exit 1
       fi
