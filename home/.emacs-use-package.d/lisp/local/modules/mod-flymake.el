@@ -43,7 +43,7 @@
 ;; (defun mod-flymake--package-lint-ignore (orig-fun desc)
 ;;   "Bypass the \"emacs\" name check for files in a specific directory.
 ;; ORIG-FUN is the advised function.  DESC is the package description struct."
-;;   (let ((target-dir (expand-file-name "~/src/emacs/lightemacs"))
+;;   (let ((target-dir (expand-file-name "~/src/emacs-misc/lightemacs"))
 ;;         (file-name (buffer-file-name (buffer-base-buffer))))
 ;;     (when file-name
 ;;       (if (and (buffer-file-name (buffer-base-buffer))

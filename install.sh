@@ -179,20 +179,6 @@ config-bash-stdops() {
   PREFIX="$HOME/.local" ./install.sh
 }
 
-# config-lightemacs() {
-#   if [[ -d ~/src/emacs/lightemacs/ ]]; then
-#     if git-is-clean ~/src/emacs/lightemacs/; then
-#       git -C ~/src/emacs/lightemacs/ checkout develop
-#       git -C ~/src/emacs/lightemacs/ pull --rebase
-#     fi
-#   else
-#     git_clone \
-#       https://github.com/jamescherti/lightemacs \
-#       "$GIT_CLONE_DIR/lightemacs"
-#     git -C "$GIT_CLONE_DIR/lightemacs" checkout develop
-#   fi
-# }
-
 config-files() {
   secure_dir "$HOME"
   # Secure dirs

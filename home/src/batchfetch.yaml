@@ -846,15 +846,15 @@ tasks:
     revision: develop
 
   - git: git@github.com:jamescherti/pre-commit-elisp
-    path: emacs/pre-commit-elisp
+    path: emacs-misc/pre-commit-elisp
     revision: develop
 
   - git: git@github.com:jamescherti/minimal-emacs.d
-    path: emacs/minimal-emacs.d
+    path: emacs-misc/minimal-emacs.d
     revision: develop
 
   - git: git@github.com:jamescherti/lightemacs
-    path: emacs/lightemacs
+    path: emacs-misc/lightemacs
     revision: develop
 
   - git: git@github.com:jamescherti/kirigami.el
@@ -866,7 +866,7 @@ tasks:
     revision: develop
 
   - git: git@github.com:jamescherti/outline-yaml.el
-    path: emacs/outline-yaml.el
+    path: emacs-misc/outline-yaml.el
     revision: develop
 
   - git: git@github.com:jamescherti/outline-indent.el

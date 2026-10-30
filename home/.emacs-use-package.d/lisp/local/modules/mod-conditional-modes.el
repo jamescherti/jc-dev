@@ -306,7 +306,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                   (when (and env-allow-syntax-checker-package-lint
                              ;; TODO add exceptions like these to the
                              ;; .my-dir-locals.el
-                             (not (or (file-in-directory-p file-name "~/src/emacs/lightemacs")
+                             (not (or (file-in-directory-p file-name "~/src/emacs-misc/lightemacs")
                                       (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
                                       (string= base-name "init.el")
                                       (string= base-name "early-init.el"))))

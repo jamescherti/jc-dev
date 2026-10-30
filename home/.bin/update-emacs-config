@@ -78,7 +78,7 @@ init() {
   fi
 
   if [[ -z ${SRC_DIR:-} ]]; then
-    SRC_DIR="$DEST_DIR/src/emacs"
+    SRC_DIR="$DEST_DIR/src/emacs-misc"
     if ! [[ -d "$SRC_DIR/lightemacs" ]]; then
       SRC_DIR="$HOME/.jc-dev"
     else

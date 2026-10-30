@@ -99,8 +99,8 @@ actions:
     shell: true
     tags: install
     list_commands:
-      - 'rsync --times -a ./emacs/minimal-emacs.d/*init.el* ~/src/emacs/lightemacs/lisp/lightemacs/init/'
-      - 'cd ~/src/emacs/lightemacs/lisp/lightemacs/init/ && pathaction -t install .'
+      - 'rsync --times -a ./emacs-misc/minimal-emacs.d/*init.el* ~/src/emacs-misc/lightemacs/lisp/lightemacs/init/'
+      - 'cd ~/src/emacs-misc/lightemacs/lisp/lightemacs/init/ && pathaction -t install .'
 
   - path_match:
       - "*/lightemacs/*"

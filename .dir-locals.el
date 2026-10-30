@@ -2,7 +2,7 @@
 
 ((nil . (;; pre-commit-elisp .dir-locals.el - https://github.com/jamescherti/pre-commit-elisp
          (pre-commit-elisp-load-path . ("home/.emacs-use-package.d/lisp/local/"
-                                        "../../emacs/lightemacs/"))
+                                        "../../emacs-misc/lightemacs/"))
          (pre-commit-elisp-error-on-compile-warning . t)
          ;; ;; Other
          ;; (indent-tabs-mode . nil)
