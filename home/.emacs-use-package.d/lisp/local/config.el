@@ -1640,7 +1640,8 @@ This uses an around advice to trap errors and verify file timestamps."
 (defun my-straight-list-unpinned-packages ()
   "Find and display packages not present in straight's profile lockfiles."
   (interactive)
-  (require 'subr-x)
+  (when (< emacs-major-version 28)
+    (require 'subr-x))
   (when (and (fboundp 'straight--lockfile-read-all)
              (fboundp 'hash-table-keys))
     (let* ((lockfile-repos (mapcar #'car (straight--lockfile-read-all)))
