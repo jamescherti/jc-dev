@@ -69,6 +69,15 @@ def main() -> None:
     if melpazoid.exists():
         melpazoid.unlink()
 
+    subprocess.check_call(
+        [
+            "sre",
+            "actions/workflows/melpazoid.yml/badge.svg",
+            "actions/workflows/ci.yml/badge.svg",
+            ".",
+        ]
+    )
+
 
 if __name__ == "__main__":
     main()
