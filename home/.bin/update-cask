@@ -65,6 +65,10 @@ def main() -> None:
 
     subprocess.check_call(["update-cookiecutter", "addon-cask"])
 
+    melpazoid = Path(".github/workflows/melpazoid.yml")
+    if melpazoid.exists():
+        melpazoid.unlink()
+
 
 if __name__ == "__main__":
     main()
