@@ -139,9 +139,7 @@
 (defun mod-buffer-terminator-empty-all ()
   "Kill all buffers."
   (interactive)
-  (mod-buffer-terminator-empty)
-  (when (fboundp 'tmux-reset)
-    (tmux-reset nil)))
+  (mod-buffer-terminator-empty))
 
 (defun mod-buffer-terminator-buffer-list ()
   "Create a buffer listing the names of all open buffers."
@@ -197,6 +195,8 @@ BUFFERS is a buffer or a list of alive buffers."
   "Kill all visible buffers.
 BUFFERS is a buffer or a list of alive buffers."
   (let ((rules '((call-function . mod-buffer-terminator-predicate)
+                 ;; (keep-buffer-property . special)
+                 (keep-buffer-property . process)
                  (call-function . mod-buffer-terminator--non-file-buffer-name-starts-with-space)
                  (return . :kill))))
     (if (fboundp 'buffer-terminator-apply-rules)
