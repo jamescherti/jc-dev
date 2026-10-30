@@ -1328,7 +1328,6 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jamescherti/ef-themes"
              :branch "main")
-
             ;; Forks of maintained packages
             (ztree
              :type git :host github
@@ -1742,6 +1741,7 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
            (bufferfile . "~/src/emacs/bufferfile.el")
            (compile-angel . "~/src/emacs/compile-angel.el")
            (ghostcursor . "~/src/emacs/ghostcursor.el")
+           (terminal-colors . "~/src/emacs/terminal-colors.el")
            ;; (cursorcolumn . "~/src/emacs/cursorcolumn.el")
            (dir-config . "~/src/emacs/dir-config.el")
            (easysession . "~/src/emacs/easysession.el")

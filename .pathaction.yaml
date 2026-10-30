@@ -47,6 +47,7 @@ actions:
 
   - path_match: "*"
     shell: true
+    # command: "export JC_DEV_UNATTENDED=1; $(type -P so || echo '') ./install.sh"
     command: "export JC_DEV_UNATTENDED=1; $(type -P so || echo '') ./install.sh"
     tags:
       - install

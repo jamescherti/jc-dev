@@ -507,6 +507,50 @@ Opens a split window showing the added and removed features."
     (lightemacs-theme-create-loader "ef-elea-light" 'ef-themes)
     (lightemacs-theme-create-loader "ef-cyprus" 'ef-themes)))
 
+;;; Terminal themes
+
+;; ;;; terminal themes
+;;
+;; (lightemacs-use-package terminal-colors-eat
+;;   :after eat
+;;   :ensure nil
+;;   ;; :diminish terminal-colors-eat-mode
+;;   :commands terminal-colors-eat-mode
+;;   :hook (eat-mode . terminal-colors-eat-mode))
+;;
+;; (lightemacs-use-package terminal-colors-vterm
+;;   :after vterm
+;;   :ensure nil
+;;   ;; :diminish terminal-colors-vterm-mode
+;;   :commands terminal-colors-vterm-mode
+;;   :hook (vterm-mode . terminal-colors-vterm-mode))
+;;
+;; (lightemacs-use-package terminal-colors-term
+;;   :after term
+;;   :ensure nil
+;;   :commands terminal-colors-term-mode
+;;   :hook (term-mode . terminal-colors-term-mode))
+
+(use-package terminal-colors
+  :straight (terminal-colors
+             :type git
+             :host github
+             :repo "jamescherti/terminal-colors.el")
+  :custom
+  (terminal-colors-default-theme "gnome-terminal-tango-dark")
+  :config
+  (with-eval-after-load 'vterm
+    (require 'terminal-colors-vterm)
+    (terminal-colors-vterm-mode 1))
+
+  (with-eval-after-load 'eat
+    (require 'terminal-colors-eat)
+    (terminal-colors-eat-mode 1))
+
+  (with-eval-after-load 'term
+    (require 'terminal-colors-term)
+    (terminal-colors-term-mode 1)))
+
 ;;; Provide
 
 (provide 'mod-begin)

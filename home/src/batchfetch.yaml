@@ -892,6 +892,10 @@ tasks:
     path: emacs/ghostcursor.el
     revision: develop
 
+  - git: git@github.com:jamescherti/terminal-colors.el
+    path: emacs/terminal-colors.el
+    revision: main
+
   - git: git@github.com:jamescherti/proxymacs.el
     path: emacs/proxymacs.el
     revision: develop

@@ -37,41 +37,37 @@ unset no_proxy
 set -e
 set -u
 
-if [[ "${SO_WRAPPER_ENABLED:-}" != "1" ]]; then
-  export SO_WRAPPER_ENABLED=1
-
-  # shellcheck disable=SC2157
-  if [[ -s ~/.config.sh ]]; then
-    # shellcheck disable=SC1090
-    source ~/.config.sh
-  fi
-
-  OPTS=()
-  if [[ "${MAIN_PROXY:-}" == "" ]]; then
-    if type -P proxychains &>/dev/null && [[ -f ~/.proxychains.conf ]]; then
-      OPTS+=(proxychains -q -f "$HOME/.proxychains.conf")
-    fi
-
-    # export TSOCKS_CONF_FILE="$HOME/.tsocks.conf"
-    # if pgrep -x squid &>/dev/null; then
-    #   read -r -i internet -p "User: " PROXY_USER
-    #   read -r -s -p "Password: " PROXY_PASSWORD
-    #   echo
-    #   export http_proxy="http://${PROXY_USER}:${PROXY_PASSWORD}@127.0.0.1:3128"
-    #   export https_proxy="$http_proxy"
-    #   export HTTP_PROXY="$http_proxy"
-    #   export HTTPS_PROXY="$https_proxy"
-    #
-    #   exec esa ssh-add-exec "$@"
-    # elif type -P proxychains &>/dev/null && [[ -f ~/.proxychains/proxychains.conf ]]; then
-    #   exec esa ssh-add-exec proxychains "$@"
-    #   exit 1
-    # elif type -P tsocks &>/dev/null && [[ -f "$TSOCKS_CONF_FILE" ]]; then
-    #   exec esa ssh-add-exec tsocks "$@"
-    #   exit 1
-    # fi
-  fi
-
-  exec esa ssh-add-exec "${OPTS[@]}" "$@"
-  exit 1
+# shellcheck disable=SC2157
+if [[ -s ~/.config.sh ]]; then
+  # shellcheck disable=SC1090
+  source ~/.config.sh
 fi
+
+OPTS=()
+if [[ "${MAIN_PROXY:-}" == "" ]]; then
+  if type -P proxychains &>/dev/null && [[ -f ~/.proxychains.conf ]]; then
+    OPTS+=(proxychains -q -f "$HOME/.proxychains.conf")
+  fi
+
+  # export TSOCKS_CONF_FILE="$HOME/.tsocks.conf"
+  # if pgrep -x squid &>/dev/null; then
+  #   read -r -i internet -p "User: " PROXY_USER
+  #   read -r -s -p "Password: " PROXY_PASSWORD
+  #   echo
+  #   export http_proxy="http://${PROXY_USER}:${PROXY_PASSWORD}@127.0.0.1:3128"
+  #   export https_proxy="$http_proxy"
+  #   export HTTP_PROXY="$http_proxy"
+  #   export HTTPS_PROXY="$https_proxy"
+  #
+  #   exec esa ssh-add-exec "$@"
+  # elif type -P proxychains &>/dev/null && [[ -f ~/.proxychains/proxychains.conf ]]; then
+  #   exec esa ssh-add-exec proxychains "$@"
+  #   exit 1
+  # elif type -P tsocks &>/dev/null && [[ -f "$TSOCKS_CONF_FILE" ]]; then
+  #   exec esa ssh-add-exec tsocks "$@"
+  #   exit 1
+  # fi
+fi
+
+exec esa ssh-add-exec "${OPTS[@]}" "$@"
+exit 1
