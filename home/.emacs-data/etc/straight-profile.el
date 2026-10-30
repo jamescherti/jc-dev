@@ -32,6 +32,7 @@
  ("compat" . "90880f81419577e1d3f68424d2a3adf31e6d663e") ; Version 31.1.0.0 | RSS RELEASE
  ("cond-let" . "3b88187fe067d4ca3dec3ef8a329b0ce18bdb356")
  ("transient" . "0cacc84ff0c7df126e194666ff8b8a1e6082e796")
+ ("ghostel" . "2c13feaa31da8a55a0471210cd26414d7265ee1e") ; TODO RSS
 
  ;; Maintained
  ("dash.el" . "fcb5d831fc08a43f984242c7509870f30983c27c") ; 2.20.0 | RSS RELEASE

@@ -1426,6 +1426,10 @@ This uses an around advice to trap errors and verify file timestamps."
              :type git :host github
              :repo "jamescherti/transient"
              :branch "main")
+            (ghostel
+             :type git :host github
+             :repo "jamescherti/ghostel"
+             :branch "main")
             (wgrep
              :type git :host github
              :repo "jamescherti/Emacs-wgrep"
