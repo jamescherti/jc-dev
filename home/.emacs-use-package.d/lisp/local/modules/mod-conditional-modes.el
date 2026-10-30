@@ -188,13 +188,16 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 (defun my-code-checker-and-reformatter-ignore-p ()
   "Files where modes like Flymake and Apheleia are disabled."
   (when-let* ((buffer (my-code-checker-get-buffer))
-              (file-name (buffer-file-name buffer))
-              (base-name (file-name-nondirectory file-name)))
+              (full-path (buffer-file-name buffer))
+              (base-name (file-name-nondirectory full-path)))
     (or (string= base-name "make.conf") ; Gentoo
+        (string= base-name "Cask")
         (string= base-name "PKGBUILD")
         (string= base-name ".dir-locals.el")
         (string= base-name ".my-dir-locals.el")
         (string= base-name "straight-profile.el")
+        (string-prefix-p "=template=" base-name)
+        (string-match-p "/\\.cookiecutter/" full-path)
         (string-suffix-p ".ebuild" base-name))))
 
 ;; Evaluate .my-dir-locals.el
