@@ -38,8 +38,9 @@ if type -P git-setup &>/dev/null; then
   git-setup
 fi
 
-echo "[INFO] Git garbage collection"
-git gc --prune=now
+# Risk of data loss
+# echo "[INFO] Git garbage collection"
+# git gc --prune=now
 
 echo "[INFO] Git: Update index"
 if [[ "$(git update-index --show-index-version)" != 4 ]]; then
