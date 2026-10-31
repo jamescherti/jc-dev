@@ -29,7 +29,7 @@
 set -euo pipefail
 
 # Verify we are inside a Git work tree
-if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+if [[ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ]]; then
   echo "Error: Not inside a Git working tree." >&2
   exit 1
 fi
@@ -41,6 +41,11 @@ status_output="$(git status --porcelain)"
 if [[ -z "${status_output}" ]]; then
   echo "Working tree is already clean. Nothing to reset."
   exit 0
+fi
+
+if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+  echo "Error: Repository does not have any commits yet (HEAD is unborn)." >&2
+  exit 1
 fi
 
 # Check specifically for tracked modifications (staged or unstaged)
@@ -56,7 +61,17 @@ git status --short --untracked-files=no
 echo "------------------------------------------------------------"
 
 # Prompt for confirmation directly from the terminal
-read -r -p "Are you sure you want to run 'git reset --hard HEAD'? [y/N] " response </dev/tty
+if [[ ! -r /dev/tty ]]; then
+  echo "Error: Interactive terminal (/dev/tty) is not available." >&2
+  exit 1
+fi
+
+response=""
+if ! read -r -p "Are you sure you want to run 'git reset --hard HEAD'? [y/N] " response </dev/tty; then
+  echo
+  echo "Reset aborted."
+  exit 1
+fi
 
 case "${response}" in
 [yY][eE][sS] | [yY])
