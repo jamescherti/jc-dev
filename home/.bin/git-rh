@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+set -euo pipefail
+
+# Verify we are inside a Git work tree
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Error: Not inside a Git working tree." >&2
+  exit 1
+fi
+
+# Capture repository status (staged, unstaged, and untracked files)
+status_output="$(git status --porcelain)"
+
+# If the working tree is completely clean, no confirmation is needed
+if [[ -z "${status_output}" ]]; then
+  echo "Working tree is already clean. Nothing to reset."
+  exit 0
+fi
+
+# Check specifically for tracked modifications (staged or unstaged)
+# git diff-index --quiet HEAD -- returns 1 if there are differences, 0 if clean
+if git diff-index --quiet HEAD -- 2>/dev/null; then
+  echo "No tracked changes to reset (only untracked files are present)."
+  exit 0
+fi
+
+echo "The following tracked changes will be permanently discarded:"
+echo "------------------------------------------------------------"
+git status --short --untracked-files=no
+echo "------------------------------------------------------------"
+
+# Prompt for confirmation directly from the terminal
+read -r -p "Are you sure you want to run 'git reset --hard HEAD'? [y/N] " response </dev/tty
+
+case "${response}" in
+[yY][eE][sS] | [yY])
+  git reset --hard HEAD
+  ;;
+*)
+  echo "Reset aborted."
+  exit 1
+
+  ;;
+esac
