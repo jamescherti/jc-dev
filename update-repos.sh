@@ -46,7 +46,7 @@ update-repos() {
   # cd "$SCRIPT_DIR"
 
   # Git checkout to default branch and git pull --ff-only
-  local git_pull_my_repo="$SCRIPT_DIR/.bin/git-pull-my-repo"
+  local git_pull_my_repo="$SCRIPT_DIR/home/.bin/git-pull-my-repo"
 
   if ! [[ -f "$git_pull_my_repo" ]]; then
     echo "Error: The script doesn't exist: $git_pull_my_repo" >&2
