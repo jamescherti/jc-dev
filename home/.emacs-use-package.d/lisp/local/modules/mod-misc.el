@@ -2150,16 +2150,16 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   ;; Python
   (progn
-    (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
+    ;; (setf (alist-get 'isort apheleia-formatters) '("isort" "--stdout" "-"))
 
     ;; Create one super-formatter that sorts imports (I) and fixes PEP 8 (E, W)
-    (setf (alist-get 'ruff-isort apheleia-formatters)
-          '("ruff" "check"
-            "-n"
-            "--select" "I,E,W"   ;; I = isort, E/W = pycodestyle (autopep8)
-            "--fix" "--fix-only"
-            "--stdin-filename" filepath
-            "-"))
+    ;; (setf (alist-get 'ruff-isort apheleia-formatters)
+    ;;       '("ruff" "check"
+    ;;         "-n"
+    ;;         "--select" "I,E,W"   ;; I = isort, E/W = pycodestyle (autopep8)
+    ;;         "--fix" "--fix-only"
+    ;;         "--stdin-filename" filepath
+    ;;         "-"))
 
     ;; Ruff: Format code (replaces autopep8/Black)
     (setf (alist-get 'ruff-format apheleia-formatters)
@@ -2170,13 +2170,14 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             "--silent"                 ;; Keep Apheleia quiet
             "-"))
 
-    (setf (alist-get 'autopep8 apheleia-formatters)
-          '("autopep8"
-            "--max-line-length=88"
-            ;; --aggressive is too aggressive when it comes to max-line-length
-            ;; "--aggressive"
-            ;; "--aggressive"
-            "-")))
+    ;; (setf (alist-get 'autopep8 apheleia-formatters)
+    ;;       '("autopep8"
+    ;;         "--max-line-length=88"
+    ;;         ;; --aggressive is too aggressive when it comes to max-line-length
+    ;;         ;; "--aggressive"
+    ;;         ;; "--aggressive"
+    ;;         "-"))
+    )
 
   (cond
    ((executable-find "ruff")
@@ -2189,21 +2190,62 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     ;; (setf (alist-get 'python-mode apheleia-mode-alist) '(autopep8 ruff-isort))
     ;; (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(autopep8 ruff-isort))
 
-    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format ruff-isort))
-    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format ruff-isort)))
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-format
+                                                         ;; ruff-isort
+                                                         ))
+    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-format
+                                                            ;; ruff-isort
+                                                            )))
 
-   (t
-    ;; Legacy
-    (setf (alist-get 'autopep8 apheleia-formatters)
-          '("autopep8"
-            "--max-line-length=88"
-            ;; --aggressive is too aggressive when it comes to max-line-length
-            ;; "--aggressive"
-            ;; "--aggressive"
-            "-"))
+   ;; (t
+   ;;  ;; Legacy
+   ;;  (setf (alist-get 'autopep8 apheleia-formatters)
+   ;;        '("autopep8"
+   ;;          "--max-line-length=88"
+   ;;          ;; --aggressive is too aggressive when it comes to max-line-length
+   ;;          ;; "--aggressive"
+   ;;          ;; "--aggressive"
+   ;;          "-"))
+   ;;
+   ;;  (setf (alist-get 'python-mode apheleia-mode-alist) '(isort autopep8))
+   ;;  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8)))
+   )
 
-    (setf (alist-get 'python-mode apheleia-mode-alist) '(isort autopep8))
-    (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8))))
+  ;; PHP
+  ;; (setf (alist-get 'phpcbf apheleia-formatters)
+  ;;       '("phpcbf" "--standard=PEAR" "-"))
+  ;;
+  ;; (setf (alist-get 'phpcbf apheleia-formatters)
+  ;;       '("sh" "-c" "phpcbf --standard=PEAR \"$1\" >/dev/null 2>&1; [ $? -le 2 ]" "--" inplace))
+
+  (setf (alist-get 'phpcbf apheleia-formatters)
+        '("sh" "-c"
+          "\"$@\" >&2; status=$?; case \"$status\" in 0|1|2) exit 0 ;; *) exit \"$status\" ;; esac"
+          "apheleia-phpcbf"
+          "phpcbf" "--standard=PEAR" inplace)
+        (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
+        (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf)
+
+  ;; (cl-defun my-apheleia-phpcbf-buffer (&key scratch callback &allow-other-keys)
+  ;;   "Format SCRATCH buffer with `phpcbf' and run CALLBACK."
+  ;;   (with-current-buffer scratch
+  ;;     (let ((stdout (generate-new-buffer " *apheleia-phpcbf*")))
+  ;;       (unwind-protect
+  ;;           (let ((status (call-process-region
+  ;;                          (point-min) (point-max)
+  ;;                          "phpcbf" nil (list stdout nil) nil
+  ;;                          "--standard=PEAR" "-")))
+  ;;             (when (memq status '(1 2))
+  ;;               (erase-buffer)
+  ;;               (insert-buffer-substring stdout))
+  ;;             (when (memq status '(0 1 2))
+  ;;               (funcall callback)))
+  ;;         (kill-buffer stdout)))))
+  ;;
+  ;; (when (fboundp 'my-apheleia-phpcbf-buffer)
+  ;;   (setf (alist-get 'phpcbf apheleia-formatters) #'my-apheleia-phpcbf-buffer)
+  ;;   (setf (alist-get 'php-mode apheleia-mode-alist) 'phpcbf)
+  ;;   (setf (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
 
   ;; SH/Bash shell scripts
   (setf (alist-get 'shfmt apheleia-formatters)

@@ -280,12 +280,15 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
               (when env-allow-reformatters
                 ;; All modes
                 (when (and (fboundp 'apheleia-mode)
-                           (derived-mode-p 'python-mode
-                                           'python-ts-mode
-                                           'bash-ts-mode
-                                           'sh-mode
-                                           'yaml-mode
-                                           'yaml-ts-mode))
+                           (derived-mode-p
+                            'python-mode
+                            'python-ts-mode
+                            'php-ts-mode
+                            'php-mode
+                            'bash-ts-mode
+                            'sh-mode
+                            'yaml-mode
+                            'yaml-ts-mode))
                   (if (and eglot-enabled
                            (or (derived-mode-p 'python-mode)
                                (derived-mode-p 'python-ts-mode)))
