@@ -2218,13 +2218,17 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   ;; (setf (alist-get 'phpcbf apheleia-formatters)
   ;;       '("sh" "-c" "phpcbf --standard=PEAR \"$1\" >/dev/null 2>&1; [ $? -le 2 ]" "--" inplace))
 
-  (setf (alist-get 'phpcbf apheleia-formatters)
-        '("sh" "-c"
-          "\"$@\" >&2; status=$?; case \"$status\" in 0|1|2) exit 0 ;; *) exit \"$status\" ;; esac"
-          "apheleia-phpcbf"
-          "phpcbf" "--standard=PEAR" inplace)
-        (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
-        (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf)
+  (with-eval-after-load 'apheleia
+    (setf (alist-get 'phpcbf apheleia-formatters)
+          '("sh" "-c"
+            "\"$@\" >&2; status=$?; case \"$status\" in 0|1|2) exit 0 ;; *) exit \"$status\" ;; esac"
+            "apheleia-phpcbf"
+            "phpcbf"
+            (concat "--standard="
+                    (expand-file-name "~/.config/phpcs/pear.xml"))
+            inplace)
+          (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
+          (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
 
   ;; (cl-defun my-apheleia-phpcbf-buffer (&key scratch callback &allow-other-keys)
   ;;   "Format SCRATCH buffer with `phpcbf' and run CALLBACK."
