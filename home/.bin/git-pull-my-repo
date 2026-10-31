@@ -26,6 +26,19 @@
 # SOFTWARE.
 #
 
+set -euf -o pipefail
+
+# shellcheck disable=SC2329
+error_handler() {
+  local errno="$?"
+  echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
+    "(${BASH_COMMAND} exited with status $errno)" >&2
+  exit "${errno}"
+}
+
+trap "error_handler" ERR
+set -o errtrace
+
 if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null | cut -d/ -f1)" 2>/dev/null | grep -q 'jamescherti/'; then
   set -x
 
@@ -33,7 +46,8 @@ if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 
   # one computer, pulling on the second computer does not remove the local
   # reference to that remote branch (e.g., origin/feature-branch). You can clean
   # these up manually during your sync:
-  git checkout-default && git pull --ff-only --prune --prune-tags
+  git checkout-default
+  git pull --ff-only --prune --prune-tags
 
   git clean -f -d
 
