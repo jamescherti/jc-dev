@@ -33,7 +33,13 @@ if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 
   # one computer, pulling on the second computer does not remove the local
   # reference to that remote branch (e.g., origin/feature-branch). You can clean
   # these up manually during your sync:
-  git checkout-default && git pull --ff-only --prune
+  git checkout-default && git pull --ff-only --prune --prune-tags
+
+  git clean -f -d
+
+  # Git stashes are local. If you use git stash on Computer 1, those changes
+  # will not sync to your remote repository when you push.
+  git stash clear
 
   set +x
 fi
