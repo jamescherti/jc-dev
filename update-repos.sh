@@ -105,8 +105,6 @@ bf-or-git() {
 }
 
 prepare-dependencies() {
-  set -x
-
   if ! [[ -d "$SRC_DIR/python/batchfetch/" ]]; then
     git clone \
       "git@github.com:jamescherti/batchfetch" \
