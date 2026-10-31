@@ -353,31 +353,6 @@ any new ones."
                               python-ts-mode
                               bash-ts-mode
                               elisp-mode
-                              ;; org-capture
-                              ;; org-compat
-                              ;; org-cycle
-                              ;; org-element
-                              ;; org-element-ast
-                              ;; org-entities
-                              ;; org-faces
-                              ;; org-fold
-                              ;; org-fold-core
-                              ;; org-footnote
-                              ;; org-ibullets
-                              ;; org-ibullets-autoloads
-                              ;; org-id
-                              ;; org-indent
-                              ;; org-keys
-                              ;; org-list
-                              ;; org-loaddefs
-                              ;; org-macro
-                              ;; org-macs
-                              ;; org-pcomplete
-                              ;; org-persist
-                              ;; org-refile
-                              ;; org-src
-                              ;; org-table
-                              ;; org-version
                               ))
   ;; (lazy-loader-buffers
   ;;  '(("*tmux*" .
