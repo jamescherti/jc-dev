@@ -513,9 +513,9 @@ Opens a split window showing the added and removed features."
              :type git
              :host github
              :repo "jamescherti/terminal-colors.el")
-  ;; (terminal-colors-default-theme "gnome-terminal-tango-dark")
   :config
-  (setq terminal-colors-default-theme "konsole-white-on-black")
+  (setq terminal-colors-default-theme "gnome-terminal-tango-dark")
+  ;; (setq terminal-colors-default-theme "konsole-white-on-black")
   (with-eval-after-load 'vterm
     (terminal-colors-vterm-mode 1))
 
