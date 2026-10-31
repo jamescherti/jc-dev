@@ -57,6 +57,7 @@ actions:
       - "--exclude=my-*"
       - "--exclude=.git"
       - "--exclude=make-local.conf"
+      - "--exclude=make.profile"
       - "{{ cwd }}/dotfiles/jc-gentoo-portage/"
       - "/etc/portage/"
 
