@@ -47,7 +47,7 @@ if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 
   # reference to that remote branch (e.g., origin/feature-branch). You can clean
   # these up manually during your sync:
   git checkout-default
-  git pull --ff-only --prune --prune-tags
+  git pull --ff-only --prune
 
   git clean -f -d
 
