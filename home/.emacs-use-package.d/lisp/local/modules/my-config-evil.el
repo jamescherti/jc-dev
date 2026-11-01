@@ -1077,7 +1077,7 @@ word after the space that contains at least two uppercase characters."
 
 ;;; Equivalent to Vim's Ctrl-p and Ctrl-n
 
-;; (defun my-cape-dabbrev ()
+;; (defun my-cape-dabbrev-forward ()
 ;;   "Complete the abbreviation before point using Cape.
 ;; Signal a user error when no abbreviation precedes point."
 ;;   (interactive)
@@ -1096,18 +1096,33 @@ word after the space that contains at least two uppercase characters."
 ;;
 
 (evil-define-key 'insert 'global
-  (kbd "C-p") 'my-cape-dabbrev
-  (kbd "C-n") 'my-cape-dabbrev)
+  (kbd "C-p") 'my-cape-dabbrev-backward
+  (kbd "C-n") 'my-cape-dabbrev-forward)
 
-(require 'cape)
-(require 'dabbrev)
-(require 'cl-lib)
+(require 'cl-lib) ;; TODO remove?
 
-(defun my-dabbrev-sort-by-distance (beg end candidates)
-  "Sort CANDIDATES by backward distance from point.
+;; Rank Cape Dabbrev candidates by their occurrence positions because its
+;; default candidate order does not represent distance from point. The normal
+;; command searches both directions; the backward command prioritizes preceding
+;; occurrences, then wraps from the buffer end. Candidates absent from the
+;; accessible source buffer follow local matches.
+;;
+;; Markers track the completion region as text changes and exclude it from the
+;; searches. Sorting metadata is attached directly to the completion table so
+;; Corfu applies it during both initial and subsequent updates. This metadata
+;; takes precedence over corfu-history-mode's default sorter when
+;; corfu-sort-override-function is nil.
+
+(defun my-dabbrev-sort-by-distance (beg end candidates &optional backward)
+  "Sort CANDIDATES by distance from point.
 BEG and END are markers delimiting the active completion region.
-Rank preceding occurrences first, nearest first, then wrap from
-the end of the accessible buffer.  Exclude the completion region.
+Exclude that region and match complete symbols in the accessible
+source buffer.
+
+When BACKWARD is nil, rank by the nearest occurrence in either
+direction.  Otherwise, rank preceding occurrences first, nearest
+first, then wrap from the end of the accessible buffer.
+
 Keep candidates absent from the buffer last in their original order."
   (let ((buffer (marker-buffer beg)))
     (if (not (and (buffer-live-p buffer)
@@ -1130,19 +1145,31 @@ Keep candidates absent from the buffer last in their original order."
                                       "\\_>"))
                              (distance most-positive-fixnum))
                          (goto-char beg)
-                         (if (re-search-backward regexp nil t)
+                         (when (re-search-backward regexp nil t)
+                           (setq distance
+                                 (- origin (match-beginning 0))))
+                         (if backward
+                             (when (= distance most-positive-fixnum)
+                               (goto-char (point-max))
+                               (when (re-search-backward regexp end t)
+                                 (setq distance
+                                       (+ (- origin (point-min))
+                                          (- (point-max)
+                                             (match-beginning 0))))))
+                           (goto-char end)
+                           (when (re-search-forward regexp nil t)
                              (setq distance
-                                   (- origin (match-beginning 0)))
-                           (goto-char (point-max))
-                           (when (re-search-backward regexp end t)
-                             (setq distance
-                                   (+ (- origin (point-min))
-                                      (- (point-max)
-                                         (match-beginning 0))))))
+                                   (min distance
+                                        (- (match-beginning 0) origin)))))
                          (cons distance candidate)))
                      candidates)))
               (mapcar #'cdr
                       (cl-stable-sort ranked #'< :key #'car)))))))))
+
+(defun my-dabbrev-sort-by-backward-distance (beg end candidates)
+  "Sort CANDIDATES by backward distance, excluding BEG through END.
+Rank preceding occurrences first, then wrap from the buffer end."
+  (my-dabbrev-sort-by-distance beg end candidates t))
 
 (defun my-dabbrev-completion-table (table sorter string predicate action)
   "Delegate completion to TABLE with SORTER in its metadata.
@@ -1154,59 +1181,60 @@ Pass STRING, PREDICATE and ACTION through to TABLE."
         ,@(cdr (completion-metadata string table predicate)))
     (complete-with-action action table string predicate)))
 
-(defun my-cape-dabbrev-capf ()
-  "Return Cape Dabbrev completions ordered by local symbol proximity.
-Return nil when no abbreviation precedes point."
-  (when (and (> (point) (if (minibufferp)
-                            (minibuffer-prompt-end)
-                          (point-min)))
-             (save-excursion
-               (backward-char 1)
-               (looking-at-p
-                (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
-    (let ((result (cape-dabbrev)))
-      (when result
-        (let* ((beg (copy-marker (nth 0 result)))
-               (end (copy-marker (nth 1 result) t))
-               (sorter
-                (apply-partially #'my-dabbrev-sort-by-distance beg end))
-               (table
-                (apply-partially #'my-dabbrev-completion-table
-                                 (nth 2 result) sorter)))
-          (append (list beg end table)
-                  (list :display-sort-function sorter
-                        :cycle-sort-function sorter)
-                  (nthcdr 3 result)))))))
+(defun my-cape-dabbrev-capf (&optional sort-function)
+  "Return Cape Dabbrev completions ordered by symbol proximity.
+Return nil when no abbreviation precedes point.
+SORT-FUNCTION defaults to `my-dabbrev-sort-by-distance' and receives
+the completion region's beginning marker, end marker and candidates."
+  (if (fboundp 'cape-dabbrev)
+      (when (and (> (point) (if (minibufferp)
+                                (minibuffer-prompt-end)
+                              (point-min)))
+                 (save-excursion
+                   (backward-char 1)
+                   (looking-at-p
+                    (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
+        (let ((result (cape-dabbrev)))
+          (when result
+            (let* ((beg (copy-marker (nth 0 result)))
+                   (end (copy-marker (nth 1 result) t))
+                   (sorter
+                    (apply-partially
+                     (or sort-function #'my-dabbrev-sort-by-distance)
+                     beg end))
+                   (table
+                    (apply-partially #'my-dabbrev-completion-table
+                                     (nth 2 result) sorter)))
+              (append (list beg end table)
+                      (list :display-sort-function sorter
+                            :cycle-sort-function sorter)
+                      (nthcdr 3 result))))))
+    (user-error "Undefined: cape-dabbrev")))
 
 (defun my-cape-dabbrev-backward-capf ()
   "Return Cape Dabbrev completions ordered by backward distance."
-  (let ((result (my-cape-dabbrev-capf)))
-    (when result
-      (let* ((beg (nth 0 result))
-             (end (nth 1 result))
-             (sorter
-              (apply-partially #'my-dabbrev-sort-by-backward-distance
-                               beg end))
-             (table
-              (apply-partially #'my-dabbrev-completion-table
-                               (nth 2 result) sorter)))
-        (append (list beg end table)
-                (list :display-sort-function sorter
-                      :cycle-sort-function sorter)
-                (nthcdr 3 result))))))
+  (my-cape-dabbrev-capf #'my-dabbrev-sort-by-backward-distance))
 
 (defun my-cape-dabbrev-backward ()
   "Complete with preceding symbols first, nearest first.
 Wrap from the buffer end after preceding occurrences.
-Candidates found only in other buffers follow local candidates."
+Candidates absent from the accessible source buffer follow."
   (interactive)
-  (cape-interactive #'my-cape-dabbrev-backward-capf))
+  (require 'cape)
+  (require 'dabbrev)
+  (if (fboundp 'cape-interactive)
+      (cape-interactive #'my-cape-dabbrev-backward-capf)
+    (user-error "Undefined: cape-interactive")))
 
-(defun my-cape-dabbrev ()
+(defun my-cape-dabbrev-forward ()
   "Complete with nearby symbols first, searching both directions.
-Candidates found only in other buffers follow local candidates."
+Candidates absent from the accessible source buffer follow."
   (interactive)
-  (cape-interactive #'my-cape-dabbrev-capf))
+  (require 'cape)
+  (require 'dabbrev)
+  (if (fboundp 'cape-interactive)
+      (cape-interactive #'my-cape-dabbrev-capf)
+    (user-error "Undefined: cape-interactive")))
 
 (with-eval-after-load 'corfu
   (setq corfu-sort-override-function nil))
