@@ -2320,16 +2320,94 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;         (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
 ;;         (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
 
-;;; apheleia php simplified
+;;; Apheleia php simplified (Elisp, no reliance on sh)
+
+;; ============================================================================
+;; Rationale: Why PHPCBF Requires a Custom Apheleia Formatter Function
+;; ============================================================================
+;;
+;; Non-Standard Exit Codes in PHPCBF
+;; ---------------------------------
+;; Standard command-list formatters in `apheleia-formatters' are executed via
+;; `apheleia--run-formatter-process', which hardcodes the success check to
+;; `zerop' (only exit status 0 is treated as success).
+;;
+;; However, `phpcbf' (PHP Code Beautifier and Fixer) uses bitmask-like exit
+;; codes to report whether changes were made, and these codes vary across
+;; PHP_CodeSniffer versions:
+;;
+;;   - Exit 0: No fixable errors were found; the file was left untouched.
+;;   - Exit 1: All fixable errors were successfully fixed.
+;;   - Exit 2: Some fixable errors were fixed, but others could not be fixed
+;;             automatically (partial fix), or unfixable warnings remain.
+;;   - Exit 3+: A fatal processing, configuration, or syntax error occurred.
+;;
+;; Because `phpcbf' returns 1 or 2 whenever it actually formats code, a standard
+;; Apheleia command list treats every successful format as a failure and
+;; discards the changes. By calling `apheleia--execute-formatter-process'
+;; directly, we can pass a custom `:exit-status' predicate that accepts 0, 1,
+;; and 2 as valid outcomes.
+;;
+;; In-Place Temporary Files vs. Standard Input/Output
+;; --------------------------------------------------
+;; Although `phpcbf' supports reading from stdin (`-'), passing PHP code over
+;; stdio is fragile in practice:
+;;
+;;   - If `display_errors' or `error_reporting' is enabled in the user's
+;;     `php.ini', PHP CLI deprecation notices or warnings are printed directly
+;;     to stdout alongside the formatted source code, corrupting the buffer.
+;;   - Certain PHP_CodeSniffer versions and third-party sniffs emit summary
+;;     headers or diagnostic messages to stdout even when `-q' (quiet) is set.
+;;
+;; Using the `inplace' symbol inside `apheleia--formatter-context' instructs
+;; Apheleia to write the `scratch' buffer to an isolated temporary file.
+;; `phpcbf' modifies that temporary file on disk, and
+;; `my-apheleia-phpcbf-finish' reads the clean file contents back into
+;; `scratch', completely ignoring any noise written to stdout.
+;;
+;; Pure Elisp vs. Shell Wrappers (`apheleia-phpcs' / `sh -c')
+;; ----------------------------------------------------------
+;; Apheleia ships with a `scripts/formatters/apheleia-phpcs' shell script to
+;; work around `phpcbf' exit codes. Avoiding that wrapper (and `sh -c' hacks) in
+;; favor of pure Elisp provides several advantages:
+;;
+;;   - No dependency on a POSIX shell (`/bin/sh'), avoiding subshell startup
+;;     overhead and path/quoting issues across platforms.
+;;   - Explicit control over which `--standard' ruleset is passed and which exit
+;;     codes (0, 1, and 2) are accepted.
+;;
+;; Preserving Apheleia's Internal Lifecycle
+;; ----------------------------------------
+;; Rather than spawning a raw process with `make-process', this implementation
+;; delegates context creation and execution to `apheleia--formatter-context' and
+;; `apheleia--execute-formatter-process'. This preserves Apheleia's built-in
+;; machinery for:
+;;
+;;   - Interrupting and killing overlapping formatter processes on rapid saves.
+;;   - Capturing stderr into `*apheleia-phpcbf-log*' when formatting fails.
+;;   - Running `apheleia-formatter-exited-hook'.
+;;   - Handling remote buffers over TRAMP according to
+;;   `apheleia-remote-algorithm'.
+;;   - Guaranteeing temporary file cleanup via the `:ensure' callback and
+;;     `condition-case' error handling.
+;; ============================================================================
 
 (defun my-apheleia-phpcbf-cleanup (file)
-  "Delete temporary FILE after PHPCBF finishes."
+  "Delete temporary FILE after PHPCBF finishes.
+FILE is the path to the temporary file created for in-place formatting,
+or nil if no file was created."
   (when file
     (ignore-errors
       (delete-file file))))
 
-(defun my-apheleia-phpcbf-finish (scratch callback file err _stdout)
-  "Copy formatted FILE into SCRATCH and invoke CALLBACK."
+(defun my-apheleia-phpcbf-finish (scratch callback file err stdout)
+  "Copy formatted FILE into SCRATCH and invoke CALLBACK.
+SCRATCH is the temporary buffer holding the formatted result.
+CALLBACK is the function invoked when formatting finishes.
+FILE is the path to the temporary file modified in place by PHPCBF.
+ERR is the error value from the formatter process, or nil on success.
+STDOUT is the process standard output buffer supplied by Apheleia."
+  (ignore stdout)
   (unless err
     (setq err
           (condition-case error-data
@@ -2343,33 +2421,46 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             (error error-data))))
   (funcall callback err))
 
-(defun my-apheleia-phpcbf-buffer
-    (&key buffer scratch callback formatter remote &allow-other-keys)
-  "Format SCRATCH asynchronously with PHPCBF and invoke CALLBACK."
+(defun my-apheleia-phpcbf-buffer (&rest args)
+  "Format a buffer asynchronously with PHPCBF using keyword ARGS.
+ARGS is a plist supplied by `apheleia--run-formatter-function' containing:
+- `:buffer': The original buffer being formatted.
+- `:scratch': The temporary buffer to populate with formatted output.
+- `:callback': The function to invoke with an error symbol/data or nil.
+- `:formatter': The symbol identifying the active Apheleia formatter.
+- `:remote': The remote file-handler prefix for TRAMP buffers, or nil."
   (require 'apheleia-formatters)
-  (with-current-buffer buffer
-    (if (not (executable-find "phpcbf" (eq apheleia-remote-algorithm 'remote)))
-        (funcall callback (cons 'error "Could not find executable for phpcbf"))
-      (let* ((context
-              (apheleia--formatter-context
-               (or formatter 'phpcbf)
-               '("phpcbf"
-                 (concat "--standard="
-                         (expand-file-name "~/.config/phpcs/pear.xml"))
-                 inplace)
-               remote
-               scratch))
-             (file (apheleia-formatter--output-fname context)))
-        (condition-case error-data
-            (apheleia--execute-formatter-process
-             :ctx context
-             :exit-status (lambda (status) (memq status '(0 1 2)))
-             :callback (apply-partially
-                        #'my-apheleia-phpcbf-finish scratch callback file)
-             :ensure (apply-partially #'my-apheleia-phpcbf-cleanup file))
-          (error
-           (my-apheleia-phpcbf-cleanup file)
-           (signal (car error-data) (cdr error-data))))))))
+  (when (and (fboundp 'apheleia--formatter-context)
+             (fboundp 'apheleia-formatter--output-fname)
+             (fboundp 'apheleia--execute-formatter-process))
+    (let ((buffer (plist-get args :buffer))
+          (scratch (plist-get args :scratch))
+          (callback (plist-get args :callback))
+          (formatter (plist-get args :formatter))
+          (remote (plist-get args :remote)))
+      (with-current-buffer buffer
+        (if (not (executable-find "phpcbf" (eq apheleia-remote-algorithm 'remote)))
+            (funcall callback (cons 'error "Could not find executable for phpcbf"))
+          (let* ((context
+                  (apheleia--formatter-context
+                   (or formatter 'phpcbf)
+                   '("phpcbf"
+                     (concat "--standard="
+                             (expand-file-name "~/.config/phpcs/pear.xml"))
+                     inplace)
+                   remote
+                   scratch))
+                 (file (apheleia-formatter--output-fname context)))
+            (condition-case error-data
+                (apheleia--execute-formatter-process
+                 :ctx context
+                 :exit-status (lambda (status) (memq status '(0 1 2)))
+                 :callback (apply-partially
+                            #'my-apheleia-phpcbf-finish scratch callback file)
+                 :ensure (apply-partially #'my-apheleia-phpcbf-cleanup file))
+              (error
+               (my-apheleia-phpcbf-cleanup file)
+               (signal (car error-data) (cdr error-data))))))))))
 
 (with-eval-after-load 'apheleia
   (setf (alist-get 'phpcbf apheleia-formatters) #'my-apheleia-phpcbf-buffer
