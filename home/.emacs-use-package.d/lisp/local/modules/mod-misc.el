@@ -2400,14 +2400,13 @@ or nil if no file was created."
     (ignore-errors
       (delete-file file))))
 
-(defun my-apheleia-phpcbf-finish (scratch callback file err stdout)
+(defun my-apheleia-phpcbf-finish (scratch callback file err _stdout)
   "Copy formatted FILE into SCRATCH and invoke CALLBACK.
 SCRATCH is the temporary buffer holding the formatted result.
 CALLBACK is the function invoked when formatting finishes.
 FILE is the path to the temporary file modified in place by PHPCBF.
 ERR is the error value from the formatter process, or nil on success.
-STDOUT is the process standard output buffer supplied by Apheleia."
-  (ignore stdout)
+_STDOUT is the process standard output buffer supplied by Apheleia."
   (unless err
     (setq err
           (condition-case error-data
@@ -2434,39 +2433,35 @@ ARGS is a plist supplied by `apheleia--run-formatter-function' containing:
         (scratch (plist-get args :scratch))
         (callback (plist-get args :callback))
         (formatter (plist-get args :formatter))
-        (remote (plist-get args :remote))
-        file)
+        (remote (plist-get args :remote)))
     (if (and (fboundp 'apheleia--formatter-context)
              (fboundp 'apheleia-formatter--output-fname)
              (fboundp 'apheleia--execute-formatter-process))
-        (condition-case error-data
-            (with-current-buffer buffer
-              (if (not (executable-find "phpcbf" (eq apheleia-remote-algorithm 'remote)))
-                  (funcall callback (cons 'error "Could not find executable for phpcbf"))
-                (let ((context
-                       (apheleia--formatter-context
-                        (or formatter 'phpcbf)
-                        '("phpcbf"
-                          (concat "--standard="
-                                  (expand-file-name "~/.config/phpcs/pear.xml"))
-                          inplace)
-                        remote
-                        scratch)))
-                  (setq file (apheleia-formatter--output-fname context))
-                  (apheleia--execute-formatter-process
-                   :ctx context
-                   :exit-status (lambda (status) (memq status '(0 1 2)))
-                   :callback (apply-partially
-                              #'my-apheleia-phpcbf-finish scratch callback file)
-                   :ensure (apply-partially #'my-apheleia-phpcbf-cleanup file)))))
-          (error
-           (my-apheleia-phpcbf-cleanup file)
-           ;; Prevent it invoking the callback twice. If a synchronous callback
-           ;; invocation raises an error, condition-case catches it and calls
-           ;; the same callback again.
-           (signal (car error-data) (cdr error-data))
-           ;; (funcall callback error-data)
-           ))
+        (with-current-buffer buffer
+          (if (not (executable-find "phpcbf" (eq apheleia-remote-algorithm 'remote)))
+              (funcall callback (cons 'error "Could not find executable for phpcbf"))
+            (let (context file)
+              (condition-case error-data
+                  (setq context (apheleia--formatter-context
+                                 (or formatter 'phpcbf)
+                                 '("phpcbf"
+                                   (concat "--standard="
+                                           (expand-file-name "~/.config/phpcs/pear.xml"))
+                                   inplace)
+                                 remote
+                                 scratch)
+                        file (apheleia-formatter--output-fname context))
+                (error
+                 (setq context nil)
+                 (my-apheleia-phpcbf-cleanup file)
+                 (funcall callback error-data)))
+              (when context
+                (apheleia--execute-formatter-process
+                 :ctx context
+                 :exit-status (lambda (status) (memq status '(0 1 2)))
+                 :callback (apply-partially
+                            #'my-apheleia-phpcbf-finish scratch callback file)
+                 :ensure (apply-partially #'my-apheleia-phpcbf-cleanup file))))))
       (funcall callback (cons 'error "Apheleia internal APIs are unavailable")))))
 
 (with-eval-after-load 'apheleia
