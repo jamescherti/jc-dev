@@ -252,9 +252,28 @@ config_uutils() {
   fi
 }
 
+is_git_branch_develop() {
+  local dir="$1"
+  local branch
+  branch=$(git -C "$dir" branch --show-current 2>/dev/null) || return 1
+  [[ "$branch" == "develop" ]]
+}
+
+copy_if_develop() {
+  local src="$1"
+  local dest="$2"
+  local dest_dir
+  dest_dir=$(dirname "$dest")
+
+  is_git_branch_develop "$dest_dir" || return 0
+  cp -uv "$src" "$dest"
+}
+
 copy_unified_python_project() {
   local target_dir="${1:?Target directory required}"
   target_dir="${target_dir/#\~/$HOME}"
+
+  is_git_branch_develop "$target_dir" || return 0
 
   local unified_dir="$SCRIPT_DIR/misc/unified-files"
   local -a file_map=(
@@ -293,11 +312,11 @@ copy_unified_files() {
   copy_unified_python_project "$HOME/src/python/git-smartpull"
 
   # Specific ones
-  cp -uv misc/unified-files/unified-python-ci.yml \
+  copy_if_develop misc/unified-files/unified-python-ci.yml \
     ~/src/python/pathaction/.github/workflows/ci.yml # pathaction
-  cp -uv misc/unified-files/unified-python-ci.yml \
+  copy_if_develop misc/unified-files/unified-python-ci.yml \
     ~/src/python/git-rexec/.github/workflows/ci.yml # git-rexec
-  cp -uv misc/unified-files/unified-python-ci.yml \
+  copy_if_develop misc/unified-files/unified-python-ci.yml \
     "$HOME/src/home-settings/work_cfg/home/.cookiecutters/python/{{cookiecutter.repo_name}}/.github/workflows/ci.yml" # cookie cutter
 }
 
