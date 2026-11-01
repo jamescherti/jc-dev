@@ -1075,26 +1075,117 @@ word after the space that contains at least two uppercase characters."
 ;;
 ;; (evil-define-key 'insert 'global (kbd "C-p") 'my-cape-dabbrev-backwards)
 
-(defun my-cape-dabbrev ()
-  "Complete the abbreviation before point using Cape.
-Signal a user error when no abbreviation precedes point."
-  (interactive)
-  (unless (and (> (point) (if (minibufferp)
-                              (minibuffer-prompt-end)
-                            (point-min)))
-               (save-excursion
-                 (backward-char 1)
-                 (looking-at-p
-                  (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
-    (user-error "No abbreviation before point"))
-  (when (fboundp 'cape-dabbrev)
-    (let ((dabbrev-check-all-buffers
-           (if (minibufferp) t dabbrev-check-all-buffers)))
-      (call-interactively #'cape-dabbrev))))
+;;; Equivalent to Vim's Ctrl-p and Ctrl-n
+
+;; (defun my-cape-dabbrev ()
+;;   "Complete the abbreviation before point using Cape.
+;; Signal a user error when no abbreviation precedes point."
+;;   (interactive)
+;;   (unless (and (> (point) (if (minibufferp)
+;;                               (minibuffer-prompt-end)
+;;                             (point-min)))
+;;                (save-excursion
+;;                  (backward-char 1)
+;;                  (looking-at-p
+;;                   (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
+;;     (user-error "No abbreviation before point"))
+;;   (when (fboundp 'cape-dabbrev)
+;;     (let ((dabbrev-check-all-buffers
+;;            (if (minibufferp) t dabbrev-check-all-buffers)))
+;;       (call-interactively #'cape-dabbrev))))
+;;
 
 (evil-define-key 'insert 'global
   (kbd "C-p") 'my-cape-dabbrev
   (kbd "C-n") 'my-cape-dabbrev)
+
+(require 'cape)
+(require 'dabbrev)
+(require 'cl-lib)
+
+(defun my-dabbrev-sort-by-distance (beg end candidates)
+  "Sort CANDIDATES by distance from point.
+BEG and END are markers delimiting the active completion region.
+Match complete symbols outside that region in the source buffer.
+Keep candidates absent from the source buffer last, in their
+original relative order."
+  (let ((buffer (marker-buffer beg)))
+    (if (not (and (buffer-live-p buffer)
+                  (eq buffer (marker-buffer end))))
+        candidates
+      (with-current-buffer buffer
+        (save-excursion
+          (save-match-data
+            (let* ((origin (point))
+                   (case-fold-search
+                    (if (eq dabbrev-case-fold-search 'case-fold-search)
+                        case-fold-search
+                      dabbrev-case-fold-search))
+                   (ranked
+                    (mapcar
+                     (lambda (candidate)
+                       (let ((regexp
+                              (concat "\\_<"
+                                      (regexp-quote candidate)
+                                      "\\_>"))
+                             (distance most-positive-fixnum))
+                         (goto-char beg)
+                         (when (re-search-backward regexp nil t)
+                           (setq distance
+                                 (abs (- origin (match-beginning 0)))))
+                         (goto-char end)
+                         (when (re-search-forward regexp nil t)
+                           (setq distance
+                                 (min distance
+                                      (abs (- (match-beginning 0)
+                                              origin)))))
+                         (cons distance candidate)))
+                     candidates)))
+              (mapcar #'cdr
+                      (cl-stable-sort ranked #'< :key #'car)))))))))
+
+(defun my-dabbrev-completion-table (table sorter string predicate action)
+  "Delegate completion to TABLE with SORTER in its metadata.
+Pass STRING, PREDICATE and ACTION through to TABLE."
+  (if (eq action 'metadata)
+      `(metadata
+        (display-sort-function . ,sorter)
+        (cycle-sort-function . ,sorter)
+        ,@(cdr (completion-metadata string table predicate)))
+    (complete-with-action action table string predicate)))
+
+(defun my-cape-dabbrev-capf ()
+  "Return Cape Dabbrev completions ordered by local symbol proximity.
+Return nil when no abbreviation precedes point."
+  (when (and (> (point) (if (minibufferp)
+                            (minibuffer-prompt-end)
+                          (point-min)))
+             (save-excursion
+               (backward-char 1)
+               (looking-at-p
+                (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
+    (let ((result (cape-dabbrev)))
+      (when result
+        (let* ((beg (copy-marker (nth 0 result)))
+               (end (copy-marker (nth 1 result) t))
+               (sorter
+                (apply-partially #'my-dabbrev-sort-by-distance beg end))
+               (table
+                (apply-partially #'my-dabbrev-completion-table
+                                 (nth 2 result) sorter)))
+          (append (list beg end table)
+                  (list :display-sort-function sorter
+                        :cycle-sort-function sorter)
+                  (nthcdr 3 result)))))))
+
+(defun my-cape-dabbrev ()
+  "Complete with nearby symbols first, searching both directions.
+Candidates found only in other buffers follow local candidates."
+  (interactive)
+  (cape-interactive #'my-cape-dabbrev-capf))
+
+(with-eval-after-load 'corfu
+  (setq corfu-sort-override-function nil))
 
 ;;; cape: evil
 
