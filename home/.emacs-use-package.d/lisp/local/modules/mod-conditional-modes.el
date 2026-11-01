@@ -24,123 +24,6 @@
 
 ;;; Code:
 
-;;; DISABLED: env vars replacement
-
-;; 1. Define the classes and their variable configurations.
-;; The `nil` key indicates that these variables apply to all major modes.
-
-;; (defvar env-allow-syntax-checkers nil)
-;; (defvar env-allow-syntax-checker-package-lint nil)
-;; (defvar env-allow-lsp nil)
-;; (defvar env-allow-whitespace-cleanup nil)
-;; (defvar env-allow-language-servers nil)
-;; (defvar env-allow-reformatters nil)
-;;
-;; (dolist (var '(env-allow-syntax-checkers
-;;                env-allow-syntax-checker-package-lint
-;;                env-allow-lsp
-;;                env-allow-whitespace-cleanup
-;;                env-allow-language-servers
-;;                env-allow-reformatters))
-;;   (put var 'safe-local-variable #'booleanp))
-;;
-;; (dir-locals-set-class-variables 'env-deny-all
-;;                                 '((nil . ((env-allow-syntax-checkers . nil)
-;;                                           (env-allow-syntax-checker-package-lint . nil)
-;;                                           (env-allow-lsp . nil)
-;;                                           (env-allow-whitespace-cleanup . nil)
-;;                                           (env-allow-language-servers . nil)
-;;                                           (env-allow-reformatters . nil)))))
-;;
-;; (dir-locals-set-class-variables 'env-allow-emacs-dev
-;;                                 '((nil . ((env-allow-syntax-checkers . t)
-;;                                           (env-allow-syntax-checker-package-lint . t)
-;;                                           (env-allow-lsp . t)
-;;                                           (env-allow-whitespace-cleanup . t)
-;;                                           (env-allow-language-servers . t)
-;;                                           (env-allow-reformatters . t)))))
-;;
-;; (dir-locals-set-class-variables 'env-allow-standard
-;;                                 '((nil . ((env-allow-syntax-checkers . t)
-;;                                           (env-allow-syntax-checker-package-lint . nil)
-;;                                           (env-allow-lsp . t)
-;;                                           (env-allow-whitespace-cleanup . t)
-;;                                           (env-allow-language-servers . t)
-;;                                           (env-allow-reformatters . t)))))
-;;
-;; (dir-locals-set-directory-class "~/src/forks/" 'env-deny-all)
-;; (dir-locals-set-directory-class "~/src/local/" 'env-deny-all)
-;; (dir-locals-set-directory-class "~/src/emacs/" 'env-allow-emacs-dev)
-;; (dir-locals-set-directory-class "~/Sync/src/" 'env-allow-standard)
-;; (dir-locals-set-directory-class "~/src/" 'env-allow-standard)
-
-;;; Auto set env-* vars
-
-(defcustom my-custom-dir-variables
-  ;; env-deny-all?
-  '(("~/src/forks/"
-     . ((env-allow-syntax-checkers . nil)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . nil)
-        (env-allow-whitespace-cleanup . nil)
-        (env-allow-language-servers . nil)
-        (env-allow-reformatters . nil)))
-
-    ("~/src/local/"
-     . ((env-allow-syntax-checkers . nil)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . nil)
-        (env-allow-whitespace-cleanup . nil)
-        (env-allow-language-servers . nil)
-        (env-allow-reformatters . nil)))
-
-    ("~/src/emacs"
-     . ((env-allow-syntax-checkers . t)
-        (env-allow-syntax-checker-package-lint . t)
-        (env-allow-lsp . t)
-        (env-allow-whitespace-cleanup . t)
-        (env-allow-language-servers . t)
-        (env-allow-reformatters . t)))
-
-    ("~/Sync/src"
-     . ((env-allow-syntax-checkers . t)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . t)
-        (env-allow-whitespace-cleanup . t)
-        (env-allow-language-servers . t)
-        (env-allow-reformatters . t)))
-
-    ("~/src/"
-     . ((env-allow-syntax-checkers . t)
-        (env-allow-syntax-checker-package-lint . nil)
-        (env-allow-lsp . t)
-        (env-allow-whitespace-cleanup . t)
-        (env-allow-language-servers . t)
-        (env-allow-reformatters . t))))
-  "Alist mapping directories to a list of buffer-local variables.
-Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
-  :type '(alist :key-type directory
-                :value-type (alist :key-type symbol :value-type sexp))
-  :group 'files)
-
-(defun my-apply-custom-dir-variables ()
-  "Apply directory-specific variables from `my-custom-dir-variables'."
-  (when-let* ((path (or (buffer-file-name (buffer-base-buffer)) default-directory)))
-    (catch 'break
-      (dolist (entry my-custom-dir-variables)
-        (when (file-in-directory-p path (expand-file-name (car entry)))
-          (dolist (var-val (cdr entry))
-            ;; This is the programmatic runtime equivalent of `setq-local`
-            (set (make-local-variable (car var-val)) (cdr var-val)))
-          (throw 'break t))))))
-
-;;; .my-dir-locals.el
-
-;; (require 'my-dir-locals)
-;; (my-dir-locals-mode 1)
-
-;;; dir-locals-trigger
-
 ;;; env- vars
 
 (defvar env-deny-all nil
@@ -161,8 +44,69 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
 (defvar env-allow-reformatters nil
   "Non-nil allows directory-local configuration of code reformatters.")
 
-(defvar env-allow-lsp nil
-  "Non-nil allows directory-local configuration of code reformatters.")
+(dolist (var '(env-deny-all
+               env-allow-syntax-checker-package-lint
+               env-allow-syntax-checkers
+               env-allow-language-servers
+               env-allow-whitespace-cleanup
+               env-allow-reformatters))
+  (put var 'safe-local-variable #'booleanp))
+
+;;; Auto set env-* vars
+
+(defcustom my-custom-dir-variables
+  ;; env-deny-all?
+  '(("~/src/forks/"
+     . ((env-allow-syntax-checkers . nil)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-whitespace-cleanup . nil)
+        (env-allow-language-servers . nil)
+        (env-allow-reformatters . nil)))
+
+    ("~/src/local/"
+     . ((env-allow-syntax-checkers . nil)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-whitespace-cleanup . nil)
+        (env-allow-language-servers . nil)
+        (env-allow-reformatters . nil)))
+
+    ("~/src/emacs"
+     . ((env-allow-syntax-checkers . t)
+        (env-allow-syntax-checker-package-lint . t)
+        (env-allow-whitespace-cleanup . t)
+        (env-allow-language-servers . t)
+        (env-allow-reformatters . t)))
+
+    ("~/Sync/src"
+     . ((env-allow-syntax-checkers . t)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-whitespace-cleanup . t)
+        (env-allow-language-servers . t)
+        (env-allow-reformatters . t)))
+
+    ("~/src/"
+     . ((env-allow-syntax-checkers . t)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-whitespace-cleanup . t)
+        (env-allow-language-servers . t)
+        (env-allow-reformatters . t))))
+  "Alist mapping directories to a list of buffer-local variables.
+Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
+  :type '(alist :key-type directory
+                :value-type (alist :key-type symbol :value-type sexp))
+  :group 'files)
+
+(defun my-apply-custom-dir-variables ()
+  "Apply directory-specific variables unless already buffer-local."
+  (when-let* ((path (or (buffer-file-name (buffer-base-buffer))
+                        default-directory)))
+    (catch 'break
+      (dolist (entry my-custom-dir-variables)
+        (when (file-in-directory-p path (expand-file-name (car entry)))
+          (dolist (var-val (cdr entry))
+            (unless (local-variable-p (car var-val))
+              (set (make-local-variable (car var-val)) (cdr var-val))))
+          (throw 'break t))))))
 
 ;;; Conditional code checker/reformatter
 
@@ -198,6 +142,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
         (string= base-name "straight-profile.el")
         (string-prefix-p "=template=" base-name)
         (string-match-p "/\\.cookiecutter/" full-path)
+        (string-match-p "/cookiecutter\\./" full-path)
         (string-suffix-p ".ebuild" base-name))))
 
 ;; Evaluate .my-dir-locals.el
@@ -218,7 +163,11 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
     (setq my-conditional-modes--checked t)
     (let* ((buf-name (buffer-name))
            (file-name (or buffer-file-name
-                          (buffer-file-name (buffer-base-buffer)))))
+                          (buffer-file-name (buffer-base-buffer))))
+           (ignore-checker-and-reformatter (my-code-checker-and-reformatter-ignore-p))
+           (env-deny-all (if ignore-checker-and-reformatter
+                             t
+                           env-deny-all)))
       (when (and (not (or (derived-mode-p 'special-mode)
                           (string-prefix-p " " buf-name)
                           (string-prefix-p "*" buf-name)))
@@ -260,7 +209,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                          (file-in-directory-p file-name "~/src/forks"))
                 (dtrt-indent-mode 1))
 
-              (when env-allow-lsp
+              (when env-allow-language-servers
                 ;; All modes
                 (when (and (fboundp 'eglot-ensure)
                            (derived-mode-p 'python-mode 'python-ts-mode))
@@ -304,18 +253,20 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
               ;; Flymake
               (let ((base-name (when file-name
                                  (file-name-nondirectory file-name))))
-                (when (and (fboundp 'flymake-mode)
-                           (not (my-code-checker-and-reformatter-ignore-p)))
-                  (when (and env-allow-syntax-checker-package-lint
-                             ;; TODO add exceptions like these to the
-                             ;; .my-dir-locals.el
-                             (not (or (file-in-directory-p file-name "~/src/emacs-misc/lightemacs")
-                                      (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
-                                      (string= base-name "init.el")
-                                      (string= base-name "early-init.el"))))
-                    (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
+                (if (fboundp 'flymake-mode)
+                    (progn
+                      (when (and env-allow-syntax-checker-package-lint
+                                 ;; TODO add exceptions like these to the
+                                 ;; .my-dir-locals.el
+                                 (not (or (file-in-directory-p file-name "~/src/emacs-misc/lightemacs")
+                                          (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
+                                          (string= base-name "init.el")
+                                          (string= base-name "early-init.el"))))
+                        (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))
 
-                  (flymake-mode 1)))
+                      (flymake-mode 1))
+                  (when (bound-and-true-p flymake-mode)
+                    (flymake-mode -1))))
 
               ;; Stripspace
               (when (and (bound-and-true-p env-allow-whitespace-cleanup)

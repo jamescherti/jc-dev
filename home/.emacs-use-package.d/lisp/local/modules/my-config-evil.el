@@ -1876,7 +1876,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   :init
   (setq quick-fasd-auto-add-on-buffer-change t
         quick-fasd-enable-initial-prompt nil
-        quick-fasd-command-args '("-d"))
+        quick-fasd-command-args '("-a"))
   (quick-fasd-mode 1))
 
 (with-eval-after-load 'evil
