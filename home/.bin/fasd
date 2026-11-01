@@ -1,11 +1,31 @@
 #!/usr/bin/env sh
-
+#
+# Maintainer: James Cherti <https://www.jamescherti.com/contact/>
+# URL: https://github.com/jamescherti/efasd
+# Version: 3.0.0
+#
+# Description:
+# ------------
+# Navigating deeply nested file systems in POSIX shells on Linux and UNIX
+# systems often requires typing repetitive, lengthy paths. The eFasd project
+# resolves this by maintaining a continuous record of the files and directories
+# you access. Instead of writing out absolute paths or executing multiple cd
+# commands, you can use default fasd aliases like j to jump to a directory, f
+# for files, d for directories, and s for search. This lets you navigate
+# directly to active project directories or open common configuration files
+# instantly.
+#
+# The fasd command calculates a "frecency" score for each path, an algorithm
+# that weights both how often and how recently a file or directory was opened.
+# This allows it to accurately predict your target destination with minimal
+# input. This tool is inspired by tools like autojump, z and v. The name fasd
+# comes from the default suggested aliases f(files), a(files/directories),
+# s(show/search/select), d(directories).
+#
 # Fasd (this file) can be sourced or executed by any POSIX compatible shell.
-
-# Fasd is originally written based on code from z (https://github.com/rupa/z)
-# by rupa deadwyler under the WTFPL license. Most if not all of the code has
-# been rewritten.
-
+#
+# License:
+# --------
 # Copyright (C) 2026 by James Cherti. All rights reserved.
 # Copyright (C) 2011, 2012 by Wei Dai. All rights reserved.
 #
@@ -414,6 +434,18 @@ EOS
 
     # maintain the file
     (
+      if [ -d "$_FASD_DATA" ]; then
+        printf 'fasd: error: "%s" is a directory\n' "$_FASD_DATA" >&2
+        exit 1
+      fi
+
+      if [ ! -f "$_FASD_DATA" ]; then
+        # Create the parent directory and database file when missing, using
+        # append redirection to avoid truncating existing data.
+        mkdir -p -- "$(dirname -- "$_FASD_DATA")" || exit 1
+        true >> "$_FASD_DATA" || exit 1
+      fi
+
       tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || exit 1
       # Trap unexpected exits and signals to guarantee cleanup
       trap '[ -f "$tempfile" ] && env rm -f "$tempfile" 2>/dev/null' EXIT
@@ -478,8 +510,10 @@ EOS
 
       # If the awk command succeeded, atomically replace the database
       if [ $? -eq 0 ]; then
-      env mv -f "$tempfile" "$_FASD_DATA"
-    fi
+        env mv -f "$tempfile" "$_FASD_DATA"
+      else
+        exit 1
+      fi
     )
     ;;
 
@@ -505,8 +539,10 @@ EOS
 
       # If the sed command succeeded, atomically replace the database
       if [ $? -eq 0 ]; then
-      env mv -f "$tempfile" "$_FASD_DATA"
-    fi
+        env mv -f "$tempfile" "$_FASD_DATA"
+      else
+        exit 1
+      fi
     )
     ;;
 
@@ -730,7 +766,7 @@ fasd [-A|-D] [paths ...]
     if [ "$res" ]; then
       fasd --add "$res"
       [ -z "$exec" ] && exec='printf %s\n'
-      exec $exec "$res"
+      $exec "$res"
     fi
     ;;
   esac

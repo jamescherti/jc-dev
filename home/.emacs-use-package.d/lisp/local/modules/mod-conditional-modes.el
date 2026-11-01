@@ -56,7 +56,14 @@
 
 (defcustom my-custom-dir-variables
   ;; env-deny-all?
-  '(("~/src/forks/"
+  '(("~/src/tools/efasd"
+     . ((env-allow-syntax-checkers . t)
+        (env-allow-syntax-checker-package-lint . nil)
+        (env-allow-whitespace-cleanup . t)
+        (env-allow-language-servers . nil)
+        (env-allow-reformatters . nil)))
+
+    ("~/src/forks/"
      . ((env-allow-syntax-checkers . nil)
         (env-allow-syntax-checker-package-lint . nil)
         (env-allow-whitespace-cleanup . nil)
