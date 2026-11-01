@@ -1076,16 +1076,21 @@ word after the space that contains at least two uppercase characters."
 ;; (evil-define-key 'insert 'global (kbd "C-p") 'my-cape-dabbrev-backwards)
 
 (defun my-cape-dabbrev ()
-  "Cape dabbrev."
+  "Complete the abbreviation before point using Cape.
+Signal a user error when no abbreviation precedes point."
   (interactive)
-  (if (minibufferp)
-      (let (;; (dabbrev-check-other-buffers t)
-            ;; (dabbrev-case-replace t)
-            ;; (dabbrev-case-fold-search t)
-            ;; (dabbrev-case-distinction nil)
-            (dabbrev-check-all-buffers t))
-        (call-interactively 'cape-dabbrev))
-    (call-interactively 'cape-dabbrev)))
+  (unless (and (> (point) (if (minibufferp)
+                              (minibuffer-prompt-end)
+                            (point-min)))
+               (save-excursion
+                 (backward-char 1)
+                 (looking-at-p
+                  (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
+    (user-error "No abbreviation before point"))
+  (when (fboundp 'cape-dabbrev)
+    (let ((dabbrev-check-all-buffers
+           (if (minibufferp) t dabbrev-check-all-buffers)))
+      (call-interactively #'cape-dabbrev))))
 
 (evil-define-key 'insert 'global
   (kbd "C-p") 'my-cape-dabbrev
