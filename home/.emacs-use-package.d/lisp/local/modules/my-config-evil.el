@@ -1104,11 +1104,11 @@ word after the space that contains at least two uppercase characters."
 (require 'cl-lib)
 
 (defun my-dabbrev-sort-by-distance (beg end candidates)
-  "Sort CANDIDATES by distance from point.
+  "Sort CANDIDATES by backward distance from point.
 BEG and END are markers delimiting the active completion region.
-Match complete symbols outside that region in the source buffer.
-Keep candidates absent from the source buffer last, in their
-original relative order."
+Rank preceding occurrences first, nearest first, then wrap from
+the end of the accessible buffer.  Exclude the completion region.
+Keep candidates absent from the buffer last in their original order."
   (let ((buffer (marker-buffer beg)))
     (if (not (and (buffer-live-p buffer)
                   (eq buffer (marker-buffer end))))
@@ -1130,15 +1130,15 @@ original relative order."
                                       "\\_>"))
                              (distance most-positive-fixnum))
                          (goto-char beg)
-                         (when (re-search-backward regexp nil t)
-                           (setq distance
-                                 (abs (- origin (match-beginning 0)))))
-                         (goto-char end)
-                         (when (re-search-forward regexp nil t)
-                           (setq distance
-                                 (min distance
-                                      (abs (- (match-beginning 0)
-                                              origin)))))
+                         (if (re-search-backward regexp nil t)
+                             (setq distance
+                                   (- origin (match-beginning 0)))
+                           (goto-char (point-max))
+                           (when (re-search-backward regexp end t)
+                             (setq distance
+                                   (+ (- origin (point-min))
+                                      (- (point-max)
+                                         (match-beginning 0))))))
                          (cons distance candidate)))
                      candidates)))
               (mapcar #'cdr
@@ -1177,6 +1177,30 @@ Return nil when no abbreviation precedes point."
                   (list :display-sort-function sorter
                         :cycle-sort-function sorter)
                   (nthcdr 3 result)))))))
+
+(defun my-cape-dabbrev-backward-capf ()
+  "Return Cape Dabbrev completions ordered by backward distance."
+  (let ((result (my-cape-dabbrev-capf)))
+    (when result
+      (let* ((beg (nth 0 result))
+             (end (nth 1 result))
+             (sorter
+              (apply-partially #'my-dabbrev-sort-by-backward-distance
+                               beg end))
+             (table
+              (apply-partially #'my-dabbrev-completion-table
+                               (nth 2 result) sorter)))
+        (append (list beg end table)
+                (list :display-sort-function sorter
+                      :cycle-sort-function sorter)
+                (nthcdr 3 result))))))
+
+(defun my-cape-dabbrev-backward ()
+  "Complete with preceding symbols first, nearest first.
+Wrap from the buffer end after preceding occurrences.
+Candidates found only in other buffers follow local candidates."
+  (interactive)
+  (cape-interactive #'my-cape-dabbrev-backward-capf))
 
 (defun my-cape-dabbrev ()
   "Complete with nearby symbols first, searching both directions.
