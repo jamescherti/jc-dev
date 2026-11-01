@@ -296,7 +296,7 @@ copy_unified_python_project() {
 copy_emacs_pre_commit_files() {
   cd "$SCRIPT_DIR" || return 1
   local src="$SCRIPT_DIR/misc/unified-files/unified-python-pre-commit-config.yaml"
-  local emacs_dir="$HOME/src/emacs"
+  local emacs_dir="$1"
 
   [[ -d "$emacs_dir" ]] || return 0
 
@@ -304,7 +304,7 @@ copy_emacs_pre_commit_files() {
   while IFS= read -r -d '' target_dir; do
     is_git_branch_develop "$target_dir" || continue
     cp -uv "$src" "$target_dir/.pre-commit-config.yaml"
-  done < <(find "$emacs_dir" -mindepth 1 -maxdepth 1 -type d -name "*.el" -print0)
+  done < <(find "$emacs_dir" -mindepth 1 -maxdepth 1 -type d -print0)
 }
 
 copy_unified_files() {
@@ -333,7 +333,8 @@ copy_unified_files() {
   copy_if_develop misc/unified-files/unified-python-ci.yml \
     "$HOME/src/home-settings/work_cfg/home/.cookiecutters/python/{{cookiecutter.repo_name}}/.github/workflows/ci.yml" # cookie cutter
 
-  copy_emacs_pre_commit_files
+  copy_emacs_pre_commit_files "$HOME/src/emacs"
+  copy_emacs_pre_commit_files "$HOME/src/emacs-misc"
 }
 
 main() {
