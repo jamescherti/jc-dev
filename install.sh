@@ -296,9 +296,9 @@ copy_unified_files() {
   cp -uv misc/unified-files/unified-python-ci.yml \
     ~/src/python/pathaction/.github/workflows/ci.yml # pathaction
   cp -uv misc/unified-files/unified-python-ci.yml \
-    ~/src/python/git-rexec/.github/workflows/ci.yml  # git-rexec
-  cp -uv misc/unified-files/unified-python-ci.yml \  # cookie cutter
-  "$HOME/src/home-settings/work_cfg/home/.cookiecutters/python/{{cookiecutter.repo_name}}/.github/workflows/ci.yml"
+    ~/src/python/git-rexec/.github/workflows/ci.yml # git-rexec
+  cp -uv misc/unified-files/unified-python-ci.yml \
+    "$HOME/src/home-settings/work_cfg/home/.cookiecutters/python/{{cookiecutter.repo_name}}/.github/workflows/ci.yml" # cookie cutter
 }
 
 main() {
