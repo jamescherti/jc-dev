@@ -291,6 +291,16 @@ copy_unified_files() {
 
   copy_unified_python_project "$HOME/src/python/watch-xfce-xfconf"
   copy_unified_python_project "$HOME/src/python/git-smartpull"
+
+  # Specific ones
+  cp -uv misc/unified-files/unified-python-ci.yml \
+    ~/src/python/pathaction/.github/workflows/ci.yml
+  cp -uv misc/unified-files/unified-python-ci.yml \
+    ~/src/python/git-rexec/.github/workflows/ci.yml
+  cp -uv misc/unified-files/unified-python-ci.yml \
+    ~/src/python/git-rexec/.github/workflows/ci.yml
+  cp -uv misc/unified-files/unified-python-ci.yml \
+    "$HOME/src/home-settings/work_cfg/home/.cookiecutters/python/{{cookiecutter.repo_name}}/.github/workflows"
 }
 
 main() {
