@@ -2249,46 +2249,107 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;         (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
 ;;         (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
 
-;;; apheleia php (too complicated)
+;;; TODO: DELETE: apheleia php (elisp, but a little more complicated)
 
-(require 'cl-lib)
+;; (require 'cl-lib)
+;;
+;; (defun my-apheleia-phpcbf-cleanup (file)
+;;   "Delete temporary FILE after PHPCBF finishes."
+;;   (ignore-errors
+;;     (delete-file file)))
+;;
+;; (defun my-apheleia-phpcbf-finish (scratch callback file err stdout)
+;;   "Copy formatted FILE into SCRATCH and invoke CALLBACK.
+;; ERR contains a process error, or nil.  STDOUT is the process output
+;; buffer supplied by Apheleia."
+;;   (unless err
+;;     (setq err
+;;           (condition-case error-data
+;;               (progn
+;;                 (unless (buffer-live-p scratch)
+;;                   (error "PHPCBF scratch buffer is no longer available"))
+;;                 (with-current-buffer stdout
+;;                   (erase-buffer)
+;;                   (insert-file-contents-literally file))
+;;                 (with-current-buffer scratch
+;;                   (erase-buffer)
+;;                   (insert-buffer-substring stdout))
+;;                 nil)
+;;             (error error-data))))
+;;   (funcall callback err))
+;;
+;; (cl-defun my-apheleia-phpcbf-buffer
+;;     (&key buffer scratch callback formatter remote &allow-other-keys)
+;;   "Format SCRATCH asynchronously with PHPCBF and invoke CALLBACK.
+;; BUFFER supplies the original buffer context.  FORMATTER identifies
+;; the Apheleia formatter.  REMOTE supplies the remote connection prefix.
+;; Accept exit codes 0, 1, and 2, including partial fixes under PHPCBF 3."
+;;   (require 'apheleia-formatters)
+;;   (when (and (fboundp 'apheleia--formatter-context)
+;;              (fboundp 'apheleia-formatter--output-fname)
+;;              (fboundp 'apheleia--execute-formatter-process))
+;;     (with-current-buffer buffer
+;;       (let* ((context
+;;               (apheleia--formatter-context
+;;                (or formatter 'phpcbf)
+;;                '("phpcbf"
+;;                  (concat "--standard="
+;;                          (expand-file-name "~/.config/phpcs/pear.xml"))
+;;                  inplace)
+;;                remote
+;;                scratch))
+;;              (file (apheleia-formatter--output-fname context)))
+;;         (condition-case error-data
+;;             (apheleia--execute-formatter-process
+;;              :ctx context
+;;              :exit-status
+;;              (lambda (status)
+;;                (memq status '(0 1 2)))
+;;              :callback
+;;              (apply-partially
+;;               #'my-apheleia-phpcbf-finish scratch callback file)
+;;              :ensure
+;;              (apply-partially #'my-apheleia-phpcbf-cleanup file))
+;;           (error
+;;            (my-apheleia-phpcbf-cleanup file)
+;;            (signal (car error-data) (cdr error-data))))))))
+;;
+;; (with-eval-after-load 'apheleia
+;;   (setf (alist-get 'phpcbf apheleia-formatters)
+;;         #'my-apheleia-phpcbf-buffer
+;;         (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
+;;         (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
+
+;;; apheleia php simplified
 
 (defun my-apheleia-phpcbf-cleanup (file)
   "Delete temporary FILE after PHPCBF finishes."
-  (ignore-errors
-    (delete-file file)))
+  (when file
+    (ignore-errors
+      (delete-file file))))
 
-(defun my-apheleia-phpcbf-finish (scratch callback file err stdout)
-  "Copy formatted FILE into SCRATCH and invoke CALLBACK.
-ERR contains a process error, or nil.  STDOUT is the process output
-buffer supplied by Apheleia."
+(defun my-apheleia-phpcbf-finish (scratch callback file err _stdout)
+  "Copy formatted FILE into SCRATCH and invoke CALLBACK."
   (unless err
     (setq err
           (condition-case error-data
               (progn
                 (unless (buffer-live-p scratch)
                   (error "PHPCBF scratch buffer is no longer available"))
-                (with-current-buffer stdout
-                  (erase-buffer)
-                  (insert-file-contents-literally file))
                 (with-current-buffer scratch
                   (erase-buffer)
-                  (insert-buffer-substring stdout))
+                  (insert-file-contents-literally file))
                 nil)
             (error error-data))))
   (funcall callback err))
 
-(cl-defun my-apheleia-phpcbf-buffer
+(defun my-apheleia-phpcbf-buffer
     (&key buffer scratch callback formatter remote &allow-other-keys)
-  "Format SCRATCH asynchronously with PHPCBF and invoke CALLBACK.
-BUFFER supplies the original buffer context.  FORMATTER identifies
-the Apheleia formatter.  REMOTE supplies the remote connection prefix.
-Accept exit codes 0, 1, and 2, including partial fixes under PHPCBF 3."
+  "Format SCRATCH asynchronously with PHPCBF and invoke CALLBACK."
   (require 'apheleia-formatters)
-  (when (and (fboundp 'apheleia--formatter-context)
-             (fboundp 'apheleia-formatter--output-fname)
-             (fboundp 'apheleia--execute-formatter-process))
-    (with-current-buffer buffer
+  (with-current-buffer buffer
+    (if (not (executable-find "phpcbf" (eq apheleia-remote-algorithm 'remote)))
+        (funcall callback (cons 'error "Could not find executable for phpcbf"))
       (let* ((context
               (apheleia--formatter-context
                (or formatter 'phpcbf)
@@ -2302,21 +2363,16 @@ Accept exit codes 0, 1, and 2, including partial fixes under PHPCBF 3."
         (condition-case error-data
             (apheleia--execute-formatter-process
              :ctx context
-             :exit-status
-             (lambda (status)
-               (memq status '(0 1 2)))
-             :callback
-             (apply-partially
-              #'my-apheleia-phpcbf-finish scratch callback file)
-             :ensure
-             (apply-partially #'my-apheleia-phpcbf-cleanup file))
+             :exit-status (lambda (status) (memq status '(0 1 2)))
+             :callback (apply-partially
+                        #'my-apheleia-phpcbf-finish scratch callback file)
+             :ensure (apply-partially #'my-apheleia-phpcbf-cleanup file))
           (error
            (my-apheleia-phpcbf-cleanup file)
            (signal (car error-data) (cdr error-data))))))))
 
 (with-eval-after-load 'apheleia
-  (setf (alist-get 'phpcbf apheleia-formatters)
-        #'my-apheleia-phpcbf-buffer
+  (setf (alist-get 'phpcbf apheleia-formatters) #'my-apheleia-phpcbf-buffer
         (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
         (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
 
