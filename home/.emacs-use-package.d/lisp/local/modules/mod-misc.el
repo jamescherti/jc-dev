@@ -2211,45 +2211,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
    ;;  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort autopep8)))
    )
 
-  ;; PHP
-  ;; (setf (alist-get 'phpcbf apheleia-formatters)
-  ;;       '("phpcbf" "--standard=PEAR" "-"))
-  ;;
-  ;; (setf (alist-get 'phpcbf apheleia-formatters)
-  ;;       '("sh" "-c" "phpcbf --standard=PEAR \"$1\" >/dev/null 2>&1; [ $? -le 2 ]" "--" inplace))
 
-  (with-eval-after-load 'apheleia
-    (setf (alist-get 'phpcbf apheleia-formatters)
-          '("sh" "-c"
-            "\"$@\" >&2; status=$?; case \"$status\" in 0|1|2) exit 0 ;; *) exit \"$status\" ;; esac"
-            "apheleia-phpcbf"
-            "phpcbf"
-            (concat "--standard="
-                    (expand-file-name "~/.config/phpcs/pear.xml"))
-            inplace)
-          (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
-          (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
-
-  ;; (cl-defun my-apheleia-phpcbf-buffer (&key scratch callback &allow-other-keys)
-  ;;   "Format SCRATCH buffer with `phpcbf' and run CALLBACK."
-  ;;   (with-current-buffer scratch
-  ;;     (let ((stdout (generate-new-buffer " *apheleia-phpcbf*")))
-  ;;       (unwind-protect
-  ;;           (let ((status (call-process-region
-  ;;                          (point-min) (point-max)
-  ;;                          "phpcbf" nil (list stdout nil) nil
-  ;;                          "--standard=PEAR" "-")))
-  ;;             (when (memq status '(1 2))
-  ;;               (erase-buffer)
-  ;;               (insert-buffer-substring stdout))
-  ;;             (when (memq status '(0 1 2))
-  ;;               (funcall callback)))
-  ;;         (kill-buffer stdout)))))
-  ;;
-  ;; (when (fboundp 'my-apheleia-phpcbf-buffer)
-  ;;   (setf (alist-get 'phpcbf apheleia-formatters) #'my-apheleia-phpcbf-buffer)
-  ;;   (setf (alist-get 'php-mode apheleia-mode-alist) 'phpcbf)
-  ;;   (setf (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
 
   ;; SH/Bash shell scripts
   (setf (alist-get 'shfmt apheleia-formatters)
@@ -2272,6 +2234,91 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   (add-hook 'bash-ts-mode-hook 'my-apheleia-sh-mode-setup)
   (add-hook 'sh-mode-hook 'my-apheleia-sh-mode-setup))
+
+;;; apheleia php (sh)
+
+;; (with-eval-after-load 'apheleia
+;;   (setf (alist-get 'phpcbf apheleia-formatters)
+;;         '("sh" "-c"
+;;           "\"$@\" >&2; status=$?; case \"$status\" in 0|1|2) exit 0 ;; *) exit \"$status\" ;; esac"
+;;           "apheleia-phpcbf"
+;;           "phpcbf"
+;;           (concat "--standard="
+;;                   (expand-file-name "~/.config/phpcs/pear.xml"))
+;;           inplace)
+;;         (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
+;;         (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
+
+;;; apheleia php (too complicated)
+
+(require 'cl-lib)
+
+(defun my-apheleia-phpcbf-cleanup (file)
+  "Delete temporary FILE after PHPCBF finishes."
+  (ignore-errors
+    (delete-file file)))
+
+(defun my-apheleia-phpcbf-finish (scratch callback file err stdout)
+  "Copy formatted FILE into SCRATCH and invoke CALLBACK.
+ERR contains a process error, or nil.  STDOUT is the process output
+buffer supplied by Apheleia."
+  (unless err
+    (setq err
+          (condition-case error-data
+              (progn
+                (unless (buffer-live-p scratch)
+                  (error "PHPCBF scratch buffer is no longer available"))
+                (with-current-buffer stdout
+                  (erase-buffer)
+                  (insert-file-contents-literally file))
+                (with-current-buffer scratch
+                  (erase-buffer)
+                  (insert-buffer-substring stdout))
+                nil)
+            (error error-data))))
+  (funcall callback err))
+
+(cl-defun my-apheleia-phpcbf-buffer
+    (&key buffer scratch callback formatter remote &allow-other-keys)
+  "Format SCRATCH asynchronously with PHPCBF and invoke CALLBACK.
+BUFFER supplies the original buffer context.  FORMATTER identifies
+the Apheleia formatter.  REMOTE supplies the remote connection prefix.
+Accept exit codes 0, 1, and 2, including partial fixes under PHPCBF 3."
+  (require 'apheleia-formatters)
+  (when (and (fboundp 'apheleia--formatter-context)
+             (fboundp 'apheleia-formatter--output-fname)
+             (fboundp 'apheleia--execute-formatter-process))
+    (with-current-buffer buffer
+      (let* ((context
+              (apheleia--formatter-context
+               (or formatter 'phpcbf)
+               '("phpcbf"
+                 (concat "--standard="
+                         (expand-file-name "~/.config/phpcs/pear.xml"))
+                 inplace)
+               remote
+               scratch))
+             (file (apheleia-formatter--output-fname context)))
+        (condition-case error-data
+            (apheleia--execute-formatter-process
+             :ctx context
+             :exit-status
+             (lambda (status)
+               (memq status '(0 1 2)))
+             :callback
+             (apply-partially
+              #'my-apheleia-phpcbf-finish scratch callback file)
+             :ensure
+             (apply-partially #'my-apheleia-phpcbf-cleanup file))
+          (error
+           (my-apheleia-phpcbf-cleanup file)
+           (signal (car error-data) (cdr error-data))))))))
+
+(with-eval-after-load 'apheleia
+  (setf (alist-get 'phpcbf apheleia-formatters)
+        #'my-apheleia-phpcbf-buffer
+        (alist-get 'php-mode apheleia-mode-alist) 'phpcbf
+        (alist-get 'php-ts-mode apheleia-mode-alist) 'phpcbf))
 
 ;;; Elisp
 
