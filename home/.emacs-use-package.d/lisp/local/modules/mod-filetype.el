@@ -67,9 +67,10 @@ symbols without the suffix `-mode'.  These mappings take precedence."
         (setf (alist-get lang org-src-lang-modes nil nil #'equal)
               sh-mode)))
 
-    (dolist (mapping mode-mappings)
-      (setf (alist-get (car mapping) org-src-lang-modes nil nil #'equal)
-            (cdr mapping)))))
+    (when mode-mappings
+      (dolist (mapping mode-mappings)
+        (setf (alist-get (car mapping) org-src-lang-modes nil nil #'equal)
+              (cdr mapping))))))
 
 (with-eval-after-load 'org-src
   (mod-filetype-automate-org-src
@@ -85,7 +86,7 @@ symbols without the suffix `-mode'.  These mappings take precedence."
    '("ash" "shell" "screen" "sh" "bash" "jsh" "bash2" "dash" "dtksh"
      "ksh" "es" "rc" "itcsh" "tcsh" "jcsh" "csh" "ksh88" "oash"
      "pdksh" "mksh" "posix" "wksh" "wsh" "zsh" "rpm")
-   nil ;; '(("diff" . diff))
+   nil ;; mode mappings like: '(("diff" . diff))
    ))
 
 ;; TODO lightemacs
