@@ -2271,6 +2271,10 @@ Accepts any arguments so it can be used as advice or a hook."
                (fboundp 'lsp-rename))
           (lsp-rename to-string))
          ((and (bound-and-true-p eglot--managed-mode)
+               (fboundp 'refactor-rename))
+          (refactor-rename to-string 'eglot))
+         ;; Obsolete
+         ((and (bound-and-true-p eglot--managed-mode)
                (fboundp 'eglot-rename))
           (eglot-rename to-string)))))
 

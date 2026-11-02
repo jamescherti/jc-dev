@@ -35,11 +35,9 @@
 (lightemacs-use-package eglot
   :ensure nil
   :commands (eglot
-             eglot-rename
              eglot-managed-p
              eglot-format
              eglot-ensure
-             eglot-rename
              eglot-format-buffer))
 
 ;;; Defaults
