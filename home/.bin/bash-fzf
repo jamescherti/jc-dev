@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Distributed under terms of the MIT license.
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+fzf() (
+  # Select a file using fd, incremental filtering, and buffered rendering.
+  # Requires Bash 4 or later.
+
+  local root="${1:-.}"
+  local query="" key="" sequence="" file="" pattern="" character=""
+  local frame="" row=""
+  local -a files=() folded=() matches=() filtered=()
+  local -i selected=0 offset=0 limit=12 index=0 position=0 dirty=1
+
+  command -v fd >/dev/null 2>&1 || return 127
+  [[ -d "$root" ]] || return 1
+  exec 3<>/dev/tty || return 1
+
+  while IFS= read -r -d '' file; do
+    files+=("$file")
+    folded+=("${file,,}")
+  done < <(
+    command fd --type f --hidden --exclude .git --color never --print0 -- . "$root"
+  )
+
+  ((${#files[@]})) || return 1
+  matches=("${!files[@]}")
+
+  trap 'printf "\033[?25h\033[?1049l" >&3' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  printf '\033[?1049h\033[?25l\033[H\033[2J' >&3
+
+  while :; do
+    if ((dirty)); then
+      pattern="*"
+      file="${query,,}"
+
+      for ((position = 0; position < ${#file}; position++)); do
+        character="${file:position:1}"
+        case "$character" in
+        '*' | '?' | '[' | ']' | '\') pattern+="\\${character}*" ;;
+        *) pattern+="${character}*" ;;
+        esac
+      done
+
+      filtered=()
+      for index in "${matches[@]}"; do
+        if [[ "${folded[index]}" == $pattern ]]; then
+          filtered+=("$index")
+        fi
+      done
+      matches=("${filtered[@]}")
+      selected=0
+      offset=0
+      dirty=0
+    fi
+
+    if ((selected < offset)); then
+      offset=$selected
+    elif ((selected >= offset + limit)); then
+      offset=$((selected - limit + 1))
+    fi
+
+    printf -v frame '\033[HSearch: %s\033[K\r\n%d/%d files | Up/Down: select | Enter: accept | Esc: cancel\033[K\r\n\033[K\r\n' \
+      "$query" "${#matches[@]}" "${#files[@]}"
+
+    for ((position = offset; position < offset + limit; position++)); do
+      if ((position < ${#matches[@]})); then
+        index=${matches[position]}
+        if ((position == selected)); then
+          printf -v row '\033[7m> %q\033[0m\033[K\r\n' "${files[index]}"
+        else
+          printf -v row '  %q\033[K\r\n' "${files[index]}"
+        fi
+      else
+        printf -v row '\033[K\r\n'
+      fi
+      frame+="$row"
+    done
+
+    printf '%s' "$frame" >&3
+
+    key=""
+    IFS= read -r -s -N 1 key <&3 || return 1
+
+    case "$key" in
+    $'\n' | $'\r')
+      if ((${#matches[@]})); then
+        printf '%s\n' "${files[${matches[selected]}]}"
+        return 0
+      fi
+      ;;
+    $'\177' | $'\b')
+      if [[ -n "$query" ]]; then
+        query="${query%?}"
+        matches=("${!files[@]}")
+        dirty=1
+      fi
+      ;;
+    $'\025')
+      query=""
+      matches=("${!files[@]}")
+      dirty=1
+      ;;
+    $'\020')
+      if ((selected > 0)); then
+        selected=$((selected - 1))
+      fi
+      ;;
+    $'\016')
+      if ((selected + 1 < ${#matches[@]})); then
+        selected=$((selected + 1))
+      fi
+      ;;
+    $'\003' | $'\004')
+      return 130
+      ;;
+    $'\033')
+      sequence=""
+      IFS= read -r -s -N 1 -t 0.1 sequence <&3 || return 130
+      if [[ "$sequence" == "[" || "$sequence" == "O" ]]; then
+        key=""
+        IFS= read -r -s -N 1 -t 0.1 key <&3 || continue
+        case "$key" in
+        A)
+          if ((selected > 0)); then
+            selected=$((selected - 1))
+          fi
+          ;;
+        B)
+          if ((selected + 1 < ${#matches[@]})); then
+            selected=$((selected + 1))
+          fi
+          ;;
+        esac
+      fi
+      ;;
+    *)
+      if [[ "$key" == [[:print:]] ]]; then
+        query+="$key"
+        dirty=1
+      fi
+      ;;
+    esac
+  done
+)
+
+fzf_insert_file() {
+  : 'Insert the selected file path at the Readline cursor.'
+
+  local selected="" quoted=""
+
+  selected=$(fzf .) || return 0
+  printf -v quoted '%q' "$selected"
+
+  READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${quoted} ${READLINE_LINE:READLINE_POINT}"
+  READLINE_POINT=$((READLINE_POINT + ${#quoted} + 1))
+}
+
+if [[ $- == *i* ]]; then
+  bind -x '"\C-t":fzf_insert_file'
+fi

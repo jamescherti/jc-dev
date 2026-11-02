@@ -128,7 +128,7 @@ main() {
     # find a different input method without these problems.
     export GTK_IM_MODULE=none
     export XMODIFIERS=@im=none
-    echo "[INFO] Change GDK_BACKEND to wayland and GTK_IM_MODULE to none" >&2
+    # echo "[INFO] Change GDK_BACKEND to wayland and GTK_IM_MODULE to none" >&2
   fi
 
   local emacs_dir
@@ -148,7 +148,7 @@ main() {
 
     exit 0
   else
-    echo "[RUN]" "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
+    # echo "[RUN]" "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
 
     exec "${emacs_bin}" "${EMACS_ARGS_DICT[@]}" "$@"
   fi
