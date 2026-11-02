@@ -405,6 +405,11 @@ main() {
     ./install.sh
   fi
 
+  # Tracker ignore
+  if [[ -d ~/Downloads ]] && ! [[ -f ~/Downloads/.trackerignore ]]; then
+    touch ~/Downloads/.trackerignore
+  fi
+
   echo
   echo Success.
 }

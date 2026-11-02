@@ -325,7 +325,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
  ;; scroll-step 10
 
  next-screen-context-lines 0
- ;; fast-but-imprecise-scrolling nil
+ fast-but-imprecise-scrolling t
  )
 
 ;; Disable the optimization locally for dired to guarantee directory

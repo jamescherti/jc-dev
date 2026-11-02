@@ -14,13 +14,13 @@ EMACS_D=""
 # RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-31.1/bin/emacs"
 # EMACS_D="$HOME/.emacs-straight.d/"
 
-# # export RUN_EMACS_BIN="/usr/bin/emacs"
-# RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
-# EMACS_D="$HOME/.emacs-straight.d/"
+# export RUN_EMACS_BIN="/usr/bin/emacs"
+RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+EMACS_D="$HOME/.emacs-straight.d/"
 #
 
-RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
-EMACS_D="$HOME/.emacs-straight.d/"
+# RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+# EMACS_D="$HOME/.emacs-straight.d/"
 
 #
 # RUN_EMACS_BIN="/usr/bin/emacs"
