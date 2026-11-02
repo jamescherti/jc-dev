@@ -37,17 +37,20 @@
 ;;; org-src automation
 
 ;; TODO article
-(defun mod-filetype-automate-org-src (mappings shell-langs)
-  "Automate tree-sitter mappings for `org-src-lang-modes'.
+(defun mod-filetype-automate-org-src (mappings shell-langs &optional mode-mappings)
+  "Configure native Org source highlighting and language mappings.
 
-MAPPINGS is a list of lists, where each inner list contains three
-elements: the Org language string, the Tree-sitter mode symbol, and
-the Tree-sitter language symbol to check for availability.
+MAPPINGS contains lists of an Org language string, a Tree-sitter
+mode symbol, and a Tree-sitter language symbol.
 
-SHELL-LANGS is a list of strings representing shell-related block
-names that should map to `bash-ts' (if bash tree-sitter is available)
-or fallback to `sh'."
+SHELL-LANGS contains shell block names mapped to `bash-ts' when
+available, otherwise to `sh'.
+
+MODE-MAPPINGS is an alist mapping Org language strings to mode
+symbols without the suffix `-mode'.  These mappings take precedence."
   (with-eval-after-load 'org-src
+    (setq org-src-fontify-natively t)
+
     (dolist (map mappings)
       (let ((org-lang (nth 0 map))
             (ts-mode (nth 1 map))
@@ -61,9 +64,13 @@ or fallback to `sh'."
                        'bash-ts
                      'sh)))
       (dolist (lang shell-langs)
-        (setf (alist-get lang org-src-lang-modes nil nil #'equal) sh-mode)))))
+        (setf (alist-get lang org-src-lang-modes nil nil #'equal)
+              sh-mode)))
 
-;; Execute the automation for all required languages
+    (dolist (mapping mode-mappings)
+      (setf (alist-get (car mapping) org-src-lang-modes nil nil #'equal)
+            (cdr mapping)))))
+
 (with-eval-after-load 'org-src
   (mod-filetype-automate-org-src
    '(("yaml"   yaml-ts   yaml)
@@ -77,7 +84,13 @@ or fallback to `sh'."
      ("cpp"    c++-ts    cpp))
    '("ash" "shell" "screen" "sh" "bash" "jsh" "bash2" "dash" "dtksh"
      "ksh" "es" "rc" "itcsh" "tcsh" "jcsh" "csh" "ksh88" "oash"
-     "pdksh" "mksh" "posix" "wksh" "wsh" "zsh" "rpm")))
+     "pdksh" "mksh" "posix" "wksh" "wsh" "zsh" "rpm")
+   nil ;; '(("diff" . diff))
+   ))
+
+;; TODO lightemacs
+(with-eval-after-load 'org-src
+  (setf (alist-get "diff" org-src-lang-modes nil nil #'equal) 'diff))
 
 ;;; Tree-sitter Fallback Helpers
 
