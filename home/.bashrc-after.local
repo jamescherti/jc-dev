@@ -476,16 +476,18 @@ if type -P eza &>/dev/null; then
     # --long
     # --git
     # --header \
+    # --ignore-glob=__pycache__ \
+    # --ignore-glob=*.elc \
+    # --ignore-glob=*.egg-info \
     command "$ls_cmd" "${OPTS[@]}" \
       --group \
       --group-directories-first \
-      --ignore-glob=__pycache__ \
-      --ignore-glob=*.elc \
-      --ignore-glob=*.egg-info \
       "$@"
   }
 
   alias ls=_jc_better_eza
+else
+  alias ls='_jc_better_ls --hide=build --hide=Templates --hide=Desktop'
 fi
 
 alias ca=cat
@@ -557,7 +559,6 @@ fi
 alias f='smart-fd'
 alias fd='smart-fd'
 alias virt-manager="ssh-add-all; virt-manager"
-alias ls='_jc_better_ls --hide=build --hide=Templates --hide=Desktop'
 
 if type -P git-smartmv >/dev/null 2>&1; then
   alias mv="git-smartmv -w 10 --non-interactive"
