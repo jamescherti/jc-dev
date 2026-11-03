@@ -181,7 +181,6 @@ fi
 # On_ICyan="\[\033[0;106m\]"   # Cyan
 # On_IWhite="\[\033[0;107m\]"  # White
 
-INPUTRC=~/.inputrc
 # Various variables you might want for your PS1 prompt instead
 # shellcheck disable=SC2034
 Time12h="\T"
@@ -365,8 +364,6 @@ if type __git_complete >/dev/null 2>&1; then
   alias sq='git squash'
 fi
 
-alias yamllint="yamllint -c ~/.yamllint_global.yml"
-
 #-------------------------------------------------------------------------------
 # CUSTOM COMPLETION
 #-------------------------------------------------------------------------------
@@ -497,10 +494,10 @@ fi
 
 alias ca=cat
 
-if [[ $OSFAMILY != "" ]]; then
-  if [[ -f "main_$OSFAMILY/bin/activate" ]]; then
+if [[ -n "$OS_ID" ]]; then
+  if [[ -f "main_$OS_ID/bin/activate" ]]; then
     # shellcheck disable=SC1090
-    source "main_$OSFAMILY/bin/activate"
+    source "main_$OS_ID/bin/activate"
   fi
 fi
 
@@ -514,8 +511,6 @@ alias cip="so cip"
 # alias ci="command git-commitflow"
 # alias gd="g d"
 # alias cip="git-commitflow --push"
-
-alias gs="git show" # avoid typo
 
 # alias b='gb'
 # alias gs='git st'
@@ -531,22 +526,14 @@ alias git-sync-upstream='so git-sync-upstream'
 alias git-sync='git-sync-upstream -t'
 alias c=cd
 
-alias ca=wcalc
-
-alias home-update="so esa ssh-add-exec home-update"
-alias hup=home-update
+# alias home-update="so esa ssh-add-exec home-update"
+# alias hup=home-update
 alias si="so smart-install"
 
 alias scp="so esa ssh-add-exec scp"
 alias ssh="so esa ssh-add-exec ssh"
 alias ssh-keyscan="so esa ssh-add-exec ssh"
 alias s='ssh'
-
-if type -P rg >/dev/null 2>&1; then
-  alias gr='rg'
-else
-  alias gr='grep -R -i --no-messages'
-fi
 
 path-is-inside-of() {
   local target="$1"
@@ -563,6 +550,12 @@ smart-fd() {
     command fd --hidden --no-ignore --exclude '.git' "$@"
   fi
 }
+
+if type -P rg >/dev/null 2>&1; then
+  alias gr='rg'
+else
+  alias gr='grep -R -i --no-messages'
+fi
 
 # alias f='fd --no-ignore'
 alias f='smart-fd'

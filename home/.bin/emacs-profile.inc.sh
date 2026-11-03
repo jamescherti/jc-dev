@@ -1,32 +1,35 @@
 #!/usr/bin/env bash
 
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
-OSFAMILY=$(
-  # shellcheck disable=SC1091
-  [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
-  echo "${ID:-unknown}"
-)
+
+if [[ "$OS_ID" = "" ]]; then
+  OS_ID=$(
+    # shellcheck disable=SC1091
+    [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
+    echo "${ID:-unknown}"
+  )
+fi
 
 # devemacs can change RUN_EMACS_BIN
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-  # RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/tag-emacs-31.1/bin/emacs"
+  # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/tag-emacs-31.1/bin/emacs"
   # EMACS_D="$HOME/.emacs-straight.d/"
 
   # export RUN_EMACS_BIN="/usr/bin/emacs"
-  RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+  RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-master/bin/emacs"
   EMACS_D="$HOME/.emacs-straight.d/"
 
-  # RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+  # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-emacs-31/bin/emacs"
   # EMACS_D="$HOME/.emacs-straight.d/"
 
   #
   # RUN_EMACS_BIN="/usr/bin/emacs"
   # EMACS_D="$HOME/.emacs-use-package.d/"
   #
-  # RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-master/bin/emacs"
+  # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-master/bin/emacs"
   # EMACS_D="$HOME/.emacs-master.d/"
   #
-  # RUN_EMACS_BIN="/opt/local/$USER/$OSFAMILY/emacs/branch-emacs-31/bin/emacs"
+  # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-emacs-31/bin/emacs"
   # EMACS_D="$HOME/.emacs-master.d/"
 fi
 

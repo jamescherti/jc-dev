@@ -228,8 +228,8 @@ config_gpg() {
 }
 
 config_uutils() {
-  if [[ $OSFAMILY = gentoo ]] || [[ $OSFAMILY = arch ]]; then
-    local dest_dir="$HOME/.local-$OSFAMILY/bin"
+  if [[ $OS_ID = gentoo ]] || [[ $OS_ID = arch ]]; then
+    local dest_dir="$HOME/.local-$OS_ID/bin"
 
     # Install uutils
     if [[ ! -f "$dest_dir/ls" ]]; then
@@ -337,11 +337,13 @@ copy_unified_files() {
 
 main() {
   # shellcheck disable=SC1091
-  OSFAMILY=$(
-    # shellcheck disable=SC1091
-    [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
-    echo "${ID:-unknown}"
-  )
+  if [[ "$OS_ID" = "" ]]; then
+    OS_ID=$(
+      # shellcheck disable=SC1091
+      [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
+      echo "${ID:-unknown}"
+    )
+  fi
 
   init
   confirm

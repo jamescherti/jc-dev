@@ -32,18 +32,6 @@ umask 022
 
 export PYTHONPATH="$HOME/.bin/python_modules:$PYTHONPATH"
 
-export PYTHONPYCACHEPREFIX="$HOME/.cache/python_cache"
-# mkdir -p "$PYTHONPYCACHEPREFIX" >/dev/null 2>&1
-
-export MYPY_CACHE_DIR="$HOME/.cache/python_cache_mypy"
-# mkdir -p "$MYPY_CACHE_DIR" >/dev/null 2>&1
-
-export PYTHON_EGG_CACHE="$HOME/.cache/python_cache_egg"
-# mkdir -p "$PYTHON_EGG_CACHE" >/dev/null 2>&1
-
-export PIP_DOWNLOAD_CACHE="$HOME/.cache/pip_download_cache"
-# mkdir -p "$PIP_DOWNLOAD_CACHE" >/dev/null 2>&1
-
 if ! [ -d ~/.sdcv_dict/ ]; then
   export STARDICT_DATA_DIR=/opt/local/sdcv_dict
 fi
@@ -163,9 +151,9 @@ custom_env() {
   unset _ce_requested_path _ce_resolved_path
 }
 
-OSFAMILY=$(osid 2>/dev/null)
-if [ -n "$USER" ] && [ -n "$OSFAMILY" ]; then
-  CUSTOM_ENV_BASE_PATH="/opt/local/$USER/$OSFAMILY"
+# OS_ID=$(osid 2>/dev/null)
+if [ -n "$USER" ] && [ -n "$OS_ID" ]; then
+  CUSTOM_ENV_BASE_PATH="/opt/local/$USER/$OS_ID"
   custom_env load emacs/tag-emacs-30.2 >/dev/null 2>&1
 fi
 
@@ -177,8 +165,8 @@ export JC_DOTFILES_UNATTENDED=1
 export JC_DEV_UNATTENDED=1
 
 export BATCHFETCH_CHECK_UNTRACKED=1
-export BATCHFETCH_JOBS=1
-BATCHFETCH_JOBS=$(nproc)
+# export BATCHFETCH_JOBS=1
+# BATCHFETCH_JOBS=$(nproc)
 
 if [ -d "$HOME/Sync" ]; then
   export GIT_CHECK_GPG_DATA_DIR="$HOME/Sync/.git-check-gpg"
@@ -199,23 +187,11 @@ export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 #
 # Useful for local cli like uutil.
 # -----------------------------------------------------------------------------
-if ! command -v osid >/dev/null 2>&1; then
-  if [ -f /etc/os-release ]; then
-    # shellcheck disable=SC1091
-    OSFAMILY=$(. /etc/os-release && printf '%s\n' "$ID")
-  fi
-else
-  OSFAMILY=$(osid 2>/dev/null)
-fi
-
-# shellcheck disable=SC2034
-OS_BIN_DIR="$HOME/.local-$OSFAMILY/bin"
-
-# Prepend the OS-specific binary directory to PATH if it exists and is not
-# already included.
-if [ -n "$OSFAMILY" ] && [ -d "$OS_BIN_DIR" ]; then
-  case ":$PATH:" in
-  *":$OS_BIN_DIR:"*) ;;
-  *) export PATH="$OS_BIN_DIR:$PATH" ;;
-  esac
-fi
+# if ! command -v osid >/dev/null 2>&1; then
+#   if [ -f /etc/os-release ]; then
+#     # shellcheck disable=SC1091
+#     OS_ID=$(. /etc/os-release && printf '%s\n' "$ID")
+#   fi
+# else
+#   OS_ID=$(osid 2>/dev/null)
+# fi

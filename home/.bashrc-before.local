@@ -35,9 +35,3 @@ JC_EMACS_INTEGRATION=1
 JC_RESTORE_LAST_DIR=1
 JC_FASD=1
 JC_FIX_GPG_TTY=1
-
-# The GNU awk (gawk) implementation is standard on many systems, but mawk is a
-# bytecode-compiled implementation that is significantly faster.
-if type -P mawk &>/dev/null; then
-  alias awk=mawk
-fi

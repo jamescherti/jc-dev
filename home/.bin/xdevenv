@@ -326,8 +326,8 @@ xdevenv-terminal() {
   TERMINAL_CMD=()
   if is_gnome && is_wayland && has_run_or_raise; then
     if type -P gnome-terminal; then
-      # OSID=$(~/.local/bin/osid)
-      # if [[ $OSID = arch ]]; then
+      # OS_ID=$(~/.local/bin/osid)
+      # if [[ $OS_ID = arch ]]; then
       #    NAUTILUS_DESKTOP_NAME=org.gnome.Terminal
       # else
       #    NAUTILUS_DESKTOP_NAME=gnome-terminal
@@ -558,8 +558,10 @@ xdevenv-file-explorer() {
     fi
   elif type -P nautilus &>/dev/null; then
     if has_run_or_raise && is_gnome && is_wayland; then
-      OSID=$(~/.local/bin/osid)
-      if [[ $OSID = gentoo ]] || [[ $OSID = arch ]]; then
+      if [[ $OS_ID = "" ]]; then
+        OS_ID=$(~/.local/bin/osid)
+      fi
+      if [[ $OS_ID = gentoo ]] || [[ $OS_ID = arch ]]; then
         NAUTILUS_DESKTOP_NAME=org.gnome.Nautilus
       else
         NAUTILUS_DESKTOP_NAME=nautilus
