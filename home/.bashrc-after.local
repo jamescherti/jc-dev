@@ -445,11 +445,6 @@ loop() {
   done
 }
 
-# shellcheck disable=SC2139
-alias rg="rg --hidden --no-messages --no-heading --threads $(ncpu)"
-# shellcheck disable=SC2139
-alias fd="fd --threads $(ncpu)"
-
 if type -P eza &>/dev/null; then
   # TODO: use global var
   _jc_better_eza() {
@@ -535,21 +530,16 @@ path-is-inside-of() {
 smart-fd() {
   if git rev-parse --is-inside-work-tree &>/dev/null \
     || path-is-inside-of "$PWD" "$HOME/src"; then
-    command fd --hidden --ignore "$@"
+    fd --hidden --ignore "$@"
   else
-    command fd --hidden --no-ignore --exclude '.git' "$@"
+    fd --hidden --no-ignore --exclude '.git' "$@"
   fi
 }
 
-if type -P rg >/dev/null 2>&1; then
-  alias gr='rg'
-else
-  alias gr='grep -R -i --no-messages'
-fi
-
-# alias f='fd --no-ignore'
 alias f='smart-fd'
 alias fd='smart-fd'
+
+# alias f='fd --no-ignore'
 alias virt-manager="ssh-add-all; virt-manager"
 
 if type -P git-smartmv >/dev/null 2>&1; then

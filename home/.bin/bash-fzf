@@ -44,7 +44,7 @@ fzf() (
     files+=("$file")
     folded+=("${file,,}")
   done < <(
-    command fd --type f --hidden --exclude .git --color never --print0 -- . "$root"
+    command fd --color=none --type f --hidden --exclude .git --color never --print0 -- . "$root"
   )
 
   ((${#files[@]})) || return 1
