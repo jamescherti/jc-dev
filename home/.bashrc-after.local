@@ -290,44 +290,29 @@ alias mountall='sudo -i /bin/sh -c "/usr/bin/udiskie-mount -a; /usr/bin/udiskie-
 alias qai='so pathaction -t install'
 
 alias_completion() {
-  local func_name='alias_completion'
-  if [[ $# -lt 2 ]]; then
-    echo "Usage: $func_name <cmd> <alias> <alias2> <...>" >&2
+  if (($# < 2)); then
+    printf '%s\n' \
+      'Usage: alias_completion <cmd> <alias> [alias ...]' >&2
     return 1
   fi
 
-  local cmd
-  cmd="$1"
-  shift
+  local cmd=$1
+  local -a aliases=("${@:2}")
+  local completion_spec
 
-  # Load the completion
   if ! type _completion_loader >/dev/null 2>&1; then
-    echo "Error: $func_name: '_completion_loader' was not found." >&2
+    printf '%s\n' \
+      'Error: alias_completion: _completion_loader was not found.' >&2
     return 1
   fi
 
   _completion_loader "$cmd"
 
-  if ! complete -p "$cmd" >/dev/null; then
-    echo "Error: $func_name: 'complete -p $cmd' failed." >&2
-    return 1
-  fi
+  completion_spec=$(complete -p "$cmd" 2>/dev/null) || return 1
+  [[ $completion_spec == 'complete '* ]] || return 1
 
-  # Add aliases
-  local alias
-  for alias in "$@"; do
-    complete_cmd=$(complete -p "$cmd" 2>/dev/null | sed -e 's/[[:space:]][^[:space:]]\+$//')
-    complete_cmd="${complete_cmd} $alias"
-
-    if ! (echo "$complete_cmd" | grep -P '^\s*complete\s' >/dev/null 2>&1); then
-      echo "Error: $func_name: alias '$alias': '$complete_cmd' is an invalid command." >&2
-      return 1
-    fi
-
-    eval "$complete_cmd"
-  done
-
-  return 0
+  eval "set -- ${completion_spec#complete }" || return 1
+  complete "${@:1:$#-1}" "${aliases[@]}"
 }
 
 if type _completion_loader >/dev/null 2>&1; then

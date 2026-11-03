@@ -167,8 +167,9 @@ export JC_DEV_UNATTENDED=1
 export BATCHFETCH_CHECK_UNTRACKED=1
 
 # shellcheck disable=SC2034
-BATCHFETCH_JOBS=$(ncpu) || BATCHFETCH_JOBS=1
-export BATCHFETCH_JOBS=1
+# Slow
+# BATCHFETCH_JOBS=$(ncpu) || BATCHFETCH_JOBS=1
+# export BATCHFETCH_JOBS=1
 
 if [ -d "$HOME/Sync" ]; then
   export GIT_CHECK_GPG_DATA_DIR="$HOME/Sync/.git-check-gpg"
