@@ -80,6 +80,8 @@ if [ "$CURRENT_SHA" = "$TARGET_SHA" ]; then
 fi
 
 # Step 3: Show differences and request confirmation
+git diff "${COMPARE_REF}..HEAD"
+
 echo "Changes to be merged from '$CURRENT_REF' into '$DEFAULT_BRANCH'" \
   "(comparing against '$COMPARE_REF'):"
 echo "--------------------------------------------------------"
