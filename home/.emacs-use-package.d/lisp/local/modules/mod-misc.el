@@ -3639,6 +3639,9 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 ;; across frequent process forks.
 (add-hook 'after-init-hook
           (lambda ()
+            (when-let* ((executable (executable-find "dash")))
+              (setq shell-file-name executable)
+              (setenv "SHELL" shell-file-name))
             (when-let* ((executable (executable-find "sh")))
               (setq shell-file-name executable)
               (setenv "SHELL" shell-file-name))
