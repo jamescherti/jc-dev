@@ -445,21 +445,10 @@ loop() {
   done
 }
 
-if type -P nproc &>/dev/null; then
-  _nproc=$(nproc)
-  if [[ $_nproc -gt 1 ]]; then
-    _nproc=$((_nproc - 1))
-  fi
-else
-  _nproc=""
-fi
-
-if [[ $_nproc != "" ]]; then
-  # shellcheck disable=SC2139
-  alias rg="rg --hidden --no-messages --no-heading --threads $_nproc"
-  # shellcheck disable=SC2139
-  alias fd="fd --threads $_nproc"
-fi
+# shellcheck disable=SC2139
+alias rg="rg --hidden --no-messages --no-heading --threads $(ncpu)"
+# shellcheck disable=SC2139
+alias fd="fd --threads $(ncpu)"
 
 if type -P eza &>/dev/null; then
   # TODO: use global var

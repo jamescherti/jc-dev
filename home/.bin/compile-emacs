@@ -39,7 +39,10 @@ FPROFILE_GENERATE=1
 USE_CLANG=0
 
 SOFTWARE_NAME="emacs"
-NUM_PROC=$(nproc --ignore=1)
+
+if NUM_PROC=$(ncpu --ignore=1); then
+  NUM_PROC=$(nproc --ignore=1)
+fi
 
 CC_OPTIMIZE="3"
 
@@ -1089,8 +1092,7 @@ run_build() {
 
   ./configure "${CONFIGURE_ARGS[@]}"
 
-  NUM_PROC_MAX=$(nproc)
-  NUM_PROC_MAX=$((NUM_PROC_MAX * 4))
+  NUM_PROC_MAX=$((NUM_PROC * 4))
 
   make -j "$NUM_PROC_MAX" -l "$NUM_PROC"
 
