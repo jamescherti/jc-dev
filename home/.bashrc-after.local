@@ -461,10 +461,6 @@ if [[ $_nproc != "" ]]; then
   alias fd="fd --threads $_nproc"
 fi
 
-if type -P bat &>/dev/null; then
-  alias cat=bat
-fi
-
 if type -P eza &>/dev/null; then
   # TODO: use global var
   _jc_better_eza() {
