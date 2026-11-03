@@ -1493,6 +1493,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
     (setq grep-use-null-device nil
           grep-command-position nil
           grep-command
+          ;; Removed: --search-zip
           (concat "rg"
                   ;; Include hidden files
                   " --hidden"
@@ -1501,7 +1502,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                   ;; Default
                   " --null --line-buffered --color=never --max-columns=1000"
                   " --path-separator / --smart-case --no-heading"
-                  " --with-filename --line-number --search-zip")
+                  " --with-filename --line-number")
           ;; Synchronize grep-template with the custom ripgrep command defined above.
           ;; The <R> and <F> tokens serve as dynamic placeholders that Emacs replaces
           ;; with the search regular expression and target file patterns at runtime.
