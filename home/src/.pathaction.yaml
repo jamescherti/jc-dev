@@ -19,11 +19,6 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-vars:
-  # debug: true
-  # verbose: true
-  last: true
-
 actions:
   - path_match:
       - "*/ansible-collection-hardening/*"

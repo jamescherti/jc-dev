@@ -197,8 +197,6 @@ config-files() {
   secure_dir ~/Pictures
   secure_dir ~/Media
 
-  cp -u "$SCRIPT_DIR/.default_pathaction.yaml" "$HOME/.pathaction.yaml"
-
   mkdir -p ~/.git-templates
   if ! [[ -L ~/.git-templates/hooks ]]; then
     # rm -f ~/.git-templates/hooks
