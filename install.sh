@@ -337,7 +337,7 @@ copy_unified_files() {
 
 main() {
   # shellcheck disable=SC1091
-  if [[ "$OS_ID" = "" ]]; then
+  if [[ "${OS_ID:-}" = "" ]]; then
     OS_ID=$(
       # shellcheck disable=SC1091
       [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
