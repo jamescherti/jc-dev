@@ -614,6 +614,6 @@ alias ccf=cbcopy-files
 
 if type -P bat &>/dev/null; then
   alias less='bat -p --paging=always'
-  export LESS="-R"
-  export LESSOPEN="|bat --color=always --style=plain %s 2>/dev/null"
+  #   export LESS="-R"
+  #   export LESSOPEN="|bat --color=always --style=plain %s 2>/dev/null"
 fi
