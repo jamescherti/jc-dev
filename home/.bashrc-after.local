@@ -611,3 +611,9 @@ alias gpg-src="git-rexec -C ~/src --exclude ~/src/forks --exclude ~/src/local --
 alias emacsdiff=emacs-diff
 alias ediff=emacs-diff
 alias ccf=cbcopy-files
+
+if type -P bat &>/dev/null; then
+  alias less='bat -p --paging=always'
+  export LESS="-R"
+  export LESSOPEN="|bat --color=always --style=plain %s 2>/dev/null"
+fi
