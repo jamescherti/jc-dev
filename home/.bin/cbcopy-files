@@ -52,7 +52,7 @@ read_shebang() {
   [[ -f "$1" && -r "$1" ]] || return 1
   IFS= read -r line <"$1" || [[ -n "$line" ]] || return 1
 
-  if [[ "$line" =~ ^[[:space:]]*\#\![[:space:]]*(.*)$ ]]; then
+  if [[ "$line" =~ ^\#\![[:space:]]*(.*)$ ]]; then
     printf '%s\n' "${BASH_REMATCH[1]%$'\r'}"
   else
     return 1
@@ -60,87 +60,54 @@ read_shebang() {
 }
 
 detect_language() {
-  local shebang interpreter token
-  local -a words=()
-  local index=0
+  local shebang interpreter word
 
   if shebang=$(read_shebang "$1"); then
-    read -r -a words <<<"$shebang"
-    interpreter="${words[0]-}"
-    interpreter="${interpreter##*/}"
+    for word in $shebang; do
+      if [[ "$word" != -* && "$word" != *=* && "${word##*/}" != "env" ]]; then
+        interpreter="${word##*/}"
+        break
+      fi
+    done
 
-    if [[ "$interpreter" == env ]]; then
-      interpreter=""
-      index=1
-
-      while ((index < ${#words[@]})); do
-        token="${words[index]}"
-
-        case "$token" in
-        --)
-          index=$((index + 1))
-          interpreter="${words[index]-}"
-          break
-          ;;
-        -u | --unset | -C | --chdir)
-          index=$((index + 2))
-          continue
-          ;;
-        -S | --split-string | -i | --ignore-environment | -0 | --null) ;;
-        --unset=* | --chdir=* | [[:alpha:]_]*=*) ;;
-        -*)
-          break
-          ;;
-        *)
-          interpreter="$token"
-          break
-          ;;
-        esac
-
-        index=$((index + 1))
-      done
-
-      interpreter="${interpreter##*/}"
-    fi
-
-    case "$interpreter" in
-    emacs | emacs-[0-9]* | emacs[0-9]*)
+    case "${interpreter-}" in
+    emacs*)
       printf '%s\n' elisp
       return
       ;;
-    python | python[0-9]* | pypy | pypy[0-9]*)
+    python* | pypy*)
       printf '%s\n' python
       return
       ;;
-    sh | bash | dash | ash | ksh | ksh[0-9]* | mksh | zsh)
+    sh | bash | dash | ash | ksh* | mksh | zsh)
       printf '%s\n' sh
       return
       ;;
     fish | csh | tcsh)
-      printf '%s\n' "$interpreter"
+      printf '%s\n' "${interpreter-}"
       return
       ;;
     node | nodejs | deno | bun)
       printf '%s\n' javascript
       return
       ;;
-    ruby | ruby[0-9]*)
+    ruby*)
       printf '%s\n' ruby
       return
       ;;
-    perl | perl[0-9]*)
+    perl*)
       printf '%s\n' perl
       return
       ;;
-    php | php[0-9]*)
+    php*)
       printf '%s\n' php
       return
       ;;
-    lua | lua[0-9]* | luajit)
+    lua*)
       printf '%s\n' lua
       return
       ;;
-    awk | gawk | mawk | nawk)
+    *awk)
       printf '%s\n' awk
       return
       ;;
