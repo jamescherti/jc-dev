@@ -21,61 +21,83 @@
 
 set -euo pipefail
 
-main() {
-  # Ensure we have at least 3 arguments
+main() (
   if [[ $# -lt 3 ]]; then
-    echo "Usage: run-every <seconds> <reference_file> <command...>" >&2
+    printf 'Usage: run-every <seconds> <reference_file> <command...>\n' >&2
     return 1
   fi
 
   local interval="$1"
-  local lock_file="$2"
+  local reference_file="$2"
   shift 2
   local command=("$@")
+  local LC_ALL=C
 
-  # Validate that the interval is a positive integer
-  if ! [[ "$interval" =~ ^[0-9]+$ ]]; then
-    echo "Error: <seconds> must be a positive integer." >&2
+  if [[ ! "$interval" =~ ^0*[1-9][0-9]*$ ]]; then
+    printf 'Error: <seconds> must be a positive integer.\n' >&2
     return 1
   fi
 
-  # Ensure the directory exists
-  mkdir -p "$(dirname "$lock_file")"
+  interval=${interval#"${interval%%[!0]*}"}
+  if [[ ${#interval} -gt 19 ]] \
+    || [[ ${#interval} -eq 19 && "$interval" > 9223372036854775807 ]]; then
+    printf 'Error: <seconds> exceeds the signed 64-bit integer range.\n' >&2
+    return 1
+  fi
 
-  local should_run=0
+  if [[ -z "$reference_file" ]]; then
+    printf 'Error: <reference_file> must not be empty.\n' >&2
+    return 1
+  fi
+  case "$reference_file" in
+  /*) ;;
+  *) reference_file="./$reference_file" ;;
+  esac
 
-  if ! [[ -f "$lock_file" ]]; then
-    # First time running: execute and create the file
-    should_run=1
+  if ! command -v flock >/dev/null 2>&1; then
+    printf 'Error: flock is required.\n' >&2
+    return 1
+  fi
+
+  local reference_dir=${reference_file%/*}
+  mkdir -p "${reference_dir:-/}"
+  exec 9>>"${reference_file}.lock"
+
+  local status
+  if flock -n -E 75 9; then
+    :
   else
-    local current_time
-    current_time=$(date +%s)
+    status=$?
+    if [[ $status -eq 75 ]]; then
+      printf '[IGNORED] %s\n' "${command[*]}"
+      return 0
+    fi
+    return "$status"
+  fi
+
+  if [[ -e "$reference_file" || -L "$reference_file" ]]; then
+    if [[ ! -f "$reference_file" ]]; then
+      printf 'Error: reference path is not a regular file: %s\n' "$reference_file" >&2
+      return 1
+    fi
 
     local last_run
-
-    # Detect if 'stat' is the GNU version or BSD/macOS version
     if stat --version >/dev/null 2>&1; then
-      last_run=$(stat -c %Y "$lock_file")
+      last_run=$(stat -L -c %Y "$reference_file")
     else
-      last_run=$(stat -f %m "$lock_file")
+      last_run=$(stat -L -f %m "$reference_file")
     fi
 
-    local elapsed
-    elapsed=$((current_time - last_run))
-
-    if [[ $elapsed -ge $interval ]]; then
-      should_run=1
-    else
-      echo "[IGNORED] ${command[*]}"
+    local current_time
+    current_time=$(date +%s)
+    if ((current_time < last_run || current_time - last_run < interval)); then
+      printf '[IGNORED] %s\n' "${command[*]}"
+      return 0
     fi
   fi
 
-  if [[ $should_run -ne 0 ]]; then
-    # Touch the lock file before execution to prevent concurrent processes
-    # from initiating the same long-running command.
-    touch "$lock_file"
-    "${command[@]}"
-  fi
-}
+  touch "$reference_file"
+  "${command[@]}" 9>&-
+)
 
 main "$@"

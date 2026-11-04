@@ -26,31 +26,78 @@
 # SOFTWARE.
 #
 
-_find_dominating_file() {
-  (
-    # Find a file in the current directory or in its parent directories (e.g.
-    # ".gitignore")
-    local filename="$1"
+_find_dominating_file() (
+  local type='f' selected_type='' next_type filename candidate
 
-    while true; do
-      local previous_dir="$PWD"
-      local path_filename="$previous_dir/$filename"
+  while (($# > 0)); do
+    case "$1" in
+    -a | --any) next_type='a' ;;
+    -f | --file) next_type='f' ;;
+    -d | --directory) next_type='d' ;;
+    -h | --help)
+      printf '%s\n' 'Usage: find-dominating-file [OPTION] [--] RELATIVE_PATH
 
-      if [[ -f "$path_filename" ]]; then
-        echo "$path_filename"
-        return 0
-      fi
+Search the current directory, then its physical ancestors.
+Print the absolute path of the nearest matching entry.
 
-      command cd .. || return 1
+  -a, --any        Match any entry, including dangling symbolic links.
+  -f, --file       Match regular files (default).
+  -d, --directory  Match directories.
+  -h, --help       Display this help.
 
-      if [[ "$PWD" == "$previous_dir" ]]; then
-        break
-      fi
-    done
+Type options are mutually exclusive. File and directory tests follow links.
+Use -- before a relative path beginning with a hyphen.
 
-    # shellcheck disable=SC2164
-    return 1
-  ) || return "$?"
-}
+Exit status: 0 = found/help, 1 = not found, 2 = invalid arguments or error.'
+      return "$?"
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      printf 'Unknown option: %s\n' "$1" >&2
+      return 2
+      ;;
+    *) break ;;
+    esac
 
-_find_dominating_file "$@" || exit "1"
+    if [[ -n "$selected_type" && "$selected_type" != "$next_type" ]]; then
+      printf '%s\n' 'Type options are mutually exclusive.' >&2
+      return 2
+    fi
+
+    type="$next_type"
+    selected_type="$type"
+    shift
+  done
+
+  if (($# != 1)); then
+    printf '%s\n' 'Expected exactly one relative path. Use --help for usage.' >&2
+    return 2
+  fi
+
+  filename="$1"
+  if [[ -z "$filename" || "$filename" == /* ]]; then
+    printf '%s\n' 'The search path must be nonempty and relative.' >&2
+    return 2
+  fi
+
+  builtin cd -P -- . || return 2
+
+  while true; do
+    candidate="${PWD%/}/$filename"
+
+    if [[ ("$type" == 'a' && (-e "$candidate" || -L "$candidate")) ||
+      ("$type" == 'f' && -f "$candidate") ||
+      ("$type" == 'd' && -d "$candidate") ]]; then
+      printf '%s\n' "$candidate" || return 2
+      return 0
+    fi
+
+    [[ "$PWD" == / ]] && return 1
+    builtin cd -P -- "$PWD/.." || return 2
+  done
+)
+
+_find_dominating_file "$@"
