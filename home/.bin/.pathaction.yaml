@@ -1,6 +1,12 @@
 ---
 
 actions:
+  - path_match: "*/borgmachine"
+    tags: install
+    list_commands:
+      - "cp {{ file | quote }} {{ '~/.bin/borgmachine' | expanduser }}"
+      - "sudo cp {{ file | quote }} /usr/local/bin/borgmachine"
+
   - path_match:
       - "*"
     tags: install

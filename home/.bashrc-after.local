@@ -512,17 +512,17 @@ path-is-inside-of() {
   [[ "$target" == "$base" ]] || [[ "$target" == "$base/"* ]]
 }
 
-smart-fd() {
-  if git rev-parse --is-inside-work-tree &>/dev/null \
-    || path-is-inside-of "$PWD" "$HOME/src"; then
-    fd --hidden --ignore "$@"
-  else
-    fd --hidden --no-ignore --exclude '.git' "$@"
-  fi
-}
-
-alias f='smart-fd'
-alias fd='smart-fd'
+# smart-fd() {
+#   if git rev-parse --is-inside-work-tree &>/dev/null \
+#     || path-is-inside-of "$PWD" "$HOME/src"; then
+#     fd --hidden --ignore "$@"
+#   else
+#     fd --hidden "$@"
+#   fi
+# }
+#
+# alias f='smart-fd'
+# alias fd='smart-fd'
 
 # alias f='fd --no-ignore'
 alias virt-manager="ssh-add-all; virt-manager"
