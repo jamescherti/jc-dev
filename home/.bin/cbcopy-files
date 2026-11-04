@@ -24,94 +24,213 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-#
 
-# Exit immediately if a command exits with a non-zero status,
-# treat unset variables as an error, and fail pipelines if any command fails.
 set -euo pipefail
 
-# Check if at least one argument is provided
 if [[ $# -eq 0 ]]; then
   echo "Usage: ${0##*/} <file1> [file2 ...]" >&2
   exit 1
 fi
 
-# shellcheck disable=SC2317
 error_handler() {
   local errno="$?"
   echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
     "(${BASH_COMMAND} exited with status $errno)" >&2
-  exit "${errno}"
+  exit "$errno"
 }
 
-trap "error_handler" ERR
+trap 'error_handler' ERR
 set -o errtrace
 
 print_backticks() {
-  printf '%s\n' "$(printf '`%.0s' {1..10})"
+  printf '``````````%s\n' "${1-}"
+}
+
+read_shebang() {
+  local line=""
+
+  [[ -f "$1" && -r "$1" ]] || return 1
+  IFS= read -r line <"$1" || [[ -n "$line" ]] || return 1
+
+  if [[ "$line" =~ ^[[:space:]]*\#\![[:space:]]*(.*)$ ]]; then
+    printf '%s\n' "${BASH_REMATCH[1]%$'\r'}"
+  else
+    return 1
+  fi
+}
+
+detect_language() {
+  local shebang interpreter token
+  local -a words=()
+  local index=0
+
+  if shebang=$(read_shebang "$1"); then
+    read -r -a words <<<"$shebang"
+    interpreter="${words[0]-}"
+    interpreter="${interpreter##*/}"
+
+    if [[ "$interpreter" == env ]]; then
+      interpreter=""
+      index=1
+
+      while ((index < ${#words[@]})); do
+        token="${words[index]}"
+
+        case "$token" in
+        --)
+          index=$((index + 1))
+          interpreter="${words[index]-}"
+          break
+          ;;
+        -u | --unset | -C | --chdir)
+          index=$((index + 2))
+          continue
+          ;;
+        -S | --split-string | -i | --ignore-environment | -0 | --null) ;;
+        --unset=* | --chdir=* | [[:alpha:]_]*=*) ;;
+        -*)
+          break
+          ;;
+        *)
+          interpreter="$token"
+          break
+          ;;
+        esac
+
+        index=$((index + 1))
+      done
+
+      interpreter="${interpreter##*/}"
+    fi
+
+    case "$interpreter" in
+    emacs | emacs-[0-9]* | emacs[0-9]*)
+      printf '%s\n' elisp
+      return
+      ;;
+    python | python[0-9]* | pypy | pypy[0-9]*)
+      printf '%s\n' python
+      return
+      ;;
+    sh | bash | dash | ash | ksh | ksh[0-9]* | mksh | zsh)
+      printf '%s\n' sh
+      return
+      ;;
+    fish | csh | tcsh)
+      printf '%s\n' "$interpreter"
+      return
+      ;;
+    node | nodejs | deno | bun)
+      printf '%s\n' javascript
+      return
+      ;;
+    ruby | ruby[0-9]*)
+      printf '%s\n' ruby
+      return
+      ;;
+    perl | perl[0-9]*)
+      printf '%s\n' perl
+      return
+      ;;
+    php | php[0-9]*)
+      printf '%s\n' php
+      return
+      ;;
+    lua | lua[0-9]* | luajit)
+      printf '%s\n' lua
+      return
+      ;;
+    awk | gawk | mawk | nawk)
+      printf '%s\n' awk
+      return
+      ;;
+    Rscript)
+      printf '%s\n' r
+      return
+      ;;
+    esac
+  fi
+
+  case "${1##*/}" in
+  *.el) printf '%s\n' elisp ;;
+  *.py | *.pyw) printf '%s\n' python ;;
+  *.sh | *.bash | *.zsh | *.ksh) printf '%s\n' sh ;;
+  *.js | *.mjs | *.cjs) printf '%s\n' javascript ;;
+  *.ts | *.mts | *.cts) printf '%s\n' typescript ;;
+  *.rb) printf '%s\n' ruby ;;
+  *.pl | *.pm) printf '%s\n' perl ;;
+  *.php) printf '%s\n' php ;;
+  *.lua) printf '%s\n' lua ;;
+  *.json) printf '%s\n' json ;;
+  *.yaml | *.yml) printf '%s\n' yaml ;;
+  *.toml) printf '%s\n' toml ;;
+  *.md | *.markdown) printf '%s\n' markdown ;;
+  *.html | *.htm) printf '%s\n' html ;;
+  *.css) printf '%s\n' css ;;
+  *.xml) printf '%s\n' xml ;;
+  *.c | *.h) printf '%s\n' c ;;
+  *.cc | *.cpp | *.cxx | *.hpp) printf '%s\n' cpp ;;
+  *.rs) printf '%s\n' rust ;;
+  *.go) printf '%s\n' go ;;
+  *) printf '%s\n' text ;;
+  esac
 }
 
 run_markdown_ls() {
+  local target_file language
+
   for target_file in "$@"; do
     if [[ -d "$target_file" ]]; then
       echo "Warning: skipped (not a file): $target_file" >&2
       continue
     fi
 
-    # Check if the argument is a regular file and is readable
     if [[ -f "$target_file" && -r "$target_file" ]]; then
       if path-is "$target_file" binary >/dev/null 2>&1; then
         echo "Warning: skipped (binary): $target_file" >&2
         continue
       fi
 
-      echo "File: ${target_file}"
-      print_backticks
+      language=$(detect_language "$target_file")
 
-      # Print the file content
-      cat "$target_file"
+      printf 'BEGIN FILE: %s\n' "$target_file"
+      print_backticks "$language"
+      cat -- "$target_file"
 
-      # Ensure a trailing newline exists so the closing backticks do not get
-      # appended to the last line of the file's content.
       if [[ -s "$target_file" &&
-        $(tail -c 1 "$target_file" | wc -l) -eq 0 ]]; then
-        echo
+        $(tail -c 1 -- "$target_file" | wc -l) -eq 0 ]]; then
+        printf '\n'
       fi
 
-      echo
+      printf '\n'
       print_backticks
-      echo
+      printf 'END FILE: %s\n\n' "$target_file"
     else
-      # Output warnings to standard error so they do not pollute the captured
-      # output
-      echo "Error: '${target_file}' is not readable." >&2
+      echo "Error: '$target_file' is not readable." >&2
       exit 1
     fi
   done
 }
 
 run_checks() {
+  local target_file
+
   for target_file in "$@"; do
     if [[ -d "$target_file" ]]; then
       continue
     fi
 
-    if [[ -f "$target_file" && ! -r "$target_file" ]]; then
-      echo "Error: '${target_file}' is not readable." >&2
+    if [[ ! -f "$target_file" || ! -r "$target_file" ]]; then
+      echo "Error: '$target_file' is not a readable regular file." >&2
       exit 1
     fi
   done
 }
 
-ATEXIT_DONE=0
-# shellcheck disable=SC2329
 atexit() {
-  trap - EXIT INT TERM
   local errno="$?"
-  if [[ "$ATEXIT_DONE" -eq 0 ]]; then
-    rm -f "$TMP_FILE"
-    ATEXIT_DONE=1
-  fi
+  trap - EXIT INT TERM
+  rm -f -- "$TMP_FILE" || :
   exit "$errno"
 }
 
@@ -119,14 +238,14 @@ main() {
   run_checks "$@"
 
   TMP_FILE=$(mktemp)
-  trap 'atexit' INT TERM EXIT
+  trap 'atexit' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
 
   run_markdown_ls "$@" >"$TMP_FILE"
 
-  # -s: sanitize UTF-8
-  # -c: clipboard checks
   cbcopy -s -c <"$TMP_FILE" || exit 1
-  cat "$TMP_FILE"
+  cat -- "$TMP_FILE"
 }
 
 main "$@"

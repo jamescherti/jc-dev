@@ -40,9 +40,7 @@ USE_CLANG=0
 
 SOFTWARE_NAME="emacs"
 
-if NUM_PROC=$(ncpu --ignore=1); then
-  NUM_PROC=$(nproc --ignore=1)
-fi
+NUM_PROC=$(nproc --ignore=1)
 
 CC_OPTIMIZE="3"
 

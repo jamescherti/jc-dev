@@ -107,9 +107,9 @@
   ;;
   ;; You do not need to remove this configuration. Disabling modification checks
   ;; provides significant startup performance improvements.
-  ;; (setq straight-check-for-modifications nil)
-  (setq straight-check-for-modifications
-        '(watch-files find-when-checking))
+  (setq straight-check-for-modifications nil)
+  ;; (setq straight-check-for-modifications
+  ;;       '(watch-files find-when-checking))
 
   ;; If you do actively develop Emacs packages, you can configure straight.el to
   ;; monitor modifications only when you save a file from within Emacs. This
@@ -887,7 +887,7 @@ subsequent GCC invocations."
 
                            le-so-long
                            le-yasnippet
-                           le-compile-angel
+                           ;; le-compile-angel
                            le-display-line-numbers
                            le-vim-tab-bar
                            le-theme
