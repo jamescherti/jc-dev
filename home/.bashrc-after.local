@@ -576,12 +576,12 @@ alias emacsdiff=emacs-diff
 alias ediff=emacs-diff
 alias ccf=cbcopy-files
 
-# if type -P bat &>/dev/null; then
-#   alias less='bat -p --paging=always'
-#
-#   # lesspipe is great for looking inside tarballs and compressed files, but it
-#   # does not provide syntax highlighting for source code. You can integrate bat
-#   # (a syntax-highlighting tool) into your LESSOPEN so that any file you view
-#   # with less is automatically colorized.
-#   # export LESSOPEN="|bat --color=always --style=plain %s 2>/dev/null"
-# fi
+if type -P bat &>/dev/null; then
+  alias less='bat -p --paging=always'
+
+  # lesspipe is great for looking inside tarballs and compressed files, but it
+  # does not provide syntax highlighting for source code. You can integrate bat
+  # (a syntax-highlighting tool) into your LESSOPEN so that any file you view
+  # with less is automatically colorized.
+  # export LESSOPEN="|bat --color=always --style=plain %s 2>/dev/null"
+fi
