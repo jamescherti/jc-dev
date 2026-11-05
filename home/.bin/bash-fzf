@@ -36,7 +36,7 @@ fzf() (
   local -a files=() folded=() matches=() filtered=()
   local -i selected=0 offset=0 limit=12 index=0 position=0 dirty=1
 
-  command -v fd >/dev/null 2>&1 || return 127
+  command -v fd &>/dev/null || return 127
   [[ -d "$root" ]] || return 1
   exec 3<>/dev/tty || return 1
 
