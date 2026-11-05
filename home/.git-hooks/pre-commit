@@ -33,6 +33,18 @@ echo "[HOOK] pre-commit"
 AUTHORINFO=$(git var GIT_AUTHOR_IDENT)
 echo "[INFO] Author: $AUTHORINFO"
 
+declare -A GIT_CONFIG=()
+
+load_git_config() {
+  local line key
+  while IFS= read -r line; do
+    if [[ $line == *=* ]]; then
+      key="${line%%=*}"
+      GIT_CONFIG["${key,,}"]="${line#*=}"
+    fi
+  done < <(git config --list 2>/dev/null || true)
+}
+
 #-------------------------------------------------------------------------------
 # Error handler
 #-------------------------------------------------------------------------------
@@ -58,10 +70,11 @@ error() {
 }
 
 init() {
-  local git_username
-  git_username=$(git config --get user.name)
+  load_git_config
 
-  if ! echo "$git_username" | grep -q ' '; then
+  local git_username="${GIT_CONFIG[user.name]:-}"
+
+  if [[ $git_username != *" "* ]]; then
     error "[ERROR] Your GIT username '$git_username' is incomplete. " \
       "It needs to contain 'firstname lastname' (separated by a space)."
     echo
@@ -86,12 +99,16 @@ init() {
   # I use INSTALL_HOOKS_GITROOT to update the symbolic links
   # (from absolute to relative: it is better for people who move
   #  their directory locally)
-  INSTALL_HOOKS_GITROOT="$(git rev-parse --show-toplevel)"
-  if ! [ -d "$INSTALL_HOOKS_GITROOT/.git" ]; then
-    echo "Error: the script $0 is not in a GIT directory: $PWD"
-    exit 1
+  if [[ -d .git ]]; then
+    INSTALL_HOOKS_GITROOT="$PWD"
   else
-    cd "$INSTALL_HOOKS_GITROOT" || exit 1
+    INSTALL_HOOKS_GITROOT="$(git rev-parse --show-toplevel)"
+    if ! [[ -d "$INSTALL_HOOKS_GITROOT/.git" ]]; then
+      echo "Error: the script $0 is not in a GIT directory: $PWD"
+      exit 1
+    else
+      cd "$INSTALL_HOOKS_GITROOT" || exit 1
+    fi
   fi
 
   INIT_SUCCESS=1
@@ -102,24 +119,22 @@ check_gpg() {
   # Check the GPG configuration
   #
   local gpgerror=0
-  local gpgsign=''
+  local gpgsign="${GIT_CONFIG[commit.gpgsign]:-}" # needs to be: true
 
-  gpgsign=$(git config commit.gpgsign || true) # needs to be: true
-  if [ "${gpgsign,,}" != "true" ]; then
+  if [[ "${gpgsign,,}" != "true" ]]; then
     error "ERROR: you need to activate GPG signature with:" \
       "git config commit.gpgsign true"
     gpgerror=1
   fi
 
-  local gpgkey=''
-  gpgkey=$(git config user.signingkey || true)
-  if [ "${gpgkey}" = "" ]; then
+  local gpgkey="${GIT_CONFIG[user.signingkey]:-}"
+  if [[ -z "${gpgkey}" ]]; then
     error "ERROR: you need to specify your GPG key with:" \
       "git config user.signingkey <GPG-KEY-ID>"
     gpgerror=1
   fi
 
-  if [ "$gpgerror" -eq "1" ]; then
+  if [[ "$gpgerror" -eq 1 ]]; then
     echo "[WARNING] You need to configure your GIT with GPG."
     exit 0
   fi
@@ -130,20 +145,21 @@ update_list_files() {
   DELETED_FILES=()
 
   # A=added C=Copied M=Modified R=Renamed
-  for file in $(git \
-    diff-index --cached --name-only --diff-filter=ACMR HEAD || true); do
-    if ! [ -e "$file" ]; then
-      echo "[IGNORED] $file"
-      continue
-    fi
-
-    MODIFIED_FILES+=("$file")
-  done
-
-  for file in $(git \
-    diff-index --cached --name-only --diff-filter=D HEAD || true); do
-    DELETED_FILES+=("$file")
-  done
+  local status file
+  while IFS=$'\t' read -r status file; do
+    case "$status" in
+    D*)
+      DELETED_FILES+=("$file")
+      ;;
+    A* | C* | M* | R*)
+      if ! [[ -e "$file" ]]; then
+        echo "[IGNORED] $file"
+        continue
+      fi
+      MODIFIED_FILES+=("$file")
+      ;;
+    esac
+  done < <(git diff-index --cached --name-status "$AGAINST" || true)
 }
 
 check_non_ascii() {
@@ -155,15 +171,11 @@ check_non_ascii() {
   # Cross platform projects tend to avoid non-ASCII filenames; prevent
   # them from being added to the repository. We exploit the fact that the
   # printable range starts at the space character and ends with tilde.
-  if [ "$allownonascii" != "true" ]; then
-    # Note that the use of brackets around a tr range is ok here, (it's even
-    # required, for portability to Solaris 10's /usr/bin/tr), since the square
-    # bracket bytes happen to fall in the designated range.
+  if [[ "$allownonascii" != "true" ]]; then
     local result=''
-    # TODO: REUSE the list of files
     result=$(git diff --cached --name-only --diff-filter=A \
       -z "$AGAINST" | LC_ALL=C tr -d '[ -~]\0' | wc -c)
-    if [ "$result" -ne "0" ]; then
+    if [[ "$result" -ne 0 ]]; then
       error "------------------------------------------------------------------"
       echo "[ERROR] Attempt to add a non-ASCII file name:"
       git diff --cached --name-only --diff-filter=A -z "$AGAINST" | LC_ALL=C cat
@@ -188,14 +200,14 @@ check_forbidden_characters() {
   for file in "${MODIFIED_FILES[@]}"; do
     echo "Check modified file: $file"
     # Extract only the added lines in the staged changes and grep for
-    # typographic quotes
+    # typographic quotes using proper locale settings for UTF-8
     if git diff --no-ext-diff --cached -- "$file" \
       | grep -E '^\+([^+]|$)' | grep -q -E "’|‘|—"; then
       error "[ERROR] Forbidden characters ('’', '‘', —...) introduced in: $file"
       fault=1
     fi
   done
-  if [ "$fault" -eq 1 ]; then
+  if [[ "$fault" -eq 1 ]]; then
     exit 1
   fi
 }
@@ -212,23 +224,26 @@ check_syntax() {
 
 check_pre_commit() {
   # Pre-commit
-  if [[ -f .gitattributes ]] && grep -q 'filter=git-crypt' .gitattributes; then
+  if [[ -f .gitattributes ]] && [[ $(<.gitattributes) == *"filter=git-crypt"* ]]; then
     echo "[IGNORE] pre-commit (git-crypt)"
   elif ! [[ -f "$INSTALL_HOOKS_GITROOT/.pre-commit-config.yaml" ]]; then
     echo "[IGNORE] pre-commit (Missing: .pre-commit-config.yaml)"
   else
     #!/usr/bin/env bash
     # File generated by pre-commit: https://pre-commit.com
-    if type -P pre-commit &>/dev/null; then
+    local pre_commit_bin
+    if pre_commit_bin=$(type -P pre-commit); then
       INSTALL_PYTHON=/usr/bin/python3
       ARGS=(hook-impl --config=.pre-commit-config.yaml --hook-type=pre-commit)
-      HERE="$(cd "$(dirname "$0")" && pwd)"
+      local script_dir="${0%/*}"
+      [[ $script_dir != "$0" ]] || script_dir="."
+      HERE="$(cd "$script_dir" && pwd)"
       ARGS+=(--hook-dir "$HERE" -- "$@")
 
-      if [ -x "$INSTALL_PYTHON" ]; then
+      if [[ -x "$INSTALL_PYTHON" ]]; then
         exec "$INSTALL_PYTHON" -mpre_commit "${ARGS[@]}"
-      elif command -v pre-commit >/dev/null; then
-        exec pre-commit "${ARGS[@]}"
+      elif [[ -n "$pre_commit_bin" ]]; then
+        exec "$pre_commit_bin" "${ARGS[@]}"
       else
         echo 'Error: pre-commit not found.' 1>&2
         exit 1
@@ -243,7 +258,9 @@ check_arch_linux() {
     if ! [[ -f .SRCINFO ]] || [[ PKGBUILD -nt .SRCINFO ]]; then
       echo "[INFO] Update .SRCINFO"
       makepkg --printsrcinfo >.SRCINFO
-      if git status --porcelain .SRCINFO | grep -q '^[ M]'; then
+      local srcinfo_status
+      srcinfo_status=$(git status --porcelain .SRCINFO)
+      if [[ $srcinfo_status == [[:space:]M]* ]]; then
         makepkg --verifysource -f
         echo "[FAILED] The .SRCINFO file has been updated successfully." \
           "Please commit again."
@@ -261,7 +278,7 @@ main() {
 
   echo "[INFO] client side pre-commit hook started"
   init
-  [ "$INIT_SUCCESS" -ne "1" ] && {
+  [[ "$INIT_SUCCESS" -ne 1 ]] && {
     error "You need to run init() before main()"
     exit 1
   }
