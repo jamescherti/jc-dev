@@ -38,11 +38,11 @@ bash_fzf() (
   local -i selected=0 offset=0 limit=12 index=0 position=0 dirty=1 match_count=0
   local worker_in worker_out worker_pid
 
-  command -v fd >/dev/null 2>&1 || return 127
-  if command -v mawk >/dev/null 2>&1; then
+  command -v fd &>/dev/null || return 127
+  if command -v mawk &>/dev/null; then
     awk_command=mawk
     awk_options=(-W interactive)
-  elif command -v awk >/dev/null 2>&1; then
+  elif command -v awk &>/dev/null; then
     awk_command=awk
     if [[ $(command awk -W version 2>/dev/null) == *mawk* ]]; then
       awk_options=(-W interactive)
