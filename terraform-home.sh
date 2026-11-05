@@ -347,7 +347,7 @@ config-gnome() {
 clean-fly-files() {
   local target_dir="${1:-$HOME/src}"
 
-  if ! command -v fd >/dev/null 2>&1; then
+  if ! command -v fd &>/dev/null; then
     echo "Error: fd is not installed or not in your PATH."
     return 1
   fi
