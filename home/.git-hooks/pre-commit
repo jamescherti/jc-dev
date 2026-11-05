@@ -223,6 +223,30 @@ check_syntax() {
 }
 
 check_pre_commit() {
+  local repo_path
+  repo_path="$(realpath -m "$INSTALL_HOOKS_GITROOT")"
+
+  local src_dir
+  src_dir="$(realpath -m "$HOME/src")"
+
+  # 1. Require the repository to be inside ~/src
+  if [[ "$repo_path" != "$src_dir" && "$repo_path" != "$src_dir"/* ]]; then
+    echo "[IGNORE] pre-commit (Path '$repo_path' is outside '$src_dir')"
+    return 0
+  fi
+
+  # 2. Block the repository if it is inside ~/src/forks
+  if [[ "$repo_path" == "$src_dir/forks" || "$repo_path" == "$src_dir/forks"/* ]]; then
+    echo "[IGNORE] pre-commit (Excluded directory: forks)"
+    return 0
+  fi
+
+  # 3. Block the repository if it is inside ~/src/local
+  if [[ "$repo_path" == "$src_dir/local" || "$repo_path" == "$src_dir/local"/* ]]; then
+    echo "[IGNORE] pre-commit (Excluded directory: local)"
+    return 0
+  fi
+
   # Pre-commit
   if [[ -f .gitattributes ]] && [[ $(<.gitattributes) == *"filter=git-crypt"* ]]; then
     echo "[IGNORE] pre-commit (git-crypt)"
@@ -298,7 +322,7 @@ main() {
   # check_syntax
 
   check_arch_linux
-  # check_pre_commit "$@"
+  check_pre_commit "$@"
 }
 
 # Main
