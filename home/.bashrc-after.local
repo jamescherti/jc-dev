@@ -462,8 +462,6 @@ else
   alias ls='_jc_better_ls --hide=build --hide=Templates --hide=Desktop'
 fi
 
-alias ca=cat
-
 if [[ -n "$OS_ID" ]]; then
   if [[ -f "main_$OS_ID/bin/activate" ]]; then
     # shellcheck disable=SC1090

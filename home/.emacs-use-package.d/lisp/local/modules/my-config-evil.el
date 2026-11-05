@@ -1473,12 +1473,30 @@ If the parentheses are balanced, the function returns t."
 
 ;;; Markdown mode
 
+(defun my-markdown-dwim ()
+  "Context-sensitive handler for C-c C-c in `markdown-mode'.
+If point is inside a code block, call `markdown-edit-code-block'.
+If point is inside a table, call `markdown-table-align'.
+Otherwise, fallback to `markdown-do'."
+  (interactive)
+  (cond
+   ((and (fboundp 'markdown-code-block-at-point-p)
+         (fboundp 'markdown-edit-code-block)
+         (markdown-code-block-at-point-p))
+    (markdown-edit-code-block))
+   ((and (fboundp 'markdown-table-at-point-p)
+         (fboundp 'markdown-table-align)
+         (markdown-table-at-point-p))
+    (markdown-table-align))
+   ((fboundp 'markdown-do)
+    (markdown-do))))
+
 (with-eval-after-load 'markdown-mode
   ;; Disable markdown-do, which checks/unchecks list items: - [x]
   (evil-define-key 'normal markdown-mode-map
     (kbd "<return>") nil
     (kbd "RET") nil
-    (kbd "C-c C-c") 'markdown-edit-code-block))
+    (kbd "C-c C-c") 'my-markdown-dwim))
 
 ;;; Code that replaces evil visualstar
 

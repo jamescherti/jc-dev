@@ -850,6 +850,8 @@ ITEMS is the flattened list of Imenu candidates."
 (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (add-hook 'markdown-ts-mode-hook 'my-setup-markdown-mode)
 
+;;; Markdown-mode keys
+
 ;;; Markdown hide markup
 
 ;; (defun my-markdown-ts-mode-hide-markup ()
