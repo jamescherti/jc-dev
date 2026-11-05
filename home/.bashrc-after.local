@@ -300,7 +300,7 @@ alias_completion() {
   local -a aliases=("${@:2}")
   local completion_spec
 
-  if ! type _completion_loader >/dev/null 2>&1; then
+  if ! type _completion_loader &>/dev/null; then
     printf '%s\n' \
       'Error: alias_completion: _completion_loader was not found.' >&2
     return 1
@@ -315,7 +315,7 @@ alias_completion() {
   complete "${@:1:$#-1}" "${aliases[@]}"
 }
 
-if type _completion_loader >/dev/null 2>&1; then
+if type _completion_loader &>/dev/null; then
   alias_completion ssh s lssh issh
   alias_completion git g
   alias_completion scp iscp
@@ -327,7 +327,7 @@ if [[ -r /usr/share/bash-completion/completions/git ]]; then
   # shellcheck disable=SC1091
   source /usr/share/bash-completion/completions/git
 fi
-if type __git_complete >/dev/null 2>&1; then
+if type __git_complete &>/dev/null; then
   __git_complete gl _git_log
   __git_complete gd _git_diff
 
@@ -525,7 +525,7 @@ path-is-inside-of() {
 # alias f='fd --no-ignore'
 alias virt-manager="ssh-add-all; virt-manager"
 
-if type -P git-smartmv >/dev/null 2>&1; then
+if type -P git-smartmv &>/dev/null; then
   alias mv="git-smartmv -w 10 --non-interactive"
 fi
 
