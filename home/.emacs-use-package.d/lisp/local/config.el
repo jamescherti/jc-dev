@@ -87,6 +87,38 @@
   ;; your own packages or upstream dependencies) outside of Emacs and rely on
   ;; straight.el to automatically rebuild them on the next launch.
   ;;
+  ;; ===========================================================================
+  ;; STRAIGHT.EL BUILD & MODIFICATION WORKFLOW
+  ;; ===========================================================================
+  ;;
+  ;; Setting `straight-check-for-modifications' to nil disables automatic
+  ;; filesystem checks on startup, which reduces Emacs init time. However,
+  ;; straight will no longer detect changes made directly to package repos (such
+  ;; as git pulls, manual edits, branch checkouts, or external updates).
+  ;;
+  ;; Packages will only rebuild automatically when straight metadata changes
+  ;; (e.g., recipe adjustments in your init file). For source changes, manual
+  ;; intervention is required to sync `straight/repos/' with `straight/build/'.
+  ;;
+  ;; Updating or editing a single package:
+  ;;  - M-x straight-check-package   (checks diffs, rebuilds changed files)
+  ;;  - M-x straight-rebuild-package (forces a clean, unconditional rebuild)
+  ;;
+  ;; Updating or rebuilding all packages:
+  ;;  - M-x straight-check-all       (checks diffs across all local repos)
+  ;;  - M-x straight-rebuild-all     (forces rebuild across all packages)
+  ;;
+  ;; 3. Note on `straight-thaw-versions':
+  ;;   - Thawing only checks out the pinned Git commit hashes from the lockfile
+  ;;     (`default.el') into the repository working trees.
+  ;;   - Thawing does NOT compile code or refresh autoloads on its own.
+  ;;   - With modification checks disabled, running `straight-thaw-versions'
+  ;;     leaves the build artifacts out of date until you follow up with
+  ;;     `M-x straight-check-all' or `M-x straight-rebuild-all'.
+  ;; ===========================================================================
+  ;;
+  ;; Issue
+  ;; -----
   ;; NOTE: Yes, the (setq straight-check-for-modifications nil) line is the
   ;; exact cause of this behavior. When this variable is set to nil, straight.el
   ;; optimizes startup time by bypassing repository state checks and recipe
@@ -105,8 +137,7 @@
   ;;   empty, it finds zero associated directories and assumes every folder in
   ;;   straight/repos is orphaned.
   ;;
-  ;; You do not need to remove this configuration. Disabling modification checks
-  ;; provides significant startup performance improvements.
+  ;; This regenerates updated autoloads and byte/native-compiled files.
   (setq straight-check-for-modifications nil)
   ;; (setq straight-check-for-modifications
   ;;       '(watch-files find-when-checking))
