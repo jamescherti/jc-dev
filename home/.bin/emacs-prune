@@ -24,7 +24,7 @@ set -u
 set -e
 
 # Cache the availability of fd to avoid redundant checks inside the loop
-if command -v fd >/dev/null 2>&1; then
+if command -v fd &>/dev/null; then
   HAS_FD=true
 else
   HAS_FD=false

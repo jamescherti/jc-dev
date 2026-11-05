@@ -154,7 +154,7 @@ custom_env() {
 # OS_ID=$(osid 2>/dev/null)
 if [ -n "$USER" ] && [ -n "$OS_ID" ]; then
   CUSTOM_ENV_BASE_PATH="/opt/local/$USER/$OS_ID"
-  custom_env load emacs/tag-emacs-30.2 >/dev/null 2>&1
+  custom_env load emacs/tag-emacs-30.2 &>/dev/null
 fi
 
 # AI env var hugging face
@@ -190,7 +190,7 @@ export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 #
 # Useful for local cli like uutil.
 # -----------------------------------------------------------------------------
-# if ! command -v osid >/dev/null 2>&1; then
+# if ! command -v osid &>/dev/null; then
 #   if [ -f /etc/os-release ]; then
 #     # shellcheck disable=SC1091
 #     OS_ID=$(. /etc/os-release && printf '%s\n' "$ID")

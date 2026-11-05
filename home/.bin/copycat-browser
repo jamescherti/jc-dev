@@ -32,7 +32,7 @@ PROCNAME='copycat-browser'
 
 notify_user() {
   echo "$*"
-  if type -P notify-send >/dev/null 2>&1; then
+  if type -P notify-send &>/dev/null; then
     notify-send "[$PROCNAME] $*"
   fi
 }
@@ -48,7 +48,7 @@ main() {
     exit 0
   fi
 
-  if type -P cbcopy >/dev/null 2>&1; then
+  if type -P cbcopy &>/dev/null; then
     notify_user "$url"
     echo "$url" | cbcopy
   else

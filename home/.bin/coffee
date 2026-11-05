@@ -67,7 +67,7 @@ gnome_disable_screensaver() {
 }
 
 xfce_disable_screensaver() {
-  if which xfconf-query >/dev/null 2>&1; then
+  if which xfconf-query &>/dev/null; then
     xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode --set "$1"
     return "$?"
   fi

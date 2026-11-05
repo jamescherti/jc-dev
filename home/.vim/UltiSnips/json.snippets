@@ -157,7 +157,7 @@ endsnippet
 
 snippet cron
 "${1:name}": {
-    "command"     : "${2:command} >/dev/null 2>&1",
+    "command"     : "${2:command} &>/dev/null",
     "user"        : "${3:root}",
     "minute"      : "${4:*}",
     "hour"        : "${5:*}",
@@ -169,7 +169,7 @@ endsnippet
 snippet crons
 "system::crontabs": {
     "${1:name}": {
-        "command"     : "${2:command} >/dev/null 2>&1",
+        "command"     : "${2:command} &>/dev/null",
         "user"        : "${3:root}",
         "minute"      : "${4:*}",
         "hour"        : "${5:*}",

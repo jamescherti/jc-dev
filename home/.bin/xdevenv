@@ -70,7 +70,7 @@ notify() {
   msg="$1"
   shift
 
-  if type -P notify-send >/dev/null 2>&1; then
+  if type -P notify-send &>/dev/null; then
     notify-send "$@" -a "$SCRIPT_NAME" "$SCRIPT_NAME" "$msg" || true
   fi
 
@@ -102,7 +102,7 @@ has_run_or_raise() {
 #   local win_pid
 #   for win_pid in "${list_win_pid[@]}"; do
 #     echo "$win_pid"
-#     xdotool windowactivate "$win_pid" >/dev/null 2>&1 && errno=0
+#     xdotool windowactivate "$win_pid" &>/dev/null && errno=0
 #   done
 
 #   return "$errno"
@@ -113,13 +113,13 @@ has_run_or_raise() {
 #   shift
 #   local xdotool_activate_window_cmd=("xdotool_activate_window" "--onlyvisible" "--class" "$win_class")
 
-#   if ! "${xdotool_activate_window_cmd[@]}" >/dev/null 2>&1; then
+#   if ! "${xdotool_activate_window_cmd[@]}" &>/dev/null; then
 #     echo "[RUN]" "$@" >&2
-#     nohup "$@" >/dev/null 2>&1 &
+#     nohup "$@" &>/dev/null &
 
 #     local i
 #     for ((i = 0; i < 100; i++)); do
-#       if "${xdotool_activate_window_cmd[@]}" >/dev/null 2>&1; then
+#       if "${xdotool_activate_window_cmd[@]}" &>/dev/null; then
 #         # First execution
 #         return 2
 #       fi
@@ -271,7 +271,7 @@ show_window_maximized_devilspie() {
 # }
 
 disable_gnome_tracker() {
-  if ! type -P systemctl >/dev/null 2>&1; then
+  if ! type -P systemctl &>/dev/null; then
     return 0
   fi
 
@@ -294,7 +294,7 @@ disable_gnome_tracker() {
 }
 
 enable_gnome_tracker() {
-  if ! type -P systemctl >/dev/null 2>&1; then
+  if ! type -P systemctl &>/dev/null; then
     return 0
   fi
 
@@ -363,7 +363,7 @@ xdevenv-terminal() {
       TERMINAL_CMD=(show_window_maximized_devilspie terminator "$win_name"
         terminator "${TERMINATOR_OPTS[@]}"
         --title=tmux --execute "${TMUX_CMD_LIST[@]}")
-    elif type -P gnome-terminal >/dev/null 2>&1; then
+    elif type -P gnome-terminal &>/dev/null; then
       local win_name="gnome-terminal-server.Gnome-terminal"
       # show_window_maximized_devilspie "$win_name" gnome-terminal --hide-menubar --title=tmux -e 'sh -c "tmux -2 attach || TERM=xterm-256color tmux -2"'
       TERMINAL_CMD=(show_window_maximized_devilspie gnome-terminal "$win_name" gnome-terminal "${GNOME_TERMINAL_OPTS[@]}" --title=tmux -e "$TMUX_CMD")
@@ -374,7 +374,7 @@ xdevenv-terminal() {
         show_window_maximized_devilspie konsole "$win_name"
         konsole "${TERMINAL_OPTS[@]}" -e "${TMUX_CMD_LIST[@]}"
       )
-    elif type -P xfce4-terminal >/dev/null 2>&1; then
+    elif type -P xfce4-terminal &>/dev/null; then
       XFCE_TERMINAL_OPTS=(--hide-menubar --hide-scrollbar) # --hide-borders
       # XFCE_TERMINAL_OPTS+=(--maximize)
       # XFCE_TERMINAL_OPTS+=(--fullscreen)
@@ -427,7 +427,7 @@ xdevenv-light() {
       night-light-enabled false
   fi
 
-  if is_xfce && type -P redshift >/dev/null 2>&1; then
+  if is_xfce && type -P redshift &>/dev/null; then
     set +e
     pkill redfish
     redshift -x
@@ -444,7 +444,7 @@ xdevenv-night() {
       night-light-enabled true
   fi
 
-  if ! is_gnome && type -P redshift >/dev/null 2>&1; then
+  if ! is_gnome && type -P redshift &>/dev/null; then
     set +e
     pkill redfish
     redshift -x
@@ -614,7 +614,7 @@ init() {
   local cmd_name
   # shellcheck disable=SC2043
   for cmd_name in tmux; do
-    if ! type -P "$cmd_name" >/dev/null 2>&1; then
+    if ! type -P "$cmd_name" &>/dev/null; then
       notify "The command '$cmd_name' does not exist."
       exit 1
     fi
@@ -697,7 +697,7 @@ main() {
 
     # chromium)
     #   # If running this inside a function or script
-    #   if flatpak info com.google.Chrome >/dev/null 2>&1; then
+    #   if flatpak info com.google.Chrome &>/dev/null; then
     #     flatpak run com.google.Chrome \
     #       --enable-features=VaapiVideoDecoder \
     #       --start-maximized \

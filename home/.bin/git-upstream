@@ -36,7 +36,7 @@ NEW_URL="$1"
 URL=$(git remote get-url upstream 2>/dev/null || true)
 
 if [[ "$URL" != "$NEW_URL" ]]; then
-  git remote remove upstream >/dev/null 2>&1 || true
+  git remote remove upstream &>/dev/null || true
   echo "[UPDATE UPSTREAM] $NEW_URL"
   git remote add upstream "$NEW_URL"
 fi

@@ -51,7 +51,7 @@
 get_vcs() {
   local begin_path="$1"
 
-  if ! cd -- "$begin_path" >/dev/null 2>&1; then
+  if ! cd -- "$begin_path" &>/dev/null; then
     printf '%s\n' "$begin_path"
     return 1
   fi
@@ -65,7 +65,7 @@ get_vcs() {
 
     prev_dir="$PWD"
     # Break the loop if permissions prevent moving up the directory tree
-    if ! cd .. >/dev/null 2>&1; then
+    if ! cd .. &>/dev/null; then
       break
     fi
 

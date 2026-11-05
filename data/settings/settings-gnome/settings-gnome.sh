@@ -80,7 +80,7 @@ gset org.gnome.desktop.interface font-hinting 'slight'    # slight / medium / fu
 gset org.gnome.desktop.wm.preferences titlebar-font 'DejaVu Sans 10'
 # gset org.gnome.desktop.interface icon-theme Adwaita
 
-if type -P meld >/dev/null 2>&1; then
+if type -P meld &>/dev/null; then
   gset org.gnome.meld custom-font 'monospace 16'
 fi
 
@@ -97,7 +97,7 @@ gset org.gnome.settings-daemon.plugins.media-keys volume-step 1
 # Arch Linux font
 # TODO: Check first if the schema org.gnome.Terminal.ProfilesList exists.
 #
-# if pacman -Q ttf-inconsolata >/dev/null 2>&1; then
+# if pacman -Q ttf-inconsolata &>/dev/null; then
 # if [[ -f "/usr/share/fonts/TTF/Inconsolata-UltraCondensed.ttf" ]]; then
 #   gset_terminal font 'Inconsolata Ultra-Bold 12'
 #   gset_terminal use-system-font false
