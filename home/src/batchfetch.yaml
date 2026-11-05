@@ -765,6 +765,11 @@ tasks:
     remote:
       upstream: https://github.com/emacsmirror/nongnu_elpa
 
+  - git: git@github.com:jamescherti/aider
+    path: forks/aider
+    remote:
+      upstream: https://github.com/Aider-AI/aider
+
   # END: UNMAINTAINED PACKAGES THAT I FORKED
   # ----------------------------------------------------------------------------
 
