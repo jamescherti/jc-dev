@@ -294,7 +294,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 ;;; Scroll
 
 (setq
- redisplay-skip-fontification-on-input nil
+ ;; redisplay-skip-fontification-on-input nil
 
  ;; Here is exactly how (setq scroll-conservatively 9) works:
  ;;
@@ -325,7 +325,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
  ;; scroll-step 10
 
  next-screen-context-lines 0
- fast-but-imprecise-scrolling t
+ ;; fast-but-imprecise-scrolling nil
  )
 
 ;; Disable the optimization locally for dired to guarantee directory

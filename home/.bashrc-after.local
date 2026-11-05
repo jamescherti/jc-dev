@@ -283,7 +283,7 @@ umount-maybe() {
   fi
 }
 
-alias mountall='sudo -i /bin/sh -c "/usr/bin/udiskie-mount -a; /usr/bin/udiskie-mount -a"'
+alias mountall='/bin/sh -c "sudo /usr/bin/udiskie-mount -a --recursive; sudo /usr/bin/udiskie-mount -a --recursive"'
 
 # Changed to command
 # alias qa='pathaction'
@@ -584,4 +584,9 @@ if type -P bat &>/dev/null; then
   # (a syntax-highlighting tool) into your LESSOPEN so that any file you view
   # with less is automatically colorized.
   # export LESSOPEN="|bat --color=always --style=plain %s 2>/dev/null"
+fi
+
+# shellcheck disable=SC1090
+if [[ -f ~/.bashrc-after2.local ]]; then
+  source ~/.bashrc-after2.local
 fi

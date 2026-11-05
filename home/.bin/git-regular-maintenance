@@ -44,5 +44,5 @@ fi
 
 echo "[INFO] Git: Update index"
 if [[ "$(git update-index --show-index-version)" != 4 ]]; then
-  git update-index --index-version=4
+  git update-index --index-version=3
 fi
