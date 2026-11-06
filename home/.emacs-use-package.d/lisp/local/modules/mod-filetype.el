@@ -93,6 +93,16 @@ symbols without the suffix `-mode'.  These mappings take precedence."
 (with-eval-after-load 'org-src
   (setf (alist-get "diff" org-src-lang-modes nil nil #'equal) 'diff))
 
+;;; treesit make window start always visible
+
+(defun my/treesit-fold-disable-window-start-visible ()
+  "Disable `make-window-start-visible' when `treesit-fold-mode' is enabled.
+Works around a `window-start' display bug with folded regions."
+  (when (bound-and-true-p treesit-fold-mode)
+    (setq-local make-window-start-visible t)))
+
+(add-hook 'treesit-fold-mode-hook #'my/treesit-fold-disable-window-start-visible)
+
 ;;; Tree-sitter Fallback Helpers
 
 ;; Enable tree-sitter based major modes globally for Emacs 31+
