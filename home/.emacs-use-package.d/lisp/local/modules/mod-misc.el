@@ -744,7 +744,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; Update search highlighting immediately to avoid a visible delay after
 ;; selecting text and moving the cursor down.
-(setq evil-ex-hl-update-delay 0)
+(setq evil-ex-hl-update-delay 0.01)
 
 ;; TODO light?
 (setq-default eldoc-documentation-function 'eldoc-documentation-compose)
