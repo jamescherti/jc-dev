@@ -947,15 +947,6 @@ guarantees that the new window is selected, as in Vim."
 (define-key evil-normal-state-map (kbd "<leader>B") 'consult-buffer)
 ;; (define-key evil-normal-state-map (kbd "<leader>b") 'consult-recent-file)
 
-;; TODO add to quick-fasd
-(defun quick-fasd-find-files ()
-  "Find files."
-  (interactive)
-  (when (fboundp 'quick-fasd-find-path)
-    (quick-fasd-find-path -1)))
-
-(define-key evil-normal-state-map (kbd "<leader>b") 'quick-fasd-find-files)
-
 (defun my-consult-buffer ()
   "My consult buffer."
   (interactive)
@@ -1897,9 +1888,26 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
         quick-fasd-command-args '("-a"))
   (quick-fasd-mode 1))
 
+;; TODO add to quick-fasd
+(defun quick-fasd-find-files ()
+  "Find files."
+  (interactive)
+  (when (fboundp 'quick-fasd-find-path)
+    (quick-fasd-find-path -1)))
+
+(define-key evil-normal-state-map (kbd "<leader>b") 'quick-fasd-find-files)
+
+;; TODO add to quick-fasd
+;; Dirs
+(defun quick-fasd-find-directories ()
+  "Find files."
+  (interactive)
+  (when (fboundp 'quick-fasd-find-path)
+    (quick-fasd-find-path 0)))
+
 (with-eval-after-load 'evil
   (evil-define-key 'normal 'global (kbd "<leader>fd")
-    'quick-fasd-find-path))
+    'quick-fasd-find-directories))
 
 ;;; Use-package pathaction
 
