@@ -2097,7 +2097,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;; Force the unimpaired mode off globally
 (setq lightemacs-evil-collection-inhibit-unimpaired-mode t)
 
-(setq scroll-conservatively 101)
+;; (setq scroll-conservatively 101)
 
 ;;; Startup speed
 

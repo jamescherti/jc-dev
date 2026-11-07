@@ -590,4 +590,5 @@ if [[ -f ~/.bashrc-after2.local ]]; then
 fi
 
 alias github-list="so github-list"
+alias github-list-categories="so github-list-categories"
 alias github-tag-to-release="so github-tag-to-release"

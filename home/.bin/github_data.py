@@ -50,9 +50,8 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     # Shell
     "jamescherti/efasd": "shell",
     # Python
+    "jamescherti/ansible-cleanup": "python",
     "jamescherti/batchfetch": "python",
-    "jamescherti/caffeine-aw": "python",
-    "jamescherti/elispcomp": "python",
     "jamescherti/git-commitflow": "python",
     "jamescherti/git-rexec": "python",
     "jamescherti/git-smartmv": "python",
@@ -61,11 +60,18 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     "jamescherti/pdfcipher": "python",
     "jamescherti/ultyas": "python",
     "jamescherti/watch-xfce-xfconf": "python",
+    # Emacs misc
+    "jamescherti/pre-commit-elisp": "emacs-misc",
+    "jamescherti/minimal-emacs.d": "emacs-misc",
+    "jamescherti/lightemacs": "emacs-misc",
     # Shell
     "jamescherti/update-iptables": "shell",
     # Other
     "jamescherti/python-dpc3848v-wifi-modem": "legacy",
     "jamescherti/docker-oddmuse": "legacy",
+    "jamescherti/caffeine-aw": "legacy",
+    "jamescherti/elispcomp": "legacy",
+    "jamescherti/gentoo-brother-ql1110nwb": "legacy",
     # "jamescherti/jamescherti": "misc",
     # "jamescherti/cherrybuckle": "python",
 }

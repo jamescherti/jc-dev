@@ -36,8 +36,8 @@ def guess_category(repo_name: str) -> str:
         repo_name: The full name of the repository (e.g., owner/repo).
 
     Returns:
-        A string representing the guessed category (e.g., "Emacs Lisp", "Python",
-        "Ansible", "Unknown").
+        A string representing the guessed category (e.g., "emacs", "python",
+        "ansible", "unknown").
     """
     try:
         return str(CUSTOM_CATEGORIES[repo_name])
@@ -46,19 +46,14 @@ def guess_category(repo_name: str) -> str:
 
     name_lower = repo_name.lower()
 
+    if name_lower.endswith(".el"):
+        return "emacs"
+
     if "/jc-" in name_lower:
         return "dotfiles"
 
     if "ansible" in name_lower:
         return "ansible"
-
-    if (
-        "elisp" in name_lower
-        or "emacs" in name_lower
-        or name_lower.endswith(".el")
-        or "emacs" in name_lower
-    ):
-        return "emacs"
 
     if (
         "arch" in name_lower
@@ -74,7 +69,7 @@ def guess_category(repo_name: str) -> str:
     if "bash" in name_lower or "shell" in name_lower:
         return "shell"
 
-    return "<UNKNOWN>"
+    return "misc"
 
 
 @handle_github_errors
@@ -86,7 +81,7 @@ def main() -> None:
         ignore_repos=IGNORE_GITHUB_REPOSITORIES
     ):
         category = guess_category(repo_name)
-        print(f"{repo_name} {category}")
+        print(f"{category}/{repo_name}")
 
 
 if __name__ == "__main__":

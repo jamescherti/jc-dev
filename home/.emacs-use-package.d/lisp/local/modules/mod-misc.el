@@ -315,7 +315,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
  ;;
  ;; Setting scroll-step to 1: This variable tells Emacs to scroll by
  ;; exactly one line at a time when the cursor moves off-screen.
- scroll-conservatively most-positive-fixnum
+ ;; scroll-conservatively most-positive-fixnum
 
  ;; In modern Emacs, if using scroll-conservatively, scroll-step is
  ;; completely redundant. Setting scroll-step 1 is a legacy holdover from
@@ -741,6 +741,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;           (lambda () (setq truncate-lines nil)))
 
 ;;; testing
+
+(setq epa-armor t)
 
 ;; TODO light?
 (setq-default eldoc-documentation-function 'eldoc-documentation-compose)

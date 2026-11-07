@@ -184,15 +184,17 @@ class GitHubLib:
 
         user = self.github.get_user()
         repos = user.get_repos(
-            visibility="public",
-            affiliation="owner",
+            type="owner",
             sort="full_name",
             direction="asc",
         )
 
         for repo in repos:
+            if repo.private or repo.fork:
+                continue
+
             repo_name = repo.full_name
-            if not repo.private and not repo.fork and repo_name not in ignored:
+            if repo_name not in ignored:
                 yield repo_name
 
 
