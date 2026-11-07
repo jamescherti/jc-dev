@@ -60,21 +60,30 @@ update-repos() {
   echo "[INFO] git pull repositories"
 
   git-rexec -C "$SRC_DIR" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout-default && '$git_pull_my_repo'"
 
   # TODO pass multiple paths
-  git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/emacs" \
+  git-rexec -C "$SRC_DIR/emacs" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
 
-  git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/python" \
+  git-rexec -C "$SRC_DIR/python" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
 
-  git-rexec -j "$GIT_PULL_WORKERS" -C "$SRC_DIR/tools" \
+  git-rexec -C "$SRC_DIR/tools" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
+
+  # I excluded GIT_REXEC_OPTS because I want it to check GPG on all repositories
+  git-rexec --parallel -C "$SRC_DIR/" \
+    "${GIT_REXEC_EXCLUDES[@]}" -- \
+    git-check-gpg
 }
 
 config-project-list() {
@@ -187,10 +196,6 @@ main() {
   update-repos
 
   config-project-list
-
-  git rexec --parallel -C "$SRC_DIR/" \
-    "${GIT_REXEC_EXCLUDES[@]}" -- \
-    git-check-gpg
 
   # TODO Run once a day
   git_maintenance

@@ -30,13 +30,15 @@
 SRC_DIR="$HOME/src"
 MY_PYTHON_PACKAGES_PATH="$HOME/src/python"
 GIT_PULL_WORKERS=6
+
 GIT_REXEC_EXCLUDES=(
   "--exclude" "$HOME/src/forks"
   "--exclude" "$HOME/src/local"
+  "-j" "$GIT_PULL_WORKERS"
 )
+
 GIT_REXEC_OPTS=(
-  "--exclude" "$HOME/src/forks"
-  "--exclude" "$HOME/src/local"
   "--if-exec" "git-is-clean"
   "--parallel"
+  "-j" "$GIT_PULL_WORKERS"
 )
