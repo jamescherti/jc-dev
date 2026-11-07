@@ -26,6 +26,7 @@
 
 import functools
 import os
+import re
 import subprocess
 import sys
 from collections.abc import Callable, Iterator
@@ -65,7 +66,7 @@ class GitHubLib:
             The GitHub token string.
 
         Raises:
-            ValueError: If the token cannot be found in either location.
+            ValueError: If the token cannot be found or decrypted.
         """
         token = os.environ.get("GITHUB_TOKEN")
         if token:
@@ -73,6 +74,9 @@ class GitHubLib:
 
         secrets_file = Path.home() / ".secrets" / "github.yaml.asc"
 
+        # Check ~/.secrets/github.yaml.asc first to match documented priority,
+        # and raise ValueError on GPG/YAML failures instead of calling sys.exit(1)
+        # so callers and @handle_github_errors manage process termination.
         if secrets_file.is_file():
             try:
                 result = subprocess.run(
@@ -82,14 +86,21 @@ class GitHubLib:
                     check=True,
                 )
                 secrets = yaml.safe_load(result.stdout)
-                if secrets and isinstance(secrets, dict) and "token" in secrets:
-                    return str(secrets["token"])
+                if isinstance(secrets, dict):
+                    raw_token = secrets.get("token")
+                    if raw_token and str(raw_token).strip():
+                        return str(raw_token).strip()
             except subprocess.CalledProcessError as e:
-                print(f"Failed to decrypt {secrets_file}: {e.stderr}")
-                sys.exit(1)
+                err_msg = e.stderr.strip() if e.stderr else str(e)
+                raise ValueError(f"Failed to decrypt {secrets_file}: {err_msg}") from e
             except yaml.YAMLError as e:
-                print(f"Failed to parse decrypted content of {secrets_file}: {e}")
-                sys.exit(1)
+                raise ValueError(
+                    f"Failed to parse decrypted content of {secrets_file}: {e}"
+                ) from e
+
+        token = os.environ.get("GITHUB_TOKEN", "").strip()
+        if token:
+            return token
 
         raise ValueError(
             "GitHub token not found. Please provide it via ~/.secrets/github.yaml.asc "
@@ -122,12 +133,15 @@ class GitHubLib:
             check=True,
         )
         url = result.stdout.strip()
-        url = url.removesuffix(".git")
 
-        if "github.com:" in url:
-            return url.split("github.com:")[1]
-        if "github.com/" in url:
-            return url.split("github.com/")[1]
+        # Match standard HTTPS, SSH (ssh://), and SCP-like GitHub URLs (including
+        # SSH host aliases like github.com-user and optional port numbers).
+        match = re.search(
+            r"github\.com[^:/]*(?::\d+)?[:/]([^/]+/[^/]+?)(?:\.git)?/?$",
+            url,
+        )
+        if match:
+            return match.group(1)
 
         raise ValueError(f"Could not parse GitHub repository from URL: {url}")
 
