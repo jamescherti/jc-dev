@@ -31,10 +31,11 @@ import subprocess
 import sys
 from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import ParamSpec, TypeVar
+from typing import ParamSpec, TypeVar, cast
 
 import yaml
 from github import Auth, Github
+from github.AuthenticatedUser import AuthenticatedUser
 from github.GithubException import GithubException
 from github.Repository import Repository
 
@@ -181,9 +182,10 @@ class GitHubLib:
         """
         ignored = set(ignore_repos) if ignore_repos else set()
 
-        user = self.github.get_user()
+        user = cast("AuthenticatedUser", self.github.get_user())
         repos = user.get_repos(
-            type="owner",
+            visibility="all",
+            affiliation="owner",
             sort="full_name",
             direction="asc",
         )
