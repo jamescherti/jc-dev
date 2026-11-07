@@ -68,10 +68,6 @@ class GitHubLib:
         Raises:
             ValueError: If the token cannot be found or decrypted.
         """
-        token = os.environ.get("GITHUB_TOKEN")
-        if token:
-            return token
-
         secrets_file = Path.home() / ".secrets" / "github.yaml.asc"
 
         # Check ~/.secrets/github.yaml.asc first to match documented priority,
@@ -90,6 +86,10 @@ class GitHubLib:
                     raw_token = secrets.get("token")
                     if raw_token and str(raw_token).strip():
                         return str(raw_token).strip()
+            except FileNotFoundError as e:
+                raise ValueError(
+                    f"Cannot decrypt {secrets_file}: 'gpg' command not found"
+                ) from e
             except subprocess.CalledProcessError as e:
                 err_msg = e.stderr.strip() if e.stderr else str(e)
                 raise ValueError(f"Failed to decrypt {secrets_file}: {err_msg}") from e
@@ -196,10 +196,18 @@ class GitHubLib:
                 yield repo_name
 
 
+# Type variables used to preserve the exact signature and return type of the decorated
+# function:
+# - P (ParamSpec): Captures the caller function's parameter specification (positional
+#   and keyword arguments) so tools like mypy and IDEs preserve argument autocomplete
+#   and validation.
+# - R (TypeVar): Captures the return type of the wrapped function so the decorated
+#   function reports returning R rather than Any.
 P = ParamSpec("P")
 R = TypeVar("R")
 
 
+# Decorator
 def handle_github_errors(func: Callable[P, R]) -> Callable[P, R]:
     """Catch configuration, subprocess, and GitHub API errors and exit cleanly."""
 
@@ -208,10 +216,13 @@ def handle_github_errors(func: Callable[P, R]) -> Callable[P, R]:
         try:
             return func(*args, **kwargs)
         except ValueError as err:
-            print(f"Configuration error: {err}", file=sys.stderr)
+            print(f"Value error: {err}", file=sys.stderr)
+            sys.exit(1)
+        except FileNotFoundError as err:
+            print(f"File not found error: {err}", file=sys.stderr)
             sys.exit(1)
         except subprocess.CalledProcessError as err:
-            print(f"Git command failed: {err}", file=sys.stderr)
+            print(f"Command failed: {err}", file=sys.stderr)
             sys.exit(1)
         except GithubException as err:
             print(f"GitHub API error: {err}", file=sys.stderr)
