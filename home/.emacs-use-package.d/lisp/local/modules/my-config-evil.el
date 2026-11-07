@@ -1935,6 +1935,11 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 
 (add-hook 'ultisnips-mode-hook #'hs-minor-mode)
 
+(defun my-setup-ultisnips-mode ()
+  "Setup `ultisnips-mode'."
+  (setq stripspace-normalize-indentation nil))
+(add-hook 'ultisnips-mode-hook #'my-setup-ultisnips-mode)
+
 ;;; better vc
 
 (defun mod-better-vc-diff ()
