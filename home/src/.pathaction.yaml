@@ -24,7 +24,7 @@ actions:
     tags: install
     list_commands:
       - "cp {{ file | quote }} {{ '~/.bin/borgmachine' | expanduser }}"
-      - "sudo cp {{ file | quote }} /usr/local/bin/borgmachine"
+      - "sudo cp {{ file | quote }} /root/.local/bin/borgmachine"
 
   - path_match:
       - "*/ansible-collection-hardening/*"
@@ -76,7 +76,7 @@ actions:
       - "*/update-iptables"
     tags: install
     list_commands:
-      - "sudo sh -c 'scp tools/update-iptables/update-iptables.sh /usr/local/bin/update-iptables && /usr/local/bin/update-iptables'"
+      - "sudo sh -c 'scp tools/update-iptables/update-iptables.sh /root/.local/bin/update-iptables && /root/.local/bin/update-iptables'"
 
   - path_match:
       - "*/ananicy-rules/*"
