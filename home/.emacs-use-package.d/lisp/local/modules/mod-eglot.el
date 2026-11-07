@@ -165,7 +165,7 @@ This function takes no arguments."
 
                     ;; Pylint remains enabled regardless of whether Ruff or
                     ;; Flake8 is active because it serves complementary role.
-                    :pylint (:enabled t)
+                    :pylint (:enabled nil)
 
                     :pylsp_mypy
                     (;; Type checking (Requires: pylsp-mypy)

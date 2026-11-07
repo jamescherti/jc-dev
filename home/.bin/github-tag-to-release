@@ -71,47 +71,8 @@ from github import Github
 from github.GithubException import GithubException
 
 
-def get_github_token() -> str:
-    """
-    Retrieve the GitHub Personal Access Token.
+from github_lib import get_github_token
 
-    Checks ~/.secrets/github.yaml.asc first, decrypts it using GPG, then falls
-    back to the GITHUB_TOKEN environment variable.
-
-    Returns:
-        The GitHub token string.
-
-    Raises:
-        ValueError: If the token cannot be found in either location.
-    """
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        return token
-
-    secrets_file = Path.home() / ".secrets" / "github.yaml.asc"
-
-    if secrets_file.is_file():
-        try:
-            result = subprocess.run(
-                ["gpg", "--decrypt", "--quiet", "--batch", str(secrets_file)],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            secrets = yaml.safe_load(result.stdout)
-            if secrets and isinstance(secrets, dict) and "token" in secrets:
-                return str(secrets["token"])
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to decrypt {secrets_file}: {e.stderr}")
-            sys.exit(1)
-        except yaml.YAMLError as e:
-            print(f"Failed to parse decrypted content of {secrets_file}: {e}")
-            sys.exit(1)
-
-    raise ValueError(
-        "GitHub token not found. Please provide it via ~/.secrets/github.yaml.asc "
-        "or the GITHUB_TOKEN environment variable."
-    )
 
 
 def get_github_repo_name() -> str:
