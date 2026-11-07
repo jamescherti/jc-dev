@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+#
+# Python Requirements:
+#   - PyGithub
+#   - PyYAML
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Script to list all public, non-fork repositories and their categories."""
+
+from github_lib import GitHubLib, handle_github_errors
+
+IGNORE_GITHUB_REPOSITORIES = {
+    "jamescherti/jc-dev",
+    "jamescherti/modeline-region.el",
+    "jamescherti/alpm-reboot-required",
+    "jamescherti/emacs-ansible",
+    "jamescherti/emacs-eat",
+    "jamescherti/emacs-elisp-autofmt",
+    "jamescherti/emacs-elpa",
+    "jamescherti/emacs-flymake-yamllint",
+    "jamescherti/emacs-nongnu-elpa",
+    "jamescherti/emacs-undo-fu",
+    "jamescherti/emacs-undo-fu-session",
+    "jamescherti/emacs-ztree",
+    "jamescherti/flymake-yamllint",
+    "jamescherti/gcmh",
+    "jamescherti/gnome-hidetopbar",
+    "jamescherti/gnome-just-perfection",
+    "jamescherti/org-mode",
+    "jamescherti/paredit",
+    "jamescherti/ztree",
+}
+
+CUSTOM_CATEGORIES = {
+    # Python
+    "jamescherti/batchfetch": "python",
+    "jamescherti/caffeine-aw": "python",
+    "jamescherti/cherrybuckle": "python",
+    "jamescherti/efasd": "python",
+    "jamescherti/elispcomp": "python",
+    "jamescherti/git-commitflow": "python",
+    "jamescherti/git-rexec": "python",
+    "jamescherti/git-smartmv": "python",
+    "jamescherti/git-smartpull": "python",
+    "jamescherti/pathaction": "python",
+    "jamescherti/pdfcipher": "python",
+    "jamescherti/python-dpc3848v-wifi-modem": "python",
+    "jamescherti/ultyas": "python",
+    "jamescherti/watch-xfce-xfconf": "python",
+    # Shell
+    "jamescherti/update-iptables": "shell",
+    # Other
+    "jamescherti/gentoo-brother-ql1110nwb": "Gentoo",
+    "jamescherti/docker-oddmuse": "Docker",
+    "jamescherti/jamescherti": "GitHub Profile",
+}
+
+
+def guess_category(repo_name: str) -> str:
+    """
+    Guess the category of a repository based on its name.
+
+    Args:
+        repo_name: The full name of the repository (e.g., owner/repo).
+
+    Returns:
+        A string representing the guessed category (e.g., "Emacs Lisp", "Python",
+        "Ansible", "Unknown").
+    """
+    if repo_name in CUSTOM_CATEGORIES:
+        return CUSTOM_CATEGORIES[repo_name]
+
+    name_lower = repo_name.lower()
+
+    if (
+        "elisp" in name_lower
+        or "emacs" in name_lower
+        or name_lower.endswith(".el")
+        or "emacs" in name_lower
+    ):
+        return "emacs"
+    if "/jc-" in name_lower:
+        return "dotfiles"
+
+    if name_lower.endswith(".py") or "python" in name_lower:
+        return "Python"
+
+    if (
+        "arch" in name_lower
+        or "gentoo" in name_lower
+        or "linux" in name_lower
+        or "overlay" in name_lower
+    ):
+        return "linux"
+
+    if "ansible" in name_lower:
+        return "ansible"
+
+    if "vim" in name_lower or "nvim" in name_lower:
+        return "vim"
+
+    if "bash" in name_lower or "shell" in name_lower:
+        return "shell"
+
+    # if "docker" in name_lower or "container" in name_lower:
+    #     return "Docker"
+
+    return "<UNKNOWN>"
+
+
+@handle_github_errors
+def main() -> None:
+    """Run the main CLI logic."""
+    github_lib = GitHubLib()
+
+    for repo_name in github_lib.list_public_source_repos(
+        ignore_repos=IGNORE_GITHUB_REPOSITORIES
+    ):
+        category = guess_category(repo_name)
+        print(f"{repo_name:<40} {category}")
+
+
+if __name__ == "__main__":
+    main()
