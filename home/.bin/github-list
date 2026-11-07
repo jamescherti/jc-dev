@@ -24,29 +24,8 @@
 #
 """Script to list all public, non-fork repositories managed."""
 
+from github_data import IGNORE_GITHUB_REPOSITORIES
 from github_lib import GitHubLib, handle_github_errors
-
-IGNORE_GITHUB_REPOSITORIES = {
-    "jamescherti/jc-dev",
-    "jamescherti/modeline-region.el",
-    "jamescherti/alpm-reboot-required",
-    "jamescherti/emacs-ansible",
-    "jamescherti/emacs-eat",
-    "jamescherti/emacs-elisp-autofmt",
-    "jamescherti/emacs-elpa",
-    "jamescherti/emacs-flymake-yamllint",
-    "jamescherti/emacs-nongnu-elpa",
-    "jamescherti/emacs-undo-fu",
-    "jamescherti/emacs-undo-fu-session",
-    "jamescherti/emacs-ztree",
-    "jamescherti/flymake-yamllint",
-    "jamescherti/gcmh",
-    "jamescherti/gnome-hidetopbar",
-    "jamescherti/gnome-just-perfection",
-    "jamescherti/org-mode",
-    "jamescherti/paredit",
-    "jamescherti/ztree",
-}
 
 
 @handle_github_errors
