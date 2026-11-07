@@ -159,12 +159,12 @@ class GitHubLib:
             ignore_repos: Optional list of repository full names (owner/repo) to ignore.
         """
         auth = Auth.Token(self.token)
-        gh = Github(auth=auth)
+        github = Github(auth=auth)
 
         ignored = set(ignore_repos) if ignore_repos else set()
 
         try:
-            user = gh.get_user()
+            user = github.get_user()
             repos = user.get_repos(
                 visibility="public",
                 affiliation="owner",

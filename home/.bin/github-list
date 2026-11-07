@@ -28,7 +28,7 @@ import sys
 
 from github_lib import GitHubLib
 
-IGNORE_GITHUB_REPOSITORIES = [
+IGNORE_GITHUB_REPOSITORIES = {
     "jamescherti/jc-dev",
     "jamescherti/modeline-region.el",
     "jamescherti/alpm-reboot-required",
@@ -48,7 +48,7 @@ IGNORE_GITHUB_REPOSITORIES = [
     "jamescherti/org-mode",
     "jamescherti/paredit",
     "jamescherti/ztree",
-]
+}
 
 
 def main() -> None:
