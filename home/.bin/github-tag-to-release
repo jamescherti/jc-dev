@@ -2,6 +2,7 @@
 #
 # Python Requirements:
 #   - PyGithub
+#   - PyYAML
 #
 # Author: James Cherti
 # URL: https://github.com/jamescherti/jc-dev
@@ -22,14 +23,14 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 """
-Script to create a git tag, push it, and generate a GitHub release.
+Script to generate a GitHub release from an existing git tag.
 
 Authentication:
 ---------------
 This script requires a GitHub Personal Access Token (PAT) with repository write access.
 The token is loaded using the following priority:
 
-1. A YAML file located at ~/.secrets/github.yaml containing:
+1. A GPG-encrypted YAML file located at ~/.secrets/github.yaml.asc containing:
    token: your_personal_access_token_here
 2. The GITHUB_TOKEN environment variable:
    export GITHUB_TOKEN="your_personal_access_token_here"
@@ -52,8 +53,8 @@ Option 2: Classic token (for public repositories only)
   4. Generate and copy the token.
 
 Token configuration:
-Save the token in ~/.secrets/github.yaml:
-    token: your_token_here
+Encrypt your YAML token file into ~/.secrets/github.yaml.asc, for example:
+    gpg --symmetric --armor ~/.secrets/github.yaml
 
 Or export it in your shell environment:
     export GITHUB_TOKEN="your_token_here"
@@ -74,8 +75,8 @@ def get_github_token() -> str:
     """
     Retrieve the GitHub Personal Access Token.
 
-    Checks ~/.secrets/github.yaml first, then falls back to the GITHUB_TOKEN
-    environment variable.
+    Checks ~/.secrets/github.yaml.asc first, decrypts it using GPG, then falls
+    back to the GITHUB_TOKEN environment variable.
 
     Returns:
         The GitHub token string.
@@ -87,21 +88,28 @@ def get_github_token() -> str:
     if token:
         return token
 
-    # Secrets
-    secrets_file = Path.home() / ".secrets" / "github.yaml"
+    secrets_file = Path.home() / ".secrets" / "github.yaml.asc"
 
     if secrets_file.is_file():
-        with secrets_file.open("r", encoding="utf-8") as fhandler:
-            try:
-                secrets = yaml.safe_load(fhandler)
-                if secrets and isinstance(secrets, dict) and "token" in secrets:
-                    return str(secrets["token"])
-            except yaml.YAMLError as e:
-                print(f"Failed to parse {secrets_file}: {e}")
-                sys.exit(1)
+        try:
+            result = subprocess.run(
+                ["gpg", "--decrypt", "--quiet", "--batch", str(secrets_file)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            secrets = yaml.safe_load(result.stdout)
+            if secrets and isinstance(secrets, dict) and "token" in secrets:
+                return str(secrets["token"])
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to decrypt {secrets_file}: {e.stderr}")
+            sys.exit(1)
+        except yaml.YAMLError as e:
+            print(f"Failed to parse decrypted content of {secrets_file}: {e}")
+            sys.exit(1)
 
     raise ValueError(
-        "GitHub token not found. Please provide it via ~/.secrets/github.yaml "
+        "GitHub token not found. Please provide it via ~/.secrets/github.yaml.asc "
         "or the GITHUB_TOKEN environment variable."
     )
 
@@ -132,20 +140,6 @@ def get_github_repo_name() -> str:
         return url.split("github.com/")[1]
 
     raise ValueError(f"Could not parse GitHub repository from URL: {url}")
-
-
-# def create_and_push_tag(tag_name: str) -> None:
-#     """
-#     Create a local git tag and push it to the origin remote.
-#
-#     Args:
-#         tag_name: The name of the tag to create and push.
-#     """
-#     print(f"Creating local tag: {tag_name}")
-#     subprocess.run(["git", "tag", tag_name], check=True)
-#
-#     print("Pushing tag to origin...")
-#     subprocess.run(["git", "push", "origin", tag_name], check=True)
 
 
 def create_github_release(repo_name: str, tag_name: str, token: str) -> None:
@@ -182,7 +176,6 @@ def main() -> None:
     try:
         token = get_github_token()
         repo_name = get_github_repo_name()
-        # create_and_push_tag(tag_name)
         create_github_release(repo_name, tag_name, token)
     except ValueError as e:
         print(f"Configuration error: {e}")
