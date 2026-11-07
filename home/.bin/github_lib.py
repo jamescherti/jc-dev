@@ -24,10 +24,13 @@
 #
 """GitHub library."""
 
+import functools
 import os
 import subprocess
 import sys
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from typing import ParamSpec, TypeVar
 
 import yaml
 from github import Auth, Github
@@ -47,6 +50,8 @@ class GitHubLib:
                 the GITHUB_TOKEN environment variable.
         """
         self.token = token if token is not None else self._retrieve_github_token()
+        self.auth = Auth.Token(self.token)
+        self.github = Github(auth=self.auth)
 
     @staticmethod
     def _retrieve_github_token() -> str:
@@ -139,9 +144,7 @@ class GitHubLib:
             repo_name = self.get_github_repo_name()
 
         print(f"Creating GitHub release for {repo_name} via API...")
-        auth = Auth.Token(self.token)
-        gh = Github(auth=auth)
-        repo = gh.get_repo(repo_name)
+        repo = self.github.get_repo(repo_name)
 
         repo.create_git_release(
             tag=tag_name,
@@ -151,33 +154,53 @@ class GitHubLib:
         )
         print("Release created.")
 
-    def list_public_source_repos(self, ignore_repos: list[str] | None = None) -> None:
+    def list_public_source_repos(
+        self, ignore_repos: list[str] | None = None
+    ) -> Iterator[str]:
         """
-        Fetch and print all public, non-fork repositories owned by the user.
+        Yield all public, non-fork repository names owned by the user.
 
         Args:
             ignore_repos: Optional list of repository full names (owner/repo) to ignore.
-        """
-        auth = Auth.Token(self.token)
-        github = Github(auth=auth)
 
+        Yields:
+            Repository full name (owner/repo) strings.
+        """
         ignored = set(ignore_repos) if ignore_repos else set()
 
-        try:
-            user = github.get_user()
-            repos = user.get_repos(
-                visibility="public",
-                affiliation="owner",
-                sort="full_name",
-                direction="asc",
-            )
+        user = self.github.get_user()
+        repos = user.get_repos(
+            visibility="public",
+            affiliation="owner",
+            sort="full_name",
+            direction="asc",
+        )
 
-            count = 0
-            for repo in repos:
-                repo_name = repo.full_name
-                if not repo.private and not repo.fork and repo_name not in ignored:
-                    print(f"{repo_name}")
-                    count += 1
-        except GithubException as err:
-            print(f"GitHub API error: {err}")
+        for repo in repos:
+            repo_name = repo.full_name
+            if not repo.private and not repo.fork and repo_name not in ignored:
+                yield repo_name
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def handle_github_errors(func: Callable[P, R]) -> Callable[P, R]:
+    """Catch configuration, subprocess, and GitHub API errors and exit cleanly."""
+
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        try:
+            return func(*args, **kwargs)
+        except ValueError as err:
+            print(f"Configuration error: {err}", file=sys.stderr)
             sys.exit(1)
+        except subprocess.CalledProcessError as err:
+            print(f"Git command failed: {err}", file=sys.stderr)
+            sys.exit(1)
+        except GithubException as err:
+            print(f"GitHub API error: {err}", file=sys.stderr)
+            sys.exit(1)
+
+    return wrapper

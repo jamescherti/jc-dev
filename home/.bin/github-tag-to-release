@@ -60,12 +60,12 @@ Or export it in your shell environment:
     export GITHUB_TOKEN="your_token_here"
 """
 
-import subprocess
 import sys
 
-from github_lib import GitHubLib
+from github_lib import GitHubLib, handle_github_errors
 
 
+@handle_github_errors
 def main() -> None:
     """Run the main CLI logic."""
     if len(sys.argv) != 2:
@@ -74,15 +74,8 @@ def main() -> None:
 
     tag_name = sys.argv[1]
 
-    try:
-        github_lib = GitHubLib()
-        github_lib.create_release(tag_name)
-    except ValueError as err:
-        print(f"Configuration error: {err}")
-        sys.exit(1)
-    except subprocess.CalledProcessError as err:
-        print(f"Git command failed: {err}")
-        sys.exit(1)
+    github_lib = GitHubLib()
+    github_lib.create_release(tag_name)
 
 
 if __name__ == "__main__":

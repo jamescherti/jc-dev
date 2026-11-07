@@ -24,9 +24,7 @@
 #
 """Script to list all public, non-fork repositories managed."""
 
-import sys
-
-from github_lib import GitHubLib
+from github_lib import GitHubLib, handle_github_errors
 
 IGNORE_GITHUB_REPOSITORIES = {
     "jamescherti/jc-dev",
@@ -50,17 +48,15 @@ IGNORE_GITHUB_REPOSITORIES = {
     "jamescherti/ztree",
 }
 
-IGNORE_GITHUB_REPOSITORIES = True
 
-
+@handle_github_errors
 def main() -> None:
     """Run the main CLI logic."""
-    try:
-        github_lib = GitHubLib()
-        github_lib.list_public_source_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES)
-    except ValueError as err:
-        print(f"Configuration error: {err}")
-        sys.exit(1)
+    github_lib = GitHubLib()
+    for repo in github_lib.list_public_source_repos(
+        ignore_repos=IGNORE_GITHUB_REPOSITORIES
+    ):
+        print(repo)
 
 
 if __name__ == "__main__":
