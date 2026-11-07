@@ -119,144 +119,130 @@
 ;; https://github.com/python-lsp/python-lsp-ruff
 ;; https://github.com/chantera/python-lsp-isort
 
-(setq-default eglot-workspace-configuration nil)
+(defun my-python-eglot-config (&optional _server)
+  "Return pylsp workspace settings for the current Eglot project.
 
-(defvar my-eglot-python-workspace nil
-  "Cached Eglot workspace configuration for Python.")
+Prefer Ruff for linting and formatting.  Fall back to Flake8 for
+linting when available, and to autopep8 for formatting.  Tool
+discovery assumes that Emacs and pylsp use the same environment.
+Ruff integration requires python-lsp-ruff in that environment."
+  (let* ((remote (file-remote-p default-directory))
+         (has-ruff (executable-find "ruff" remote))
+         (has-flake8 (and (not has-ruff) (executable-find "flake8" remote)))
+         (ruff-enabled (if has-ruff t :json-false))
+         (fallback-lint (if (or has-ruff has-flake8) :json-false t))
+         (fallback-format (if has-ruff :json-false t)))
+    `(:pylsp
+      (;; Formatter to use for reformatting signatures in docstrings.
+       :signature
+       (;; Signature
+        ;; :formatter can be "ruff", "black", or null.
+        :formatter ,(if has-ruff "ruff" "black")
+        :include_docstring t
+        :line_length 88)
+       :plugins
+       (;; Plugin: https://github.com/python-lsp/python-lsp-ruff
+        :ruff (;; Ruff configuration
+               :enabled ,ruff-enabled
+               :formatEnabled ,ruff-enabled
 
-(defun my-python-eglot-config ()
-  "Set buffer-local eglot configuration for Python.
+               ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
+               ;; and 'D' (pydocstyle).
+               ;; :extendSelect ["W" "UP" "D"]
 
-This function takes no arguments."
-  (let* ((has-ruff (executable-find "ruff"))
-         (has-flake8 (executable-find "flake8")))
-    (setq-local eglot-workspace-configuration
-                `(:pylsp
-                  (;; Formatter to use for reformatting signatures in docstrings.
-                   :signature
-                   (;; Signature
-                    ;; :formatter has to be "ruff", "black", or nil
-                    :formatter ,(if has-ruff
-                                    "ruff"
-                                  "black")
-                    :include_docstring t
-                    :line_length 88)
-                   :plugins
-                   (;; Plugin: https://github.com/python-lsp/python-lsp-ruff
-                    :ruff (;; Ruff configuration
-                           :enabled ,(if has-ruff t :json-false)
-                           :formatEnabled ,(if has-ruff t :json-false)
+               ;; I: Sort imports. Combine all selected rules in one
+               ;; :extendSelect vector when enabling several groups.
+               ;; :extendSelect ["I"]
+               ;; :format ["I"]
 
-                           ;; Add 'W' (pycodestyle warnings), 'UP' (pyupgrade),
-                           ;; and 'D' (pydocstyle).
-                           ;; :extendSelect ["W" "UP" "D"]
+               ;; Ignore specific rules
+               ;;   D213: Multi-line docstring summary should start on
+               ;;         the second line.
+               ;;   D202: No blank lines allowed after function
+               ;;         docstring.
+               ;; :ignore ["D213" "D202"]
+               )
 
-                           ;; I: Sort imports
-                           ;; :extendSelect ["I"]
-                           ;; :format ["I"]
+        ;; Pylint is disabled independently of Ruff and Flake8.
+        :pylint (:enabled :json-false)
 
-                           ;; Ignore specific rules
-                           ;;   D213: Multi-line docstring summary should start on
-                           ;;         the second line.
-                           ;;   D202: No blank lines allowed after function
-                           ;;         docstring.
-                           ;; :ignore ["D213" "D202"]
-                           )
+        :pylsp_mypy
+        (;; Type checking (Requires: pylsp-mypy)
+         :enabled t
+         ;; Disabling live mode prevents type-checking updates on
+         ;; every edit. Save the file to refresh mypy diagnostics.
+         :live_mode :json-false)
 
-                    ;; Pylint remains enabled regardless of whether Ruff or
-                    ;; Flake8 is active because it serves complementary role.
-                    :pylint (:enabled nil)
+        ;; Flake8 is a wrapper tool that bundles pyflakes,
+        ;; pycodestyle, and mccabe.
+        :flake8 (:enabled ,(if has-flake8 t :json-false))
 
-                    :pylsp_mypy
-                    (;; Type checking (Requires: pylsp-mypy)
-                     :enabled t
-                     ;; Disabling live mode prevents type-checking updates on
-                     ;; every edit. Save the file to refresh mypy diagnostics.
-                     :live_mode :json-false)
+        ;; Flake8 runs these checkers. Ruff implements overlapping rules.
+        ;; Disable the standalone pylsp checkers when either is active.
+        ;; Rule coverage depends on the selected Ruff or Flake8 rules.
+        :mccabe (:enabled ,fallback-lint)
+        :pyflakes (;; pyflakes catches logical errors
+                   ;; (unused imports, undefined names...)
+                   :enabled ,fallback-lint)
 
-                    ;; Flake8 is a wrapper tool that bundles pyflakes,
-                    ;; pycodestyle, and mccabe.
-                    :flake8 (:enabled ,(if (and (not has-ruff) has-flake8)
-                                           t
-                                         :json-false))
+        :pycodestyle (;; pycodestyle checks style and PEP 8 conventions
+                      :enabled ,fallback-lint
 
-                    ;; When Flake8 or Ruff runs, they execute these under
-                    ;; the hood. If we enable either, we must explicitly
-                    ;; disable the individual pylsp plugins for them,
-                    ;; otherwise the language server will run the exact
-                    ;; same checks twice and duplicate all editor
-                    ;; diagnostics.
-                    :mccabe (:enabled ,(if (or has-ruff has-flake8)
-                                           :json-false
-                                         t))
-                    :pyflakes (;; pyflakes catches logical errors
-                               ;; (unused imports, undefined names...)
-                               :enabled ,(if (or has-ruff has-flake8)
-                                             :json-false
-                                           t))
+                      ;; Ignore specific rules
+                      ;; :ignore ["W293"]
+                      )
 
-                    :pycodestyle (;; pycodestyle catches style/formatting
-                                  ;; violations (PEP 8)
-                                  :enabled ,(if (or has-ruff has-flake8)
-                                                :json-false
-                                              t)
+        :pydocstyle (;; pydocstyle enforces PEP 257 docstring conventions.
+                     ;; Select Ruff's D rules or install flake8-docstrings
+                     ;; for equivalent checks when this plugin is disabled.
+                     ;; https://github.com/pycqa/flake8-docstrings
+                     :enabled ,fallback-lint
 
-                                  ;; Ignore specific rules
-                                  ;; :ignore ["W293"]
-                                  )
+                     ;; Ignore specific rules
+                     ;;   D213: Multi-line docstring summary should start on
+                     ;;         the second line.
+                     ;;   D202: No blank lines allowed after function
+                     ;;         docstring.
+                     ;; :ignore ["D213" "D202"]
+                     )
 
-                    :pydocstyle (;; pydocstyle enforces PEP 257 docstring
-                                 ;; conventions
-                                 :enabled ,(if (or has-ruff has-flake8)
-                                               ;; Use flake8-docstrings
-                                               ;; https://github.com/pycqa/flake8-docstrings
-                                               :json-false
-                                             t)
+        ;; Formatting: isort
+        ;; https://github.com/chantera/python-lsp-isort
+        :isort (:enabled ,fallback-format)
 
-                                 ;; Ignore specific rules
-                                 ;;   D213 Multi-line docstring summary should start on
-                                 ;;        the second line.
-                                 ;;   D202 No blank lines allowed after function
-                                 ;;        docstring.
-                                 ;; :ignore ["D213" "D202"]
-                                 )
+        ;; Formatting: autopep8
+        ;; https://github.com/python-lsp/python-lsp-server
+        :autopep8 (:enabled ,fallback-format)
+        :yapf (:enabled :json-false)
 
-                    ;; Formatting: isort
-                    ;; https://github.com/chantera/python-lsp-isort
-                    :isort (:enabled ,(if has-ruff :json-false t))
+        ;; Code completion
+        :jedi_completion (;; Jedi configuration
+                          :enabled t
 
-                    ;; Formatting: autopep8
-                    :autopep8 (:enabled ,(if has-ruff :json-false t))
-                    :yapf (:enabled :json-false)
+                          ;; Resolving documentation details eagerly
+                          ;; :eager t
 
-                    ;; Code completion
-                    :jedi_completion (;; jedi configuration
-                                      :enabled t
+                          ;; Add class objects as a separate completion item
+                          :include_class_objects t
 
-                                      ;; Resolving documentation details eagerly
-                                      ;; :eager t
+                          ;; Add function objects as a separate completion item
+                          :include_function_objects t
 
-                                      ;; Add class objects as a separate completion item
-                                      :include_class_objects t
+                          ;; Include function parameters in completion snippets.
+                          :include_params t
 
-                                      ;; Add function objects as a separate completion item
-                                      :include_function_objects t
+                          ;; Fuzzy matching for typos/abbreviations
+                          ;; :fuzzy t
 
-                                      ;; Auto-complete methods and classes for each parameter
-                                      :include_params t
+                          ;; Modules for which labels and snippets should be cached.
+                          ;; :cache_for ["pandas", "numpy", "tensorflow", "matplotlib"]
 
-                                      ;; Fuzzy matching for typos/abbreviations
-                                      ;; :fuzzy t
+                          ;; Maximum number of completion items to resolve eagerly.
+                          ;; :resolve_at_most 25
+                          ))))))
 
-                                      ;; Modules for which labels and snippets should be cached.
-                                      ;; :cache_for ["pandas", "numpy", "tensorflow", "matplotlib"]
-
-                                      ;; How many labels and snippets should be resolved?
-                                      ;; :resolve_at_most 25
-                                      )))))))
-
-(add-hook 'python-mode-hook #'my-python-eglot-config -60)
-(add-hook 'python-ts-mode-hook #'my-python-eglot-config -60)
+(with-eval-after-load 'eglot
+  (setq-default eglot-workspace-configuration #'my-python-eglot-config))
 
 ;;; Remove eglot from the modeline
 

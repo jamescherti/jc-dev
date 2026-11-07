@@ -26,14 +26,12 @@
 GitHub library.
 """
 
-import yaml
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
-
-
+import yaml
 
 
 def get_github_token() -> str:
@@ -77,3 +75,30 @@ def get_github_token() -> str:
         "GitHub token not found. Please provide it via ~/.secrets/github.yaml.asc "
         "or the GITHUB_TOKEN environment variable."
     )
+
+
+def get_github_repo_name() -> str:
+    """
+    Parse the GitHub repository identifier (owner/repo) from the origin remote URL.
+
+    Returns:
+        The parsed repository string.
+
+    Raises:
+        ValueError: If the remote URL does not match standard GitHub formats.
+    """
+    result = subprocess.run(
+        ["git", "remote", "get-url", "origin"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    url = result.stdout.strip()
+    url = url.removesuffix(".git")
+
+    if "github.com:" in url:
+        return url.split("github.com:")[1]
+    if "github.com/" in url:
+        return url.split("github.com/")[1]
+
+    raise ValueError(f"Could not parse GitHub repository from URL: {url}")

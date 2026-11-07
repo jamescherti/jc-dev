@@ -60,47 +60,12 @@ Or export it in your shell environment:
     export GITHUB_TOKEN="your_token_here"
 """
 
-import os
 import subprocess
 import sys
-from pathlib import Path
 
-import yaml
-from github import Auth
-from github import Github
+from github import Auth, Github
 from github.GithubException import GithubException
-
-
-from github_lib import get_github_token
-
-
-
-def get_github_repo_name() -> str:
-    """
-    Parse the GitHub repository identifier (owner/repo) from the origin remote URL.
-
-    Returns:
-        The parsed repository string.
-
-    Raises:
-        ValueError: If the remote URL does not match standard GitHub formats.
-    """
-    result = subprocess.run(
-        ["git", "remote", "get-url", "origin"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    url = result.stdout.strip()
-    if url.endswith(".git"):
-        url = url[:-4]
-
-    if "github.com:" in url:
-        return url.split("github.com:")[1]
-    if "github.com/" in url:
-        return url.split("github.com/")[1]
-
-    raise ValueError(f"Could not parse GitHub repository from URL: {url}")
+from github_lib import get_github_repo_name, get_github_token
 
 
 def create_github_release(repo_name: str, tag_name: str, token: str) -> None:
