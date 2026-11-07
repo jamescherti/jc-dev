@@ -36,6 +36,7 @@ from typing import ParamSpec, TypeVar
 import yaml
 from github import Auth, Github
 from github.GithubException import GithubException
+from github.Repository import Repository
 
 
 class GitHubLib:
@@ -168,17 +169,15 @@ class GitHubLib:
         )
         print("Release created.")
 
-    def list_public_source_repos(
-        self, ignore_repos: list[str] | None = None
-    ) -> Iterator[str]:
+    def list_repos(self, ignore_repos: list[str] | None = None) -> Iterator[Repository]:
         """
-        Yield all public, non-fork repository names owned by the user.
+        Yield all repositories names owned by the user.
 
         Args:
             ignore_repos: Optional list of repository full names (owner/repo) to ignore.
 
         Yields:
-            Repository full name (owner/repo) strings.
+            A GitHub repository.
         """
         ignored = set(ignore_repos) if ignore_repos else set()
 
@@ -190,12 +189,9 @@ class GitHubLib:
         )
 
         for repo in repos:
-            if repo.private or repo.fork:
-                continue
-
             repo_name = repo.full_name
             if repo_name not in ignored:
-                yield repo_name
+                yield repo
 
 
 # Type variables used to preserve the exact signature and return type of the decorated

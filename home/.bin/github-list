@@ -32,10 +32,11 @@ from github_lib import GitHubLib, handle_github_errors
 def main() -> None:
     """Run the main CLI logic."""
     github_lib = GitHubLib()
-    for repo in github_lib.list_public_source_repos(
-        ignore_repos=IGNORE_GITHUB_REPOSITORIES
-    ):
-        print(repo)
+    for repo in github_lib.list_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES):
+        if repo.fork:
+            continue
+
+        print(repo.full_name)
 
 
 if __name__ == "__main__":

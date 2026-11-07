@@ -24,7 +24,7 @@
 #
 """Script to list all public, non-fork repositories and their categories."""
 
-from github_data import CUSTOM_CATEGORIES, IGNORE_GITHUB_REPOSITORIES
+from github_data import ALLOWED_FORKS, CUSTOM_CATEGORIES, IGNORE_GITHUB_REPOSITORIES
 from github_lib import GitHubLib, handle_github_errors
 
 
@@ -77,10 +77,12 @@ def main() -> None:
     """Run the main CLI logic."""
     github_lib = GitHubLib()
 
-    for repo_name in github_lib.list_public_source_repos(
-        ignore_repos=IGNORE_GITHUB_REPOSITORIES
-    ):
-        category = guess_category(repo_name)
+    for repo in github_lib.list_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES):
+        if repo.fork and repo.full_name not in ALLOWED_FORKS:
+            continue
+
+        repo_name = repo.name
+        category = "forks" if repo.fork else guess_category(repo_name)
         print(f"{category}/{repo_name}")
 
 
