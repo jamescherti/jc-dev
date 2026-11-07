@@ -871,7 +871,7 @@ tasks:
     revision: develop
 
   - git: git@github.com:jamescherti/outline-yaml.el
-    path: emacs-misc/outline-yaml.el
+    path: legacy/outline-yaml.el
     revision: develop
 
   - git: git@github.com:jamescherti/outline-indent.el
