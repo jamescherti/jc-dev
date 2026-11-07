@@ -49,11 +49,11 @@ IGNORE_GITHUB_REPOSITORIES = {
 }
 
 CUSTOM_CATEGORIES = {
+    # Shell
+    "jamescherti/efasd": "shell",
     # Python
     "jamescherti/batchfetch": "python",
     "jamescherti/caffeine-aw": "python",
-    "jamescherti/cherrybuckle": "python",
-    "jamescherti/efasd": "python",
     "jamescherti/elispcomp": "python",
     "jamescherti/git-commitflow": "python",
     "jamescherti/git-rexec": "python",
@@ -61,15 +61,15 @@ CUSTOM_CATEGORIES = {
     "jamescherti/git-smartpull": "python",
     "jamescherti/pathaction": "python",
     "jamescherti/pdfcipher": "python",
-    "jamescherti/python-dpc3848v-wifi-modem": "python",
     "jamescherti/ultyas": "python",
     "jamescherti/watch-xfce-xfconf": "python",
     # Shell
     "jamescherti/update-iptables": "shell",
     # Other
-    "jamescherti/gentoo-brother-ql1110nwb": "Gentoo",
-    "jamescherti/docker-oddmuse": "Docker",
-    "jamescherti/jamescherti": "GitHub Profile",
+    "jamescherti/python-dpc3848v-wifi-modem": "legacy",
+    "jamescherti/docker-oddmuse": "legacy",
+    # "jamescherti/jamescherti": "misc",
+    # "jamescherti/cherrybuckle": "python",
 }
 
 
