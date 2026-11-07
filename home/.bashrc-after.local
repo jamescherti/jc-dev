@@ -588,3 +588,6 @@ fi
 if [[ -f ~/.bashrc-after2.local ]]; then
   source ~/.bashrc-after2.local
 fi
+
+alias github-list="so github-list"
+alias github-tag-to-release="so github-tag-to-release"

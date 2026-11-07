@@ -63,32 +63,7 @@ Or export it in your shell environment:
 import subprocess
 import sys
 
-from github import Auth, Github
-from github.GithubException import GithubException
 from github_lib import GitHubLib
-
-
-def create_github_release(repo_name: str, tag_name: str, token: str) -> None:
-    """
-    Create a GitHub release for the given tag using the PyGithub library.
-
-    Args:
-        repo_name: The GitHub repository identifier (e.g., owner/repo).
-        tag_name: The tag name for the release.
-        token: The GitHub Personal Access Token.
-    """
-    print(f"Creating GitHub release for {repo_name} via API...")
-    auth = Auth.Token(token)
-    gh = Github(auth=auth)
-    repo = gh.get_repo(repo_name)
-
-    repo.create_git_release(
-        tag=tag_name,
-        name=tag_name,
-        message="",
-        generate_release_notes=True,
-    )
-    print("Release created.")
 
 
 def main() -> None:
@@ -101,17 +76,12 @@ def main() -> None:
 
     try:
         github_lib = GitHubLib()
-        token = github_lib.get_github_token()
-        repo_name = github_lib.get_github_repo_name()
-        create_github_release(repo_name, tag_name, token)
-    except ValueError as e:
-        print(f"Configuration error: {e}")
+        github_lib.create_release(tag_name)
+    except ValueError as err:
+        print(f"Configuration error: {err}")
         sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"Git command failed: {e}")
-        sys.exit(1)
-    except GithubException as e:
-        print(f"GitHub API error: {e}")
+    except subprocess.CalledProcessError as err:
+        print(f"Git command failed: {err}")
         sys.exit(1)
 
 
