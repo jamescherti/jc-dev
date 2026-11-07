@@ -32,71 +32,73 @@ from pathlib import Path
 import yaml
 
 
-def get_github_token() -> str:
-    """
-    Retrieve the GitHub Personal Access Token.
+class GitHubLib:
+    """Library class for GitHub configuration and repository information."""
 
-    Checks ~/.secrets/github.yaml.asc first, decrypts it using GPG, then falls
-    back to the GITHUB_TOKEN environment variable.
+    def get_github_token(self) -> str:
+        """
+        Retrieve the GitHub Personal Access Token.
 
-    Returns:
-        The GitHub token string.
+        Checks ~/.secrets/github.yaml.asc first, decrypts it using GPG, then falls
+        back to the GITHUB_TOKEN environment variable.
 
-    Raises:
-        ValueError: If the token cannot be found in either location.
-    """
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        return token
+        Returns:
+            The GitHub token string.
 
-    secrets_file = Path.home() / ".secrets" / "github.yaml.asc"
+        Raises:
+            ValueError: If the token cannot be found in either location.
+        """
+        token = os.environ.get("GITHUB_TOKEN")
+        if token:
+            return token
 
-    if secrets_file.is_file():
-        try:
-            result = subprocess.run(
-                ["gpg", "--decrypt", "--quiet", "--batch", str(secrets_file)],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            secrets = yaml.safe_load(result.stdout)
-            if secrets and isinstance(secrets, dict) and "token" in secrets:
-                return str(secrets["token"])
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to decrypt {secrets_file}: {e.stderr}")
-            sys.exit(1)
-        except yaml.YAMLError as e:
-            print(f"Failed to parse decrypted content of {secrets_file}: {e}")
-            sys.exit(1)
+        secrets_file = Path.home() / ".secrets" / "github.yaml.asc"
 
-    raise ValueError(
-        "GitHub token not found. Please provide it via ~/.secrets/github.yaml.asc "
-        "or the GITHUB_TOKEN environment variable."
-    )
+        if secrets_file.is_file():
+            try:
+                result = subprocess.run(
+                    ["gpg", "--decrypt", "--quiet", "--batch", str(secrets_file)],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                secrets = yaml.safe_load(result.stdout)
+                if secrets and isinstance(secrets, dict) and "token" in secrets:
+                    return str(secrets["token"])
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to decrypt {secrets_file}: {e.stderr}")
+                sys.exit(1)
+            except yaml.YAMLError as e:
+                print(f"Failed to parse decrypted content of {secrets_file}: {e}")
+                sys.exit(1)
 
+        raise ValueError(
+            "GitHub token not found. Please provide it via ~/.secrets/github.yaml.asc "
+            "or the GITHUB_TOKEN environment variable."
+        )
 
-def get_github_repo_name() -> str:
-    """
-    Parse the GitHub repository identifier (owner/repo) from the origin remote URL.
+    def get_github_repo_name(self) -> str:
+        """
+        Parse the GitHub repository identifier (owner/repo) from the origin remote URL.
 
-    Returns:
-        The parsed repository string.
+        Returns:
+            The parsed repository string.
 
-    Raises:
-        ValueError: If the remote URL does not match standard GitHub formats.
-    """
-    result = subprocess.run(
-        ["git", "remote", "get-url", "origin"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    url = result.stdout.strip()
-    url = url.removesuffix(".git")
+        Raises:
+            ValueError: If the remote URL does not match standard GitHub formats.
+        """
+        result = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        url = result.stdout.strip()
+        url = url.removesuffix(".git")
 
-    if "github.com:" in url:
-        return url.split("github.com:")[1]
-    if "github.com/" in url:
-        return url.split("github.com/")[1]
+        if "github.com:" in url:
+            return url.split("github.com:")[1]
+        if "github.com/" in url:
+            return url.split("github.com/")[1]
 
-    raise ValueError(f"Could not parse GitHub repository from URL: {url}")
+        raise ValueError(f"Could not parse GitHub repository from URL: {url}")

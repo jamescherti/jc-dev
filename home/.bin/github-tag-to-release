@@ -65,7 +65,7 @@ import sys
 
 from github import Auth, Github
 from github.GithubException import GithubException
-from github_lib import get_github_repo_name, get_github_token
+from github_lib import GitHubLib
 
 
 def create_github_release(repo_name: str, tag_name: str, token: str) -> None:
@@ -100,8 +100,9 @@ def main() -> None:
     tag_name = sys.argv[1]
 
     try:
-        token = get_github_token()
-        repo_name = get_github_repo_name()
+        github_lib = GitHubLib()
+        token = github_lib.get_github_token()
+        repo_name = github_lib.get_github_repo_name()
         create_github_release(repo_name, tag_name, token)
     except ValueError as e:
         print(f"Configuration error: {e}")
