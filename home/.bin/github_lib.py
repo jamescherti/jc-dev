@@ -153,7 +153,7 @@ class GitHubLib:
 
     def list_public_source_repos(self, ignore_repos: list[str] | None = None) -> None:
         """
-        Fetch and print all public, non-fork repositories owned by the authenticated user.
+        Fetch and print all public, non-fork repositories owned by the user.
 
         Args:
             ignore_repos: Optional list of repository full names (owner/repo) to ignore.

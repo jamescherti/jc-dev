@@ -50,6 +50,8 @@ IGNORE_GITHUB_REPOSITORIES = {
     "jamescherti/ztree",
 }
 
+IGNORE_GITHUB_REPOSITORIES = True
+
 
 def main() -> None:
     """Run the main CLI logic."""
