@@ -152,14 +152,14 @@ config-pip-packages() {
   # "$MY_PYTHON_PACKAGES_PATH/watch-xfce-xfconf"
 }
 
-install_python_deps() {
-  cd "$SCRIPT_DIR/misc/deps"
-  if [[ "${VIRTUAL_ENV:-}" = "" ]]; then
-    ./deps-python-pip-user.sh
-  else
-    ./deps-python-pyenv.sh
-  fi
-}
+# install_python_deps() {
+#   cd "$SCRIPT_DIR/misc/deps"
+#   if [[ "${VIRTUAL_ENV:-}" = "" ]]; then
+#     ./deps-python-pip-user.sh
+#   else
+#     ./deps-python-pyenv.sh
+#   fi
+# }
 
 config-fonts() {
   local fonts_dir=(
@@ -408,8 +408,6 @@ main() {
 
   clean-fly-files "$@"
 
-  install_python_deps
-
   config-firefox
   config-gnome
   config-xfce
@@ -418,14 +416,14 @@ main() {
 
   config-fonts
 
+  # install_python_deps
+
   # TODO merge with install_python_deps?
   config-pip-packages
 
   # Vim packages
-  (
-    cd ~/.vim_bundle/packpath/pack/git-plugins/start
-    batchfetch
-  )
+  cd ~/.vim_bundle/packpath/pack/git-plugins/start
+  batchfetch
 }
 
 main "$@"

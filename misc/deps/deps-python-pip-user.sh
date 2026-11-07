@@ -26,19 +26,22 @@
 # SOFTWARE.
 #
 
-[[ $VIRTUAL_ENV = "" ]] && VIRTUAL_ENV=""
+set -e
+set -u
+
+SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+cd "$SCRIPT_DIR"
+
+[[ "${VIRTUAL_ENV:-}" = "" ]] && VIRTUAL_ENV=""
 
 # shellcheck disable=SC1091
 source .cfg.sh
-
-set -e
-set -u
 
 main() {
   PIP_ARGS=()
   [[ $VIRTUAL_ENV = "" ]] && PIP_ARGS+=(--user)
 
-  pip install --upgrade "${MY_PIP_PACKAGES[@]}"
+  pip install "${PIP_ARGS[@]}" --upgrade "${MY_PIP_PACKAGES[@]}"
 }
 
 main "$@"
