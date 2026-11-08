@@ -32,29 +32,29 @@
 ;; Enter within a comment context will both insert a new line and correctly
 ;; indent it to match the comment's indentation level, facilitating more
 ;; consistent formatting of multi-line comments.
-(unless noninteractive
-  ;; RET: Rebound to 'comment-indent-new-line'. This ensures that pressing Enter
-  ;; inside or after a comment block correctly continues the comment structure
-  ;; with proper indentation, a standard practice for maintaining clean source
-  ;; code documentation.
-  (global-set-key (kbd "RET") #'comment-indent-new-line)
-
-  ;; C-<return>: Explicitly mapped to 'newline-and-indent'. This gives the user
-  ;; a dedicated shortcut to create a new line with proper indentation on
-  ;; demand, rather than relying on automatic triggers.
-  (global-set-key (kbd "C-<return>") #'newline-and-indent))
+;; (unless noninteractive
+;;   ;; RET: Rebound to 'comment-indent-new-line'. This ensures that pressing Enter
+;;   ;; inside or after a comment block correctly continues the comment structure
+;;   ;; with proper indentation, a standard practice for maintaining clean source
+;;   ;; code documentation.
+;;   (global-set-key (kbd "RET") #'comment-indent-new-line)
+;;
+;;   ;; C-<return>: Explicitly mapped to 'newline-and-indent'. This gives the user
+;;   ;; a dedicated shortcut to create a new line with proper indentation on
+;;   ;; demand, rather than relying on automatic triggers.
+;;   (global-set-key (kbd "C-<return>") #'newline-and-indent))
 
 ;; Disable 'electric-indent-mode' globally. This mode is the root cause of
 ;; unexpected cursor jumps and re-indentation triggered by character insertion.
 ;; By setting it to -1 and ensuring the default value is nil, we guarantee that
 ;; typing or pressing Enter never triggers automatic reformatting, providing a
 ;; consistent experience across all buffers.
-(with-eval-after-load 'electric
-  (when (bound-and-true-p electric-indent-mode)
-    (electric-indent-mode -1))
-  (setq-default electric-indent-mode nil)
-  (advice-add 'electric-indent-mode :override #'ignore)
-  (advice-add 'electric-indent-local-mode :override #'ignore))
+;; (with-eval-after-load 'electric
+;;   (when (bound-and-true-p electric-indent-mode)
+;;     (electric-indent-mode -1))
+;;   (setq-default electric-indent-mode nil)
+;;   (advice-add 'electric-indent-mode :override #'ignore)
+;;   (advice-add 'electric-indent-local-mode :override #'ignore))
 
 ;; In certain modes (like `text-mode'), pressing Return multiple times causes
 ;; Emacs to lose your current indentation. The cursor drops to column 0 on

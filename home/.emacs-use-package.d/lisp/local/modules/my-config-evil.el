@@ -104,6 +104,128 @@
 (setq inhibit-mouse-button-numbers '(1 2 3)
       pixel-scroll-precision-use-momentum nil)
 
+;;; Do not highlight visual on all windows
+
+(setq highlight-nonselected-windows nil)
+
+(defun my-evil-visual-highlight-override (&optional arg)
+  "Highlight Visual selection, depending on the Visual type.
+ARG is an optional numeric prefix. With negative ARG, disable highlighting."
+  (cond
+   ((and (numberp arg) (< arg 1))
+    (when evil-visual-overlay
+      (delete-overlay evil-visual-overlay)
+      (setq evil-visual-overlay nil))
+    (when evil-visual-block-overlays
+      (mapc #'delete-overlay evil-visual-block-overlays)
+      (setq evil-visual-block-overlays nil)))
+   ((eq evil-visual-selection 'block)
+    (when evil-visual-overlay
+      (evil-visual-highlight -1))
+    (evil-visual-highlight-block
+     evil-visual-beginning
+     evil-visual-end))
+   (t
+    (when evil-visual-block-overlays
+      (evil-visual-highlight -1))
+    (if evil-visual-overlay
+        (move-overlay evil-visual-overlay
+                      evil-visual-beginning evil-visual-end)
+      (setq evil-visual-overlay
+            (make-overlay evil-visual-beginning evil-visual-end)))
+    (unless highlight-nonselected-windows
+      (overlay-put evil-visual-overlay 'window (selected-window)))
+    (overlay-put evil-visual-overlay 'face 'region)
+    (overlay-put evil-visual-overlay 'priority 99))))
+
+(defun my-evil-visual-highlight-block-override (beg end &optional overlays)
+  "Highlight rectangular region from BEG to END.
+OVERLAYS is an optional symbol holding a list of overlays to reuse."
+  (let* ((point (point))
+         (overlays (or overlays 'evil-visual-block-overlays))
+         (old (symbol-value overlays))
+         beg-col end-col new nlines overlay window-beg window-end)
+    (save-excursion
+      (setq beg-col (evil-column beg)
+            end-col (evil-column end))
+      (when (>= beg-col end-col)
+        (if (= beg-col end-col)
+            (setq end-col (1+ end-col))
+          (evil-swap beg-col end-col))
+        (setq beg (progn (goto-char beg) (evil-move-to-column beg-col))
+              end (progn (goto-char end) (evil-move-to-column end-col 1))))
+      (and (memq this-command '(next-line previous-line evil-use-register))
+           (eq temporary-goal-column most-positive-fixnum)
+           (setq end-col most-positive-fixnum))
+      (sit-for 0)
+      (setq window-beg (max (window-start) beg)
+            window-end (min (window-end) (1+ end))
+            nlines (count-lines window-beg
+                                (min window-end (point-max))))
+      (goto-char window-beg)
+      (dotimes (_ nlines)
+        (let (before after row-beg row-end)
+          (evil-move-to-column beg-col)
+          (when (< (current-column) beg-col)
+            (setq before
+                  (propertize
+                   (make-string
+                    (- beg-col (current-column)) ?\s)
+                   'face
+                   (or (get-text-property (1- (point)) 'face)
+                       'default))))
+          (setq row-beg (point))
+          (evil-move-to-column end-col)
+          (when (and (not (eolp))
+                     (< (current-column) end-col))
+            (setq after
+                  (propertize
+                   (make-string
+                    (if (= (point) row-beg)
+                        (- end-col beg-col)
+                      (- end-col (current-column)))
+                    ?\s) 'face 'region))
+            (if (= point row-beg)
+                (put-text-property
+                 0 (min (length after) 1)
+                 'cursor t after)
+              (put-text-property
+               (max 0 (1- (length after))) (length after)
+               'cursor t after)))
+          (setq row-end (min (point) (line-end-position)))
+          (while (and old
+                      (setq overlay (car old))
+                      (< (overlay-start overlay) row-beg)
+                      (/= (overlay-end overlay) row-end))
+            (delete-overlay overlay)
+            (setq old (cdr old)))
+          (cond
+           ((and old (setq overlay (car old))
+                 (or (= (overlay-start overlay) row-beg)
+                     (= (overlay-end overlay) row-end)))
+            (move-overlay overlay row-beg row-end)
+            (overlay-put overlay 'before-string before)
+            (overlay-put overlay 'after-string after)
+            (setq new (cons overlay new)
+                  old (cdr old)))
+           (t
+            (setq overlay (make-overlay row-beg row-end))
+            (overlay-put overlay 'before-string before)
+            (overlay-put overlay 'after-string after)
+            (setq new (cons overlay new)))))
+        (forward-line 1))
+      (dolist (overlay new)
+        (unless highlight-nonselected-windows
+          (overlay-put overlay 'window (selected-window)))
+        (overlay-put overlay 'face 'region)
+        (overlay-put overlay 'priority 99))
+      (dolist (overlay old)
+        (delete-overlay overlay))
+      (set overlays (nreverse new)))))
+
+(advice-add 'evil-visual-highlight :override #'my-evil-visual-highlight-override)
+(advice-add 'evil-visual-highlight-block :override #'my-evil-visual-highlight-block-override)
+
 ;;; undo
 
 ;;; Stop Visual Paste from Overwriting Your Register
@@ -1199,6 +1321,7 @@ Candidates absent from the accessible source buffer follow."
 (evil-define-key 'insert 'global
   (kbd "C-p") 'my-cape-dabbrev-backward
   (kbd "C-n") 'my-cape-dabbrev-forward)
+
 ;;; cape: evil
 
 (defun my-minibuffer-setup-dabbrev-evil ()
