@@ -62,6 +62,7 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     "jamescherti/wip": "",
     "jamescherti/notes": "",
     # Other
+    "jamescherti/outline-yaml.el": "legacy",
     "jamescherti/python-dpc3848v-wifi-modem": "legacy",
     "jamescherti/docker-oddmuse": "legacy",
     # "jamescherti/jamescherti": "misc",
@@ -87,7 +88,6 @@ IGNORE_GITHUB_REPOSITORIES: set[str] = {
     "jamescherti/org-mode",
     "jamescherti/paredit",
     "jamescherti/ztree",
-    "jamescherti/docker-oddmuse",
     "jamescherti/gentoo-brother-ql1110nwb",
     "jamescherti/outline-yaml.el",
     "jamescherti/python-dpc3848v-wifi-modem",

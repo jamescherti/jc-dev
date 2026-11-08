@@ -22,7 +22,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
-"""Script to generate ~/src/batchfetch-auto.yaml for all GitHub repositories."""
+"""Script to generate ~/src/batchfetch.yaml for all GitHub repositories."""
 
 import collections
 from pathlib import Path
@@ -78,7 +78,7 @@ def guess_category(repo_name: str) -> str:
 def generate_batchfetch_yaml(
     repos_by_category: dict[str, list[tuple[str, str | None]]], out_path: Path
 ) -> None:
-    """Generate the batchfetch-auto.yaml file with specific headers and tasks.
+    """Generate the batchfetch.yaml file with specific headers and tasks.
 
     Args:
         repos_by_category: Dictionary grouping repositories by their category.
@@ -163,7 +163,7 @@ def main() -> None:
         print("[REPO]", repo.full_name)
 
     # Generate YAML file
-    out_path = SRC_DIR / "batchfetch-auto.yaml"
+    out_path = SRC_DIR / "batchfetch.yaml"
     generate_batchfetch_yaml(repos_by_category, out_path)
     print(f"Generated {out_path}")
 
