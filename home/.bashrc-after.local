@@ -289,6 +289,44 @@ alias mountall='/bin/sh -c "sudo /usr/bin/udiskie-mount -a --recursive; sudo /us
 # alias qa='pathaction'
 alias qai='so pathaction -t install'
 
+declare -A _alias_completion_commands=()
+declare -A _alias_completion_git_functions=()
+
+_alias_completion_load() {
+  local alias_name=$1
+  local cmd=${_alias_completion_commands[$alias_name]-}
+  local spec
+
+  [[ -n $cmd ]] || return 1
+
+  if ! complete -p -- "$cmd" &>/dev/null; then
+    if declare -F _comp_load &>/dev/null; then
+      _comp_load -- "$cmd" || :
+    elif declare -F _completion_loader &>/dev/null; then
+      _completion_loader "$cmd" || :
+    fi
+  fi
+
+  if [[ $cmd == git ]] &&
+     ! declare -F __git_complete &>/dev/null &&
+     [[ -r /usr/share/bash-completion/completions/git ]]; then
+    source /usr/share/bash-completion/completions/git
+  fi
+
+  if [[ -n ${_alias_completion_git_functions[$alias_name]-} ]] &&
+     declare -F __git_complete &>/dev/null; then
+    __git_complete "$alias_name" \
+      "${_alias_completion_git_functions[$alias_name]}" || return 1
+  elif spec=$(complete -p -- "$cmd" 2>/dev/null); then
+    eval "set -- ${spec#complete }" || return 1
+    complete "${@:1:$#-1}" -- "$alias_name" || return 1
+  else
+    complete -o bashdefault -o default -- "$alias_name" || return 1
+  fi
+
+  return 124
+}
+
 alias_completion() {
   if (($# < 2)); then
     printf '%s\n' \
@@ -296,59 +334,51 @@ alias_completion() {
     return 1
   fi
 
-  local cmd=$1
-  local -a aliases=("${@:2}")
-  local completion_spec
+  local cmd=$1 alias_name
+  shift
 
-  if ! type _completion_loader &>/dev/null; then
-    printf '%s\n' \
-      'Error: alias_completion: _completion_loader was not found.' >&2
-    return 1
-  fi
-
-  _completion_loader "$cmd"
-
-  completion_spec=$(complete -p "$cmd" 2>/dev/null) || return 1
-  [[ $completion_spec == 'complete '* ]] || return 1
-
-  eval "set -- ${completion_spec#complete }" || return 1
-  complete "${@:1:$#-1}" "${aliases[@]}"
+  for alias_name; do
+    _alias_completion_commands[$alias_name]=$cmd
+    complete -o bashdefault -o default \
+      -F _alias_completion_load -- "$alias_name" || return 1
+  done
 }
 
-if type _completion_loader &>/dev/null; then
-  alias_completion ssh s lssh issh
-  alias_completion git g
-  alias_completion scp iscp
+_alias_git_completion() {
+  local function_name=$1 alias_name
+  shift
+
+  alias_completion git "$@" || return 1
+
+  for alias_name; do
+    _alias_completion_git_functions[$alias_name]=$function_name
+  done
+}
+
+if ! declare -F _comp_load &>/dev/null &&
+   ! declare -F _completion_loader &>/dev/null &&
+   [[ -r /usr/share/bash-completion/bash_completion ]]; then
+  source /usr/share/bash-completion/bash_completion
 fi
 
-# TODO: move them to bashrc.local?
-if [[ -r /usr/share/bash-completion/completions/git ]]; then
-  # Arch
-  # shellcheck disable=SC1091
-  source /usr/share/bash-completion/completions/git
-fi
-if type __git_complete &>/dev/null; then
-  __git_complete gl _git_log
-  __git_complete gd _git_diff
+alias_completion ssh s lssh issh
+alias_completion git g
+alias_completion scp iscp
 
-  __git_complete gp _git_push
-  __git_complete gpf _git_push
+_alias_git_completion _git_log gl
+_alias_git_completion _git_diff gd
+_alias_git_completion _git_push gp gpf
+_alias_git_completion _git_branch br gb
 
-  __git_complete br _git_branch
-  __git_complete gb _git_branch
+alias merge='git merge'
+_alias_git_completion _git_merge merge
 
-  alias merge="git merge"
-  __git_complete merge _git_merge
+alias co='git checkout'
+_alias_git_completion _git_checkout co
 
-  alias co="git checkout"
-  __git_complete co _git_checkout
-
-  __git_complete squash _git_checkout
-  __git_complete sq _git_checkout
-  alias squash='git squash'
-  alias sq='git squash'
-fi
-
+alias squash='git squash'
+alias sq='git squash'
+_alias_git_completion _git_checkout squash sqi
 #-------------------------------------------------------------------------------
 # CUSTOM COMPLETION
 #-------------------------------------------------------------------------------
