@@ -72,8 +72,12 @@ NO_GIT_UPDATE_REPOS: list[str] = [
     "jamescherti/cherrybuckle",
     "jamescherti/caffeine-aw",
     "jamescherti/emacs",
-    "jamescherti/cherrybuckle",
 ]
+
+# Upstream URLs for repositories that are not detected as forks by the GitHub API.
+CUSTOM_UPSTREAMS: dict[str, str] = {
+    "jamescherti/cherrybuckle": "https://github.com/zevv/bucklespring",
+}
 
 
 def guess_category(repo_name: str) -> str:
@@ -205,6 +209,8 @@ def main() -> None:
         upstream_url = None
         if repo.fork and getattr(repo, "parent", None):
             upstream_url = repo.parent.html_url
+        elif repo.full_name in CUSTOM_UPSTREAMS:
+            upstream_url = CUSTOM_UPSTREAMS[repo.full_name]
 
         git_uri = f"git@github.com:{repo.full_name}"
         repo_name = repo.full_name.split("/")[-1]
