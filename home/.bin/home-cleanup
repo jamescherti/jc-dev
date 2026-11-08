@@ -29,7 +29,7 @@
 set -euf -o pipefail
 
 # TOTAL_CLEANUPS=0
-MTIME="+15"
+ATIME="+30"
 
 ATEXIT_DONE=0
 atexit() {
@@ -59,7 +59,7 @@ cleanup_dir() {
   local before
   before=$(dir_size)
 
-  find "$dir" -type f -mtime "$MTIME" -delete 2>/dev/null || true
+  find "$dir" -type f -atime "$ATIME" -delete 2>/dev/null || true
 
   local after
   after=$(dir_size)
