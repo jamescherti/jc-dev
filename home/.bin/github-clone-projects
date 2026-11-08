@@ -25,14 +25,10 @@
 """Script to list all public, non-fork repositories and their categories."""
 
 from pathlib import Path
-from typing import cast
 
-from github_data import CUSTOM_CATEGORIES, IGNORE_GITHUB_REPOSITORIES
+from confirm_lib import confirm
+from github_data import CUSTOM_CATEGORIES, IGNORE_GITHUB_REPOSITORIES, SRC_DIR
 from github_lib import GitHubLib, handle_github_errors
-from prompt_toolkit import prompt
-from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
-
-SRC_DIR = Path().home() / "src"
 
 
 def guess_category(repo_name: str) -> str:
@@ -79,39 +75,16 @@ def guess_category(repo_name: str) -> str:
     return "misc"
 
 
-def confirm(message: str = "Continue?", *, default: bool = True) -> bool:
-    """Prompt the user for a yes/no decision with a single keypress.
+def abbreviate_home(path: Path) -> Path:
+    """Abbreviate the user's home directory to '~'.
 
     Args:
-        message: The prompt message to display.
-        default: The fallback value when pressing Enter.
+        path: Path instance to format.
 
     Returns:
-        True if confirmed, False otherwise.
+        Path starting with '~' if inside the home directory, otherwise the original path.
     """
-    bindings = KeyBindings()
-    hint = "[Y/n]" if default else "[y/N]"
-    full_prompt = f"{message} {hint} "
-
-    @bindings.add("y")
-    @bindings.add("Y")
-    def _handle_yes(event: KeyPressEvent) -> None:
-        event.app.exit(result=True)
-
-    @bindings.add("n")
-    @bindings.add("N")
-    def _handle_no(event: KeyPressEvent) -> None:
-        event.app.exit(result=False)
-
-    @bindings.add("enter")
-    def _handle_enter(event: KeyPressEvent) -> None:
-        event.app.exit(result=default)
-
-    @bindings.add("c-c")
-    def _handle_cancel(event: KeyPressEvent) -> None:
-        event.app.exit(exception=KeyboardInterrupt)
-
-    return cast("bool", prompt(full_prompt, key_bindings=bindings))
+    return Path("~") / path.resolve().relative_to(Path.home())
 
 
 @handle_github_errors
@@ -124,9 +97,9 @@ def main() -> None:
 
         repo_name = repo.name
         category = "forks" if repo.fork else guess_category(repo_full_name)
-        print(f"[PROJECT] {repo_name}")
 
         repo_path = SRC_DIR / category / repo_name if category else SRC_DIR / repo_name
+        print(f"[PROJECT] {abbreviate_home(repo_path)}")
 
         if repo_path.exists():
             continue

@@ -24,6 +24,10 @@
 #
 """Script to list all public, non-fork repositories and their categories."""
 
+from pathlib import Path
+
+SRC_DIR = Path().home() / "src"
+
 CUSTOM_CATEGORIES: dict[str, str] = {
     # Shell
     "jamescherti/efasd": "tools",

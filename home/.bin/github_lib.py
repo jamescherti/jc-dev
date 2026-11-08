@@ -31,13 +31,15 @@ import subprocess
 import sys
 from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import ParamSpec, TypeVar, cast
+from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast
 
 import yaml
 from github import Auth, Github
-from github.AuthenticatedUser import AuthenticatedUser
 from github.GithubException import GithubException
 from github.Repository import Repository
+
+if TYPE_CHECKING:
+    from github.AuthenticatedUser import AuthenticatedUser
 
 
 class GitHubLib:
