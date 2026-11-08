@@ -304,6 +304,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
  ;; Large jumps (> 9 lines off-screen): Emacs gives up on scrolling and
  ;; recenters the window.
  ;; scroll-conservatively 8
+ scroll-conservatively most-positive-fixnum
 
  ;; Setting scroll-conservatively to most-positive-fixnum: By default, when
  ;; your cursor moves off the screen, Emacs recenters the window so the

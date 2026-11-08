@@ -28,6 +28,19 @@
 
 (require 'cl-lib)
 
+;;; Ediff the current file against another file
+
+(defun my-ediff-current-file-against (other-file)
+  "Run `ediff-files' comparing current file to OTHER-FILE.
+OTHER-FILE is the file path chosen from the minibuffer."
+  (interactive "fCompare with file: ")
+  (let ((current (buffer-file-name)))
+    (unless current
+      (user-error "Current buffer is not visiting a file"))
+    (ediff-files current other-file)))
+
+(global-set-key (kbd "C-c d f") #'my-ediff-current-file-against)
+
 ;;; Defaults
 
 ;; Old params

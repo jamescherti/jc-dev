@@ -36,6 +36,7 @@
 (eval-and-compile
   (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'lightemacs-module)
+(require 'cl-lib) ;; TODO remove?
 
 ;;; Load modules
 
@@ -1055,42 +1056,7 @@ word after the space that contains at least two uppercase characters."
   (kbd "<leader>os") 'org-schedule
   (kbd "<leader>Z") 'my-org-agenda-switch-to-todos)
 
-;;; cape: complete before point
-
-;; (defun my-cape-dabbrev-backwards ()
-;;    "Cape-dabbrev backwards."
-;;    (interactive)
-;;    (let ((dabbrev-backward-only t))
-;;      (when (fboundp 'cape-dabbrev)
-;;        (cape-dabbrev t))))
-;;
-;; (evil-define-key 'insert 'global (kbd "C-p") 'my-cape-dabbrev-backwards)
-
 ;;; Equivalent to Vim's Ctrl-p and Ctrl-n
-
-;; (defun my-cape-dabbrev-forward ()
-;;   "Complete the abbreviation before point using Cape.
-;; Signal a user error when no abbreviation precedes point."
-;;   (interactive)
-;;   (unless (and (> (point) (if (minibufferp)
-;;                               (minibuffer-prompt-end)
-;;                             (point-min)))
-;;                (save-excursion
-;;                  (backward-char 1)
-;;                  (looking-at-p
-;;                   (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
-;;     (user-error "No abbreviation before point"))
-;;   (when (fboundp 'cape-dabbrev)
-;;     (let ((dabbrev-check-all-buffers
-;;            (if (minibufferp) t dabbrev-check-all-buffers)))
-;;       (call-interactively #'cape-dabbrev))))
-;;
-
-(evil-define-key 'insert 'global
-  (kbd "C-p") 'my-cape-dabbrev-backward
-  (kbd "C-n") 'my-cape-dabbrev-forward)
-
-(require 'cl-lib) ;; TODO remove?
 
 ;; Rank Cape Dabbrev candidates by their occurrence positions because its
 ;; default candidate order does not represent distance from point. The normal
@@ -1229,6 +1195,10 @@ Candidates absent from the accessible source buffer follow."
 
 (with-eval-after-load 'corfu
   (setq corfu-sort-override-function nil))
+
+(evil-define-key 'insert 'global
+  (kbd "C-p") 'my-cape-dabbrev-backward
+  (kbd "C-n") 'my-cape-dabbrev-forward)
 
 ;;; cape: evil
 
