@@ -30,7 +30,7 @@ Authentication:
 This script requires a GitHub Personal Access Token (PAT) with repository write access.
 The token is loaded using the following priority:
 
-1. A GPG-encrypted YAML file located at ~/.secrets/github.yaml.asc containing:
+1. A GPG-encrypted YAML file located at /path/to/github-token.yaml.asc containing:
    token: your_personal_access_token_here
 2. The GITHUB_TOKEN environment variable:
    export GITHUB_TOKEN="your_personal_access_token_here"
@@ -53,8 +53,8 @@ Option 2: Classic token (for public repositories only)
   4. Generate and copy the token.
 
 Token configuration:
-Encrypt your YAML token file into ~/.secrets/github.yaml.asc, for example:
-    gpg --symmetric --armor ~/.secrets/github.yaml
+Encrypt your YAML token file into /path/to/github-token.yaml.asc, for example:
+    gpg --symmetric --armor /path/to/github-token.yaml
 
 Or export it in your shell environment:
     export GITHUB_TOKEN="your_token_here"

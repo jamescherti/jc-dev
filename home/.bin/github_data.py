@@ -26,6 +26,8 @@
 
 from pathlib import Path
 
+SECRETS_FILE = Path.home() / ".secrets" / "github.yaml.asc"
+
 SRC_DIR = Path().home() / "src"
 
 CUSTOM_CATEGORIES: dict[str, str] = {

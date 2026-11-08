@@ -30,13 +30,13 @@ import re
 import subprocess
 import sys
 from collections.abc import Callable, Iterator
-from pathlib import Path
 from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast
 
 import yaml
 from github import Auth, Github
 from github.GithubException import GithubException
 from github.Repository import Repository
+from github_data import SECRETS_FILE
 
 if TYPE_CHECKING:
     from github.AuthenticatedUser import AuthenticatedUser
@@ -63,8 +63,8 @@ class GitHubLib:
         """
         Retrieve the GitHub Personal Access Token.
 
-        Checks ~/.secrets/github.yaml.asc first, decrypts it using GPG, then falls
-        back to the GITHUB_TOKEN environment variable.
+        Checks .yaml.asc first, decrypts it using GPG, then falls back to the
+        GITHUB_TOKEN environment variable.
 
         Returns:
             The GitHub token string.
@@ -72,15 +72,13 @@ class GitHubLib:
         Raises:
             ValueError: If the token cannot be found or decrypted.
         """
-        secrets_file = Path.home() / ".secrets" / "github.yaml.asc"
-
         # Check ~/.secrets/github.yaml.asc first to match documented priority,
         # and raise ValueError on GPG/YAML failures instead of calling sys.exit(1)
         # so callers and @handle_github_errors manage process termination.
-        if secrets_file.is_file():
+        if SECRETS_FILE.is_file():
             try:
                 result = subprocess.run(
-                    ["gpg", "--decrypt", "--quiet", "--batch", str(secrets_file)],
+                    ["gpg", "--decrypt", "--quiet", "--batch", str(SECRETS_FILE)],
                     capture_output=True,
                     text=True,
                     check=True,
@@ -92,14 +90,14 @@ class GitHubLib:
                         return str(raw_token).strip()
             except FileNotFoundError as e:
                 raise ValueError(
-                    f"Cannot decrypt {secrets_file}: 'gpg' command not found"
+                    f"Cannot decrypt {SECRETS_FILE}: 'gpg' command not found"
                 ) from e
             except subprocess.CalledProcessError as e:
                 err_msg = e.stderr.strip() if e.stderr else str(e)
-                raise ValueError(f"Failed to decrypt {secrets_file}: {err_msg}") from e
+                raise ValueError(f"Failed to decrypt {SECRETS_FILE}: {err_msg}") from e
             except yaml.YAMLError as e:
                 raise ValueError(
-                    f"Failed to parse decrypted content of {secrets_file}: {e}"
+                    f"Failed to parse decrypted content of {SECRETS_FILE}: {e}"
                 ) from e
 
         token = os.environ.get("GITHUB_TOKEN", "").strip()
