@@ -310,6 +310,7 @@ _alias_completion_load() {
   if [[ $cmd == git ]] &&
      ! declare -F __git_complete &>/dev/null &&
      [[ -r /usr/share/bash-completion/completions/git ]]; then
+    # shellcheck disable=SC1091
     source /usr/share/bash-completion/completions/git
   fi
 
@@ -358,6 +359,7 @@ _alias_git_completion() {
 if ! declare -F _comp_load &>/dev/null &&
    ! declare -F _completion_loader &>/dev/null &&
    [[ -r /usr/share/bash-completion/bash_completion ]]; then
+  # shellcheck disable=SC1091
   source /usr/share/bash-completion/bash_completion
 fi
 
