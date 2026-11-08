@@ -592,4 +592,4 @@ fi
 alias github-list="so github-list"
 alias github-list-categories="so github-list-categories"
 alias github-tag-to-release="so github-tag-to-release"
-alias github-clone-projects="so github-clone-projects"
+alias update-batchfetch-projects="so update-batchfetch-projects"

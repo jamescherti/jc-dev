@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+#
+# Python Requirements:
+#   - PyGithub
+#   - PyYAML
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Script to generate ~/src/batchfetch.yaml for all GitHub repositories."""
+
+import collections
+from pathlib import Path
+
+from github_data import CUSTOM_CATEGORIES, IGNORE_GITHUB_REPOSITORIES, SRC_DIR
+from github_lib import GitHubLib, handle_github_errors
+
+
+def guess_category(repo_name: str) -> str:
+    """
+    Guess the category of a repository based on its name.
+
+    Args:
+        repo_name: The full name of the repository (e.g., owner/repo).
+
+    Returns:
+        A string representing the guessed category (e.g., "emacs", "python",
+        "ansible", "unknown").
+    """
+    try:
+        return str(CUSTOM_CATEGORIES[repo_name])
+    except KeyError:
+        pass
+
+    name_lower = repo_name.lower()
+
+    if name_lower.endswith(".el"):
+        return "emacs"
+
+    if "/jc-" in name_lower:
+        return "dotfiles"
+
+    if "ansible" in name_lower:
+        return "ansible"
+
+    if (
+        "arch" in name_lower
+        or "gentoo" in name_lower
+        or "linux" in name_lower
+        or "overlay" in name_lower
+    ):
+        return "linux"
+
+    if "vim" in name_lower:
+        return "vim"
+
+    if "bash" in name_lower or "shell" in name_lower:
+        return "shell"
+
+    return "misc"
+
+
+def generate_batchfetch_yaml(
+    repos_by_category: dict[str, list[str]], out_path: Path
+) -> None:
+    """Generate the batchfetch.yaml file with specific headers and tasks.
+
+    Args:
+        repos_by_category: Dictionary grouping repositories by their category.
+        out_path: Destination path for the YAML file.
+    """
+    lines = [
+        "---",
+        "#",
+        "# Author: James Cherti",
+        "# URL: https://github.com/jamescherti/jc-dev",
+        "#",
+        "# Distributed under terms of the MIT license.",
+        "#",
+        "# Copyright (C) 2004-2026 James Cherti",
+        "#",
+        "# Permission is hereby granted, free of charge, to any person obtaining a copy",
+        '# of this software and associated documentation files (the "Software"), to deal',
+        "# in the Software without restriction, including without limitation the rights",
+        "# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell",
+        "# copies of the Software, and to permit persons to whom the Software is",
+        "# furnished to do so, subject to the following conditions:",
+        "#",
+        "# The above copyright notice and this permission notice shall be included in all",
+        "# copies or substantial portions of the Software.",
+        "#",
+        '# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR',
+        "# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,",
+        "# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE",
+        "# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER",
+        "# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,",
+        "# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE",
+        "# SOFTWARE.",
+        "#",
+        "",
+        "options:",
+        '  exec_before: ["sh", "-c", "set -e; git-setup"]',
+        "  git_update: false",
+        '  exec_after: ["update-project-list"]',
+        "  # git_update_strategy: reset",
+        "  ignore_untracked:",
+        "    - wip",
+        "    - home-settings",
+        "    - batchfetch-enc.yaml",
+        "    - notes",
+        "    - .ignore",
+        "    - other",
+        "    - .dir-settings.el",
+        "    - .pathaction.yaml",
+        "    - .quickaction.yaml",
+        "    - local/",
+        "    - bell/",
+        "    - .fileaction.yaml",
+        "    - batchfetch-local.yaml",
+        "    - .my-dir-locals.el",
+        "    - forks/.my-dir-locals.el",
+        "    - emacs/.my-dir-locals.el",
+        "",
+        "tasks:",
+    ]
+
+    for category, repos in sorted(repos_by_category.items()):
+        category_title = category.capitalize() if category else "Misc"
+        lines.append(f"  # {'-' * 76}")
+        lines.append(f"  # {category_title}")
+        lines.append(f"  # {'-' * 76}")
+
+        for repo_full_name in sorted(repos):
+            repo_name = repo_full_name.split("/")[-1]
+            path_val = f"{category}/{repo_name}" if category else repo_name
+            lines.append(f"  - git: git@github.com:{repo_full_name}")
+            lines.append(f"    path: {path_val}")
+            lines.append("")
+
+    # Ensure trailing newline
+    lines.append("")
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+
+
+@handle_github_errors
+def main() -> None:
+    """Run the main CLI logic."""
+    github_lib = GitHubLib()
+    repos_by_category: dict[str, list[str]] = collections.defaultdict(list)
+
+    # Fetch and group repositories
+    for repo in github_lib.list_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES):
+        category = "forks" if repo.fork else guess_category(repo.full_name)
+        repos_by_category[category].append(repo.full_name)
+        print("[REPO]", repo.full_name)
+
+    # Generate YAML file
+    out_path = SRC_DIR / "batchfetch.yaml"
+    generate_batchfetch_yaml(repos_by_category, out_path)
+    print(f"Generated {out_path}")
+
+
+if __name__ == "__main__":
+    main()
