@@ -100,6 +100,9 @@ snippet regionc
 			end (point-max)))
 
 	(let* ((original-text (buffer-substring-no-properties beg end))
+		   ;; Run the subprocess from the temporary directory so it can start
+           ;; even if the buffer's working directory has been deleted.
+		   (default-directory temporary-file-directory)
 		   (cleaned-text
 			(with-temp-buffer
 			  ;; Insert the original text into our temporary workspace.
@@ -384,10 +387,6 @@ snippet touch
 (make-empty-file ${1:"file"})
 endsnippet
 
-snippet run
-(call-process ${1:shell-file-name} nil nil nil ${2:"--arg" "arg2"})
-endsnippet
-
 snippet shell
 shell-file-name
 endsnippet
@@ -482,7 +481,10 @@ snippet dirname
 endsnippet
 
 snippet command
-(call-process ${1:"/path/to/command"} nil nil nil ${2:"arg1" "arg2"})
+;; Run the subprocess from the temporary directory so it can start
+;; even if the buffer's working directory has been deleted.
+(let ((default-directory temporary-file-directory))
+  (call-process ${1:"/path/to/command"} nil nil nil ${2:"arg1" "arg2"}))
 endsnippet
 
 snippet shell

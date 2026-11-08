@@ -829,6 +829,8 @@ subsequent GCC invocations."
             (read (current-buffer))))
       (when (executable-find "gcc")
         (with-temp-buffer
+          ;; Run the subprocess from the temporary directory so it can start
+          ;; even if the buffer's working directory has been deleted.
           (let* ((default-directory temporary-file-directory)
                  (exit-code (call-process "gcc" nil t nil "-march=native"
                                           "-Q" "--help=target")))

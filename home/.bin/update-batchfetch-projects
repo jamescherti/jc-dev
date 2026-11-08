@@ -137,7 +137,7 @@ def generate_batchfetch_yaml(
     """
     lines = [
         "---",
-        "# Generated automatically with update-batchfetch-projects.",
+        "# Generated automatically using update-batchfetch-projects.",
         "#",
         "# Author: James Cherti",
         "# URL: https://github.com/jamescherti/jc-dev",

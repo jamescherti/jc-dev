@@ -1876,6 +1876,8 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 (lightemacs-use-package quick-fasd
   :commands (quick-fasd-mode
              quick-fasd-find-path
+             quick-fasd-find-file
+             quick-fasd-find-directory
              quick-fasd-add-path)
 
   :bind (("C-x C-d" . quick-fasd-find-path)
@@ -1883,31 +1885,9 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
          ("C-x C-d" . quick-fasd-find-path))
 
   :init
-  (setq quick-fasd-auto-add-on-buffer-change t
-        quick-fasd-enable-initial-prompt nil
-        quick-fasd-command-args '("-a"))
+  (define-key evil-normal-state-map (kbd "<leader>b") 'quick-fasd-find-file)
+  (evil-define-key 'normal 'global (kbd "<leader>fd") 'quick-fasd-find-directory)
   (quick-fasd-mode 1))
-
-;; TODO add to quick-fasd
-(defun quick-fasd-find-files ()
-  "Find files."
-  (interactive)
-  (when (fboundp 'quick-fasd-find-path)
-    (quick-fasd-find-path -1)))
-
-(define-key evil-normal-state-map (kbd "<leader>b") 'quick-fasd-find-files)
-
-;; TODO add to quick-fasd
-;; Dirs
-(defun quick-fasd-find-directories ()
-  "Find files."
-  (interactive)
-  (when (fboundp 'quick-fasd-find-path)
-    (quick-fasd-find-path 0)))
-
-(with-eval-after-load 'evil
-  (evil-define-key 'normal 'global (kbd "<leader>fd")
-    'quick-fasd-find-directories))
 
 ;;; Use-package pathaction
 

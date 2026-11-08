@@ -4578,8 +4578,11 @@ function or if an invalid choice is made."
 ;; TODO: Should we execute it after inserting anything in the speller
 (defun run-sync-spell-dict-if-exists ()
   "Run sync-spell-dict command if it exists."
-  (when (executable-find "sync-spell-dict")
-    (call-process "sync-spell-dict" nil 0 nil)))
+  ;; Run the subprocess from the temporary directory so it can start even if the
+  ;; buffer's working directory has been deleted.
+  (let ((default-directory temporary-file-directory))
+    (when (executable-find "sync-spell-dict")
+      (call-process "sync-spell-dict" nil 0 nil))))
 
 (add-hook 'kill-emacs-hook 'run-sync-spell-dict-if-exists)
 
