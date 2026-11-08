@@ -64,6 +64,17 @@ MISSING_REPOSITORIES: list[dict[str, str | None]] = [
     },
 ]
 
+# Global list of repositories that should not be updated automatically.
+NO_GIT_UPDATE_REPOS: list[str] = [
+    "jamescherti/motley-overlay",
+    "jamescherti/archlinux-linux-keep-modules",
+    "jamescherti/archlinux-brother-ql1110nwb",
+    "jamescherti/cherrybuckle",
+    "jamescherti/caffeine-aw",
+    "jamescherti/emacs",
+    "jamescherti/cherrybuckle",
+]
+
 
 def guess_category(repo_name: str) -> str:
     """
@@ -110,13 +121,14 @@ def guess_category(repo_name: str) -> str:
 
 
 def generate_batchfetch_yaml(
-    repos_by_category: dict[str, list[tuple[str, str, str | None]]], out_path: Path
+    repos_by_category: dict[str, list[tuple[str, str, str | None, bool]]],
+    out_path: Path,
 ) -> None:
     """Generate the batchfetch.yaml file with specific headers and tasks.
 
     Args:
         repos_by_category: Dictionary grouping repositories by their category.
-            Values are tuples of (git_uri, path, upstream_url).
+            Values are tuples of (git_uri, path, upstream_url, disable_update).
         out_path: Destination path for the YAML file.
     """
     lines = [
@@ -160,9 +172,12 @@ def generate_batchfetch_yaml(
         lines.append(f"  # {category_title}")
         lines.append(f"  # {'-' * 76}")
 
-        for git_uri, path_val, upstream_url in sorted(repos):
+        for git_uri, path_val, upstream_url, disable_update in sorted(repos):
             lines.append(f"  - git: {git_uri}")
             lines.append(f"    path: {path_val}")
+
+            if disable_update:
+                lines.append("    git_update: false")
 
             if upstream_url:
                 lines.append("    remote:")
@@ -179,7 +194,7 @@ def generate_batchfetch_yaml(
 def main() -> None:
     """Run the main CLI logic."""
     github_lib = GitHubLib()
-    repos_by_category: dict[str, list[tuple[str, str, str | None]]] = (
+    repos_by_category: dict[str, list[tuple[str, str, str | None, bool]]] = (
         collections.defaultdict(list)
     )
 
@@ -194,8 +209,11 @@ def main() -> None:
         git_uri = f"git@github.com:{repo.full_name}"
         repo_name = repo.full_name.split("/")[-1]
         path_val = f"{category}/{repo_name}" if category else repo_name
+        disable_update = repo.full_name in NO_GIT_UPDATE_REPOS
 
-        repos_by_category[category].append((git_uri, path_val, upstream_url))
+        repos_by_category[category].append(
+            (git_uri, path_val, upstream_url, disable_update)
+        )
         print("[REPO]", repo.full_name)
 
     # Append missing external/custom repositories
@@ -205,7 +223,11 @@ def main() -> None:
         upstream_url = repo_data["upstream_uri"]
 
         category = path_val.split("/")[0] if "/" in path_val else "misc"
-        repos_by_category[category].append((git_uri, path_val, upstream_url))
+        disable_update = any(r in git_uri for r in NO_GIT_UPDATE_REPOS)
+
+        repos_by_category[category].append(
+            (git_uri, path_val, upstream_url, disable_update)
+        )
         print("[MISSING REPO]", git_uri)
 
     # Generate YAML file
