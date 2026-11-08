@@ -30,6 +30,40 @@ from pathlib import Path
 from github_data import CUSTOM_CATEGORIES, IGNORE_GITHUB_REPOSITORIES, SRC_DIR
 from github_lib import GitHubLib, handle_github_errors
 
+# Global list for repositories missed by the GitHub API or hosted externally.
+MISSING_REPOSITORIES: list[dict[str, str | None]] = [
+    {
+        "uri": "git@github.com:jamescherti/emacs-ansible",
+        "directory": "forks/emacs-ansible",
+        "upstream_uri": "https://gitlab.com/emacs-ansible/emacs-ansible.git/",
+    },
+    {
+        "uri": "git@github.com:jamescherti/emacs-eat",
+        "directory": "forks/emacs-eat",
+        "upstream_uri": "https://codeberg.org/akib/emacs-eat",
+    },
+    {
+        "uri": "git@github.com:jamescherti/python-dpc3848v-wifi-modem",
+        "directory": "linux/python-dpc3848v-wifi-modem",
+        "upstream_uri": None,
+    },
+    {
+        "uri": "git@github.com:jamescherti/ztree",
+        "directory": "forks/ztree",
+        "upstream_uri": "https://codeberg.org/fourier/ztree",
+    },
+    {
+        "uri": "ssh://aur@aur.archlinux.org/linux-keep-modules",
+        "directory": "linux/aur-linux-keep-modules",
+        "upstream_uri": None,
+    },
+    {
+        "uri": "ssh://aur@aur.archlinux.org/brother-ql1110nwb",
+        "directory": "linux/aur-brother-ql1110nwb",
+        "upstream_uri": None,
+    },
+]
+
 
 def guess_category(repo_name: str) -> str:
     """
@@ -76,13 +110,13 @@ def guess_category(repo_name: str) -> str:
 
 
 def generate_batchfetch_yaml(
-    repos_by_category: dict[str, list[tuple[str, str | None]]], out_path: Path
+    repos_by_category: dict[str, list[tuple[str, str, str | None]]], out_path: Path
 ) -> None:
     """Generate the batchfetch.yaml file with specific headers and tasks.
 
     Args:
         repos_by_category: Dictionary grouping repositories by their category.
-            Values are tuples of (repo_full_name, upstream_url).
+            Values are tuples of (git_uri, path, upstream_url).
         out_path: Destination path for the YAML file.
     """
     lines = [
@@ -126,10 +160,8 @@ def generate_batchfetch_yaml(
         lines.append(f"  # {category_title}")
         lines.append(f"  # {'-' * 76}")
 
-        for repo_full_name, upstream_url in sorted(repos):
-            repo_name = repo_full_name.split("/")[-1]
-            path_val = f"{category}/{repo_name}" if category else repo_name
-            lines.append(f"  - git: git@github.com:{repo_full_name}")
+        for git_uri, path_val, upstream_url in sorted(repos):
+            lines.append(f"  - git: {git_uri}")
             lines.append(f"    path: {path_val}")
 
             if upstream_url:
@@ -147,11 +179,11 @@ def generate_batchfetch_yaml(
 def main() -> None:
     """Run the main CLI logic."""
     github_lib = GitHubLib()
-    repos_by_category: dict[str, list[tuple[str, str | None]]] = (
+    repos_by_category: dict[str, list[tuple[str, str, str | None]]] = (
         collections.defaultdict(list)
     )
 
-    # Fetch and group repositories
+    # Fetch and group repositories from GitHub API
     for repo in github_lib.list_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES):
         category = "forks" if repo.fork else guess_category(repo.full_name)
 
@@ -159,8 +191,22 @@ def main() -> None:
         if repo.fork and getattr(repo, "parent", None):
             upstream_url = repo.parent.html_url
 
-        repos_by_category[category].append((repo.full_name, upstream_url))
+        git_uri = f"git@github.com:{repo.full_name}"
+        repo_name = repo.full_name.split("/")[-1]
+        path_val = f"{category}/{repo_name}" if category else repo_name
+
+        repos_by_category[category].append((git_uri, path_val, upstream_url))
         print("[REPO]", repo.full_name)
+
+    # Append missing external/custom repositories
+    for repo_data in MISSING_REPOSITORIES:
+        git_uri = str(repo_data["uri"])
+        path_val = str(repo_data["directory"])
+        upstream_url = repo_data["upstream_uri"]
+
+        category = path_val.split("/")[0] if "/" in path_val else "misc"
+        repos_by_category[category].append((git_uri, path_val, upstream_url))
+        print("[MISSING REPO]", git_uri)
 
     # Generate YAML file
     out_path = SRC_DIR / "batchfetch.yaml"
