@@ -98,8 +98,8 @@
       tooltip-short-delay 0.08)
 
 ;; TODO is this good?
-(setq mouse-wheel-progressive-speed nil ; disable acceleration of scrolling
-      )
+;; disable acceleration of scrolling
+(setq mouse-wheel-progressive-speed nil)
 
 (setq inhibit-mouse-button-numbers '(1 2 3)
       pixel-scroll-precision-use-momentum nil)
@@ -434,11 +434,15 @@ Positive COUNT moves backward, negative COUNT moves forward."
   :type exclusive
   (let ((cnt (or count 1)))
     (evil-signal-at-bob-or-eob (- (or count 1)))
-    (if (and (fboundp 'treesit-parser-list)
-             (treesit-parser-list))
-        (progn
-          (my-evil-nav-treesit-move-defun (- cnt)))
-      (evil-forward-beginning 'evil-defun count))
+    (cond
+     ((and (bound-and-true-p outline-indent-minor-mode)
+           (fboundp 'outline-indent-forward-same-level))
+      (outline-indent-forward-same-level cnt))
+     ((and (fboundp 'treesit-parser-list)
+           (treesit-parser-list))
+      (my-evil-nav-treesit-move-defun (- cnt)))
+     (t
+      (evil-forward-beginning 'evil-defun count)))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 
@@ -448,11 +452,15 @@ Positive COUNT moves backward, negative COUNT moves forward."
   :type exclusive
   (let ((cnt (or count 1)))
     (evil-signal-at-bob-or-eob (- (or count 1)))
-    (if (and (fboundp 'treesit-parser-list)
-             (treesit-parser-list))
-        (progn
-          (my-evil-nav-treesit-move-defun cnt))
-      (evil-backward-beginning 'evil-defun count))
+    (cond
+     ((and (bound-and-true-p outline-indent-minor-mode)
+           (fboundp 'outline-indent-backward-same-level))
+      (outline-indent-backward-same-level cnt))
+     ((and (fboundp 'treesit-parser-list)
+           (treesit-parser-list))
+      (my-evil-nav-treesit-move-defun cnt))
+     (t
+      (evil-backward-beginning 'evil-defun count)))
     (unless (evil-operator-state-p)
       (my-evil-nav-post-jump))))
 

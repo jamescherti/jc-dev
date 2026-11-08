@@ -508,7 +508,7 @@ at the same level."
   ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
   ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
   ;; (custom-set-faces `(org-block-end-line ((t (:height 0.6 :extend t)))))
-  )
+  (hl-line-mode 1))
 
 (add-hook 'org-mode-hook #'my-org-mode-setup)
 

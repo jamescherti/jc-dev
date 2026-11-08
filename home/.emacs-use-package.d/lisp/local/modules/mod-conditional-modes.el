@@ -148,8 +148,8 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
         (string= base-name ".my-dir-locals.el")
         (string= base-name "straight-profile.el")
         (string-prefix-p "=template=" base-name)
-        (string-match-p "/\\.cookiecutter/" full-path)
-        (string-match-p "/cookiecutter\\./" full-path)
+        (string-match-p "\\.cookiecutter" full-path)
+        (string-match-p "cookiecutter\\." full-path)
         (string-suffix-p ".ebuild" base-name))))
 
 ;; Evaluate .my-dir-locals.el
