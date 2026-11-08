@@ -1097,9 +1097,9 @@ Keep candidates absent from the buffer last in their original order."
                     (mapcar
                      (lambda (candidate)
                        (let ((regexp
-                              (concat "\\_<"
+                              (concat (if (string-match-p "\\`\\(?:\\sw\\|\\s_\\)" candidate) "\\_<" "")
                                       (regexp-quote candidate)
-                                      "\\_>"))
+                                      (if (string-match-p "\\(?:\\sw\\|\\s_\\)\\'" candidate) "\\_>" "")))
                              (distance most-positive-fixnum))
                          (goto-char beg)
                          (when (re-search-backward regexp nil t)
@@ -1150,7 +1150,7 @@ the completion region's beginning marker, end marker and candidates."
                  (save-excursion
                    (backward-char 1)
                    (looking-at-p
-                    (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_"))))
+                    (or dabbrev-abbrev-char-regexp "\\sw\\|\\s_\\|[$@%#]"))))
         (let ((result (cape-dabbrev)))
           (when result
             (let* ((beg (copy-marker (nth 0 result)))
@@ -1199,7 +1199,6 @@ Candidates absent from the accessible source buffer follow."
 (evil-define-key 'insert 'global
   (kbd "C-p") 'my-cape-dabbrev-backward
   (kbd "C-n") 'my-cape-dabbrev-forward)
-
 ;;; cape: evil
 
 (defun my-minibuffer-setup-dabbrev-evil ()
