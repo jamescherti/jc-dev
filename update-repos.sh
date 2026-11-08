@@ -120,9 +120,10 @@ prepare-dependencies() {
       "$SRC_DIR/python/batchfetch/"
   fi
 
-  rsync -a \
-    "$SCRIPT_DIR/home/src/batchfetch.yaml" \
-    "$SRC_DIR/batchfetch.yaml"
+  # TODO auto generate
+  # rsync -a \
+  #   "$SCRIPT_DIR/home/src/batchfetch.yaml" \
+  #   "$SRC_DIR/batchfetch.yaml"
 
   BF_OR_GIT_BRANCH=main
   bf-or-git "$SRC_DIR/dotfiles/jc-dev"

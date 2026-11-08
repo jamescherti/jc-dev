@@ -138,12 +138,21 @@ config-pip-packages() {
   #
   # --no-deps: Causes pip to skip resolving and verifying dependencies
   # altogether.
-  pip install "${pip_opts[@]}" --no-build-isolation --no-deps \
-    "$MY_PYTHON_PACKAGES_PATH/pathaction" \
-    "$MY_PYTHON_PACKAGES_PATH/ultyas" \
-    "$MY_PYTHON_PACKAGES_PATH/git-commitflow" \
-    "$MY_PYTHON_PACKAGES_PATH/git-smartmv" \
+  local list_pip_pkg_path=(
+    "$MY_PYTHON_PACKAGES_PATH/pathaction"
+    "$MY_PYTHON_PACKAGES_PATH/ultyas"
+    "$MY_PYTHON_PACKAGES_PATH/git-commitflow"
+    "$MY_PYTHON_PACKAGES_PATH/git-smartmv"
     "$MY_PYTHON_PACKAGES_PATH/ansible-cleanup"
+  )
+
+  local pip_pkg_path
+  for pip_pkg_path in "${list_pip_pkg_path[@]}"; do
+    git -C "$pip_pkg_path" checkout develop
+  done
+
+  pip install "${pip_opts[@]}" --no-build-isolation --no-deps \
+    "${list_pip_pkg_path[@]}"
   # "$MY_PYTHON_PACKAGES_PATH/caffeine-aw" \
   # "$MY_PYTHON_PACKAGES_PATH/elispcomp"
   # "$MY_PYTHON_PACKAGES_PATH/git-smartpull"

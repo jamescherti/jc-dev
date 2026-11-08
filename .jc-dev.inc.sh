@@ -29,7 +29,7 @@
 # shellcheck disable=SC2034
 SRC_DIR="$HOME/src"
 MY_PYTHON_PACKAGES_PATH="$HOME/src/python"
-GIT_PULL_WORKERS=6
+GIT_PULL_WORKERS=4
 
 GIT_REXEC_EXCLUDES=(
   "--exclude" "$HOME/src/forks"
