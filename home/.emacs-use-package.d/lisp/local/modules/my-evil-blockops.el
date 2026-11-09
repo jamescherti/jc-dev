@@ -161,9 +161,9 @@ _ARG specifies the number of levels to demote when passed as a prefix argument."
       (if node
           (let ((start (treesit-node-start node))
                 (end (treesit-node-end node)))
-            ;; Use 'line to force Evil into visual-line mode (like pressing
-            ;; 'V')
-            (evil-visual-select start (max start (1- end)) 'line 1))
+            ;; Set direction to -1 so the cursor (point) stays at `start`
+            ;; and the mark goes to `end`.
+            (evil-visual-select start (max start (1- end)) 'line -1))
         (user-error "No valid tree-sitter node found at point"))))
 
    ((and (derived-mode-p 'org-mode)
