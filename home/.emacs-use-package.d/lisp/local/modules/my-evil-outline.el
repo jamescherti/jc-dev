@@ -125,7 +125,13 @@ ARG specifies how many sibling headings to advance forward."
   (interactive "p")
   (cond
    ((derived-mode-p 'prog-mode)
-    (let ((cmd (lookup-key evil-normal-state-map (kbd "]]"))))
+    ;; Check local normal state map and motion state map in addition to
+    ;; `evil-normal-state-map' because Evil binds `]]' in `evil-motion-state-map'
+    ;; by default.
+    (let ((cmd (or (and (bound-and-true-p evil-normal-state-local-map)
+                        (lookup-key evil-normal-state-local-map (kbd "]]")))
+                   (lookup-key evil-normal-state-map (kbd "]]"))
+                   (lookup-key evil-motion-state-map (kbd "]]")))))
       (if (commandp cmd)
           (call-interactively cmd)
         (user-error "No default command bound to ]] in prog-mode"))))
@@ -151,7 +157,13 @@ ARG specifies how many sibling headings to retreat backward."
   (interactive "p")
   (cond
    ((derived-mode-p 'prog-mode)
-    (let ((cmd (lookup-key evil-normal-state-map (kbd "[[\\"))))
+    ;; Fix invalid key sequence `"[[\\"' to `"[["' and fall back to
+    ;; `evil-normal-state-local-map' and `evil-motion-state-map' where Evil
+    ;; defines `[[' by default.
+    (let ((cmd (or (and (bound-and-true-p evil-normal-state-local-map)
+                        (lookup-key evil-normal-state-local-map (kbd "[[")))
+                   (lookup-key evil-normal-state-map (kbd "[["))
+                   (lookup-key evil-motion-state-map (kbd "[[")))))
       (if (commandp cmd)
           (call-interactively cmd)
         (user-error "No default command bound to [[ in prog-mode"))))
@@ -224,6 +236,9 @@ ARG specifies how many sibling headings to retreat backward."
              (fboundp 'outline-end-of-subtree)
              (fboundp 'outline-end-of-heading)
              (fboundp 'outline-hide-subtree))
+    ;; Default `arg' to 1 when omitted in non-interactive calls so `(> arg 0)'
+    ;; and `(abs arg)' do not fail with a wrong-type-argument error.
+    (setq arg (or arg 1))
     ;; TODO: PATCH3: Restore column
     (let ((column (current-column)))
       (unwind-protect
@@ -340,11 +355,13 @@ This function ensures the last blank line is included, even when
 addressing the issue where the cursor might be reset after the operation.
 ORIG-FUN is the function ARGS are the arguments."
   (interactive "p")
+  ;; Pass `'(1)' instead of `1' as fallback to `apply', which requires its last
+  ;; argument to be a list when `args' is nil.
   (if (bound-and-true-p outline-minor-mode)
-      (apply orig-fun (or args 1))
+      (apply orig-fun (or args '(1)))
     (let ((column (current-column)))
       (unwind-protect
-          (apply orig-fun (or args 1))
+          (apply orig-fun (or args '(1)))
         (move-to-column column)))))
 
 (with-eval-after-load 'outline
