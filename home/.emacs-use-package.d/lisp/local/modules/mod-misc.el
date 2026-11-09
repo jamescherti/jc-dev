@@ -1934,7 +1934,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             (lambda ()
               ;; For some reason, ibuffer-truncate-lines doesn't work (TODO)
               (my-disable-fringe-truncation-arrow)
-              (toggle-truncate-lines 1)))
+              ;; (toggle-truncate-lines 1)
+              ))
 
   (add-hook 'ibuffer-mode-hook
             (lambda ()

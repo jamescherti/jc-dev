@@ -854,8 +854,9 @@ ITEMS is the flattened list of Imenu candidates."
   ;; and the hyphen after n are rendered as highlighted glyphs.
   (setq-local nobreak-char-display nil)
 
-  (let ((inhibit-message t))
-    (toggle-truncate-lines 0)))
+  ;; (let ((inhibit-message t))
+  ;;   (toggle-truncate-lines 0))
+  (visual-line-mode 1))
 
 (add-hook 'markdown-mode-hook #'my-setup-markdown-mode)
 (add-hook 'markdown-ts-mode-hook 'my-setup-markdown-mode)

@@ -442,13 +442,18 @@ DEC is the amount to decrease the text scale."
                 (with-selected-window win
                   (recenter))))))))))
 
+(defun my-toggle-visual-mode ()
+  "Toggle visual line -mode."
+  ;; (toggle-truncate-lines)
+  (visual-line-mode 'toggle))
+
 (defun mod-ediff--setup-ediff-auto-truncate ()
   "Apply the synchronization advice to `toggle-truncate-lines'."
-  (advice-add 'toggle-truncate-lines :after #'mod-ediff--sync-truncate-advice))
+  (advice-add 'my-toggle-visual-mode :after #'mod-ediff--sync-truncate-advice))
 
 (defun mod-ediff--ediff-teardown-auto-truncate ()
   "Remove the synchronization advice when the session terminates."
-  (advice-remove 'toggle-truncate-lines #'mod-ediff--sync-truncate-advice))
+  (advice-remove 'my-toggle-visual-mode #'mod-ediff--sync-truncate-advice))
 
 (add-hook 'ediff-prepare-buffer-hook #'mod-ediff--setup-ediff-auto-truncate)
 (add-hook 'ediff-cleanup-hook #'mod-ediff--ediff-teardown-auto-truncate)

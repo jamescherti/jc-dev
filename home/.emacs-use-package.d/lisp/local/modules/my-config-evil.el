@@ -154,15 +154,17 @@ _ARG is the ignored optional prefix argument from `evil-visual-highlight'."
 (defun evilbuffer-toggle-truncate-line ()
   "Toggle truncate line."
   (interactive)
-  (if truncate-lines
-      ;; When the text is wrapped
-      (progn
-        (let ((inhibit-message t))
-          ;; Wrap
-          (toggle-truncate-lines 0)))
-    (let ((inhibit-message t))
-      ;; Truncate
-      (toggle-truncate-lines 1))))
+  (visual-line-mode 'toggle)
+  ;; (if truncate-lines
+  ;;     ;; When the text is wrapped
+  ;;     (progn
+  ;;       (let ((inhibit-message t))
+  ;;         ;; Wrap
+  ;;         (toggle-truncate-lines 0)))
+  ;;   (let ((inhibit-message t))
+  ;;     ;; Truncate
+  ;;     (toggle-truncate-lines 1)))
+  )
 
 (defun evilbuffer-erase ()
   "Delete the entire contents of the current buffer, even if it is read-only."
@@ -1842,8 +1844,11 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   ;; (goto-address-mode 1)
   (my-disable-fringe-truncation-arrow)
 
-  (let ((inhibit-message t))
-    (toggle-truncate-lines 0)))
+  ;; (let ((inhibit-message t))
+  ;;   (visual-line-mode 1)
+  ;;   ;; (toggle-truncate-lines 0)
+  ;;   )
+  )
 
 (add-hook 'quick-sdcv-mode-hook 'my-setup-quick-sdcv)
 (add-hook 'quick-sdcv-mode-hook 'goto-address-mode)

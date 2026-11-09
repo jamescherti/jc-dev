@@ -504,6 +504,8 @@ at the same level."
   ;; It makes o not auto indent after a bullet list like * or -
   (setq-local evil-auto-indent nil)
 
+  (visual-line-mode 1)
+
   ;; (setq-local indent-line-function nil)
   ;; (custom-set-faces `(org-block ((t (:height 0.7)))))
   ;; (custom-set-faces `(org-block-begin-line ((t (:height 0.6)))))
