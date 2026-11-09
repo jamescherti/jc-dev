@@ -418,8 +418,6 @@ at the same level."
 ;;; Other settings
 
 (with-eval-after-load 'org
-
-
   (unless noninteractive
     (define-key org-mode-map (kbd "C-c C-e") 'org-babel-execute-maybe)
     (define-key org-mode-map (kbd "C-c C-c") 'org-edit-src-code)
