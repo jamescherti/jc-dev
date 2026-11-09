@@ -418,33 +418,9 @@ at the same level."
 ;;; Other settings
 
 (with-eval-after-load 'org
-  ;; The function inserts a new heading at the current cursor position, and
-  ;; prepends it with "TODO " if activated while on a "TODO" task, thus creating
-  ;; a new to-do item. In addition to that, for those utilizing evil-mode the
-  ;; function transitions the user into insert mode right after the "TODO "
-  ;; insertion.
-  (defun my-org-insert-heading-respect-content-and-prepend-todo ()
-    "Insert a new org heading respecting content and prepend it with TODO.
-  Additionally, ensure entry into insert state when evil-mode is active."
-    (interactive)
-    (when (and (fboundp 'org-entry-is-todo-p)
-               (fboundp 'org-entry-is-done-p)
-               (fboundp 'org-insert-heading-respect-content))
-      (let ((entry-is-todo (org-entry-is-todo-p))
-            (entry-is-done (org-entry-is-done-p)))
-        (when (and (bound-and-true-p evil-local-mode)
-                   (fboundp 'evil-insert-state))
-          (evil-insert-state))
-        (org-insert-heading-respect-content)
-        (when (or entry-is-todo entry-is-done)
-          (just-one-space)
-          (insert "TODO")
-          (just-one-space)))))
+
 
   (unless noninteractive
-    (define-key org-mode-map (kbd "C-<return>")
-                'my-org-insert-heading-respect-content-and-prepend-todo)
-
     (define-key org-mode-map (kbd "C-c C-e") 'org-babel-execute-maybe)
     (define-key org-mode-map (kbd "C-c C-c") 'org-edit-src-code)
     (define-key org-mode-map (kbd "C-c C-d") 'my-org-toggle-todo)

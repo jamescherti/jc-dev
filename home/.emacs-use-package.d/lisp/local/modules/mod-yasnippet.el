@@ -21,6 +21,7 @@
         (progn
           (yas-expand-snippet (buffer-string) (point-min) (point-max))
           (when (and (not (bobp))
+                     (bound-and-true-p evil-local-mode)
                      (fboundp 'evil-insert-state)
                      (not (zerop (buffer-size))))
             (evil-insert-state)))

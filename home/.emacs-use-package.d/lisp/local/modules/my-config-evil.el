@@ -187,7 +187,8 @@ _ARG is the ignored optional prefix argument from `evil-visual-highlight'."
                         'markdown-mode)
         (insert "# ")))
 
-      (evil-insert-state)))))
+      (when (bound-and-true-p evil-local-mode)
+        (evil-insert-state))))))
 
 (defun my-clear-highlights ()
   "Clear highlight and related state in the buffer."
@@ -360,16 +361,18 @@ _ARG is the ignored optional prefix argument from `evil-visual-highlight'."
 (defun lightemacs-evil-shift-right ()
   "Shift the selected region to the right, preserving the selection."
   (interactive)
-  (evil-shift-right evil-visual-beginning evil-visual-end 1 nil)
-  (evil-normal-state)
-  (evil-visual-restore))
+  (when (bound-and-true-p evil-local-mode)
+    (evil-shift-right evil-visual-beginning evil-visual-end 1 nil)
+    (evil-normal-state)
+    (evil-visual-restore)))
 
 (defun lightemacs-evil-shift-left ()
   "Shift the selected region to the left, preserving the selection."
   (interactive)
-  (evil-shift-left evil-visual-beginning evil-visual-end 1 nil)
-  (evil-normal-state)
-  (evil-visual-restore))
+  (when (bound-and-true-p evil-local-mode)
+    (evil-shift-left evil-visual-beginning evil-visual-end 1 nil)
+    (evil-normal-state)
+    (evil-visual-restore)))
 (evil-define-key 'visual 'global
   (kbd ">") 'lightemacs-evil-shift-right
   (kbd "<") 'lightemacs-evil-shift-left)
@@ -1491,7 +1494,8 @@ search direction (default: \='forward)."
   (interactive)
   (when (fboundp 'vterm-reset-cursor-point)
     (vterm-reset-cursor-point)
-    (evil-insert-state)))
+    (when (bound-and-true-p evil-local-mode)
+      (evil-insert-state))))
 
 (defun my-vterm-direct-paste ()
   "Send the clipboard contents directly to the vterm process."

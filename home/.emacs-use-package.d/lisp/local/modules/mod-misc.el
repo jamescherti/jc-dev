@@ -3401,7 +3401,8 @@ ARGS - the arguments passed to the original function"
     (vterm-reset-cursor-point))
 
   ;; Force Evil into insert state
-  (when (fboundp 'evil-insert-state)
+  (when (and (bound-and-true-p evil-local-mode)
+             (fboundp 'evil-insert-state))
     (evil-insert-state)))
 
 (add-hook 'shell-pop-in-after-hook #'my-shell-pop-evil-insert-state)
@@ -5875,7 +5876,7 @@ on text following the cursor."
 
 ;;; require blocks ops
 
-(require 'my-evil-blocks-ops)
+(require 'my-evil-blockops)
 
 ;;; DISABLED: desktop
 

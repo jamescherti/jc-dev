@@ -1,4 +1,4 @@
-;;; my-evil-blocks-ops.el --- my-evil-blocks-ops -*- lexical-binding: t -*-
+;;; my-evil-blockops.el --- my-evil-blockops -*- lexical-binding: t -*-
 
 ;; Author: James Cherti
 ;; URL: https://github.com/jamescherti/jc-dev
@@ -151,35 +151,6 @@ _ARG specifies the number of levels to demote when passed as a prefix argument."
    (t
     (user-error "No supported outline selection command is available"))))
 
-(defun my-insert-heading ()
-  "Insert a new line or heading at current level and switch to insert state."
-  (interactive)
-  (cond
-   ((and (derived-mode-p 'org-mode)
-         (fboundp 'org-insert-heading-respect-content))
-    (call-interactively #'org-insert-heading-respect-content)
-    (when (fboundp 'evil-insert-state)
-      (evil-insert-state)))
-
-   ((and (or (bound-and-true-p outline-indent-minor-mode)
-             (derived-mode-p 'python-ts-mode)
-             (string-suffix-p "-ts-mode" (symbol-name major-mode))
-             (and (fboundp 'treesit-parser-list)
-                  (treesit-parser-list)))
-         (fboundp 'outline-indent-insert-heading))
-    (outline-indent-insert-heading)
-    (when (fboundp 'evil-insert-state)
-      (evil-insert-state)))
-
-   ((and (bound-and-true-p outline-minor-mode)
-         (fboundp 'outline-insert-heading))
-    (call-interactively #'outline-insert-heading)
-    (when (fboundp 'evil-insert-state)
-      (evil-insert-state)))
-
-   (t
-    (user-error "No supported outline heading insertion command is available"))))
-
 (defun my-outline-forward-same-level (&optional _arg)
   "Move forward to next sibling heading.
 _ARG specifies how many sibling headings to advance forward."
@@ -262,8 +233,62 @@ _ARG specifies how many sibling headings to retreat backward."
   (kbd "gj")  'my-outline-forward-same-level
   (kbd "gk")  'my-outline-backward-same-level)
 
+;;; Insert heading
+
+;; The function inserts a new heading at the current cursor position, and
+;; prepends it with "TODO " if activated while on a "TODO" task, thus creating a
+;; new to-do item. In addition to that, for those utilizing evil-mode the
+;; function transitions the user into insert mode right after the "TODO "
+;; insertion.
+(defun my-org-insert-heading-respect-content-and-prepend-todo ()
+  "Insert a new org heading respecting content and prepend it with TODO.
+Additionally, ensure entry into insert state when `evil-mode' is active."
+  (interactive)
+  (when (and (fboundp 'org-entry-is-todo-p)
+             (fboundp 'org-entry-is-done-p)
+             (fboundp 'org-insert-heading-respect-content))
+    (let ((entry-is-todo (org-entry-is-todo-p))
+          (entry-is-done (org-entry-is-done-p)))
+      (when (and (bound-and-true-p evil-local-mode)
+                 (fboundp 'evil-insert-state))
+        (evil-insert-state))
+      (org-insert-heading-respect-content)
+      (when (or entry-is-todo entry-is-done)
+        (just-one-space)
+        (insert "TODO")
+        (just-one-space)))))
+
+(defun my-evil-blockops-insert-heading ()
+  "Insert a new line or heading at current level and switch to insert state."
+  (interactive)
+  (let ((prev-point (point)))
+    (unwind-protect
+        (cond
+         ((derived-mode-p 'org-mode)
+          (my-org-insert-heading-respect-content-and-prepend-todo))
+
+         ((and (bound-and-true-p outline-indent-minor-mode)
+               (fboundp 'outline-indent-insert-heading))
+          (call-interactively #'outline-indent-insert-heading))
+
+         ((and (bound-and-true-p outline-minor-mode)
+               (fboundp 'outline-insert-heading))
+          (call-interactively #'outline-insert-heading))
+
+         (t
+          (user-error "No outline heading insertion command is available")))
+      ;; Switch to insert mode
+      (when (/= prev-point (point))
+        (when (and (bound-and-true-p evil-local-mode)
+                   (fboundp 'evil-insert-state))
+          (evil-insert-state))))))
+
 (evil-define-key '(normal insert) my-intercept-mode-map
-  (kbd "C-<return>") 'my-insert-heading)
+  (kbd "C-<return>") 'my-evil-blockops-insert-heading)
+
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-<return>")
+              'my-org-insert-heading-respect-content-and-prepend-todo))
 
 ;; (with-eval-after-load 'outline-indent
 ;;   (evil-define-key 'normal outline-mode-map (kbd "]]") nil)
@@ -438,7 +463,7 @@ heading."
 ;;; Navigation
 
 ;; M-[ and M-]: Previous and next section
-(defun my-evil-block-ops--nav-treesit-move-defun (count)
+(defun my-evil-blockops--nav-treesit-move-defun (count)
   "Move COUNT defuns using tree-sitter, falling back to buffer boundaries.
 Positive COUNT moves backward, negative COUNT moves forward."
   (when (fboundp 'treesit-beginning-of-defun)
@@ -450,20 +475,16 @@ Positive COUNT moves backward, negative COUNT moves forward."
             (goto-char (point-max))
           (goto-char (point-min)))))))
 
-(defun my-evil-block-ops--nav-post-jump ()
+(defun my-evil-blockops--nav-post-jump ()
   "Open folds, recenter window, and pulse the line after an interactive jump."
   (unless (evil-operator-state-p)
-    ;; (when (and (invisible-p (point))
-    ;;            (fboundp 'evil-open-fold-rec))
-    ;;   (ignore-errors (evil-open-fold-rec)))
-
     ;; Guard against void-function errors if the package providing this is absent.
     (lightemacs-recenter-maybe)
 
     (when (fboundp 'pulse-momentary-highlight-one-line)
       (pulse-momentary-highlight-one-line (point)))))
 
-(defun my-evil-block-ops--nav-section-core (count is-backward)
+(defun my-evil-blockops--nav-section-core (count is-backward)
   "Core logic for moving sections forward or backward.
 COUNT is the absolute number of sections to move.
 IS-BACKWARD is non-nil for backward movement, nil for forward."
@@ -478,8 +499,8 @@ IS-BACKWARD is non-nil for backward movement, nil for forward."
      ((and (fboundp 'my-tree-sitter-p)
            (my-tree-sitter-p)
            (derived-mode-p 'prog-mode)
-           (fboundp 'my-evil-block-ops--nav-treesit-move-defun))
-      (my-evil-block-ops--nav-treesit-move-defun signed-count))
+           (fboundp 'my-evil-blockops--nav-treesit-move-defun))
+      (my-evil-blockops--nav-treesit-move-defun signed-count))
 
      ;; Outline indent minor mode
      ((and (bound-and-true-p outline-indent-minor-mode)
@@ -496,22 +517,22 @@ IS-BACKWARD is non-nil for backward movement, nil for forward."
         (evil-forward-beginning 'evil-defun count))))
 
     (unless (evil-operator-state-p)
-      (when (fboundp 'my-evil-block-ops--nav-post-jump)
-        (my-evil-block-ops--nav-post-jump)))))
+      (when (fboundp 'my-evil-blockops--nav-post-jump)
+        (my-evil-blockops--nav-post-jump)))))
 
-(evil-define-motion my-evil-block-ops-nav-forward-section (count)
+(evil-define-motion my-evil-blockops-nav-forward-section (count)
   "Move the cursor to the beginning of the COUNT-th next section.
 COUNT specifies the number of sections to advance forward."
   :jump t
   :type exclusive
-  (my-evil-block-ops--nav-section-core (or count 1) nil))
+  (my-evil-blockops--nav-section-core (or count 1) nil))
 
-(evil-define-motion my-evil-block-ops-nav-backward-section (count)
+(evil-define-motion my-evil-blockops-nav-backward-section (count)
   "Move the cursor to the beginning of the COUNT-th previous section.
 COUNT specifies the number of sections to move backward."
   :jump t
   :type exclusive
-  (my-evil-block-ops--nav-section-core (or count 1) t))
+  (my-evil-blockops--nav-section-core (or count 1) t))
 
 (when (or (display-graphic-p)
           (daemonp))
@@ -521,14 +542,14 @@ COUNT specifies the number of sections to move backward."
   ;; directly highjacks the prefix of these incoming messages, breaking terminal
   ;; features and dumping coordinate data into the buffer.
   (evil-define-key '(insert motion) 'global (kbd "M-[")
-    'my-evil-block-ops-nav-backward-section))
+    'my-evil-blockops-nav-backward-section))
 
 (evil-define-key '(insert motion) 'global (kbd "M-]")
-  'my-evil-block-ops-nav-forward-section)
+  'my-evil-blockops-nav-forward-section)
 
 (evil-define-key '(normal) my-intercept-mode-map
-  (kbd "[[") 'my-evil-block-ops-nav-backward-section
-  (kbd "]]") 'my-evil-block-ops-nav-forward-section)
+  (kbd "[[") 'my-evil-blockops-nav-backward-section
+  (kbd "]]") 'my-evil-blockops-nav-forward-section)
 
 (evil-define-key '(motion) my-intercept-mode-map
   (kbd "{") 'evil-backward-paragraph
@@ -536,11 +557,11 @@ COUNT specifies the number of sections to move backward."
 
 ;;; Provide
 
-(provide 'my-evil-blocks-ops)
+(provide 'my-evil-blockops)
 
 ;; Local variables:
 ;; env-allow-syntax-checker-package-lint: nil
 ;; byte-compile-warnings: (not free-vars)
 ;; End:
 
-;;; my-evil-blocks-ops.el ends here
+;;; my-evil-blockops.el ends here
