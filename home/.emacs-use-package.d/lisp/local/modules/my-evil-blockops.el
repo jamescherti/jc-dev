@@ -33,11 +33,18 @@
 
 (lightemacs-use-package combobulate
   :commands (combobulate
-             combobulate-mode)
+             combobulate-mode
+             combobulate-drag-up
+             combobulate-drag-down
+             combobulate-mark-node-dwim
+             combobulate-navigate-next
+             combobulate-navigate-previous)
   :init
   ;; (with-eval-after-load 'evil
   ;;   (evil-define-key 'normal 'global (kbd "<leader>co") #'combobulate))
-  (eldoc-add-command-completions "combobulate-"))
+  (eldoc-add-command-completions "combobulate-")
+  :config
+  (require 'combobulate-manipulation))
 
 ;;; Combobulate and tree-sitter integration
 
@@ -123,14 +130,27 @@ _ARG specifies the number of levels to demote when passed as a prefix argument."
    (t
     (user-error "No supported outline demotion command is available"))))
 
-(defun my-select-subtree ()
+(defun my-evil-blockops-select-block ()
   "Select the current subtree or block according to the active mode."
   (interactive)
   (cond
    ;; Support Combobulate node selection for tree-sitter modes.
-   ((and (my-combobulate-active-p)
-         (fboundp 'combobulate-mark-node-dwim))
-    (call-interactively #'combobulate-mark-node-dwim))
+   ;; ((and (my-combobulate-active-p)
+   ;;       (fboundp 'combobulate-mark-node-dwim)
+   ;;       (fboundp 'evil-visual-select))
+   ;;  (let ((bounds
+   ;;         (save-mark-and-excursion
+   ;;           (unless mark-active
+   ;;             (set-marker (mark-marker) nil))
+   ;;           (call-interactively #'combobulate-mark-node-dwim)
+   ;;           (let ((anchor (mark t))
+   ;;                 (cursor (point)))
+   ;;             (unless (and anchor (/= anchor cursor))
+   ;;               (user-error "Combobulate did not mark a nonempty node"))
+   ;;             (list (min anchor cursor) (max anchor cursor)
+   ;;                   'inclusive (if (< cursor anchor) -1 1))))))
+   ;;    (apply #'evil-visual-select bounds)
+   ;;    (setq deactivate-mark nil)))
 
    ((and (derived-mode-p 'org-mode)
          (fboundp 'org-mark-subtree))
@@ -158,8 +178,8 @@ _ARG specifies how many sibling headings to advance forward."
   (cond
    ;; Support Combobulate sibling navigation for tree-sitter modes.
    ((and (my-combobulate-active-p)
-         (fboundp 'combobulate-navigate-sibling-forward))
-    (call-interactively #'combobulate-navigate-sibling-forward))
+         (fboundp 'combobulate-navigate-next))
+    (call-interactively #'combobulate-navigate-next))
 
    ((derived-mode-p 'prog-mode)
     ;; Check local normal state map and motion state map in addition to
@@ -195,8 +215,8 @@ _ARG specifies how many sibling headings to retreat backward."
   (cond
    ;; Support Combobulate sibling navigation for tree-sitter modes.
    ((and (my-combobulate-active-p)
-         (fboundp 'combobulate-navigate-sibling-backward))
-    (call-interactively #'combobulate-navigate-sibling-backward))
+         (fboundp 'combobulate-navigate-previous))
+    (call-interactively #'combobulate-navigate-previous))
 
    ((derived-mode-p 'prog-mode)
     ;; Fix invalid key sequence `"[[\\"' to `"[["' and fall back to
@@ -229,7 +249,7 @@ _ARG specifies how many sibling headings to retreat backward."
 (evil-define-key '(normal) my-intercept-mode-map
   (kbd "M-h") 'my-promote-subtree
   (kbd "M-l") 'my-demote-subtree
-  (kbd "gV")  'my-select-subtree
+  (kbd "gV")  'my-evil-blockops-select-block
   (kbd "gj")  'my-outline-forward-same-level
   (kbd "gk")  'my-outline-backward-same-level)
 
@@ -406,7 +426,16 @@ heading."
    ;; Support Combobulate node dragging for tree-sitter modes.
    ((and (my-combobulate-active-p)
          (fboundp 'combobulate-drag-up))
-    (call-interactively #'combobulate-drag-up))
+    ;; In YAML, starting mid-line can move only the current line down instead of
+    ;; the entire block.
+    (when (derived-mode-p 'yaml-ts-mode)
+      (beginning-of-line))
+    (let ((point (point)))
+      (condition-case err
+          (call-interactively #'combobulate-drag-up)
+        (error
+         (goto-char point)
+         (user-error "%s" (error-message-string err))))))
 
    ((and (derived-mode-p 'org-mode)
          (fboundp 'org-move-subtree-up))
@@ -433,7 +462,16 @@ heading."
   (cond
    ;; Support Combobulate node dragging for tree-sitter modes.
    ((and (my-combobulate-active-p)
-         (fboundp 'combobulate-drag-down))
+         (let ((point (point)))
+           (condition-case err
+               (call-interactively #'combobulate-drag-down)
+             (error
+              (goto-char point)
+              (user-error "%s" (error-message-string err))))))
+    ;; In YAML, starting mid-line can move only the current line down instead of
+    ;; the entire block.
+    (when (derived-mode-p 'yaml-ts-mode)
+      (beginning-of-line))
     (call-interactively #'combobulate-drag-down))
 
    ((and (derived-mode-p 'org-mode)

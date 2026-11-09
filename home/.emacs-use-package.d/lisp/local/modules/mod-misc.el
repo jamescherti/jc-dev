@@ -300,6 +300,7 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 ;;; Scroll
 
 (setq
+ ;; TODO lightemacs. It fixes bugs in tree sitter, maybe
  ;; redisplay-skip-fontification-on-input nil
 
  ;; Here is exactly how (setq scroll-conservatively 9) works:
@@ -337,9 +338,9 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 
 ;; Disable the optimization locally for dired to guarantee directory
 ;; fontification
-(add-hook 'dired-mode-hook
-          (lambda ()
-            (setq-local redisplay-skip-fontification-on-input nil)))
+;; (add-hook 'dired-mode-hook
+;;           (lambda ()
+;;             (setq-local redisplay-skip-fontification-on-input nil)))
 
 ;; The number of lines to try scrolling a window by when point moves out.
 ;; If that fails to bring point back on frame, point is centered instead.

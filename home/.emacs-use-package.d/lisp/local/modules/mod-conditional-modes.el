@@ -244,6 +244,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                 ;; All modes
                 (when (and (fboundp 'apheleia-mode)
                            (derived-mode-p
+                            'emacs-lisp-mode
                             'python-mode
                             'python-ts-mode
                             'php-ts-mode
