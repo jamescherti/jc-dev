@@ -36,7 +36,7 @@
              combobulate-mode
              combobulate-drag-up
              combobulate-drag-down
-             combobulate-mark-node-dwim
+             ;; combobulate-mark-node-dwim
              combobulate-navigate-next
              combobulate-navigate-previous)
   :init
@@ -144,25 +144,26 @@ _ARG specifies the number of levels to demote when passed as a prefix argument."
   "Select the current subtree or block according to the active mode."
   (interactive)
   (cond
-   ;; Support block selection natively via Tree-sitter to avoid Combobulate's
-   ;; interactive UI overlays and transient maps locking up the state.
+   ;; Support block selection natively via Tree-sitter.
    ((and (my-combobulate-active-p)
          (fboundp 'treesit-node-at)
          (fboundp 'evil-visual-select))
-    ;; In YAML, starting mid-line can move only the current line down instead
-    ;; of the entire block.
-    ;; (when (derived-mode-p 'yaml-ts-mode)
-    ;;   (beginning-of-line))
-
-    (let ((node (treesit-node-at (point))))
-      ;; Move up to the first meaningful structural node (skips leaf brackets/punctuation)
+    (let* ((pt (save-excursion
+                 ;; Go to the beginning of the line and find the first
+                 ;; non-whitespace character to ensure we target the node, not
+                 ;; the indentation.
+                 (back-to-indentation)
+                 (point)))
+           (node (treesit-node-at pt)))
+      ;; Move up to the first meaningful structural node
       (while (and node (not (treesit-node-check node 'named)))
         (setq node (treesit-node-parent node)))
       (if node
           (let ((start (treesit-node-start node))
                 (end (treesit-node-end node)))
-            ;; Evil inclusive selection expects the last character position
-            (evil-visual-select start (max start (1- end)) 'inclusive 1))
+            ;; Use 'line to force Evil into visual-line mode (like pressing
+            ;; 'V')
+            (evil-visual-select start (max start (1- end)) 'line 1))
         (user-error "No valid tree-sitter node found at point"))))
 
    ((and (derived-mode-p 'org-mode)
