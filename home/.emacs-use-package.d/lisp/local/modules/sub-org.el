@@ -229,7 +229,7 @@
 ;;
 ;; Setting this to t will fold  stuff
 ;; (setq org-hide-block-startup nil) ; default nil
-(setq org-startup-folded nil)
+(setq org-startup-folded t)
 
 ;; Allow resizing images and prevent them from defaulting to actual width.
 (setq org-image-actual-width nil)
