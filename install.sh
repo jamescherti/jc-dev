@@ -302,8 +302,10 @@ copy_emacs_pre_commit_files() {
     is_git_branch_develop "$target_dir" || continue
     cp -uv \
       "$SCRIPT_DIR/misc/unified-files/unified-python-pre-commit-config.yaml" \
-      "$SCRIPT_DIR/misc/unified-files/unified-elisp-dir-locals.el" \
       "$target_dir/.pre-commit-config.yaml"
+    cp -uv \
+      "$SCRIPT_DIR/misc/unified-files/unified-elisp-dir-locals.el" \
+      "$target_dir/.dir-locals.el"
   done < <(find "$emacs_dir" -mindepth 1 -maxdepth 1 -type d -print0)
 }
 

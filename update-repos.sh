@@ -70,6 +70,11 @@ update-repos() {
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
 
+  git-rexec -C "$SRC_DIR/emacs-misc" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
+    "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout develop && git pull --rebase && git push"
+
   git-rexec -C "$SRC_DIR/python" \
     "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
