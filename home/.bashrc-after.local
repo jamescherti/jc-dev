@@ -307,15 +307,15 @@ _alias_completion_load() {
     fi
   fi
 
-  if [[ $cmd == git ]] &&
-     ! declare -F __git_complete &>/dev/null &&
-     [[ -r /usr/share/bash-completion/completions/git ]]; then
+  if [[ $cmd == git ]] \
+    && ! declare -F __git_complete &>/dev/null \
+    && [[ -r /usr/share/bash-completion/completions/git ]]; then
     # shellcheck disable=SC1091
     source /usr/share/bash-completion/completions/git
   fi
 
-  if [[ -n ${_alias_completion_git_functions[$alias_name]-} ]] &&
-     declare -F __git_complete &>/dev/null; then
+  if [[ -n ${_alias_completion_git_functions[$alias_name]-} ]] \
+    && declare -F __git_complete &>/dev/null; then
     __git_complete "$alias_name" \
       "${_alias_completion_git_functions[$alias_name]}" || return 1
   elif spec=$(complete -p -- "$cmd" 2>/dev/null); then
@@ -356,9 +356,9 @@ _alias_git_completion() {
   done
 }
 
-if ! declare -F _comp_load &>/dev/null &&
-   ! declare -F _completion_loader &>/dev/null &&
-   [[ -r /usr/share/bash-completion/bash_completion ]]; then
+if ! declare -F _comp_load &>/dev/null \
+  && ! declare -F _completion_loader &>/dev/null \
+  && [[ -r /usr/share/bash-completion/bash_completion ]]; then
   # shellcheck disable=SC1091
   source /usr/share/bash-completion/bash_completion
 fi
@@ -462,10 +462,17 @@ loop() {
   done
 }
 
+_EZA_INIT=0
+
 if type -P eza &>/dev/null; then
   # TODO: use global var
   _jc_better_eza() {
     OPTS=()
+
+    if [[ $_EZA_INIT -eq 0 ]]; then
+      _EZA_INIT=1
+      eval "$(dircolors -b)"
+    fi
 
     local ls_cmd
     ls_cmd="eza"
