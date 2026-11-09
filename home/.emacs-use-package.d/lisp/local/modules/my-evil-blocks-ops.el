@@ -438,7 +438,7 @@ heading."
 ;;; Navigation
 
 ;; M-[ and M-]: Previous and next section
-(defun my-evil-nav-treesit-move-defun (count)
+(defun my-evil-block-ops--nav-treesit-move-defun (count)
   "Move COUNT defuns using tree-sitter, falling back to buffer boundaries.
 Positive COUNT moves backward, negative COUNT moves forward."
   (when (fboundp 'treesit-beginning-of-defun)
@@ -450,17 +450,20 @@ Positive COUNT moves backward, negative COUNT moves forward."
             (goto-char (point-max))
           (goto-char (point-min)))))))
 
-(defun my-evil-nav-post-jump ()
+(defun my-evil-block-ops--nav-post-jump ()
   "Open folds, recenter window, and pulse the line after an interactive jump."
   (unless (evil-operator-state-p)
     ;; (when (and (invisible-p (point))
     ;;            (fboundp 'evil-open-fold-rec))
     ;;   (ignore-errors (evil-open-fold-rec)))
+
+    ;; Guard against void-function errors if the package providing this is absent.
     (lightemacs-recenter-maybe)
+
     (when (fboundp 'pulse-momentary-highlight-one-line)
       (pulse-momentary-highlight-one-line (point)))))
 
-(defun my--evil-nav-section-core (count is-backward)
+(defun my-evil-block-ops--nav-section-core (count is-backward)
   "Core logic for moving sections forward or backward.
 COUNT is the absolute number of sections to move.
 IS-BACKWARD is non-nil for backward movement, nil for forward."
@@ -475,8 +478,8 @@ IS-BACKWARD is non-nil for backward movement, nil for forward."
      ((and (fboundp 'my-tree-sitter-p)
            (my-tree-sitter-p)
            (derived-mode-p 'prog-mode)
-           (fboundp 'my-evil-nav-treesit-move-defun))
-      (my-evil-nav-treesit-move-defun signed-count))
+           (fboundp 'my-evil-block-ops--nav-treesit-move-defun))
+      (my-evil-block-ops--nav-treesit-move-defun signed-count))
 
      ;; Outline indent minor mode
      ((and (bound-and-true-p outline-indent-minor-mode)
@@ -493,22 +496,22 @@ IS-BACKWARD is non-nil for backward movement, nil for forward."
         (evil-forward-beginning 'evil-defun count))))
 
     (unless (evil-operator-state-p)
-      (when (fboundp 'my-evil-nav-post-jump)
-        (my-evil-nav-post-jump)))))
+      (when (fboundp 'my-evil-block-ops--nav-post-jump)
+        (my-evil-block-ops--nav-post-jump)))))
 
-(evil-define-motion my-evil-nav-forward-section (count)
+(evil-define-motion my-evil-block-ops-nav-forward-section (count)
   "Move the cursor to the beginning of the COUNT-th next section.
 COUNT specifies the number of sections to advance forward."
   :jump t
   :type exclusive
-  (my--evil-nav-section-core (or count 1) nil))
+  (my-evil-block-ops--nav-section-core (or count 1) nil))
 
-(evil-define-motion my-evil-nav-backward-section (count)
+(evil-define-motion my-evil-block-ops-nav-backward-section (count)
   "Move the cursor to the beginning of the COUNT-th previous section.
 COUNT specifies the number of sections to move backward."
   :jump t
   :type exclusive
-  (my--evil-nav-section-core (or count 1) t))
+  (my-evil-block-ops--nav-section-core (or count 1) t))
 
 (when (or (display-graphic-p)
           (daemonp))
@@ -518,14 +521,14 @@ COUNT specifies the number of sections to move backward."
   ;; directly highjacks the prefix of these incoming messages, breaking terminal
   ;; features and dumping coordinate data into the buffer.
   (evil-define-key '(insert motion) 'global (kbd "M-[")
-    'my-evil-nav-backward-section))
+    'my-evil-block-ops-nav-backward-section))
 
 (evil-define-key '(insert motion) 'global (kbd "M-]")
-  'my-evil-nav-forward-section)
+  'my-evil-block-ops-nav-forward-section)
 
 (evil-define-key '(normal) my-intercept-mode-map
-  (kbd "[[") 'my-evil-nav-backward-section
-  (kbd "]]") 'my-evil-nav-forward-section)
+  (kbd "[[") 'my-evil-block-ops-nav-backward-section
+  (kbd "]]") 'my-evil-block-ops-nav-forward-section)
 
 (evil-define-key '(motion) my-intercept-mode-map
   (kbd "{") 'evil-backward-paragraph
