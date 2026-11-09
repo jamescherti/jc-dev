@@ -4963,28 +4963,6 @@ ARGS are the arguments passed to ORIG-FN."
 
 ;;; DISABLED: exec file form shell
 
-;; TODO enable on mac
-;; (lightemacs-use-package exec-path-from-shell
-;;   :if (and (or (display-graphic-p) (daemonp))
-;;            (eq system-type 'darwin)) ; macOS only
-;;   :demand t
-;;   :functions exec-path-from-shell-initialize
-;;   :init
-;;   (setq exec-path-from-shell-variables
-;;         '("PATH" "MANPATH"
-;;           "TMPDIR"
-;;           "SSH_AUTH_SOCK" "SSH_AGENT_PID"
-;;           "GPG_AGENT_INFO"
-;;           ;; "FZF_DEFAULT_COMMAND" "FZF_DEFAULT_OPTS" ; fzf
-;;           ;; "VIRTUAL_ENV" ; Python
-;;           ;; "GOPATH" "GOROOT" "GOBIN" ; Go
-;;           ;; "CARGO_HOME" "RUSTUP_HOME" ; Rust
-;;           ;; "NVM_DIR" "NODE_PATH" ; Node/JS
-;;           "LANG" "LC_CTYPE"))
-;;   :config
-;;   ;; Initialize
-;;   (exec-path-from-shell-initialize))
-
 ;;; DISABLED: Perfect margin
 
 ;; Buggy
