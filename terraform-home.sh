@@ -309,7 +309,7 @@ install_gnome_extension() {
 config-gnome() {
   # JC-GNOME-SETTINGS
   if [[ "${XDG_CURRENT_DESKTOP:-}" = GNOME ]]; then
-    ~/src/dotfiles/jc-gnome-settings/jc-gnome-settings.sh
+    ~/src/dotfiles/jc-gnome-settings/install.sh
     ~/src/dotfiles/jc-gnome-settings/misc/jc-gnome-shortcuts.sh
 
     # LOCAL GNOME SETTINGS
