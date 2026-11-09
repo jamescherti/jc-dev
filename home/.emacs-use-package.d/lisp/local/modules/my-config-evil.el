@@ -1309,84 +1309,6 @@ Candidates absent from the accessible source buffer follow."
   (kbd "<leader>ep") 'evilinferior-run-python
   (kbd "<leader>el") 'ielm)
 
-;;; evil intercept (TODO replace with global?)
-
-(defvar my-intercept-mode-map (make-sparse-keymap)
-  "High precedence keymap.")
-
-(define-minor-mode my-intercept-mode
-  "Global minor mode for higher precedence evil keybindings."
-  :global t
-  :group 'my-intercept-mode)
-
-(dolist (state '(normal visual insert))
-  (evil-make-intercept-map
-   (evil-get-auxiliary-keymap my-intercept-mode-map state t t)
-   state))
-
-(defun my-shell-pop ()
-  "Close the minibuffer if active, then launch `shell-pop'."
-  (interactive)
-  ;; (let ((process-connection-type nil)) ; Use a pipe instead of a pty
-  ;;    (start-process "xdevenv-terminal" nil "xdevenv" "terminal"))
-
-  (let ((inhibit-redisplay t))
-    (if (active-minibuffer-window)
-        (progn
-          ;; Schedule shell-pop to run immediately after the abort finishes
-          (run-at-time 0 nil (lambda ()
-                               (when (fboundp 'shell-pop)
-                                 ;; Clear the echo area to remove "Quit"
-                                 (message nil)
-                                 (call-interactively 'shell-pop))))
-          (abort-recursive-edit))
-      ;; If no minibuffer is active, just run shell-pop normally
-      (when (fboundp 'shell-pop)
-        (call-interactively 'shell-pop)))))
-
-(unless noninteractive
-  (global-set-key (kbd "M-RET") 'my-shell-pop)
-  (global-set-key (kbd "M-<enter>") 'my-shell-pop)
-  ;; (global-set-key (kbd "M-<return>") 'shell-pop)
-  ;; (global-set-key (kbd "M-RET") 'vterm-toggle)
-  ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
-  )
-
-;; (evil-define-key '(normal visual) my-intercept-mode-map
-;;   "{" 'evil-backward-paragraph
-;;   "}" 'evil-forward-paragraph)
-
-(evil-define-key '(normal) my-intercept-mode-map
-  (kbd "[[") 'my-evil-nav-backward-section
-  (kbd "]]") 'my-evil-nav-forward-section
-
-  (kbd "{") 'evil-backward-paragraph
-  (kbd "}") 'evil-forward-paragraph)
-
-(evil-define-key '(motion) my-intercept-mode-map
-  (kbd "[[") 'my-evil-nav-backward-section
-  (kbd "]]") 'my-evil-nav-forward-section
-
-  (kbd "{") 'evil-backward-paragraph
-  (kbd "}") 'evil-forward-paragraph)
-
-(evil-define-key '(normal insert visual) my-intercept-mode-map
-  (kbd "M-RET") 'my-shell-pop
-  (kbd "M-<enter>") 'my-shell-pop
-  (kbd "M-<return>") 'my-shell-pop
-
-  (kbd "M-x") 'execute-extended-command
-
-  (kbd "M-o") 'my-previous-interesting-buffer
-  (kbd "M-i") 'my-next-interesting-buffer
-
-  (kbd "C-S-k") 'my-tab-bar-move-tab-backward
-  (kbd "C-S-j") 'my-tab-bar-move-tab
-  (kbd "C-k") 'my-tab-previous
-  (kbd "C-j") 'my-tab-next)
-
-(my-intercept-mode 1)
-
 ;;; check parens no jump
 
 ;; TODO: Part of smooth cursor?
@@ -2325,6 +2247,69 @@ Accepts any arguments so it can be used as advice or a hook."
     (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode))
 
   (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename))
+
+;;; intercept
+
+(defun my-shell-pop ()
+  "Close the minibuffer if active, then launch `shell-pop'."
+  (interactive)
+  ;; (let ((process-connection-type nil)) ; Use a pipe instead of a pty
+  ;;    (start-process "xdevenv-terminal" nil "xdevenv" "terminal"))
+
+  (let ((inhibit-redisplay t))
+    (if (active-minibuffer-window)
+        (progn
+          ;; Schedule shell-pop to run immediately after the abort finishes
+          (run-at-time 0 nil (lambda ()
+                               (when (fboundp 'shell-pop)
+                                 ;; Clear the echo area to remove "Quit"
+                                 (message nil)
+                                 (call-interactively 'shell-pop))))
+          (abort-recursive-edit))
+      ;; If no minibuffer is active, just run shell-pop normally
+      (when (fboundp 'shell-pop)
+        (call-interactively 'shell-pop)))))
+
+(unless noninteractive
+  (global-set-key (kbd "M-RET") 'my-shell-pop)
+  (global-set-key (kbd "M-<enter>") 'my-shell-pop)
+  ;; (global-set-key (kbd "M-<return>") 'shell-pop)
+  ;; (global-set-key (kbd "M-RET") 'vterm-toggle)
+  ;; (global-set-key (kbd "M-<enter>") 'vterm-toggle)
+  )
+
+;; (evil-define-key '(normal visual) my-intercept-mode-map
+;;   "{" 'evil-backward-paragraph
+;;   "}" 'evil-forward-paragraph)
+
+(evil-define-key '(normal) my-intercept-mode-map
+  (kbd "[[") 'my-evil-nav-backward-section
+  (kbd "]]") 'my-evil-nav-forward-section
+
+  (kbd "{") 'evil-backward-paragraph
+  (kbd "}") 'evil-forward-paragraph)
+
+(evil-define-key '(motion) my-intercept-mode-map
+  (kbd "[[") 'my-evil-nav-backward-section
+  (kbd "]]") 'my-evil-nav-forward-section
+
+  (kbd "{") 'evil-backward-paragraph
+  (kbd "}") 'evil-forward-paragraph)
+
+(evil-define-key '(normal insert visual) my-intercept-mode-map
+  (kbd "M-RET") 'my-shell-pop
+  (kbd "M-<enter>") 'my-shell-pop
+  (kbd "M-<return>") 'my-shell-pop
+
+  (kbd "M-x") 'execute-extended-command
+
+  (kbd "M-o") 'my-previous-interesting-buffer
+  (kbd "M-i") 'my-next-interesting-buffer
+
+  (kbd "C-S-k") 'my-tab-bar-move-tab-backward
+  (kbd "C-S-j") 'my-tab-bar-move-tab
+  (kbd "C-k") 'my-tab-previous
+  (kbd "C-j") 'my-tab-next)
 
 ;;; n/N (and M-n and M-N): Search and recenter
 

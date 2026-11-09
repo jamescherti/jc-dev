@@ -24,10 +24,10 @@
 
 ;;; Code:
 
-
 (require 'evil)
 (require 'outline)
 (require 'buffer-guardian)
+(require 'my-evil-intercept)
 
 ;;; Outline Keybindings
 
@@ -135,25 +135,50 @@ heading."
     (define-key org-mode-map (kbd "M-<up>") 'org-move-subtree-up)
     (define-key org-mode-map (kbd "M-<down>") 'org-move-subtree-down)))
 
-(defun my-setup-outline-minor-mode-keymap ()
-  "Setup `outline-minor-mode'."
+(defun my-move-subtree-up ()
+  "Move the current subtree up according to the active mode."
+  (interactive)
   (cond
-   ((derived-mode-p 'org-mode)
-    (evil-define-key 'normal 'local (kbd "M-k") 'org-move-subtree-up)
-    (evil-define-key 'normal 'local (kbd "M-j") 'org-move-subtree-down))
+   ((and (derived-mode-p 'org-mode)
+         (fboundp 'org-move-subtree-up))
+    (call-interactively #'org-move-subtree-up))
 
-   ((bound-and-true-p outline-indent-minor-mode)
-    (evil-define-key 'normal 'local (kbd "M-k") 'outline-indent-move-subtree-up)
-    (evil-define-key 'normal 'local (kbd "M-j") 'outline-indent-move-subtree-down))
+   ((and (or (bound-and-true-p outline-indent-minor-mode)
+             (derived-mode-p 'python-ts-mode))
+         (fboundp 'outline-indent-move-subtree-up))
+    (call-interactively #'outline-indent-move-subtree-up))
 
-   ((bound-and-true-p outline-minor-mode)
-    ;; Set `M-k` and `M-j` to move indented blocks up and down
-    (evil-define-key 'normal 'local (kbd "M-k") 'my-patched-outline-move-subtree-up)
-    (evil-define-key 'normal 'local (kbd "M-j") 'my-patched-outline-move-subtree-down))))
+   ((and (bound-and-true-p outline-minor-mode)
+         (fboundp 'my-patched-outline-move-subtree-up))
+    (call-interactively #'my-patched-outline-move-subtree-up))
 
-(add-hook 'org-mode-hook #'my-setup-outline-minor-mode-keymap)
-(add-hook 'outline-indent-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
-(add-hook 'outline-minor-mode-hook #'my-setup-outline-minor-mode-keymap)
+   (t
+    (user-error "No supported outline movement command is available"))))
+
+(defun my-move-subtree-down ()
+  "Move the current subtree down according to the active mode."
+  (interactive)
+  (cond
+   ((and (derived-mode-p 'org-mode)
+         (fboundp 'org-move-subtree-down))
+    (call-interactively #'org-move-subtree-down))
+
+   ((and (or (bound-and-true-p outline-indent-minor-mode)
+             ;; Move blocks up/down on treesit-mode
+             (derived-mode-p 'python-ts-mode))
+         (fboundp 'outline-indent-move-subtree-down))
+    (call-interactively #'outline-indent-move-subtree-down))
+
+   ((and (bound-and-true-p outline-minor-mode)
+         (fboundp 'my-patched-outline-move-subtree-down))
+    (call-interactively #'my-patched-outline-move-subtree-down))
+
+   (t
+    (user-error "No supported outline movement command is available"))))
+
+(evil-define-key '(normal) my-intercept-mode-map
+  (kbd "M-k") 'my-move-subtree-up
+  (kbd "M-j") 'my-move-subtree-down)
 
 ;;; outline: Restore column: move subtree up/down
 
