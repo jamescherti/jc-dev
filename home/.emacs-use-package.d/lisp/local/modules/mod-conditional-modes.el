@@ -172,7 +172,12 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
            (file-name (or buffer-file-name
                           (buffer-file-name (buffer-base-buffer))))
            (ignore-checker-and-reformatter (my-code-checker-and-reformatter-ignore-p))
-           (env-deny-all (if ignore-checker-and-reformatter
+           (conflict (save-excursion
+                       (goto-char (point-min))
+                       (when (re-search-forward "^<<<<<<< " nil t)
+                         (smerge-mode 1))))
+           (env-deny-all (if (or conflict
+                                 ignore-checker-and-reformatter)
                              t
                            env-deny-all)))
       (when (and (not (or (derived-mode-p 'special-mode)

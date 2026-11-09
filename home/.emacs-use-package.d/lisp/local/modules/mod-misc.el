@@ -2838,40 +2838,18 @@ generally one of the lines that are folded."
 (with-eval-after-load 'consult
   (add-hook 'consult-preview-allowed-hooks #'my-disable-fringe-truncation-arrow))
 
-;;; Enable `smerge'
-
-(defun my-enable-smerge-maybe ()
-  "Enable `smerge'."
-  ;; (when (and buffer-file-name
-  ;;            (vc-backend buffer-file-name))
-  ;;   (save-excursion
-  ;;     (goto-char (point-min))
-  ;;     (when (re-search-forward "^<<<<<<< " nil t)
-  ;;       (smerge-mode +1))))
-  )
-
-(add-hook 'find-file-hook #'my-enable-smerge-maybe)
-
-;; Switch to `fundamental-mode' when `smerge-mode' is activated.
-(defun my-smerge-to-fundamental-mode ()
-  "Switch to `fundamental-mode' when `smerge-mode' is activated."
-  ;; (when (and smerge-mode (not (eq major-mode 'fundamental-mode)))
-  ;;   (text-mode)
-  ;;   (smerge-mode 1))
-  )
-(add-hook 'smerge-mode-hook #'my-smerge-to-fundamental-mode)
-
 ;;; DISABLED: Disable `smerge' mode paredit
 
-;; (defun my-disable-modes-on-smerge ()
-;;   "Disable `paredit-mode' when a git conflict happens."
-;;   (when (bound-and-true-p smerge-mode)
-;;     (when (and (derived-mode-p 'emacs-lisp-mode)
-;;                (bound-and-true-p paredit-mode)
-;;                (fboundp 'paredit-mode))
-;;       (message "The `paredit-mode' has been disabled")
-;;       (paredit-mode -1))))
-;; (add-hook 'smerge-mode-hook #'my-disable-modes-on-smerge)
+(defun my-disable-modes-on-smerge ()
+  "Disable `paredit-mode' when a git conflict happens."
+  (when (bound-and-true-p smerge-mode)
+    (when (and (derived-mode-p 'emacs-lisp-mode)
+               (bound-and-true-p paredit-mode)
+               (fboundp 'paredit-mode))
+      (message "The `paredit-mode' has been disabled")
+      (paredit-mode -1))))
+
+(add-hook 'smerge-mode-hook #'my-disable-modes-on-smerge)
 
 ;;; Prune native comp tmp files
 
