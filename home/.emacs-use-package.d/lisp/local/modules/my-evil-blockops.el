@@ -177,9 +177,18 @@ _ARG specifies how many sibling headings to advance forward."
   (interactive "p")
   (cond
    ;; Support Combobulate sibling navigation for tree-sitter modes.
-   ((and (my-combobulate-active-p)
-         (fboundp 'combobulate-navigate-next))
-    (call-interactively #'combobulate-navigate-next))
+   ((my-combobulate-active-p)
+    (let ((point (point)))
+      ;; In YAML, starting mid-line can move only the current line down instead
+      ;; of the entire block.
+      (when (derived-mode-p 'yaml-ts-mode)
+        (beginning-of-line))
+
+      (condition-case err
+          (call-interactively #'combobulate-navigate-next)
+        (error
+         (goto-char point)
+         (user-error "%s" (error-message-string err))))))
 
    ((derived-mode-p 'prog-mode)
     ;; Check local normal state map and motion state map in addition to
@@ -214,9 +223,18 @@ _ARG specifies how many sibling headings to retreat backward."
   (interactive "p")
   (cond
    ;; Support Combobulate sibling navigation for tree-sitter modes.
-   ((and (my-combobulate-active-p)
-         (fboundp 'combobulate-navigate-previous))
-    (call-interactively #'combobulate-navigate-previous))
+   ((my-combobulate-active-p)
+    (let ((point (point)))
+      ;; In YAML, starting mid-line can move only the current line down instead
+      ;; of the entire block.
+      (when (derived-mode-p 'yaml-ts-mode)
+        (beginning-of-line))
+
+      (condition-case err
+          (call-interactively #'combobulate-navigate-previous)
+        (error
+         (goto-char point)
+         (user-error "%s" (error-message-string err))))))
 
    ((derived-mode-p 'prog-mode)
     ;; Fix invalid key sequence `"[[\\"' to `"[["' and fall back to
@@ -424,17 +442,17 @@ heading."
   (interactive)
   (cond
    ;; Support Combobulate node dragging for tree-sitter modes.
-   ((and (my-combobulate-active-p)
-         (fboundp 'combobulate-drag-up))
-    ;; In YAML, starting mid-line can move only the current line down instead of
-    ;; the entire block.
-    (when (derived-mode-p 'yaml-ts-mode)
-      (beginning-of-line))
-    (let ((point (point)))
+   ((my-combobulate-active-p)
+    (let ((prev-point (point)))
+      ;; In YAML, starting mid-line can move only the current line down instead
+      ;; of the entire block.
+      (when (derived-mode-p 'yaml-ts-mode)
+        (beginning-of-line))
+
       (condition-case err
           (call-interactively #'combobulate-drag-up)
         (error
-         (goto-char point)
+         (goto-char prev-point)
          (user-error "%s" (error-message-string err))))))
 
    ((and (derived-mode-p 'org-mode)
@@ -461,18 +479,18 @@ heading."
   (interactive)
   (cond
    ;; Support Combobulate node dragging for tree-sitter modes.
-   ((and (my-combobulate-active-p)
-         (let ((point (point)))
-           (condition-case err
-               (call-interactively #'combobulate-drag-down)
-             (error
-              (goto-char point)
-              (user-error "%s" (error-message-string err))))))
-    ;; In YAML, starting mid-line can move only the current line down instead of
-    ;; the entire block.
-    (when (derived-mode-p 'yaml-ts-mode)
-      (beginning-of-line))
-    (call-interactively #'combobulate-drag-down))
+   ((my-combobulate-active-p)
+    (let ((prev-point (point)))
+      ;; In YAML, starting mid-line can move only the current line down instead of
+      ;; the entire block.
+      (when (derived-mode-p 'yaml-ts-mode)
+        (beginning-of-line))
+
+      (condition-case err
+          (call-interactively #'combobulate-drag-down)
+        (error
+         (goto-char prev-point)
+         (user-error "%s" (error-message-string err))))))
 
    ((and (derived-mode-p 'org-mode)
          (fboundp 'org-move-subtree-down))
