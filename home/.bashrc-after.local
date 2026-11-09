@@ -41,10 +41,11 @@ fi
 unset IGNOREEOF
 
 # Ensure your TMOUT is set to your desired timeout in seconds (e.g., 1 hour)
-export TMOUT=3600
+# export TMOUT=3600
 
 if [[ $EUID != 0 ]]; then
-  TMOUT=300
+  unset TMOUT &>/dev/null
+  # TMOUT=300
 else
   TMOUT=120
 fi
