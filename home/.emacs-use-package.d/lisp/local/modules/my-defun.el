@@ -1033,6 +1033,22 @@ The result is displayed in a pretty-printed temporary buffer."
         (read-only-mode 1)
         (display-buffer (current-buffer))))))
 
+;;; Tree-sitter
+
+(defun my-tree-sitter-p ()
+  "Return non-nil if tree-sitter is active in the current buffer.
+
+This function checks for two possible indicators of active tree-sitter support:
+1. The major mode name ends with '-ts-mode' (common convention).
+2. A valid tree-sitter parser is currently loaded for this buffer (detected via
+   'treesit-parser-list').
+
+This is useful for conditionally enabling features that depend on
+tree-sitter being available."
+  (or (string-suffix-p "-ts-mode" (symbol-name major-mode))
+      (and (fboundp 'treesit-parser-list)
+           (treesit-parser-list))))
+
 ;;; Provide
 (provide 'my-defun)
 

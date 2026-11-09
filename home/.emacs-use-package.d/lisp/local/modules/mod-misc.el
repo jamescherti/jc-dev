@@ -178,14 +178,13 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 (defun initialize-indirect-buffer-treesit-parsers ()
   "Initialize tree-sitter parsers in indirect buffers based on the base buffer."
   (when (and (fboundp 'treesit-major-mode-setup)
-             (fboundp 'treesit-parser-list)
              (fboundp 'treesit-parser-create))
     (let* ((base (buffer-base-buffer))
            ;; If this is an indirect buffer, switch context to the base buffer
            ;; to retrieve its active parsers.
            (parser-list (and base
                              (with-current-buffer base
-                               (treesit-parser-list)))))
+                               (my-tree-sitter-p)))))
       (when parser-list
         ;; Instantiate identical parsers for this indirect buffer.
         (dolist (parser parser-list)
@@ -5874,16 +5873,9 @@ on text following the cursor."
 ;;   :defer t
 ;;   :commands undercover)
 
-;;; DISABLED: combobulate
+;;; require blocks ops
 
-;; TODO lightemacs
-;; (lightemacs-use-package combobulate
-;;   :commands combobulate
-;;   ;; :init
-;;   ;; (with-eval-after-load 'evil
-;;   ;;   (evil-define-key 'normal 'global (kbd "<leader>co") #'combobulate))
-;;   :init
-;;   (eldoc-add-command-completions "combobulate-"))
+(require 'my-evil-blocks-ops)
 
 ;;; DISABLED: desktop
 

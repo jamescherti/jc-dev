@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'my-defun) ; my-tree-sitter-p
+
 ;;; env- vars
 
 (defvar env-deny-all nil
@@ -228,7 +230,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                   (setq eglot-enabled t)
                   (eglot-ensure)
 
-                  (when (treesit-parser-list)
+                  (when (my-tree-sitter-p)
                     ;; This is to avoid redundant semantic highlighting,
                     ;; disabling Eglot's :semanticTokensProvider is reasonable
                     ;; when Tree-sitter is already providing semantic

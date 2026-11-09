@@ -407,86 +407,6 @@ ORIG-FUN is the function and ARGS the arguments."
 (evil-define-key 'normal 'global (kbd "J") 'evilcursor-join-normal)
 (evil-define-key 'visual 'global (kbd "J") 'evil-join)
 
-;; M-[ and M-]: Previous and next section
-(defun my-evil-nav-treesit-move-defun (count)
-  "Move COUNT defuns using tree-sitter, falling back to buffer boundaries.
-Positive COUNT moves backward, negative COUNT moves forward."
-  (when (fboundp 'treesit-beginning-of-defun)
-    (let ((start-pt (point)))
-      (evil-signal-at-bob-or-eob (- count))
-      (unless (and (treesit-beginning-of-defun count)
-                   (/= (point) start-pt))
-        (if (< count 0)
-            (goto-char (point-max))
-          (goto-char (point-min)))))))
-
-(defun my-evil-nav-post-jump ()
-  "Open folds, recenter window, and pulse the line after an interactive jump."
-  (unless (evil-operator-state-p)
-    ;; (when (and (invisible-p (point))
-    ;;            (fboundp 'evil-open-fold-rec))
-    ;;   (ignore-errors (evil-open-fold-rec)))
-    (lightemacs-recenter-maybe)
-    (when (fboundp 'pulse-momentary-highlight-one-line)
-      (pulse-momentary-highlight-one-line (point)))))
-
-(evil-define-motion my-evil-nav-forward-section (count)
-  "Move the cursor to the beginning of the COUNT-th next section."
-  :jump t
-  :type exclusive
-  (let ((cnt (or count 1)))
-    (evil-signal-at-bob-or-eob (- (or count 1)))
-    (cond
-     ((and (bound-and-true-p outline-indent-minor-mode)
-           (fboundp 'outline-indent-forward-same-level))
-      (outline-indent-forward-same-level cnt))
-     ((and (fboundp 'treesit-parser-list)
-           (treesit-parser-list))
-      (my-evil-nav-treesit-move-defun (- cnt)))
-     (t
-      (evil-forward-beginning 'evil-defun count)))
-    (unless (evil-operator-state-p)
-      (my-evil-nav-post-jump))))
-
-(evil-define-motion my-evil-nav-backward-section (count)
-  "Move the cursor to the beginning of the COUNT-th previous section."
-  :jump t
-  :type exclusive
-  (let ((cnt (or count 1)))
-    (evil-signal-at-bob-or-eob (- (or count 1)))
-    (cond
-     ((and (bound-and-true-p outline-indent-minor-mode)
-           (fboundp 'outline-indent-backward-same-level))
-      (outline-indent-backward-same-level cnt))
-     ((and (fboundp 'treesit-parser-list)
-           (treesit-parser-list))
-      (my-evil-nav-treesit-move-defun cnt))
-     (t
-      (evil-backward-beginning 'evil-defun count)))
-    (unless (evil-operator-state-p)
-      (my-evil-nav-post-jump))))
-
-(when (or (display-graphic-p)
-          (daemonp))
-  ;; Only on display-graphic-p because the M-[ issue occurs because modern
-  ;; terminals use "Escape sequences" beginning with the ESC [ characters (the
-  ;; byte-level equivalent of M-[) to communicate complex input like mouse
-  ;; movements, pixel-perfect clicks, and bracketed pastes. When you bind a
-  ;; custom command to M-[ in your Emacs configuration, you effectively
-  ;; "highjack" the prefix of these incoming messages; Emacs consumes the first
-  ;; two characters to trigger your function, leaving the remaining coordinate
-  ;; or paste data orphaned and uninterpreted. Consequently, the terminal's
-  ;; attempt to say "the mouse clicked at these coordinates" is chopped up, and
-  ;; the tail end of that technical string-the "gibberish" you see-is dumped
-  ;; directly into your buffer as literal text. Would you like me to provide a
-  ;; snippet to identify exactly which command is currently "stealing" that M-[
-  ;; prefix?
-  (evil-define-key '(insert motion) 'global (kbd "M-[")
-    'my-evil-nav-backward-section))
-
-(evil-define-key '(insert motion) 'global (kbd "M-]")
-  'my-evil-nav-forward-section)
-
 ;; Do not fail when the kill-ring is empty
 ;; To prevent the p command in Evil mode from failing when the paste ring
 ;; (akin to the clipboard in Vim) is empty, you can redefine the paste
@@ -2281,20 +2201,6 @@ Accepts any arguments so it can be used as advice or a hook."
 ;; (evil-define-key '(normal visual) my-intercept-mode-map
 ;;   "{" 'evil-backward-paragraph
 ;;   "}" 'evil-forward-paragraph)
-
-(evil-define-key '(normal) my-intercept-mode-map
-  (kbd "[[") 'my-evil-nav-backward-section
-  (kbd "]]") 'my-evil-nav-forward-section
-
-  (kbd "{") 'evil-backward-paragraph
-  (kbd "}") 'evil-forward-paragraph)
-
-(evil-define-key '(motion) my-intercept-mode-map
-  (kbd "[[") 'my-evil-nav-backward-section
-  (kbd "]]") 'my-evil-nav-forward-section
-
-  (kbd "{") 'evil-backward-paragraph
-  (kbd "}") 'evil-forward-paragraph)
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
   (kbd "M-RET") 'my-shell-pop
