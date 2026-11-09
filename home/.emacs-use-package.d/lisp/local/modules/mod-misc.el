@@ -410,12 +410,6 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 ;; 100% visible because there is always a buffer line below it.
 ;; (setq scroll-margin 1)
 
-
-;; Apply the following settings if you also want scrolling with an ordinary
-;; mouse to be almost as smooth as scrolling with a touchpad, on systems other
-;; than X:
-;; (setq pixel-scroll-precision-large-scroll-height 40.0)
-
 ;; scroll-margin: Setting this to 0 ensures that the cursor can sit on the
 ;; absolute top or bottom line of the window. If this is set to a positive
 ;; integer (like 3 or 5), Emacs will force the screen to scroll before you reach
@@ -3205,6 +3199,33 @@ ARGS - the arguments passed to the original function"
 (add-hook 'lightemacs-emacs-startup-hook #'battery-angel-mode 90)
 (add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
 (add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
+
+;;; inhibit mouse
+
+;; Apply the following settings if you also want scrolling with an ordinary
+;; mouse to be almost as smooth as scrolling with a touchpad, on systems other
+;; than X:
+;; (setq pixel-scroll-precision-large-scroll-height 40.0)
+
+(setq pixel-scroll-precision-use-momentum nil
+      pixel-scroll-precision-interpolate-mice t
+      pixel-scroll-precision-interpolation-factor 0.6
+      ;; mouse-wheel-scroll-amount '(1 ((shift) . 1))
+      ;; mouse-wheel-progressive-speed nil
+      pixel-scroll-precision-large-scroll-height nil)
+
+(add-hook 'inhibit-mouse-mode-hook
+          #'(lambda()
+              (unless (and
+                       ;; Exclude macOS Carbon environments where pixel
+                       ;; scrolling is natively supported and does not
+                       ;; require explicit activation.
+                       (eq window-system 'mac)
+                       (bound-and-true-p mac-carbon-version-string))
+                (when (fboundp 'pixel-scroll-precision-mode)
+                  (if (bound-and-true-p inhibit-mouse-mode)
+                      (pixel-scroll-precision-mode -1)
+                    (pixel-scroll-precision-mode 1))))))
 
 ;;; Rainbow
 

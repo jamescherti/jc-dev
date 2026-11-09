@@ -101,8 +101,7 @@
 ;; disable acceleration of scrolling
 (setq mouse-wheel-progressive-speed nil)
 
-(setq inhibit-mouse-button-numbers '(1 2 3)
-      pixel-scroll-precision-use-momentum nil)
+(setq inhibit-mouse-button-numbers '(1 2 3))
 
 ;;; Do not highlight visual on all windows
 
@@ -1360,7 +1359,7 @@ search direction (default: \='forward)."
          (count 1)
          (direction (or direction 'forward))
          (bounds (unless visual-p
-                    (bounds-of-thing-at-point 'symbol)))
+                   (bounds-of-thing-at-point 'symbol)))
          ;; Fetch boundaries before evil-exit-visual-state deactivates the region
          (bnd-start (if visual-p
                         (region-beginning)
