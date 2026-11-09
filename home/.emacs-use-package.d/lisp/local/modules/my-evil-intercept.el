@@ -41,7 +41,7 @@
    (evil-get-auxiliary-keymap my-intercept-mode-map state t t)
    state))
 
-(add-hook 'lightemacs-after-init-hook #'my-intercept-mode)
+(my-intercept-mode 1)
 
 ;;; Provide
 

@@ -29,7 +29,7 @@
 (require 'buffer-guardian)
 (require 'my-evil-intercept)
 
-;;; Outline Keybindings
+;;; Outline Keybindings: Shift left and right
 
 ;; (with-eval-after-load 'outline-indent
 ;;   (evil-define-key 'normal outline-mode-map (kbd "]]") nil)
