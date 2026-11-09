@@ -34,7 +34,6 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     # Shell
     "jamescherti/efasd": "tools",
     "jamescherti/update-iptables": "tools",
-    "jamescherti/cherrybuckle": "tools",
     # Python
     "jamescherti/vim-client": "python",
     "jamescherti/ansible-cleanup": "python",
@@ -47,8 +46,6 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     "jamescherti/pdfcipher": "python",
     "jamescherti/ultyas": "python",
     "jamescherti/watch-xfce-xfconf": "python",
-    "jamescherti/caffeine-aw": "python",  # Python: legacy
-    "jamescherti/elispcomp": "python",
     # Emacs misc
     "jamescherti/pre-commit-elisp": "emacs-misc",
     "jamescherti/minimal-emacs.d": "emacs-misc",
@@ -56,14 +53,16 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     # Shell
     "jamescherti/lightvim": "dotfiles",
     "jamescherti/bash-stdops": "dotfiles",
-    # Linux
-    "jamescherti/gentoo-brother-ql1110nwb": "linux",
     # No category
     "jamescherti/jamescherti": "",
     "jamescherti/jc-dev": "dotfiles",
     "jamescherti/wip": "",
     "jamescherti/notes": "",
     # Other
+    "jamescherti/gentoo-brother-ql1110nwb": "legacy",
+    "jamescherti/cherrybuckle": "legacy",
+    "jamescherti/elispcomp": "legacy",
+    "jamescherti/caffeine-aw": "legacy",  # Python: legacy
     "jamescherti/outline-yaml.el": "legacy",
     "jamescherti/python-dpc3848v-wifi-modem": "legacy",
     "jamescherti/docker-oddmuse": "legacy",
