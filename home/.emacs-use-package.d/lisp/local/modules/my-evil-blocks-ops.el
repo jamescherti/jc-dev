@@ -460,74 +460,63 @@ Positive COUNT moves backward, negative COUNT moves forward."
     (when (fboundp 'pulse-momentary-highlight-one-line)
       (pulse-momentary-highlight-one-line (point)))))
 
+(defun my--evil-nav-section-core (count is-backward)
+  "Core logic for moving sections forward or backward.
+COUNT is the absolute number of sections to move.
+IS-BACKWARD is non-nil for backward movement, nil for forward."
+  (let ((count (abs count))
+        (signed-count (if is-backward
+                          (- count)
+                        count)))
+    (evil-signal-at-bob-or-eob signed-count)
+
+    (cond
+     ;; Tree-sitter defun navigator
+     ((and (fboundp 'my-tree-sitter-p)
+           (my-tree-sitter-p)
+           (derived-mode-p 'prog-mode)
+           (fboundp 'my-evil-nav-treesit-move-defun))
+      (my-evil-nav-treesit-move-defun signed-count))
+
+     ;; Outline indent minor mode
+     ((and (bound-and-true-p outline-indent-minor-mode)
+           (fboundp 'outline-indent-backward-same-level)
+           (fboundp 'outline-indent-forward-same-level))
+      (if is-backward
+          (outline-indent-backward-same-level count)
+        (outline-indent-forward-same-level count)))
+
+     ;; Standard fallback
+     (t
+      (if is-backward
+          (evil-backward-beginning 'evil-defun count)
+        (evil-forward-beginning 'evil-defun count))))
+
+    (unless (evil-operator-state-p)
+      (when (fboundp 'my-evil-nav-post-jump)
+        (my-evil-nav-post-jump)))))
+
 (evil-define-motion my-evil-nav-forward-section (count)
   "Move the cursor to the beginning of the COUNT-th next section.
 COUNT specifies the number of sections to advance forward."
   :jump t
   :type exclusive
-  (let ((cnt (or count 1)))
-    (evil-signal-at-bob-or-eob cnt)
-    (cond
-     ((and (fboundp 'my-tree-sitter-p)
-           (my-tree-sitter-p)
-           (fboundp 'my-evil-nav-treesit-move-defun))
-      (my-evil-nav-treesit-move-defun cnt))
-
-     ((and (bound-and-true-p outline-indent-minor-mode)
-           (fboundp 'outline-indent-forward-same-level))
-      (outline-indent-forward-same-level cnt))
-
-     (t
-      ;; Standard fallback: handles both legacy modes and Emacs 29+ tree-sitter
-      ;; modes via `end-of-defun-function' / `beginning-of-defun-function'.
-      (evil-forward-beginning 'evil-defun cnt)))
-
-    (unless (evil-operator-state-p)
-      (when (fboundp 'my-evil-nav-post-jump)
-        (my-evil-nav-post-jump)))))
+  (my--evil-nav-section-core (or count 1) nil))
 
 (evil-define-motion my-evil-nav-backward-section (count)
   "Move the cursor to the beginning of the COUNT-th previous section.
 COUNT specifies the number of sections to move backward."
   :jump t
   :type exclusive
-  (let ((cnt (or count 1)))
-    (evil-signal-at-bob-or-eob (- cnt))
-    (cond
-     ;; If you have a custom tree-sitter defun navigator that takes a signed count,
-     ;; pass (- cnt) and do not pre-emptively call beginning-of-line.
-     ((and (my-tree-sitter-p)
-           (fboundp 'my-evil-nav-treesit-move-defun))
-      (my-evil-nav-treesit-move-defun (- cnt)))
-
-     ((and (bound-and-true-p outline-indent-minor-mode)
-           (fboundp 'outline-indent-backward-same-level))
-      (outline-indent-backward-same-level cnt))
-
-     (t
-      ;; Handles both standard modes and Emacs 29+ tree-sitter modes via
-      ;; `beginning-of-defun-function'.
-      (evil-backward-beginning 'evil-defun cnt)))
-
-    (unless (evil-operator-state-p)
-      (when (fboundp 'my-evil-nav-post-jump)
-        (my-evil-nav-post-jump)))))
+  (my--evil-nav-section-core (or count 1) t))
 
 (when (or (display-graphic-p)
           (daemonp))
-  ;; Only on display-graphic-p because the M-[ issue occurs because modern
-  ;; terminals use "Escape sequences" beginning with the ESC [ characters (the
-  ;; byte-level equivalent of M-[) to communicate complex input like mouse
-  ;; movements, pixel-perfect clicks, and bracketed pastes. When you bind a
-  ;; custom command to M-[ in your Emacs configuration, you effectively
-  ;; "highjack" the prefix of these incoming messages; Emacs consumes the first
-  ;; two characters to trigger your function, leaving the remaining coordinate
-  ;; or paste data orphaned and uninterpreted. Consequently, the terminal's
-  ;; attempt to say "the mouse clicked at these coordinates" is chopped up, and
-  ;; the tail end of that technical string-the "gibberish" you see-is dumped
-  ;; directly into your buffer as literal text. Would you like me to provide a
-  ;; snippet to identify exactly which command is currently "stealing" that M-[
-  ;; prefix?
+  ;; Only on display-graphic-p because modern terminals use escape sequences
+  ;; beginning with ESC [ (the byte-level equivalent of M-[) to communicate
+  ;; complex input like mouse movements and bracketed pastes. Binding M-[
+  ;; directly highjacks the prefix of these incoming messages, breaking terminal
+  ;; features and dumping coordinate data into the buffer.
   (evil-define-key '(insert motion) 'global (kbd "M-[")
     'my-evil-nav-backward-section))
 
@@ -536,16 +525,9 @@ COUNT specifies the number of sections to move backward."
 
 (evil-define-key '(normal) my-intercept-mode-map
   (kbd "[[") 'my-evil-nav-backward-section
-  (kbd "]]") 'my-evil-nav-forward-section
-
-  ;; (kbd "{") 'evil-backward-paragraph
-  ;; (kbd "}") 'evil-forward-paragraph
-  )
+  (kbd "]]") 'my-evil-nav-forward-section)
 
 (evil-define-key '(motion) my-intercept-mode-map
-  ;; (kbd "[[") 'my-evil-nav-backward-section
-  ;; (kbd "]]") 'my-evil-nav-forward-section
-
   (kbd "{") 'evil-backward-paragraph
   (kbd "}") 'evil-forward-paragraph)
 
