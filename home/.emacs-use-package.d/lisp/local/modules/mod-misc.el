@@ -251,7 +251,14 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
                   mode-line-front-space
                   mode-line-modified
                   "  |  "
-                  mode-line-buffer-identification
+                  ;; mode-line-buffer-identification
+                  (:eval
+                   (if (and buffer-file-name
+                            (eq (frame-parameter nil 'fullscreen) 'maximized))
+                       (propertize (abbreviate-file-name buffer-file-name)
+                                   'face 'mode-line-buffer-id
+                                   'help-echo buffer-file-name)
+                     mode-line-buffer-identification))
                   "  |  "
                   (vc-mode vc-mode)
                   (:eval
