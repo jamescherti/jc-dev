@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Convert Git tags starting with 'v' to bare numeric tags.
+
+This script converts tags like 'v1.0.0' to '1.0.0'. By default, it runs
+in a dry-run mode. Use '--apply' to execute the changes and push to a remote.
+The old 'v' prefixed tags are deleted automatically unless '--keep-old' is passed.
+"""
+
+import argparse
+import os
+import subprocess
+import sys
+
+
+def run_git(
+    args: list[str],
+    *,
+    check: bool = True,
+    capture: bool = True,
+    env: dict[str, str] | None = None,
+) -> str:
+    """Execute a Git command and return its standard output.
+
+    Args:
+        args: The Git arguments to run.
+        check: Whether to raise an exception on a non-zero exit status.
+        capture: Whether to capture standard output and error.
+        env: Optional environment variables to merge with os.environ.
+
+    Returns:
+        The stripped standard output of the command if capture is True,
+        else an empty string.
+
+    Raises:
+        SystemExit: If the Git command fails and check is True.
+    """
+    run_env = os.environ.copy()
+    if env:
+        run_env.update(env)
+
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            text=True,
+            capture_output=capture,
+            check=check,
+            env=run_env,
+        )
+        return result.stdout.strip() if capture else ""
+    except subprocess.CalledProcessError as err:
+        print(f"Error executing: git {' '.join(args)}", file=sys.stderr)
+        if capture and err.stderr:
+            print(err.stderr.strip(), file=sys.stderr)
+        sys.exit(err.returncode)
+
+
+def is_git_repo() -> bool:
+    """Check if the current directory is within a Git repository.
+
+    Returns:
+        True if inside a Git repository, False otherwise.
+    """
+    try:
+        subprocess.run(
+            ["git", "rev-parse", "--is-inside-work-tree"],
+            capture_output=True,
+            check=True,
+        )
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def main() -> None:
+    """Run the main CLI logic for tag conversion."""
+    parser = argparse.ArgumentParser(
+        description=(
+            "Convert git tags starting with 'v' to bare numeric tags "
+            "(e.g., v1.0.0 -> 1.0.0)."
+        )
+    )
+    parser.add_argument(
+        "-a",
+        "--apply",
+        action="store_true",
+        help="Perform the tag creation and push changes to remote.",
+    )
+    parser.add_argument(
+        "-k",
+        "--keep-old",
+        action="store_true",
+        help="Keep the old 'v' prefixed tags instead of deleting them.",
+    )
+    parser.add_argument(
+        "-o",
+        "--overwrite",
+        action="store_true",
+        help="Overwrite the destination bare tag if it already exists.",
+    )
+    parser.add_argument(
+        "--no-sign",
+        action="store_true",
+        help="Do not GPG-sign the tag, using the default e-mail address's key.",
+        default=False,
+    )
+    parser.add_argument(
+        "-r",
+        "--remote",
+        default="origin",
+        help="Git remote to push/delete (default: origin).",
+    )
+
+    args = parser.parse_args()
+
+    if not is_git_repo():
+        print("Error: Must be run inside a git repository.", file=sys.stderr)
+        sys.exit(1)
+
+    raw_tags = run_git(["tag", "-l", "v[0-9]*"])
+    old_tags = raw_tags.splitlines() if raw_tags else []
+
+    if not old_tags:
+        print("No tags matching 'v[0-9]*' found.")
+        sys.exit(0)
+
+    print(f"Found {len(old_tags)} tag(s) to process.")
+
+    if not args.apply:
+        print("DRY RUN MODE: No changes will be made. Pass --apply to execute.\n")
+
+    tags_to_push: list[str] = []
+    tags_to_delete: list[str] = []
+
+    for old_tag in old_tags:
+        new_tag = old_tag[1:]  # Strip the leading 'v'
+
+        # Check if the new bare tag already exists
+        try:
+            subprocess.run(
+                ["git", "rev-parse", "-q", "--verify", f"refs/tags/{new_tag}"],
+                capture_output=True,
+                check=True,
+            )
+            if not args.overwrite:
+                print(f"[-] Tag '{new_tag}' already exists. Skipping creation.")
+                if not args.keep_old:
+                    # Still delete the old tag even if we skipped creation
+                    tags_to_delete.append(old_tag)
+                continue
+            print(f"[*] Tag '{new_tag}' already exists. Overwriting.")
+        except subprocess.CalledProcessError:
+            pass
+
+        print(f"[+] Map: {old_tag} -> {new_tag}")
+
+        if args.apply:
+            # Determine if the old tag is annotated ('tag') or lightweight ('commit')
+            tag_type = run_git(["cat-file", "-t", old_tag])
+            is_annotated = tag_type == "tag"
+
+            tag_flag = "-s" if not args.no_sign else "-a"
+            base_cmd = ["tag", "-f"] if args.overwrite else ["tag"]
+
+            # Extract the original date (returns the tagger date for annotated tags,
+            # or the commit author date for lightweight tags).
+            tag_date = run_git(
+                ["tag", "-l", "--format=%(creatordate:iso-strict)", old_tag]
+            )
+
+            git_env = None
+            if tag_date:
+                git_env = {"GIT_COMMITTER_DATE": tag_date}
+
+            if is_annotated:
+                # Separate subject and body to strip out any existing GPG signature blocks
+                subject = run_git(
+                    ["tag", "-l", "--format=%(contents:subject)", old_tag]
+                )
+                body = run_git(["tag", "-l", "--format=%(contents:body)", old_tag])
+                tag_msg = f"{subject}\n\n{body}".strip()
+
+                if tag_msg:
+                    run_git(
+                        [*base_cmd, tag_flag, new_tag, old_tag, "-m", tag_msg],
+                        env=git_env,
+                    )
+                else:
+                    run_git(
+                        [*base_cmd, tag_flag, new_tag, old_tag, "-m", new_tag],
+                        env=git_env,
+                    )
+            elif not args.no_sign:
+                # GPG signing a previously lightweight tag requires a message
+                run_git([*base_cmd, "-s", new_tag, old_tag, "-m", new_tag], env=git_env)
+            else:
+                # Lightweight tags do not store their own dates; they just point to commits.
+                run_git([*base_cmd, new_tag, old_tag])
+
+        tags_to_push.append(new_tag)
+
+        if not args.keep_old:
+            tags_to_delete.append(old_tag)
+
+    if args.apply:
+        if tags_to_push:
+            print(f"\nPushing new tags to '{args.remote}'...")
+            push_cmd = ["push"]
+            if args.overwrite:
+                push_cmd.append("--force")
+            push_cmd.extend([args.remote, *tags_to_push])
+            run_git(push_cmd, capture=False)
+
+        if tags_to_delete:
+            print(f"\nDeleting old tags locally and remotely from '{args.remote}'...")
+            for old_tag in tags_to_delete:
+                run_git(["tag", "-d", old_tag])
+                run_git(["push", args.remote, "--delete", old_tag], capture=False)
+
+        print("\nDone.")
+    else:
+        print(f"\nDry run complete. Run with: {sys.argv[0]} --apply")
+        extra_args = []
+        if args.no_sign:
+            extra_args.append("--no-sign")
+        if args.overwrite:
+            extra_args.append("--overwrite")
+        if args.keep_old:
+            extra_args.append("--keep-old")
+
+        if extra_args:
+            print(
+                f"To execute with your options: {sys.argv[0]} --apply {' '.join(extra_args)}"
+            )
+
+
+if __name__ == "__main__":
+    main()
