@@ -65,7 +65,6 @@ import re
 import sys
 from collections.abc import Iterable
 
-from confirm_lib import confirm
 from github_lib import GitHubLib, handle_github_errors
 
 try:
@@ -130,7 +129,7 @@ def main() -> None:
     github_lib = GitHubLib()
     repo_name = github_lib.get_github_repo_name()
 
-    print(f"Fetching tags and releases for {repo_name}...")
+    # print(f"Fetching tags and releases for {repo_name}...")
     repo = github_lib.github.get_repo(repo_name)
 
     tags = {tag.name for tag in repo.get_tags()}
@@ -143,12 +142,16 @@ def main() -> None:
         print("Nothing to do.")
         return
 
-    print(f"Found {len(sorted_missing_tags)} missing release(s). Creating them now...")
+    print(f"Found {len(sorted_missing_tags)} missing release(s).")
+    print()
     for tag_name in sorted_missing_tags:
-        # print("Create release:", tag_name)
-        if confirm(f"Create release {tag_name}"):
-            print("Super")
-            # github_lib.create_release(tag_name, repo_name=repo_name)
+        print("Create release:", tag_name)
+        repo.create_git_release(
+            tag=tag_name,
+            name=tag_name,
+            message="",
+            generate_release_notes=True,
+        )
 
 
 if __name__ == "__main__":

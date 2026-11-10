@@ -147,29 +147,6 @@ class GitHubLib:
 
         raise ValueError(f"Could not parse GitHub repository from URL: {url}")
 
-    def create_release(self, tag_name: str, repo_name: str | None = None) -> None:
-        """
-        Create a GitHub release for the given tag using the PyGithub library.
-
-        Args:
-            tag_name: The tag name for the release.
-            repo_name: The GitHub repository identifier (e.g., owner/repo). If omitted,
-                the origin remote of the current working repository is used.
-        """
-        if repo_name is None:
-            repo_name = self.get_github_repo_name()
-
-        print(f"Creating GitHub release for {repo_name} via API...")
-        repo = self.github.get_repo(repo_name)
-
-        repo.create_git_release(
-            tag=tag_name,
-            name=tag_name,
-            message="",
-            generate_release_notes=True,
-        )
-        print("Release created.")
-
     def list_repos(self, ignore_repos: list[str] | None = None) -> Iterator[Repository]:
         """
         Yield all repositories names owned by the user.

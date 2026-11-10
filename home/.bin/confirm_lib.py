@@ -30,7 +30,7 @@ from prompt_toolkit import prompt
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 
 
-def confirm(message: str = "Continue?", *, default: bool = True) -> bool:
+def confirm(message: str = "Continue?", *, default: bool = False) -> bool:
     """Prompt the user for a yes/no decision with a single keypress.
 
     Args:
