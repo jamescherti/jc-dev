@@ -19,8 +19,6 @@
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
 
-set -x
-
 if [[ $EMACS_BIN = "" ]]; then
   EMACS_BIN="$HOME/.bin/run-emacs"
 fi
