@@ -52,16 +52,17 @@ MISSING_REPOSITORIES: list[dict[str, str | None]] = [
         "directory": "forks/ztree",
         "upstream_uri": "https://codeberg.org/fourier/ztree",
     },
-    {
-        "uri": "ssh://aur@aur.archlinux.org/linux-keep-modules",
-        "directory": "linux/aur-linux-keep-modules",
-        "upstream_uri": None,
-    },
-    {
-        "uri": "ssh://aur@aur.archlinux.org/brother-ql1110nwb",
-        "directory": "linux/aur-brother-ql1110nwb",
-        "upstream_uri": None,
-    },
+    # TODO: It doesn't work
+    # {
+    #     "uri": "ssh://aur@aur.archlinux.org/linux-keep-modules",
+    #     "directory": "linux/aur-linux-keep-modules",
+    #     "upstream_uri": None,
+    # },
+    # {
+    #     "uri": "ssh://aur@aur.archlinux.org/brother-ql1110nwb",
+    #     "directory": "linux/aur-brother-ql1110nwb",
+    #     "upstream_uri": None,
+    # },
 ]
 
 # Global list of repositories that should not be updated automatically.
@@ -234,7 +235,7 @@ def main() -> None:
         repos_by_category[category].append(
             (git_uri, path_val, upstream_url, disable_update)
         )
-        print("[MISSING REPO]", git_uri)
+        print("[ADD ADDITIONAL REPO]", git_uri)
 
     # Generate YAML file
     out_path = SRC_DIR / "batchfetch.yaml"
