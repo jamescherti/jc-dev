@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+#
+# Python Requirements:
+#   - PyGithub
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Manage GitHub repository settings.
+
+Script to auto-detect and set the homepage URL for a GitHub repository,
+and manage repository feature visibility.
+
+Usage:
+------
+    python3 manage_github_repo.py
+
+The script automatically determines the repository name and sets the
+homepage URL to: https://github.com/owner/repo.
+"""
+
+import sys
+
+from github.Repository import Repository
+from github_data import IGNORE_GITHUB_REPOSITORIES
+from github_lib import GitHubLib, handle_github_errors
+
+
+def update_homepage_url(repo: Repository, target_url: str) -> bool:
+    """Update the repository homepage URL if necessary.
+
+    Args:
+        repo: The PyGithub Repository object.
+        target_url: The expected homepage URL.
+    """
+    if repo.homepage == target_url:
+        return False
+
+    print(f"  [UPDATE] Setting homepage to: {target_url}")
+    repo.edit(homepage=target_url)
+    return True
+
+
+@handle_github_errors
+def main() -> None:
+    """Run the main CLI logic to update the repository."""
+    if len(sys.argv) > 1:
+        print(f"Usage: {sys.argv[0]}", file=sys.stderr)
+        sys.exit(1)
+
+    github_lib = GitHubLib()
+
+    change = False
+    index = 0
+    for repo in github_lib.list_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES):
+        print(f"[REPO] {repo.full_name}")
+
+        if repo.fork:
+            continue
+
+        target_url = f"https://github.com/{repo.full_name}"
+
+        change |= update_homepage_url(repo, target_url)
+
+        if repo.has_wiki or repo.has_projects:
+            for name, value in (
+                ("Change wiki to", not repo.has_wiki),
+                ("Change projects to", not repo.has_projects),
+            ):
+                print(f"  [UPDATE] {name}={value}")
+
+            repo.edit(has_projects=False, has_wiki=False)
+            change = True
+
+        if repo.delete_branch_on_merge:
+            print("WARNING: delete branch")
+
+        index += 1
+        if index == 1:
+            break
+
+    if not change:
+        print("Nothing to do.")
+
+
+if __name__ == "__main__":
+    main()
