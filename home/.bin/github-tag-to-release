@@ -135,7 +135,8 @@ def main() -> None:
     tags = {tag.name for tag in repo.get_tags()}
     releases = {release.tag_name for release in repo.get_releases()}
 
-    missing_tags = tags - releases
+    # missing_tags = tags - releases
+    missing_tags = tags
     sorted_missing_tags = sort_versions(missing_tags)
 
     if not sorted_missing_tags:
@@ -145,12 +146,17 @@ def main() -> None:
     print(f"Found {len(sorted_missing_tags)} missing release(s).")
     print()
     for tag_name in sorted_missing_tags:
+        if tag_name in releases:
+            print("Delete release:", tag_name)
+            release = repo.get_release(tag_name)
+            release.delete_release()
+
         print("Create release:", tag_name)
         repo.create_git_release(
             tag=tag_name,
             name=tag_name,
             message="",
-            generate_release_notes=True,
+            generate_release_notes=False,
         )
 
 
