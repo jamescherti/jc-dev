@@ -31,6 +31,7 @@ This script requires a GitHub Personal Access Token (PAT) with repository write 
 The token is loaded using the following priority:
 
 1. A GPG-encrypted YAML file located at /path/to/github-token.yaml.asc containing:
+
    token: your_personal_access_token_here
 2. The GITHUB_TOKEN environment variable:
    export GITHUB_TOKEN="your_personal_access_token_here"
@@ -60,22 +61,91 @@ Or export it in your shell environment:
     export GITHUB_TOKEN="your_token_here"
 """
 
+import re
 import sys
+from collections.abc import Iterable
 
 from github_lib import GitHubLib, handle_github_errors
+
+try:
+    from packaging.version import InvalidVersion, Version
+except ImportError:
+    Version = None  # type: ignore[assignment,misc]
+    InvalidVersion = Exception  # type: ignore[assignment,misc]
+
+VERSION_TAG_RE = re.compile(r"^[^0-9]*(\d+(?:\.\d+)+.*)$")
+
+
+def parse_version_key(tag: str) -> tuple[int, ...] | Version | None:
+    """Extract a sortable version key from a tag string."""
+    match = VERSION_TAG_RE.match(tag)
+    if not match:
+        return None
+
+    version_str = match.group(1)
+    if Version is not None:
+        try:
+            return Version(version_str)
+        except InvalidVersion:
+            pass
+
+    # Fallback to numeric tuple extraction if packaging is unavailable or non-PEP 440
+    numbers = re.findall(r"\d+", version_str)
+    if not numbers:
+        return None
+    return tuple(int(n) for n in numbers)
+
+
+def sort_versions(items: Iterable[str]) -> list[str]:
+    """Sort an iterable of version strings from oldest to newest.
+
+    Args:
+        items: An iterable of strings containing version representations.
+
+    Returns:
+        A list of version strings sorted in ascending order.
+    """
+    versioned_items: list[tuple[tuple[int, ...] | Version, str]] = []
+    for raw_item in items:
+        item = raw_item.strip()
+        if not item:
+            continue
+
+        version_key = parse_version_key(item)
+        if version_key is not None:
+            versioned_items.append((version_key, item))
+
+    versioned_items.sort(key=lambda entry: entry[0])
+    return [item for _, item in versioned_items]
 
 
 @handle_github_errors
 def main() -> None:
     """Run the main CLI logic."""
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <tag-name>")
+    if len(sys.argv) > 1:
+        print(f"Usage: {sys.argv[0]}", file=sys.stderr)
         sys.exit(1)
 
-    tag_name = sys.argv[1]
-
     github_lib = GitHubLib()
-    github_lib.create_release(tag_name)
+    repo_name = github_lib.get_github_repo_name()
+
+    print(f"Fetching tags and releases for {repo_name}...")
+    repo = github_lib.github.get_repo(repo_name)
+
+    tags = {tag.name for tag in repo.get_tags()}
+    releases = {release.tag_name for release in repo.get_releases()}
+
+    missing_tags = tags - releases
+    sorted_missing_tags = sort_versions(missing_tags)
+
+    if not sorted_missing_tags:
+        print("Nothing to do.")
+        return
+
+    print(f"Found {len(sorted_missing_tags)} missing release(s). Creating them now...")
+    for tag_name in sorted_missing_tags:
+        print("Create release:", tag_name)
+        # github_lib.create_release(tag_name, repo_name=repo_name)
 
 
 if __name__ == "__main__":

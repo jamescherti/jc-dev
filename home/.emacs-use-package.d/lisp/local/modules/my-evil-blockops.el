@@ -519,15 +519,16 @@ heading."
 ;; M-[ and M-]: Previous and next section
 (defun my-evil-blockops--nav-treesit-move-defun (count)
   "Move COUNT defuns using tree-sitter, falling back to buffer boundaries.
-Positive COUNT moves backward, negative COUNT moves forward."
-  (when (fboundp 'treesit-beginning-of-defun)
+Positive COUNT moves forward; negative COUNT moves backward.
+Zero COUNT leaves point unchanged."
+  (when (and (not (zerop count))
+             (fboundp 'treesit-beginning-of-defun))
     (let ((start-pt (point)))
-      (evil-signal-at-bob-or-eob (- count))
-      (unless (and (treesit-beginning-of-defun count)
-                   (/= (point) start-pt))
-        (if (< count 0)
-            (goto-char (point-max))
-          (goto-char (point-min)))))))
+      (treesit-beginning-of-defun (- count))
+      (when (= (point) start-pt)
+        (goto-char (if (< count 0)
+                       (point-min)
+                     (point-max)))))))
 
 (defun my-evil-blockops--nav-post-jump ()
   "Open folds, recenter window, and pulse the line after an interactive jump."
@@ -542,10 +543,10 @@ Positive COUNT moves backward, negative COUNT moves forward."
   "Core logic for moving sections forward or backward.
 COUNT is the absolute number of sections to move.
 IS-BACKWARD is non-nil for backward movement, nil for forward."
-  (let ((count (abs count))
-        (signed-count (if is-backward
-                          (- count)
-                        count)))
+  (let* ((count (abs count))
+         (signed-count (if is-backward
+                           (- count)
+                         count)))
     (evil-signal-at-bob-or-eob signed-count)
 
     (cond
