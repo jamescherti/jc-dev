@@ -134,16 +134,15 @@ bf-or-git() {
 }
 
 prepare-dependencies() {
+  cd "$SCRIPT_DIR"
+
   if ! [[ -d "$SRC_DIR/python/batchfetch/" ]]; then
     git clone \
       "git@github.com:jamescherti/batchfetch" \
       "$SRC_DIR/python/batchfetch/"
   fi
 
-  # TODO auto generate
-  # rsync -a \
-  #   "$SCRIPT_DIR/home/src/batchfetch.yaml" \
-  #   "$SRC_DIR/batchfetch.yaml"
+  ./home/.bin/update-batchfetch-projects
 
   BF_OR_GIT_BRANCH=main
   bf-or-git "$SRC_DIR/dotfiles/jc-dev"
