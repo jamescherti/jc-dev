@@ -122,6 +122,7 @@ class Release:
 
         if self.confirm("Apply?"):
             self.execute_release(new_version, new_num, python_project)
+            subprocess.check_call(["github-tag-to-release"])
 
     def chdir_git_toplevel(self) -> None:
         """Change the current directory to the Git toplevel directory."""
