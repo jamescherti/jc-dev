@@ -59,6 +59,13 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     "jamescherti/wip": "",
     "jamescherti/notes": "",
     # Other
+    "alpm-reboot-required": "legacy",
+    "archlinux-brother-ql1110nwb": "legacy",
+    "archlinux-linux-keep-modules": "legacy",
+    "aur-brother-ql1110nwb": "legacy",
+    "aur-linux-keep-modules": "legacy",
+    "docker-oddmuse": "legacy",
+    "python-dpc3848v-wifi-modem": "legacy",
     "jamescherti/gentoo-brother-ql1110nwb": "legacy",
     "jamescherti/cherrybuckle": "legacy",
     "jamescherti/elispcomp": "legacy",
