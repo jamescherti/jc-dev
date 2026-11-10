@@ -103,7 +103,7 @@ def main() -> None:
     github_lib = GitHubLib()
 
     change = False
-    index = 0
+    # index = 0
     for repo in github_lib.list_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES):
         if repo.fork:
             continue
@@ -128,9 +128,9 @@ def main() -> None:
         if repo.delete_branch_on_merge:
             print("WARNING: delete branch")
 
-        index += 1
-        if index == 1:
-            break
+        # index += 1
+        # if index == 1:
+        #     break
 
     if not change:
         print("Nothing to do.")
