@@ -20,6 +20,13 @@
 #
 
 actions:
+  - path_match: "*/jamescherti/README.md"
+    cwd: "jamescherti"
+    tags: install
+    shell: true
+    list_commands:
+      - update-github-repo-jamescherti
+
   - path_match: "*/borgmachine"
     tags: install
     list_commands:

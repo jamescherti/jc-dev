@@ -65,6 +65,7 @@ import re
 import sys
 from collections.abc import Iterable
 
+from confirm_lib import confirm
 from github_lib import GitHubLib, handle_github_errors
 
 try:
@@ -144,8 +145,10 @@ def main() -> None:
 
     print(f"Found {len(sorted_missing_tags)} missing release(s). Creating them now...")
     for tag_name in sorted_missing_tags:
-        print("Create release:", tag_name)
-        # github_lib.create_release(tag_name, repo_name=repo_name)
+        # print("Create release:", tag_name)
+        if confirm(f"Create release {tag_name}"):
+            print("Super")
+            # github_lib.create_release(tag_name, repo_name=repo_name)
 
 
 if __name__ == "__main__":
