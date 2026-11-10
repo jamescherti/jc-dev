@@ -85,6 +85,21 @@ update-repos() {
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
 
+  git-rexec -C "$SRC_DIR/dotfiles" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
+    "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout develop && git pull --rebase && git push"
+
+  git-rexec -C "$SRC_DIR/ansible" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
+    "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout develop && git pull --rebase && git push"
+
+  git-rexec -C "$SRC_DIR/tools" \
+    "${GIT_REXEC_EXCLUDES[@]}" \
+    "${GIT_REXEC_OPTS[@]}" -- \
+    sh -c "git checkout develop && git pull --rebase && git push"
+
   # I excluded GIT_REXEC_OPTS because I want it to check GPG on all repositories
   git-rexec --parallel -C "$SRC_DIR/" \
     "${GIT_REXEC_EXCLUDES[@]}" -- \

@@ -224,14 +224,21 @@ _git_wrapper() {
   fi
 }
 
+_GIT_REXEC_OPTIONS=(
+  --exclude ~/src/forks/
+  --exclude ~/src/local/
+  --exclude ~/src/legacy/
+)
+
+alias git-rexec='command git-rexec "${_GIT_REXEC_OPTIONS[@]}"'
+
 alias git='_git_wrapper git'
 # alias rgit='_git_wrapper git find git'
 alias lrgit='_git_wrapper git-finder-exec git'
 
 _git_find_repos_wrapper() {
   so git-rexec \
-    --exclude ~/src/forks/ \
-    --exclude ~/src/local/ \
+    "${_GIT_REXEC_OPTIONS[@]}" \
     -C . \
     "$@"
 }
