@@ -56,6 +56,43 @@ def update_homepage_url(repo: Repository, target_url: str) -> bool:
     return True
 
 
+def protect_default_branch(repo: Repository) -> bool:
+    """Enforce branch protection rules on the repository default branch.
+
+    Args:
+        repo: The PyGithub Repository object.
+    """
+    branch_name = repo.default_branch
+    branch = repo.get_branch(branch_name)
+
+    if branch.protected:
+        return False
+
+    branch.edit_protection(
+        # Do not block the sole admin from pushing or bypassing checks when needed
+        enforce_admins=False,
+        # Enforce a clean, straight commit history without merge commits
+        required_linear_history=True,
+        # Prevent deleting the protected branch
+        allow_deletions=False,
+        # Block force pushes to protect the branch history
+        allow_force_pushes=False,
+        # For a solo workflow that permits direct pushes, remove the last three
+        # arguments. PyGithub expects an integer when required_approving_review_count is
+        # supplied. Passing False for either review option still configures the pull
+        # request review rule.
+        # --- The following are explicitly disabled for a solo workflow ---
+        # Allow the sole contributor to merge without external approvals
+        # required_approving_review_count=None,
+        # Do not invalidate PRs on new commits (irrelevant without reviews)
+        # dismiss_stale_reviews=False,
+        # Do not mandate approval from designated CODEOWNERS
+        # require_code_owner_reviews=False,
+    )
+    print(f"  [UPDATE] Protected branch: '{branch_name}'")
+    return True
+
+
 @handle_github_errors
 def main() -> None:
     """Run the main CLI logic to update the repository."""
@@ -68,14 +105,15 @@ def main() -> None:
     change = False
     index = 0
     for repo in github_lib.list_repos(ignore_repos=IGNORE_GITHUB_REPOSITORIES):
-        print(f"[REPO] {repo.full_name}")
-
         if repo.fork:
             continue
 
+        print(f"[REPO] {repo.full_name}")
         target_url = f"https://github.com/{repo.full_name}"
 
         change |= update_homepage_url(repo, target_url)
+
+        change |= protect_default_branch(repo)
 
         if repo.has_wiki or repo.has_projects:
             for name, value in (
@@ -85,7 +123,7 @@ def main() -> None:
                 print(f"  [UPDATE] {name}={value}")
 
             repo.edit(has_projects=False, has_wiki=False)
-            change = True
+            change |= True
 
         if repo.delete_branch_on_merge:
             print("WARNING: delete branch")
