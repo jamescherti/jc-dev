@@ -32,6 +32,7 @@ The token is loaded using the following priority:
 
 1. A GPG-encrypted YAML file located at /path/to/github-token.yaml.asc containing:
 
+
    token: your_personal_access_token_here
 2. The GITHUB_TOKEN environment variable:
    export GITHUB_TOKEN="your_personal_access_token_here"
@@ -65,6 +66,7 @@ import re
 import sys
 from collections.abc import Iterable
 
+from github.Repository import Repository
 from github_lib import GitHubLib, handle_github_errors
 
 try:
@@ -74,6 +76,8 @@ except ImportError:
     InvalidVersion = Exception  # type: ignore[assignment,misc]
 
 VERSION_TAG_RE = re.compile(r"^[^0-9]*(\d+(?:\.\d+)+.*)$")
+INCLUDE_CHANGELOG = False
+OVERWRITE_EXISTING_RELEASES = True
 
 
 def parse_version_key(tag: str) -> tuple[int, ...] | Version | None:
@@ -119,6 +123,40 @@ def sort_versions(items: Iterable[str]) -> list[str]:
     return [item for _, item in versioned_items]
 
 
+def build_release_message(
+    repo: Repository,
+    tag_name: str,
+    prev_tag: str | None,
+) -> str:
+    """Build the release body with commit subjects and a comparison URL.
+
+    Args:
+        repo: The PyGithub Repository instance.
+        tag_name: The current tag being released.
+        prev_tag: The immediately preceding version tag, if any.
+
+    Returns:
+        Formatted markdown string for the GitHub release message.
+    """
+    sections: list[str] = [f"Release: {tag_name}"]
+
+    if prev_tag is not None:
+        comparison = repo.compare(prev_tag, tag_name)
+        commit_lines: list[str] = []
+        for commit in comparison.commits:
+            subject = commit.commit.message.splitlines()[0].strip()
+            if subject:
+                commit_lines.append(f"- {subject} ({commit.sha[:7]})")
+
+        if commit_lines:
+            sections.append("## What's Changed\n\n" + "\n".join(commit_lines))
+
+        compare_url = f"{repo.html_url}/compare/{prev_tag}...{tag_name}"
+        sections.append(f"**Full Changelog**: {compare_url}")
+
+    return "\n\n".join(sections)
+
+
 @handle_github_errors
 def main() -> None:
     """Run the main CLI logic."""
@@ -135,8 +173,18 @@ def main() -> None:
     tags = {tag.name for tag in repo.get_tags()}
     releases = {release.tag_name for release in repo.get_releases()}
 
-    # missing_tags = tags - releases
-    missing_tags = tags
+    sorted_all_tags = sort_versions(tags)
+
+    prev_tag_map: dict[str, str | None] = {}
+    if INCLUDE_CHANGELOG:
+        # Map each tag to its previous tag so comparisons still work if you
+        # uncomment `missing_tags = tags - releases` later.
+        prev_tag_map = {
+            tag: (sorted_all_tags[i - 1] if i > 0 else None)
+            for i, tag in enumerate(sorted_all_tags)
+        }
+
+    missing_tags = tags if OVERWRITE_EXISTING_RELEASES else tags - releases
     sorted_missing_tags = sort_versions(missing_tags)
 
     if not sorted_missing_tags:
@@ -146,16 +194,23 @@ def main() -> None:
     print(f"Found {len(sorted_missing_tags)} missing release(s).")
     print()
     for tag_name in sorted_missing_tags:
-        if tag_name in releases:
-            print("Delete release:", tag_name)
+        if OVERWRITE_EXISTING_RELEASES and tag_name in releases:
             release = repo.get_release(tag_name)
             release.delete_release()
+
+        if INCLUDE_CHANGELOG:
+            release_message = build_release_message(
+                repo, tag_name, prev_tag_map.get(tag_name)
+            )
+        else:
+            changelog = f"[changelog]({repo.html_url}/commits/{tag_name})"
+            release_message = f"Release: {tag_name} ({changelog})"
 
         print("Create release:", tag_name)
         repo.create_git_release(
             tag=tag_name,
             name=tag_name,
-            message="",
+            message=release_message,
             generate_release_notes=False,
         )
 
