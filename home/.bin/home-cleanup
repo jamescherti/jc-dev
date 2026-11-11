@@ -32,19 +32,21 @@ set -euf -o pipefail
 ATIME="+30"
 
 ATEXIT_DONE=0
+FD_TMP_FILE=$(mktemp) || return 1
+# shellcheck disable=SC2329
 atexit() {
   local errno="$?"
-  trap - EXIT INT TERM HUP QUIT
+  trap - INT TERM EXIT
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
-    # if [[ $TOTAL_CLEANUPS -eq 0 ]]; then
-    #   echo "Nothing to do."
-    # fi
     ATEXIT_DONE=1
+
+    if [[ $FD_TMP_FILE != "" ]]; then
+      [[ -f $FD_TMP_FILE ]] && rm -f "$FD_TMP_FILE"
+      FD_TMP_FILE=""
+    fi
   fi
   exit "$errno"
 }
-
-trap 'atexit' EXIT INT TERM HUP QUIT
 
 dir_size() {
   LC_ALL=C du -hs -- "$dir" | cut -f 1
@@ -68,121 +70,141 @@ cleanup_dir() {
   fi
 }
 
-cleanup_dir "$HOME/.cache/pip"
-cleanup_dir "$HOME/.cache/thumbnails"
-cleanup_dir "$HOME/.cache/pylint"
-cleanup_dir "$HOME/.vim_bundle/undo"
-cleanup_dir "$HOME/.vim_bundle/swp"
-cleanup_dir "$HOME/.vim_bundle/backup"
-cleanup_dir "$HOME/.vim_bundle/view"
-cleanup_dir "$HOME/.emacs-data/var/autosave"
-cleanup_dir "$HOME/.emacs-data/var/backup"
-cleanup_dir "$HOME/.emacs-data/var/undo-fu-session"
-cleanup_dir "$HOME/.emacs-data/var/tmp-files.d"
-cleanup_dir "$HOME/.emacs-data/var/elisp-autofmt-cache"
+unset FD_DEFAULT_OPTIONS &>/dev/null || true
+FD_OPTS=(
+  --color=never
+  --follow
+  --exclude "/.src-other/"
+  --exclude "/src/forks/"
+  --exclude "/src/local/"
+  --exclude "/.gnupg/"
+  --exclude 'pubring.kbx~'
+  --exclude '.git/'
+  --exclude '.svn/'
+  --exclude '.hg/'
+  --exclude '/.nobackup/'
+  --exclude '/.config/'
+  --exclude '/.var/app/'
+  --exclude '/.local/share/Trash/'
+  --exclude 'user-places.xbel.bak'
+  # Python
+  --exclude '/.local/lib/'
+  --exclude '/.config/libreoffice'
+  --exclude '/.config/chromium'
+  # Emacs
+  --exclude "tree-sitter/"
+  --exclude "autosave/"
+  --exclude 'elpa/'
+  --exclude 'elpaca/'
+  --exclude 'straight/'
+)
 
-# Python & Dev tools
-cleanup_dir "$HOME/.cache/ruff"
-cleanup_dir "$HOME/.cache/python_cache"
-cleanup_dir "$HOME/.cache/python_cache_egg"
-cleanup_dir "$HOME/.cache/python_cache_mypy"
+FD_CUSTOM_DIR="$HOME"
+fd_delete() {
+  local answer status
+  local -a matches
 
-# System, Desktop & Misc
-cleanup_dir "$HOME/.cache/fontconfig"
-cleanup_dir "$HOME/.cache/mesa_shader_cache"
-cleanup_dir "$HOME/.cache/gstreamer-1.0"
+  if fd --hidden --no-ignore "${FD_OPTS[@]}" "$@" \
+    --print0 "$FD_CUSTOM_DIR" >"$FD_TMP_FILE"; then
+    mapfile -d '' -t matches <"$FD_TMP_FILE"
+  else
+    return 1
+  fi
 
-# TODO Step 2?
-#
-# MODIFIED_DAYS="+90"
-# cleanup_files() {
-#   local path="$1"
-#   local glob="$2"
-#   local filetype="$3" # f, d
-#   local modified_days="$4"
-#   local title="${filetype}: ${glob} in ${path}:"
-#
-#   if ! [[ -d "$path" ]]; then
-#     return 0
-#   fi
-#
-#   #
-#   # Commands
-#   #
-#   local -a cmd_find
-#   cmd_find=(find "$path" -type "$filetype" -name "$glob" -not -path '*/\.git/*')
-#   if [[ "$filetype" == "d" ]]; then
-#     cmd_find+=(-prune)
-#   fi
-#
-#   local -a cmd_find_total
-#   cmd_find_total=("${cmd_find[@]}")
-#
-#   if [[ -n "$modified_days" ]]; then
-#     cmd_find+=(-mtime "$modified_days")
-#   fi
-#
-#   #
-#   # Find the files
-#   #
-#   local -a list_files=()
-#   readarray -d '' list_files < <("${cmd_find[@]}" -print0 2>/dev/null || true)
-#   if [[ "${#list_files[@]}" -le 0 ]]; then
-#     return 0
-#   fi
-#
-#   #
-#   # Show infos
-#   #
-#
-#   # shellcheck disable=SC2001
-#   echo "$title" | sed -e 's/./-/g'
-#   echo "$title"
-#   # shellcheck disable=SC2001
-#   echo "$title" | sed -e 's/./-/g'
-#
-#   local item
-#   local counter=0
-#   echo "Command:" "${cmd_find[@]}"
-#   echo "Files:"
-#   # shellcheck disable=SC1073
-#   for item in "${list_files[@]}"; do
-#     echo "  $item"
-#     counter=$((counter + 1))
-#     if [[ "$counter" -gt 5 ]]; then
-#       echo "  (more...)"
-#       break
-#     fi
-#   done
-#   echo -n "The files that will be deleted: ${#list_files[@]} / "
-#   "${cmd_find_total[@]}" 2>/dev/null | wc -l || true
-#   echo -n "Size: "
-#   printf '%s\0' "${list_files[@]}" \
-#     | LC_ALL=C du --files0-from=- --human-readable --summarize --total 2>/dev/null \
-#     | tail -n 1 \
-#     | sed -e 's/[[:space:]]*total$//' || true
-#
-#   #
-#   # Delete
-#   #
-#   echo
-#   local ANSWER=''
-#   if ! read -r -p "Delete? [y,n] " ANSWER; then
-#     echo
-#     return 0
-#   fi
-#   if [[ "$ANSWER" == "y" ]]; then
-#     for item in "${list_files[@]}"; do
-#       echo "DELETE: $item"
-#       rm -fr -- "$item"
-#     done
-#   fi
-#
-#   echo
-#
-#   # TOTAL_CLEANUPS=$((TOTAL_CLEANUPS + 1))
-# }
-#
-# cleanup_files "$HOME" '.DS_Store' f "$MODIFIED_DAYS"
-# cleanup_files "$HOME" '.comments' d ""
-# cleanup_files "$HOME" '__pycache__' d ""
+  if ((${#matches[@]} == 0)); then
+    return 0
+  fi
+
+  # printf 'Matched paths:\n'
+  # printf '  %q\n' "${matches[@]}"
+
+  if ! du --summarize --human-readable --total \
+    --files0-from="$FD_TMP_FILE"; then
+    return 1
+  fi
+
+  while true; do
+    if ! read -r -p 'Delete all listed paths recursively? [yes/no] ' answer; then
+      return 1
+    fi
+
+    case "$answer" in
+    yes | no)
+      break
+      ;;
+    *)
+      echo "Invalid input. Please enter 'yes' or 'no'."
+      ;;
+    esac
+  done
+
+  case "$answer" in
+  yes | YES)
+    rm -rf -- "${matches[@]}"
+    status=$?
+    if [[ $status -eq 0 ]]; then
+      printf 'Deletion done.\n\n'
+    else
+      printf 'Deletion error.\n\n'
+    fi
+    return "$status"
+    ;;
+  *)
+    printf 'Deletion cancelled.\n\n'
+    ;;
+  esac
+}
+
+main() {
+  trap 'atexit' INT TERM EXIT
+
+  # REmoved:#$|
+  FD_CUSTOM_DIR="$HOME"
+  fd_delete -t f '(^#.*#$|^\.#.*$|~$|\.swp$|\.swo$)'
+  fd_delete -t f '\.(tmp|bak)$'
+  fd_delete -t f '(\.DS_Store|\.comments|__pycache__|Thumbs\.db)$'
+  fd_delete -t f '\.(o|a|so)$'
+  fd_delete -t f '\.ansible$'
+  fd_delete -t f '(\.tox|\.nox|\.ipynb_checkpoints|\.egg-info|\.dist-info)$'
+
+  # Python & test tools
+  fd_delete -t f '(\.pytest_cache|\.mypy_cache|\.ruff_cache|\.uv_cache)$'
+
+  FD_CUSTOM_DIR="$HOME/src"
+  fd_delete -t d --exclude /local --exclude /forks '(build|dist)$'
+
+  # fd_delete '^(build|dist)$'
+  #
+  # # Logs & temp files
+  #
+  # # Emacs autosaves & lock files
+  #
+  # # Desktop & OS metadata
+  # fd_delete '^desktop\.ini$'
+
+  # cleanup_dir "$HOME/.cache/pip"
+  # cleanup_dir "$HOME/.cache/thumbnails"
+  # cleanup_dir "$HOME/.cache/pylint"
+  # cleanup_dir "$HOME/.vim_bundle/undo"
+  # cleanup_dir "$HOME/.vim_bundle/swp"
+  # cleanup_dir "$HOME/.vim_bundle/backup"
+  # cleanup_dir "$HOME/.vim_bundle/view"
+  # cleanup_dir "$HOME/.emacs-data/var/autosave"
+  # cleanup_dir "$HOME/.emacs-data/var/backup"
+  # cleanup_dir "$HOME/.emacs-data/var/undo-fu-session"
+  # cleanup_dir "$HOME/.emacs-data/var/tmp-files.d"
+  # cleanup_dir "$HOME/.emacs-data/var/elisp-autofmt-cache"
+  #
+  # # Python & Dev tools
+  # cleanup_dir "$HOME/.cache/ruff"
+  # cleanup_dir "$HOME/.cache/python_cache"
+  # cleanup_dir "$HOME/.cache/python_cache_egg"
+  # cleanup_dir "$HOME/.cache/python_cache_mypy"
+  #
+  # # System, Desktop & Misc
+  # cleanup_dir "$HOME/.cache/fontconfig"
+  # cleanup_dir "$HOME/.cache/mesa_shader_cache"
+  # cleanup_dir "$HOME/.cache/gstreamer-1.0"
+}
+
+main "$@"

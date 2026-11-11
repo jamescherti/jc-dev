@@ -104,6 +104,12 @@ update-repos() {
   git-rexec --parallel -C "$SRC_DIR/" \
     "${GIT_REXEC_EXCLUDES[@]}" -- \
     git-check-gpg
+
+  local repo
+  for repo in notes wip dotfiles/jc-dev; do
+    cd "$HOME/src/$repo"
+    git checkout develop
+  done
 }
 
 config-project-list() {

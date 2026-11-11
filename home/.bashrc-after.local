@@ -388,7 +388,7 @@ _alias_git_completion _git_checkout co
 
 alias squash='git squash'
 alias sq='git squash'
-_alias_git_completion _git_checkout squash sqi
+_alias_git_completion _git_checkout squash sq
 #-------------------------------------------------------------------------------
 # CUSTOM COMPLETION
 #-------------------------------------------------------------------------------
@@ -631,13 +631,27 @@ if type -P bat &>/dev/null; then
   # export LESSOPEN="|bat --color=always --style=plain %s 2>/dev/null"
 fi
 
-# shellcheck disable=SC1090
-if [[ -f ~/.bashrc-after2.local ]]; then
-  source ~/.bashrc-after2.local
-fi
-
 alias github-list="so github-list"
 alias github-list-categories="so github-list-categories"
 alias github-tag-to-release="so github-tag-to-release"
 alias update-batchfetch-projects="so update-batchfetch-projects"
 alias github-sanitize-all="so github-sanitize-all"
+
+# FIGNORE is a colon-separated list of filename suffixes that Bash ignores
+# during filename
+
+# Python
+FIGNORE+=':build:dist'
+FIGNORE+=':.coverage:coverage.json'
+
+# FIGNORE+=':.hypothesis'
+# FIGNORE+=':.lo:.la:.gcda:.gcno:.class'
+# FIGNORE+=':node_modules:.parcel-cache:.next:.nuxt:.svelte-kit:.tsbuildinfo'
+# FIGNORE+=':.gradle:.terraform:.direnv'
+# FIGNORE+=':.aux:.fls:.fdb_latexmk:.synctex.gz'
+export FIGNORE
+
+# shellcheck disable=SC1090
+if [[ -f ~/.bashrc-after2.local ]]; then
+  source ~/.bashrc-after2.local
+fi

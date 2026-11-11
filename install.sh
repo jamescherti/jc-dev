@@ -414,6 +414,15 @@ main() {
     touch ~/Downloads/.trackerignore
   fi
 
+  # Git rexec ignore
+  touch ~/src/forks/.git-rexec-ignore
+  if ! [[ -f ~/src/local ]]; then
+    touch ~/src/local/.git-rexec-ignore
+  fi
+  if ! [[ -f ~/src/legacy ]]; then
+    touch ~/src/legacy/.git-rexec-ignore
+  fi
+
   echo
   echo Success.
 }
