@@ -217,6 +217,9 @@ main() {
 
   config-project-list
 
+  cd ~/src/notes/ && git config hooks.allowDefaultBranchCommits true
+  cd ~/src/wip/ && git config hooks.allowDefaultBranchCommits true
+
   # TODO Run once a day
   git_maintenance
 }
