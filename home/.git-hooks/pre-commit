@@ -337,7 +337,7 @@ main() {
   # check_syntax
 
   check_arch_linux
-  # check_pre_commit "$@"
+  check_pre_commit "$@"
 }
 
 # Main
