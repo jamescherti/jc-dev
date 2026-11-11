@@ -44,7 +44,7 @@ if [[ -s ~/.config.sh ]]; then
 fi
 
 OPTS=()
-if [[ "${ALL_PROXY:-}" == "" ]]; then
+if [[ "${HTTPS_PROXY:-}" == "" ]] || [[ "${ALL_PROXY:-}" == "" ]]; then
   if type -P proxychains &>/dev/null && [[ -f ~/.proxychains.conf ]]; then
     OPTS+=(proxychains -q -f "$HOME/.proxychains.conf")
   fi
