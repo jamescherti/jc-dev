@@ -93,6 +93,68 @@ def protect_default_branch(repo: Repository) -> bool:
     return True
 
 
+def disable_projects_and_wiki(repo: Repository) -> bool:
+    """Disable projects and wiki."""
+    if repo.has_wiki or repo.has_projects:
+        for name, value in (
+            ("Change wiki to", not repo.has_wiki),
+            ("Change projects to", not repo.has_projects),
+        ):
+            print(f"  [UPDATE] {name}={value}")
+
+        repo.edit(has_projects=False, has_wiki=False)
+        return True
+
+    return False
+
+
+# def set_pull_request_limit(repo: Repository) -> None:
+#     """Allow one open non-draft pull request per contributor without write access.
+#
+#     :param repo: Public GitHub repository to configure.
+#     """
+#     repo.requester.requestJsonAndCheck(
+#         "PATCH",
+#         f"{repo.url}/interaction-limits/pulls/creation-cap",
+#         headers={"X-GitHub-Api-Version": "2026-03-10"},
+#         input={
+#             "enabled": True,
+#             "max_open_pull_requests": 1,
+#             "include_drafts": False,
+#         },
+#     )
+#
+#
+# @dataclass
+# class PullRequestLimit:
+#     """Represent the repository's limit on concurrent open pull requests.
+#
+#     :ivar enabled: Whether the repository enforces the limit.
+#     :ivar max_open_pull_requests: Maximum number of open pull requests
+#         allowed per contributor without write access, subject to exemptions.
+#     """
+#
+#     enabled: bool
+#     max_open_pull_requests: int
+#
+#
+# def get_pull_request_limit(repo: Repository) -> PullRequestLimit:
+#     """Retrieve the repository's pull request creation limit.
+#
+#     :param repo: GitHub repository to query.
+#     :return: The configured limit and its enforcement status.
+#     """
+#     _, data = repo.requester.requestJsonAndCheck(
+#         "GET",
+#         f"{repo.url}/interaction-limits/pulls/creation-cap",
+#         headers={"X-GitHub-Api-Version": "2026-03-10"},
+#     )
+#     return PullRequestLimit(
+#         enabled=data["enabled"],
+#         max_open_pull_requests=data["max_open_pull_requests"],
+#     )
+
+
 @handle_github_errors
 def main() -> None:
     """Run the main CLI logic to update the repository."""
@@ -112,18 +174,8 @@ def main() -> None:
         target_url = f"https://github.com/{repo.full_name}"
 
         change |= update_homepage_url(repo, target_url)
-
         change |= protect_default_branch(repo)
-
-        if repo.has_wiki or repo.has_projects:
-            for name, value in (
-                ("Change wiki to", not repo.has_wiki),
-                ("Change projects to", not repo.has_projects),
-            ):
-                print(f"  [UPDATE] {name}={value}")
-
-            repo.edit(has_projects=False, has_wiki=False)
-            change |= True
+        change |= disable_projects_and_wiki(repo)
 
         if repo.delete_branch_on_merge:
             print("WARNING: delete branch")
