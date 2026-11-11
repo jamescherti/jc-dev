@@ -225,10 +225,13 @@ _git_wrapper() {
 }
 
 _GIT_REXEC_OPTIONS=(
-  --exclude ~/src/forks/
-  --exclude ~/src/local/
-  --exclude ~/src/legacy/
 )
+
+# _GIT_REXEC_OPTIONS=(
+#   --exclude ~/src/forks/
+#   --exclude ~/src/local/
+#   --exclude ~/src/legacy/
+# )
 
 alias git-rexec='command git-rexec "${_GIT_REXEC_OPTIONS[@]}"'
 
