@@ -144,9 +144,8 @@ prepare-dependencies() {
 
   ./home/.bin/update-batchfetch-projects
 
-  BF_OR_GIT_BRANCH=main
-  bf-or-git "$SRC_DIR/dotfiles/jc-dev"
   BF_OR_GIT_BRANCH=develop
+  bf-or-git "$SRC_DIR/dotfiles/jc-dev"
   bf-or-git "$SRC_DIR/python/batchfetch/"
   bf-or-git "$SRC_DIR/python/git-rexec/"
 
@@ -216,9 +215,6 @@ main() {
   update-repos
 
   config-project-list
-
-  cd ~/src/notes/ && git config hooks.allowDefaultBranchCommits true
-  cd ~/src/wip/ && git config hooks.allowDefaultBranchCommits true
 
   # TODO Run once a day
   git_maintenance
