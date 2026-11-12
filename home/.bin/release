@@ -50,7 +50,7 @@ class Release:
 
         self.chdir_git_toplevel()
 
-        os.environ["ALLOW_DIRECT_COMMITS"] = "1"
+        self.env["ALLOW_DIRECT_COMMITS"] = "1"
 
         subprocess.check_call(["git-is-clean"], env=self.env)
         subprocess.check_call(["git-checkout-default-branch"], env=self.env)
@@ -120,13 +120,27 @@ class Release:
 
         print("Changes:")
         print("--------")
-        subprocess.call(["git", "--no-pager", "diff"])
+        subprocess.call(["git", "--no-pager", "diff"], env=self.env)
         print()
 
         if self.confirm("Apply?"):
             self.execute_release(new_version, new_num, is_python=python_project)
-            subprocess.check_call(["github-tag-to-release"])
-            self.update_develop(release_branch)
+            has_develop: bool = bool(
+                self.quick_run(["git", "branch", "--list", "develop"])
+            )
+            if has_develop:
+                self.update_develop(release_branch)
+                subprocess.check_call(["git", "switch", release_branch], env=self.env)
+
+            self.push_with_retry(["git", "push", "--tags"])
+            subprocess.check_call(["github-tag-to-release"], env=self.env)
+            release_ref: str = f"refs/heads/{release_branch}"
+            self.push_with_retry(
+                ["git", "push", "origin", f"{release_ref}:{release_ref}"]
+            )
+
+            if has_develop:
+                subprocess.check_call(["git", "switch", "develop"], env=self.env)
 
     def chdir_git_toplevel(self) -> None:
         """Change the current directory to the Git toplevel directory."""
@@ -162,18 +176,14 @@ class Release:
 
         :param release_branch: The branch from which the release was made.
         """
-        if self.quick_run(["git", "branch", "--list", "develop"]):
-            subprocess.check_call(["git", "switch", "develop"])
-        # elif self.quick_run(["git", "branch", "-r", "--list", "origin/develop"]):
-        #     subprocess.check_call(["git", "switch", "--track", "origin/develop"])
-        else:
-            return
-
+        subprocess.check_call(["git", "switch", "develop"], env=self.env)
         subprocess.check_call(
-            ["git", "merge", "--no-edit", f"refs/heads/{release_branch}"]
+            ["git", "merge", "--no-edit", f"refs/heads/{release_branch}"],
+            env=self.env,
         )
         subprocess.check_call(
-            ["git", "push", "origin", "refs/heads/develop:refs/heads/develop"]
+            ["git", "push", "origin", "refs/heads/develop:refs/heads/develop"],
+            env=self.env,
         )
 
     def confirm(self, string: str) -> bool:
@@ -327,7 +337,7 @@ class Release:
             str(self.git_root),
         ]
         print("[CMD]", cmd)
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, env=self.env)
 
         # Revert changes to sensitive files that should not be bumped
         files_to_revert: list[str] = [
@@ -337,24 +347,33 @@ class Release:
         for filename in files_to_revert:
             path: Path = self.git_root / filename
             if path.is_file():
-                subprocess.check_call(["git", "checkout", str(path)])
+                subprocess.check_call(["git", "checkout", str(path)], env=self.env)
 
     def execute_release(
         self, new_version: str, new_num: str, *, is_python: bool
     ) -> None:
         """
-        Perform the git commit, tagging, building, and pushing.
+        Commit and tag the release, then build and upload Python distributions.
 
         :param new_version: The tag version.
         :param new_num: The numeric version.
         :param is_python: Whether to run Python build/upload steps.
         """
-        subprocess.check_call(["git", "fetch"])
-        subprocess.check_call(["git", "commit", "-a", "-m", f"Release: {new_num}"])
-        subprocess.check_call(["git", "tag", "-s", new_version, "-m", new_version])
+        subprocess.check_call(["git", "fetch"], env=self.env)
+        subprocess.check_call(
+            ["git", "commit", "-a", "-m", f"Release: {new_num}"],
+            env=self.env,
+        )
+        subprocess.check_call(
+            ["git", "tag", "-s", new_version, "-m", new_version],
+            env=self.env,
+        )
 
         if is_python:
-            subprocess.check_call(["python", "-m", "build", "--no-isolation", "."])
+            subprocess.check_call(
+                ["python", "-m", "build", "--no-isolation", "."],
+                env=self.env,
+            )
             while True:
                 try:
                     distributions: list[str] = sorted(
@@ -363,21 +382,34 @@ class Release:
                         if path.is_file() and not path.name.startswith(".")
                     )
                     subprocess.check_call(
-                        ["python", "-m", "twine", "upload", "--verbose", *distributions]
+                        [
+                            "python",
+                            "-m",
+                            "twine",
+                            "upload",
+                            "--verbose",
+                            *distributions,
+                        ],
+                        env=self.env,
                     )
                     break
                 except subprocess.CalledProcessError:
                     if not self.confirm("Twine upload failed. Try again?"):
                         break
 
-        for push_cmd in (("git", "push"), ("git", "push", "--tags")):
-            while True:
-                try:
-                    subprocess.check_call(push_cmd)
-                    break
-                except subprocess.CalledProcessError:
-                    if not self.confirm(f"{' '.join(push_cmd)} failed. Try again?"):
-                        break
+    def push_with_retry(self, cmd: list[str]) -> None:
+        """
+        Run a Git push and offer to retry on failure.
+
+        :param cmd: The Git push command.
+        """
+        while True:
+            try:
+                subprocess.check_call(cmd, env=self.env)
+                return
+            except subprocess.CalledProcessError:
+                if not self.confirm(f"{' '.join(cmd)} failed. Try again?"):
+                    return
 
 
 if __name__ == "__main__":
