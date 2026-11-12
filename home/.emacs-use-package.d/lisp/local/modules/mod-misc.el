@@ -1572,11 +1572,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
               (evil-collection-eat-toggle-send-escape)))))
       (add-hook 'eat-mode-hook 'evil-collection-enable-eat-toggle-send-escape)))
 
-  (add-hook 'emacs-lisp-mode-hook
-            #'(lambda()
-                (setq-local dabbrev-case-fold-search t
-                            case-fold-search t)))
-
   (setq epg-gpg-program "gpg2"
         ;; epa-pinentry-mode 'loopback  ;; Obsolete
 
@@ -2496,7 +2491,6 @@ ARGS is a plist supplied by `apheleia--run-formatter-function' containing:
                           imenu-generic-expression)))
 
 (add-hook 'emacs-lisp-mode-hook #'better-jump--setup-imenu-elisp)
-
 
 ;; elisp evil-imenu
 

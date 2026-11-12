@@ -221,6 +221,13 @@ LANG is the tree-sitter language symbol to check for availability."
                          (my-set-tab-width 2)
                        (error "Undefined: my-set-tab-width")))))
 
+(add-hook 'emacs-lisp-mode-hook
+          #'(lambda()
+              (setq-local dabbrev-case-fold-search t
+                          case-fold-search t)))
+
+(setq evil-ex-search-case 'sensitive)
+
 ;;; Vimrc mode
 
 (lightemacs-use-package vimrc-mode
