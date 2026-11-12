@@ -142,8 +142,10 @@ install-pip-packages() {
 }
 
 bf-or-git() {
-  if [[ -f "$1" ]]; then
+  if [[ -d "$1" ]]; then
     batchfetch "$1"
+    git -C "$1" checkout "$BF_OR_GIT_BRANCH"
+    git -C "$1" pull
   else
     git -C "$1" checkout "$BF_OR_GIT_BRANCH"
     git -C "$1" pull
