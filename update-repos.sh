@@ -65,12 +65,12 @@ update-repos() {
     sh -c "git checkout-default && '$git_pull_my_repo'"
 
   git-rexec -C "$SRC_DIR/emacs" \
-    "$SRC_DIR/emacs" \
-    "$SRC_DIR/emacs-misc" \
-    "$SRC_DIR/python" \
-    "$SRC_DIR/tools" \
-    "$SRC_DIR/dotfiles" \
-    "$SRC_DIR/ansible" \
+    -C "$SRC_DIR/emacs" \
+    -C "$SRC_DIR/emacs-misc" \
+    -C "$SRC_DIR/python" \
+    -C "$SRC_DIR/tools" \
+    -C "$SRC_DIR/dotfiles" \
+    -C "$SRC_DIR/ansible" \
     "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
@@ -142,14 +142,12 @@ install-pip-packages() {
 }
 
 bf-or-git() {
-  if [[ -d "$1" ]]; then
+  if ! [[ -d "$1" ]]; then
     batchfetch "$1"
-    git -C "$1" checkout "$BF_OR_GIT_BRANCH"
-    git -C "$1" pull
-  else
-    git -C "$1" checkout "$BF_OR_GIT_BRANCH"
-    git -C "$1" pull
   fi
+
+  git -C "$1" checkout "$BF_OR_GIT_BRANCH"
+  git -C "$1" pull
 }
 
 prepare-dependencies() {
@@ -161,14 +159,14 @@ prepare-dependencies() {
       "$SRC_DIR/python/batchfetch/"
   fi
 
-  ./home/.bin/update-batchfetch-projects
+  if ! [[ -f ~/src/batchfetch.yaml ]]; then
+    ./home/.bin/update-batchfetch-projects
+  fi
 
   BF_OR_GIT_BRANCH=develop
   bf-or-git "$SRC_DIR/dotfiles/jc-dev"
   bf-or-git "$SRC_DIR/python/batchfetch/"
   bf-or-git "$SRC_DIR/python/git-rexec/"
-
-  set +x
 }
 
 git_maintenance() {
@@ -236,7 +234,7 @@ main() {
   config-project-list
 
   # TODO Run once a day
-  git_maintenance
+  # git_maintenance
 }
 
 main "$@"
