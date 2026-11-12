@@ -64,41 +64,52 @@ update-repos() {
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout-default && '$git_pull_my_repo'"
 
-  # TODO pass multiple paths
   git-rexec -C "$SRC_DIR/emacs" \
+    "$SRC_DIR/emacs" \
+    "$SRC_DIR/emacs-misc" \
+    "$SRC_DIR/python" \
+    "$SRC_DIR/tools" \
+    "$SRC_DIR/dotfiles" \
+    "$SRC_DIR/ansible" \
     "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
     sh -c "git checkout develop && git pull --rebase && git push"
 
-  git-rexec -C "$SRC_DIR/emacs-misc" \
-    "${GIT_REXEC_EXCLUDES[@]}" \
-    "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout develop && git pull --rebase && git push"
-
-  git-rexec -C "$SRC_DIR/python" \
-    "${GIT_REXEC_EXCLUDES[@]}" \
-    "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout develop && git pull --rebase && git push"
-
-  git-rexec -C "$SRC_DIR/tools" \
-    "${GIT_REXEC_EXCLUDES[@]}" \
-    "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout develop && git pull --rebase && git push"
-
-  git-rexec -C "$SRC_DIR/dotfiles" \
-    "${GIT_REXEC_EXCLUDES[@]}" \
-    "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout develop && git pull --rebase && git push"
-
-  git-rexec -C "$SRC_DIR/ansible" \
-    "${GIT_REXEC_EXCLUDES[@]}" \
-    "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout develop && git pull --rebase && git push"
-
-  git-rexec -C "$SRC_DIR/tools" \
-    "${GIT_REXEC_EXCLUDES[@]}" \
-    "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout develop && git pull --rebase && git push"
+  # TODO pass multiple paths
+  # git-rexec -C "$SRC_DIR/emacs" \
+  #   "${GIT_REXEC_EXCLUDES[@]}" \
+  #   "${GIT_REXEC_OPTS[@]}" -- \
+  #   sh -c "git checkout develop && git pull --rebase && git push"
+  #
+  # git-rexec -C "$SRC_DIR/emacs-misc" \
+  #   "${GIT_REXEC_EXCLUDES[@]}" \
+  #   "${GIT_REXEC_OPTS[@]}" -- \
+  #   sh -c "git checkout develop && git pull --rebase && git push"
+  #
+  # git-rexec -C "$SRC_DIR/python" \
+  #   "${GIT_REXEC_EXCLUDES[@]}" \
+  #   "${GIT_REXEC_OPTS[@]}" -- \
+  #   sh -c "git checkout develop && git pull --rebase && git push"
+  #
+  # git-rexec -C "$SRC_DIR/tools" \
+  #   "${GIT_REXEC_EXCLUDES[@]}" \
+  #   "${GIT_REXEC_OPTS[@]}" -- \
+  #   sh -c "git checkout develop && git pull --rebase && git push"
+  #
+  # git-rexec -C "$SRC_DIR/dotfiles" \
+  #   "${GIT_REXEC_EXCLUDES[@]}" \
+  #   "${GIT_REXEC_OPTS[@]}" -- \
+  #   sh -c "git checkout develop && git pull --rebase && git push"
+  #
+  # git-rexec -C "$SRC_DIR/ansible" \
+  #   "${GIT_REXEC_EXCLUDES[@]}" \
+  #   "${GIT_REXEC_OPTS[@]}" -- \
+  #   sh -c "git checkout develop && git pull --rebase && git push"
+  #
+  # git-rexec -C "$SRC_DIR/tools" \
+  #   "${GIT_REXEC_EXCLUDES[@]}" \
+  #   "${GIT_REXEC_OPTS[@]}" -- \
+  #   sh -c "git checkout develop && git pull --rebase && git push"
 
   # I excluded GIT_REXEC_OPTS because I want it to check GPG on all repositories
   git-rexec --parallel -C "$SRC_DIR/" \
