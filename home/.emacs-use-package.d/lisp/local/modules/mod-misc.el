@@ -3227,6 +3227,26 @@ ARGS - the arguments passed to the original function"
                       (pixel-scroll-precision-mode -1)
                     (pixel-scroll-precision-mode 1))))))
 
+;; TODO update terminal article
+;; In terminal buffers, pixel scrolling intercepts Page Up and Page Down,
+;; preventing programs such as `less' from paging through Git output. Override
+;; the mode's keymap locally so the terminal handles those keys while pixel
+;; scrolling remains enabled in other buffers.
+;;
+;; `pixel-scroll-precision-mode' is global, so disabling it from a terminal hook
+;; would affect every buffer. An empty buffer-local override lets wheel events
+;; reach the terminal's own bindings.
+(defun my-terminal-disable-pixel-scroll-bindings ()
+  "Let the terminal buffer handle its own scroll events."
+  (setq-local minor-mode-overriding-map-alist
+              (cons (cons 'pixel-scroll-precision-mode (make-sparse-keymap))
+                    (assq-delete-all
+                     'pixel-scroll-precision-mode
+                     (copy-sequence minor-mode-overriding-map-alist)))))
+
+(dolist (hook '(term-mode-hook vterm-mode-hook eat-mode-hook))
+  (add-hook hook #'my-terminal-disable-pixel-scroll-bindings))
+
 ;;; Rainbow
 
 ;; (lightemacs-use-package rainbow-mode

@@ -50,9 +50,14 @@ class Release:
 
         self.chdir_git_toplevel()
 
+        os.environ["ALLOW_DIRECT_COMMITS"] = "1"
+
+        subprocess.check_call(["git-is-clean"], env=self.env)
+        subprocess.check_call(["git-checkout-default-branch"], env=self.env)
+
         # Ensure we are on a release branch
         try:
-            self.ensure_branch_main_or_master()
+            release_branch: str = self.ensure_branch_main_or_master()
         except PyReleaseError as err:
             print(f"Error: {err}", file=sys.stderr)
             sys.exit(1)
@@ -61,8 +66,6 @@ class Release:
         self.all_tag_variants: list[str] = []
         self.load_git_tags()
         self.latest_version: str = self.get_latest_version()
-
-        self.git_root = self.git_top_level()
 
         print(f"Tags: {', '.join(self.tags)}")
         print(f"Project dir: {self.git_root}\n")
@@ -77,7 +80,7 @@ class Release:
 
         # Prompt the user to enter the old version
         while True:
-            old_version: str = self.get_version("Old version: ", True)
+            old_version: str = self.get_version("Old version: ", exist_ok=True)
             if old_version not in self.all_tag_variants:
                 print(
                     f"Error: {old_version} is not part of the project",
@@ -88,7 +91,7 @@ class Release:
 
         # Prompt the user to enter the new version
         while True:
-            new_version: str = self.get_version("New version: ", False)
+            new_version: str = self.get_version("New version: ", exist_ok=False)
             if version.parse(new_version) <= version.parse(old_version):
                 print(
                     f"Error: New version {new_version} must be "
@@ -121,8 +124,9 @@ class Release:
         print()
 
         if self.confirm("Apply?"):
-            self.execute_release(new_version, new_num, python_project)
+            self.execute_release(new_version, new_num, is_python=python_project)
             subprocess.check_call(["github-tag-to-release"])
+            self.update_develop(release_branch)
 
     def chdir_git_toplevel(self) -> None:
         """Change the current directory to the Git toplevel directory."""
@@ -134,10 +138,11 @@ class Release:
 
         os.chdir(self.git_root)
 
-    def ensure_branch_main_or_master(self) -> None:
+    def ensure_branch_main_or_master(self) -> str:
         """
         Verify that the current branch is main or master.
 
+        :returns: The current release branch.
         :raises PyReleaseError: If the branch is not main or master.
         """
         branch: str = self.run_get_firstline(
@@ -148,6 +153,28 @@ class Release:
                 f"Current branch is '{branch}'. Releases "
                 "must be made from main or master."
             )
+
+        return branch
+
+    def update_develop(self, release_branch: str) -> None:
+        """
+        Merge the release into develop and push the resulting branch.
+
+        :param release_branch: The branch from which the release was made.
+        """
+        if self.quick_run(["git", "branch", "--list", "develop"]):
+            subprocess.check_call(["git", "switch", "develop"])
+        # elif self.quick_run(["git", "branch", "-r", "--list", "origin/develop"]):
+        #     subprocess.check_call(["git", "switch", "--track", "origin/develop"])
+        else:
+            return
+
+        subprocess.check_call(
+            ["git", "merge", "--no-edit", f"refs/heads/{release_branch}"]
+        )
+        subprocess.check_call(
+            ["git", "push", "origin", "refs/heads/develop:refs/heads/develop"]
+        )
 
     def confirm(self, string: str) -> bool:
         """
@@ -184,7 +211,7 @@ class Release:
                 latest_ver_str = tag
         return latest_ver_str
 
-    def get_version(self, prompt: str, exist_ok: bool) -> str:
+    def get_version(self, prompt: str, *, exist_ok: bool) -> str:
         """
         Get a version string from the user.
 
@@ -312,7 +339,9 @@ class Release:
             if path.is_file():
                 subprocess.check_call(["git", "checkout", str(path)])
 
-    def execute_release(self, new_version: str, new_num: str, is_python: bool) -> None:
+    def execute_release(
+        self, new_version: str, new_num: str, *, is_python: bool
+    ) -> None:
         """
         Perform the git commit, tagging, building, and pushing.
 
@@ -328,8 +357,13 @@ class Release:
             subprocess.check_call(["python", "-m", "build", "--no-isolation", "."])
             while True:
                 try:
+                    distributions: list[str] = sorted(
+                        str(path)
+                        for path in (self.git_root / "dist").iterdir()
+                        if path.is_file() and not path.name.startswith(".")
+                    )
                     subprocess.check_call(
-                        "python -m twine upload --verbose dist/*", shell=True
+                        ["python", "-m", "twine", "upload", "--verbose", *distributions]
                     )
                     break
                 except subprocess.CalledProcessError:

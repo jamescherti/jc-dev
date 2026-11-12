@@ -315,8 +315,12 @@ main() {
   CURRENT_BRANCH=$(git branch --show-current)
   DEFAULT_BRANCH=$(git-default-branch)
 
+  ALLOW_DIRECT_COMMITS=${ALLOW_DIRECT_COMMITS:-0}
+
   # Check if the current branch is main or master
-  if [[ "$CURRENT_BRANCH" = "$DEFAULT_BRANCH" ]]; then
+  if [[ $ALLOW_DIRECT_COMMITS -eq 0 ]] \
+    && [[ $DEFAULT_BRANCH != "develop" ]] \
+    && [[ "$CURRENT_BRANCH" = "$DEFAULT_BRANCH" ]]; then
     echo "Error: Direct commits to the '$CURRENT_BRANCH' branch are " \
       "forbidden. Please use another branch." >&2
     exit 1

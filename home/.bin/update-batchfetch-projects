@@ -52,6 +52,61 @@ MISSING_REPOSITORIES: list[dict[str, str | None]] = [
         "directory": "forks/ztree",
         "upstream_uri": "https://codeberg.org/fourier/ztree",
     },
+    {
+        "uri": "git@github.com:jamescherti/emacs-elisp-autofmt",
+        "directory": "forks/emacs-elisp-autofmt",
+        "upstream_uri": "https://codeberg.org/ideasman42/emacs-elisp-autofmt",
+    },
+    {
+        "uri": "git@github.com:jamescherti/emacs-elpa",
+        "directory": "forks/emacs-elpa",
+        "upstream_uri": "https://git.savannah.gnu.org/git/emacs/elpa.git",
+    },
+    {
+        "uri": "git@github.com:jamescherti/emacs-nongnu-elpa",
+        "directory": "forks/emacs-nongnu-elpa",
+        "upstream_uri": "https://git.savannah.gnu.org/git/emacs/nongnu.git",
+    },
+    {
+        "uri": "git@github.com:jamescherti/emacs-undo-fu-session",
+        "directory": "forks/emacs-undo-fu-session",
+        "upstream_uri": "https://codeberg.org/ideasman42/emacs-undo-fu-session/",
+    },
+    {
+        "uri": "git@github.com:jamescherti/emacs-undo-fu",
+        "directory": "forks/emacs-undo-fu",
+        "upstream_uri": "https://codeberg.org/ideasman42/emacs-undo-fu/",
+    },
+    {
+        "uri": "git@github.com:jamescherti/flymake-yamllint",
+        "directory": "forks/flymake-yamllint",
+        "upstream_uri": "https://codeberg.org/shaohme/flymake-yamllint",
+    },
+    {
+        "uri": "git@github.com:jamescherti/gcmh",
+        "directory": "forks/gcmh",
+        "upstream_uri": "https://gitlab.com/koral/gcmh.git/",
+    },
+    {
+        "uri": "git@github.com:jamescherti/gnome-just-perfection",
+        "directory": "forks/gnome-just-perfection",
+        "upstream_uri": "https://gitlab.gnome.org/jrahmatzadeh/just-perfection",
+    },
+    {
+        "uri": "git@github.com:jamescherti/org-mode",
+        "directory": "forks/org-mode",
+        "upstream_uri": "https://git.savannah.gnu.org/git/emacs/org-mode.git",
+    },
+    {
+        "uri": "git@github.com:jamescherti/paredit",
+        "directory": "forks/paredit",
+        "upstream_uri": "https://paredit.org/paredit.git",
+    },
+    {
+        "uri": "git@github.com:jamescherti/setup-emacs",
+        "directory": "forks/setup-emacs",
+        "upstream_uri": "https://github.com/purcell/setup-emacs",
+    },
     # TODO: It doesn't work
     # {
     #     "uri": "ssh://aur@aur.archlinux.org/linux-keep-modules",
@@ -167,6 +222,13 @@ def generate_batchfetch_yaml(
         "    - .my-dir-locals.el",
         "    - forks/.my-dir-locals.el",
         "    - emacs/.my-dir-locals.el",
+        "    - legacy/.git-rexec-ignore",
+        "    - forks/.git-rexec-ignore",
+        "    - batchfetch-old.yaml",
+        "    - ",
+        "    - ",
+        "    - ",
+        "    - ",
         "",
         "tasks:",
     ]
