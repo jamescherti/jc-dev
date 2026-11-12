@@ -40,8 +40,6 @@ trap "error_handler" ERR
 set -o errtrace
 
 if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null | cut -d/ -f1)" 2>/dev/null | grep -q 'jamescherti/'; then
-  set -x
-
   # --prune: Prune dead remote-tracking branches: When you delete a branch on
   # one computer, pulling on the second computer does not remove the local
   # reference to that remote branch (e.g., origin/feature-branch). You can clean
@@ -54,6 +52,4 @@ if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 
   # Git stashes are local. If you use git stash on Computer 1, those changes
   # will not sync to your remote repository when you push.
   git stash clear
-
-  set +x
 fi
