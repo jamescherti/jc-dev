@@ -117,7 +117,7 @@ update-repos() {
     git-check-gpg
 
   local repo
-  for repo in notes wip dotfiles/jc-dev; do
+  for repo in notes wip dotfiles/jc-dev home-settings; do
     cd "$HOME/src/$repo"
     git checkout develop
   done
