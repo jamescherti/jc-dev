@@ -864,22 +864,62 @@ guarantees that the new window is selected, as in Vim."
 
 ;;; evil consult
 
+;; (defun my-consult-fd-project ()
+;;   "Run `consult-fd' in the root directory of the current project."
+;;   (interactive)
+;;   (require 'consult)
+;;   (let* ((project (project-current nil "."))
+;;          (project-root (when (and project
+;;                                   (fboundp 'project-root))
+;;                          (project-root project)))
+;;          (consult-fd-args
+;;           (when (boundp 'consult-fd-args)
+;;             (concat consult-fd-args
+;;                     " --threads "
+;;                     (number-to-string (num-processors))))))
+;;     (if (fboundp 'consult-fd)
+;;         (consult-fd project-root)
+;;       (error "Undefined: consult-fd"))))
+
 (defun my-consult-fd-project ()
   "Run `consult-fd' in the root directory of the current project."
   (interactive)
   (require 'consult)
-  (let* ((project (project-current nil "."))
-         (project-root (when (and project
-                                  (fboundp 'project-root))
-                         (project-root project)))
-         (consult-fd-args
-          (when (boundp 'consult-fd-args)
-            (concat consult-fd-args
-                    " --threads "
-                    (number-to-string (num-processors))))))
+  (let* ((project (project-current))
+         (root (if project
+                   (project-root project)
+                 default-directory))
+         (consult-fd-args (if (boundp 'consult-fd-args)
+                              (concat consult-fd-args
+                                      " --threads "
+                                      (number-to-string (num-processors)))
+                            consult-fd-args)))
     (if (fboundp 'consult-fd)
-        (consult-fd project-root)
-      (error "Undefined: consult-fd"))))
+        (consult-fd root)
+      (user-error "Consult-fd is not available"))))
+
+(defun my-consult-project-files ()
+  "Select a file from all files in the current project.
+Gathers files using `project-files' and prompts via `consult--read'."
+  (interactive)
+  (require 'consult)
+  (require 'project)
+  (let* ((project (project-current t))
+         (root (if project (project-root project) default-directory))
+         (files (when project (project-files project))))
+    (if files
+        (let* ((relative-files (mapcar
+                                (lambda (f)
+                                  (file-relative-name f root))
+                                files))
+               (selected (consult--read
+                          relative-files
+                          :prompt "Project file: "
+                          :sort t
+                          :category 'file)))
+          (when selected
+            (find-file (expand-file-name selected root))))
+      (user-error "No active project or files found"))))
 
 (defun my-consult-imenu ()
   "Call `consult-imenu'."
@@ -1728,8 +1768,20 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
          :map minibuffer-local-completion-map
          ("C-x C-d" . quick-fasd-find-path))
 
+  :preface
+  (defun my-find-file ()
+    "Find a file.."
+    (interactive)
+    (cond
+     ((and (project-current)
+           (fboundp 'my-consult-project-files))
+      (my-consult-project-files))
+
+     (t
+      (quick-fasd-find-file))))
+
   :init
-  (define-key evil-normal-state-map (kbd "<leader>b") 'quick-fasd-find-file)
+  (define-key evil-normal-state-map (kbd "<leader>b") 'my-find-file)
   (evil-define-key 'normal 'global (kbd "<leader>fd") 'quick-fasd-find-directory)
   (quick-fasd-mode 1))
 

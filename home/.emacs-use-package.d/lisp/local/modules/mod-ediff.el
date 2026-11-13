@@ -69,7 +69,10 @@ OTHER-FILE is the file path chosen from the minibuffer."
 
 ;;; ediff: settings
 
-(setq ediff-keep-variants t)
+;; Prompt on Ediff exit so I can kill the unmodified revision buffer and keep
+;; the working file's buffer open.
+(setq ediff-keep-variants nil)
+
 ;; (setq ediff-make-buffers-readonly-at-startup nil) ; default nil
 ;; (setq ediff-confirm-copy t)
 
