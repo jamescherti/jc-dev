@@ -62,7 +62,7 @@ update-repos() {
   git-rexec -C "$SRC_DIR" \
     "${GIT_REXEC_EXCLUDES[@]}" \
     "${GIT_REXEC_OPTS[@]}" -- \
-    sh -c "git checkout-default-branch && '$git_pull_my_repo'"
+    sh -c "git-checkout-default-branch && '$git_pull_my_repo'"
 
   git-rexec -C "$SRC_DIR/emacs" \
     -C "$SRC_DIR/emacs-misc" \
@@ -164,6 +164,7 @@ prepare-dependencies() {
 
   BF_OR_GIT_BRANCH=develop
   bf-or-git "$SRC_DIR/dev/jc-dev"
+  bf-or-git "$SRC_DIR/dotfiles/bash-stdops/"
   bf-or-git "$SRC_DIR/python/batchfetch/"
   bf-or-git "$SRC_DIR/python/git-rexec/"
 }
