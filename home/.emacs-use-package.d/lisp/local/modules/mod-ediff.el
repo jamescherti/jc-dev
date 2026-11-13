@@ -39,7 +39,11 @@ OTHER-FILE is the file path chosen from the minibuffer."
       (user-error "Current buffer is not visiting a file"))
     (ediff-files current other-file)))
 
-(global-set-key (kbd "C-c d f") #'my-ediff-current-file-against)
+;; (global-set-key (kbd "C-c d f") #'my-ediff-current-file-against)
+
+(with-eval-after-load 'evil
+  (when (fboundp 'evil-define-key*)
+    (evil-define-key* 'normal 'global (kbd "<leader>ef") #'my-ediff-current-file-against)))
 
 ;;; Defaults
 
@@ -67,11 +71,37 @@ OTHER-FILE is the file path chosen from the minibuffer."
 
 (add-hook 'ediff-select-hook #'my-ediff-recenter)
 
-;;; ediff: settings
+;;; Better ediff-keep-variants
 
 ;; Prompt on Ediff exit so I can kill the unmodified revision buffer and keep
 ;; the working file's buffer open.
-(setq ediff-keep-variants nil)
+;; (setq ediff-keep-variants nil)
+
+;; Keep ordinary file buffers open when quitting Ediff.
+(setq ediff-keep-variants t)
+
+(defun my-ediff-cleanup-revision-buffers ()
+  "Kill unmodified VC revision buffers used only by this Ediff session."
+  ;; ediff-revision is `vc-diff'
+  (when (eq ediff-job-name 'ediff-revision)
+    (let ((control (current-buffer)))
+      (dolist (variant (list ediff-buffer-A ediff-buffer-B))
+        (when (buffer-live-p variant)
+          (with-current-buffer variant
+            (when (and (not (buffer-modified-p))
+                       (or (bound-and-true-p vc-buffer-revision)
+                           (and (bound-and-true-p vc-parent-buffer)
+                                buffer-file-name
+                                (string-match-p
+                                 (rx ".~" (or (= 40 xdigit) (= 64 xdigit))
+                                     "~" eos)
+                                 buffer-file-name)))
+                       (not (remq control ediff-this-buffer-ediff-sessions)))
+              (kill-buffer variant))))))))
+
+(add-hook 'ediff-cleanup-hook #'my-ediff-cleanup-revision-buffers)
+
+;;; ediff: settings
 
 ;; (setq ediff-make-buffers-readonly-at-startup nil) ; default nil
 ;; (setq ediff-confirm-copy t)

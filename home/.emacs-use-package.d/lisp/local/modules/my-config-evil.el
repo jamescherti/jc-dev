@@ -693,7 +693,7 @@ This enhancement prevents the cursor from moving."
 
 ;;; eglot
 
-(define-key evil-normal-state-map (kbd "<leader>ef") 'my-eglot-format-buffer)
+;; (define-key evil-normal-state-map (kbd "<leader>ef") 'my-eglot-format-buffer)
 
 ;;; evil jump
 
