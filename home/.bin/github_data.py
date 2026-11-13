@@ -54,10 +54,11 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     "jamescherti/lightvim": "dotfiles",
     "jamescherti/bash-stdops": "dotfiles",
     # No category
-    "jamescherti/jamescherti": "",
     "jamescherti/jc-dev": "dotfiles",
-    "jamescherti/wip": "",
-    "jamescherti/notes": "",
+    "jamescherti/jamescherti": "dev",
+    "jamescherti/wip": "dev",
+    "jamescherti/notes": "dev",
+    "jamescherti/home-settings": "dev",
     # Other
     "jamescherti/alpm-reboot-required": "legacy",
     "jamescherti/archlinux-brother-ql1110nwb": "legacy",
@@ -71,9 +72,6 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     "jamescherti/elispcomp": "legacy",
     "jamescherti/caffeine-aw": "legacy",  # Python: legacy
     "jamescherti/outline-yaml.el": "legacy",
-    "jamescherti/python-dpc3848v-wifi-modem": "legacy",
-    "jamescherti/docker-oddmuse": "legacy",
-    # "jamescherti/jamescherti": "misc",
 }
 
 IGNORE_GITHUB_REPOSITORIES: set[str] = {
