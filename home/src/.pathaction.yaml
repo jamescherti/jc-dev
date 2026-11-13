@@ -74,7 +74,7 @@ actions:
       - "{{ cwd }}/tools/efasd"
     tags: install
     list_commands:
-      - "cp -u tools/efasd/fasd {{ '~/src/dotfiles/jc-dev/home/.bin/fasd' | expanduser | quote }}"
+      - "cp -u tools/efasd/fasd {{ '~/src/dev/jc-dev/home/.bin/fasd' | expanduser | quote }}"
       - "cp -u tools/efasd/fasd {{ '~/.bin/fasd' | expanduser | quote }}"
 
   - path_match:

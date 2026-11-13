@@ -333,7 +333,7 @@ copy_unified_files() {
   copy_if_develop misc/unified-files/unified-python-ci.yml \
     ~/src/python/git-rexec/.github/workflows/ci.yml # git-rexec
   copy_if_develop misc/unified-files/unified-python-ci.yml \
-    "$HOME/src/home-settings/work_cfg/home/.cookiecutters/python/{{cookiecutter.repo_name}}/.github/workflows/ci.yml" # cookie cutter
+    "$HOME/src/dev/home-settings/work_cfg/home/.cookiecutters/python/{{cookiecutter.repo_name}}/.github/workflows/ci.yml" # cookie cutter
 
   copy_emacs_pre_commit_files "$HOME/src/emacs"
   copy_emacs_pre_commit_files "$HOME/src/emacs-misc"
@@ -404,8 +404,8 @@ main() {
 
   copy_unified_files
 
-  if [[ -f ~/src/home-settings/install.sh ]]; then
-    cd ~/src/home-settings/
+  if [[ -f ~/src/dev/home-settings/install.sh ]]; then
+    cd ~/src/dev/home-settings/
     ./install.sh
   fi
 

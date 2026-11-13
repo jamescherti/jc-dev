@@ -22,7 +22,7 @@
 set -euf
 shopt -s extglob
 
-UNIFIED_SPELL_FILE="$HOME/src/home-settings/work_cfg/home/.sync-spell-dict"
+UNIFIED_SPELL_FILE="$HOME/src/dev/home-settings/work_cfg/home/.sync-spell-dict"
 if ! [[ -f $UNIFIED_SPELL_FILE ]]; then
   UNIFIED_SPELL_FILE="$HOME/.sync-spell-dict"
 fi

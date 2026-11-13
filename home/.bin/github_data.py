@@ -54,7 +54,7 @@ CUSTOM_CATEGORIES: dict[str, str] = {
     "jamescherti/lightvim": "dotfiles",
     "jamescherti/bash-stdops": "dotfiles",
     # No category
-    "jamescherti/jc-dev": "dotfiles",
+    "jamescherti/jc-dev": "dev",
     "jamescherti/jamescherti": "dev",
     "jamescherti/wip": "dev",
     "jamescherti/notes": "dev",

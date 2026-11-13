@@ -195,7 +195,7 @@ tasks:
   # Dotfiles
   # ----------------------------------------------------------------------------
   - git: git@github.com:jamescherti/jc-dev
-    path: dotfiles/jc-dev
+    path: dev/jc-dev
     revision: main
 
   - git: git@github.com:jamescherti/jc-gentoo-portage

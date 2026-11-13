@@ -274,7 +274,7 @@ Format: (DIRECTORY-PATH . ((VAR1 . VAL1) (VAR2 . VAL2) ...))"
                                  ;; TODO add exceptions like these to the
                                  ;; .my-dir-locals.el
                                  (not (or (file-in-directory-p file-name "~/src/emacs-misc/lightemacs")
-                                          (file-in-directory-p file-name "~/src/dotfiles/jc-dev")
+                                          (file-in-directory-p file-name "~/src/dev/jc-dev")
                                           (string= base-name "init.el")
                                           (string= base-name "early-init.el"))))
                         (add-hook 'flymake-diagnostic-functions 'package-lint-flymake nil t))

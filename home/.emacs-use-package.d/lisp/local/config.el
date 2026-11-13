@@ -567,23 +567,23 @@
 ;; Trust buffer contents for Flymake
 (when (boundp 'trusted-content)
   (let ((dirs (list
-               ;; "~/src/dotfiles/jc-dev/"
+               ;; "~/src/dev/jc-dev/"
                ;; "~/src/emacs/"
-               ;; "~/src/wip/"
+               ;; "~/src/dev/wip/"
                ;; "~/src/tools/"
 
                "~/src/ansible/"
                "~/src/dotfiles/"
                "~/src/emacs/"
                "~/src/git/"
-               "~/src/home-settings/"
+               "~/src/dev/home-settings/"
                "~/src/jamescherti/"
                "~/src/linux/"
-               "~/src/notes/"
+               "~/src/dev/notes/"
                "~/src/other/"
                "~/src/tools/"
                "~/src/vim/"
-               "~/src/wip/"
+               "~/src/dev/wip/"
 
                ;; "~/src/local"
                ;; "~/src/forks/"
@@ -1218,7 +1218,7 @@ This uses an around advice to trap errors and verify file timestamps."
             (source (expand-file-name my-straight-default-profile))
             (destination
              (expand-file-name
-              "~/src/dotfiles/jc-dev/home/.emacs-data/etc/straight-profile.el")))
+              "~/src/dev/jc-dev/home/.emacs-data/etc/straight-profile.el")))
         ;; (message "%s:%s"
         ;;          (file-exists-p source)
         ;;          (file-newer-than-file-p source destination))

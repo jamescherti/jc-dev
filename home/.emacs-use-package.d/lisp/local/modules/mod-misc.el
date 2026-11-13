@@ -4591,11 +4591,11 @@ function or if an invalid choice is made."
         (list
          (cons "straight"
                (lambda ()
-                 (find-file "~/src/dotfiles/jc-dev/home/.emacs-data/etc/straight-profile.el")
+                 (find-file "~/src/dev/jc-dev/home/.emacs-data/etc/straight-profile.el")
                  (tab-new)
-                 (find-file "~/src/dotfiles/jc-dev/home/src/batchfetch.yaml")
+                 (find-file "~/src/dev/jc-dev/home/src/batchfetch.yaml")
                  (tab-new)
-                 (find-file "~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/config.el"))))))
+                 (find-file "~/src/dev/jc-dev/home/.emacs-use-package.d/lisp/local/config.el"))))))
 
 ;; Silence: Truncate long lines disabled
 ;; TODO: Should we execute it after inserting anything in the speller

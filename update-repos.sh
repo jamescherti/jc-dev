@@ -116,7 +116,7 @@ update-repos() {
     git-check-gpg
 
   local repo
-  for repo in notes wip dotfiles/jc-dev home-settings; do
+  for repo in dev/notes dev/wip dev/jc-dev dev/home-settings; do
     cd "$HOME/src/$repo"
     git checkout develop
   done
@@ -163,7 +163,7 @@ prepare-dependencies() {
   fi
 
   BF_OR_GIT_BRANCH=develop
-  bf-or-git "$SRC_DIR/dotfiles/jc-dev"
+  bf-or-git "$SRC_DIR/dev/jc-dev"
   bf-or-git "$SRC_DIR/python/batchfetch/"
   bf-or-git "$SRC_DIR/python/git-rexec/"
 }

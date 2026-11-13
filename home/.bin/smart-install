@@ -35,10 +35,9 @@ import subprocess
 import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import List
 
 
-def run(command: List[str]):
+def run(command: list[str]):
     """Execute a command in a subprocess.
 
     This function prints the command to be executed and then runs it in a
@@ -66,11 +65,11 @@ def is_directory_writable(directory: os.PathLike) -> bool:
 
     try:
         with NamedTemporaryFile(dir=directory, delete=True) as temp_file:
-            temp_file.write(b'test')
+            temp_file.write(b"test")
             temp_file.flush()  # Ensure the content is written to disk
 
         return True
-    except (OSError, IOError):
+    except OSError:
         return False
 
 
@@ -133,12 +132,8 @@ def smart_install_python(project_dir: os.PathLike) -> bool:
         # the original directory is read-only. Pip requires write access to
         # create directories like 'build/', and will fail with an error (e.g.,
         # "ERROR: Failed building wheel") if it cannot do so.
-        print(
-            f"[INFO] COPYING the read-only {project_dir} to a "
-            "temporary directory..."
-        )
-        shutil.copytree(project_dir, tmpdir, dirs_exist_ok=True,
-                        symlinks=True)
+        print(f"[INFO] COPYING the read-only {project_dir} to a temporary directory...")
+        shutil.copytree(project_dir, tmpdir, dirs_exist_ok=True, symlinks=True)
 
         pip_install(Path(tmpdir))
         return True
@@ -161,30 +156,30 @@ def rsync(source: os.PathLike, dest: os.PathLike):
     source = Path(source).resolve()
     dest = Path(dest).resolve()
 
-    source_str = f"{source}{os.path.sep}" \
-        if source.is_dir() else str(source)
-    dest_str = f"{dest}{os.path.sep}" \
-        if dest.is_dir() else str(dest)
+    source_str = f"{source}{os.path.sep}" if source.is_dir() else str(source)
+    dest_str = f"{dest}{os.path.sep}" if dest.is_dir() else str(dest)
 
     run(["rsync", "-a", "--delete", source_str, dest_str])
 
 
 def smart_install_ansible_role(project_name: str) -> bool:
-    "Install a Vim plugin that is located in the current directory"
-    dest = Path.home() / "src/wip/ansible/roles" / \
-        project_name.replace("ansible-role-", "")
-    rsync(Path(".").resolve(), dest)
+    """Install a Vim plugin that is located in the current directory"""
+    dest = (
+        Path.home()
+        / "src/dev/wip/ansible/roles"
+        / project_name.replace("ansible-role-", "")
+    )
+    rsync(Path().resolve(), dest)
     return True
 
 
 def smart_install_vim(project_name: str) -> bool:
-    "Install a Vim plugin that is located in the current directory"
+    """Install a Vim plugin that is located in the current directory"""
     if Path("doc").is_dir():
         run(["vim", "-u", "NONE", "-c", "helptags ./doc", "-c", "q"])
 
-    dest = Path.home() / ".vim_bundle/packpath/pack/git-plugins/start" / \
-        project_name
-    rsync(Path(".").resolve(), dest)
+    dest = Path.home() / ".vim_bundle/packpath/pack/git-plugins/start" / project_name
+    rsync(Path().resolve(), dest)
     return True
 
 
@@ -207,12 +202,12 @@ def ext_exists(ext: str, recursive: bool = True) -> bool:
     :return: True if any file with the specified extension exists, False
              otherwise.
     """
-    pattern = f'**/*.{ext}' if recursive else f'*.{ext}'
-    return any(Path('.').glob(pattern))
+    pattern = f"**/*.{ext}" if recursive else f"*.{ext}"
+    return any(Path().glob(pattern))
 
 
 def smart_install(path: os.PathLike) -> bool:
-    "Intelligently install various types of projects."
+    """Intelligently install various types of projects."""
     path = Path(path).resolve()
     if Path(path).is_file():
         path = Path(path).parent
@@ -240,23 +235,29 @@ def smart_install(path: os.PathLike) -> bool:
             run(["./install.sh"])
             return True
 
-        elif Path("jc-xfce-settings.sh").is_file():
+        if Path("jc-xfce-settings.sh").is_file():
             run(["./jc-xfce-settings.sh"])
             return True
 
         # 2: Python
-        elif (Path("setup.py").is_file()
-              or Path("pyproject.toml").is_file()) and ext_exists("py"):
+        if (
+            Path("setup.py").is_file() or Path("pyproject.toml").is_file()
+        ) and ext_exists("py"):
             return smart_install_python(cwd)
 
         # 3: Vim plugins
-        elif Path("README.md").is_file() and \
-                (Path("colors").is_dir() or Path("plugin").is_dir()
-                 or Path("autoload").is_dir()) and ext_exists("vim"):
+        if (
+            Path("README.md").is_file()
+            and (
+                Path("colors").is_dir()
+                or Path("plugin").is_dir()
+                or Path("autoload").is_dir()
+            )
+            and ext_exists("vim")
+        ):
             return smart_install_vim(project_name)
 
-        elif Path("tasks/main.yml").is_file() or \
-                Path("tasks/main.yaml").is_file():
+        if Path("tasks/main.yml").is_file() or Path("tasks/main.yaml").is_file():
             return smart_install_ansible_role(project_name)
 
         # 4: Emacs packages
@@ -273,20 +274,18 @@ def smart_install(path: os.PathLike) -> bool:
 
         os.chdir("..")
 
-    print(f"{sys.argv[0]}: project type not supported: '{path}'",
-          file=sys.stderr)
+    print(f"{sys.argv[0]}: project type not supported: '{path}'", file=sys.stderr)
     return False
 
 
 def command_line_interface(list_dirs):
-    "The command-line interface."
+    """The command-line interface."""
     if not list_dirs:
         list_dirs = ["."]
 
     for path in list_dirs:
         if not os.path.exists(path):
-            print(f"{sys.argv[0]}: no such file or directory: {path}",
-                  file=sys.stderr)
+            print(f"{sys.argv[0]}: no such file or directory: {path}", file=sys.stderr)
             sys.exit(1)
 
     errno = 0

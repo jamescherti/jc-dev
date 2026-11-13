@@ -160,7 +160,7 @@ custom-emacs "emacs-straight"
 if [[ "$INSTALL_DEVEMACS" == true ]] || [[ -d "$DEST_DIR/.devemacs.d" ]]; then
   # Only when it does not exist. This is supposed to always be stable.
   lightemacs-init-files "$DEST_DIR/.devemacs.d"
-  rsync ~/src/dotfiles/jc-dev/home/.devemacs.d/lisp/local/config.el \
+  rsync ~/src/dev/jc-dev/home/.devemacs.d/lisp/local/config.el \
     "$DEST_DIR/.devemacs.d/lisp/local/config.el"
 fi
 
@@ -184,16 +184,16 @@ wait
 #   >"$DEST_DIR/.lightemacs-elpaca.d/lisp/local/config.el"
 
 # After everything, ensure jc-dev is sync
-if [[ -d ~/src/dotfiles/jc-dev ]]; then
-  cd ~/src/dotfiles/jc-dev
+if [[ -d ~/src/dev/jc-dev ]]; then
+  cd ~/src/dev/jc-dev
 
-  run-rsync ~/src/dotfiles/jc-dev/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
+  run-rsync ~/src/dev/jc-dev/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
 fi
 
 wait
 
-if [[ -d ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
-  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
-  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-straight.d/lisp/local/
-  rsync -a ~/src/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-elpaca.d/lisp/local/
+if [[ -d ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
+  rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
+  rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-straight.d/lisp/local/
+  rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-elpaca.d/lisp/local/
 fi
