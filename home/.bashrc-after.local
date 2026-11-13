@@ -247,9 +247,9 @@ _git_find_repos_wrapper() {
 }
 
 _gm_wrapper() {
-  local opts=()
+  local opts=("--exit-on-error")
   if [[ $# -eq 0 ]]; then
-    opts+=("--print" "--exit-on-error")
+    opts+=("--print")
   fi
   _git_find_repos_wrapper \
     "${opts[@]}" \
