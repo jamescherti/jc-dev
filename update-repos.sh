@@ -65,7 +65,6 @@ update-repos() {
     sh -c "git checkout-default && '$git_pull_my_repo'"
 
   git-rexec -C "$SRC_DIR/emacs" \
-    -C "$SRC_DIR/emacs" \
     -C "$SRC_DIR/emacs-misc" \
     -C "$SRC_DIR/python" \
     -C "$SRC_DIR/tools" \
