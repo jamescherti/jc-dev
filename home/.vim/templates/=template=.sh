@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euf -o pipefail
+set -eufo pipefail
 
 # shellcheck disable=SC2317
 error_handler() {
