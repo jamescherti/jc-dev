@@ -9,19 +9,19 @@
  ("straight.el" . "ff4f9b1a658fef4edcaf44a0be0326f1e609dc9a")
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
  ("diff-hl" . "c9ecc496e6638552be7a52c690e5ff62565130c8") ; TODO add to RSS
- ("evil-collection" . "783c96b9901417cb8b6df63ab606387fa72dc922") ; 3.0.3 add to RSS
+ ("evil-collection" . "e3f70c513585086ad83e245829e1de8f72f2de26") ; 3.0.3 add to RSS
  ("embark" . "79531fc6aab311acf6874679082f336de4a91789") ; 1.2 | RSS RELEASE
  ("evil-matchit" . "4cb8dd3d811ecb2abd774b491223ac5460dcdd5e") ; 5.0.0 | RSS RELEASE
- ("apheleia" . "d97806bf2b5b72f1e3df01e9a045a4d242906b65") ; v4.6.0 | RSS RELEASE
+ ("apheleia" . "664fcfd3ec8f868169609c03ca3f8e54d897c27a") ; v4.6.0 | RSS RELEASE
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
  ("modus-themes" . "782743415b3eedac0b99db2342fb35703deb752f") ; 5.3.0 | RSS RELEASE
- ("ef-themes" . "e1f617607a5f0692b398365dcd8412ba1e98ccb3") ; 2.2.1 | RSS RELEASE
+ ("ef-themes" . "716d365d0cf2ad3d855c6879a476857bc5fa57d2") ; 2.2.1 | RSS RELEASE
  ("orderless" . "3d2c2e6468ddf51e69c78e8212e5fd9006d2ce8a") ; 1.8 | RSS RELEASE
  ("vertico" . "a9998a777f1d92348f84d091bb15b87df933a7a2")  ; 2.15 | RSS RELEASE
  ("corfu" . "b468efac023dda39332acc943edc9895c80b5a6f") ; 2.16 | RSS RELEASE
  ("cape" . "f0135abaf95a22b9fb2c951751a5d0733ce61bbd") ; 2.8 | RSS RELEASE
  ("git-modes" . "f291a4cc4a8b02a25d5cf93b4ab6af29e6f060d9") ; v1.5.0 | RSS RELEASE
- ("gptel" . "65280701b87dc32cbe6cf9c07f1b88fdf035085c") ; v0.9.9.6 | RSS RELEASE
+ ("gptel" . "e161ababf0cb19654ec9097f06c09c95d4561721") ; v0.9.9.6 | RSS RELEASE
  ("dumb-jump" . "cf06b4ccdce6a39346c32f05139f9ee8b77ee229")
  ("indent-bars" . "36620c5f3fba2ba8f23d7ef947e0d1d09e412bf5") ; 1.0.1 | RSS RELEASE
  ("treesit-fold" . "cc1003b730a3167b972cc8400dffe19be7988fc7")
