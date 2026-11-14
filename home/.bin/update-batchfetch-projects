@@ -243,7 +243,7 @@ def generate_batchfetch_yaml(
         lines.append(f"  # {category_title}")
         lines.append(f"  # {'-' * 76}")
 
-        for git_uri, path_val, upstream_url, disable_update in sorted(repos):
+        for git_uri, path_val, upstream_url, disable_update in repos:
             lines.append(f"  - git: {git_uri}")
             lines.append(f"    path: {path_val}")
 
