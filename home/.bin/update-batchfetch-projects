@@ -107,6 +107,18 @@ MISSING_REPOSITORIES: list[dict[str, str | None]] = [
         "directory": "forks/setup-emacs",
         "upstream_uri": "https://github.com/purcell/setup-emacs",
     },
+    {
+        "uri": "git@github.com:jamescherti/home-settings",
+        "directory": "dev/home-settings",
+    },
+    {
+        "uri": "git@github.com:jamescherti/jc-dev",
+        "directory": "dev/jc-dev",
+    },
+    {
+        "uri": "git@github.com:jamescherti/wip",
+        "directory": "dev/wip",
+    },
     # TODO: It doesn't work
     # {
     #     "uri": "ssh://aur@aur.archlinux.org/linux-keep-modules",
@@ -225,10 +237,6 @@ def generate_batchfetch_yaml(
         "    - legacy/.git-rexec-ignore",
         "    - forks/.git-rexec-ignore",
         "    - batchfetch-old.yaml",
-        "    - ",
-        "    - ",
-        "    - ",
-        "    - ",
         "",
         "tasks:",
     ]
@@ -289,14 +297,18 @@ def main() -> None:
     for repo_data in MISSING_REPOSITORIES:
         git_uri = str(repo_data["uri"])
         path_val = str(repo_data["directory"])
-        upstream_url = repo_data["upstream_uri"]
 
         category = path_val.split("/")[0] if "/" in path_val else "misc"
         disable_update = any(r in git_uri for r in NO_GIT_UPDATE_REPOS)
 
-        repos_by_category[category].append(
-            (git_uri, path_val, upstream_url, disable_update)
-        )
+        try:
+            upstream_url = repo_data["upstream_uri"]
+            repos_by_category[category].append(
+                (git_uri, path_val, upstream_url, disable_update)
+               )
+        except KeyError:
+            pass
+
         print("[ADD ADDITIONAL REPO]", git_uri)
 
     # Generate YAML file
