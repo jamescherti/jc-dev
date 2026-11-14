@@ -92,7 +92,7 @@ def render(pins: dict[str, str]) -> str:
             previous = destinations[repository]
             raise ValueError(
                 f"{previous!r} and {name!r} both use "
-                f"the checkout directory 'emacs-packages/{repository}'"
+                f"the checkout directory '{repository}'"
             )
         destinations[repository] = name
 
