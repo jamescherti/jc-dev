@@ -27,7 +27,6 @@
 #
 
 set -euf -o pipefail
-IFS=$'\n\t'
 
 export FROM_PRE_PUSH=1
 echo "[HOOK] pre-push"

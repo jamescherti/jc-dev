@@ -27,7 +27,6 @@
 #
 
 set -euf -o pipefail
-IFS=$'\n\t'
 echo "[HOOK] pre-commit"
 
 AUTHORINFO=$(git var GIT_AUTHOR_IDENT)

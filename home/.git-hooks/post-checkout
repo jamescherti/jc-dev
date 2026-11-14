@@ -27,7 +27,6 @@
 #
 
 set -euf -o pipefail
-IFS=$'\n\t'
 
 export FROM_POST_CHECKOUT=1
 echo "[HOOK] post-checkout"
