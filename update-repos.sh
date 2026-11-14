@@ -224,6 +224,7 @@ main() {
   # are present
   mkdir -p "$SRC_DIR"
   cd "$SRC_DIR"
+  ./home/.bin/update-emacs-batchfetch
 
   prepare-dependencies
 
