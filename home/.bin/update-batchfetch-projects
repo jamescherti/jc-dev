@@ -110,14 +110,17 @@ MISSING_REPOSITORIES: list[dict[str, str | None]] = [
     {
         "uri": "git@github.com:jamescherti/home-settings",
         "directory": "dev/home-settings",
+        "upstream_uri": "https://github.com/jamescherti/home-settings",
     },
     {
         "uri": "git@github.com:jamescherti/jc-dev",
         "directory": "dev/jc-dev",
+        "upstream_uri": "https://github.com/jamescherti/jc-dev",
     },
     {
         "uri": "git@github.com:jamescherti/wip",
         "directory": "dev/wip",
+        "upstream_uri": "https://github.com/jamescherti/wip",
     },
     # TODO: It doesn't work
     # {
