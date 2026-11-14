@@ -18,8 +18,11 @@ if ! [[ -f "$RUN_EMACS_BIN" ]]; then
   # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/tag-emacs-31.1/bin/emacs"
   # EMACS_D="$HOME/.emacs-straight.d/"
 
+  # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-master/bin/emacs"
+  # EMACS_D="$HOME/.emacs-straight.d/"
+
   RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-master/bin/emacs"
-  EMACS_D="$HOME/.emacs-straight.d/"
+  EMACS_D="$HOME/.emacs-use-package.d/"
 
   #
   # RUN_EMACS_BIN="/usr/bin/emacs"

@@ -2151,6 +2151,20 @@ This function records the time when `window-setup-hook' runs."
  ;; evil-want-C-i-jump t
  )
 
+;;; Package paths
+
+(defun my-lightemacs-init-local-packages ()
+  "Configure local packages when Lightemacs uses the built-in manager."
+  (when (eq lightemacs-package-manager 'builtin-package)
+    (setq lightemacs-use-package-init-refresh nil
+          use-package-always-ensure nil)
+    (dolist (directory '("~/.emacs-packages/" "~/src/emacs/"))
+      (let ((default-directory (expand-file-name directory)))
+        (when (file-directory-p default-directory)
+          (normal-top-level-add-subdirs-to-load-path))))))
+
+(add-hook 'lightemacs-pre-init-hook #'my-lightemacs-init-local-packages)
+
 ;;; Provide
 
 (provide 'config)

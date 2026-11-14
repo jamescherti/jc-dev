@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Generate batchfetch.yaml from the package pins in a straight.el profile."""
+
+import argparse
+import re
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+
+DEFAULT_OUTPUT = Path("~/.emacs-packages/batchfetch.yaml").expanduser()
+STRAIGHT_PROFILE = Path(
+    "~/src/dev/jc-dev/home/.emacs-data/etc/straight-profile.el"
+).expanduser()
+IGNORED_PACKAGES: set[str] = {
+    "elpa",
+    "melpa",
+    "nongnu-elpa",
+    "org",
+}
+
+PACKAGE_ALIASES: dict[str, str] = {
+    "org": "org-mode",
+    "basic-mode": "emacs-basic-mode",
+    "eat": "emacs-eat",
+}
+
+ENTRY = re.compile(
+    r'\(\s*"(?P<name>[A-Za-z0-9_.+-]+)"\s*\.\s*'
+    r'"(?P<revision>[0-9a-fA-F]{40}|[0-9a-fA-F]{64})"\s*\)\s*'
+)
+ENDING = re.compile(r"\)\s*(?::epsilon\s*)?")
+
+
+def read_profile(profile: Path) -> dict[str, str]:
+    """Read active package names and commit hashes in profile order."""
+    source = profile.read_text(encoding="utf-8-sig")
+    source = re.sub(r";[^\n]*", "", source)
+
+    opening = re.match(r"\s*\(\s*", source)
+    if opening is None:
+        raise ValueError(f"{profile}: expected a list of package pins")
+
+    offset = opening.end()
+    pins: dict[str, str] = {}
+
+    while entry := ENTRY.match(source, offset):
+        name = entry["name"]
+        if name in {".", ".."} or name in pins:
+            line = source.count("\n", 0, offset) + 1
+            reason = "duplicate package" if name in pins else "invalid package name"
+            raise ValueError(f"{profile}:{line}: {reason} {name!r}")
+
+        pins[name] = entry["revision"]
+        offset = entry.end()
+
+    if ENDING.fullmatch(source, offset) is None:
+        line = source.count("\n", 0, offset) + 1
+        raise ValueError(f"{profile}:{line}: invalid package pin or profile ending")
+
+    return pins
+
+
+def render(pins: dict[str, str]) -> str:
+    """Render package pins using repository aliases for URLs and checkout paths."""
+    tasks: list[str] = []
+    destinations: dict[str, str] = {}
+
+    for name, revision in pins.items():
+        if name in IGNORED_PACKAGES:
+            continue
+
+        repository = PACKAGE_ALIASES.get(name, name)
+        if repository in destinations:
+            previous = destinations[repository]
+            raise ValueError(
+                f"{previous!r} and {name!r} both use "
+                f"the checkout directory 'emacs-packages/{repository}'"
+            )
+        destinations[repository] = name
+
+        tasks.extend(
+            [
+                f"  - git: git@github.com:jamescherti/{repository}",
+                f"    path: emacs-packages/{repository}",
+                f'    revision: "{revision}"',
+            ]
+        )
+
+    if not tasks:
+        return "tasks: []\n"
+
+    return "tasks:\n" + "\n".join(tasks) + "\n"
+
+
+def write_output(output: Path, content: str) -> None:
+    """Replace the output atomically, preserving existing permission bits."""
+    try:
+        permissions = output.stat().st_mode & 0o777
+    except FileNotFoundError:
+        permissions = None
+
+    temporary: Path | None = None
+    try:
+        with NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=output.parent,
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(content)
+
+        if permissions is not None:
+            temporary.chmod(permissions)
+        temporary.replace(output)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def main() -> None:
+    """Generate the batchfetch configuration from the selected profile."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "profile",
+        nargs="?",
+        type=Path,
+        default=STRAIGHT_PROFILE,
+        help="straight.el profile (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=DEFAULT_OUTPUT,
+        help="output YAML file (default: %(default)s)",
+    )
+    args = parser.parse_args()
+
+    try:
+        profile = args.profile.expanduser().resolve()
+        output = args.output.expanduser().resolve()
+        if output in {profile, Path(__file__).resolve()}:
+            raise ValueError("output must differ from the profile and script")
+
+        write_output(output, render(read_profile(profile)))
+    except (OSError, ValueError, RuntimeError) as error:
+        parser.exit(1, f"{parser.prog}: {error}\n")
+
+
+if __name__ == "__main__":
+    main()
