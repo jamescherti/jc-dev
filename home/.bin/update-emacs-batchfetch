@@ -99,7 +99,7 @@ def render(pins: dict[str, str]) -> str:
         tasks.extend(
             [
                 f"  - git: git@github.com:jamescherti/{repository}",
-                f"    path: emacs-packages/{repository}",
+                f"    path: {repository}",
                 f'    revision: "{revision}"',
             ]
         )
