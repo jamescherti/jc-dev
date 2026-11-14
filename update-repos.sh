@@ -224,11 +224,14 @@ main() {
   # are present
   mkdir -p "$SRC_DIR"
   cd "$SRC_DIR"
-  ./home/.bin/update-emacs-batchfetch
 
   prepare-dependencies
 
   install-pip-packages
+
+  ./home/.bin/update-emacs-batchfetch
+  cd ~/.emacs-packages
+  batchfetch
 
   update-repos
 
