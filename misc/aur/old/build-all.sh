@@ -7,7 +7,7 @@
 # DOCKER_USER_GID=$(id -g)
 # DOCKER_USER_UID=$(id -u)
 
-set -eu -o pipefail
+set -euo pipefail
 
 if [ "$(id -u)" -ne "0" ]; then
   echo "Error: you need root privileges to run this script." >&2
