@@ -34,8 +34,7 @@ unset http_proxy
 unset https_proxy
 unset no_proxy
 
-set -e
-set -u
+set -euo pipefail
 
 # shellcheck disable=SC2157
 if [[ -s ~/.config.sh ]]; then

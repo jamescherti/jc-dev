@@ -26,8 +26,7 @@
 # SOFTWARE.
 #
 
-set -e
-set -u
+set -euo pipefail
 
 main() {
   local tag_found=0

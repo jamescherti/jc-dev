@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-set -u
-set -e
+set -euo pipefail
 
 # When jemacs runs inside a tmux session, ensure Emacs does not attempt to
 # connect to an unreachable session outside firejail

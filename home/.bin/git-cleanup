@@ -43,9 +43,7 @@
 # SOFTWARE.
 #
 
-
-set -e
-set -u
+set -euo pipefail
 
 cleanup_branches() {
   local branches=()

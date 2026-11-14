@@ -29,8 +29,7 @@
 # SOFTWARE.
 #
 
-set -e
-set -u
+set -euo pipefail
 
 NEW_URL="$1"
 URL=$(git remote get-url upstream 2>/dev/null || true)
