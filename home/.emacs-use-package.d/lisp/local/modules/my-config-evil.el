@@ -1773,9 +1773,9 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
     "Find a file.."
     (interactive)
     (cond
-     ((and (project-current)
-           (fboundp 'my-consult-project-files))
-      (my-consult-project-files))
+     ;; ((and (project-current)
+     ;;       (fboundp 'my-consult-project-files))
+     ;;  (my-consult-project-files))
 
      (t
       (quick-fasd-find-file))))

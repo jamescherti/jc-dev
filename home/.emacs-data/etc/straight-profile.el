@@ -14,7 +14,7 @@
  ("evil-matchit" . "4cb8dd3d811ecb2abd774b491223ac5460dcdd5e") ; 5.0.0 | RSS RELEASE
  ("apheleia" . "d97806bf2b5b72f1e3df01e9a045a4d242906b65") ; v4.6.0 | RSS RELEASE
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
- ("modus-themes" . "aedb41742ff326fa4884136300155ca21a0bd628") ; 5.3.0 | RSS RELEASE
+ ("modus-themes" . "782743415b3eedac0b99db2342fb35703deb752f") ; 5.3.0 | RSS RELEASE
  ("ef-themes" . "e1f617607a5f0692b398365dcd8412ba1e98ccb3") ; 2.2.1 | RSS RELEASE
  ("orderless" . "3d2c2e6468ddf51e69c78e8212e5fd9006d2ce8a") ; 1.8 | RSS RELEASE
  ("vertico" . "a9998a777f1d92348f84d091bb15b87df933a7a2")  ; 2.15 | RSS RELEASE
