@@ -237,6 +237,10 @@ main() {
 
   config-project-list
 
+  mkdir -p ~/.emacs-repos
+  ln -sf ~/.emacs-packages ~/.emacs-repos/emacs-packages
+  ln -sf ~/src/emacs ~/.emacs-repos/my-packages
+
   # TODO Run once a day
   # git_maintenance
 }

@@ -550,7 +550,6 @@ alias si="so smart-install"
 
 alias scp="so esa ssh-add-exec scp"
 alias ssh="so esa ssh-add-exec ssh"
-alias ssh-keyscan="so esa ssh-add-exec ssh"
 alias s='ssh'
 
 path-is-inside-of() {
