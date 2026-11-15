@@ -484,10 +484,6 @@ Opens a split window showing the added and removed features."
 ;;; Terminal themes
 
 (use-package terminal-colors
-  :straight (terminal-colors
-             :type git
-             :host github
-             :repo "jamescherti/terminal-colors.el")
   :config
   (setq terminal-colors-default-theme "gnome-terminal-tango-dark")
   ;; (setq terminal-colors-default-theme "konsole-white-on-black")
