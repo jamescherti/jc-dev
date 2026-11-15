@@ -158,9 +158,9 @@ prepare-dependencies() {
       "$SRC_DIR/python/batchfetch/"
   fi
 
-  if ! [[ -f ~/src/batchfetch.yaml ]]; then
-    ./home/.bin/update-batchfetch-projects
-  fi
+  # if ! [[ -f ~/src/batchfetch.yaml ]]; then
+  ./home/.bin/update-batchfetch-projects
+  # fi
 
   BF_OR_GIT_BRANCH=develop
   bf-or-git "$SRC_DIR/dev/jc-dev"
