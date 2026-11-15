@@ -1609,26 +1609,6 @@ of the line or the buffer; just return nil."
   (kbd "l") #'evilcursor-forward-char
   (kbd "h") #'evilcursor-backward-char)
 
-;;; O: Evil Open Above
-
-(evil-define-command evilcursor-open-above (count)
-  "Insert a new line above point, using current line's indentation.
-The insertion will be repeated COUNT times.
-This command temporarily disables `electric-indent-mode` to prevent automatic
-re-indentation after inserting the copied indentation."
-  :suppress-operator t
-  (interactive "p")
-  (let ((indentation (buffer-substring-no-properties
-                      (pos-bol)
-                      (progn (back-to-indentation) (point))))
-        (electric-indent-mode nil))
-    (evil-narrow-to-field
-      (evil-open-above count)
-      (delete-horizontal-space t)
-      (insert indentation))))
-
-(define-key evil-normal-state-map "O" 'evilcursor-open-above)
-
 ;;; Evil search next and previous
 
 (evil-define-motion evilcursor-find-char (count char)
@@ -2012,12 +1992,12 @@ and ensures TUI apps like Vim receive an immediate exit signal."
 
 (add-hook 'term-mode-hook #'my-term-setup t)
 
-;;; evil outline
+;;; Evil outline
 
 (with-eval-after-load 'outline
   (require 'my-evil-outline))
 
-;;; highlight search after paste
+;;; Highlight search after paste
 
 ;; TODO: Send patch to evil?
 
@@ -2077,7 +2057,7 @@ Accepts any arguments so it can be used as advice or a hook."
   (advice-add 'outline-move-subtree-up :after #'my-evil-refresh-search-highlight)
   (advice-add 'outline-move-subtree-down :after #'my-evil-refresh-search-highlight))
 
-;;; copy the whole buffer
+;;; Copy the whole buffer
 
 (defun my-copy-whole-buffer-evil ()
   "Copy the entire buffer without moving the cursor and sync with Evil registers."
@@ -2129,9 +2109,9 @@ Accepts any arguments so it can be used as advice or a hook."
 (define-key evil-insert-state-map (kbd "C-z") #'ignore)
 (define-key evil-motion-state-map (kbd "C-z") #'ignore)
 
-(setq evil-toggle-key "")
+;; (setq evil-toggle-key "")
 
-;;; wizard
+;;; Wizard
 
 ;; (evil-define-key '(normal visual) my-intercept-mode-map
 ;;    "{" 'wizard-point-backward-to-empty-line
@@ -2223,7 +2203,7 @@ Accepts any arguments so it can be used as advice or a hook."
 
   (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename))
 
-;;; intercept
+;;; Intercept
 
 (defun my-shell-pop ()
   "Close the minibuffer if active, then launch `shell-pop'."
@@ -2289,6 +2269,26 @@ Accepts any arguments so it can be used as advice or a hook."
 (evil-define-key 'motion 'global
   (kbd "M-N") #'evilcursor-ex-search-previous-recenter
   (kbd "M-n") #'evilcursor-ex-search-next-recenter)
+
+;;; DISABLED: O: Evil Open Above
+
+;; (evil-define-command evilcursor-open-above (count)
+;;   "Insert a new line above point, using current line's indentation.
+;; The insertion will be repeated COUNT times.
+;; This command temporarily disables `electric-indent-mode` to prevent automatic
+;; re-indentation after inserting the copied indentation."
+;;   :suppress-operator t
+;;   (interactive "p")
+;;   (let ((indentation (buffer-substring-no-properties
+;;                       (pos-bol)
+;;                       (progn (back-to-indentation) (point))))
+;;         (electric-indent-mode nil))
+;;     (evil-narrow-to-field
+;;       (evil-open-above count)
+;;       (delete-horizontal-space t)
+;;       (insert indentation))))
+;;
+;; (define-key evil-normal-state-map "O" 'evilcursor-open-above)
 
 ;;; DISABLED: Spell checker: Jinx or Flyspell
 
