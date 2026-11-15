@@ -795,7 +795,7 @@ When FORCE-ALL is non-nil, use all functions."
 
 (evil-define-key 'normal 'global
   (kbd "gd") 'eviljump-goto-definition
-  (kbd "<leader>d") 'eviljump-goto-definition
+  (kbd "<leader>d") 'eviljump-goto-definition-force
   (kbd "<leader>D") 'eviljump-goto-definition-force)
 ;; Causes bugs
 ;; (evil-define-key 'normal 'global (kbd "gd") 'eviljump-goto-definition)
