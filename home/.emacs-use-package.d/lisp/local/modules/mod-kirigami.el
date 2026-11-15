@@ -42,29 +42,32 @@
 
 ;; Important for kirigami jump to load
 ;; Copied/pasted from le-kirigami
-(lightemacs-use-package kirigami
-  :commands (kirigami-open-fold
-             kirigami-open-fold-rec
-             kirigami-close-fold
-             kirigami-toggle-fold
-             kirigami-open-folds
-             kirigami-close-folds-except-current
-             kirigami-close-folds
-             kirigami-global-mode)
-  ;; :hook (lightemacs-after-init . kirigami-global-mode)
-  :init
-  (lightemacs-module-bind kirigami
-    (global-set-key (kbd "C-c z o") 'kirigami-open-fold)
-    (global-set-key (kbd "C-c z c") 'kirigami-close-fold)
-    (global-set-key (kbd "C-c z m") 'kirigami-close-folds)
-    (global-set-key (kbd "C-c z r") 'kirigami-open-folds)
-    (global-set-key (kbd "C-c z O") 'kirigami-open-fold-rec)
-    (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold))
+(require 'le-kirigami)
 
-  (add-hook-text-editing-modes 'kirigami-mode)
-  (add-hook 'my-scratch-buffer-created-hook 'kirigami-mode)
+;; (lightemacs-use-package kirigami
+;;   :commands (kirigami-mode
+;;              kirigami-global-mode
+;;              kirigami-open-fold
+;;              kirigami-open-fold-rec
+;;              kirigami-close-fold
+;;              kirigami-toggle-fold
+;;              kirigami-open-folds
+;;              kirigami-close-folds-except-current
+;;              kirigami-close-folds)
+;;   ;; :hook (lightemacs-after-init . kirigami-global-mode)
+;;   :init
+;;   (lightemacs-module-bind kirigami
+;;     (global-set-key (kbd "C-c z o") 'kirigami-open-fold)
+;;     (global-set-key (kbd "C-c z c") 'kirigami-close-fold)
+;;     (global-set-key (kbd "C-c z m") 'kirigami-close-folds)
+;;     (global-set-key (kbd "C-c z r") 'kirigami-open-folds)
+;;     (global-set-key (kbd "C-c z O") 'kirigami-open-fold-rec)
+;;     (global-set-key (kbd "C-c z TAB") 'kirigami-toggle-fold))
+;;
+;;   (add-hook-text-editing-modes 'kirigami-mode)
+;;   (add-hook 'my-scratch-buffer-created-hook 'kirigami-mode))
 
-  :config
+(with-eval-after-load 'kirigami
   (require 'kirigami-jump)
   (when (fboundp 'kirigami-jump-mode)
     (kirigami-jump-mode 1))
@@ -73,7 +76,6 @@
     (require 'kirigami-evil)
     (when (fboundp 'kirigami-evil-mode)
       (kirigami-evil-mode 1))))
-
 
 ;;; Useful function: my-reveal-kirigami-fold-after-undo-advice
 
