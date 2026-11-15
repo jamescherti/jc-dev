@@ -390,40 +390,36 @@ This function uses the selected files as arguments."
        "open" "-a" "/Applications/Meld.app" "--args")
     (my-start-process-with-files "meld")))
 
-;;---------------------------------------------------------------
-;; save
-;;---------------------------------------------------------------
-(defun buffer-cwd ()
-  "Return the directory of the current buffer."
-  (interactive)
-  (or (my-dir-config--buffer-cwd) default-directory))
-
 ;;-----------------------------------------------------------------------------
 ;; Commands
 ;;-----------------------------------------------------------------------------
-(defun my-dir-config--buffer-cwd ()
+;; (defun exec-command (command &rest args)
+;;   "Execute shell COMMAND with ARGS without displaying the output."
+;;   (apply 'call-process command nil nil nil args))
+
+(defun buffer-cwd ()
   "Return the directory associated with the current buffer.
-Returns:
-- The directory path if the buffer is in `dired-mode', or
-- The directory of the file if the buffer is visiting a file, or
-- nil if neither condition is met."
-  (let ((file-name (buffer-file-name (buffer-base-buffer))))
-    (cond ((derived-mode-p 'dired-mode)
-           (file-name-as-directory (expand-file-name default-directory)))
+Signal a `user-error' if the path does not name an existing directory."
+  (let* ((file-name (buffer-file-name (buffer-base-buffer)))
+         (directory (if file-name
+                        (file-name-directory file-name)
+                      default-directory)))
+    (unless (and directory (file-directory-p directory))
+      (user-error "Expected an existing directory, got: %S" directory))
+    (file-name-as-directory (expand-file-name directory))))
 
-          (file-name
-           (expand-file-name (file-name-directory file-name))))))
-
-(defun exec-command (command &rest args)
-  "Execute shell COMMAND with ARGS without displaying the output."
-  (apply 'call-process command nil nil nil args))
+(defun buffer-cwd-or-temp ()
+  "Return the directory from `buffer-cwd' if it exists.
+Otherwise, return `temporary-file-directory'."
+  (let ((directory (buffer-cwd)))
+    (if (and directory (file-directory-p directory))
+        directory
+      temporary-file-directory)))
 
 (defun exec-shell-command (arg &optional cwd)
   "Execute shell command ARG without displaying the output.
 CWD is the current working directory."
-  (unless cwd
-    (setq cwd (buffer-cwd)))
-  (let ((default-directory cwd))
+  (let ((default-directory (buffer-cwd)))
     (call-process "env" nil nil nil "sh" "-c" arg)))
 
 ;;-----------------------------------------------------------------------------
@@ -698,44 +694,40 @@ such as `next-buffer' or `previous-buffer'."
 
 ;;; check parens
 
-;; TODO buffer wizard
-
 (defun my-check-parens-no-jump (&optional no-error)
-  "Check for unbalanced parentheses in the current buffer.
-This function scans the entire buffer for balanced parentheses. If an imbalance
-is found, it either triggers a user error or simply shows a message, depending
-on the optional argument NO-ERROR.
-If NO-ERROR is non-nil, it only displays a message about the unmatched
-parenthesis or quote, including the line number, column, and file name, but does
-not raise an error.
-If NO-ERROR is nil or omitted, a user error is raised with the same details, and
-the function returns nil.
-If the parentheses are balanced, the function returns t."
+  "Check for unbalanced brackets or quotes without moving point.
+Scan the accessible portion of the current buffer according to the current
+syntax table. Return t if scanning succeeds.
+
+If an imbalance is found, signal a `user-error' with the line number, one-based
+column number, and abbreviated file name (or buffer name). If NO-ERROR is
+non-nil, display the diagnostic and return nil instead.
+
+Unlike `check-parens', leave point and mark unchanged."
   (interactive)
   (condition-case data
       (progn
         (scan-sexps (point-min) (point-max))
-        ;; Return t
         t)
     (scan-error
-     (let* ((char (nth 2 data))
+     ;; Compute the diagnostic without moving point.
+     (let* ((pos (nth 2 data))
+            (file-name (buffer-file-name (buffer-base-buffer)))
             (msg
              (format "Unmatched bracket or quote in line %s, column %s in %s"
-                     (line-number-at-pos char)
-                     (let ((column (save-excursion (goto-char char)
-                                                   (current-column))))
-                       (when (integerp column)
-                         (1+ column)))
-                     (let ((file-name (buffer-file-name (buffer-base-buffer))))
-                       (if file-name
-                           (abbreviate-file-name file-name)
-                         (buffer-name))))))
-
+                     (line-number-at-pos pos)
+                     (save-excursion
+                       (goto-char pos)
+                       (1+ (current-column)))
+                     (if file-name
+                         (abbreviate-file-name file-name)
+                       (buffer-name)))))
+       ;; Honor NO-ERROR and treat the diagnostic as literal text.
        (if no-error
-           (user-error msg)
-         (user-error msg))
-       ;; Return nil
-       nil))))
+           (progn
+             (message "%s" msg)
+             nil)
+         (user-error "%s" msg))))))
 
 ;; (advice-add 'check-parens :override #'my-check-parens-no-jump)
 

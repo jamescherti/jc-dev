@@ -266,7 +266,11 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
                          (if project-name
                              (format "  |  Project:%s" project-name)
                            (format "  |  Dir:%s"
-                                   (abbreviate-file-name (buffer-cwd)))))
+                                   (abbreviate-file-name
+                                    (condition-case nil
+                                        (buffer-cwd)
+                                      (error
+                                       default-directory))))))
                      "")
                    )
                   "  |  "
@@ -3505,7 +3509,10 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
                   (frame-selected-window window-or-frame)
                 window-or-frame))
          (directory (with-current-buffer (window-buffer win)
-                      (buffer-cwd))))
+                      (condition-case nil
+                          (buffer-cwd)
+                        (error
+                         nil)))))
     (when (and directory
                (not (file-remote-p directory)))
       ;; If the cache is nil (e.g., on first run after startup), read the

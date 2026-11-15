@@ -1796,7 +1796,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (setq stripspace-normalize-indentation nil))
 (add-hook 'ultisnips-mode-hook #'my-setup-ultisnips-mode)
 
-;;; better vc
+;;; Better vc
 
 (defun mod-better-vc-diff ()
   "Save and call `vc-diff' silently."
