@@ -113,9 +113,9 @@ MISSING_REPOSITORIES: list[dict[str, str | None]] = [
         "upstream_uri": "https://github.com/jamescherti/home-settings",
     },
     {
-        "uri": "git@github.com:jamescherti/jc-dev",
-        "directory": "dev/jc-dev",
-        "upstream_uri": "https://github.com/jamescherti/jc-dev",
+        "uri": "git@github.com:jamescherti/notes",
+        "directory": "dev/notes",
+        "upstream_uri": "https://github.com/jamescherti/notes",
     },
     {
         "uri": "git@github.com:jamescherti/wip",
@@ -301,7 +301,7 @@ def main() -> None:
             upstream_url = repo_data["upstream_uri"]
             repos_by_category[category].append(
                 (git_uri, path_val, upstream_url, disable_update)
-               )
+            )
         except KeyError:
             pass
 
