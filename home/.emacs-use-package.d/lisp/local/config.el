@@ -920,7 +920,7 @@ subsequent GCC invocations."
 
                            le-so-long
                            le-yasnippet
-                           ;; le-compile-angel
+                           le-compile-angel
                            le-display-line-numbers
                            le-vim-tab-bar
                            le-theme
@@ -995,7 +995,7 @@ subsequent GCC invocations."
                            le-aggressive-indent
                            le-highlight-defined
                            le-paredit
-                           le-elisp-autofmt
+                           ;; le-elisp-autofmt
                            ;; le-page-break-lines
 
                            ;; le-autorevert
@@ -1044,7 +1044,7 @@ subsequent GCC invocations."
                            le-indent-bars
                            le-stripspace
 
-                           le-eat
+                           ;; le-eat
                            le-vterm
 
                            le-persist-text-scale

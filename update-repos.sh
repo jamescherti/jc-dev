@@ -232,6 +232,7 @@ main() {
   ./home/.bin/update-emacs-batchfetch
   cd ~/.emacs-packages
   batchfetch
+  ./home/.bin/update-emacs-packages-nosearch
 
   update-repos
 
