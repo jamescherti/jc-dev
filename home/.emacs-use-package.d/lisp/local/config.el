@@ -984,8 +984,8 @@ subsequent GCC invocations."
                            le-cape
                            mod-corfu-cape
 
-                           ;; le-corfu-prescient
                            ;; le-prescient
+                           ;; le-corfu-prescient
                            ;; le-vertico-prescient
 
                            ;; le-magit
