@@ -1474,10 +1474,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
    modus-themes-bold-constructs t
    modus-themes-mixed-fonts nil
 
-   kirigami-enhance-outline-open t
-   kirigami-enhance-outline-close-all t
-   kirigami-preserve-visual-position t
-
    savehist-autosave-interval 650
    tab-bar-history-limit 15
 

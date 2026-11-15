@@ -35,10 +35,14 @@
 
 ;;; Install Kirigami
 
-(setq kirigami-menu-bar-label "Folds")
-(setq kirigami-context-menu-label "Contextual folds")
-(setq kirigami-show-menu-bar t)
-(setq kirigami-show-context-menu t)
+(setq kirigami-enhance-outline-open t
+      kirigami-enhance-outline-close-all t
+      kirigami-preserve-visual-position nil
+
+      kirigami-menu-bar-label "Folds"
+      kirigami-context-menu-label "Contextual folds"
+      kirigami-show-menu-bar t
+      kirigami-show-context-menu t)
 
 ;; Important for kirigami jump to load
 ;; Copied/pasted from le-kirigami
