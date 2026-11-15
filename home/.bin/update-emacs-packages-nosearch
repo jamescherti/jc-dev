@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Add .nosearch files to non-loadable Emacs package directories."""
+
+import argparse
+import os
+import re
+from pathlib import Path
+
+EXCLUDED_NAMES = {
+    "assets",
+    "bench",
+    "benchmark",
+    "benchmarks",
+    "bin",
+    "dev",
+    "doc",
+    "docs",
+    "documentation",
+    "example",
+    "examples",
+    "fixture",
+    "fixtures",
+    "img",
+    "media",
+    "samplecode",
+    "screenshots",
+    "scripts",
+    "spec",
+    "specs",
+    "stub",
+    "test",
+    "testcase",
+    "testcases",
+    "testdata",
+    "testing",
+    "tests",
+    "testsuite",
+    "tools",
+}
+
+
+def is_excluded(directory: Path) -> bool:
+    """Return whether DIRECTORY has a name indicating non-runtime files."""
+    # return "test" in directory.name
+    tokens = re.split(r"[-_.]+", directory.name.lower())
+    return any(token in EXCLUDED_NAMES for token in tokens)
+
+
+def handle_walk_error(error: OSError) -> None:
+    """Raise ERROR instead of silently skipping unreadable directories."""
+    raise error
+
+
+def scan_directories(root: Path) -> tuple[list[Path], set[Path]]:
+    """Scan ROOT once and identify directories containing .el files."""
+    directories: list[Path] = []
+    contains_elisp: set[Path] = set()
+
+    for current, subdirs, filenames in os.walk(root, onerror=handle_walk_error):
+        directory = Path(current)
+
+        subdirs[:] = [
+            name
+            for name in subdirs
+            if not name.startswith(".") and not (directory / name).is_symlink()
+        ]
+
+        directories.append(directory)
+
+        if any(filename.endswith(".el") for filename in filenames):
+            contains_elisp.add(directory)
+
+    return directories, contains_elisp
+
+
+def propagate_elisp_to_parents(
+    root: Path,
+    directories: list[Path],
+    contains_elisp: set[Path],
+) -> None:
+    """Mark ancestors of directories containing .el files."""
+    for directory in reversed(directories):
+        if directory in contains_elisp and directory != root:
+            contains_elisp.add(directory.parent)
+
+
+def create_nosearch_files(
+    root: Path,
+    directories: list[Path],
+    contains_elisp: set[Path],
+    dry_run: bool,
+) -> int:
+    """Create .nosearch files and return the number selected."""
+    excluded_subtrees: set[Path] = set()
+    created = 0
+
+    for directory in directories:
+        if directory == root:
+            continue
+
+        if directory.parent in excluded_subtrees:
+            excluded_subtrees.add(directory)
+            continue
+
+        marker = directory / ".nosearch"
+
+        if marker.exists() or marker.is_symlink():
+            # if directory in contains_elisp:
+            #     print(f"Warning: existing marker may hide .el files: {marker}")
+            excluded_subtrees.add(directory)
+            continue
+
+        if is_excluded(directory):
+            excluded_subtrees.add(directory)
+            continue
+
+        if directory in contains_elisp:
+            continue
+
+        if not dry_run:
+            marker.touch(exist_ok=False)
+
+        action = "Would create" if dry_run else "Created"
+        print(f"{action}: {marker}")
+
+        excluded_subtrees.add(directory)
+        created += 1
+
+    return created
+
+
+def add_nosearch_files(root: Path, dry_run: bool = False) -> int:
+    """Add .nosearch files under ROOT and return the number selected."""
+    directories, contains_elisp = scan_directories(root)
+    propagate_elisp_to_parents(root, directories, contains_elisp)
+
+    return create_nosearch_files(root, directories, contains_elisp, dry_run)
+
+
+def main() -> int:
+    """Parse arguments and process the requested package directory."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        type=Path,
+        default=Path.home() / ".emacs-packages",
+        help="Package directory (default: ~/.emacs-packages)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview changes without creating files",
+    )
+    args = parser.parse_args()
+
+    if not args.directory.is_dir():
+        parser.error(f"Directory does not exist: {args.directory}")
+
+    root = args.directory.resolve()
+
+    try:
+        count = add_nosearch_files(root, dry_run=args.dry_run)
+    except OSError as exc:
+        parser.exit(1, f"Error: {exc}\n")
+
+    action = "Would create" if args.dry_run else "Created"
+    print(f"{action} {count} .nosearch file(s).")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

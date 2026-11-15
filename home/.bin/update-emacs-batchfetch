@@ -26,14 +26,20 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 DEFAULT_OUTPUT = Path("~/.emacs-packages/batchfetch.yaml").expanduser()
+
 STRAIGHT_PROFILE = Path(
     "~/src/dev/jc-dev/home/.emacs-data/etc/straight-profile.el"
 ).expanduser()
+
 IGNORED_PACKAGES: set[str] = {
     "elpa",
     "melpa",
     "nongnu-elpa",
     "org",
+    "straight.el",
+    "benchmark-init-el",
+    "cond-let",
+    "transient",
 }
 
 PACKAGE_ALIASES: dict[str, str] = {
@@ -46,6 +52,7 @@ ENTRY = re.compile(
     r'\(\s*"(?P<name>[A-Za-z0-9_.+-]+)"\s*\.\s*'
     r'"(?P<revision>[0-9a-fA-F]{40}|[0-9a-fA-F]{64})"\s*\)\s*'
 )
+
 ENDING = re.compile(r"\)\s*(?::epsilon\s*)?")
 
 
@@ -84,7 +91,10 @@ def render(pins: dict[str, str]) -> str:
     destinations: dict[str, str] = {}
 
     for name, revision in pins.items():
-        if name in IGNORED_PACKAGES:
+        if (
+            name in IGNORED_PACKAGES
+            or (Path("~/src").expanduser() / "emacs" / name).exists()
+        ):
             continue
 
         repository = PACKAGE_ALIASES.get(name, name)
@@ -160,9 +170,10 @@ def main() -> None:
         profile = args.profile.expanduser().resolve()
         output = args.output.expanduser().resolve()
         if output in {profile, Path(__file__).resolve()}:
-            raise ValueError("output must differ from the profile and script")
+            raise ValueError("output must differ from the profile and script")  # noqa: TRY301
 
         write_output(output, render(read_profile(profile)))
+        print("Success.")
     except (OSError, ValueError, RuntimeError) as error:
         parser.exit(1, f"{parser.prog}: {error}\n")
 
