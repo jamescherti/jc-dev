@@ -78,12 +78,19 @@ actions:
       - "cp -u tools/efasd/fasd {{ '~/.bin/fasd' | expanduser | quote }}"
 
   - path_match:
+      - "*/gentoo-upgrade.sh"
+      - "*/gentoo-upgrade/*"
+      - "*/gentoo-upgrade"
+    tags: install
+    command: "sudo cp linux/gentoo-upgrade/gentoo-upgrade /root/.local/bin/gentoo-upgrade"
+
+  - path_match:
       - "*/update-iptables.sh"
       - "*/update-iptables/*"
       - "*/update-iptables"
     tags: install
     list_commands:
-      - "sudo sh -c 'scp tools/update-iptables/update-iptables.sh /root/.local/bin/update-iptables && /root/.local/bin/update-iptables'"
+      - "sudo sh -c 'cp tools/update-iptables/update-iptables.sh /root/.local/bin/update-iptables && /root/.local/bin/update-iptables'"
 
   - path_match:
       - "*/ananicy-rules/*"
