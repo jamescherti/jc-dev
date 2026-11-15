@@ -1765,6 +1765,26 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (evil-define-key 'normal 'global (kbd "<leader>fd") 'quick-fasd-find-directory)
   (quick-fasd-mode 1))
 
+;;; DISABLED: Reduce messages
+
+;; (defun lightemacs-evil--suppress-evil-search-error (orig-fn &rest args)
+;;   "Handle `search-failed' errors from Evil search commands.
+;; ORIG-FN is the original Evil function being advised.
+;; ARGS is the list of arguments passed to ORIG-FN."
+;;   (if lightemacs-evil-suppress-search-failed
+;;       (condition-case err
+;;           (apply orig-fn args)
+;;         (search-failed
+;;          (when executing-kbd-macro
+;;            ;; Propagate the error so keyboard macros abort properly
+;;            (signal (car err) (cdr err)))))
+;;     (apply orig-fn args)))
+;;
+;; (when lightemacs-evil-suppress-search-failed
+;;   (with-eval-after-load 'evil-commands
+;;     (advice-add 'evil-ex-search-next :around #'lightemacs-evil--suppress-evil-search-error)
+;;     (advice-add 'evil-ex-search-previous :around #'lightemacs-evil--suppress-evil-search-error)))
+
 ;;; Use-package pathaction
 
 (defun pathaction-install ()

@@ -77,7 +77,7 @@ CUSTOM_CATEGORIES: dict[str, str] = {
 IGNORE_GITHUB_REPOSITORIES: set[str] = {
     # My repos: TODO clone them
     "jamescherti/modeline-region.el",
-    "jamescherti/alpm-reboot-required",
+    # "jamescherti/alpm-reboot-required",
     "jamescherti/emacs-ansible",
     "jamescherti/emacs-eat",
     "jamescherti/emacs-elisp-autofmt",
@@ -95,8 +95,8 @@ IGNORE_GITHUB_REPOSITORIES: set[str] = {
     "jamescherti/paredit",
     "jamescherti/ztree",
     "jamescherti/gentoo-brother-ql1110nwb",
-    "jamescherti/outline-yaml.el",
-    "jamescherti/python-dpc3848v-wifi-modem",
+    # "jamescherti/outline-yaml.el",
+    # "jamescherti/python-dpc3848v-wifi-modem",
     # Forks
     "jamescherti/ace-window",
     "jamescherti/Ananicy",
