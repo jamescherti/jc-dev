@@ -4902,35 +4902,6 @@ ARGS are the arguments passed to ORIG-FN."
 
 (require 'my-evil-blockops)
 
-;;; restore window-start
-
-(defvar my-xref-window-starts
-  (make-hash-table :test 'equal :weakness 'key)
-  "Map xref markers to their original window-start positions.")
-
-(defun my-xref-push-marker-advice (orig-fun &optional m)
-  "Save the current window-start associated with marker M before pushing."
-  (let ((marker (or m (point-marker))))
-    (when (markerp marker)
-      (puthash marker (window-start) my-xref-window-starts)))
-  (funcall orig-fun m))
-
-(defun my-xref-jump-around (orig-fun)
-  "Restore window-start after executing xref navigation function ORIG-FUN."
-  (let* ((history (xref--get-history))
-         (stack (if (eq orig-fun #'xref-go-back) (car history) (cdr history)))
-         (target-marker (car stack))
-         (saved-start (and target-marker (gethash target-marker my-xref-window-starts))))
-    (funcall orig-fun)
-    (when (and saved-start (integer-or-marker-p saved-start))
-      (set-window-start (selected-window) saved-start t)
-      (when target-marker
-        (remhash target-marker my-xref-window-starts)))))
-
-(advice-add #'xref-push-marker-stack :around #'my-xref-push-marker-advice)
-(advice-add #'xref-go-back :around #'my-xref-jump-around)
-(advice-add #'xref-go-forward :around #'my-xref-jump-around)
-
 ;;; DISABLED: vterm-toggle
 
 ;; (lightemacs-use-package vterm-toggle
