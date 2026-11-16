@@ -38,6 +38,12 @@ snippet b
 (boundp '${1:var-name})
 endsnippet
 
+snippet iffb
+(if (fboundp '${1:function-name})
+		${2:t}
+	(error "Undefined: $1"))
+endsnippet
+
 snippet fb
 (fboundp '${1:function-name})
 endsnippet

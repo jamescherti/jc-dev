@@ -115,7 +115,7 @@ This excludes buffers whose names begin with an asterisk (*)."
                     (string-prefix-p " " buffer-name))
                (and point-manager-exclude-special-buffers
                     (string-prefix-p "*" buffer-name))))
-            (apply #'derived-mode-p point-manager-excluded-modes)))
+            (derived-mode-p point-manager-excluded-modes)))
 
   (unless point-manager--inhibit
     (cond

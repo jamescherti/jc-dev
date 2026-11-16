@@ -238,7 +238,10 @@ _ARG is the ignored optional prefix argument from `evil-visual-highlight'."
   (interactive)
   (unwind-protect
       (progn
-        (goto-char (point-max)))
+        (goto-char (point-max))
+
+        (when (and (eobp) (bolp) (not (bobp)))
+          (backward-char 1)))
     (lightemacs-recenter-maybe -1 t)))
 
 ;; TODO: Article? Bug report?
