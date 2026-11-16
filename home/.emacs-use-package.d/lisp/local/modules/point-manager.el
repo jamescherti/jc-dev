@@ -115,7 +115,8 @@ This excludes buffers whose names begin with an asterisk (*)."
                     (string-prefix-p " " buffer-name))
                (and point-manager-exclude-special-buffers
                     (string-prefix-p "*" buffer-name))))
-            (derived-mode-p point-manager-excluded-modes)))
+            ;; Emacs 29 expects each excluded mode as a separate argument.
+            (apply #'derived-mode-p point-manager-excluded-modes)))
 
   (unless point-manager--inhibit
     (cond
@@ -136,8 +137,21 @@ This excludes buffers whose names begin with an asterisk (*)."
 (defun point-manager--pre-command-hook (&rest _)
   "Save point and column position.
 The argument _ is ignored."
-  (unless point-manager--initialized
-    (point-manager--initialize-buffer))
+  ;; (unless point-manager--initialized
+  ;;   (point-manager--initialize-buffer))
+
+  ;; Eligibility can change when a buffer is renamed or settings are edited.
+  (let ((context (list (buffer-name)
+                       (and buffer-file-name t)
+                       (window-minibuffer-p)
+                       point-manager-exclude-minibuffer
+                       point-manager-exclude-hidden-buffers
+                       point-manager-exclude-special-buffers
+                       point-manager-excluded-modes)))
+    (unless (and point-manager--initialized
+                 (equal context point-manager--initialization-context))
+      (point-manager--initialize-buffer)
+      (setq point-manager--initialization-context (copy-tree context))))
 
   ;; (setq point-manager--pre-command this-command)
   (unless point-manager--inhibit
