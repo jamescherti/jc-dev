@@ -67,7 +67,8 @@ ARGS are the arguments passed to the original function."
           (run-hooks 'my-scratch-buffer-created-hook))))
     result))
 
-(advice-add 'get-scratch-buffer-create :around #'my-advice-scratch-buffer-create)
+(with-eval-after-load 'simple
+  (advice-add 'get-scratch-buffer-create :around #'my-advice-scratch-buffer-create))
 
 ;;; Local modes instead of global ones
 

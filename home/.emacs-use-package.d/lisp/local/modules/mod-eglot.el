@@ -353,7 +353,8 @@ FORMAT and ARGS are the message format string and its arguments."
                                (string-suffix-p "politely to terminate" message-string))))
       (apply orig-fun format args))))
 
-(advice-add 'eglot--message :around #'my-eglot--message-filter)
+(with-eval-after-load 'eglot
+  (advice-add 'eglot--message :around #'my-eglot--message-filter))
 
 ;;; Cape
 

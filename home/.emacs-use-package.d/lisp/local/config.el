@@ -1708,8 +1708,9 @@ This uses an around advice to trap errors and verify file timestamps."
                              "--" "test"))
         (error "Failed to restore gptel test submodule")))))
 
-(advice-add 'straight-thaw-versions
-            :before #'my/straight-fix-gptel-submodule)
+(with-eval-after-load 'straight
+  (advice-add 'straight-thaw-versions
+              :before #'my/straight-fix-gptel-submodule))
 
 ;;; Add my packages to load path
 

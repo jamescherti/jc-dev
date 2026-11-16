@@ -194,9 +194,9 @@ If ENABLE is non-nil, install hooks. Otherwise remove them."
           ;; TODO too slow. implement restoring window start when it opens for real
           ;; (advice-add 'evil-ex-search-forward :around #'kirigami-jump--around-outline-show-entry)
 
-          (advice-add 'evil-goto-line :around #'kirigami-jump--around-outline-show-entry)
-
-          (advice-add 'evil-goto-mark :around #'kirigami-jump--around-outline-show-entry)))
+          (with-eval-after-load 'evil-commands
+            (advice-add 'evil-goto-line :around #'kirigami-jump--around-outline-show-entry)
+            (advice-add 'evil-goto-mark :around #'kirigami-jump--around-outline-show-entry))))
     ;; DISABLE
     (with-eval-after-load 'flymake
       (advice-remove 'flymake-goto-next-error #'kirigami-jump--around-outline-show-entry)

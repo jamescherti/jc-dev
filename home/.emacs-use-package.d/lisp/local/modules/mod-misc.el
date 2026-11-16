@@ -436,7 +436,8 @@ during unsafe operations like interning symbols on file open."
     (apply orig args)))
 
 (when (< emacs-major-version 32)
-  (advice-add 'vc-find-backend-function :around #'my-suppress-shorthands)
+  (with-eval-after-load 'vc-hooks
+    (advice-add 'vc-find-backend-function :around #'my-suppress-shorthands))
 
   (with-eval-after-load 'cc-fonts
     (advice-add 'c-compose-keywords-list :around #'my-suppress-shorthands)))

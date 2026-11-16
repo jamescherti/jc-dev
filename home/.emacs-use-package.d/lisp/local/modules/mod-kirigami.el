@@ -205,11 +205,12 @@ OBJECT can be nil (current window), a window, or a frame."
 ;;; Undo
 
 ;; Built-in
-(dolist (cmd '(undo
-               undo-only
-               undo-redo))
-  (when (fboundp cmd)
-    (advice-add cmd :after #'my-reveal-kirigami-fold-after-undo-advice)))
+(with-eval-after-load 'simple
+  (dolist (cmd '(undo
+                 undo-only
+                 undo-redo))
+    (when (fboundp cmd)
+      (advice-add cmd :after #'my-reveal-kirigami-fold-after-undo-advice))))
 
 ;; (with-eval-after-load 'undo-fu
 ;;   (dolist (cmd '(undo-fu-only-undo
@@ -303,10 +304,11 @@ or within the active region before applying the comment."
       (ignore-errors
         (kirigami-open-fold-rec)))))
 
-(advice-add 'comment-dwim :before #'kirigami--unfold-for-comment-advice)
-(advice-add 'comment-region :before #'kirigami--unfold-for-comment-advice)
-(advice-add 'comment-or-uncomment-region :before #'kirigami--unfold-for-comment-advice)
-(advice-add 'uncomment-region :before #'kirigami--unfold-for-comment-advice)
+(with-eval-after-load 'newcomment
+  (advice-add 'comment-dwim :before #'kirigami--unfold-for-comment-advice)
+  (advice-add 'comment-region :before #'kirigami--unfold-for-comment-advice)
+  (advice-add 'comment-or-uncomment-region :before #'kirigami--unfold-for-comment-advice)
+  (advice-add 'uncomment-region :before #'kirigami--unfold-for-comment-advice))
 
 ;;; Kirigami: Fold things when opening them
 
