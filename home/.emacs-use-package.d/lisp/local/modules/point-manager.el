@@ -154,56 +154,43 @@ The argument _ is ignored."
 (defun point-manager--post-command-hook (&optional _command)
   "Maintain cursor constraints in normal state.
 The argument _COMMAND is the previous command (ignored)."
-  (let ((prev-pt (window-parameter nil 'point-manager--previous-point))
-        (prev-col (window-parameter nil 'point-manager--previous-column)))
-    (when (and (not point-manager--inhibit)
-               (eq (selected-window) point-manager--pre-command-window)
-               (eq (current-buffer) point-manager--pre-command-buffer)
-               prev-pt
-               (/= (point) prev-pt)
-               (or (not (boundp 'evil-state))
-                   (eq evil-state 'normal))
-               (not (minibufferp))
-               (not (region-active-p)))
-      ;; DELETE: Restore the column after deleting
-      ;; NOTE: this fails when using corfu completionm, for some reason
-      ;; (setq point-manager--region-active-p (region-active-p))
-      ;; (when (and (not point-manager--region-active-p)
-      ;;            point-manager-restore-column-after-commands
-      ;;            (memq point-manager--pre-command
-      ;;                  point-manager-restore-column-after-commands))
-      ;;   (point-manager--move-to-column prev-col))
-
-      ;; END OF FILE
-      (when (and (eobp)
-                 (not (bobp)))
+  (when (and (not point-manager--inhibit)
+             (eq (selected-window) point-manager--pre-command-window)
+             (eq (current-buffer) point-manager--pre-command-buffer)
+             (let ((prev-pt (window-parameter
+                             nil 'point-manager--previous-point)))
+               (and prev-pt (/= (point) prev-pt)))
+             (or (not (boundp 'evil-state))
+                 (eq evil-state 'normal))
+             (not (minibufferp))
+             (not (region-active-p)))
+    (let ((prev-col (window-parameter
+                     nil 'point-manager--previous-column)))
+      ;; Restore the previous column when moving to the end of the buffer.
+      (when (and (eobp) (not (bobp)))
         (forward-char -1)
-
         (if point-manager-ignore-invisible
             (vertical-motion 0)
           (goto-char (my-pos-bol)))
-
         (point-manager--move-to-column prev-col))
 
-      ;; DIRED: Handle dired-mode header line and column constraints
+      ;; Enforce Dired's header and minimum-column constraints.
       (when (eq point-manager--buffer-type 'dired)
-        (let ((column (current-column)))
-          ;; DIRED: First line
-          ;; Prevent the cursor from moving to the first line containing the
-          ;; directory header. An alternative approach is available via (setq
-          ;; dired-movement-style 'bounded-files). However, this does not
-          ;; accommodate navigation using gg or G in Evil mode (moving to the top
-          ;; and bottom of the buffer).
-          (when (= (my-pos-bol) (point-min))
+        ;; DIRED: First line
+        ;; Prevent the cursor from moving to the first line containing the
+        ;; directory header. An alternative approach is available via (setq
+        ;; dired-movement-style 'bounded-files). However, this does not
+        ;; accommodate navigation using gg or G in Evil mode (moving to the top
+        ;; and bottom of the buffer).
+        (let ((header-p (= (my-pos-bol) (point-min))))
+          (when header-p
             (forward-line 1)
-            (point-manager--move-to-column prev-col)
-            ;; This is used by the next check (2 columns)
-            (setq column prev-col))
-
-          ;; DIRED: First two columns
+            (point-manager--move-to-column prev-col))
           (when (and point-manager-dired-min-column
-                     (< column point-manager-dired-min-column))
-            (point-manager--move-to-column point-manager-dired-min-column)))))))
+                     (< (if header-p prev-col (current-column))
+                        point-manager-dired-min-column))
+            (point-manager--move-to-column
+             point-manager-dired-min-column)))))))
 
 ;;;###autoload
 (define-minor-mode point-manager-mode
