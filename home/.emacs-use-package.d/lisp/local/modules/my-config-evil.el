@@ -236,13 +236,38 @@ _ARG is the ignored optional prefix argument from `evil-visual-highlight'."
 (defun my-goto-end-of-buffer (&rest _)
   "Go to the end of the buffer."
   (interactive)
-  (unwind-protect
-      (progn
-        (goto-char (point-max))
+  (goto-char (point-max))
 
-        (when (and (eobp) (bolp) (not (bobp)))
-          (backward-char 1)))
-    (lightemacs-recenter-maybe -1 t)))
+  (when (and (eobp) (bolp) (not (bobp)))
+    (backward-char 1))
+
+  ;; Move backward until reaching visible text.
+  ;; TODO kirigami?
+  (vertical-motion 0)
+  (end-of-line)
+
+  ;; (while (and (> (point) (point-min))
+  ;;             (or (invisible-p (point))
+  ;;                 (invisible-p (1- (point)))))
+  ;;   (backward-char 1))
+
+  ;; Move backward until reaching visible text.
+  ;; Slow
+  ;; (let ((invisible-fn (cond
+  ;;                      ((derived-mode-p 'org-mode)
+  ;;                       (lambda (position)
+  ;;                         (org-invisible-p position t)))
+  ;;                      ((or (derived-mode-p 'outline-mode)
+  ;;                           (bound-and-true-p outline-minor-mode))
+  ;;                       #'outline-invisible-p)
+  ;;                      (t
+  ;;                       #'invisible-p))))
+  ;;   (while (and (> (point) (point-min))
+  ;;               (or (funcall invisible-fn (point))
+  ;;                   (funcall invisible-fn (1- (point)))))
+  ;;     (backward-char 1)))
+
+  (lightemacs-recenter-maybe -1 t))
 
 ;; TODO: Article? Bug report?
 (defun my-uncomment-and-join-region ()
