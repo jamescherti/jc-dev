@@ -43,6 +43,98 @@
 (require 'sub-project)
 (require 'mod-evil-smart-next-line)
 
+;;; Wizard
+
+;; (evil-define-key '(normal visual) my-intercept-mode-map
+;;    "{" 'wizard-point-backward-to-empty-line
+;;    "}" 'wizard-point-forward-to-empty-line)
+
+(define-key evil-visual-state-map (kbd "M-j") 'wizard-move-region-down)
+(define-key evil-visual-state-map (kbd "M-k") 'wizard-move-region-up)
+
+(evil-define-key 'visual 'global (kbd "C") 'wizard-copy-unindented)
+
+;; (lightemacs-use-package mod-better-grep
+;;   :ensure nil
+;;   :commands mod-better-grep
+;;   :init
+;;   (with-eval-after-load 'evil
+;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
+
+;; Elpaca and the built-in package
+(lightemacs-use-package wizard
+  :commands (wizard-clone-and-switch-to-indirect-buffer
+             wizard-unhighlight
+             wizard-toggle-highlight-at-point
+             wizard-switch-to-base-buffer
+             wizard-replace-symbol-at-point
+             wizard-hl-todo-mode
+             wizard-hl-todo-local-mode
+             wizard-paste-indented
+             wizard-grep
+             wizard-reload-current-buffer)
+
+  :init
+  ;; (setq wizard-point-ignore-invisible t)
+
+  ;;; Paste with current indentation
+  (global-set-key (kbd "C-v") 'wizard-paste-indented)
+  (evil-define-key 'insert 'global (kbd "C-v") 'wizard-paste-indented)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>gg") 'wizard-grep
+    (kbd "<leader>ll") 'wizard-reload-current-buffer)
+
+  ;; Indirect buffer
+  (evil-define-key 'normal 'global
+    (kbd "<leader>ec") 'wizard-clone-and-switch-to-indirect-buffer
+    (kbd "<leader>eC") 'wizard-switch-to-base-buffer)
+
+  ;; Highlight
+  ;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>eh") 'wizard-toggle-highlight-at-point
+    (kbd "<leader>eH") 'wizard-unhighlight)
+
+  (add-hook-text-editing-modes 'wizard-hl-todo-local-mode)
+  (add-hook 'my-scratch-buffer-created-hook 'wizard-hl-todo-local-mode)
+
+  (with-eval-after-load 'consult
+    (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode)))
+
+;;; Smart rename
+
+(defun pkg-wizard-smart-rename ()
+  "Smartly decide how to rename the symbol at point."
+  (interactive)
+  (cond
+   ;; Eglot or LSP-Mode
+   ((and (not (region-active-p))
+         (or (bound-and-true-p eglot--managed-mode)
+             (bound-and-true-p lsp-managed-mode)))
+    (let* ((from-string (thing-at-point 'symbol))
+           (to-string (read-string (format "Replace '%s' with: " from-string)
+                                   from-string nil from-string)))
+      (cond
+       ((and (bound-and-true-p lsp-managed-mode)
+             (fboundp 'lsp-rename))
+        (lsp-rename to-string))
+       ((and (bound-and-true-p eglot--managed-mode)
+             (fboundp 'refactor-rename))
+        (refactor-rename to-string 'eglot))
+       ;; Obsolete
+       ((and (bound-and-true-p eglot--managed-mode)
+             (fboundp 'eglot-rename))
+        (eglot-rename to-string)))))
+
+   ;; Replace string
+   (t
+    (ignore-errors
+      (when (fboundp 'wizard-replace-symbol-at-point)
+        (wizard-replace-symbol-at-point))))))
+
+(evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename)
+(evil-define-key 'normal 'global (kbd "<leader>R") 'wizard-replace-symbol-at-point)
+
 ;;; Evil config
 
 (setq
@@ -68,10 +160,10 @@
 
  ;; Do not modify the mode line to show Evil state
  evil-mode-line-format nil
- )
 
-;; Make `v$` exclude the final newline
-(setq evil-v$-excludes-newline t)
+ ;; Make `v$` exclude the final newline
+ evil-v$-excludes-newline t)
+
 
 ;; Required by evil-collection
 
@@ -2152,98 +2244,6 @@ Accepts any arguments so it can be used as advice or a hook."
 (define-key evil-motion-state-map (kbd "C-z") #'ignore)
 
 ;; (setq evil-toggle-key "")
-
-;;; Wizard
-
-;; (evil-define-key '(normal visual) my-intercept-mode-map
-;;    "{" 'wizard-point-backward-to-empty-line
-;;    "}" 'wizard-point-forward-to-empty-line)
-
-(define-key evil-visual-state-map (kbd "M-j") 'wizard-move-region-down)
-(define-key evil-visual-state-map (kbd "M-k") 'wizard-move-region-up)
-
-(evil-define-key 'visual 'global (kbd "C") 'wizard-copy-unindented)
-
-;; (lightemacs-use-package mod-better-grep
-;;   :ensure nil
-;;   :commands mod-better-grep
-;;   :init
-;;   (with-eval-after-load 'evil
-;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
-
-;; Elpaca and the built-in package
-(lightemacs-use-package wizard
-  :commands (wizard-clone-and-switch-to-indirect-buffer
-             wizard-unhighlight
-             wizard-toggle-highlight-at-point
-             wizard-switch-to-base-buffer
-             wizard-replace-symbol-at-point
-             wizard-hl-todo-mode
-             wizard-hl-todo-local-mode
-             wizard-paste-indented
-             wizard-grep
-             wizard-reload-current-buffer)
-  :preface
-  (defun pkg-wizard-smart-rename ()
-    "Smartly decide how to rename the symbol at point."
-    (interactive)
-    (cond
-     ;; Eglot or LSP-Mode
-     ((and (not (region-active-p))
-           (or (bound-and-true-p eglot--managed-mode)
-               (bound-and-true-p lsp-managed-mode)))
-      (let* ((from-string (thing-at-point 'symbol))
-             (to-string (read-string (format "Replace '%s' with: " from-string)
-                                     from-string nil from-string)))
-        (cond
-         ((and (bound-and-true-p lsp-managed-mode)
-               (fboundp 'lsp-rename))
-          (lsp-rename to-string))
-         ((and (bound-and-true-p eglot--managed-mode)
-               (fboundp 'refactor-rename))
-          (refactor-rename to-string 'eglot))
-         ;; Obsolete
-         ((and (bound-and-true-p eglot--managed-mode)
-               (fboundp 'eglot-rename))
-          (eglot-rename to-string)))))
-
-     ;; Replace string
-     (t
-      (ignore-errors
-        (when (fboundp 'wizard-replace-symbol-at-point)
-          (wizard-replace-symbol-at-point))))))
-
-  :init
-  (setq wizard-point-ignore-invisible t)
-
-  ;;; Paste with current indentation
-  (global-set-key (kbd "C-v") 'wizard-paste-indented)
-  (evil-define-key 'insert 'global (kbd "C-v") 'wizard-paste-indented)
-  (evil-define-key 'normal 'global
-    (kbd "<leader>gg") 'wizard-grep
-    (kbd "<leader>ll") 'wizard-reload-current-buffer)
-
-  ;; Indirect buffer
-  (evil-define-key 'normal 'global
-    (kbd "<leader>ec") 'wizard-clone-and-switch-to-indirect-buffer
-    (kbd "<leader>eC") 'wizard-switch-to-base-buffer)
-
-  ;; Rename
-  (evil-define-key 'normal 'global (kbd "<leader>R") 'wizard-replace-symbol-at-point)
-
-  ;; Highlight
-  ;; (evil-define-key 'normal 'global (kbd "C-h") #'wizard-toggle-highlight-at-point)
-  (evil-define-key 'normal 'global
-    (kbd "<leader>eh") 'wizard-toggle-highlight-at-point
-    (kbd "<leader>eH") 'wizard-unhighlight)
-
-  (add-hook-text-editing-modes 'wizard-hl-todo-local-mode)
-  (add-hook 'my-scratch-buffer-created-hook 'wizard-hl-todo-local-mode)
-
-  (with-eval-after-load 'consult
-    (add-hook 'consult-preview-allowed-hooks #'wizard-hl-todo-local-mode))
-
-  (evil-define-key 'normal 'global (kbd "<leader>r") #'pkg-wizard-smart-rename))
 
 ;;; Intercept
 
