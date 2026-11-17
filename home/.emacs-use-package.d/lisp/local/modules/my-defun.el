@@ -606,18 +606,18 @@ TO-STRING."
 ;;   "Switch to the next buffer that is a file, Dired, or vterm."
 ;;   (interactive)
 ;;   (my-smart-switch-interesting-buffer #'next-buffer))
-
-(defun my-previous-interesting-buffer ()
-  "Switch to the previous buffer that is a file, Dired, or vterm."
-  (interactive)
-  ;; (my-smart-previous-interesting-buffer)
-  (previous-buffer))
-
-(defun my-next-interesting-buffer ()
-  "Switch to the next buffer that is a file, Dired, or vterm."
-  (interactive)
-  ;; (my-smart-next-interesting-buffer)
-  (next-buffer))
+;;
+;; (defun my-previous-interesting-buffer ()
+;;   "Switch to the previous buffer that is a file, Dired, or vterm."
+;;   (interactive)
+;;   ;; (my-smart-previous-interesting-buffer)
+;;   (previous-buffer))
+;;
+;; (defun my-next-interesting-buffer ()
+;;   "Switch to the next buffer that is a file, Dired, or vterm."
+;;   (interactive)
+;;   ;; (my-smart-next-interesting-buffer)
+;;   (next-buffer))
 
 ;;; check parens
 

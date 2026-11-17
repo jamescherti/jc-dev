@@ -20,16 +20,6 @@
 #
 
 actions:
-  - path_match: "*"
-    tags: main
-    shell: true
-    shell_path: /usr/bin/python3
-    # shell_cmd: ["-c"]
-    shell_command: ["python3", "-c"]
-    command: |
-      import sys
-      print("Hello world")
-
   - path_match: "*/jamescherti/README.md"
     cwd: "jamescherti"
     tags: install

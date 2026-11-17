@@ -754,24 +754,34 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; frame. When you cycle through buffers in your active window, it skips
 ;; straight to your recent file history rather than jumping to a duplicate view
 ;; of a buffer you are already looking at elsewhere on your screen.
-(setq switch-to-prev-buffer-skip 'visible)
+;; (setq switch-to-prev-buffer-skip 'visible)
 
 ;; A custom function or a list of criteria to tailor what gets skipped. For
 ;; example, if you want to skip visible buffers plus specific technical buffers
 ;; (like *Messages* or *scratch*), you can pass a lambda:
-(setq switch-to-prev-buffer-skip
-      (lambda (window buffer bury-or-kill)
-        (let ((buf (or buffer (when window (window-buffer window)))))
-          (or
-           ;; Skip if the buffer is visible in any other window
-           (and window (not (eq window (selected-window))))
-           ;; Skip internal or utility buffers starting with an asterisk
-           (and buf (string-match-p "^\\*" (buffer-name buf)))))))
+;; (defun wizard-switch-to-prev-buffer-skip-p (window buffer _bury-or-kill)
+;;   "Skip BUFFER if visible, starts with *, or matches utility major modes."
+;;   (let* ((target-frame (if window
+;;                            (window-frame window)
+;;                          (selected-frame)))
+;;          (buf-name (buffer-name buffer))
+;;          (buf-mode (buffer-local-value 'major-mode buffer)))
+;;     (or (get-buffer-window buffer target-frame)
+;;         (string-match-p "^\\*" buf-name)
+;;         (memq buf-mode '(grep-mode
+;;                          compilation-mode
+;;                          embark-collect-mode
+;;                          embark-live-mode)))))
+;;
+;; (setq switch-to-prev-buffer-skip #'wizard-switch-to-prev-buffer-skip-p)
+
+;; (setq switch-to-prev-buffer-skip 'this)
+;; (setq switch-to-prev-buffer-skip-regexp "^\\*")
 
 (setq epa-armor t)
 
 ;; TODO light?
-(setq-default eldoc-documentation-function 'eldoc-documentation-compose)
+;; (setq-default eldoc-documentation-function 'eldoc-documentation-default)
 
 (setq hs-show-indicators t
       hs-indicator-type 'fringe)
@@ -1373,8 +1383,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
         )
 
   (unless noninteractive
-    (global-set-key (kbd "M-o") 'my-previous-interesting-buffer)
-    (global-set-key (kbd "M-i") 'my-next-interesting-buffer)
+    (global-set-key (kbd "M-o") 'previous-buffer)
+    (global-set-key (kbd "M-i") 'next-buffer)
     ;; (global-set-key (kbd "M-=") 'global-text-scale-adjust)
     ;; (global-set-key (kbd "M-RET") 'toggle-term-tmux)
     ;; (global-set-key (kbd "M-<enter>") 'toggle-term-tmux)

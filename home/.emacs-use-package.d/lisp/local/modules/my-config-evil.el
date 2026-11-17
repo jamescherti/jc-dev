@@ -326,15 +326,19 @@ _ARG is the ignored optional prefix argument from `evil-visual-highlight'."
 (defun my-goto-end-of-buffer (&rest _)
   "Go to the end of the buffer."
   (interactive)
-  (goto-char (point-max))
+  (let ((column (current-column)))
+    (unwind-protect
+        (progn
+          (goto-char (point-max))
 
-  (when (and (eobp) (bolp) (not (bobp)))
-    (backward-char 1))
+          (when (and (eobp) (bolp) (not (bobp)))
+            (backward-char 1))
 
-  ;; Move backward until reaching visible text.
-  ;; TODO kirigami?
-  (vertical-motion 0)
-  (end-of-line)
+          ;; Move backward until reaching visible text.
+          ;; TODO kirigami?
+          (vertical-motion 0)
+          (end-of-line)))
+    (move-to-column column))
 
   ;; (while (and (> (point) (point-min))
   ;;             (or (invisible-p (point))
@@ -2286,8 +2290,8 @@ Accepts any arguments so it can be used as advice or a hook."
 
   (kbd "M-x") 'execute-extended-command
 
-  (kbd "M-o") 'my-previous-interesting-buffer
-  (kbd "M-i") 'my-next-interesting-buffer
+  (kbd "M-o") 'previous-buffer
+  (kbd "M-i") 'next-buffer
 
   (kbd "C-S-k") 'wizard-tab-bar-move-tab-backward
   (kbd "C-S-j") 'wizard-tab-bar-move-tab-forward
