@@ -7,8 +7,6 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
 (require 'seq)
 
 ;;; Dired defaults

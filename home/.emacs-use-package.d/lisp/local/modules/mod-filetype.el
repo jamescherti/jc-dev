@@ -31,8 +31,6 @@
 ;;; Require
 
 (require 'my-defun)
-(eval-and-compile
-  (require 'lightemacs-use-package))
 
 ;;; org-src automation
 
@@ -176,7 +174,7 @@ LANG is the tree-sitter language symbol to check for availability."
 
 ;;; typescript
 
-(lightemacs-use-package typescript-ts-mode
+(use-package typescript-ts-mode
   :if (and (>= emacs-major-version 29)
            (my-treesit-language-available-p 'typescript))
   :ensure nil
@@ -230,7 +228,7 @@ LANG is the tree-sitter language symbol to check for availability."
 
 ;;; Vimrc mode
 
-(lightemacs-use-package vimrc-mode
+(use-package vimrc-mode
   :commands vimrc-mode
   :mode
   ("/\\.l?vim\\(rc\\)?\\([^/]*\\)?\\'" . vimrc-mode)
@@ -482,7 +480,7 @@ When FORCE is non-nil, force installing them."
 
 ;;; Ansible
 
-;; (lightemacs-use-package ansible
+;; (use-package ansible
 ;;   :commands ansible-mode
 ;;   :config
 ;;   (setq ansible-playbook-font-lock
@@ -616,7 +614,7 @@ When FORCE is non-nil, force installing them."
 
 ;;; Ansible: ansible-doc
 
-(lightemacs-use-package ansible-doc
+(use-package ansible-doc
   :commands ansible-doc
   ;; :init
   ;; (push '("\\*ansible-doc" (display-buffer-same-window)) display-buffer-alist)
@@ -673,7 +671,7 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; HTML
 
-;; (lightemacs-use-package web-mode
+;; (use-package web-mode
 ;;   :commands web-mode
 ;;   ;; :mode "\\.html?\\'"
 ;;   ;; :mode "\\.css\\'"
@@ -780,22 +778,22 @@ ITEMS is the flattened list of Imenu candidates."
 
 ;;; jinja2-mode and csv-mode
 
-;; (lightemacs-use-package jinja2-mode
+;; (use-package jinja2-mode
 ;;    :commands jinja2-mode
 ;;    :mode ("\\.j2\\'" . jinja2-mode))
 
 ;;; ultisnips-mode
 
-(lightemacs-use-package ultisnips-mode
+(use-package ultisnips-mode
   :commands ultisnips-mode
   :mode ("\\.snippets\\'" . ultisnips-mode))
 
 ;;; Jenkinsfile
 
-(lightemacs-use-package groovy-mode
+(use-package groovy-mode
   :commands groovy-mode)
 
-(lightemacs-use-package jenkinsfile-mode
+(use-package jenkinsfile-mode
   :commands jenkinsfile-mode
   :mode
   (("/Jenkinsfile[^/]*\\'" . jenkinsfile-mode)
@@ -803,7 +801,7 @@ ITEMS is the flattened list of Imenu candidates."
 
 ;;; BASIC
 
-(lightemacs-use-package basic-mode
+(use-package basic-mode
   :commands basic-qb45-mode
   :init
   ;; Djgpp and Rhide

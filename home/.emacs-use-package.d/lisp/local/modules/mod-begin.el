@@ -28,8 +28,6 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
 (require 'my-defun)
 
 ;;; Restore column
@@ -40,7 +38,7 @@
 (setq stripspace-use-virtual-overlay nil)
 ;; (setq stripspace-restore-column nil) ;; TODO Integrate
 
-(lightemacs-use-package ghostcursor
+(use-package ghostcursor
   :demand t
   :functions ghostcursor-global-mode
   :config
@@ -322,7 +320,7 @@ any new ones."
 ;; For file-path-todo
 (require 'mod-defun nil t)
 
-(lightemacs-use-package lazy-loader
+(use-package lazy-loader
   :ensure nil
   :commands lazy-loader-mode
   :hook (lightemacs-after-init . lazy-loader-mode)
@@ -424,13 +422,13 @@ Opens a split window showing the added and removed features."
 
 ;;; Themes
 
-(lightemacs-use-package modus-themes
+(use-package modus-themes
   :defer t)
-(lightemacs-use-package ef-themes
+(use-package ef-themes
   :defer t)
-(lightemacs-use-package doom-themes
+(use-package doom-themes
   :defer t)
-(lightemacs-use-package tomorrow-night-deepblue-theme
+(use-package tomorrow-night-deepblue-theme
   :defer t)
 
 (with-eval-after-load 'le-theme

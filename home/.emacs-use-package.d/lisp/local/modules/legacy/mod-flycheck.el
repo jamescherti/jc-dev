@@ -24,14 +24,9 @@
 
 ;;; Code:
 
-;;; Require
-
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
 ;;; Use-package
 
-(lightemacs-use-package flycheck
+(use-package flycheck
   :commands (flycheck-mode
              flycheck-next-error
              flycheck-previous-error)

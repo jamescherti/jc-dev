@@ -7,10 +7,6 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
-
 ;;; auto insert if new file
 
 ;; This is called by main.el

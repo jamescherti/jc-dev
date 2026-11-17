@@ -5,10 +5,7 @@
 
 ;;; Code:
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
-(lightemacs-use-package flymake-yamllint
+(use-package flymake-yamllint
   :after flymake
   :commands flymake-yamllint-setup
 

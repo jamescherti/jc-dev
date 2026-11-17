@@ -26,10 +26,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'lightemacs-use-package))
-
-(lightemacs-use-package lua-mode
+(use-package lua-mode
   :commands lua-mode
   :mode
   ("\\.lua\\'" . lua-mode))

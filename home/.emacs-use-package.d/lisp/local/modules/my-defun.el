@@ -927,7 +927,7 @@ WIDTH is the tab width."
 ;;; Macrostep
 
 ;; Buggy
-;; (lightemacs-use-package macrostep
+;; (use-package macrostep
 ;;   :bind (:map emacs-lisp-mode-map
 ;;               ("C-c e" . macrostep-expand)
 ;;               :map lisp-interaction-mode-map

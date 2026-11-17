@@ -26,10 +26,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'lightemacs-use-package))
-
-(lightemacs-use-package php-mode
+(use-package php-mode
   :commands php-mode
   :mode
   ("\\.php3\\'" . php-mode)

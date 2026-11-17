@@ -30,8 +30,6 @@
 
 (require 'my-defun)
 (require 'cl-lib)
-(eval-and-compile
-  (require 'lightemacs-use-package))
 (require 'seq)
 
 ;;; Speed
@@ -202,10 +200,10 @@ When non-nil, `tab-width' is updated automatically when a major mode loads.")
 
 ;;; Packages TODO lightemacs?
 
-;; (lightemacs-use-package cond-let
+;; (use-package cond-let
 ;;   :defer t)
 
-;; (lightemacs-use-package transient
+;; (use-package transient
 ;;   :defer t)
 
 ;;; Modeline
@@ -2971,7 +2969,7 @@ ARGS - the arguments passed to the original function"
 
 ;; package cl is deprecated
 ;; NOTE: For some reason, this is always reinstalled.
-;; (lightemacs-use-package golden-ratio
+;; (use-package golden-ratio
 ;;   :commands (golden-ratio
 ;;              golden-ratio-mode
 ;;              golden-ratio-toggle-widescreen
@@ -2982,7 +2980,7 @@ ARGS - the arguments passed to the original function"
 
 ;;; Focus
 
-;; (lightemacs-use-package focus
+;; (use-package focus
 ;;   :commands (focus-mode
 ;;              focus-change-thing
 ;;              focus-pin
@@ -2994,7 +2992,7 @@ ARGS - the arguments passed to the original function"
 
 ;;; Disabled packages
 
-;; (lightemacs-use-package ws-butler
+;; (use-package ws-butler
 ;;   :commands ws-butler-mode
 ;;   :init
 ;;   (defun my-setup-ws-butler ()
@@ -3004,7 +3002,7 @@ ARGS - the arguments passed to the original function"
 ;;       (ws-butler-mode)))
 ;;   (add-hook 'find-file-hook #'my-setup-ws-butler))
 
-;; (lightemacs-use-package quickrun
+;; (use-package quickrun
 ;;   :commands (quickrun
 ;;              quickrun-replace-region
 ;;              quickrun-eval-print
@@ -3017,7 +3015,7 @@ ARGS - the arguments passed to the original function"
 
 ;; ztree
 
-;; (lightemacs-use-package ztree
+;; (use-package ztree
 ;;   :commands ztree-diff)
 
 ;;; auto revert
@@ -3273,7 +3271,7 @@ ARGS - the arguments passed to the original function"
 
 ;;; Rainbow
 
-;; (lightemacs-use-package rainbow-mode
+;; (use-package rainbow-mode
 ;;   :commands rainbow-mode
 ;;   :no-require t)
 
@@ -3289,14 +3287,14 @@ ARGS - the arguments passed to the original function"
 
 ;;; git-timemachine
 
-;; (lightemacs-use-package git-timemachine
+;; (use-package git-timemachine
 ;;   :commands git-timemachine
 ;;   :bind (:map vc-prefix-map
 ;;               ("t" . git-timemachine)))
 
 ;;; stillness-mode
 
-;; (lightemacs-use-package stillness-mode
+;; (use-package stillness-mode
 ;;   :commands stillness-mode
 ;;   :hook (lightemacs-after-init . stillness-mode))
 
@@ -3310,7 +3308,7 @@ ARGS - the arguments passed to the original function"
 ;;                        (t '("terminal" "*terminal*"
 ;;                             (lambda () (term shell-pop-term-shell)))))
 
-;; (lightemacs-use-package popper
+;; (use-package popper
 ;;   :commands (popper-mode
 ;;              popper-echo-mode
 ;;              popper-cycle
@@ -3418,7 +3416,7 @@ ARGS - the arguments passed to the original function"
 ;;                        (t '("terminal" "*terminal*"
 ;;                             (lambda () (term shell-pop-term-shell)))))
 
-(lightemacs-use-package shell-pop
+(use-package shell-pop
   :commands shell-pop
   :bind (("C-c t" . shell-pop))
   :config
@@ -3925,7 +3923,7 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;;; ghostel
 
-;; (lightemacs-use-package ghostel
+;; (use-package ghostel
 ;;   :bind (("C-c g" . ghostel)
 ;;          ("C-c p" . ghostel-project)
 ;;          ("C-c o" . ghostel-other))
@@ -3959,7 +3957,7 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 ;;   )
 
 ;; Evil-mode integration for tracking terminal state transitions
-;; (lightemacs-use-package evil-ghostel
+;; (use-package evil-ghostel
 ;;   :after (ghostel evil)
 ;;   :hook (ghostel-mode . evil-ghostel-mode)
 ;;   :custom
@@ -4198,7 +4196,7 @@ properly handles remote files over Tramp), applying the setting only if
 
 ;;; Lazy autorevert
 
-(lightemacs-use-package lazy-autorevert
+(use-package lazy-autorevert
   :ensure nil
   :commands lazy-autorevert-mode
   :hook (lightemacs-on-first-file . lazy-autorevert-mode)
@@ -4226,7 +4224,7 @@ properly handles remote files over Tramp), applying the setting only if
     (setq-local eldoc-idle-delay 0.3)
     (eldoc-mode 1)))
 
-(lightemacs-use-package eldoc
+(use-package eldoc
   :ensure nil
   :commands (global-eldoc-mode
              eldoc-mode)
@@ -4592,7 +4590,7 @@ function or if an invalid choice is made."
 
 ;;; current window only
 
-(lightemacs-use-package single-window
+(use-package single-window
   :commands single-window-mode
   :init
   (single-window-mode 1)
@@ -4620,7 +4618,7 @@ function or if an invalid choice is made."
 
 ;;; workspace actions
 
-(lightemacs-use-package workspace-actions
+(use-package workspace-actions
   :ensure nil
   :bind ("C-c a r" . workspace-actions-run)
   :init
@@ -4905,7 +4903,7 @@ ARGS are the arguments passed to ORIG-FN."
 
 ;;; benchmark init
 
-;; (lightemacs-use-package benchmark-init
+;; (use-package benchmark-init
 ;;   :ensure nil
 ;;   :commands (benchmark-init/activate
 ;;              benchmark-init/deactivate)
@@ -4945,7 +4943,7 @@ ARGS are the arguments passed to ORIG-FN."
 
 ;;; DISABLED: vterm-toggle
 
-;; (lightemacs-use-package vterm-toggle
+;; (use-package vterm-toggle
 ;;   :commands vterm-toggle
 ;;   :bind (("<f2>" . vterm-toggle))
 ;;   :init
@@ -5015,7 +5013,7 @@ ARGS are the arguments passed to ORIG-FN."
 ;; olivetti: Sometimes struggles with side-pane elements. For example, if you
 ;; enable line numbers, Olivetti might push them into the middle of the screen
 ;; right next to the text block, which can look jarring.
-;; (lightemacs-use-package olivetti
+;; (use-package olivetti
 ;;   ;; :if (display-graphic-p)
 ;;   :commands olivetti-mode
 ;;   :init
@@ -5071,7 +5069,7 @@ ARGS are the arguments passed to ORIG-FN."
 
 ;;; DISABLED: visual-fill-column
 
-;; (lightemacs-use-package visual-fill-column
+;; (use-package visual-fill-column
 ;;   :commands visual-fill-column-for-vline
 ;;   ;; :hook
 ;;   ;; (
@@ -5204,7 +5202,7 @@ ARGS are the arguments passed to ORIG-FN."
   ;; Marginalia active for buffers and commands.
   (setq marginalia-annotators (assq-delete-all 'project-file marginalia-annotators)))
 
-;; (lightemacs-use-package vertico-buffer
+;; (use-package vertico-buffer
 ;;   :ensure nil
 ;;   :commands (vertico-buffer-mode
 ;;              vertico-buffer--redisplay)
@@ -5266,7 +5264,7 @@ ARGS are the arguments passed to ORIG-FN."
 
 ;; NOTE: This causes encoding bugs.
 
-;; (lightemacs-use-package git-gutter
+;; (use-package git-gutter
 ;;   :commands (git-gutter-mode)
 ;;
 ;;   :init
@@ -5291,7 +5289,7 @@ ARGS are the arguments passed to ORIG-FN."
 ;;   (global-set-key (kbd "C-x v p") 'git-gutter:popup-hunk)
 ;;   (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk))
 ;;
-;; (lightemacs-use-package git-gutter-fringe
+;; (use-package git-gutter-fringe
 ;;   :after git-gutter
 ;;   :init
 ;;   (setq git-gutter-fr:side 'left-fringe))
@@ -5300,7 +5298,7 @@ ARGS are the arguments passed to ORIG-FN."
 
 ;; TODO kill emacs hook issue when editing .asc file, it asks for the password
 
-;; (lightemacs-use-package savefold
+;; (use-package savefold
 ;;   :init
 ;;   ;; Removed org (buggy)
 ;;   (setq savefold-backends '(outline hideshow treesit-fold markdown))
@@ -5370,7 +5368,7 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;     (require 'consult-flymake)))
 
 ;; TODO fix vertico after enabling this
-;; (lightemacs-use-package vertico-repeat
+;; (use-package vertico-repeat
 ;;   ;; Vertico repeat last command
 ;;   :ensure nil
 ;;   :after vertico
@@ -5382,7 +5380,7 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   :init
 ;;   (evil-define-key 'normal 'global (kbd "<leader>vr") #'vertico-repeat-last))
 
-;;(lightemacs-use-package vertico-quick
+;;(use-package vertico-quick
 ;;  :ensure nil
 ;;  :after (vertico)
 ;;  :custom
@@ -5398,7 +5396,7 @@ Standard save hooks handle persistence when the buffer is modified."
 ;;   "M-," #'vertico-quick-insert
 ;;   "M-." #'vertico-quick-exit))
 
-;; (lightemacs-use-package vertico-directory
+;; (use-package vertico-directory
 ;;   :ensure nil
 ;;   :after vertico
 ;;   :defer t
@@ -5487,7 +5485,7 @@ Standard save hooks handle persistence when the buffer is modified."
 
 ;;; DISABLED: highlight-numbers
 
-;; (lightemacs-use-package highlight-numbers
+;; (use-package highlight-numbers
 ;;   :commands highlight-numbers-mode
 ;;   :hook (emacs-lisp-mode . highlight-numbers-mode))
 
@@ -5760,7 +5758,7 @@ on text following the cursor."
 
 ;;; DISABLED: tempel
 
-;; (lightemacs-use-package tempel
+;; (use-package tempel
 ;;   :commands (tempel-complete
 ;;              tempel-insert)
 ;;   :bind (("S-SPC" . tempel-complete) ;; expand or insert template
@@ -5774,12 +5772,12 @@ on text following the cursor."
 ;;   ;;                                     (file-name-directory load-file-name)))
 ;;   )
 ;;
-;; (lightemacs-use-package tempel-collection
+;; (use-package tempel-collection
 ;;   :after tempel)
 
 ;;; DISABLED: vundo
 
-;; (lightemacs-use-package vundo
+;; (use-package vundo
 ;;   :commands vundo
 ;;   :bind (("C-x u" . my-vundo-open))
 ;;   :init
@@ -5801,7 +5799,7 @@ on text following the cursor."
 
 ;; Unmaintained and unnecessary.
 
-;; (lightemacs-use-package flyspell-lazy
+;; (use-package flyspell-lazy
 ;;   :commands flyspell-lazy-mode
 ;;   :config
 ;;   :hook ((after-init . flyspell-lazy-mode))
@@ -5812,7 +5810,7 @@ on text following the cursor."
 
 ;;; DISABLED: disproject
 
-;; (lightemacs-use-package disproject
+;; (use-package disproject
 ;;   :bind ( :map ctl-x-map
 ;;           ("p" . disproject-dispatch)
 ;;           :map global-map
@@ -5820,7 +5818,7 @@ on text following the cursor."
 
 ;;; DISABLED: erefactor
 
-;; (lightemacs-use-package erefactor
+;; (use-package erefactor
 ;;   :commands (erefactor-highlight-current-symbol
 ;;              erefactor-eval-current-defun
 ;;              erefactor-add-current-defun
@@ -5876,7 +5874,7 @@ on text following the cursor."
 
 ;;; DISABLED: difftastic
 
-;; (lightemacs-use-package difftastic
+;; (use-package difftastic
 ;;   :commands (difftastic-files
 ;;              difftastic-buffers
 ;;              difftastic-file-buffer
@@ -5896,7 +5894,7 @@ on text following the cursor."
 
 ;; Default: M-→/← moves to the next/previous instance of the currently
 ;; highlighted word
-;; (lightemacs-use-package auto-highlight-symbol
+;; (use-package auto-highlight-symbol
 ;;   :commands (global-auto-highlight-symbol-mode
 ;;              auto-highlight-symbol-mode)
 ;;   :init
@@ -5941,7 +5939,7 @@ on text following the cursor."
 
 ;;; DISABLED: cov / underdover
 
-;; (lightemacs-use-package cov
+;; (use-package cov
 ;;   :defer t
 ;;   :commands (cov-mode
 ;;              cov-clear-overlays
@@ -5974,13 +5972,13 @@ on text following the cursor."
 ;;   (set-face-attribute 'cov-med-face nil :foreground "yellow")
 ;;   (set-face-attribute 'cov-heavy-face nil :foreground "green"))
 
-;; (lightemacs-use-package undercover
+;; (use-package undercover
 ;;   :defer t
 ;;   :commands undercover)
 
 ;;; DISABLED: desktop
 
-;; (lightemacs-use-package desktop
+;; (use-package desktop
 ;;   :ensure nil
 ;;   :demand t
 ;;   :commands (desktop-save-mode desktop-read)

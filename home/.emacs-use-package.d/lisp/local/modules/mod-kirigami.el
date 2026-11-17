@@ -29,8 +29,6 @@
 ;;; Require
 
 (require 'lightemacs-module)
-(eval-and-compile
-  (require 'lightemacs-use-package))
 (require 'my-defun)
 
 ;;; Install Kirigami
@@ -48,7 +46,7 @@
 ;; Copied/pasted from le-kirigami
 (require 'le-kirigami)
 
-;; (lightemacs-use-package kirigami
+;; (use-package kirigami
 ;;   :commands (kirigami-mode
 ;;              kirigami-global-mode
 ;;              kirigami-open-fold

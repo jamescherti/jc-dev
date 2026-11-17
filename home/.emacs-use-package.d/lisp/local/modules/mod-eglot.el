@@ -26,13 +26,11 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
 (require 'my-defun)
 
 ;;; use-package eglot
 
-(lightemacs-use-package eglot
+(use-package eglot
   :ensure nil
   :commands (eglot
              eglot-managed-p

@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
 (defgroup mod-cleanup nil
   "Customization options for `mod-cleanup-mode'."
   :group 'mod-cleanup

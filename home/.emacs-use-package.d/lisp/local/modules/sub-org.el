@@ -27,9 +27,6 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
 (require 'my-defun)
 (require 'org)
 
@@ -118,7 +115,7 @@
 
 ;;; use-package org
 
-;; (lightemacs-use-package org
+;; (use-package org
 ;;   :commands (org-mode
 ;;              org-indent-mode
 ;;              org-set-tags-command
@@ -678,7 +675,7 @@ any minor mode associated with the current `major-mode'."
 
 (add-hook 'org-src-mode-hook #'my-org-src-apply-minor-modes)
 
-;; (lightemacs-use-package consult-org
+;; (use-package consult-org
 ;;   :ensure nil
 ;;   :commands consult-org-heading
 ;;   :init
@@ -729,7 +726,7 @@ any minor mode associated with the current `major-mode'."
 
 ;;; org-ibullets
 
-(lightemacs-use-package org-ibullets
+(use-package org-ibullets
   :after org
   :commands org-ibullets-mode
   :hook (org-mode . org-ibullets-mode))

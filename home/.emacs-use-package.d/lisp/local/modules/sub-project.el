@@ -28,9 +28,8 @@
 
 (require 'my-defun)
 (require 'le-core-defaults)
-(eval-and-compile (require 'lightemacs-use-package))
 
-(lightemacs-use-package project
+(use-package project
   :ensure nil
   :commands (project--read-project-list
              ;; project-find-file

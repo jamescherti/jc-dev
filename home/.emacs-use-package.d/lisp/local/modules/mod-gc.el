@@ -7,12 +7,9 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
 ;;; gcsentinel
 
-(lightemacs-use-package gcsentinel
+(use-package gcsentinel
   :ensure nil
   :commands gcsentinel-mode
   :init

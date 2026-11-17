@@ -38,10 +38,7 @@
 ;;   :config
 ;;   (evil-define-key 'insert 'global (kbd "C-S-SPC") #'consult-company))
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
-(lightemacs-use-package company
+(use-package company
   :commands (company-complete
              company-complete-common
              global-company-mode

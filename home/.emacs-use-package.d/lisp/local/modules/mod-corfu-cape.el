@@ -5,11 +5,6 @@
 
 ;;; Code:
 
-;;; Require
-
-(eval-and-compile
-  (require 'lightemacs-use-package))
-
 ;;; elisp cape
 
 ;; SH
@@ -30,7 +25,7 @@
 
 ;;; Icons corfu
 
-;; (lightemacs-use-package nerd-icons-completion
+;; (use-package nerd-icons-completion
 ;;   :if (display-graphic-p)
 ;;   :commands nerd-icons-completion-marginalia-setup
 ;;   :config

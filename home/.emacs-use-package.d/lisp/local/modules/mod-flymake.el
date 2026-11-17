@@ -27,8 +27,6 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
 (require 'my-defun)
 
 ;;; Flymake defaults
@@ -106,7 +104,7 @@
 
 ;;; Flymake bashate
 
-(lightemacs-use-package flymake-bashate
+(use-package flymake-bashate
   :commands flymake-bashate-setup
   :init
   (setq flymake-bashate-max-line-length 80)
@@ -228,10 +226,10 @@ environment for accurate linting."
 ;; ;;       sideline-format-right "   %s"                ; format for right aligment
 ;; ;;       sideline-priority 100                        ; overlays' priority
 ;; ;;       sideline-display-backend-name t)
-;; (lightemacs-use-package sideline
+;; (use-package sideline
 ;;   :commands sideline-mode)
 ;;
-;; (lightemacs-use-package sideline-flymake
+;; (use-package sideline-flymake
 ;;   :commands sideline-flymake)
 ;; (setq sideline-flymake-display-mode 'point)
 ;; (defun my-setup-sideline-flymake ()

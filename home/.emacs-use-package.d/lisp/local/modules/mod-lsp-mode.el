@@ -27,8 +27,6 @@
 
 ;;; Require
 
-(eval-and-compile
-  (require 'lightemacs-use-package))
 (require 'my-defun)
 (require 'lightemacs-module)
 
@@ -37,7 +35,7 @@
 
 ;;; use-package lsp-mode
 
-(lightemacs-use-package lsp-mode
+(use-package lsp-mode
   :commands (lsp-mode
              lsp-describe-thing-at-point
              lsp-deferred

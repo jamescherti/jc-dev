@@ -33,8 +33,6 @@
 (require 'mod-cleanup)
 (require 'my-defun)
 (require 'lightemacs)  ; lightemacs-save-window-start
-(eval-and-compile
-  (require 'lightemacs-use-package))  ; lightemacs-save-window-start
 (require 'lightemacs-module)
 (require 'cl-lib) ;; TODO remove?
 
@@ -54,7 +52,7 @@
 
 (evil-define-key 'visual 'global (kbd "C") 'wizard-copy-unindented)
 
-;; (lightemacs-use-package mod-better-grep
+;; (use-package mod-better-grep
 ;;   :ensure nil
 ;;   :commands mod-better-grep
 ;;   :init
@@ -62,7 +60,7 @@
 ;;     (evil-define-key 'normal 'global (kbd "<leader>gg") #'mod-better-grep)))
 
 ;; Elpaca and the built-in package
-(lightemacs-use-package wizard
+(use-package wizard
   :commands (wizard-clone-and-switch-to-indirect-buffer
              wizard-unhighlight
              wizard-toggle-highlight-at-point
@@ -1853,7 +1851,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 ;;; quick-fasd
 
 ;; TODO Lightemacs
-(lightemacs-use-package quick-fasd
+(use-package quick-fasd
   :commands (quick-fasd-mode
              quick-fasd-find-path
              quick-fasd-find-file
@@ -2600,7 +2598,7 @@ When BANG is non-nil, discard modifications without confirmation."
 
 ;;; DISABLED: Packages
 
-;; (lightemacs-use-package tabgo
+;; (use-package tabgo
 ;;   :commands tabgo
 ;;   :bind (("M-z" . tabgo)
 ;;          ("M-t" . tabgo)))
