@@ -2333,7 +2333,7 @@ When BANG is non-nil, discard modifications without confirmation."
   :repeat nil
   (interactive "<f><!>")
   (if file
-      (if (file-directory-p)
+      (if (file-directory-p file)
           (find-file file)
         (wizard-tab-bar-find-file file))
     (revert-buffer bang (or bang (not (buffer-modified-p))) t)

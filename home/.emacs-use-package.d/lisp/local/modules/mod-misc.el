@@ -749,6 +749,25 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing
 
+;; Why it is useful: This prevents switch-to-prev-buffer (and previous-buffer)
+;; from landing on buffers that are currently visible in other windows on your
+;; frame. When you cycle through buffers in your active window, it skips
+;; straight to your recent file history rather than jumping to a duplicate view
+;; of a buffer you are already looking at elsewhere on your screen.
+(setq switch-to-prev-buffer-skip 'visible)
+
+;; A custom function or a list of criteria to tailor what gets skipped. For
+;; example, if you want to skip visible buffers plus specific technical buffers
+;; (like *Messages* or *scratch*), you can pass a lambda:
+(setq switch-to-prev-buffer-skip
+      (lambda (window buffer bury-or-kill)
+        (let ((buf (or buffer (when window (window-buffer window)))))
+          (or
+           ;; Skip if the buffer is visible in any other window
+           (and window (not (eq window (selected-window))))
+           ;; Skip internal or utility buffers starting with an asterisk
+           (and buf (string-match-p "^\\*" (buffer-name buf)))))))
+
 (setq epa-armor t)
 
 ;; TODO light?
