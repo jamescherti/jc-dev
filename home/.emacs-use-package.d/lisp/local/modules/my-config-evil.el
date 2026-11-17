@@ -578,7 +578,10 @@ This enhancement prevents the cursor from moving."
 (define-key evil-visual-state-map (kbd "C-c") 'evil-yank)
 
 ;; (define-key evil-normal-state-map (kbd "<leader>gs") 'global-text-scale-adjust)
-(define-key evil-normal-state-map (kbd "<leader>t")  'my-tab-split)
+
+;; (define-key evil-normal-state-map (kbd "<leader>t")  'tab-bar-duplicate-tab)
+(define-key evil-normal-state-map (kbd "<leader>t")  'tab-new)
+
 (define-key evil-normal-state-map (kbd "<leader>T")  'tab-bar-change-tab-group)
 (define-key evil-normal-state-map (kbd "<leader>em") 'toggle-menu-bar-mode-from-frame)
 
@@ -639,11 +642,7 @@ This enhancement prevents the cursor from moving."
   (define-key minibuffer-local-map (kbd "C-<down>") 'next-history-element)
 
   ;; Open in a NEW TAB
-  (keymap-set vertico-map "C-t"
-              (lambda()
-                ;; Open embark-dwim in a new tab
-                (when (fboundp 'tab-new-func-buffer-from-other-window)
-                  (tab-new-func-buffer-from-other-window 'embark-dwim))))
+  (evil-define-key 'normal vertico-map (kbd "<leader>t") #'my-tab-new-embark-dwim)
 
   (if (< emacs-major-version 31)
       (lightemacs-module-load '(le-wgrep))
@@ -1730,7 +1729,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 (defun my-setup-quick-sdcv ()
   "Setup quick-sdcv."
   ;; (goto-address-mode 1)
-  (my-disable-fringe-truncation-arrow)
+  (wizard-hide-truncation-and-continuation-indicators)
 
   ;; (let ((inhibit-message t))
   ;;   (visual-line-mode 1)
@@ -2292,8 +2291,8 @@ Accepts any arguments so it can be used as advice or a hook."
   (kbd "M-o") 'my-previous-interesting-buffer
   (kbd "M-i") 'my-next-interesting-buffer
 
-  (kbd "C-S-k") 'my-tab-bar-move-tab-backward
-  (kbd "C-S-j") 'my-tab-bar-move-tab
+  (kbd "C-S-k") 'wizard-tab-bar-move-tab-backward
+  (kbd "C-S-j") 'wizard-tab-bar-move-tab-forward
   (kbd "C-k") 'my-tab-previous
   (kbd "C-j") 'my-tab-next)
 
@@ -2314,6 +2313,21 @@ Accepts any arguments so it can be used as advice or a hook."
 (evil-define-key 'motion 'global
   (kbd "M-N") #'evilcursor-ex-search-previous-recenter
   (kbd "M-n") #'evilcursor-ex-search-next-recenter)
+
+;;; Better evil-edit
+
+(evil-define-command evil-edit (file &optional bang)
+  "Open FILE using `wizard-tab-bar-find-file'.
+If FILE is nil, reload the current buffer from disk.
+When BANG is non-nil, discard modifications without confirmation."
+  :repeat nil
+  (interactive "<f><!>")
+  (if file
+      (if (file-directory-p)
+          (find-file file)
+        (wizard-tab-bar-find-file file))
+    (revert-buffer bang (or bang (not (buffer-modified-p))) t)
+    (read-only-mode -1)))
 
 ;;; DISABLED: O: Evil Open Above
 

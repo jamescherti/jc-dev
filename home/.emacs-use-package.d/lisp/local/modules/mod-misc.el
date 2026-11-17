@@ -1363,8 +1363,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
     (global-set-key (kbd "C--") 'text-scale-decrease)
     (global-set-key (kbd "C-+") 'text-scale-increase)
-    (global-set-key (kbd "C-S-k") 'my-tab-bar-move-tab-backward)
-    (global-set-key (kbd "C-S-j") 'my-tab-bar-move-tab)
+    (global-set-key (kbd "C-S-k") 'wizard-tab-bar-move-tab-backward)
+    (global-set-key (kbd "C-S-j") 'wizard-tab-bar-move-tab-forward)
     (global-set-key (kbd "C-k") 'my-tab-previous)
     (global-set-key (kbd "C-j") 'my-tab-next))
 
@@ -1693,7 +1693,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             #'(lambda()
                 ;; Disable auto-hscroll in embark-collect buffers.
                 (setq-local auto-hscroll-mode nil)
-                (my-disable-fringe-truncation-arrow)))
+                (wizard-hide-truncation-and-continuation-indicators)))
 
   (add-hook 'text-mode-hook #'(lambda () (setq-local indent-tabs-mode nil)))
 
@@ -1930,7 +1930,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
   (add-hook 'ibuffer-hook
             (lambda ()
               ;; For some reason, ibuffer-truncate-lines doesn't work (TODO)
-              (my-disable-fringe-truncation-arrow)
+              (wizard-hide-truncation-and-continuation-indicators)
               ;; (toggle-truncate-lines 1)
               ))
 
@@ -2816,16 +2816,16 @@ generally one of the lines that are folded."
 (defun my-minibuffer-mode-setup ()
   "Setup minibuffer mode."
   ;; Remove the arrow when the line is wrapped
-  (my-disable-fringe-truncation-arrow)
+  (wizard-hide-truncation-and-continuation-indicators)
   (setq-local truncate-lines t))
 
 (when (fboundp 'my-minibuffer-mode-setup)
   (add-hook 'minibuffer-setup-hook #'my-minibuffer-mode-setup))
 
-(add-hook-text-editing-modes #'my-disable-fringe-truncation-arrow)
-(add-hook 'my-scratch-buffer-created-hook 'my-disable-fringe-truncation-arrow)
+(add-hook-text-editing-modes #'wizard-hide-truncation-and-continuation-indicators)
+(add-hook 'my-scratch-buffer-created-hook 'wizard-hide-truncation-and-continuation-indicators)
 (with-eval-after-load 'consult
-  (add-hook 'consult-preview-allowed-hooks #'my-disable-fringe-truncation-arrow))
+  (add-hook 'consult-preview-allowed-hooks #'wizard-hide-truncation-and-continuation-indicators))
 
 ;;; DISABLED: Disable `smerge' mode paredit
 
@@ -3890,9 +3890,9 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
 
 ;;; terminal: Disable arrow
 
-;; (add-hook 'term-mode-hook 'my-disable-fringe-truncation-arrow t)
-;; (add-hook 'vterm-mode-hook 'my-disable-fringe-truncation-arrow t)
-;; (add-hook 'eat-mode-hook 'my-disable-fringe-truncation-arrow t)
+;; (add-hook 'term-mode-hook 'wizard-hide-truncation-and-continuation-indicators t)
+;; (add-hook 'vterm-mode-hook 'wizard-hide-truncation-and-continuation-indicators t)
+;; (add-hook 'eat-mode-hook 'wizard-hide-truncation-and-continuation-indicators t)
 
 ;;; ghostel
 
@@ -4016,7 +4016,11 @@ are editing by falling back to another visible file buffer."
         ;; Fallback if no visible valid buffer is found
         (buffer-name current-buf))))))
 
-(setq tab-bar-tab-name-function #'custom-tab-bar-tab-name)
+(setq tab-bar-tab-name-function #'custom-tab-bar-tab-name
+      tab-bar-new-tab-to 'right
+      ;; Then keep the selected window as a single window on the new tab
+      tab-bar-new-tab-choice 'window)
+
 
 ;;; le-undo-fu
 

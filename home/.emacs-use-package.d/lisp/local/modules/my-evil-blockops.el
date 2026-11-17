@@ -146,6 +146,16 @@ _ARG specifies the number of levels to demote when passed as a prefix argument."
   (interactive)
   (cond
    ;; Support block selection natively via Tree-sitter.
+   ((derived-mode-p 'emacs-lisp-mode)
+    (let ((symbol-bounds (bounds-of-thing-at-point 'sexp)))
+      (if symbol-bounds
+          (evil-visual-select
+           (car symbol-bounds)
+           (cdr symbol-bounds)
+           'inclusive)
+        (user-error
+         "No valid sexp found at point"))))
+
    ((and (my-combobulate-active-p)
          (fboundp 'treesit-node-at)
          (fboundp 'evil-visual-select))

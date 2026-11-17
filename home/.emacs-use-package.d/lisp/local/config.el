@@ -212,7 +212,7 @@
 
 (setq vterm-module-cmake-args
       (concat "-DCMAKE_BUILD_TYPE=Release "
-              "-DCMAKE_C_FLAGS='-O3 -march=native -mtune=native' "
+              "-DCMAKE_C_FLAGS='-O2 -march=native -mtune=native' "
               "-DCMAKE_SHARED_LINKER_FLAGS='-Wl,-O2 -Wl,--as-needed' "
               "-DUSE_SYSTEM_LIBVTERM=yes"))
 
@@ -260,7 +260,7 @@
                                      ;; through native-comp-compiler-options is
                                      ;; redundant and bypasses the native
                                      ;; compiler's built-in logic.
-                                     "-O3"
+                                     "-O2"
 
                                      ;; Using -g0 disables the generation of
                                      ;; debug symbols for .eln files, which

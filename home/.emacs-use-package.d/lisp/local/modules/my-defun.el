@@ -25,9 +25,9 @@
 
 ;;; Code:
 
-(defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
+;; (defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
+;; (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 (defconst IS-MAC (eq system-type 'darwin))
-(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
 (declare-function pos-eol nil)
 (declare-function pos-bol nil)
@@ -114,37 +114,6 @@ each buffer."
                                 (project-root project))))
       (directory-file-name project-root))))
 
-(defun my-tab-bar-switch-to-buffer (buffer)
-  "Switch to the tab containing a window with the specified BUFFER."
-  (let* ((target-tab (alist-get 'index (tab-bar-get-buffer-tab buffer t nil))))
-    (when target-tab
-      (tab-bar-select-tab (1+ target-tab))
-      (pop-to-buffer buffer)
-      t)))
-
-(defun my-tab-bar-find-file (filename)
-  "Switch to the tab and the window containing a file or directory named FILENAME.
-If FILENAME is a directory, find the buffer of the `dired'. If the file or
-directory is not open yet, open it in the current window."
-  (let ((buffer (if (file-directory-p filename)
-                    (dired-noselect filename)
-                  (or (get-file-buffer filename)
-                      (find-file-noselect filename)))))
-    (when (fboundp 'my-tab-bar-switch-to-buffer)
-      (when (and buffer (not (my-tab-bar-switch-to-buffer buffer)))
-        (set-window-buffer nil buffer)))))
-
-(defun my-disable-fringe-truncation-arrow ()
-  "Disable the truncation arrow."
-  (unless (boundp 'fringe-indicator-alist)
-    (error "The fringe-indicator-alist was not declared"))
-  (setq fringe-indicator-alist
-        (seq-remove (lambda (item)
-                      (memq (car item) '(truncation continuation)))
-                    fringe-indicator-alist))
-  (push '(continuation nil nil) fringe-indicator-alist)
-  (push '(truncation nil nil) fringe-indicator-alist))
-
 (defun my-treesit-language-available-p (language)
   "Check if `treesit-ready-p' exists.
 LANGUAGE is the programming language."
@@ -185,29 +154,42 @@ LANGUAGE is the programming language."
         (goto-char (point-min))
         (display-buffer (current-buffer))))))
 
-(defun bufferfile--get-dired-file ()
-  "Get the currently selected `dired' file."
-  (when (fboundp 'dired-get-file-for-visit)
-    (when-let* ((file (condition-case nil
-                          (dired-get-file-for-visit)
-                        (error nil))))
-      file)))
+;; (defun bufferfile--get-dired-file ()
+;;   "Get the currently selected `dired' file."
+;;   (when (fboundp 'dired-get-file-for-visit)
+;;     (when-let* ((file (condition-case nil
+;;                           (dired-get-file-for-visit)
+;;                         (error nil))))
+;;       file)))
 
-(defun my-tab-bar-move-tab (&optional arg)
-  "Move the current tab ARG positions to the right without cycling."
-  (interactive "p")
-  (let* ((tabs (funcall tab-bar-tabs-function))
-         (count (length tabs))
-         (index (tab-bar--current-tab-index))
-         (arg (or arg 1))
-         (new-index (+ index arg)))
-    (when (and (< new-index count) (> new-index -1))
-      (tab-bar-move-tab arg))))
+(defun wizard-tab-bar-move-tab (argument &optional frame)
+  "Move the current tab by ARGUMENT positions without cycling.
+Optional argument FRAME specifies the frame whose tabs to modify."
+  (let* ((tab-list (funcall
+                    tab-bar-tabs-function
+                    frame))
+         (total-tabs (length tab-list))
+         (current-index
+          (if (fboundp 'tab-bar--current-tab-index)
+              (tab-bar--current-tab-index)
+            (error "Undefined: `tab-bar--current-tab-index'")))
+         (target-index (+ current-index argument)))
+    (when current-index
+      (when (and (>= target-index 0)
+                 (< target-index total-tabs))
+        (tab-bar-move-tab argument)))))
 
-(defun my-tab-bar-move-tab-backward (&optional arg)
-  "Move the current tab ARG positions to the left without cycling."
+(defun wizard-tab-bar-move-tab-forward (&optional arg)
+  "Move the current tab ARG positions to the right without cycling.
+ARG is the number of positions to move forward."
   (interactive "p")
-  (my-tab-bar-move-tab (- (or arg 1))))
+  (wizard-tab-bar-move-tab (or arg 1)))
+
+(defun wizard-tab-bar-move-tab-backward (&optional arg)
+  "Move the current tab ARG positions to the left without cycling.
+ARG is the number of positions to move backward."
+  (interactive "p")
+  (wizard-tab-bar-move-tab (- (or arg 1))))
 
 (defun my-tab-next (&optional arg)
   "Switch to the next tab ARG positions to the right without cycling."
@@ -422,61 +404,6 @@ CWD is the current working directory."
   (let ((default-directory (buffer-cwd)))
     (call-process "env" nil nil nil "sh" "-c" arg)))
 
-;;-----------------------------------------------------------------------------
-;; CLONE BUFFERS
-;;-----------------------------------------------------------------------------
-(defun tab-new-func-buffer-from-other-window (func)
-  "Open the buffer created by the FUNC function in the other window in a new tab."
-  (let* ((original-tab-index (1+ (tab-bar--current-tab-index)))
-         (original-window (selected-window)))
-    ;; Save the state of the other window
-    (other-window 1)
-    (let* ((other-window (selected-window))
-           (other-window-buf (current-buffer))
-           (other-window-point (point))
-           (other-window-view (window-start)))
-      ;; Move back to the original window
-      (other-window -1)
-
-      ;; Call the specified function (e.g., embark-dwim, ivy-call...)
-      (funcall func)
-
-      ;; Switch back to the other window
-      (other-window 1)
-      (unless (eq (selected-window) original-window)
-        (let* ((preview-buf (current-buffer)))
-          ;; Create a new tab and switch to the preview buffer
-          (tab-bar-new-tab)
-          (set-window-buffer nil preview-buf)
-
-          ;; Go back to the original tab
-          (tab-bar-select-tab original-tab-index)
-
-          ;; Restore the state of the other window
-          (select-window other-window)
-          (set-window-buffer nil other-window-buf)
-          (goto-char other-window-point)
-          (set-window-start nil other-window-view t)
-
-          ;; Switch to the original window
-          (select-window original-window))))))
-
-(defun my-tab-split ()
-  "Open the current file or directory in a new tab."
-  (interactive)
-  ;; (tab-bar-duplicate-tab)
-  (let ((inhibit-redisplay t))
-    (let ((buffer-list (window-prev-buffers nil))
-          (buffer (current-buffer))
-          (point (point))
-          (window-start (window-start)))
-      (tab-bar-new-tab)
-      (set-window-buffer nil buffer)
-      (set-window-prev-buffers nil buffer-list)
-      (with-current-buffer buffer
-        (goto-char point)
-        (set-window-start nil window-start t)))))
-
 ;;; Text editing buffers: Exclude
 
 (defun my-valid-file-buffer-p ()
@@ -554,15 +481,15 @@ in all buffers."
 
 ;;; ignore-errors advice
 
-(defun my--ignore-error-advice (orig-fn &rest args)
-  "Advise function to suppress any output of the ORIG-FN function.
-ARGS are the ORIG_-FN function arguments."
-  (ignore-errors
-    (apply orig-fn args)))
-
-(defun my-advice-ignore-errors (fn)
-  "Advise the the FN function to be quiet."
-  (advice-add fn :around #'my--ignore-error-advice))
+;; (defun my--ignore-error-advice (orig-fn &rest args)
+;;   "Advise function to suppress any output of the ORIG-FN function.
+;; ARGS are the ORIG_-FN function arguments."
+;;   (ignore-errors
+;;     (apply orig-fn args)))
+;;
+;; (defun my-advice-ignore-errors (fn)
+;;   "Advise the the FN function to be quiet."
+;;   (advice-add fn :around #'my--ignore-error-advice))
 
 ;;; Ansible format buffer
 
@@ -638,47 +565,47 @@ TO-STRING."
 
 ;;; Interesting buffers
 
-(defun my-interesting-buffer-p ()
-  "Return t if this buffer is considered a file/directory or otherwise interesting."
-  (let ((buf-name (buffer-name))
-        (file-name (buffer-file-name (buffer-base-buffer))))
-    (or
-     ;;(string-prefix-p "*Ollama" buf-name)
-     ;;(string-prefix-p "*sdcv:" buf-name)
-     ;; (derived-mode-p 'helpful-mode)
-     ;; (derived-mode-p 'quick-sdcv-mode)
-     (and (not (string-prefix-p "*" buf-name))
-          (not (string-prefix-p " " buf-name)))
-     (and file-name
-          (string-suffix-p "/todo.org" file-name)))))
+;; (defun my-interesting-buffer-p ()
+;;   "Return t if this buffer is considered a file/directory or otherwise interesting."
+;;   (let ((buf-name (buffer-name))
+;;         (file-name (buffer-file-name (buffer-base-buffer))))
+;;     (or
+;;      ;;(string-prefix-p "*Ollama" buf-name)
+;;      ;;(string-prefix-p "*sdcv:" buf-name)
+;;      ;; (derived-mode-p 'helpful-mode)
+;;      ;; (derived-mode-p 'quick-sdcv-mode)
+;;      (and (not (string-prefix-p "*" buf-name))
+;;           (not (string-prefix-p " " buf-name)))
+;;      (and file-name
+;;           (string-suffix-p "/todo.org" file-name)))))
 
-(defun my-smart-switch-interesting-buffer (switch-func)
-  "Switch to an interesting buffer using SWITCH-FUNC.
-SWITCH-FUNC should be a symbol for a buffer navigation function,
-such as `next-buffer' or `previous-buffer'."
-  (let ((start-buffer (current-buffer))
-        (found nil)
-        (max-iters (length (buffer-list))))
-    (funcall switch-func)
-    (while (and (> max-iters 0)
-                (not (eq (current-buffer) start-buffer))
-                (not (setq found (my-interesting-buffer-p))))
-      (funcall switch-func)
-      (setq max-iters (1- max-iters)))
-    ;; If we didn't find anything and aren't already back at the start, revert
-    ;; safely.
-    (unless (or found (eq (current-buffer) start-buffer))
-      (set-window-buffer nil start-buffer))))
-
-(defun my-smart-previous-interesting-buffer ()
-  "Switch to the previous buffer that is a file, Dired, or vterm."
-  (interactive)
-  (my-smart-switch-interesting-buffer #'previous-buffer))
-
-(defun my-smart-next-interesting-buffer ()
-  "Switch to the next buffer that is a file, Dired, or vterm."
-  (interactive)
-  (my-smart-switch-interesting-buffer #'next-buffer))
+;; (defun my-smart-switch-interesting-buffer (switch-func)
+;;   "Switch to an interesting buffer using SWITCH-FUNC.
+;; SWITCH-FUNC should be a symbol for a buffer navigation function,
+;; such as `next-buffer' or `previous-buffer'."
+;;   (let ((start-buffer (current-buffer))
+;;         (found nil)
+;;         (max-iters (length (buffer-list))))
+;;     (funcall switch-func)
+;;     (while (and (> max-iters 0)
+;;                 (not (eq (current-buffer) start-buffer))
+;;                 (not (setq found (my-interesting-buffer-p))))
+;;       (funcall switch-func)
+;;       (setq max-iters (1- max-iters)))
+;;     ;; If we didn't find anything and aren't already back at the start, revert
+;;     ;; safely.
+;;     (unless (or found (eq (current-buffer) start-buffer))
+;;       (set-window-buffer nil start-buffer))))
+;;
+;; (defun my-smart-previous-interesting-buffer ()
+;;   "Switch to the previous buffer that is a file, Dired, or vterm."
+;;   (interactive)
+;;   (my-smart-switch-interesting-buffer #'previous-buffer))
+;;
+;; (defun my-smart-next-interesting-buffer ()
+;;   "Switch to the next buffer that is a file, Dired, or vterm."
+;;   (interactive)
+;;   (my-smart-switch-interesting-buffer #'next-buffer))
 
 (defun my-previous-interesting-buffer ()
   "Switch to the previous buffer that is a file, Dired, or vterm."
@@ -765,36 +692,36 @@ Unlike `check-parens', leave point and mark unchanged."
 ;;; Complicated version my-jump-to-buffers-or-open
 ;; (jump to the buffer's tab TODO wizard)
 
-(defcustom my-ephemeral-buffer-names
-  '("*scratch*" "*Messages*" "*Warnings*" "*Help*")
-  "List of buffer names from which file jumps should reuse the current tab."
-  :type '(repeat string)
-  :group 'convenience)
-
-(defcustom my-ephemeral-major-modes
-  '(help-mode compilation-mode dired-mode)
-  "List of major modes from which file jumps should reuse the current tab."
-  :type '(repeat symbol)
-  :group 'convenience)
-
-(defcustom my-ephemeral-file-names
-  '("todo.org")
-  "List of file names from which file jumps should reuse the current tab."
-  :type '(repeat string)
-  :group 'convenience)
-
-(defun my-ephemeral-buffer-p ()
-  "Return non-nil if the current buffer is considered transient or ephemeral.
-Checks against `my-ephemeral-buffer-names', `my-ephemeral-major-modes',
-and `my-ephemeral-file-names'.  Properly resolves indirect buffers to
-check their base buffer's file name."
-  (let ((base-file-name (buffer-file-name (or (buffer-base-buffer)
-                                              (current-buffer)))))
-    (or (member (buffer-name) my-ephemeral-buffer-names)
-        (apply #'derived-mode-p my-ephemeral-major-modes)
-        (and base-file-name
-             (member (file-name-nondirectory base-file-name)
-                     my-ephemeral-file-names)))))
+;; (defcustom my-ephemeral-buffer-names
+;;   '("*scratch*" "*Messages*" "*Warnings*" "*Help*")
+;;   "List of buffer names from which file jumps should reuse the current tab."
+;;   :type '(repeat string)
+;;   :group 'convenience)
+;;
+;; (defcustom my-ephemeral-major-modes
+;;   '(help-mode compilation-mode dired-mode)
+;;   "List of major modes from which file jumps should reuse the current tab."
+;;   :type '(repeat symbol)
+;;   :group 'convenience)
+;;
+;; (defcustom my-ephemeral-file-names
+;;   '("todo.org")
+;;   "List of file names from which file jumps should reuse the current tab."
+;;   :type '(repeat string)
+;;   :group 'convenience)
+;;
+;; (defun my-ephemeral-buffer-p ()
+;;   "Return non-nil if the current buffer is considered transient or ephemeral.
+;; Checks against `my-ephemeral-buffer-names', `my-ephemeral-major-modes',
+;; and `my-ephemeral-file-names'.  Properly resolves indirect buffers to
+;; check their base buffer's file name."
+;;   (let ((base-file-name (buffer-file-name (or (buffer-base-buffer)
+;;                                               (current-buffer)))))
+;;     (or (member (buffer-name) my-ephemeral-buffer-names)
+;;         (apply #'derived-mode-p my-ephemeral-major-modes)
+;;         (and base-file-name
+;;              (member (file-name-nondirectory base-file-name)
+;;                      my-ephemeral-file-names)))))
 
 ;; NOTE: Buggy
 ;; (defun my-jump-to-buffers-or-open (bufs fallback-file
@@ -1040,6 +967,202 @@ tree-sitter being available."
   (or (string-suffix-p "-ts-mode" (symbol-name major-mode))
       (and (fboundp 'treesit-parser-list)
            (treesit-parser-list))))
+
+;;; vertico/ivy tab new
+
+(defun my-tab-new-func-buffer-from-other-window (func)
+  "Call FUNC and open the buffer it displays in the other window in a new tab.
+FUNC takes no arguments.  Return to the original tab and window afterward."
+  ;; Save the state of the other window
+  (let* ((inhibit-redisplay t)
+         (original-window (selected-window))
+         (other-window (next-window original-window 'nomini))
+         (other-window-buffer-list (window-prev-buffers other-window))
+         (other-window-buf (window-buffer other-window))
+         (other-window-state (window-state-get other-window)))
+    ;; Move back to the original window
+    (select-window original-window)
+
+    (unwind-protect
+        (progn
+          ;; Call the specified function (e.g., embark-dwim, ivy-call...)
+          (funcall func)
+
+          ;; Switch back to the other window
+          (unless (eq other-window original-window)
+            (select-window other-window)
+            (let ((preview-buf (current-buffer))
+                  (preview-point (point))
+                  (preview-view (window-start))
+                  (preview-hscroll (window-hscroll)))
+              ;; Create a new tab and switch to the preview buffer
+              (tab-bar-new-tab 1)
+              (unwind-protect
+                  (progn
+                    (set-window-buffer nil preview-buf)
+                    (set-window-prev-buffers nil other-window-buffer-list)
+                    (set-window-point nil preview-point)
+                    (set-window-start nil preview-view t)
+                    (set-window-hscroll nil preview-hscroll))
+                ;; Go back to the original tab
+                (tab-bar-switch-to-prev-tab)))))
+      ;; Restore the state of the other window
+      (when (and (window-live-p other-window)
+                 (buffer-live-p other-window-buf))
+        (window-state-put other-window-state other-window))
+
+      ;; Switch to the original window
+      (when (window-live-p original-window)
+        (select-window original-window)))))
+
+;; OLD VERSION
+;; (defun my-tab-new-func-buffer-from-other-window (func)
+;;   "Open the buffer created by the FUNC function in the other window in a new tab."
+;;   (let* ((original-tab-index (1+ (tab-bar--current-tab-index)))
+;;          (original-window (selected-window)))
+;;     ;; Save the state of the other window
+;;     (other-window 1)
+;;     (let* ((other-window (selected-window))
+;;            (other-window-buf (current-buffer))
+;;            (other-window-point (point))
+;;            (other-window-view (window-start)))
+;;       ;; Move back to the original window
+;;       (other-window -1)
+;;
+;;       ;; Call the specified function (e.g., embark-dwim, ivy-call...)
+;;       (funcall func)
+;;
+;;       ;; Switch back to the other window
+;;       (other-window 1)
+;;       (unless (eq (selected-window) original-window)
+;;         (let* ((preview-buf (current-buffer)))
+;;           ;; Create a new tab and switch to the preview buffer
+;;           (tab-bar-new-tab)
+;;           (set-window-buffer nil preview-buf)
+;;
+;;           ;; Go back to the original tab
+;;           (tab-bar-select-tab original-tab-index)
+;;
+;;           ;; Restore the state of the other window
+;;           (select-window other-window)
+;;           (set-window-buffer nil other-window-buf)
+;;           (goto-char other-window-point)
+;;           (set-window-start nil other-window-view t)
+;;
+;;           ;; Switch to the original window
+;;           (select-window original-window))))))
+
+(defun my-tab-new-embark-dwim ()
+  "Open the default Embark candidate action in a new background tab."
+  (interactive)
+  (require 'embark)
+  (let ((embark-quit-after-action nil))
+    (my-tab-new-func-buffer-from-other-window #'embark-dwim)))
+
+;;; Hide truncation arrows
+
+;; (require 'seq)
+;;
+;; (defvar-local wizard--saved-line-fringe-indicators :unset
+;;   "Saved truncation and continuation entries, or :unset when not saved.")
+;;
+;; ;;;###autoload
+;; (define-minor-mode wizard-hide-truncation-and-continuation-indicators-mode
+;;   "Hide truncation and continuation fringe indicators in the current buffer.
+;; Restore their saved settings when disabled.  Preserve other indicators.
+;; Repeated enabling preserves the settings saved on the first activation."
+;;   :init-value nil
+;;   :lighter nil
+;;   (let* ((indicator-p (lambda (entry)
+;;                         (memq (car entry) '(truncation continuation))))
+;;          (other-indicators (seq-remove indicator-p fringe-indicator-alist)))
+;;     (if wizard-hide-truncation-and-continuation-indicators-mode
+;;         (progn
+;;           (when (eq wizard--saved-line-fringe-indicators :unset)
+;;             (setq wizard--saved-line-fringe-indicators
+;;                   (copy-tree
+;;                    (seq-filter indicator-p fringe-indicator-alist))))
+;;           (setq-local fringe-indicator-alist
+;;                       (append '((truncation nil nil)
+;;                                 (continuation nil nil))
+;;                               other-indicators)))
+;;       (unless (eq wizard--saved-line-fringe-indicators :unset)
+;;         (setq-local fringe-indicator-alist
+;;                     (append wizard--saved-line-fringe-indicators
+;;                             other-indicators))
+;;         (setq wizard--saved-line-fringe-indicators :unset)))))
+
+(defun wizard-hide-truncation-and-continuation-indicators ()
+  "Hide truncation and continuation fringe indicators in the current buffer.
+Preserve all other fringe indicator settings.
+Repeated calls have the same effect as a single call."
+  (interactive)
+  ;; (setq-local fringe-indicator-alist
+  ;;             (append '((truncation nil nil)
+  ;;                       (continuation nil nil))
+  ;;                     (seq-remove
+  ;;                      (lambda (indicator)
+  ;;                        (memq (car indicator)
+  ;;                              '(truncation continuation)))
+  ;;                      fringe-indicator-alist)))
+  t
+  )
+
+
+;;; tab bar find-file
+
+;; (defun wizard-tab-bar-select-buffer-window (buffer)
+;;   "Select the frame, tab, and window displaying BUFFER.
+;; BUFFER may be a buffer object or a buffer name.
+;; Search all frames, including hidden and iconified frames.
+;; Return t when a matching window is selected, or nil otherwise."
+;;   (let ((target-tab (tab-bar-get-buffer-tab buffer t nil)))
+;;     (when target-tab
+;;       (let ((target-frame (alist-get 'frame target-tab))
+;;             (target-index (alist-get 'index target-tab)))
+;;         (select-frame-set-input-focus target-frame)
+;;         (tab-bar-select-tab (1+ target-index))
+;;         (let ((target-window (get-buffer-window buffer target-frame)))
+;;           (when target-window
+;;             (select-window target-window)
+;;             t))))))
+;;
+;; (defun wizard-tab-bar-find-file (filename)
+;;   "Open FILENAME, reusing a tab and window that already display it.
+;; FILENAME may name a file or directory.  Use Dired for directories.
+;; Search all frames for a window displaying the corresponding buffer.
+;; If no matching window exists, display the buffer in the current window."
+;;   (let* ((filename (expand-file-name filename))
+;;          (buffer (if (file-directory-p filename)
+;;                      (dired-noselect filename)
+;;                    (or (get-file-buffer filename)
+;;                        (find-file-noselect filename)))))
+;;     (unless (wizard-tab-bar-select-buffer-window buffer)
+;;       (switch-to-buffer buffer))))
+
+(defun wizard-tab-bar-find-file (filename)
+  "Open FILENAME in an existing tab or a new tab.
+FILENAME may name a file or directory.  Use Dired for directories.
+Search all frames for a tab displaying the corresponding buffer, preferring the
+current tab. If none exists, create a new tab. Select the resulting window."
+  (let* ((filename (expand-file-name filename))
+         (buffer (find-file-noselect filename))
+         (display-buffer-overriding-action '(display-buffer-in-tab
+                                             (reusable-frames . t)
+                                             (ignore-current-tab . nil))))
+    (pop-to-buffer buffer)))
+
+;; (defun wizard-hide-truncation-and-continuation-indicators ()
+;;   "Disable the truncation arrow."
+;;   (unless (boundp 'fringe-indicator-alist)
+;;     (error "The fringe-indicator-alist was not declared"))
+;;   (setq fringe-indicator-alist
+;;         (seq-remove (lambda (item)
+;;                       (memq (car item) '(truncation continuation)))
+;;                     fringe-indicator-alist))
+;;   (push '(continuation nil nil) fringe-indicator-alist)
+;;   (push '(truncation nil nil) fringe-indicator-alist))
+
 
 ;;; Provide
 (provide 'my-defun)

@@ -1005,11 +1005,11 @@ via `unwind-protect' even if the movement signals an error."
 ;;
 ;;   ;; (define-key org-agenda-keymap (kbd "C-k") nil)
 ;;   ;; (define-key org-agenda-keymap (kbd ",") nil)
-;;   ;; (define-key org-agenda-keymap (kbd ",t") 'my-tab-split)
+;;   ;; (define-key org-agenda-keymap (kbd ",t") 'wizard-tab-bar-duplicate-window)
 ;;   ;; (define-key org-agenda-keymap (kbd "M-/") 'org-agenda-filter)
 ;;   ;; (define-key org-agenda-keymap (kbd "C-k") 'tab-previous)
 ;;   ;; (define-key org-agenda-keymap (kbd "C-j") 'tab-next)
-;;   ;; (define-key org-agenda-keymap (kbd ",t") 'my-tab-split)
+;;   ;; (define-key org-agenda-keymap (kbd ",t") 'wizard-tab-bar-duplicate-window)
 ;;   )
 
 ;; (setq org-deadline-warning-days 5)
@@ -1196,7 +1196,7 @@ via `unwind-protect' even if the movement signals an error."
 ;;   ;; (define-key org-agenda-keymap (kbd "C-w C-c") 'buffer-terminator-close-window)
 ;;   ;; (define-key org-agenda-keymap (kbd "C-k") nil)
 ;;   ;; (define-key org-agenda-keymap (kbd ",") nil)  ; Evil leader
-;;   ;; (define-key org-agenda-keymap (kbd ", t") 'my-tab-split)  ; Evil leader
+;;   ;; (define-key org-agenda-keymap (kbd ", t") 'wizard-tab-bar-duplicate-window)  ; Evil leader
 ;;   ;; (define-key org-agenda-keymap (kbd "h") #'left-char)
 ;;   ;; (define-key org-agenda-keymap (kbd "j") #'org-agenda-next-line)
 ;;   ;; (define-key org-agenda-keymap (kbd "k") #'org-agenda-previous-line)

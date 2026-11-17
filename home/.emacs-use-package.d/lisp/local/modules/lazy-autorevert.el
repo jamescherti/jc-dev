@@ -31,7 +31,7 @@
 
 (require 'autorevert)
 
-(defcustom lazy-autorevert-verbose t
+(defcustom lazy-autorevert-verbose nil
   "If non-nil, print a message when a buffer is successfully reverted.
 This variable dynamically overrides `auto-revert-verbose' during the
 execution of the lazy auto-revert handler."
