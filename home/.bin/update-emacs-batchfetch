@@ -35,7 +35,6 @@ IGNORED_PACKAGES: set[str] = {
     "elpa",
     "melpa",
     "nongnu-elpa",
-    "org",
     "straight.el",
     "benchmark-init-el",
     "cond-let",
@@ -47,6 +46,8 @@ PACKAGE_ALIASES: dict[str, str] = {
     "basic-mode": "emacs-basic-mode",
     "eat": "emacs-eat",
 }
+
+PACKAGE_COMMAND: dict[str, str] = {"org-mode": "make autoloads"}
 
 ENTRY = re.compile(
     r'\(\s*"(?P<name>[A-Za-z0-9_.+-]+)"\s*\.\s*'
@@ -114,6 +115,8 @@ def render(pins: dict[str, str]) -> str:
             ]
         )
 
+        if repository in PACKAGE_COMMAND:
+            tasks.append(f"    exec_after: {PACKAGE_COMMAND[repository]}")
     if not tasks:
         return "tasks: []\n"
 

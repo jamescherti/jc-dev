@@ -2157,6 +2157,11 @@ This function records the time when `window-setup-hook' runs."
 (defun my-lightemacs-init-local-packages ()
   "Configure local packages when Lightemacs uses the built-in manager."
   (when (eq lightemacs-package-manager 'builtin-package)
+    (setq load-path (seq-remove (lambda (dir)
+                                  (when (string-match-p "/org\\'" dir)
+                                    t))
+                                load-path))
+
     (setq lightemacs-use-package-init-refresh nil
           use-package-always-ensure nil)
     (dolist (directory '("~/.emacs-packages/" "~/src/emacs/"))

@@ -780,14 +780,9 @@ When FORCE-ALL is non-nil, use all functions."
      (t
       (eviljump-goto-definition-try-imenu-first nil)))
 
-    ;; Buggy
-    ;; TODO make it only do this when out of screen?
-    ;; (when (or (not (eq old-buffer (current-buffer)))
-    ;;           (/= old-point (point)))
-    ;;   ;; Dynamically recenter the point to a position roughly 25% from the top
-    ;;   ;; of the window. Using (window-body-height) instead of a hardcoded line
-    ;;   ;; number ensures consistent visual placement across different screen
-    ;;   ;; sizes, font scales, and window split configurations.
+    ;; (when (and (or (not (eq old-buffer (current-buffer)))
+    ;;                (/= old-point (point)))
+    ;;            (not (pos-visible-in-window-p (point) (selected-window) t)))
     ;;   (recenter (/ (window-body-height) 4)))
     ))
 

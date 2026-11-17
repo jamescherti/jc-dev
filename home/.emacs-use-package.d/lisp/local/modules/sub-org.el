@@ -118,22 +118,22 @@
 
 ;;; use-package org
 
-(lightemacs-use-package org
-  :commands (org-mode
-             org-indent-mode
-             org-set-tags-command
-             org-version
-             org-agenda
-             org-capture
-             org-schedule
-             org-agenda-filter
-             org-agenda-todo
-             org-agenda-set-tags
-             org-agenda-filter-remove-all
-             org-agenda-goto)
-
-  :mode
-  ("\\.org\\'" . org-mode))
+;; (lightemacs-use-package org
+;;   :commands (org-mode
+;;              org-indent-mode
+;;              org-set-tags-command
+;;              org-version
+;;              org-agenda
+;;              org-capture
+;;              org-schedule
+;;              org-agenda-filter
+;;              org-agenda-todo
+;;              org-agenda-set-tags
+;;              org-agenda-filter-remove-all
+;;              org-agenda-goto)
+;;
+;;   :mode
+;;   ("\\.org\\'" . org-mode))
 
 ;;; Testing
 
