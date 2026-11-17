@@ -1163,6 +1163,25 @@ current tab. If none exists, create a new tab. Select the resulting window."
 ;;   (push '(continuation nil nil) fringe-indicator-alist)
 ;;   (push '(truncation nil nil) fringe-indicator-alist))
 
+;;; edit in a new tab
+
+(defun my-edit-file-in-new-tab (file)
+  "Open FILE in current buffer or new tab."
+  (interactive "fFile to edit: ")
+  (cond
+   ((string= (buffer-name) "*scratch*")
+    (find-file file))
+
+   (t
+    (if (fboundp 'wizard-tab-bar-find-file-new-tab)
+        (wizard-tab-bar-find-file-new-tab file)
+      (error "Undefined: `wizard-tab-bar-find-file-new-tab'"))))
+
+  ;; (if (< emacs-major-version 29)
+  ;;     (pulse-momentary-highlight-region (line-beginning-position)
+  ;;                                       (line-end-position))
+  ;;   (pulse-momentary-highlight-region (my-pos-bol) (my-pos-eol)))
+  )
 
 ;;; Provide
 (provide 'my-defun)

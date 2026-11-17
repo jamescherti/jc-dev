@@ -2296,6 +2296,18 @@ Accepts any arguments so it can be used as advice or a hook."
   (kbd "C-k") 'my-tab-previous
   (kbd "C-j") 'my-tab-next)
 
+;;; Visual: Restore column
+
+(defun evil--restore-column (orig-fun &rest args)
+  "Ensure the cursor's column is restored after executing ORIG-FUN with ARGS."
+  (let ((column (current-column)))
+    (unwind-protect
+        (apply orig-fun args)
+      (move-to-column column))))
+
+(advice-add 'evil-backward-section-begin :around #'evil--restore-column)
+(advice-add 'evil-backward-section-end :around #'evil--restore-column)
+
 ;;; n/N (and M-n and M-N): Search and recenter
 
 (evil-define-motion evilcursor-ex-search-next-recenter (count)
