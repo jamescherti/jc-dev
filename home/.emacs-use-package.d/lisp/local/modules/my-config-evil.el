@@ -152,7 +152,7 @@
  ;; runaway macros. By ignoring these errors, a misaligned macro might continue
  ;; executing in unintended locations, resulting in corrupted text that requires
  ;; careful inspection and multiple undo operations to fix.
- ;; evil-kbd-macro-suppress-motion-error t
+ evil-kbd-macro-suppress-motion-error t
 
  ;; Use Vim-style regular expressions in search and substitute commands,
  ;; allowing features like \v (very magic), \zs, and \ze for precise matches
@@ -162,42 +162,40 @@
  evil-mode-line-format nil
 
  ;; Make `v$` exclude the final newline
- evil-v$-excludes-newline t)
+ evil-v$-excludes-newline t
 
+ ;; Do not move cursor back when exiting insert state
+ ;;
+ ;; Disabling this breaks standard Vim muscle memory. Vim always moves the cursor
+ ;; one space left when exiting insert mode. Altering this behavior causes
+ ;; off-by-one errors when executing normal mode commands immediately after
+ ;; pressing Escape.
+ evil-move-cursor-back nil
 
-;; Required by evil-collection
+ ;; Only complete in the current buffer
+ evil-complete-all-buffers nil
 
-;; Do not move cursor back when exiting insert state
-;;
-;; Disabling this breaks standard Vim muscle memory. Vim always moves the cursor
-;; one space left when exiting insert mode. Altering this behavior causes
-;; off-by-one errors when executing normal mode commands immediately after
-;; pressing Escape.
-(setq evil-move-cursor-back nil)
+ evil-command-window-height 8
 
-;; Only complete in the current buffer
-(setq evil-complete-all-buffers nil)
+ evil-display-shell-error-in-message nil
 
-(setq evil-command-window-height 8
-      evil-display-shell-error-in-message nil)
+ ;; Controls whether evil-collection defines Vim-unimpaired-style keybindings
+ ;; (setq evil-collection-want-unimpaired-p nil)
+ ;; evil-collection-want-unimpaired-p nil
 
-;; Controls whether evil-collection defines Vim-unimpaired-style keybindings
-;; (setq evil-collection-want-unimpaired-p nil)
-(setq evil-collection-calendar-want-org-bindings t)
+ evil-collection-calendar-want-org-bindings t
 
-(setq tooltip-hide-delay 20 ;; seconds
-      tooltip-delay 0.3
-      tooltip-short-delay 0.08)
+ tooltip-hide-delay 20 ;; seconds
+ tooltip-delay 0.3
+ tooltip-short-delay 0.08
 
-;; TODO is this good?
-;; disable acceleration of scrolling
-(setq mouse-wheel-progressive-speed nil)
+ ;; disable acceleration of scrolling
+ mouse-wheel-progressive-speed nil
 
-(setq inhibit-mouse-button-numbers '(1 2 3))
+ inhibit-mouse-button-numbers '(1 2 3)
 
-;;; Do not highlight visual on all windows
-
-(setq highlight-nonselected-windows nil)
+ ;; Do not highlight visual on all windows
+ highlight-nonselected-windows nil)
 
 (defun my-evil-visual-highlight-current-window (&optional _arg)
   "Restrict Evil visual overlays to the selected window.
