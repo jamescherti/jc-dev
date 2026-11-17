@@ -2255,6 +2255,8 @@ Accepts any arguments so it can be used as advice or a hook."
 ;;   "{" 'evil-backward-paragraph
 ;;   "}" 'evil-forward-paragraph)
 
+(require 'my-evil-intercept)
+
 (evil-define-key '(normal insert visual) my-intercept-mode-map
   (kbd "M-RET") 'my-shell-pop
   (kbd "M-<enter>") 'my-shell-pop

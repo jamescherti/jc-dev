@@ -28,6 +28,7 @@
 (eval-and-compile
   (require 'lightemacs-use-package))
 (require 'my-defun) ; my-tree-sitter-p
+(require 'my-evil-intercept)
 
 ;;; Combobulate
 

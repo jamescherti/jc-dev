@@ -42,6 +42,7 @@
    state))
 
 (my-intercept-mode 1)
+;; (add-hook 'lightemacs-after-init-hook #'my-intercept-mode)
 
 ;;; Provide
 

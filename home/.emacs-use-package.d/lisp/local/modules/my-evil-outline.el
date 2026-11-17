@@ -27,7 +27,7 @@
 (require 'evil)
 (require 'outline)
 (require 'buffer-guardian)
-(require 'my-evil-intercept)
+;; (require 'my-evil-intercept)
 
 ;;; outline: Restore column: move subtree up/down
 
