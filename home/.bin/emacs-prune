@@ -52,8 +52,6 @@ if ! type -P fd &>/dev/null; then
   exit 1
 fi
 
-NOTHING_TO_DO=1
-
 cleanup-emacs-files() {
   local local_fd_opts=()
   if [[ ${1:-} == apply ]]; then
@@ -68,8 +66,6 @@ cleanup-emacs-files() {
     if ! [[ -d "$dir" ]]; then
       continue
     fi
-
-    NOTHING_TO_DO=0
 
     if [[ $1 != dry-run ]]; then
       echo "[CLEANUP] Delete *.elc files and eln-cache/* " \
@@ -95,29 +91,46 @@ cleanup-emacs-files() {
 }
 
 main() {
+  local profile_opts=(--exclude '.devemacs.d')
+
+  if [[ ${1:-} == -f ]]; then
+    profile_opts=()
+    shift
+  fi
+
+  if (($# > 0)); then
+    printf 'Usage: %s [-f]\n' "${0##*/}" >&2
+    return 2
+  fi
+
   # Run mapfile in the current shell so it can populate PROFILE_DIRS.
   shopt -s lastpipe
   fd "${FD_COMMON_OPTS[@]}" \
     --type d \
     --max-depth 1 \
     --glob '.*emacs*.d' \
-    --exclude '.devemacs.d' \
+    "${profile_opts[@]}" \
     --print0 "$HOME" | mapfile -d '' -t PROFILE_DIRS
 
-  cleanup-emacs-files dry-run
+  local preview
+  preview=$(
+    set -e
+    cleanup-emacs-files dry-run
+  )
 
-  if [[ $NOTHING_TO_DO -ne 0 ]]; then
-    echo
-    read -r -p "Delete? [y,n] " ANSWER
-    if [[ "$ANSWER" != "y" ]]; then
-      exit 1
-    fi
-    echo
-
-    cleanup-emacs-files apply
-  else
-    echo "Nothing do to."
+  if [[ -z "$preview" ]]; then
+    echo "Nothing to do."
+    return 0
   fi
+
+  printf '%s\n\n' "$preview"
+  read -r -p "Delete? [y,n] " ANSWER
+  if [[ "$ANSWER" != "y" ]]; then
+    exit 1
+  fi
+  echo
+
+  cleanup-emacs-files apply
 }
 
 main "$@"
