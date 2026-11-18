@@ -41,9 +41,8 @@
 ;; (setq lightemacs-ui-features '(dialogs menu-bar tooltips context-menu))
 ;; (setq lightemacs-ui-features '(dialogs tool-bar menu-bar tooltips context-menu))
 
-;; TODO minimal-emacs.d?
-(setq native-comp-verbose (if init-file-debug 1 0)
-      native-comp-debug (if init-file-debug 1 0))
+;; (setq native-comp-verbose 0 ; Omits compiler instruction dumps.
+;;       native-comp-debug 0)
 
 (setq lightemacs-native-comp-excluded-cpus 1)
 
@@ -1452,9 +1451,9 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/wizard.el"
              :branch "main")
             (cond-let
-             :type git :host github
-             :repo "jamescherti/cond-let"
-             :branch "main")
+              :type git :host github
+              :repo "jamescherti/cond-let"
+              :branch "main")
             (transient
              :type git :host github
              :repo "jamescherti/transient"
@@ -2151,6 +2150,44 @@ This function records the time when `window-setup-hook' runs."
  ;; evil-want-C-u-scroll t
  ;; evil-want-C-i-jump t
  )
+
+;;; excluded CPUs
+
+(defvar lightemacs-native-comp-excluded-cpus nil
+  "Number of CPUs to reserve and not use for `native-compile'.
+Set this to nil to disable this feature.")
+
+(defun lightemacs--calculate-native-comp-async-jobs-number ()
+  "Set `native-comp-async-jobs-number' based on the available CPUs."
+  ;; The `num-processors' function is only available in Emacs >= 28.1
+  (cond
+   ((and (boundp 'lightemacs-native-comp-excluded-cpus)
+         (fboundp 'num-processors))
+    (max 1 (- (funcall 'num-processors) lightemacs-native-comp-excluded-cpus)))
+
+   ((boundp 'native-comp-async-jobs-number)
+    native-comp-async-jobs-number)
+
+   (t
+    ;; Half (See `native-comp-async-jobs-number' default value)
+    0)))
+
+
+;; Increase the number of CPUs
+;; - `lightemacs-native-comp-excluded-cpus`: By default, Emacs uses only half of
+;; the available CPUs for native compilation. The
+;; `lightemacs-native-comp-excluded-cpus` variable adjusts that behavior by
+;; reserving the specified number of CPUs and using the remainder for native
+;; compilation, thereby increasing parallelism and speeding up the process. Set
+;; this to `nil` to disable CPU reservation entirely.
+(when (and (bound-and-true-p lightemacs-native-comp-excluded-cpus)
+           (numberp lightemacs-native-comp-excluded-cpus)
+           (featurep 'native-compile)
+           (fboundp 'native-comp-available-p)
+           (native-comp-available-p)
+           (fboundp 'lightemacs--calculate-native-comp-async-jobs-number))
+  (setq native-comp-async-jobs-number
+        (lightemacs--calculate-native-comp-async-jobs-number)))
 
 ;;; Package paths
 
