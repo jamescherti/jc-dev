@@ -33,7 +33,6 @@
 (require 'mod-cleanup)
 (require 'my-defun)
 (require 'lightemacs)  ; lightemacs-save-window-start
-(require 'lightemacs-module)
 (require 'cl-lib) ;; TODO remove?
 
 ;;; Load modules

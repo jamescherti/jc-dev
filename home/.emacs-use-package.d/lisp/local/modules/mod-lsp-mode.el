@@ -28,8 +28,8 @@
 ;;; Require
 
 (require 'my-defun)
-(require 'lightemacs-module)
 
+(require 'lightemacs)
 (lightemacs-module-load '(le-corfu
                           le-cape))
 

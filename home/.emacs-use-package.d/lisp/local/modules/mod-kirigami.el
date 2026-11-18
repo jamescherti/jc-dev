@@ -28,7 +28,7 @@
 
 ;;; Require
 
-(require 'lightemacs-module)
+(require 'lightemacs)
 (require 'my-defun)
 
 ;;; Install Kirigami
