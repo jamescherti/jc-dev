@@ -22,63 +22,102 @@
 
 set -euo pipefail
 
+# Additional directories beyond the default ~/.*emacs*.d directories.
+#
+# During cleanup, the following file types are removed from these directories:
+#   - .elc
+#   - eln-cache/.eln
+#   - var/eln-cache/.eln
+#   - eln-cache/*.c
+#   - var/eln-cache/*.c
+# Set to an empty array to skip scanning additional directories.
+ADDITIONAL_CLEANUP_DIRS=(
+  "$HOME/src/emacs"
+  "$HOME/src/emacs-misc"
+)
+
+# Explicitly exclude version control directories
+FD_COMMON_OPTS=(
+  --unrestricted
+  --ignore-case
+  --exclude '.git'
+  --exclude '.hg'
+  --exclude '.svn'
+  --color=never
+)
+
 # Cache the availability of fd to avoid redundant checks inside the loop
-if command -v fd &>/dev/null; then
-  HAS_FD=true
-else
-  HAS_FD=false
-fi
-
-cleanup-emacs-files() {
-  while IFS= read -r dir; do
-    if [[ -d "$dir" ]]; then
-      if [[ $1 != dry-run ]]; then
-        echo "[CLEANUP] Delete .elc and .eln files: $dir"
-      fi
-
-      if [[ "$HAS_FD" == true ]]; then
-        local fd_opts=()
-        if [[ $1 != dry-run ]]; then
-          fd_opts=("--exec-batch" "rm" "-f")
-        fi
-
-        # Explicitly exclude version control directories
-        fd --type f --hidden --no-ignore --ignore-case \
-          --exclude '.git' --exclude '.hg' --exclude '.svn' \
-          --extension elc --extension eln --color=never \
-          . "$dir" "${fd_opts[@]}"
-      else
-        local find_opts=("-print")
-        if [[ $1 != dry-run ]]; then
-          find_opts=("-delete")
-        fi
-
-        # Use -prune to prevent find from descending into version control directories
-        find "$dir" \
-          -type d \( -name '.git' -o -name '.hg' -o -name '.svn' \) -prune \
-          -o -type f \( -iname '*.elc' -o -iname '*.eln' \) "${find_opts[@]}"
-      fi
-    fi
-  done < <(
-    if [[ -d "$HOME/src/emacs" ]]; then
-      echo "$HOME/src/emacs"
-    fi
-
-    if [[ "$HAS_FD" == true ]]; then
-      fd --type d --hidden --no-ignore --max-depth 1 --glob '.*emacs*.d' --exclude '.devemacs.d' "$HOME"
-    else
-      find "$HOME" -maxdepth 1 -type d -name '.*emacs*.d' ! -name '.devemacs.d'
-    fi
-  )
-}
-
-cleanup-emacs-files dry-run
-
-echo
-read -r -p "Delete all compiled .elc and .eln files? [y,n] " ANSWER
-if [[ "$ANSWER" != "y" ]]; then
+if ! type -P fd &>/dev/null; then
+  echo "Error: fd command not found." >&2
   exit 1
 fi
-echo
 
-cleanup-emacs-files apply
+NOTHING_TO_DO=1
+
+cleanup-emacs-files() {
+  local local_fd_opts=()
+  if [[ ${1:-} == apply ]]; then
+    local_fd_opts=(--exec-batch rm -f --)
+  elif [[ ${1:-} != dry-run ]]; then
+    printf "Expected dry-run or apply.\n" >&2
+    exit 1
+  fi
+
+  local dir
+  for dir in "${ADDITIONAL_CLEANUP_DIRS[@]}" "${PROFILE_DIRS[@]}"; do
+    if ! [[ -d "$dir" ]]; then
+      continue
+    fi
+
+    NOTHING_TO_DO=0
+
+    if [[ $1 != dry-run ]]; then
+      echo "[CLEANUP] Delete *.elc files and eln-cache/* " \
+        "files: $dir"
+    fi
+
+    fd "${FD_COMMON_OPTS[@]}" --type f \
+      --extension elc \
+      . "$dir" "${local_fd_opts[@]}"
+
+    # delete eln-cache to remove all the .eln, .c, and .tmp files. (.c files are
+    # Emacs's native compiler creates them native-comp-debug is 2 or 3, Emacs
+    # writes a pseudo-C dump beside each .eln it compiles. Those dumps are only
+    # useful for debugging the compiler.)
+    local cache_action=()
+    if [[ $1 == apply ]]; then
+      cache_action=(--exec-batch rm -rf --)
+    fi
+
+    fd "${FD_COMMON_OPTS[@]}" --type d --case-sensitive --prune \
+      --glob 'eln-cache' "$dir" "${cache_action[@]}"
+  done
+}
+
+main() {
+  # Run mapfile in the current shell so it can populate PROFILE_DIRS.
+  shopt -s lastpipe
+  fd "${FD_COMMON_OPTS[@]}" \
+    --type d \
+    --max-depth 1 \
+    --glob '.*emacs*.d' \
+    --exclude '.devemacs.d' \
+    --print0 "$HOME" | mapfile -d '' -t PROFILE_DIRS
+
+  cleanup-emacs-files dry-run
+
+  if [[ $NOTHING_TO_DO -ne 0 ]]; then
+    echo
+    read -r -p "Delete? [y,n] " ANSWER
+    if [[ "$ANSWER" != "y" ]]; then
+      exit 1
+    fi
+    echo
+
+    cleanup-emacs-files apply
+  else
+    echo "Nothing do to."
+  fi
+}
+
+main "$@"

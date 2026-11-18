@@ -28,7 +28,11 @@
 
 set -euf -o pipefail
 
-INSTALL_DEVEMACS=false
+LIGHTEMACS_DIR="$HOME/src/emacs-misc/lightemacs"
+EMACS_BASE_CFG="$HOME/src/dev/jc-dev/home/.emacs-use-package.d"
+DELETE_ALL=false
+
+# Arguments
 if ! PARSED_OPTS=$(getopt -n "$0" -o f -- "$@"); then
   echo "Usage: $0 [-f]" >&2
   exit 1
@@ -38,7 +42,7 @@ eval set -- "$PARSED_OPTS"
 while true; do
   case "$1" in
   -f)
-    INSTALL_DEVEMACS=true
+    DELETE_ALL=true
     shift
     ;;
   --)
@@ -52,21 +56,21 @@ while true; do
   esac
 done
 
+run-rsync() {
+  echo "[RSYNC]" "$@"
+  rsync -a \
+    --times --atimes --exclude '*.elc' --exclude '*.eln' \
+    --exclude legacy \
+    "$@" &
+  return 0
+}
+
 # shellcheck disable=SC2317
 error_handler() {
   local errno="$?"
   echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
     "(${BASH_COMMAND} exited with status $errno)" >&2
   exit "${errno}"
-}
-
-run-rsync() {
-  echo "[RSYNC]" "$@"
-  rsync -a --delete \
-    --times --atimes --exclude '*.elc' --exclude '*.eln' \
-    --exclude config.el --exclude legacy \
-    "$@" &
-  return 0
 }
 
 init() {
@@ -77,41 +81,25 @@ init() {
     DEST_DIR="$HOME"
   fi
 
-  if [[ -z ${SRC_DIR:-} ]]; then
-    SRC_DIR="$DEST_DIR/src/emacs-misc"
-    if ! [[ -d "$SRC_DIR/lightemacs" ]]; then
-      SRC_DIR="$HOME/.jc-dev"
-    else
-      git -C "$SRC_DIR/lightemacs/" checkout develop
-    fi
-  fi
-
-  # Init the base
-  EMACS_BASE="$DEST_DIR/.emacs-use-package.d"
-  mkdir -p "$EMACS_BASE"
-  lightemacs-init-files "$EMACS_BASE"
-}
-
-lightemacs-init-files() {
-  local dir="$1"
-  mkdir -p "$dir/lisp/local/"
-
-  local lightemacs_path
-  if [[ -d "$SRC_DIR/lightemacs" ]]; then
-    lightemacs_path="$SRC_DIR/lightemacs"
-  elif [[ -d "$HOME/.jc-dev/lightemacs" ]]; then
-    lightemacs_path="$HOME/.jc-dev/lightemacs"
-  else
-    echo "Cannot find the Lightemacs source code" >&2
+  if ! [[ -d "$LIGHTEMACS_DIR" ]]; then
+    echo "Error: The directory doesn't exist: $LIGHTEMACS_DIR" >&2
     exit 1
   fi
 
-  rsync "$lightemacs_path/early-init.el" \
-    "$lightemacs_path/init.el" \
-    "$dir/"
+  git -C "$LIGHTEMACS_DIR" checkout --quiet develop
+}
 
-  run-rsync "$lightemacs_path/lisp/lightemacs/" \
-    "$dir/lisp/lightemacs/"
+lightemacs-init-files() {
+  local dest_dir="$1"
+
+  mkdir -p "$dest_dir/lisp/lightemacs"
+
+  run-rsync "$LIGHTEMACS_DIR/early-init.el" \
+    "$LIGHTEMACS_DIR/init.el" \
+    "$dest_dir/"
+
+  run-rsync --delete "$LIGHTEMACS_DIR/lisp/lightemacs/" \
+    "$dest_dir/lisp/lightemacs/"
 }
 
 custom-emacs() {
@@ -120,20 +108,26 @@ custom-emacs() {
 
   echo
   echo "[CUSTOM-EMACS] ${custom_emacs_name}"
+
+  if [[ $DELETE_ALL = true ]]; then
+    rm -fr "$dest_dir/lisp"
+  fi
+
+  # Lightemacs config
   lightemacs-init-files "$dest_dir"
 
-  # shellcheck disable=SC2188
-  # >"$dest_dir/lisp/local/config.el"
-  # if [[ $# -gt 0 ]]; then
-  #   printf "%s\n" "$@" >>"$dest_dir/lisp/local/config.el"
-  # fi
-  mkdir -p "$EMACS_BASE/lisp/local"
-  rsync "$EMACS_BASE/lisp/local/config.el" "$dest_dir/lisp/local/config.el"
-
-  # echo "$EMACS_BASE/lisp/local/" "$dest_dir/lisp/local/"
+  # Local config
+  mkdir -p "$dest_dir/lisp/local"
   run-rsync \
-    "$EMACS_BASE/lisp/local/" \
+    --delete \
+    --exclude "/config.el" \
+    "$EMACS_BASE_CFG/lisp/local/" \
     "$dest_dir/lisp/local/"
+
+  run-rsync \
+    --delete \
+    "$EMACS_BASE_CFG/lisp/local/config.el" \
+    "$dest_dir/lisp/local/config.el"
 
   shift
 }
@@ -146,54 +140,38 @@ init
 # ------------------------------------------------------------------------------
 # My Emacs: EMACS MASTER
 # ------------------------------------------------------------------------------
+custom-emacs "emacs-use-package"
 custom-emacs "emacs-master"
-# custom-emacs "emacs-29.1"
-
 custom-emacs "emacs-elpaca"
 custom-emacs "emacs-straight"
+# custom-emacs "emacs-local"
 
 # ------------------------------------------------------------------------------
 # OTHER LIGHTEMACS
 # ------------------------------------------------------------------------------
-# lightemacs-init-files "$DEST_DIR/.lightemacs.d"
-
-if [[ "$INSTALL_DEVEMACS" == true ]] || [[ -d "$DEST_DIR/.devemacs.d" ]]; then
+if [[ "$DELETE_ALL" == true ]] || ! [[ -d "$DEST_DIR/.devemacs.d" ]]; then
   # Only when it does not exist. This is supposed to always be stable.
   lightemacs-init-files "$DEST_DIR/.devemacs.d"
-  rsync ~/src/dev/jc-dev/home/.devemacs.d/lisp/local/config.el \
+  mkdir -p "$DEST_DIR/.devemacs.d/lisp/local"
+  run-rsync \
+    "$EMACS_BASE_CFG/lisp/local/config.el" \
     "$DEST_DIR/.devemacs.d/lisp/local/config.el"
 fi
 
 lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d"
 lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
 
-wait
-
-# rm -fr "$DEST_DIR/.emacs-27.d"
-# rm -fr "$DEST_DIR/.emacs-sandbox-28/.emacs.d"
-
-# echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)" \
-#   >"$DEST_DIR/.lightemacs.d/lisp/local/config.el"
-#
-# echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
-#       (setq lightemacs-package-manager 'straight)" \
-#   >"$DEST_DIR/.lightemacs-straight.d/lisp/local/config.el"
-#
-# echo "(load (expand-file-name \"~/.config.el\") :no-error :nosuffix)
-#       (setq lightemacs-package-manager 'elpaca)" \
-#   >"$DEST_DIR/.lightemacs-elpaca.d/lisp/local/config.el"
-
 # After everything, ensure jc-dev is sync
-if [[ -d ~/src/dev/jc-dev ]]; then
-  cd ~/src/dev/jc-dev
+# if [[ -d ~/src/dev/jc-dev ]]; then
+#   cd ~/src/dev/jc-dev
+#
+#   run-rsync ~/src/dev/jc-dev/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
+# fi
 
-  run-rsync ~/src/dev/jc-dev/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
-fi
+# wait
 
-wait
-
-if [[ -d ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
-  rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
-  rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-straight.d/lisp/local/
-  rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-elpaca.d/lisp/local/
-fi
+# if [[ -d ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local ]]; then
+#   rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-use-package.d/lisp/local/
+#   rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-straight.d/lisp/local/
+#   rsync -a ~/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/ ~/.emacs-elpaca.d/lisp/local/
+# fi

@@ -27,7 +27,7 @@
 ;;; use-package project
 
 (require 'my-defun)
-(require 'le-core-defaults)
+(require 'lightemacs)
 
 (use-package project
   :ensure nil
