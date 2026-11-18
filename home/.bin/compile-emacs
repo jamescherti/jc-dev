@@ -33,6 +33,9 @@ HANDLE_FPROFILE=1
 
 FPROFILE_INTERACTIVE=0
 
+# Run tests
+RUN_EMACS_MAKE_CHECK=1
+
 FPROFILE_GENERATE=1
 
 # 1 to use Clang on Arch Linux
@@ -1190,6 +1193,10 @@ main() {
           esac
         done
       fi
+    fi
+
+    if [[ $RUN_EMACS_MAKE_CHECK -ne 0 ]]; then
+      make check
     fi
 
     make distclean
