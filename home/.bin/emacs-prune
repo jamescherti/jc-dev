@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <https://www.gnu.org/licenses/>.
 #
-#
 
 set -euo pipefail
 
@@ -53,7 +52,8 @@ if ! type -P fd &>/dev/null; then
 fi
 
 cleanup-emacs-files() {
-  local local_fd_opts=()
+  # Keep each preview path intact, including paths containing newlines.
+  local local_fd_opts=(--print0)
   if [[ ${1:-} == apply ]]; then
     local_fd_opts=(--exec-batch rm -f --)
   elif [[ ${1:-} != dry-run ]]; then
@@ -80,7 +80,8 @@ cleanup-emacs-files() {
     # Emacs's native compiler creates them native-comp-debug is 2 or 3, Emacs
     # writes a pseudo-C dump beside each .eln it compiles. Those dumps are only
     # useful for debugging the compiler.)
-    local cache_action=()
+    # Use the same preview delimiter for cache directories.
+    local cache_action=(--print0)
     if [[ $1 == apply ]]; then
       cache_action=(--exec-batch rm -rf --)
     fi
@@ -113,11 +114,13 @@ main() {
     --print0 "$HOME" | mapfile -d '' -t PROFILE_DIRS
 
   local found_matches=0
-  local preview_line
+  local preview_path
+
+  # Display each pathname on one line, escaping special characters.
   cleanup-emacs-files dry-run \
-    | while IFS= read -r preview_line; do
+    | while IFS= read -r -d '' preview_path; do
       found_matches=1
-      printf '%s\n' "$preview_line"
+      printf '%q\n' "$preview_path"
     done
 
   if ((!found_matches)); then

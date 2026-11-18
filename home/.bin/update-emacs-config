@@ -154,7 +154,7 @@ if [[ "$DELETE_ALL" == true ]] || ! [[ -d "$DEST_DIR/.devemacs.d" ]]; then
   lightemacs-init-files "$DEST_DIR/.devemacs.d"
   mkdir -p "$DEST_DIR/.devemacs.d/lisp/local"
   run-rsync \
-    "$EMACS_BASE_CFG/lisp/local/config.el" \
+    "$HOME/src/dev/jc-dev/home/.devemacs.d/lisp/local/config.el" \
     "$DEST_DIR/.devemacs.d/lisp/local/config.el"
 fi
 
