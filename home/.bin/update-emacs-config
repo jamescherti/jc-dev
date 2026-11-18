@@ -29,6 +29,7 @@
 set -euf -o pipefail
 
 LIGHTEMACS_DIR="$HOME/src/emacs-misc/lightemacs"
+HOME_SETTINGS_MODULES="$HOME/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/"
 EMACS_BASE_CFG="$HOME/src/dev/jc-dev/home/.emacs-use-package.d"
 DELETE_ALL=false
 
@@ -61,7 +62,7 @@ run-rsync() {
   rsync -a \
     --times --atimes --exclude '*.elc' --exclude '*.eln' \
     --exclude legacy \
-    "$@" &
+    "$@"
   return 0
 }
 
@@ -120,14 +121,10 @@ custom-emacs() {
   mkdir -p "$dest_dir/lisp/local"
   run-rsync \
     --delete \
-    --exclude "/config.el" \
-    "$EMACS_BASE_CFG/lisp/local/" \
-    "$dest_dir/lisp/local/"
-
-  run-rsync \
-    --delete \
     "$EMACS_BASE_CFG/lisp/local/config.el" \
-    "$dest_dir/lisp/local/config.el"
+    "$EMACS_BASE_CFG/lisp/local/" \
+    "$HOME_SETTINGS_MODULES/" \
+    "$dest_dir/lisp/local/"
 
   shift
 }
@@ -140,10 +137,10 @@ init
 # ------------------------------------------------------------------------------
 # My Emacs: EMACS MASTER
 # ------------------------------------------------------------------------------
-custom-emacs "emacs-use-package"
-custom-emacs "emacs-master"
-custom-emacs "emacs-elpaca"
-custom-emacs "emacs-straight"
+custom-emacs "emacs-use-package" &
+custom-emacs "emacs-master" &
+custom-emacs "emacs-elpaca" &
+custom-emacs "emacs-straight" &
 # custom-emacs "emacs-local"
 
 # ------------------------------------------------------------------------------
@@ -158,8 +155,10 @@ if [[ "$DELETE_ALL" == true ]] || ! [[ -d "$DEST_DIR/.devemacs.d" ]]; then
     "$DEST_DIR/.devemacs.d/lisp/local/config.el"
 fi
 
-lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d"
-lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d"
+lightemacs-init-files "$DEST_DIR/.lightemacs-straight.d" &
+lightemacs-init-files "$DEST_DIR/.lightemacs-elpaca.d" &
+
+wait
 
 # After everything, ensure jc-dev is sync
 # if [[ -d ~/src/dev/jc-dev ]]; then
