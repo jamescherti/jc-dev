@@ -74,7 +74,7 @@ cleanup-emacs-files() {
 
     fd "${FD_COMMON_OPTS[@]}" --type f \
       --extension elc \
-      . "$dir" "${local_fd_opts[@]}"
+      . "$dir" "${local_fd_opts[@]}" || return
 
     # delete eln-cache to remove all the .eln, .c, and .tmp files. (.c files are
     # Emacs's native compiler creates them native-comp-debug is 2 or 3, Emacs
@@ -86,7 +86,7 @@ cleanup-emacs-files() {
     fi
 
     fd "${FD_COMMON_OPTS[@]}" --type d --case-sensitive --prune \
-      --glob 'eln-cache' "$dir" "${cache_action[@]}"
+      --glob 'eln-cache' "$dir" "${cache_action[@]}" || return
   done
 }
 
@@ -112,18 +112,20 @@ main() {
     "${profile_opts[@]}" \
     --print0 "$HOME" | mapfile -d '' -t PROFILE_DIRS
 
-  local preview
-  preview=$(
-    set -e
-    cleanup-emacs-files dry-run
-  )
+  local found_matches=0
+  local preview_line
+  cleanup-emacs-files dry-run \
+    | while IFS= read -r preview_line; do
+      found_matches=1
+      printf '%s\n' "$preview_line"
+    done
 
-  if [[ -z "$preview" ]]; then
+  if ((!found_matches)); then
     echo "Nothing to do."
     return 0
   fi
 
-  printf '%s\n\n' "$preview"
+  echo
   read -r -p "Delete? [y,n] " ANSWER
   if [[ "$ANSWER" != "y" ]]; then
     exit 1
