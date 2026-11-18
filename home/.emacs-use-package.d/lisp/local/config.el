@@ -897,8 +897,11 @@ subsequent GCC invocations."
 (setq lightemacs-cycle nil)
 
 (unless noninteractive
-  (setq lightemacs-theme-name 'tomorrow-night-deepblue)
-  (setq lightemacs-theme-package 'tomorrow-night-deepblue-theme))
+  (setq lightemacs-theme-name nil)
+  (setq lightemacs-theme-package nil)
+  ;; (setq lightemacs-theme-name 'tomorrow-night-deepblue)
+  ;; (setq lightemacs-theme-package 'tomorrow-night-deepblue-theme)
+  )
 
 ;;; Lightemacs modules
 
@@ -923,7 +926,9 @@ subsequent GCC invocations."
                            le-quick-fasd
                            le-display-line-numbers
                            le-vim-tab-bar
+
                            le-theme
+                           le-savehist
 
                            mod-yasnippet
 
@@ -1001,7 +1006,6 @@ subsequent GCC invocations."
                            ;; le-autorevert
 
                            ;; le-recentf
-                           le-savehist
                            le-saveplace
 
                            ;; TODO replace with tab-bar-history-mode
@@ -1813,12 +1817,12 @@ Iterates over `my-package-base-directory' and adds all subdirectories to
 (defun lightemacs-user-before-modules ()
   "Pre-modules."
   ;; Issue with elpaca
-  ;; (require 'benchmark-init)
-  ;; (require 'benchmark-init-modes)
-  ;; (when (fboundp 'benchmark-init/activate)
-  ;;   (benchmark-init/activate)
-  ;;   ;; (add-hook 'window-setup-hook 'benchmark-init/deactivate 90)
-  ;;   (add-hook 'emacs-startup-hook 'benchmark-init/deactivate 98))
+  (require 'benchmark-init)
+  (require 'benchmark-init-modes)
+  (when (fboundp 'benchmark-init/activate)
+    (benchmark-init/activate)
+    ;; (add-hook 'window-setup-hook 'benchmark-init/deactivate 90)
+    (add-hook 'emacs-startup-hook 'benchmark-init/deactivate 98))
 
   (my-add-packages-to-load-path))
 

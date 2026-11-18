@@ -534,8 +534,45 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; to match keywords or tags defined in matchit plugins.
 (setq evilmi-always-simple-jump t)
 
-(autoload 'global-evil-matchit-mode "evil-matchit" nil t)
-(autoload 'evil-matchit-mode "evil-matchit" nil t)
+(defvar lightemacs--evil-matchit-rules-configured nil
+  "Non-nil after the custom evil-matchit rules have been registered.")
+
+(defun my-enable-evil-matchit-mode ()
+  "Register custom rules once and enable `evil-matchit-mode' in this buffer."
+  (require 'le-evil-matchit)
+  (unless lightemacs--evil-matchit-rules-configured
+    (setq lightemacs--evil-matchit-rules-configured t)
+    (if (fboundp 'evilmi-load-plugin-rules)
+        (when (fboundp 'evilmi-load-plugin-rules)
+          (evilmi-load-plugin-rules '(cmake-ts-mode) '(cmake))
+          (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(c simple))
+
+          ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
+          ;; # evilmi BUG here: place the cursor on { and press %
+          ;; _jc_better_cd() {
+          (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
+
+          ;; (evilmi-load-plugin-rules '(cmake-ts-mode) '(simple cmake))
+          ;; (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(simple c))
+
+          (evilmi-load-plugin-rules '(css-ts-mode) '(simple))
+          (evilmi-load-plugin-rules '(php-ts-mode) '(simple template html))
+          (evilmi-load-plugin-rules '(lua-ts-mode) '(simple script))
+          (evilmi-load-plugin-rules '(python-ts-mode) '(simple python))
+          (evilmi-load-plugin-rules '(yaml-ts-mode) '(simple yaml))
+
+          ;; Loads the 'simple' plugin before the 'sh' plugin. The 'simple'
+          ;; plugin handles basic text matching for brackets and quotes. Placing
+          ;; it first ensures that [ ] pairs are matched immediately, preventing
+          ;; the 'sh' plugin from incorrectly interpreting them as part of the
+          ;; if/fi control flow structure.
+          ;; (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
+          )
+      (error "Undefined: `evilmi-load-plugin-rules'")))
+
+  (if (fboundp 'evil-matchit-mode)
+      (evil-matchit-mode 1)
+    (error "Undefined: `evil-matchit-mode'")))
 
 (dolist (hook '(js-mode-hook
                 json-mode-hook
@@ -594,33 +631,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
                 sh-mode-hook
                 bash-ts-mode-hook))
-  (add-hook hook #'evil-matchit-mode))
-
-(when (fboundp 'evilmi-load-plugin-rules)
-  (evilmi-load-plugin-rules '(cmake-ts-mode) '(cmake))
-  (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(c simple))
-
-  ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
-  ;; # evilmi BUG here: place the cursor on { and press %
-  ;; _jc_better_cd() {
-  (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
-
-  ;; (evilmi-load-plugin-rules '(cmake-ts-mode) '(simple cmake))
-  ;; (evilmi-load-plugin-rules '(c-ts-mode c++-ts-mode) '(simple c))
-
-  (evilmi-load-plugin-rules '(css-ts-mode) '(simple))
-  (evilmi-load-plugin-rules '(php-ts-mode) '(simple template html))
-  (evilmi-load-plugin-rules '(lua-ts-mode) '(simple script))
-  (evilmi-load-plugin-rules '(python-ts-mode) '(simple python))
-  (evilmi-load-plugin-rules '(yaml-ts-mode) '(simple yaml))
-
-  ;; Loads the 'simple' plugin before the 'sh' plugin. The 'simple' plugin
-  ;; handles basic text matching for brackets and quotes. Placing it first
-  ;; ensures that [ ] pairs are matched immediately, preventing the 'sh'
-  ;; plugin from incorrectly interpreting them as part of the if/fi control
-  ;; flow structure.
-  ;; (evilmi-load-plugin-rules '(bash-ts-mode) '(simple sh))
-  )
+  (add-hook hook #'my-enable-evil-matchit-mode))
 
 ;; TODO unbalanced parenthesis that happen in .bashrc (jc-dotfiles)
 ;; # evilmi BUG here: place the cursor on { and press %
@@ -3204,11 +3215,11 @@ ARGS - the arguments passed to the original function"
 
 (setup-battery-angel-on-ac)
 
-(require 'battery-angel)
-(setq battery-angel-verbose t)
-(add-hook 'lightemacs-emacs-startup-hook #'battery-angel-mode 90)
-(add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
-(add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
+;; (require 'battery-angel)
+;; (setq battery-angel-verbose t)
+;; (add-hook 'lightemacs-emacs-startup-hook #'battery-angel-mode 90)
+;; (add-hook 'battery-angel-on-ac-hook #'setup-battery-angel-on-ac)
+;; (add-hook 'battery-angel-on-bat-hook #'setup-battery-angel-on-bat)
 
 ;;; inhibit mouse
 
@@ -3269,9 +3280,9 @@ ARGS - the arguments passed to the original function"
 (when (fboundp 'easysession-scratch-mode)
   (easysession-scratch-mode 1))
 
-(require 'easysession-eshell)
-(when (fboundp 'easysession-eshell-mode)
-  (easysession-eshell-mode 1))
+;; (require 'easysession-eshell)
+;; (when (fboundp 'easysession-eshell-mode)
+;;   (easysession-eshell-mode 1))
 
 ;;; git-timemachine
 
