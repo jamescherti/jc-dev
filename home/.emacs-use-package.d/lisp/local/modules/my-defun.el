@@ -1183,6 +1183,27 @@ current tab. If none exists, create a new tab. Select the resulting window."
   ;;   (pulse-momentary-highlight-region (my-pos-bol) (my-pos-eol)))
   )
 
+;;; ex lightemacs
+
+(defun lightemacs--format-value (val)
+  "Format VAL into a string representation for Elisp configuration."
+  (cond
+   ;; Booleans (t or nil)
+   ((memq val '(t nil))
+    (symbol-name val))
+   ;; Strings (quoted)
+   ((stringp val)
+    (prin1-to-string val))
+   ;; Lists (quoted as '(list))
+   ((listp val)
+    (format "'%s" (prin1-to-string val)))
+   ;; Symbols (quoted as 'symbol)
+   ((symbolp val)
+    (format "'%s" (symbol-name val)))
+   ;; Fallback for numbers or other types
+   (t
+    (prin1-to-string val))))
+
 ;;; Provide
 (provide 'my-defun)
 
