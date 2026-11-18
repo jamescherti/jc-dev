@@ -4927,7 +4927,8 @@ ARGS are the arguments passed to ORIG-FN."
 
 ;;; require blocks ops
 
-(require 'my-evil-blockops)
+(with-eval-after-load 'evil
+  (require 'my-evil-blockops))
 
 ;;; Remove stale early-init.elc
 
