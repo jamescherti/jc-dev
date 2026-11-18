@@ -51,7 +51,6 @@
 ;; (setq compile-angel-cache-locate-file t)
 
 (setq lightemacs-load-compiled-init-files t)
-(setq lightemacs-recentf-track-switch-to-buffer t)
 ;; Experimental
 ;; TODO make them a default
 (setq compile-angel-cache-file-truename t)
@@ -564,6 +563,7 @@
 ;; (setq enable-dir-local-variables t)
 
 ;; Trust buffer contents for Flymake
+;; Make a for loop
 (when (boundp 'trusted-content)
   (let ((dirs (list
                ;; "~/src/dev/jc-dev/"
@@ -574,6 +574,7 @@
                "~/src/ansible/"
                "~/src/dotfiles/"
                "~/src/emacs/"
+               "~/src/emacs-misc/"
                "~/src/git/"
                "~/src/dev/home-settings/"
                "~/src/jamescherti/"
@@ -1451,9 +1452,9 @@ This uses an around advice to trap errors and verify file timestamps."
              :repo "jamescherti/wizard.el"
              :branch "main")
             (cond-let
-              :type git :host github
-              :repo "jamescherti/cond-let"
-              :branch "main")
+             :type git :host github
+             :repo "jamescherti/cond-let"
+             :branch "main")
             (transient
              :type git :host github
              :repo "jamescherti/transient"

@@ -1392,7 +1392,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
   ;; (add-hook 'lisp-interaction-mode-hook #'outline-minor-mode)
 
-  (with-eval-after-load 'recentf
+  (with-eval-after-load 'le-recentf
     (setq recentf-exclude
           (append recentf-exclude
                   '("^~/\\.bin/"
@@ -4957,6 +4957,33 @@ ARGS are the arguments passed to ORIG-FN."
 ;;                 early-init-elc (error-message-string err))))))
 ;;
 ;; (add-hook 'kill-emacs-hook #'lightemacs--delete-stale-early-init-elc)
+
+;;; recentf add files on buffer change
+
+(defvar lightemacs-recentf-track-switch-to-buffer nil
+  "Non-nil means track buffer switches and add the visited file to `recentf'.
+When enabled, switching to a buffer visiting a file automatically
+adds that file to the recentf list.")
+
+;; Add file at the beginning of the recent list after switching buffer.
+;; The global window hook supplies the affected frame at redisplay time.
+(defun lightemacs-recentf--add-file-on-buffer-change (frame)
+  "Record files newly displayed in the ordinary windows of FRAME."
+  (when
+      (and (fboundp 'recentf-add-file) (bound-and-true-p recentf-mode))
+    ;; Visit the selected window last so its file takes precedence.
+    (dolist (window (nreverse (window-list frame 'nomini)))
+      (let ((buffer (window-buffer window)))
+        (unless (eq buffer (window-old-buffer window))
+          (let ((file (buffer-file-name (or (buffer-base-buffer buffer)
+                                            buffer))))
+            (when
+                file
+              (recentf-add-file file))))))))
+
+(when lightemacs-recentf-track-switch-to-buffer
+  (add-hook 'window-buffer-change-functions
+            #'lightemacs-recentf--add-file-on-buffer-change))
 
 ;;; DISABLED: vterm-toggle
 
