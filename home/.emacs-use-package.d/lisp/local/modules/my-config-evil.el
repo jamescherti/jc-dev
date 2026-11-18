@@ -1849,34 +1849,20 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 
 ;;; quick-fasd
 
-;; TODO Lightemacs
-(use-package quick-fasd
-  :commands (quick-fasd-mode
-             quick-fasd-find-path
-             quick-fasd-find-file
-             quick-fasd-find-directory
-             quick-fasd-add-path)
+(defun my-find-file ()
+  "Find a file.."
+  (interactive)
+  (cond
+   ;; ((and (project-current)
+   ;;       (fboundp 'my-consult-project-files))
+   ;;  (my-consult-project-files))
 
-  :bind (("C-x C-d" . quick-fasd-find-path)
-         :map minibuffer-local-completion-map
-         ("C-x C-d" . quick-fasd-find-path))
+   (t
+    (quick-fasd-find-file))))
 
-  :preface
-  (defun my-find-file ()
-    "Find a file.."
-    (interactive)
-    (cond
-     ;; ((and (project-current)
-     ;;       (fboundp 'my-consult-project-files))
-     ;;  (my-consult-project-files))
-
-     (t
-      (quick-fasd-find-file))))
-
-  :init
+(with-eval-after-load 'le-quick-fasd
   (define-key evil-normal-state-map (kbd "<leader>b") 'my-find-file)
-  (evil-define-key 'normal 'global (kbd "<leader>fd") 'quick-fasd-find-directory)
-  (quick-fasd-mode 1))
+  (evil-define-key 'normal 'global (kbd "<leader>fd") 'quick-fasd-find-directory))
 
 ;;; DISABLED: Reduce messages
 

@@ -38,11 +38,11 @@
 (setq stripspace-use-virtual-overlay nil)
 ;; (setq stripspace-restore-column nil) ;; TODO Integrate
 
-(use-package ghostcursor
-  :demand t
-  :functions ghostcursor-global-mode
-  :config
-  (ghostcursor-global-mode 1))
+;; (use-package ghostcursor
+;;   :demand t
+;;   :functions ghostcursor-global-mode
+;;   :config
+;;   (ghostcursor-global-mode 1))
 
 ;;; scratch
 
@@ -422,14 +422,15 @@ Opens a split window showing the added and removed features."
 
 ;;; Themes
 
-(use-package modus-themes
-  :defer t)
-(use-package ef-themes
-  :defer t)
-(use-package doom-themes
-  :defer t)
-(use-package tomorrow-night-deepblue-theme
-  :defer t)
+;; TODO causes an issue with elpaca
+;; (use-package modus-themes
+;;   :defer t)
+;; (use-package ef-themes
+;;   :defer t)
+;; (use-package doom-themes
+;;   :defer t)
+;; (use-package tomorrow-night-deepblue-theme
+;;   :defer t)
 
 (with-eval-after-load 'le-theme
   (when (fboundp 'lightemacs-theme-create-loader)
@@ -482,18 +483,19 @@ Opens a split window showing the added and removed features."
 
 ;;; Terminal themes
 
-(use-package terminal-colors
-  :config
-  (setq terminal-colors-default-theme "gnome-terminal-tango-dark")
-  ;; (setq terminal-colors-default-theme "konsole-white-on-black")
-  (with-eval-after-load 'vterm
-    (terminal-colors-vterm-mode 1))
-
-  (with-eval-after-load 'eat
-    (terminal-colors-eat-mode 1))
-
-  (with-eval-after-load 'term
-    (terminal-colors-term-mode 1)))
+;; (use-package terminal-colors
+;;   :if (not (eq lightemacs-package-manager 'elpaca))
+;;   :config
+;;   (setq terminal-colors-default-theme "gnome-terminal-tango-dark")
+;;   ;; (setq terminal-colors-default-theme "konsole-white-on-black")
+;;   (with-eval-after-load 'vterm
+;;     (terminal-colors-vterm-mode 1))
+;;
+;;   (with-eval-after-load 'eat
+;;     (terminal-colors-eat-mode 1))
+;;
+;;   (with-eval-after-load 'term
+;;     (terminal-colors-term-mode 1)))
 
 ;;; Provide
 

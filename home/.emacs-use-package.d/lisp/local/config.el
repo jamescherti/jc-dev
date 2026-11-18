@@ -478,17 +478,6 @@
                                    ;; are not actually used by the code.
                                    "-Wl,--as-needed"))
 
-;;; Package manager
-
-(let ((user-dir (file-truename lightemacs-user-directory)))
-  (cond
-   ((string= user-dir
-             (file-truename "~/.emacs-elpaca.d/"))
-    (setq lightemacs-package-manager 'elpaca))
-   ((string= user-dir
-             (file-truename "~/.emacs-straight.d/"))
-    (setq lightemacs-package-manager 'straight))))
-
 ;;; Minimalist
 
 (setq user-lisp-auto-scrape nil)
@@ -538,7 +527,17 @@
 ;; PERFORMANCE: Only support Git
 (setq vc-handled-backends '(Git))
 
-;;; Load ~/config.el
+;;; Package manager and ~/.config.el
+
+;; Load this before ~/.config.el
+(let ((user-dir (file-truename lightemacs-user-directory)))
+  (cond
+   ((string= user-dir
+             (file-truename "~/.emacs-elpaca.d/"))
+    (setq lightemacs-package-manager 'elpaca))
+   ((string= user-dir
+             (file-truename "~/.emacs-straight.d/"))
+    (setq lightemacs-package-manager 'straight))))
 
 ;; (message "LOADING config.el")
 (let ((config-file (expand-file-name "~/.config.el")))
@@ -920,7 +919,8 @@ subsequent GCC invocations."
 
                            le-so-long
                            le-yasnippet
-                           le-compile-angel
+                           ;; le-compile-angel
+                           le-quick-fasd
                            le-display-line-numbers
                            le-vim-tab-bar
                            le-theme
