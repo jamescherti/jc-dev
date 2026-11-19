@@ -312,7 +312,7 @@ main() {
 
   # Get the current branch name
   CURRENT_BRANCH=$(git branch --show-current)
-  DEFAULT_BRANCH=$(git-default-branch)
+  DEFAULT_BRANCH=$(git-default-branch) || true
 
   ALLOW_DIRECT_COMMITS=${ALLOW_DIRECT_COMMITS:-0}
 

@@ -89,7 +89,7 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 #
 # The -fno-omit-frame-pointer The Emacs developers recommend using this to
 # disable omit-frame-pointer, because it can cause hard to debug bugs.
-export BASE_CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
+export BASE_CFLAGS="-O$CC_OPTIMIZE -g0 -pipe -march=native -mtune=native"
 
 # Stable
 export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
@@ -200,7 +200,7 @@ export BASE_LDFLAGS="-Wl,-O2 -Wl,--sort-common \
 # Emacs, compile it with the jit USE flag (native compilation). The underlying
 # libgccjit code compiler benefits immensely from your optimized LLVM/Clang and
 # Python stacks.
-export BASE_CFLAGS="$BASE_CFLAGS -fno-semantic-interposition"
+# export BASE_CFLAGS="$BASE_CFLAGS -fno-semantic-interposition"
 
 # The -fno-finite-math-only flag prevents the compiler from assuming that
 # floating-point operations never produce NaN or infinity values. This flag is
@@ -212,7 +212,7 @@ export BASE_CFLAGS="$BASE_CFLAGS -fno-semantic-interposition"
 # largely redundant for the Emacs codebase. Emacs does not rely heavily on
 # floating-point math, and it is not a shared library where semantic
 # interposition rules heavily apply.
-export BASE_CFLAGS="$BASE_CFLAGS -fno-finite-math-only"
+# export BASE_CFLAGS="$BASE_CFLAGS -fno-finite-math-only"
 
 # Applying -fno-plt to the Emacs Executable (C Core)
 # -----------------------------------------------------
