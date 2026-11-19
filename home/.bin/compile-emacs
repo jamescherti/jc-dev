@@ -92,10 +92,19 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 export BASE_CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
 
 # Stable
-export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
+# Commented out: Let GCC apply its default -fomit-frame-pointer optimization,
+# which is enabled at -O2 on supported targets.
+# However, frame pointers improve stack tracing and diagnostics. Your existing
+# comment indicates that you deliberately chose to preserve them following Emacs
+# developer advice.
+# export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
 
-# Unstable, according to Emacs devs, but it works for me.
-# export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
+# Small improvement in some C functions
+# This is the most plausible for improving execution performance compared with
+# -fgraphite-identity -floop-nest-optimize -fdevirtualize-at-ltrans -fipa-pta.
+# Not recommended, according to Emacs devs, but I've never had any issues with
+# it.
+export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
 
 # if [[ $ID = arch ]]; then
 #   TARGET_BRANCH="emacs-30"
@@ -537,7 +546,7 @@ CONFIGURE_ARGS=(
   # installation is complete. Every built-in feature is already running as
   # native machine code the very first time I launch it. There is no background
   # natively compile the standard library.
-  # --with-native-compilation=aot
+  --with-native-compilation=aot
 
   # When I use this flag alone, it enables Just-In-Time (JIT) compilation
   # The Emacs C source compiles quickly. Only a absolute minimum set of Lisp
@@ -547,7 +556,7 @@ CONFIGURE_ARGS=(
   # magit, or org-mode), Emacs will notice those files are only available as
   # byte-code (.elc). It will then spawn background processes to compile them
   # into .eln files on the fly.
-  --with-native-compilation
+  # --with-native-compilation
 
   --with-modules
   --with-threads
@@ -602,6 +611,8 @@ CONFIGURE_ARGS=(
   # with a wide range of systems is a priority.
   #
   # Cairo XCB stands for X C bindings. X11, not Wayland.
+  #
+  # Potential benefit for high-latency X11; known compatibility concerns
   # --without-cairo-xcb
 
   # Fewer developers test Emacs with --with-cairo-xcb than with default
@@ -829,11 +840,45 @@ operating_system() {
 }
 
 # shellcheck disable=SC2317
+
 error_handler() {
   local errno="$?"
   echo "Error: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}" \
     "(${BASH_COMMAND} exited with status $errno)" >&2
   exit "${errno}"
+}
+
+configure_aot() {
+  local gcc_target_options
+  local cpu_architecture
+  local native_comp_eval
+  local BYTE_COMPILE_EXTRA_FLAGS
+
+  gcc_target_options=$(gcc -march=native -Q --help=target)
+
+  cpu_architecture=$(awk '
+    $1 == "-march=" {
+      print $2
+      exit
+    }
+  ' <<<"$gcc_target_options")
+
+  if [[ ! "$cpu_architecture" =~ ^[[:alnum:]_.+-]+$ ]]; then
+    echo "Error: Cannot detect CPU architecture." >&2
+    exit 1
+  fi
+
+  native_comp_eval="(setq native-comp-speed 2"
+  native_comp_eval+=' native-comp-compiler-options'
+  native_comp_eval+=' (list "-O2" "-g0" "-fomit-frame-pointer"'
+  native_comp_eval+=' "-fno-finite-math-only"'
+  native_comp_eval+=" \"-march=$cpu_architecture\""
+  native_comp_eval+=" \"-mtune=$cpu_architecture\")"
+  native_comp_eval+=' native-comp-driver-options'
+  native_comp_eval+=' (list "-Wl,-z,pack-relative-relocs"'
+  native_comp_eval+=' "-Wl,-O2" "-Wl,--as-needed"))'
+
+  echo -- "--eval '$native_comp_eval'"
 }
 
 run_build() {
@@ -1067,7 +1112,16 @@ run_build() {
       # -Wno-error=coverage-mismatch
       # removed from cflags: -fprofile-correction -Wno-missing-profile -Wno-error=coverage-mismatch
       # removed from ldflags: -fprofile-correction
-      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_DIR -Wno-missing-profile -Wno-error=coverage-mismatch"
+      #
+      # TODO benchmark profile-partial-training to see if it is beneficial.
+      # -fprofile-partial-training This option has a tradeoff: it can increase
+      # executable size, and the resulting instruction-cache behavior might
+      # offset its benefits. GCC supports -fprofile-partial-training for
+      # precisely this situation: functions not covered during training are
+      # optimized without the profile feedback rather than automatically treated
+      # as cold code.
+      # https://gcc.gnu.org/onlinedocs/gcc-14.3.0/gcc/Optimize-Options.html
+      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_DIR -fprofile-partial-training -Wno-missing-profile -Wno-error=coverage-mismatch"
       export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_DIR -O$CC_OPTIMIZE"
     fi
   else
@@ -1089,12 +1143,13 @@ run_build() {
   echo "[LDFLAGS] $LDFLAGS"
 
   set -x
-
   ./configure "${CONFIGURE_ARGS[@]}"
+  set +x
 
   NUM_PROC_MAX=$((NUM_PROC * 4))
 
-  make -j "$NUM_PROC_MAX" -l "$NUM_PROC"
+  make -j "$NUM_PROC_MAX" -l "$NUM_PROC" \
+    "BYTE_COMPILE_EXTRA_FLAGS=$BYTE_COMPILE_EXTRA_FLAGS"
 
   if [[ "$do_install" -ne 0 ]]; then
     test -f "$EMACS_INSTALL_PREFIX/bin/emacs" && rm -fr "$EMACS_INSTALL_PREFIX"
@@ -1105,10 +1160,45 @@ run_build() {
     # size. This is usually done for production releases to make the binaries
     # smaller and more efficient, since debugging symbols are typically not
     # needed in a production environment.
-    make install-strip
+    make install-strip \
+      "BYTE_COMPILE_EXTRA_FLAGS=$BYTE_COMPILE_EXTRA_FLAGS"
+  fi
+}
+
+configure_aot_compilation() {
+  local gcc_target_options
+  local cpu_architecture
+
+  if ! command -v gcc >/dev/null 2>&1; then
+    echo "Error: GCC is not installed." >&2
+    exit 1
   fi
 
-  set +x
+  if ! gcc_target_options=$(gcc -march=native -Q --help=target); then
+    echo "Error: Cannot query GCC target options." >&2
+    exit 1
+  fi
+
+  cpu_architecture=$(awk '
+    $1 == "-march=" {
+      print $2
+      exit
+    }
+  ' <<<"$gcc_target_options")
+
+  if [[ ! "$cpu_architecture" =~ ^[a-zA-Z0-9_.+-]+$ ]]; then
+    echo "Error: Cannot detect the CPU architecture." >&2
+    exit 1
+  fi
+
+  if ! gcc -x c -fsyntax-only \
+    "-march=$cpu_architecture" "-mtune=$cpu_architecture" \
+    - <<<'int main(void) { return 0; }' >/dev/null 2>&1; then
+    echo "Error: Unsupported CPU architecture: $cpu_architecture" >&2
+    exit 1
+  fi
+
+  echo "$cpu_architecture"
 }
 
 main() {
@@ -1144,10 +1234,13 @@ main() {
   #   source /etc/makepkg.conf
   # fi
 
+  BYTE_COMPILE_EXTRA_FLAGS=$(configure_aot)
+
   echo "[SOURCE DIR]" "$PWD"
   echo "[CONFIGURE OPTION]" "${CONFIGURE_ARGS[@]}"
   echo "[BASE_CFLAGS] $BASE_CFLAGS"
   echo "[BASE_LDFLAGS] $BASE_LDFLAGS"
+  echo "{BYTE_COMPILE_EXTRA_FLAGS} $BYTE_COMPILE_EXTRA_FLAGS"
   echo
 
   read -r -p "Compile Emacs? [y,n] " ANSWER
@@ -1221,9 +1314,11 @@ main() {
     echo "-------------------------------------------------------------"
     echo "Make distclean"
     echo "-------------------------------------------------------------"
-    make distclean
+    # make distclean
+
     git clean -fxd
     git reset --hard HEAD
+    ./autogen.sh
 
     echo "Building with profile use..."
     run_build "fprofile-use" 1

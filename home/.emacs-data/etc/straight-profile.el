@@ -15,7 +15,7 @@
  ("apheleia" . "664fcfd3ec8f868169609c03ca3f8e54d897c27a") ; v4.6.0 | RSS RELEASE
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
  ("modus-themes" . "782743415b3eedac0b99db2342fb35703deb752f") ; 5.3.0 | RSS RELEASE
- ("ef-themes" . "716d365d0cf2ad3d855c6879a476857bc5fa57d2") ; 2.2.1 | RSS RELEASE
+ ("ef-themes" . "0682217085244de7b3e8aba81496abe4b70a61bd") ; 2.3.0 | RSS RELEASE
  ("orderless" . "3d2c2e6468ddf51e69c78e8212e5fd9006d2ce8a") ; 1.8 | RSS RELEASE
  ("vertico" . "a9998a777f1d92348f84d091bb15b87df933a7a2")  ; 2.15 | RSS RELEASE
  ("corfu" . "b468efac023dda39332acc943edc9895c80b5a6f") ; 2.16 | RSS RELEASE
