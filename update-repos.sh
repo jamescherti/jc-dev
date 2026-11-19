@@ -241,8 +241,13 @@ main() {
   config-project-list
 
   mkdir -p ~/.emacs-repos
-  ln -sf ~/.emacs-packages ~/.emacs-repos/emacs-packages
-  ln -sf ~/src/emacs ~/.emacs-repos/my-packages
+  if ! [[ -L ~/.emacs-repos/emacs-packages ]]; then
+    ln -sf ~/.emacs-packages ~/.emacs-repos/emacs-packages
+  fi
+
+  if ! [[ -L ~/src/emacs ~/.emacs-repos/my-packages ]]; then
+    ln -sf ~/src/emacs ~/.emacs-repos/my-packages
+  fi
 
   # TODO Run once a day
   # git_maintenance
