@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-if [ "$(id -u)" -ne "0" ]; then
+if ((EUID != 0)); then
   echo "Error: you need root privileges to run this script." >&2
   exit 1
 fi

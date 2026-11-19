@@ -43,7 +43,7 @@ init() {
   trap "error_handler" ERR
   set -o errtrace
 
-  if [ "$(id -u)" -eq "0" ]; then
+  if ((EUID == 0)); then
     echo "Error: you cannot run this script as root." >&2
     exit 1
   fi

@@ -92,19 +92,14 @@ EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 export BASE_CFLAGS="-O$CC_OPTIMIZE -pipe -march=native -mtune=native"
 
 # Stable
-# Commented out: Let GCC apply its default -fomit-frame-pointer optimization,
-# which is enabled at -O2 on supported targets.
-# However, frame pointers improve stack tracing and diagnostics. Your existing
-# comment indicates that you deliberately chose to preserve them following Emacs
-# developer advice.
-# export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
+export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
 
 # Small improvement in some C functions
 # This is the most plausible for improving execution performance compared with
 # -fgraphite-identity -floop-nest-optimize -fdevirtualize-at-ltrans -fipa-pta.
 # Not recommended, according to Emacs devs, but I've never had any issues with
 # it.
-export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
+# export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
 
 # if [[ $ID = arch ]]; then
 #   TARGET_BRANCH="emacs-30"
@@ -848,39 +843,6 @@ error_handler() {
   exit "${errno}"
 }
 
-configure_aot() {
-  local gcc_target_options
-  local cpu_architecture
-  local native_comp_eval
-  local BYTE_COMPILE_EXTRA_FLAGS
-
-  gcc_target_options=$(gcc -march=native -Q --help=target)
-
-  cpu_architecture=$(awk '
-    $1 == "-march=" {
-      print $2
-      exit
-    }
-  ' <<<"$gcc_target_options")
-
-  if [[ ! "$cpu_architecture" =~ ^[[:alnum:]_.+-]+$ ]]; then
-    echo "Error: Cannot detect CPU architecture." >&2
-    exit 1
-  fi
-
-  native_comp_eval="(setq native-comp-speed 2"
-  native_comp_eval+=' native-comp-compiler-options'
-  native_comp_eval+=' (list "-O2" "-g0" "-fomit-frame-pointer"'
-  native_comp_eval+=' "-fno-finite-math-only"'
-  native_comp_eval+=" \"-march=$cpu_architecture\""
-  native_comp_eval+=" \"-mtune=$cpu_architecture\")"
-  native_comp_eval+=' native-comp-driver-options'
-  native_comp_eval+=' (list "-Wl,-z,pack-relative-relocs"'
-  native_comp_eval+=' "-Wl,-O2" "-Wl,--as-needed"))'
-
-  echo -- "--eval '$native_comp_eval'"
-}
-
 run_build() {
   local phase="$1"
   local do_install="$2"
@@ -1165,19 +1127,12 @@ run_build() {
   fi
 }
 
-configure_aot_compilation() {
+configure_aot() {
   local gcc_target_options
   local cpu_architecture
+  local native_comp_eval
 
-  if ! command -v gcc >/dev/null 2>&1; then
-    echo "Error: GCC is not installed." >&2
-    exit 1
-  fi
-
-  if ! gcc_target_options=$(gcc -march=native -Q --help=target); then
-    echo "Error: Cannot query GCC target options." >&2
-    exit 1
-  fi
+  gcc_target_options=$(gcc -march=native -Q --help=target)
 
   cpu_architecture=$(awk '
     $1 == "-march=" {
@@ -1186,19 +1141,22 @@ configure_aot_compilation() {
     }
   ' <<<"$gcc_target_options")
 
-  if [[ ! "$cpu_architecture" =~ ^[a-zA-Z0-9_.+-]+$ ]]; then
-    echo "Error: Cannot detect the CPU architecture." >&2
+  if [[ ! "$cpu_architecture" =~ ^[[:alnum:]_.+-]+$ ]]; then
+    echo "Error: Cannot detect CPU architecture." >&2
     exit 1
   fi
 
-  if ! gcc -x c -fsyntax-only \
-    "-march=$cpu_architecture" "-mtune=$cpu_architecture" \
-    - <<<'int main(void) { return 0; }' >/dev/null 2>&1; then
-    echo "Error: Unsupported CPU architecture: $cpu_architecture" >&2
-    exit 1
-  fi
+  native_comp_eval="(setq native-comp-speed 2"
+  native_comp_eval+=' native-comp-compiler-options'
+  native_comp_eval+=' (list "-O2" "-g0" "-fno-omit-frame-pointer"'
+  native_comp_eval+=' "-fno-finite-math-only"'
+  native_comp_eval+=" \"-march=$cpu_architecture\""
+  native_comp_eval+=" \"-mtune=$cpu_architecture\")"
+  native_comp_eval+=' native-comp-driver-options'
+  native_comp_eval+=' (list "-Wl,-z,pack-relative-relocs"'
+  native_comp_eval+=' "-Wl,-O2" "-Wl,--as-needed"))'
 
-  echo "$cpu_architecture"
+  printf '%s\n' "--eval '$native_comp_eval'"
 }
 
 main() {
