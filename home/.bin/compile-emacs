@@ -119,14 +119,14 @@ export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
 # -Wl,-O2 - Instructs the linker to optimize layout of the binary. Helps reduce
 # cache misses slightly.
 #
-# -Wl,--sort-common – Orders common symbols to improve memory locality. Small
+# -Wl,--sort-common - Orders common symbols to improve memory locality. Small
 # effect, generally safe.
 #
-# -Wl,--as-needed – Only links libraries that are actually used. Reduces the
+# -Wl,--as-needed - Only links libraries that are actually used. Reduces the
 # size of the executable and startup overhead. Useful for Emacs because it links
 # many libraries.
 #
-# -Wl,-z,pack-relative-relocs – Reduces the size of relocations for
+# -Wl,-z,pack-relative-relocs - Reduces the size of relocations for
 # position-independent executables. Slightly reduces memory usage and can
 # improve startup speed.
 #
@@ -139,10 +139,12 @@ export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
 export BASE_LDFLAGS="-Wl,-O2 -Wl,--sort-common \
   -Wl,--as-needed -Wl,-z,pack-relative-relocs"
 
-if [[ $ID == "debian" ]] && [[ ${VERSION_ID:-} == "13" ]]; then
-  export BASE_CFLAGS="$BASE_CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
-  export BASE_LDFLAGS="$BASE_LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
-fi
+# Debian 13 defaults to GCC 14, not GCC 12. These flags could introduce
+# incompatible compiler headers or libraries.
+# if [[ $ID == "debian" ]] && [[ ${VERSION_ID:-} == "13" ]]; then
+#   export BASE_CFLAGS="$BASE_CFLAGS -I/usr/lib/gcc/x86_64-linux-gnu/12/include"
+#   export BASE_LDFLAGS="$BASE_LDFLAGS -L/usr/lib/gcc/x86_64-linux-gnu/12"
+# fi
 
 # The -fno-semantic-interposition flag is an advanced compiler option that
 # removes a strict ELF-standard optimization barrier, allowing for more
@@ -327,7 +329,7 @@ export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
 #   call stacks from the Lisp evaluator. These are highly branch-dependent
 #   workloads.
 #
-# * Lack of Affine Loops: For Graphite to optimize a loop, the loop must have
+# * Lack of Affine Loops: For Graphite to optimize a loop, it must have
 #   affine bounds (linear equations based on loop iterators) without complex
 #   control flow inside the loop body. The C code in Emacs does not fit this
 #   profile.
@@ -369,8 +371,8 @@ export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
 # -fipa-pta enables interprocedural points-to analysis, allowing GCC to perform
 # deeper pointer alias analysis across function boundaries. While technically
 # applicable to C code, this optimization significantly increases compiler RAM
-# usage and compilation time. For a codebase like Emacs, the runtime performance
-# gains are usually negligible and may not justify the additional build
+# usage and compilation time. The runtime performance gains for a codebase like
+# Emacs are usually negligible and may not justify the additional build
 # complexity and resource consumption.
 #
 # NOTE: Enabling -fipa-pta for .eln compilation is generally not worthwhile.
@@ -466,9 +468,9 @@ CONFIGURE_ARGS=(
   # that include it will be recompiled. This relies on the GCC compiler's -MMD
   # and -MF flags.
   #
-  # When a header file changes, only the affected .c files are recompiled.
+  # When a header file changes, only the affected .c files will be recompiled.
   # This avoids either: Rebuilding the entire project unnecessarily, or
-  # Missing necessary recompilation (leading to incorrect builds).
+  # Missing necessary recompilation, leading to incorrect builds.
   #
   # Improved Build Efficiency, which is beneficial in large codebases like
   # Emacs, this option ensures that only modified and dependent files are
@@ -495,16 +497,16 @@ CONFIGURE_ARGS=(
   # manage memory more efficiently, especially in memory-intensive workloads.
   # Enabling this option requires that the MPS library and headers are installed
   # and accessible during compilation. While primarily experimental, using MPS
-  # can improve performance and enable advanced memory management features,
-  # making it useful for custom Emacs builds such as those using the incremental
-  # garbage collection (IGC) framework.
+  # can improve performance and enable advanced memory management features
+  # for custom Emacs builds such as those using the incremental garbage
+  # collection (IGC) framework.
   # --with-mps=yes
 
   # Remove support for Access Control Lists and Extended Attributes for slightly
   # faster/simpler file I/O.
   #
   # If I am aiming for a lean, high-performance binary and don't use complex
-  # Access Control Lists or Extended Attributes on your files: This slightly
+  # Access Control Lists or Extended Attributes for files: This slightly
   # reduces the overhead of file I/O operations and reduces the number of linked
   # system libraries. If we are on a standard personal Linux setup, these are
   # rarely needed inside Emacs.
@@ -557,8 +559,8 @@ CONFIGURE_ARGS=(
   --without-gpm
 
   # You will not be able to embed native WebKit browser sessions inside Emacs
-  # buffers. You will miss out on the ability to render complex HTML natively or
-  # use packages that rely on embedded web views.
+  # buffers. You will miss out on the ability to render complex HTML natively
+  # or use packages that rely on embedded web views.
   --without-xwidgets
 
   # --with-xdbe
@@ -660,9 +662,7 @@ CONFIGURE_ARGS=(
 
   # The LCMS2 library enables color management for image processing in Emacs,
   # allowing for accurate color rendering of images and fonts. If you work
-  # with images or high-quality graphics in Emacs (e.g., in Org-mode, dired
-  # with image previews, or using image-based formats), you may want to keep
-  # this enabled.
+  # with images in Emacs, you may want to keep this enabled.
   #
   # I enabled support for many image formats (JPEG, PNG, WebP). Without
   # LCMS2, Emacs cannot apply ICC color profiles. If you view images in Emacs,
@@ -733,13 +733,13 @@ CONFIGURE_ARGS=(
 
   # GSettings
   #
-  # What it does: GSettings is the configuration storage system for GNOME and
+  # What it does: GSettings is the configuration system used by GNOME and
   # GTK-based desktops.
   #
   # Why you want it: It allows Emacs to read system-wide settings like your
   # default monospace font, font rendering hints (antialiasing), and UI themes.
   #
-  # When to disable: Only disable this if you are building a strictly
+  # When to disable: Only disable if you are building a strictly
   # terminal-only Emacs (headless server) or if you want to avoid installing
   # glib dependencies. If you disable this on a desktop, Emacs will ignore your
   # system font configuration.
@@ -767,15 +767,14 @@ CONFIGURE_ARGS=(
   # than 2GB and want to reduce Emacs' binary size and potential overhead.
   # This option limits Emacs to handling files up to 2GB in size. If you're
   # not working with very large files, this might be a good option to reduce
-  # potential overhead and the complexity of Emacs when dealing with files
+  # the overhead and the complexity of Emacs when dealing with files
   # that could be impractical to open or edit within Emacs.
   # It may slightly reduce the size of the Emacs binary and improve
   # performance, but this benefit is minimal in most cases.
   #
   # --disable-largefile: I recommend removing this. The "overhead" of 64-bit
   # file offsets is non-existent on a 64-bit Arch system. Disabling this makes
-  # it impossible to open files larger than 2GB, which can be a significant
-  # limitation if you ever need to view large log files or database dumps.
+  # it impossible to open files larger than 2GB.
   # --disable-largefile
 )
 
@@ -844,7 +843,7 @@ run_build() {
   local current_cflags="$BASE_CFLAGS"
   local current_ldflags="$BASE_LDFLAGS"
 
-  if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+  if [[ "$USE_CLANG" -ne 0 ]]; then
     export CC=clang
     export CXX=clang++
     export AR=llvm-ar
@@ -872,26 +871,26 @@ run_build() {
   #
   # Benefits:
   # - Enables the linker plugin during Link Time Optimization (-flto).
-  # - Allows the compiler and linker to cooperate, performing optimizations across
-  # different C translation units.
-  # - Can yield a slightly faster Emacs binary due to aggressive inlining and dead
-  # code elimination across the entire C codebase.
+  # - Allows the compiler and linker to cooperate, performing optimizations
+  #   across different C translation units.
+  # - Can yield a slightly faster Emacs binary due to aggressive inlining and
+  #   dead code elimination across the entire C codebase.
   #
   # Tradeoffs:
-  # - Increases both memory usage and overall compilation time during the linking
-  # phase.
+  # - Increases both memory usage and overall compilation time during the
+  #   linking phase.
   # - Demands a compatible linker (such as ld.gold or lld) that is properly
   # configured to work with your GCC installation.
   # - It is mostly redundant. Modern versions of GCC automatically activate the
-  # linker plugin when you pass the -flto flag, so specifying it manually adds no
-  # extra value.
+  #   linker plugin when you pass the -flto flag, so specifying it manually adds
+  #   no extra value.
   #
   # 2. For compiling .el files to .eln files (Native Compilation)
   #
   # Benefits:
-  # - Practically zero. Emacs native compilation uses libgccjit to compile Emacs
-  # Lisp into independent shared libraries (.eln files) that are loaded
-  # dynamically at runtime.
+  # - Practically zero. Emacs native compilation uses libgccjit to compile
+  #   Emacs Lisp into independent shared libraries (.eln files) that are loaded
+  #   dynamically at runtime.
   # - Because there is no large-scale linking of multiple object files into a
   # single binary, whole-program optimization techniques do not apply here.
   #
@@ -899,9 +898,9 @@ run_build() {
   # - Introduces a high probability of build failures. The libgccjit environment
   # is delicate and sensitive to injected compiler and linker flags.
   # - Forcing linker plugins into the async native compilation threads can cause
-  # the generation of .eln files to crash or hang indefinitely.
-  # - It wastes system resources by adding unnecessary steps to the compilation of
-  # single-file shared objects.
+  #   the generation of .eln files to crash or hang indefinitely.
+  # - It wastes system resources by adding unnecessary steps to the compilation
+  #   of single-file shared objects.
   #
   # IMPORTANT: redundant if using -flto=auto (already implies plugin usage)
   #
@@ -960,7 +959,7 @@ run_build() {
     rm -fr "$FPROFILE_DIR"
     mkdir -p "$FPROFILE_DIR"
 
-    if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+    if [[ "$USE_CLANG" -ne 0 ]]; then
       # Clang concurrent build threads will overwrite each other's data unless
       # explicitly separated using %p (PID) and %m (Binary Signature).
       export LLVM_PROFILE_FILE="$FPROFILE_DIR/%p-%m.profraw"
@@ -1011,7 +1010,7 @@ run_build() {
     # generation. If the compiler driver does not see an -O flag during this
     # link invocation, it defaults to -O0.
     # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
-    if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+    if [[ "$USE_CLANG" -ne 0 ]]; then
       # Clang demands that we explicitly merge raw generated profile data before use
 
       # Why llvm-profdata is required
@@ -1061,8 +1060,8 @@ run_build() {
       # The Crash: GCC looks at the old profile data (which might say "this
       # program has 7 branches") and looks at the new conftest.c file (which
       # only has 1 branch). GCC panics, throws a coverage-mismatch error, and
-      # halts. Because the compiler halted, ./configure assumes your compiler is
-      # completely broken and throws the cannot compute suffix of executables:
+      # halts. Because the compiler halted, ./configure assumes your compiler
+      # is completely broken and throws the cannot compute suffix of executables:
       # cannot compile and link error.
       # Solution: -fprofile-correction -Wno-missing-profile
       # -Wno-error=coverage-mismatch
@@ -1073,7 +1072,7 @@ run_build() {
     fi
   else
     # Fallback for when PGO is completely disabled but LTO is still desired
-    if [[ "$ID" == "arch" && "$USE_CLANG" -ne 0 ]]; then
+    if [[ "$USE_CLANG" -ne 0 ]]; then
       export CFLAGS="$current_cflags"
       export LDFLAGS="$current_ldflags -O$CC_OPTIMIZE"
     else
@@ -1104,8 +1103,8 @@ run_build() {
     # step of "stripping" the binaries. Stripping refers to removing debugging
     # symbols and other information from the executable files, reducing their
     # size. This is usually done for production releases to make the binaries
-    # smaller and more efficient, since debugging symbols are typically not needed
-    # in a production environment.
+    # smaller and more efficient, since debugging symbols are typically not
+    # needed in a production environment.
     make install-strip
   fi
 
@@ -1152,12 +1151,11 @@ main() {
   echo
 
   read -r -p "Compile Emacs? [y,n] " ANSWER
+  [[ "$ANSWER" != "y" ]] && exit 1
 
   git clean -fxd
   git reset --hard HEAD
   ./autogen.sh
-
-  [[ "$ANSWER" != "y" ]] && exit 1
 
   if [[ $HANDLE_FPROFILE -ne 0 ]]; then
     echo "Building with profile generation..."
@@ -1203,10 +1201,29 @@ main() {
       make check || true
     fi
 
+    if [[ "$USE_CLANG" -ne 0 ]]; then
+      profile_pattern='*.profraw'
+    else
+      profile_pattern='*.gcda'
+    fi
+
+    if [[ ! -d "$FPROFILE_DIR" ]] \
+      || ! find "$FPROFILE_DIR" -type f -name "$profile_pattern" \
+        ! -name '*conftest*' -print -quit | grep -q .; then
+      echo "Error: No PGO data found in $FPROFILE_DIR" >&2
+      exit 1
+    fi
+
+    echo "[PGO PROFILE DIR] $FPROFILE_DIR"
+    echo "[PGO PROFILE FILES] $(find "$FPROFILE_DIR" -type f \
+      -name "$profile_pattern" ! -name '*conftest*' | wc -l)"
+
     echo "-------------------------------------------------------------"
     echo "Make distclean"
     echo "-------------------------------------------------------------"
     make distclean
+    git clean -fxd
+    git reset --hard HEAD
 
     echo "Building with profile use..."
     run_build "fprofile-use" 1
