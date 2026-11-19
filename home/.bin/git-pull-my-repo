@@ -39,6 +39,9 @@ error_handler() {
 trap "error_handler" ERR
 set -o errtrace
 
+# Update the local repository's record of the remote default branch
+git remote set-head origin --auto >/dev/null
+
 if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null | cut -d/ -f1)" 2>/dev/null | grep -q 'jamescherti/'; then
   # Fetch new commits and prune remote-tracking branches deleted on origin.
   #
@@ -47,9 +50,6 @@ if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 
   # - --prune removes remote-tracking branches whose corresponding branches were
   #   deleted on origin.
   git fetch --prune origin
-
-  # Update the local repository's record of the remote default branch
-  git remote set-head origin --auto
 
   # Checkout to the default branch
   git checkout-default-branch
