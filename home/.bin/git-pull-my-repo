@@ -39,6 +39,30 @@ error_handler() {
 trap "error_handler" ERR
 set -o errtrace
 
+delete_local_branches() {
+  if ! git remote get-url origin >/dev/null 2>&1; then
+    return
+  fi
+
+  # We have already git fetch --prune pruned origin
+  # git fetch --prune origin || exit 1
+
+  current_branch=$(git branch --show-current)
+
+  while IFS= read -r branch; do
+    # Do not delete the currently checked-out branch.
+    if [[ "$branch" == "$current_branch" ]]; then
+      continue
+    fi
+
+    # Delete local branches that do not exist on origin.
+    if ! git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+      # git branch -D -- "$branch"
+      echo "delete $branch"
+    fi
+  done < <(git for-each-ref --format='%(refname:lstrip=2)' refs/heads)
+}
+
 # Update the local repository's record of the remote default branch
 git remote set-head origin --auto >/dev/null
 
@@ -63,4 +87,7 @@ if git remote get-url "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 
   # Stash entries are saved snapshots of changes set aside with git stash.
   # Remove all of them from this repository.
   git stash clear
+
+  # Delete local branches
+  delete_local_branches
 fi
