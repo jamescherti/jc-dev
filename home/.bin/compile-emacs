@@ -66,6 +66,13 @@ EMACS_INSTALL_PREFIX_APPEND_OPERATING_SYSTEM=1
 #   $EMACS_INSTALL_PREFIX/debian/branch-emacs-30
 EMACS_INSTALL_PREFIX_APPEND_EMACS_BRANCH=1
 
+# Builds .eln native code files for Emacs's bundled .el/.elc Lisp files as part
+# of the build step. Shifts compilation CPU and time cost upfront into your
+# build step instead of having background compilation subprocesses run while you
+# use Emacs.
+# TODO remove?
+export NATIVE_FULL_AOT=1
+
 # Performance-focused build flags for compiling Emacs (or other large C
 # projects). These settings are intended to maximize runtime and startup
 # performance, with no regard for debugging convenience or security hardening.
