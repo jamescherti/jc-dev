@@ -813,6 +813,9 @@ ITEMS is the flattened list of Imenu candidates."
 
 ;;; auto-mode-alist
 
+;; TODO lightemacs?
+(add-to-list 'auto-mode-alist '("/Makefile\\.in\\'" . makefile-gmake-mode))
+
 (nconc auto-mode-alist
        '(;; conf-mode
          ;; ("\\.profile\\'" . conf-mode)  ; firejail profiles
