@@ -99,14 +99,14 @@ export NATIVE_FULL_AOT=1
 export BASE_CFLAGS="-O$CC_OPTIMIZE -g0 -pipe -march=native -mtune=native"
 
 # Stable
-export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
+# export BASE_CFLAGS="$BASE_CFLAGS -fno-omit-frame-pointer"
 
 # Small improvement in some C functions
 # This is the most plausible for improving execution performance compared with
 # -fgraphite-identity -floop-nest-optimize -fdevirtualize-at-ltrans -fipa-pta.
 # Not recommended, according to Emacs devs, but I've never had any issues with
 # it.
-# export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
+export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
 
 # if [[ $ID = arch ]]; then
 #   TARGET_BRANCH="emacs-30"
@@ -1155,7 +1155,9 @@ configure_aot() {
 
   native_comp_eval="(setq native-comp-speed 2"
   native_comp_eval+=' native-comp-compiler-options'
-  native_comp_eval+=' (list "-O2" "-g0" "-fno-omit-frame-pointer"'
+  # native_comp_eval+=' (list "-O2" "-g0"'
+  # native_comp_eval+=' (list "-O2" "-g0" "-fno-omit-frame-pointer"'
+  native_comp_eval+=' (list "-O2" "-g0" "-fomit-frame-pointer"'
   native_comp_eval+=' "-fno-finite-math-only"'
   native_comp_eval+=" \"-march=$cpu_architecture\""
   native_comp_eval+=" \"-mtune=$cpu_architecture\")"
