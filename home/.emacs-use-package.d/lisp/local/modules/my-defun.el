@@ -423,10 +423,7 @@ FUNC is the function to execute when the buffer passes `my-valid-file-buffer-p'.
 
 ;;; Text editing buffers
 
-(defvar text-editing-modes '(conf-mode
-                             prog-mode
-                             text-mode
-                             diff-mode)
+(defvar text-editing-modes lightemacs-text-editing-modes
   "List of text editing modes.")
 
 (defun add-functions-to-mode-hooks (modes functions &optional only-if-file)
@@ -1203,6 +1200,31 @@ current tab. If none exists, create a new tab. Select the resulting window."
    ;; Fallback for numbers or other types
    (t
     (prin1-to-string val))))
+
+;;; recenter if out of view
+
+;; README:
+;; - `lightemacs-recenter-if-out-of-view` (macro): Execute BODY and recenter if
+;; point is outside the original window bounds.
+;;
+;; (defmacro lightemacs-recenter-if-out-of-view (&rest body)
+;;   "Execute BODY and recenter if point is off-screen.
+;;
+;; This checks if the point is visible in the selected window after
+;; execution. If the buffer changes or the window is deleted,
+;; recentering is skipped."
+;;   (declare (indent 0) (debug t))
+;;   (let ((win-sym (make-symbol "start-window")))
+;;     `(let ((,win-sym (selected-window)))
+;;        ;; use prog1 to return the result of body
+;;        (progn ,@body)
+;;        (when (and (>= scroll-conservatively 101)
+;;                   (window-live-p ,win-sym)
+;;                   (eq (current-buffer) (window-buffer ,win-sym))
+;;                   ;; pos-visible-in-window-p handles partial lines and
+;;                   ;; redisplay logic more robustly than manual arithmetic.
+;;                   (not (pos-visible-in-window-p (point) ,win-sym)))
+;;          (recenter)))))
 
 ;;; Provide
 (provide 'my-defun)

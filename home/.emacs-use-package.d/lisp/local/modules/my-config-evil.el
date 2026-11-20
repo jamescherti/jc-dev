@@ -852,25 +852,26 @@ This enhancement prevents the cursor from moving."
   "Improved `evil-goto-definition` to open folds correctly in outline mode.
 When IMENU-ONLY is nil it only uses imenu."
   (require 'xref)
-  (when (fboundp 'xref-push-marker-stack)
-    (let ((previous-point (point))
-          (previous-point-marker (point-marker)))
-      ;; Try imenu first
-      (when (member 'evil-goto-definition-imenu evil-goto-definition-functions)
-        (let ((evil-goto-definition-functions '(evil-goto-definition-imenu)))
-          (evil-goto-definition))
+  (if (fboundp 'xref-push-marker-stack)
+      (let ((previous-point (point))
+            (previous-point-marker (point-marker)))
+        ;; Try imenu first
+        (when (member 'evil-goto-definition-imenu evil-goto-definition-functions)
+          (let ((evil-goto-definition-functions '(evil-goto-definition-imenu)))
+            (evil-goto-definition))
 
-        (when (not (eq previous-point (point)))
-          ;; Add it to the stack because it does not do it by default
-          (xref-push-marker-stack previous-point-marker)
-          (setq imenu-only t)))
+          (when (not (eq previous-point (point)))
+            ;; Add it to the stack because it does not do it by default
+            (xref-push-marker-stack previous-point-marker)
+            (setq imenu-only t)))
 
-      ;; Try the others
-      (unless imenu-only
-        (let ((evil-goto-definition-functions
-               (remq 'evil-goto-definition-imenu
-                     evil-goto-definition-functions)))
-          (evil-goto-definition))))))
+        ;; Try the others
+        (unless imenu-only
+          (let ((evil-goto-definition-functions
+                 (remq 'evil-goto-definition-imenu
+                       evil-goto-definition-functions)))
+            (evil-goto-definition))))
+    (error "Undefined: `xref-push-marker-stack'")))
 
 (defun eviljump-goto-definition (&optional force-all)
   "Find definition and recenter the window.
@@ -904,7 +905,8 @@ When FORCE-ALL is non-nil, use all functions."
 (defun eviljump-goto-definition-force ()
   "Go to definition."
   (interactive)
-  (eviljump-goto-definition t))
+  ;; (eviljump-goto-definition t)
+  (evil-goto-definition))
 
 (evil-define-key 'normal 'global
   (kbd "gd") 'eviljump-goto-definition
