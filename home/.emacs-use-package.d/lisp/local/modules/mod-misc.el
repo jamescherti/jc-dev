@@ -3139,6 +3139,13 @@ ARGS - the arguments passed to the original function"
 ;; instantly with zero background overhead.
 ;; (setq consult-preview-key nil)
 
+;;; rg: --no-messages
+
+(with-eval-after-load 'le-consult
+  (unless (member "--no-messages" (split-string consult-ripgrep-args))
+    (setq consult-ripgrep-args
+          (concat consult-ripgrep-args " --no-messages"))))
+
 ;;; battery angel
 
 (defvar battery-angel--manage-compile-angel nil)
