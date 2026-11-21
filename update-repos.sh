@@ -245,7 +245,7 @@ main() {
     ln -sf ~/.emacs-packages ~/.emacs-repos/emacs-packages
   fi
 
-  if ! [[ -L ~/src/emacs ~/.emacs-repos/my-packages ]]; then
+  if ! [[ -L ~/.emacs-repos/my-packages ]]; then
     ln -sf ~/src/emacs ~/.emacs-repos/my-packages
   fi
 
