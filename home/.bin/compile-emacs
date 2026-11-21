@@ -1090,7 +1090,15 @@ run_build() {
       # optimized without the profile feedback rather than automatically treated
       # as cold code.
       # https://gcc.gnu.org/onlinedocs/gcc-14.3.0/gcc/Optimize-Options.html
-      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_DIR -fprofile-partial-training -Wno-missing-profile -Wno-error=coverage-mismatch"
+      export CFLAGS="$current_cflags -flto=auto -fprofile-use=$FPROFILE_DIR -fprofile-partial-training"
+      # Removed: -Wno-missing-profile -Wno-error=coverage-mismatch
+
+      # Reject incompatible PGO profiles.
+      CFLAGS+=" -Werror=coverage-mismatch"
+
+      # Missing profiles are acceptable for code not exercised during training.
+      CFLAGS+=" -Wno-missing-profile"
+
       export LDFLAGS="$current_ldflags -flto=auto -fprofile-use=$FPROFILE_DIR -O$CC_OPTIMIZE"
     fi
   else
