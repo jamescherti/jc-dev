@@ -22,8 +22,9 @@
 
 ;;; Commentary:
 
-
 ;;; Code:
+
+(require 'lightemacs)
 
 ;; (defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
 ;; (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
