@@ -1140,6 +1140,11 @@ run_build() {
     make install-strip \
       "BYTE_COMPILE_EXTRA_FLAGS=$BYTE_COMPILE_EXTRA_FLAGS"
   fi
+
+  if [[ "$phase" == "fprofile-use" ]]; then
+    # Cleanup
+    rm -fr "$FPROFILE_DIR"
+  fi
 }
 
 configure_aot() {

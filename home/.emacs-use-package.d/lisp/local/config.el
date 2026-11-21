@@ -27,7 +27,7 @@
 ;;; Debug on error
 
 (setq debug-on-error t)
-(setq comp-libgccjit-reproducer t)
+;; (setq comp-libgccjit-reproducer t)
 
 ;;; Profiling
 
@@ -955,10 +955,7 @@ subsequent GCC invocations."
 
                            le-quick-sdcv
 
-                           le-outline
-                           le-outline-indent
-                           le-hideshow
-                           le-treesit-fold
+                           le-group-code-folding
 
                            ;; xclip (Emacs handles the clipboard natively with
                            ;; your (setq select-enable-clipboard t) setting; you
@@ -1023,8 +1020,8 @@ subsequent GCC invocations."
 
                            ;; le-yasnippet-snippets
 
-                           ;; le-markdown-mode
-                           le-maybe-markdown-ts
+                           le-markdown-mode
+                           ;; le-maybe-markdown-ts
 
                            le-maybe-yaml-ts
 
@@ -1148,6 +1145,8 @@ subsequent GCC invocations."
 (add-hook 'lightemacs-post-early-init-hook #'lightemacs-user-post-early-init)
 
 ;;; Package defaults
+
+(setq treesit-fold-prefer-outline t)
 
 (setq gcsentinel-low-cons-threshold minimal-emacs-gc-cons-threshold)
 (setq gcsentinel-high-cons-threshold (* 1200 1024 1024))

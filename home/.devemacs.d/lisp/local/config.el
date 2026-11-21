@@ -91,7 +91,6 @@
                            le-stripspace
 
                            le-markdown-mode
-                           ;; le-maybe-markdown-ts
                            le-maybe-yaml-ts
 
                            ;; le-persist-text-scale

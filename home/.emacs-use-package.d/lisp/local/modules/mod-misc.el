@@ -3139,6 +3139,48 @@ ARGS - the arguments passed to the original function"
 ;; instantly with zero background overhead.
 ;; (setq consult-preview-key nil)
 
+;;; Emacs bug: `markdown-ts-mode'
+
+;; ;; Bug 1
+;; ;; With markup hidden, trailing spaces in an ATX heading are invisible,
+;; ;; so pressing SPC at the end of the heading appears to do nothing.
+;; ;; Show those spaces while editing so the cursor visibly advances.
+;; (defun my-markdown-ts-show-heading-spaces (node &rest _args)
+;;   "Show trailing spaces on heading NODE while editing.
+;; Ignore the remaining fontification arguments in _ARGS."
+;;   (when (and markdown-ts-hide-markup (not (bound-and-true-p view-mode)))
+;;     (save-excursion
+;;       (goto-char (treesit-node-start node))
+;;       (end-of-line)
+;;       (let ((line-end (point)))
+;;         (skip-chars-backward " \t" (line-beginning-position))
+;;         (remove-text-properties (point) line-end '(invisible nil))))))
+;;
+;; (with-eval-after-load 'markdown-ts-mode
+;;   (advice-add 'markdown-ts--fontify-atx-heading :after
+;;               #'my-markdown-ts-show-heading-spaces))
+;;
+;; ;; Bug 2
+;; ;; The ATX heading formatter skips the last character of the node because
+;; ;; it assumes the heading ends in a newline.  At the end of a buffer
+;; ;; without a final newline, apply the heading face to the skipped character.
+;; (defun my-markdown-ts-fontify-heading-end (node &rest _args)
+;;   "Apply the heading face to the last character of an ATX heading NODE.
+;; Ignore the additional fontification arguments in _ARGS."
+;;   (let ((end (treesit-node-end node)))
+;;     (when (and (> end (treesit-node-start node))
+;;                (not (eq (char-before end) ?\n)))
+;;       (let* ((marker (treesit-node-child node 0))
+;;              (text (treesit-node-text marker t)))
+;;         (when (string-match "#+" text)
+;;           (let* ((level (- (match-end 0) (match-beginning 0)))
+;;                  (face (intern (format "markdown-ts-heading-%d" level))))
+;;             (font-lock-append-text-property (1- end) end 'face face)))))))
+;;
+;; (with-eval-after-load 'markdown-ts-mode
+;;   (advice-add 'markdown-ts--fontify-atx-heading :after
+;;               #'my-markdown-ts-fontify-heading-end))
+
 ;;; rg: --no-messages
 
 (with-eval-after-load 'consult
