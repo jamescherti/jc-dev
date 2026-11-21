@@ -3141,7 +3141,7 @@ ARGS - the arguments passed to the original function"
 
 ;;; rg: --no-messages
 
-(with-eval-after-load 'le-consult
+(with-eval-after-load 'consult
   (unless (member "--no-messages" (split-string consult-ripgrep-args))
     (setq consult-ripgrep-args
           (concat consult-ripgrep-args " --no-messages"))))

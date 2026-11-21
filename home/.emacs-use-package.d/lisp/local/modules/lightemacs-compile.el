@@ -103,20 +103,20 @@ If LOADED-ONLY is non-nil, return only the files that are currently loaded."
         (push early-init all-el-files)))
 
     ;; Collect files from modules directory
-    (when (and (boundp 'lightemacs-modules-directory)
-               (stringp lightemacs-modules-directory)
-               (file-directory-p lightemacs-modules-directory))
+    (when (and (boundp 'lightemacs-builtin-modules-directory)
+               (stringp lightemacs-builtin-modules-directory)
+               (file-directory-p lightemacs-builtin-modules-directory))
       (setq all-el-files
             (append all-el-files
-                    (lightemacs-find-el-files lightemacs-modules-directory))))
+                    (lightemacs-find-el-files lightemacs-builtin-modules-directory))))
 
     ;; Collect files from local directory
-    (when (and (boundp 'lightemacs-local-directory)
-               (stringp lightemacs-local-directory)
-               (file-directory-p lightemacs-local-directory))
+    (when (and (boundp 'lightemacs-local-lisp-directory)
+               (stringp lightemacs-local-lisp-directory)
+               (file-directory-p lightemacs-local-lisp-directory))
       (setq all-el-files
             (append all-el-files
-                    (lightemacs-find-el-files lightemacs-local-directory))))
+                    (lightemacs-find-el-files lightemacs-local-lisp-directory))))
 
     (if loaded-only
         (let ((loaded-hash (make-hash-table :test 'equal))
@@ -246,15 +246,15 @@ BASE-PATH is the base path of the module without its file extension."
  ((eq lightemacs-package-manager 'straight)
   (lightemacs--compile-module-maybe
    (expand-file-name "le-core-pm-straight"
-                     lightemacs-core-directory)))
+                     lightemacs-builtin-lisp-directory)))
  ((eq lightemacs-package-manager 'elpaca)
   (lightemacs--compile-module-maybe
    (expand-file-name "le-core-pm-elpaca"
-                     lightemacs-core-directory)))
+                     lightemacs-builtin-lisp-directory)))
  ((eq lightemacs-package-manager 'builtin-package)
   (lightemacs--compile-module-maybe
    (expand-file-name "le-core-pm-use-package"
-                     lightemacs-core-directory))))
+                     lightemacs-builtin-lisp-directory))))
 
 (let ((init-files '("early-init"
                     "init")))
@@ -272,7 +272,7 @@ BASE-PATH is the base path of the module without its file extension."
                       "lightemacs"
                       "lightemacs-module")))
   (dolist (module core-modules)
-    (let ((base-path (expand-file-name module lightemacs-core-directory)))
+    (let ((base-path (expand-file-name module lightemacs-builtin-lisp-directory)))
       (lightemacs--compile-module-maybe base-path))))
 
 (defun lightemacs-legacy-module-load (modules)
@@ -286,7 +286,7 @@ is not added to the loaded list."
                (native-comp-available-p))
       (require 'comp nil t)))
 
-  (let ((priority-path (cons lightemacs-modules-directory
+  (let ((priority-path (cons lightemacs-builtin-modules-directory
                              (cons lightemacs-local-modules-directory
                                    load-path))))
     (dolist (feature-symbol modules)
