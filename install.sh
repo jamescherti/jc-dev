@@ -340,17 +340,11 @@ copy_unified_files() {
 }
 
 main() {
-  # shellcheck disable=SC1091
-  if [[ "${OS_ID:-}" = "" ]]; then
-    if command -v osid &>/dev/null; then
-      OS_ID=$(osid)
-    else
-      OS_ID=$(
-        # shellcheck disable=SC1091
-        [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
-        printf '%s\n' "${ID:-unknown}"
-      )
-    fi
+  if command -v osid &>/dev/null; then
+    OS_ID=$(osid)
+  else
+    echo "Error: osid is required. Install it or ensure it is in your PATH." >&2
+    exit 1
   fi
 
   init

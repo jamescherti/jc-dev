@@ -2,17 +2,12 @@
 
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
 
-# shellcheck disable=SC1091
-if [[ "${OS_ID:-}" = "" ]]; then
-  if command -v osid &>/dev/null; then
-    OS_ID=$(osid)
-  else
-    OS_ID=$(
-      # shellcheck disable=SC1091
-      [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
-      printf '%s\n' "${ID:-unknown}"
-    )
-  fi
+OS_ID=unknown
+if command -v osid &>/dev/null; then
+  OS_ID=$(osid)
+else
+  echo "Error: osid is required. Install it or ensure it is in your PATH." >&2
+  exit 1
 fi
 
 # devemacs can change RUN_EMACS_BIN

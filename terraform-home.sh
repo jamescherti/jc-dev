@@ -412,15 +412,12 @@ main() {
   # shellcheck disable=SC1091
   source .jc-dev.inc.sh
 
-  # shellcheck disable=SC1091
+  OS_ID=unknown
   if command -v osid &>/dev/null; then
     OS_ID=$(osid)
   else
-    OS_ID=$(
-      # shellcheck disable=SC1091
-      [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
-      printf '%s\n' "${ID:-unknown}"
-    )
+    echo "Error: osid is required. Install it or ensure it is in your PATH." >&2
+    exit 1
   fi
 
   clean-fly-files "$@"

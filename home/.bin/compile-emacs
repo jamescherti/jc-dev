@@ -21,15 +21,12 @@
 
 set -euo pipefail
 
-# shellcheck disable=SC1091
+OS_ID=unknown
 if command -v osid &>/dev/null; then
-  ID=$(osid)
+  OS_ID=$(osid)
 else
-  ID=$(
-    # shellcheck disable=SC1091
-    [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
-    printf '%s\n' "${ID:-unknown}"
-  )
+  echo "Error: osid is required. Install it or ensure it is in your PATH." >&2
+  exit 1
 fi
 
 # 1 to automatically handle the 2-step process: generate profile, then use it
