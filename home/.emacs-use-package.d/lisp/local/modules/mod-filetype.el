@@ -224,7 +224,7 @@ LANG is the tree-sitter language symbol to check for availability."
               (setq-local dabbrev-case-fold-search t
                           case-fold-search t)))
 
-(setq evil-ex-search-case 'sensitive)
+(setq evil-ex-search-case 'smart)
 
 ;;; Vimrc mode
 

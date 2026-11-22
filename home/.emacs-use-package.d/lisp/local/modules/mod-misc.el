@@ -1896,27 +1896,27 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; Org + vertico preview error: Debugger entered--Lisp error: (error "rx '**'
 ;; range error")
 
-;;; Other settings
+;;; Mac
 
-(setq
- ;; Control ^ = Control
+(setq ;; Control ^ = Control
  ;; Command = Fn/Globe
  ;; Fn/Globe = Command
  mac-command-modifier 'control
- mac-option-modifier 'meta
+ mac-option-modifier 'meta)
+
+;;; ibuffer
+
+(setq ibuffer-modified-char ?\s)
+
+(setq
 
  ;;; ibuffer
-
- ibuffer-filter-group-name-face '(:inherit (success bold))
- ;; ibuffer-hidden-filter-groups nil
 
  ;; The number of hours before a buffer is considered "old".
  ibuffer-old-time 5
 
  ;; If non-nil, then forward and backwards movement commands cycle.
- ibuffer-movement-cycle nil
-
- ibuffer-show-empty-filter-groups nil
+ ibuffer-movement-cycle lightemacs-cycle
 
  ;; If non-nil, don't ask for confirmation of "dangerous" operations.
  ibuffer-expert t
@@ -1935,35 +1935,51 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 (setq ibuffer-default-display-maybe-show-predicates t)
 
+(setq ibuffer-formats
+      '((mark modified read-only " "
+              (name 55 55 :left :nil) " "
+              (size-h 9 -1 :right) " "
+              (mode 16 16 :left :elide) " "
+              filename-and-process)))
+
+(add-hook 'ibuffer-hook
+          (lambda ()
+            ;; For some reason, ibuffer-truncate-lines doesn't work (TODO)
+            (wizard-hide-truncation-and-continuation-indicators)
+            ;; (toggle-truncate-lines 1)
+            ))
+
+(add-hook 'ibuffer-mode-hook
+          (lambda ()
+            (require 'ibuf-ext)
+            (when (fboundp 'ibuffer-switch-to-saved-filter-groups)
+              (ibuffer-switch-to-saved-filter-groups "default"))))
+
+(defun my-ibuffer-apply-default-groups ()
+  "Apply the saved default filter groups to the current Ibuffer."
+  (ibuffer-switch-to-saved-filter-groups "default"))
+(add-hook 'ibuffer-mode-hook #'my-ibuffer-apply-default-groups)
+
 (with-eval-after-load 'ibuffer
-  (progn
-    ;; Add size
-    (define-ibuffer-column size-h
-      (:name "Size" :inline t)
-      (cond
-       ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
-       ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
-       (t (format "%8d" (buffer-size)))))
+  ;; Close the [ Default ] fold
+  (defun my-ibuffer-collapse-default (name)
+    "Collapse the Default group after loading the saved layout NAME."
+    (when (equal name "default")
+      (add-to-list 'ibuffer-hidden-filter-groups "Default")
+      (ibuffer-update nil t)))
+  (with-eval-after-load 'ibuf-ext
+    (advice-remove 'ibuffer-switch-to-saved-filter-groups
+                   #'my-ibuffer-collapse-other)
+    (advice-add 'ibuffer-switch-to-saved-filter-groups :after
+                #'my-ibuffer-collapse-default))
 
-    (setq ibuffer-formats
-          '((mark modified read-only " "
-                  (name 55 55 :left :nil) " "
-                  (size-h 9 -1 :right) " "
-                  (mode 16 16 :left :elide) " "
-                  filename-and-process))))
-
-  (add-hook 'ibuffer-hook
-            (lambda ()
-              ;; For some reason, ibuffer-truncate-lines doesn't work (TODO)
-              (wizard-hide-truncation-and-continuation-indicators)
-              ;; (toggle-truncate-lines 1)
-              ))
-
-  (add-hook 'ibuffer-mode-hook
-            (lambda ()
-              (require 'ibuf-ext)
-              (when (fboundp 'ibuffer-switch-to-saved-filter-groups)
-                (ibuffer-switch-to-saved-filter-groups "default")))))
+  ;; Add size
+  (define-ibuffer-column size-h
+    (:name "Size" :inline t)
+    (cond
+     ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+     ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+     (t (format "%8d" (buffer-size))))))
 
 ;;; saveplace
 

@@ -568,8 +568,6 @@ ORIG-FUN is the function and ARGS the arguments."
   (kbd "<leader>sre") 'my-bash-stdops-sre
   (kbd "<leader>ev") 'tab-bar-switch-to-tab)
 
-(evil-define-key '(visual normal insert) 'global (kbd "M-p") 'project-switch-project)
-
 ;; Buggy
 ;; (evil-define-key '(visual normal insert) 'global (kbd "M-p") 'my-project-switch-project)
 
@@ -2269,6 +2267,7 @@ Accepts any arguments so it can be used as advice or a hook."
 (require 'my-evil-intercept)
 
 (evil-define-key '(normal insert visual) my-intercept-mode-map
+  (kbd "M-p") 'project-switch-project
   (kbd "M-RET") 'my-shell-pop
   (kbd "M-<enter>") 'my-shell-pop
   (kbd "M-<return>") 'my-shell-pop
