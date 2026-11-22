@@ -741,8 +741,8 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; testing: consult
 
-;; (add-hook 'embark-collect-mode-hook
-;;           (lambda () (setq truncate-lines nil)))
+(add-hook 'embark-collect-mode-hook
+          (lambda () (setq truncate-lines nil)))
 
 ;;; testing
 
@@ -1936,7 +1936,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 (setq ibuffer-default-display-maybe-show-predicates t)
 
 (with-eval-after-load 'ibuffer
-
   (progn
     ;; Add size
     (define-ibuffer-column size-h
@@ -1964,129 +1963,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
             (lambda ()
               (require 'ibuf-ext)
               (when (fboundp 'ibuffer-switch-to-saved-filter-groups)
-                (ibuffer-switch-to-saved-filter-groups "default"))))
-
-  (setq ibuffer-saved-filter-groups
-        (quote (("default"
-
-                 ("Programming" (and (derived-mode . prog-mode)
-                                     (not (starred-name))))
-
-                 ("Text" (and (derived-mode . text-mode)
-                              (not (starred-name))))
-
-                 ("Org" (or (name . "^\\*Calendar\\*$")
-                            (name . "^\\*Org Agenda")
-                            (name . "^ \\*Agenda")
-                            (mode . org-mode)
-                            (name . "^diary$")
-                            (mode . muse-mode)
-                            (mode . org-mode)
-                            (mode . org-agenda-mode)))
-
-                 ("Emacs" (or
-                           (name . "^\\*scratch\\*$")
-                           (name . "^\\*Messages\\*$")
-                           (name . "^\\*Warnings\\*$")
-                           (name . "^\\*Compile-Log\\*$")
-                           (name . "^\\*Async-native-compile-log\\*$")
-                           (name . "^\\*dashboard\\*$")
-                           (name . "^\\*compilation\\*$")
-                           (name . "^\\*Backtrace\\*$")
-                           (name . "^\\*Packages\\*$")
-                           (name . "^\\*Customize\\*$")
-                           (name . "^\\*\\(Echo\\|Minibuf\\)")))
-
-                 ("Help" (or (name . "^\\*Help\\*$")
-                             (name . "^\\*Apropos\\*$")
-                             (name . "^\\*info\\*$")
-                             (mode . Man-mode)
-                             (mode . woman-mode)))
-
-                 ("Repl" (or (mode . gnuplot-comint-mode)
-                             (mode . inferior-emacs-lisp-mode)
-                             (mode . inferior-python-mode)))
-
-                 ("VC" (or (mode . diff-mode)
-                           (derived-mode . log-view-mode)))
-
-                 ("Starred" (starred-name))
-
-                 ("Term" (or (mode . term-mode)
-                             (mode . shell-mode)
-                             (mode . vterm-mode)
-                             (mode . compilation-mode)
-                             (mode . eshell-mode)))
-
-                 ("Dired" (or (mode . dired-mode)
-                              (mode . sr-mode)))
-
-                 ("Other" (name . ".*"))
-
-                 ;; (add-hook 'ibuffer-mode-hook
-                 ;;           (lambda ()
-                 ;;             (ibuffer-switch-to-saved-filter-groups "custom")
-                 ;;             (setq ibuffer-hidden-filter-groups nil)))
-
-                 ;; ("Conf" (or (mode . yaml-mode)
-                 ;;             (mode . yaml-ts-mode)
-                 ;;             (mode . conf-mode)))
-
-                 ;; ("Coq" (or
-                 ;;         (mode . coq-mode)
-                 ;;         (name . "\\<coq\\>")
-                 ;;         (name . "_CoqProject")))
-                 ;; ("code" (or (mode . emacs-lisp-mode)
-                 ;;             (mode . yaml-mode)
-                 ;;             (mode . yaml-ts-mode)
-                 ;;             (mode . cperl-mode)
-                 ;;             (mode . c-mode)
-                 ;;             (mode . java-mode)
-                 ;;             (mode . idl-mode)
-                 ;;             (mode . web-mode)
-                 ;;             (mode . lisp-mode)
-                 ;;             (mode . js2-mode)
-                 ;;             (mode . c++-mode)
-                 ;;             (mode . lua-mode)
-                 ;;             (mode . cmake-mode)
-                 ;;             (mode . ruby-mode)
-                 ;;             (mode . css-mode)
-                 ;;             (mode . objc-mode)
-                 ;;             (mode . sql-mode)
-                 ;;             (mode . python-mode)
-                 ;;             (mode . php-mode)
-                 ;;             (mode . sh-mode)
-                 ;;             (mode . json-mode)
-                 ;;             (mode . scala-mode)
-                 ;;             (mode . go-mode)
-                 ;;             (mode . erlang-mode)))
-
-                 ;; ("Unsaved" (modified))
-                 ;; ("erc" (mode . erc-mode))
-                 ;; ("Browser" (or (mode . eww-mode)
-                 ;;                (mode . xwidget-webkit-mode)))
-                 ;; ("Mail" (or (mode . mail-mode)
-                 ;;             (mode . message-mode)
-                 ;;             (derived-mode . gnus-mode)))
-                 ;; ("Dict" (or (mode . fanyi-mode)
-                 ;;             (mode . dictionary-mode)))
-                 ;; ("Magit" (or (mode . magit-repolist-mode)
-                 ;;              (mode . magit-submodule-list-mode)
-                 ;;              (mode . git-rebase-mode)
-                 ;;              (derived-mode . magit-section-mode)
-                 ;;              (mode . vc-annotate-mode)))
-                 ;; ("IRC" (or (mode . rcirc-mode)
-                 ;;            (mode . erc-mode)))
-
-                 ;; ("gnus" (or (mode . message-mode)
-                 ;;             (mode . bbdb-mode)
-                 ;;             (mode . mail-mode)
-                 ;;             (mode . gnus-group-mode)
-                 ;;             (mode . gnus-summary-mode)
-                 ;;             (mode . gnus-article-mode)
-                 ;;             (name . "^\\.bbdb$")
-                 ;;             (name . "^\\.newsrc-dribble")))
-                 )))))
+                (ibuffer-switch-to-saved-filter-groups "default")))))
 
 ;;; saveplace
 
