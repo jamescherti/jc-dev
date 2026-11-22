@@ -413,7 +413,15 @@ main() {
   source .jc-dev.inc.sh
 
   # shellcheck disable=SC1091
-  source /etc/os-release
+  if command -v osid &>/dev/null; then
+    OS_ID=$(osid)
+  else
+    OS_ID=$(
+      # shellcheck disable=SC1091
+      [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
+      printf '%s\n' "${ID:-unknown}"
+    )
+  fi
 
   clean-fly-files "$@"
 

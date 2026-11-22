@@ -342,11 +342,15 @@ copy_unified_files() {
 main() {
   # shellcheck disable=SC1091
   if [[ "${OS_ID:-}" = "" ]]; then
-    OS_ID=$(
-      # shellcheck disable=SC1091
-      [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
-      echo "${ID:-unknown}"
-    )
+    if command -v osid &>/dev/null; then
+      OS_ID=$(osid)
+    else
+      OS_ID=$(
+        # shellcheck disable=SC1091
+        [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
+        printf '%s\n' "${ID:-unknown}"
+      )
+    fi
   fi
 
   init

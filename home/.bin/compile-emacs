@@ -22,10 +22,14 @@
 set -euo pipefail
 
 # shellcheck disable=SC1091
-ID=unknown
-if [[ -f /etc/os-release ]]; then
-  # shellcheck disable=SC1091
-  source /etc/os-release
+if command -v osid &>/dev/null; then
+  ID=$(osid)
+else
+  ID=$(
+    # shellcheck disable=SC1091
+    [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
+    printf '%s\n' "${ID:-unknown}"
+  )
 fi
 
 # 1 to automatically handle the 2-step process: generate profile, then use it
@@ -108,7 +112,7 @@ export BASE_CFLAGS="-O$CC_OPTIMIZE -g0 -pipe -march=native -mtune=native"
 # it.
 export BASE_CFLAGS="$BASE_CFLAGS -fomit-frame-pointer"
 
-# if [[ $ID = arch ]]; then
+# if [[ $ID = archlinux ]]; then
 #   TARGET_BRANCH="emacs-30"
 #   TARGET_TAG="emacs-30.2"
 #   CURRENT_BRANCH=$(git branch --show-current)
@@ -401,7 +405,7 @@ export BASE_LDFLAGS="$BASE_LDFLAGS -Wl,-z,now -Wl,-z,relro"
 #
 # Again: huge compile-time cost, minimal likely runtime gain, particularly poor
 # fit for native-comp generated code. This belongs in HPC workloads, not Emacs.
-# if [[ "$ID" != "arch" || "$USE_CLANG" -eq 0 ]]; then
+# if [[ "$ID" != "archlinux" || "$USE_CLANG" -eq 0 ]]; then
 #   export BASE_CFLAGS="$BASE_CFLAGS -fipa-pta"
 # fi
 
@@ -828,16 +832,7 @@ operating_system() {
   darwin*)
     echo macos
     ;;
-  *)
-    if [[ -f /etc/os-release ]]; then
-      # shellcheck disable=SC1091
-      source /etc/os-release
-      test "$ID" = "archlinux" && ID=arch
-      echo "$ID"
-    else
-      exit 1
-    fi
-    ;;
+  *) ;;
   esac
 }
 
@@ -923,7 +918,7 @@ run_build() {
   # linker failed to load the plugin, GCC would silently fall back to traditional
   # linking or fail in confusing ways. Explicitly declaring the flag forced a hard
   # error if the plugin was missing, rather than allowing a silent downgrade.
-  if [[ "$ID" != "arch" || "$USE_CLANG" -eq 0 ]]; then
+  if [[ "$ID" != "archlinux" || "$USE_CLANG" -eq 0 ]]; then
     current_cflags="$current_cflags -fuse-linker-plugin"
     current_ldflags="$current_ldflags -fuse-linker-plugin"
   fi

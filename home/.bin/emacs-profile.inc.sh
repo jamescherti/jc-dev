@@ -2,12 +2,17 @@
 
 RUN_EMACS_BIN="${RUN_EMACS_BIN:-}"
 
-if [[ "$OS_ID" = "" ]]; then
-  OS_ID=$(
-    # shellcheck disable=SC1091
-    [[ -r /etc/os-release ]] && source /etc/os-release 2>/dev/null
-    echo "${ID:-unknown}"
-  )
+# shellcheck disable=SC1091
+if [[ "${OS_ID:-}" = "" ]]; then
+  if command -v osid &>/dev/null; then
+    OS_ID=$(osid)
+  else
+    OS_ID=$(
+      # shellcheck disable=SC1091
+      [ -r /etc/os-release ] && . /etc/os-release 2>/dev/null
+      printf '%s\n' "${ID:-unknown}"
+    )
+  fi
 fi
 
 # devemacs can change RUN_EMACS_BIN
