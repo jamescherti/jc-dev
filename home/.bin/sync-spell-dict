@@ -64,8 +64,8 @@ TMP_FILE=$(mktemp)
 TMP_OUT=$(mktemp)
 ATEXIT_DONE=0
 atexit() {
-  trap - EXIT INT TERM HUP QUIT
   local errno="$?"
+  trap - EXIT INT TERM HUP QUIT
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     if [[ -f "$TMP_FILE" ]]; then
       rm -f "$TMP_FILE" || true

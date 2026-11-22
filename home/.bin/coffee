@@ -30,8 +30,8 @@ set -euo pipefail
 
 ATEXIT_DONE=0
 atexit() {
-  trap - EXIT INT TERM HUP QUIT
   local errno="$?"
+  trap - EXIT INT TERM HUP QUIT
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     disable_screensaver false
     ATEXIT_DONE=1

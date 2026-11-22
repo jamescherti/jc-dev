@@ -541,8 +541,8 @@ snippet atexit
 ATEXIT_DONE=0
 # shellcheck disable=SC2329
 atexit() {
-	trap - EXIT INT TERM
 	local errno="$?"
+	trap - EXIT INT TERM
 	if [[ "$ATEXIT_DONE" -eq 0 ]]; then
 		${1:}
 		ATEXIT_DONE=1
