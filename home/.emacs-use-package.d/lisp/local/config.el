@@ -44,8 +44,6 @@
 ;; (setq native-comp-verbose 0 ; Omits compiler instruction dumps.
 ;;       native-comp-debug 0)
 
-(setq lightemacs-native-comp-excluded-cpus 1)
-
 ;; (setq native-comp-jit-compilation nil)
 (setq compile-angel-enable-native-compile t)
 ;; (setq compile-angel-cache-locate-file t)
@@ -701,58 +699,58 @@
 ;; Hook the cleanup function to Emacs exit
 (add-hook 'kill-emacs-hook #'my-cleanup-session-temp-directory 90)
 
-;;; Byte-compile
+;;; DISABLED: Byte-compile
 
-(defvar my-elc-cache--emacs-lisp-directory
-  ;; Directory where Emacs's own *.el and *.elc Lisp files are installed.
-  (if (bound-and-true-p lisp-directory)
-      ;; Always use `file-truename'
-      (file-truename lisp-directory)
-    (when-let* ((library-path (locate-library "simple")))
-      ;; Always use `file-truename'
-      (file-name-directory (file-truename library-path)))))
-
-;; TODO lightemacs?
-(defvar my-elc-cache-directory
-  ;; This has to be `file-truename'
-  (file-truename (expand-file-name "elc-cache/" user-emacs-directory))
-  "Directory to store byte-compiled .elc files.")
-
-(defun my-elc-cache-dest-file (filename)
-  "Determine the cache destination for the byte-compiled FILENAME."
-  (let* ((true-file (file-truename filename))
-         ;; FIX: Temporarily disable the hook variable to prevent infinite
-         ;; recursion
-         (byte-compile-dest-file-function nil)
-         ;; Use Emacs's native compiler functions to safely handle .gz and .elc
-         (default-dest (if (fboundp 'byte-compile-default-dest-file)
-                           (byte-compile-default-dest-file filename)
-                         ;; Fallback for older Emacs versions
-                         (byte-compile-dest-file filename))))
-    ;; Ignore Emacs's built-in files
-    (if (or
-         ;; (and my-elc-cache--emacs-lisp-directory
-         ;;      (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
-         ;; early-init has no way to guess the elc-cache path before it is
-         ;; loaded before config.el
-         ;; (string-suffix-p "/init.el" true-file)
-         ;; (string-suffix-p "/early-init.el" true-file)
-         ;; (string-suffix-p "/config.el" true-file)
-         (not (string-prefix-p (file-truename "~/src/") true-file))
-         ;; Ignore files already in the cache directory to prevent recursive
-         ;; paths
-         ;; (string-prefix-p my-elc-cache-directory true-file)
-         )
-        ;; Return the normal destination
-        default-dest
-      ;; Map the third-party file into the cache directory
-      (let* ((expanded-dest (expand-file-name default-dest))
-             ;; Strip the leading slash so it appends properly to the cache
-             ;; directory
-             (relative (replace-regexp-in-string "^/" "" expanded-dest))
-             (dest (expand-file-name relative my-elc-cache-directory)))
-        (make-directory (file-name-directory dest) t)
-        dest))))
+;; (defvar my-elc-cache--emacs-lisp-directory
+;;   ;; Directory where Emacs's own *.el and *.elc Lisp files are installed.
+;;   (if (bound-and-true-p lisp-directory)
+;;       ;; Always use `file-truename'
+;;       (file-truename lisp-directory)
+;;     (when-let* ((library-path (locate-library "simple")))
+;;       ;; Always use `file-truename'
+;;       (file-name-directory (file-truename library-path)))))
+;;
+;; ;; TODO lightemacs?
+;; (defvar my-elc-cache-directory
+;;   ;; This has to be `file-truename'
+;;   (file-truename (expand-file-name "elc-cache/" user-emacs-directory))
+;;   "Directory to store byte-compiled .elc files.")
+;;
+;; (defun my-elc-cache-dest-file (filename)
+;;   "Determine the cache destination for the byte-compiled FILENAME."
+;;   (let* ((true-file (file-truename filename))
+;;          ;; FIX: Temporarily disable the hook variable to prevent infinite
+;;          ;; recursion
+;;          (byte-compile-dest-file-function nil)
+;;          ;; Use Emacs's native compiler functions to safely handle .gz and .elc
+;;          (default-dest (if (fboundp 'byte-compile-default-dest-file)
+;;                            (byte-compile-default-dest-file filename)
+;;                          ;; Fallback for older Emacs versions
+;;                          (byte-compile-dest-file filename))))
+;;     ;; Ignore Emacs's built-in files
+;;     (if (or
+;;          ;; (and my-elc-cache--emacs-lisp-directory
+;;          ;;      (string-prefix-p my-elc-cache--emacs-lisp-directory true-file))
+;;          ;; early-init has no way to guess the elc-cache path before it is
+;;          ;; loaded before config.el
+;;          ;; (string-suffix-p "/init.el" true-file)
+;;          ;; (string-suffix-p "/early-init.el" true-file)
+;;          ;; (string-suffix-p "/config.el" true-file)
+;;          (not (string-prefix-p (file-truename "~/src/") true-file))
+;;          ;; Ignore files already in the cache directory to prevent recursive
+;;          ;; paths
+;;          ;; (string-prefix-p my-elc-cache-directory true-file)
+;;          )
+;;         ;; Return the normal destination
+;;         default-dest
+;;       ;; Map the third-party file into the cache directory
+;;       (let* ((expanded-dest (expand-file-name default-dest))
+;;              ;; Strip the leading slash so it appends properly to the cache
+;;              ;; directory
+;;              (relative (replace-regexp-in-string "^/" "" expanded-dest))
+;;              (dest (expand-file-name relative my-elc-cache-directory)))
+;;         (make-directory (file-name-directory dest) t)
+;;         dest))))
 
 ;; TODO
 ;; The provided Emacs Lisp snippet successfully intercepts
@@ -2177,6 +2175,7 @@ Set this to nil to disable this feature.")
     ;; Half (See `native-comp-async-jobs-number' default value)
     0)))
 
+(setq lightemacs-native-comp-excluded-cpus 1)
 
 ;; Increase the number of CPUs
 ;; - `lightemacs-native-comp-excluded-cpus`: By default, Emacs uses only half of
