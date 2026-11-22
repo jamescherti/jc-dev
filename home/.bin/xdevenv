@@ -504,9 +504,9 @@ xdevenv-startup-apps() {
     bg_run flatpak run org.keepassxc.KeePassXC --minimized
   fi
 
-  # xdevenv-terminal
-  # bg_run "$0" web-browser
-  # bg_run "$0" editor
+  bg_run "$0" web-browser
+  bg_run "$0" editor
+  bg_run "$0" terminal
 
   set -e
 }
