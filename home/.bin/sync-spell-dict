@@ -65,7 +65,7 @@ TMP_OUT=$(mktemp)
 ATEXIT_DONE=0
 atexit() {
   local errno="$?"
-  trap - EXIT INT TERM HUP QUIT
+  trap - EXIT INT TERM HUP QUIT ABRT
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     if [[ -f "$TMP_FILE" ]]; then
       rm -f "$TMP_FILE" || true
@@ -79,7 +79,7 @@ atexit() {
   fi
   exit "$errno"
 }
-trap 'atexit' EXIT INT TERM HUP QUIT
+trap 'atexit' EXIT INT TERM HUP QUIT ABRT
 
 #-------------------------------------------------------------------------------
 # Get Mozilla dictionaries paths

@@ -542,7 +542,7 @@ ATEXIT_DONE=0
 # shellcheck disable=SC2329
 atexit() {
 	local errno="$?"
-	trap - EXIT INT TERM
+	trap - EXIT INT TERM HUP QUIT ABRT
 	if [[ "$ATEXIT_DONE" -eq 0 ]]; then
 		${1:}
 		ATEXIT_DONE=1
@@ -550,7 +550,7 @@ atexit() {
 	exit "$errno"
 }
 
-trap 'atexit' INT TERM EXIT
+trap 'atexit' EXIT INT TERM HUP QUIT ABRT
 endsnippet
 
 snippet unique
@@ -562,7 +562,7 @@ atexit() {
 	exit "$errno"
 }
 
-trap 'atexit' INT TERM EXIT
+trap 'atexit' EXIT INT TERM HUP QUIT ABRT
 
 if ! ( set -o noclobber; echo "locked" > "$LOCKFILE") 2> /dev/null; then
 	echo "Lock failed: the program \$0 is already running (the file $LOCKFILE exists)." >&2

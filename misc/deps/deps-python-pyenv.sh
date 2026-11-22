@@ -69,7 +69,7 @@ rm -f "$REQUIREMENTS_LOG"
 
 atexit() {
   local errno="$?"
-  trap - EXIT INT TERM
+  trap - EXIT INT TERM HUP QUIT ABRT
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     if [[ -f "$REQUIREMENTS_LOG" ]]; then
       sort <"$REQUIREMENTS_LOG" | uniq >"$REQUIREMENTS_LOG.new"
@@ -89,7 +89,7 @@ atexit() {
 }
 
 init() {
-  trap 'atexit' INT TERM EXIT
+  trap 'atexit' EXIT INT TERM HUP QUIT ABRT
 
   if ! [[ -f "$PYTHON_VENV_DIR/bin/activate" ]]; then
     rm -fr "$PYTHON_VENV_DIR"

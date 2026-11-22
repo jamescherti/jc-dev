@@ -196,7 +196,7 @@ run_checks() {
 
 atexit() {
   local errno="$?"
-  trap - EXIT INT TERM
+  trap - EXIT INT TERM HUP QUIT ABRT
   rm -f -- "$TMP_FILE" || :
   exit "$errno"
 }

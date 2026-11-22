@@ -36,7 +36,7 @@ FD_TMP_FILE=$(mktemp) || return 1
 # shellcheck disable=SC2329
 atexit() {
   local errno="$?"
-  trap - INT TERM EXIT
+  trap - EXIT INT TERM HUP QUIT ABRT
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     ATEXIT_DONE=1
 
@@ -156,7 +156,7 @@ fd_delete() {
 }
 
 main() {
-  trap 'atexit' INT TERM EXIT
+  trap 'atexit' EXIT INT TERM HUP QUIT ABRT
 
   # REmoved:#$|
   FD_CUSTOM_DIR="$HOME"

@@ -31,7 +31,7 @@ set -euo pipefail
 ATEXIT_DONE=0
 atexit() {
   local errno="$?"
-  trap - EXIT INT TERM HUP QUIT
+  trap - EXIT INT TERM HUP QUIT ABRT
   if [[ "$ATEXIT_DONE" -eq 0 ]]; then
     disable_screensaver false
     ATEXIT_DONE=1
@@ -93,7 +93,7 @@ disable_screensaver() {
 }
 
 init() {
-  trap 'atexit' EXIT INT TERM HUP QUIT
+  trap 'atexit' EXIT INT TERM HUP QUIT ABRT
   if is_gnome; then
     GNOME_IDLE_DELAY=$(gsettings get org.gnome.desktop.session idle-delay)
     GNOME_LOCK_ENABLED="$(gsettings get org.gnome.desktop.screensaver lock-enabled)"
