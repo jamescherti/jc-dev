@@ -1095,17 +1095,15 @@ FUNC takes no arguments.  Return to the original tab and window afterward."
 Preserve all other fringe indicator settings.
 Repeated calls have the same effect as a single call."
   (interactive)
-  ;; (setq-local fringe-indicator-alist
-  ;;             (append '((truncation nil nil)
-  ;;                       (continuation nil nil))
-  ;;                     (seq-remove
-  ;;                      (lambda (indicator)
-  ;;                        (memq (car indicator)
-  ;;                              '(truncation continuation)))
-  ;;                      fringe-indicator-alist)))
-  t
-  )
-
+  ;; Disable truncation arrows
+  (setq-local fringe-indicator-alist
+              (append '((truncation nil nil)
+                        (continuation nil nil))
+                      (seq-remove
+                       (lambda (indicator)
+                         (memq (car indicator)
+                               '(truncation continuation)))
+                       fringe-indicator-alist))))
 
 ;;; tab bar find-file
 

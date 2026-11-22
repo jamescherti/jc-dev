@@ -10,7 +10,7 @@
  ("dtrt-indent" . "8402da6bcc288709366e0b589fa79e744e877788") ; 1.27 | RSS RELEASE
  ("diff-hl" . "c9ecc496e6638552be7a52c690e5ff62565130c8") ; TODO add to RSS
  ("evil-collection" . "e3f70c513585086ad83e245829e1de8f72f2de26") ; 3.0.3 add to RSS
- ("embark" . "79531fc6aab311acf6874679082f336de4a91789") ; 1.2 | RSS RELEASE
+ ("embark" . "d9ee7346b3f9217d8a0f24d3477c33f450c77385") ; 1.2 | RSS RELEASE
  ("evil-matchit" . "4cb8dd3d811ecb2abd774b491223ac5460dcdd5e") ; 5.0.0 | RSS RELEASE
  ("apheleia" . "664fcfd3ec8f868169609c03ca3f8e54d897c27a") ; v4.6.0 | RSS RELEASE
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")

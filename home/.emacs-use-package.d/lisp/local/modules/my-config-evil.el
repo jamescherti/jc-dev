@@ -2328,6 +2328,27 @@ When BANG is non-nil, discard modifications without confirmation."
     (revert-buffer bang (or bang (not (buffer-modified-p))) t)
     (read-only-mode -1)))
 
+;;; track eol
+
+(setq evil-track-eol nil)
+
+;; When navigating vertically with visual line movement commands such as
+;; previous-visual-line or next-visual-line (or evil-previous-visual-line and
+;; evil-next-visual-line when using Evil), the cursor may enter invisible text
+;; if folded regions are present.
+;;
+;; This behavior occurs under the following conditions:
+;; - End-of-line tracking is enabled and the cursor originates from a longer
+;;   line. During vertical movement, the cursor attempts to preserve its
+;;   logical column position, which can correspond to a location inside hidden
+;;   content on the target line.
+;; - line-move-ignore-invisible is set to nil, causing Emacs to include hidden
+;;   or folded text during vertical movement rather than skipping it.
+;;
+;; The following ensures that vertical navigation never lands in invisible
+;; text within folded regions, add the following to your configuration:
+;; (setq track-eol nil)
+
 ;;; DISABLED: O: Evil Open Above
 
 ;; (evil-define-command evilcursor-open-above (count)

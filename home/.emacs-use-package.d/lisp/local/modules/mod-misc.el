@@ -4583,6 +4583,53 @@ function or if an invalid choice is made."
 
 ;;; embark fix
 
+;; A new fix
+
+(setq embark-collect-group-format "%s")
+
+;; Fix 3
+;; Print each group heading as a single-column row. Embark gives headings an
+;; empty annotation column, so the default printer adds padding between the
+;; title and the fold ellipsis. Omitting that column places the ellipsis
+;; directly after the title while keeping annotations aligned on candidate rows.
+(setq embark-collect-group-format "%s")
+(defun my-embark-collect-print-entry (entry-id columns)
+  "Print COLUMNS for ENTRY-ID, omitting padding after group titles."
+  (let ((tabulated-list-format
+         (if entry-id
+             tabulated-list-format
+           (vector (aref tabulated-list-format 0)))))
+    (tabulated-list-print-entry entry-id columns)))
+(defun my-embark-collect-setup-printer ()
+  "Use compact group headings in the current Embark Collect buffer."
+  (setq-local tabulated-list-printer #'my-embark-collect-print-entry))
+(add-hook 'embark-collect-mode-hook #'my-embark-collect-setup-printer)
+
+;; Fix 1
+;; When enabled, this advice prevents Embark Collect from adding ... when the
+;; candidate column is too narrow for a formatted label. After Embark builds the
+;; rows, it measures each first-column label, including group headings, and
+;; widens the column if any label exceeds its current width. Your group-heading
+;; fix already handles headings. The advice also covers candidate labels that
+;; gain text during formatting, such as multiline candidates with an appended
+;; separator. It cannot restore text shortened earlier by the completion source.
+;; As pasted, the code is commented out and has no effect.
+;; (defun my-embark-collect-fit-labels (&rest _args)
+;;   "Widen the candidate column to fit every formatted label.
+;; Ignore _ARGS passed by `embark-collect--format-entries'."
+;;   (let* ((column (aref tabulated-list-format 0))
+;;          (width (nth 1 column)))
+;;     (dolist (entry tabulated-list-entries)
+;;       (let* ((cells (cadr entry))
+;;              (label (car (aref cells 0))))
+;;         (setq width (max width (string-width label)))))
+;;     (setf (nth 1 column) width)))
+;;
+;; (with-eval-after-load 'embark
+;;   (advice-add 'embark-collect--format-entries :after
+;;               #'my-embark-collect-fit-labels))
+
+;; Fix 2: Already applied
 ;; TODO https://github.com/oantolin/embark/issues/813
 ;;
 ;; Fix: Group titles in embark-collect buffers are aggressively truncated
@@ -6187,27 +6234,6 @@ on text following the cursor."
 ;;
 ;;   (when my-rg-exists
 ;;     (setq-default projectile-generic-command my-projectile-rg-command)))
-
-;;; DISABLED: track eol
-
-;; (setq evil-track-eol nil)
-
-;; When navigating vertically with visual line movement commands such as
-;; previous-visual-line or next-visual-line (or evil-previous-visual-line and
-;; evil-next-visual-line when using Evil), the cursor may enter invisible text
-;; if folded regions are present.
-;;
-;; This behavior occurs under the following conditions:
-;; - End-of-line tracking is enabled and the cursor originates from a longer
-;;   line. During vertical movement, the cursor attempts to preserve its
-;;   logical column position, which can correspond to a location inside hidden
-;;   content on the target line.
-;; - line-move-ignore-invisible is set to nil, causing Emacs to include hidden
-;;   or folded text during vertical movement rather than skipping it.
-;;
-;; The following ensures that vertical navigation never lands in invisible
-;; text within folded regions, add the following to your configuration:
-;; (setq track-eol nil)
 
 ;;; Provide
 
