@@ -877,6 +877,7 @@ subsequent GCC invocations."
 ;; (setq lightemacs-theme-default-font "Iosevka SemiBold")
 
 (setq lightemacs-theme-default-font "Iosevka Term SemiBold")
+;; (setq lightemacs-theme-default-font "Iosevka Term Bold")
 (setq lightemacs-theme-variable-font "Iosevka")
 
 ;; (setq lightemacs-theme-default-font "DejaVu Sans Mono")
