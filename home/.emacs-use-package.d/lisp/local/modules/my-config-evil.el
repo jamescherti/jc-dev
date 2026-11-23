@@ -904,6 +904,8 @@ When FORCE-ALL is non-nil, use all functions."
   "Go to definition."
   (interactive)
   (eviljump-goto-definition t)
+
+  ;; eviljump-goto-definition works better with imenu and other jumps
   ;; (evil-goto-definition)
   )
 
