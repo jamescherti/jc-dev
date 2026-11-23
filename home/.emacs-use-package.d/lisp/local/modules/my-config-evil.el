@@ -33,7 +33,8 @@
 (require 'mod-cleanup)
 (require 'my-defun)
 (require 'lightemacs)  ; lightemacs-save-window-start
-(require 'cl-lib) ;; TODO remove?
+(require 'cl-lib)
+(require 'seq)
 
 ;;; Load modules
 
@@ -903,11 +904,11 @@ When FORCE-ALL is non-nil, use all functions."
 (defun eviljump-goto-definition-force ()
   "Go to definition."
   (interactive)
-  (eviljump-goto-definition t)
+  ;; (eviljump-goto-definition t)
 
-  ;; eviljump-goto-definition works better with imenu and other jumps
-  ;; (evil-goto-definition)
-  )
+  ;; TODO should this be part of evil-goto-definition or Emacs?
+  (let ((search-invisible t))
+    (evil-goto-definition)))
 
 (evil-define-key 'normal 'global
   (kbd "gd") 'eviljump-goto-definition
