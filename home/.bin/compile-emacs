@@ -915,7 +915,7 @@ run_build() {
   # linker failed to load the plugin, GCC would silently fall back to traditional
   # linking or fail in confusing ways. Explicitly declaring the flag forced a hard
   # error if the plugin was missing, rather than allowing a silent downgrade.
-  if [[ "$ID" != "archlinux" || "$USE_CLANG" -eq 0 ]]; then
+  if [[ "$OS_ID" != "archlinux" || "$USE_CLANG" -eq 0 ]]; then
     current_cflags="$current_cflags -fuse-linker-plugin"
     current_ldflags="$current_ldflags -fuse-linker-plugin"
   fi
