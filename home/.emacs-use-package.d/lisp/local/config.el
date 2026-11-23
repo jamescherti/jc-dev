@@ -2195,6 +2195,9 @@ Set this to nil to disable this feature.")
 
 ;;; Package paths
 
+(setq lightemacs-byte-compile-additional-directories (list "~/.emacs-packages/"
+                                                           "~/src/emacs"))
+
 (defun my-lightemacs-init-local-packages ()
   "Configure local packages when Lightemacs uses the built-in manager."
   (when (eq lightemacs-package-manager 'builtin-package)
