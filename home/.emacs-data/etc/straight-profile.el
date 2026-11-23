@@ -11,7 +11,7 @@
  ("diff-hl" . "c9ecc496e6638552be7a52c690e5ff62565130c8") ; TODO add to RSS
  ("evil-collection" . "e3f70c513585086ad83e245829e1de8f72f2de26") ; 3.0.3 add to RSS
  ("embark" . "d9ee7346b3f9217d8a0f24d3477c33f450c77385") ; 1.2 | RSS RELEASE
- ("evil-matchit" . "4cb8dd3d811ecb2abd774b491223ac5460dcdd5e") ; 5.0.0 | RSS RELEASE
+ ("evil-matchit" . "d3777fe1984b081537f6410c3f907ff1d24c6225") ; 5.0.1 | RSS RELEASE
  ("apheleia" . "664fcfd3ec8f868169609c03ca3f8e54d897c27a") ; v4.6.0 | RSS RELEASE
  ("package-lint" . "35996f478d81e51dae4fa30d051f741895d07399")
  ("modus-themes" . "782743415b3eedac0b99db2342fb35703deb752f") ; 5.3.0 | RSS RELEASE
