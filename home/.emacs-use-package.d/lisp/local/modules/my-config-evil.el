@@ -903,8 +903,9 @@ When FORCE-ALL is non-nil, use all functions."
 (defun eviljump-goto-definition-force ()
   "Go to definition."
   (interactive)
-  ;; (eviljump-goto-definition t)
-  (evil-goto-definition))
+  (eviljump-goto-definition t)
+  ;; (evil-goto-definition)
+  )
 
 (evil-define-key 'normal 'global
   (kbd "gd") 'eviljump-goto-definition
