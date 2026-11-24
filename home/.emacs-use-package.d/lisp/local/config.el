@@ -1060,7 +1060,7 @@ subsequent GCC invocations."
 
                            le-avy
                            ;; le-ace-window
-                           ;; le-expand-region
+                           le-expand-region
 
                            le-bufferfile
 
@@ -1073,7 +1073,7 @@ subsequent GCC invocations."
 
                            ;; I am using helpful because it allows having
                            ;; separate buffers for every variable or function
-                           ;; le-helpful
+                           le-helpful
 
                            le-indent-bars
                            le-stripspace
