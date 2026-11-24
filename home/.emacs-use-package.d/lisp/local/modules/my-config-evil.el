@@ -821,15 +821,17 @@ This enhancement prevents the cursor from moving."
 ;; this first, Evil will immediately hand the jump request over to your language
 ;; server, which has actual compiler-level awareness of your project.
 (setq evil-goto-definition-functions
-      '(;; Delegates the jump to the Emacs 'xref' API. This is the modern
-        ;; standard, capable of crossing file boundaries and hooking directly
-        ;; into Language Server Protocols (eglot/lsp-mode) or dumb-jump.
-        evil-goto-definition-xref
-
+      '(
         ;; Uses the standard Emacs 'imenu' index. It relies on regular
         ;; expressions defined by the current major mode to find definitions
         ;; within the active buffer.
         evil-goto-definition-imenu
+
+
+        ;; Delegates the jump to the Emacs 'xref' API. This is the modern
+        ;; standard, capable of crossing file boundaries and hooking directly
+        ;; into Language Server Protocols (eglot/lsp-mode) or dumb-jump.
+        evil-goto-definition-xref
 
         ;; Hooks into the CEDET/Semantic framework. This is an older
         ;; parsing engine that attempts to understand code syntax trees.
@@ -901,14 +903,17 @@ When FORCE-ALL is non-nil, use all functions."
     ;;   (recenter (/ (window-body-height) 4)))
     ))
 
+(defvar local-modules-disable-redirects nil)
+
 (defun eviljump-goto-definition-force ()
   "Go to definition."
   (interactive)
-  ;; (eviljump-goto-definition t)
+  (let ((local-modules-disable-redirects t))
+    ;; (eviljump-goto-definition t)
 
-  ;; TODO should this be part of evil-goto-definition or Emacs?
-  (let ((search-invisible t))
-    (evil-goto-definition)))
+    ;; TODO should this be part of evil-goto-definition or Emacs?
+    (let ((search-invisible t))
+      (evil-goto-definition))))
 
 (evil-define-key 'normal 'global
   (kbd "gd") 'eviljump-goto-definition
@@ -2351,8 +2356,6 @@ When BANG is non-nil, discard modifications without confirmation."
 ;; The following ensures that vertical navigation never lands in invisible
 ;; text within folded regions, add the following to your configuration:
 ;; (setq track-eol nil)
-
-;;; DISABLED: O: Evil Open Above
 
 ;; (evil-define-command evilcursor-open-above (count)
 ;;   "Insert a new line above point, using current line's indentation.

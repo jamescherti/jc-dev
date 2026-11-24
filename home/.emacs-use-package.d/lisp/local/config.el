@@ -588,7 +588,26 @@
     (dolist (dir dirs)
       (when dir
         ;; Ensure the path ends with a slash so it registers as a directory
-        (push dir trusted-content)))))
+        (push (file-name-as-directory dir) trusted-content)
+        (push (file-name-as-directory (expand-file-name dir)) trusted-content)))))
+
+(defun my-elisp-project-source-path ()
+  "Prefer the current project's directories for Elisp source lookup."
+  (when-let* ((filename (buffer-file-name (buffer-base-buffer)))
+              (project (project-current nil (file-name-directory filename))))
+    (let* ((default-directory (file-name-as-directory (if project
+                                                          (project-root project)
+                                                        ".")))
+           (fallback-source-path (or (bound-and-true-p find-library-source-path) load-path))
+           ;; removed: (list (directory-file-name default-directory))
+           (load-path nil)
+           (normal-top-level-add-subdirs-inode-list nil))
+      (push default-directory load-path)
+      (normal-top-level-add-subdirs-to-load-path)
+      (setq-local find-library-source-path
+                  (append load-path (copy-sequence fallback-source-path))))))
+
+(add-hook 'emacs-lisp-mode-hook #'my-elisp-project-source-path)
 
 ;;; Hardening: Only enable .dir-locals.el in ~/src
 

@@ -2414,26 +2414,49 @@ ARGS is a plist supplied by `apheleia--run-formatter-function' containing:
 
 ;; elisp evil-imenu
 
+;; (let ((sym-regexp (or (bound-and-true-p lisp-mode-symbol-regexp)
+;;                       "\\(?:\\sw\\|\\s_\\|\\\\.\\)+")))
+;;   (add-to-list
+;;    'lisp-imenu-generic-expression
+;;    (list "Packages"
+;;          (concat "^\\s-*("
+;;                  (eval-when-compile
+;;                    (regexp-opt '("use-package" "require") t))
+;;                  "\\s-+\\(" sym-regexp "\\)")
+;;          2))
+;;   (add-to-list
+;;    'lisp-imenu-generic-expression
+;;    (list "Hydras"
+;;          (concat "^\\s-*("
+;;                  (eval-when-compile
+;;                    (regexp-opt '("defhydra") t))
+;;                  "\\s-+\\(" sym-regexp "\\)")
+;;          2)))
+
 (with-eval-after-load 'lisp-mode
   (add-to-list 'lisp-imenu-generic-expression
                `("Evil Definitions"
                  ,(rx line-start
                       (* space)
                       "("
-                      (or "evil-define-avy-motion"
-                          "evil-define-command"
-                          "evil-define-interactive-code"
-                          "evil-define-key"
-                          "evil-define-key*"
-                          "evil-define-keymap"
-                          "evil-define-local-var"
-                          "evil-define-minor-mode-key"
-                          "evil-define-motion"
-                          "evil-define-operator"
-                          "evil-define-state"
-                          "evil-define-text-object"
-                          "evil-define-type"
-                          "evil-define-visual-selection")
+                      (or
+                       ;; Functions
+                       "evil-define-command"
+                       "evil-define-motion"
+                       "evil-define-operator"
+                       "evil-define-state"
+                       "evil-define-text-object"
+                       ;; Other
+                       ;; "evil-define-avy-motion"
+                       ;; "evil-define-interactive-code"
+                       ;; "evil-define-key"
+                       ;; "evil-define-key*"
+                       ;; "evil-define-keymap"
+                       ;; "evil-define-minor-mode-key"
+                       ;; "evil-define-local-var"
+                       ;; "evil-define-type"
+                       ;; "evil-define-visual-selection"
+                       )
                       (+ space)
                       (* (any "'" "#"))
                       (* "(")
