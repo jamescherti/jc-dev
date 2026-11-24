@@ -743,7 +743,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; If you do not want pulse highlighting anywhere in Emacs, set pulse-flag to
 ;; nil (or 'never when using customize-option / defcustom semantics):
-(setq pulse-flag nil)
+(setq pulse-flag 'never)
 
 (with-eval-after-load 'xref
   (remove-hook 'xref-after-jump-hook #'xref-pulse-momentarily)
