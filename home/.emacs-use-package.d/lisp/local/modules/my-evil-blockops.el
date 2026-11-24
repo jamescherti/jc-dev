@@ -545,8 +545,9 @@ Zero COUNT leaves point unchanged."
     ;; Guard against void-function errors if the package providing this is absent.
     (lightemacs-recenter-maybe)
 
-    (when (fboundp 'pulse-momentary-highlight-one-line)
-      (pulse-momentary-highlight-one-line (point)))))
+    ;; (when (fboundp 'pulse-momentary-highlight-one-line)
+    ;;   (pulse-momentary-highlight-one-line (point)))
+    ))
 
 (defun my-evil-blockops--nav-section-core (count is-backward)
   "Core logic for moving sections forward or backward.

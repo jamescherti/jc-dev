@@ -159,6 +159,8 @@ If ENABLE is non-nil, install hooks. Otherwise remove them."
     (with-eval-after-load 'imenu
       (funcall fn 'imenu-after-jump-hook #'kirigami-jump--delayed-open-parent-headers -80))
 
+    (add-hook 'local-modules-redirect-after-jump-hook 'kirigami-jump--outline-after-jump-when-not-minibuffer)
+
     (with-eval-after-load 'consult
       (setq consult-after-jump-hook nil)
       ;; NOTE: I removed recenter from consult-after-jump-hook because it
