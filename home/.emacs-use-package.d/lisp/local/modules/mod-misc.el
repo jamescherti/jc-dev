@@ -739,6 +739,16 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
                      (if (< count 2) "" "s")
                      (if (< count 2) "was" "were")))))))))
 
+;;; Disable pulse
+
+;; If you do not want pulse highlighting anywhere in Emacs, set pulse-flag to
+;; nil (or 'never when using customize-option / defcustom semantics):
+(setq pulse-flag nil)
+
+(with-eval-after-load 'xref
+  (remove-hook 'xref-after-jump-hook #'xref-pulse-momentarily)
+  (remove-hook 'xref-after-return-hook #'xref-pulse-momentarily))
+
 ;;; testing: consult
 
 (add-hook 'embark-collect-mode-hook

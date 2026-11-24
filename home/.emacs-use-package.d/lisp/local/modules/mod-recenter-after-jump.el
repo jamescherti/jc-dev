@@ -144,18 +144,13 @@ visibility when navigation commands are executed."
 
 (with-eval-after-load 'xref
   (when (boundp 'xref-after-jump-hook)
-    (let ((xref-pulse-originally-present (memq 'xref-pulse-momentarily
-                                               xref-after-jump-hook)))
-      (remove-hook 'xref-after-jump-hook 'recenter)
-      (remove-hook 'xref-after-jump-hook 'xref-pulse-momentarily)
+    (remove-hook 'xref-after-jump-hook 'recenter)
 
-      (add-hook 'xref-after-return-hook
-                #'lightemacs-default-settings--recenter-maybe 70)
+    (add-hook 'xref-after-return-hook
+              #'lightemacs-default-settings--recenter-maybe 70)
 
-      (add-hook 'xref-after-jump-hook
-                'lightemacs-default-settings--recenter-maybe 70)
-      (when xref-pulse-originally-present
-        (add-hook 'xref-after-jump-hook 'xref-pulse-momentarily 71)))))
+    (add-hook 'xref-after-jump-hook
+              'lightemacs-default-settings--recenter-maybe 70)))
 
 ;;; Provide
 

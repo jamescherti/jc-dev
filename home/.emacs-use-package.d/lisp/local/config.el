@@ -593,21 +593,36 @@
 
 (defun my-elisp-project-source-path ()
   "Prefer the current project's directories for Elisp source lookup."
-  (when-let* ((filename (buffer-file-name (buffer-base-buffer)))
-              (project (project-current nil (file-name-directory filename))))
-    (let* ((default-directory (file-name-as-directory (if project
-                                                          (project-root project)
-                                                        ".")))
-           (fallback-source-path (or (bound-and-true-p find-library-source-path) load-path))
-           ;; removed: (list (directory-file-name default-directory))
-           (load-path nil)
-           (normal-top-level-add-subdirs-inode-list nil))
-      (push default-directory load-path)
-      (normal-top-level-add-subdirs-to-load-path)
-      (setq-local find-library-source-path
-                  (append load-path (copy-sequence fallback-source-path))))))
+  (let* ((filename (buffer-file-name (buffer-base-buffer)))
+         (project (project-current nil (file-name-directory filename)))
+         new-load-path)
+    (when (and filename project)
+      (let* ((default-directory (expand-file-name
+                                 (file-name-as-directory (if project
+                                                             (project-root project)
+                                                           "."))))
+             (fallback-source-path (copy-sequence
+                                    (or (bound-and-true-p find-library-source-path)
+                                        load-path)))
+             ;; removed: (list (directory-file-name default-directory))
+             (load-path nil)
+             (normal-top-level-add-subdirs-inode-list nil)
+             (user-directory (expand-file-name lightemacs-user-directory)))
+        (setq fallback-source-path
+              (seq-filter
+               (lambda(path)
+                 (not (file-in-directory-p path user-directory)))
+               fallback-source-path))
 
-(add-hook 'emacs-lisp-mode-hook #'my-elisp-project-source-path)
+        (push default-directory load-path)
+        (normal-top-level-add-subdirs-to-load-path)
+
+        (setq-local find-library-source-path
+                    (append load-path fallback-source-path))
+
+        (setq new-load-path (copy-sequence find-library-source-path))))))
+
+(add-hook 'emacs-lisp-mode-hook #'my-elisp-project-source-path 80)
 
 ;;; Hardening: Only enable .dir-locals.el in ~/src
 
@@ -971,7 +986,7 @@ subsequent GCC invocations."
 
                            ;; le-csv-mode
 
-                           le-quick-sdcv
+                           ;; le-quick-sdcv
 
                            le-group-code-folding
 
@@ -1020,7 +1035,7 @@ subsequent GCC invocations."
 
                            ;; le-autorevert
 
-                           ;; le-recentf
+                           le-recentf
                            le-saveplace
 
                            ;; TODO replace with tab-bar-history-mode
@@ -1054,7 +1069,7 @@ subsequent GCC invocations."
                            le-dtrt-indent
 
                            le-dumb-jump
-                           le-git-modes
+                           ;; le-git-modes
 
                            ;; I am using helpful because it allows having
                            ;; separate buffers for every variable or function
@@ -2229,7 +2244,8 @@ Set this to nil to disable this feature.")
     (setq lightemacs-use-package-init-refresh nil
           use-package-always-ensure nil)
     (dolist (directory '("~/.emacs-packages/" "~/src/emacs/"))
-      (let ((default-directory (expand-file-name directory)))
+      (let ((default-directory (expand-file-name directory))
+            (normal-top-level-add-subdirs-inode-list nil))
         (when (file-directory-p default-directory)
           (normal-top-level-add-subdirs-to-load-path))))))
 

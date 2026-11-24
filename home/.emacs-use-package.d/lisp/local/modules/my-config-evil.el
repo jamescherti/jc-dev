@@ -814,114 +814,31 @@ This enhancement prevents the cursor from moving."
 
 ;;; evil jump
 
-;; I changed the order from (imenu, xref, search) to (xref, imenu, search).
-;; evil-goto-definition-xref (Priority 1): This should always be at the absolute
-;; top. xref is the modern standard Emacs API for code navigation. When you run
-;; eglot, lsp-mode, or dumb-jump, they all plug directly into xref. By putting
-;; this first, Evil will immediately hand the jump request over to your language
-;; server, which has actual compiler-level awareness of your project.
-(setq evil-goto-definition-functions
-      '(
-        ;; Uses the standard Emacs 'imenu' index. It relies on regular
-        ;; expressions defined by the current major mode to find definitions
-        ;; within the active buffer.
-        evil-goto-definition-imenu
-
-
-        ;; Delegates the jump to the Emacs 'xref' API. This is the modern
-        ;; standard, capable of crossing file boundaries and hooking directly
-        ;; into Language Server Protocols (eglot/lsp-mode) or dumb-jump.
-        evil-goto-definition-xref
-
-        ;; Hooks into the CEDET/Semantic framework. This is an older
-        ;; parsing engine that attempts to understand code syntax trees.
-        ;;
-        ;; Disabled. This belongs to a legacy era of Emacs (the CEDET/Semantic
-        ;; project) which attempted to parse C/C++ and other languages entirely
-        ;; in Elisp. In the modern landscape of Language Server Protocols (LSP)
-        ;; and Tree-sitter, CEDET is obsolete, slow, and largely abandoned.
-        ;; Keeping it in your lookup chain only adds unnecessary cycles.
-        ;;
-        ;; evil-goto-definition-semantic
-
-        ;; The fallback mechanism. If all else fails, it executes a primitive
-        ;; text search inside the current buffer for the exact string matching
-        ;; the symbol under your cursor.
-        evil-goto-definition-search))
-
-(defun eviljump-goto-definition-try-imenu-first (imenu-only)
-  "Improved `evil-goto-definition` to open folds correctly in outline mode.
-When IMENU-ONLY is nil it only uses imenu."
-  (require 'xref)
-  (if (fboundp 'xref-push-marker-stack)
-      (let ((previous-point (point))
-            (previous-point-marker (point-marker)))
-        ;; Try imenu first
-        (when (member 'evil-goto-definition-imenu evil-goto-definition-functions)
-          (let ((evil-goto-definition-functions '(evil-goto-definition-imenu)))
-            (evil-goto-definition))
-
-          (when (not (eq previous-point (point)))
-            ;; Add it to the stack because it does not do it by default
-            (xref-push-marker-stack previous-point-marker)
-            (setq imenu-only t)))
-
-        ;; Try the others
-        (unless imenu-only
-          (let ((evil-goto-definition-functions
-                 (remq 'evil-goto-definition-imenu
-                       evil-goto-definition-functions)))
-            (evil-goto-definition))))
-    (error "Undefined: `xref-push-marker-stack'")))
-
-(defun eviljump-goto-definition (&optional force-all)
+(defun eviljump-goto-definition-recenter (&optional force-all)
   "Find definition and recenter the window.
 When FORCE-ALL is non-nil, use all functions."
   (interactive)
   (let ((old-buffer (current-buffer))
-        (old-point (point)))
-    (cond
-     ((and (fboundp 'eglot-managed-p)
-           (eglot-managed-p))
-      (xref-find-definitions (thing-at-point 'symbol t)))
-
-     ((and (bound-and-true-p lsp-mode)
-           (fboundp 'lsp-find-definition))
-      (lsp-find-definition))
-
-     ((and (not force-all)
-           (derived-mode-p 'emacs-lisp-mode))
-      ;; Do not jump to emacs.d. Only use imenu.
-      (eviljump-goto-definition-try-imenu-first t))
-
-     (t
-      (eviljump-goto-definition-try-imenu-first nil)))
-
-    ;; (when (and (or (not (eq old-buffer (current-buffer)))
-    ;;                (/= old-point (point)))
-    ;;            (not (pos-visible-in-window-p (point) (selected-window) t)))
-    ;;   (recenter (/ (window-body-height) 4)))
-    ))
-
-(defvar local-modules-disable-redirects nil)
-
-(defun eviljump-goto-definition-force ()
-  "Go to definition."
-  (interactive)
-  (let ((local-modules-disable-redirects t))
-    ;; (eviljump-goto-definition t)
-
-    ;; TODO should this be part of evil-goto-definition or Emacs?
-    (let ((search-invisible t))
-      (evil-goto-definition))))
+        (previous-point (point))
+        (previous-point-marker (point-marker))
+        (inhibit-redisplay t)
+        (inhibit-message t)
+        ;; TODO patch
+        ;; Load history makes Emacs load from history in priority (~/.emacs.d
+        ;; instead of your buffer-local load-path)
+        ;; (load-history nil)
+        )
+    (evil-goto-definition)
+    (when (and (or (not (eq old-buffer (current-buffer)))
+                   (and
+                    (not (pos-visible-in-window-p (point) (selected-window) t))
+                    (/= previous-point (point)))))
+      (recenter (/ (window-body-height) 4)))))
 
 (evil-define-key 'normal 'global
-  (kbd "gd") 'eviljump-goto-definition
-  (kbd "<leader>d") 'eviljump-goto-definition-force
-  (kbd "<leader>D") 'eviljump-goto-definition-force)
-;; Causes bugs
-;; (evil-define-key 'normal 'global (kbd "gd") 'eviljump-goto-definition)
-;; (evil-define-key 'normal 'global (kbd "gD") 'eviljump-goto-definition-force)
+  (kbd "gd") 'eviljump-goto-definition-recenter
+  (kbd "<leader>d") 'eviljump-goto-definition-recenter
+  (kbd "<leader>D") 'eviljump-goto-definition-recenter)
 
 ;;; evilwindow: split and select
 
@@ -1867,7 +1784,11 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
    ;;  (my-consult-project-files))
 
    (t
-    (quick-fasd-find-file))))
+    (if (fboundp 'consult-recent-file)
+        (consult-recent-file)
+      (error "Undefined: `consult-recent-file'"))
+    ;; (quick-fasd-find-file)
+    )))
 
 (with-eval-after-load 'le-quick-fasd
   (define-key evil-normal-state-map (kbd "<leader>b") 'my-find-file)

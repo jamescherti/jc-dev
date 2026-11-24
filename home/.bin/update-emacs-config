@@ -29,7 +29,7 @@
 set -euf -o pipefail
 
 LIGHTEMACS_DIR="$HOME/src/emacs-misc/lightemacs"
-HOME_SETTINGS_MODULES="$HOME/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local/"
+HOME_SETTINGS_MODULES="$HOME/src/dev/home-settings/work_cfg/home/.emacs-use-package.d/lisp/local"
 EMACS_BASE_CFG="$HOME/src/dev/jc-dev/home/.emacs-use-package.d"
 DELETE_ALL=false
 
