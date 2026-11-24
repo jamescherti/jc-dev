@@ -1060,7 +1060,7 @@ subsequent GCC invocations."
 
                            le-avy
                            ;; le-ace-window
-                           le-expand-region
+                           ;; le-expand-region
 
                            le-bufferfile
 
