@@ -1838,8 +1838,6 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (remove-hook 'pathaction-before-run-hook 'pathaction--save-buffer)
   (add-hook 'pathaction-before-run-hook #'my-save-all-buffers))
 
-(add-hook 'ultisnips-mode-hook #'hs-minor-mode)
-
 (defun my-setup-ultisnips-mode ()
   "Setup `ultisnips-mode'."
   (setq stripspace-normalize-indentation nil))

@@ -790,9 +790,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; TODO light?
 ;; (setq-default eldoc-documentation-function 'eldoc-documentation-default)
 
-(setq hs-show-indicators t
-      hs-indicator-type 'fringe)
-
 ;; Apply to all future frames, including emacsclient frames
 (add-to-list 'default-frame-alist '(wait-for-wm . nil))
 
@@ -2849,44 +2846,52 @@ ARGS - the arguments passed to the original function"
 
 ;;; hideshow
 
-(with-eval-after-load 'hideshow
-  ;; TODO lightemacs?
-  ;; Fringe
-  (define-fringe-bitmap 'hs-marker [0 24 24 126 126 24 24 0])
-  (defcustom hs-fringe-face 'hs-fringe-face
-    "*Specify face used to highlight the fringe on hidden regions."
-    :type 'face
-    :group 'hideshow)
-  (defface hs-fringe-face
-    '((t (:foreground "#888" :box (:line-width 2 :color "grey75"
-                                               :style released-button))))
-    "Face used to highlight the fringe on folded regions"
-    :group 'hideshow)
-  (defcustom hs-face 'hs-face
-    "*Specify the face to to use for the hidden region indicator"
-    :type 'face
-    :group 'hideshow)
-  (defface hs-face
-    '((t (:foreground "grey" :background unspecified :box nil)))
-    "Face to hightlight the ... area of hidden regions"
-    :group 'hideshow)
+(setq
+ ;; hs-display-lines-hidden t
+ hs-allow-nesting t
+ hs-hide-comments-when-hiding-all t)
 
-  (defun display-code-line-counts (ov)
-    (when (eq 'code (overlay-get ov 'hs))
-      (let* (;;(marker-string "*fringe-dummy*")
-             ;; (marker-length (length marker-string))
-             (display-string (format "(%d)..."
-                                     (count-lines (overlay-start ov)
-                                                  (overlay-end ov)))))
-        (overlay-put ov 'help-echo "Hiddent text. C-c,= to show")
-        ;; (put-text-property 0 marker-length 'display
-        ;;                    (list 'left-fringe 'hs-marker 'hs-fringe-face)
-        ;;                    marker-string)
-        ;; (overlay-put ov 'before-string marker-string)
-        (put-text-property 0 (length display-string) 'face 'hs-face
-                           display-string)
-        (overlay-put ov 'display display-string))))
-  (setq hs-set-up-overlay 'display-code-line-counts))
+;; (setq hs-show-indicators t
+;;       hs-indicator-type 'fringe)
+
+;; (with-eval-after-load 'hideshow
+;;   ;; TODO lightemacs?
+;;   ;; Fringe
+;;   (define-fringe-bitmap 'hs-marker [0 24 24 126 126 24 24 0])
+;;   (defcustom hs-fringe-face 'hs-fringe-face
+;;     "*Specify face used to highlight the fringe on hidden regions."
+;;     :type 'face
+;;     :group 'hideshow)
+;;   (defface hs-fringe-face
+;;     '((t (:foreground "#888" :box (:line-width 2 :color "grey75"
+;;                                                :style released-button))))
+;;     "Face used to highlight the fringe on folded regions"
+;;     :group 'hideshow)
+;;   (defcustom hs-face 'hs-face
+;;     "*Specify the face to to use for the hidden region indicator"
+;;     :type 'face
+;;     :group 'hideshow)
+;;   (defface hs-face
+;;     '((t (:foreground "grey" :background unspecified :box nil)))
+;;     "Face to hightlight the ... area of hidden regions"
+;;     :group 'hideshow)
+;;
+;;   (defun display-code-line-counts (ov)
+;;     (when (eq 'code (overlay-get ov 'hs))
+;;       (let* (;;(marker-string "*fringe-dummy*")
+;;              ;; (marker-length (length marker-string))
+;;              (display-string (format "(%d)..."
+;;                                      (count-lines (overlay-start ov)
+;;                                                   (overlay-end ov)))))
+;;         (overlay-put ov 'help-echo "Hiddent text. C-c,= to show")
+;;         ;; (put-text-property 0 marker-length 'display
+;;         ;;                    (list 'left-fringe 'hs-marker 'hs-fringe-face)
+;;         ;;                    marker-string)
+;;         ;; (overlay-put ov 'before-string marker-string)
+;;         (put-text-property 0 (length display-string) 'face 'hs-face
+;;                            display-string)
+;;         (overlay-put ov 'display display-string))))
+;;   (setq hs-set-up-overlay 'display-code-line-counts))
 
 ;;; server
 
