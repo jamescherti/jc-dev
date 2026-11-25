@@ -268,9 +268,9 @@ end"))
              (format "pandoc -f markdown -t org --lua-filter=%s"
                      (shell-quote-argument tmp-lua))
              t t)
-            ;; shell-command-on-region with REPLACE=t leaves the point at the
-            ;; end of the inserted text. Since we inserted at BEG, the new
-            ;; valid range is from BEG to (point).
+            ;; `shell-command-on-region' with REPLACE=t leaves the point at the
+            ;; end of the inserted text. Since we inserted at BEG, the new valid
+            ;; range is from BEG to (point).
             (remove-dash-lines beg (point)))
         (delete-file tmp-lua)))))
 

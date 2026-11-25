@@ -3208,12 +3208,28 @@ ARGS - the arguments passed to the original function"
 ;; than X:
 ;; (setq pixel-scroll-precision-large-scroll-height 40.0)
 
-(setq pixel-scroll-precision-use-momentum nil
-      pixel-scroll-precision-interpolate-mice t
-      pixel-scroll-precision-interpolation-factor 0.6
-      ;; mouse-wheel-scroll-amount '(1 ((shift) . 1))
-      ;; mouse-wheel-progressive-speed nil
-      pixel-scroll-precision-large-scroll-height nil)
+(setq
+ ;; Keep scrolling after the wheel stops (inertia). Only effective on
+ ;; touchpads. Set to nil so the display stops exactly when the input
+ ;; stops: no overshoot or drift, at the cost of the touchpad
+ ;; "flick" feel.
+ pixel-scroll-precision-use-momentum nil
+ ;; Interpolate (animate) scrolls from a physical mouse wheel so
+ ;; discrete clicks feel as smooth as a touchpad.
+ ;; Tradeoff: each click is spread over time, so quick successive clicks
+ ;; can coalesce and the scroll lags the input slightly.
+ pixel-scroll-precision-interpolate-mice t
+ ;; Scales the distance of an interpolated scroll (default 2.0). 0.6 keeps
+ ;; each click's scroll short, finer control, less content skipped per
+ ;; click, but needs more clicks to travel far.
+ pixel-scroll-precision-interpolation-factor 0.6
+ ;; mouse-wheel-scroll-amount '(1 ((shift) . 1))
+ ;; mouse-wheel-progressive-speed nil
+ ;;
+ ;; Threshold (px) above which a scroll is animated instead of applied at
+ ;; once. Nil: large scrolls (shift+wheel, fast flicks) land instantly,
+ ;; snappy navigation, but big jumps are not smoothed.
+ pixel-scroll-precision-large-scroll-height nil)
 
 (add-hook 'inhibit-mouse-mode-hook
           #'(lambda()
