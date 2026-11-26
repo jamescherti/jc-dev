@@ -2031,7 +2031,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; t=absolute
 ;; (setq-default display-line-numbers-type t) ; fast
 ;; (setq-default display-line-numbers-type 'visual) ; visual is slow
-(setq-default display-line-numbers-type 'relative)
+;; (setq-default display-line-numbers-type 'relative)
 
 (setq
  ;; t is slow. Use nil.
