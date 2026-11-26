@@ -5013,59 +5013,59 @@ adds that file to the recentf list.")
 
 ;;; Bug testing
 
-(defvar my-point-watch--last-point nil
-  "Last recorded point position in the watched buffer.")
-
-(defvar my-point-watch--last-buffer nil
-  "Last recorded buffer.")
-
-(defun my-point-watch--check (stage)
-  "Log when `point` shifts unexpectedly during STAGE."
-  (let ((current-buf (current-buffer))
-        (current-pt (point)))
-    (if (and (eq current-buf my-point-watch--last-buffer)
-             my-point-watch--last-point
-             (/= current-pt my-point-watch--last-point)
-             (not (memq this-command
-                        '(self-insert-command
-                          next-line
-                          previous-line
-                          evil-forward-char
-                          evil-backward-word-begin
-                          evil-forward-word-begin
-                          evil-backward-WORD-begin
-                          evil-forward-WORD-begin
-                          evil-backward-char
-                          evil-insert-line
-                          evil-append-line
-                          evil-open-below
-                          evil-open-above
-                          evil-next-line
-                          evil-previous-line
-                          evil-normal-post-command))))
-        (message "[point-watch:%s] buf=%s pt: %s -> %s cmd=%S last=%S"
-                 stage
-                 (buffer-name current-buf)
-                 my-point-watch--last-point
-                 current-pt
-                 this-command
-                 last-command))
-    (setq my-point-watch--last-buffer current-buf
-          my-point-watch--last-point current-pt)))
-
-(defun my-point-watch--post-cmd ()
-  "Run point check after commands."
-  (my-point-watch--check "post-cmd"))
-
-(defun my-point-watch--timer-tick ()
-  "Run point check on a short repeating timer."
-  (my-point-watch--check "timer"))
-
-(defvar my-point-watch--timer
-  (run-with-timer 0.2 0.2 #'my-point-watch--timer-tick)
-  "Timer used to detect point jumps outside commands.")
-
-(add-hook 'post-command-hook #'my-point-watch--post-cmd 99)
+;; (defvar my-point-watch--last-point nil
+;;   "Last recorded point position in the watched buffer.")
+;;
+;; (defvar my-point-watch--last-buffer nil
+;;   "Last recorded buffer.")
+;;
+;; (defun my-point-watch--check (stage)
+;;   "Log when `point` shifts unexpectedly during STAGE."
+;;   (let ((current-buf (current-buffer))
+;;         (current-pt (point)))
+;;     (if (and (eq current-buf my-point-watch--last-buffer)
+;;              my-point-watch--last-point
+;;              (/= current-pt my-point-watch--last-point)
+;;              (not (memq this-command
+;;                         '(self-insert-command
+;;                           next-line
+;;                           previous-line
+;;                           evil-forward-char
+;;                           ;; evil-backward-word-begin
+;;                           ;; evil-forward-word-begin
+;;                           ;; evil-backward-WORD-begin
+;;                           ;; evil-forward-WORD-begin
+;;                           evil-backward-char
+;;                           evil-insert-line
+;;                           evil-append-line
+;;                           evil-open-below
+;;                           evil-open-above
+;;                           evil-next-line
+;;                           evil-previous-line
+;;                           evil-normal-post-command))))
+;;         (message "[point-watch:%s] buf=%s pt: %s -> %s cmd=%S last=%S"
+;;                  stage
+;;                  (buffer-name current-buf)
+;;                  my-point-watch--last-point
+;;                  current-pt
+;;                  this-command
+;;                  last-command))
+;;     (setq my-point-watch--last-buffer current-buf
+;;           my-point-watch--last-point current-pt)))
+;;
+;; (defun my-point-watch--post-cmd ()
+;;   "Run point check after commands."
+;;   (my-point-watch--check "post-cmd"))
+;;
+;; (defun my-point-watch--timer-tick ()
+;;   "Run point check on a short repeating timer."
+;;   (my-point-watch--check "timer"))
+;;
+;; (defvar my-point-watch--timer
+;;   (run-with-timer 0.2 0.2 #'my-point-watch--timer-tick)
+;;   "Timer used to detect point jumps outside commands.")
+;;
+;; (add-hook 'post-command-hook #'my-point-watch--post-cmd 99)
 
 ;;; DISABLED: vterm-toggle
 

@@ -12,8 +12,8 @@ fi
 
 # devemacs can change RUN_EMACS_BIN
 if ! [[ -f "$RUN_EMACS_BIN" ]]; then
-  RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-master/bin/emacs"
-  # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-emacs-31/bin/emacs"
+  # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-master/bin/emacs"
+  RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/branch-emacs-31/bin/emacs"
   # RUN_EMACS_BIN="/opt/local/$USER/$OS_ID/emacs/tag-emacs-31.1/bin/emacs"
   EMACS_D="$HOME/.emacs-use-package.d/"
 
