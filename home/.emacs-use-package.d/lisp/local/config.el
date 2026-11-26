@@ -594,7 +594,8 @@
 (defun my-elisp-project-source-path ()
   "Prefer the current project's directories for Elisp source lookup."
   (let* ((filename (buffer-file-name (buffer-base-buffer)))
-         (project (project-current nil (file-name-directory filename)))
+         (project (when filename
+                    (project-current nil (file-name-directory filename))))
          new-load-path)
     (when (and filename project)
       (let* ((default-directory (expand-file-name
@@ -2051,7 +2052,7 @@ FRAME is the frame. When FRAME is nil, the `selected-frame' function is used."
 ;; then open the easysession.el file
 ;; do not switch to other tabs
 ;; quit emacs, launch it, then the other tabs bufers will not be loaded
-(setq easysession-buffer-list-function 'easysession-visible-buffer-list)
+;; (setq easysession-buffer-list-function 'easysession-visible-buffer-list)
 
 ;; (setq easysession-save-pretty-print t)
 

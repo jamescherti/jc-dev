@@ -1986,17 +1986,13 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;;; ibuffer
 
-(setq ibuffer-modified-char ?\s)
-
 (setq
+ ibuffer-modified-char ?\s
 
  ;;; ibuffer
 
  ;; The number of hours before a buffer is considered "old".
- ibuffer-old-time 5
-
- ;; If non-nil, then forward and backwards movement commands cycle.
- ibuffer-movement-cycle lightemacs-cycle
+ ibuffer-old-time 2
 
  ;; If non-nil, don't ask for confirmation of "dangerous" operations.
  ibuffer-expert t
@@ -2008,19 +2004,21 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
  ;; ibuffer-use-other-window nil
 
  ibuffer-use-header-line nil
+
  ;; ibuffer-default-shrink-to-minimum-size t
 
  ;; Prevent long file names from wrapping when using olivetti
- ibuffer-truncate-lines t)
+ ibuffer-truncate-lines t
 
-(setq ibuffer-default-display-maybe-show-predicates t)
+ ibuffer-default-display-maybe-show-predicates nil
 
-(setq ibuffer-formats
-      '((mark modified read-only " "
-              (name 55 55 :left :nil) " "
-              (size-h 9 -1 :right) " "
-              (mode 16 16 :left :elide) " "
-              filename-and-process)))
+ ;; ibuffer-formats
+ ;; '((mark modified read-only " "
+ ;;         (name 55 55 :left :nil) " "
+ ;;         (size-h 9 -1 :right) " "
+ ;;         (mode 16 16 :left :elide) " "
+ ;;         filename-and-process))
+ )
 
 (add-hook 'ibuffer-hook
           (lambda ()
@@ -3950,6 +3948,11 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
   ;;   ;; when the cursor approaches the left or right edges of the window.
   ;;   (setq-local hscroll-margin 0))
 
+  ;; TODO
+  ;; Disable auto-composition-mode in the current buffer
+  (when (fboundp 'auto-composition-mode)
+    (auto-composition-mode -1))
+
   ;; (when (or eat-p term-p)
   ;;   ;; Suppress prompts for terminating active processes when closing
   ;;   (setq-local confirm-kill-processes nil))
@@ -3965,23 +3968,10 @@ WINDOW-OR-FRAME is provided by `window-buffer-change-functions'."
   (remove-hook 'pre-command-hook 'evil--jump-hook t)
   (remove-hook 'post-command-hook 'evil--jump-handle-buffer-crossing t))
 
-;; TODO lightemacs?
-(with-eval-after-load 'lightemacs
-  ;; If you use Evil, terminal buffers are generally best left in Emacs state
-  ;; or Insert state so the shell can process input natively. Modes like
-  ;; evil-snipe-local-mode can intercept keys like 's' or 'f' and prevent you
-  ;; from typing them in the shell.
-  ;; TODO?
-  ;; evil-surround-mode
-  ;; evil-snipe-local-mode
-
-  (add-to-list 'lightemacs-all-terminals-disabled-modes 'auto-composition-mode))
-
 (add-hook 'term-mode-hook 'my-speed-up-terminal-buffer t)
 (add-hook 'vterm-mode-hook 'my-speed-up-terminal-buffer t)
 (add-hook 'eat-mode-hook 'my-speed-up-terminal-buffer t)
 (add-hook 'ghostel-mode-hook 'my-speed-up-terminal-buffer t)
-(add-hook 'compilation-mode-hook 'my-speed-up-terminal-buffer t)
 
 ;;; terminal: Disable arrow
 
