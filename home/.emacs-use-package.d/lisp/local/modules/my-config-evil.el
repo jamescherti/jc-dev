@@ -1823,8 +1823,8 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (when (fboundp 'pathaction-run)
     (pathaction-run "main")))
 
-;; (define-key evil-normal-state-map (kbd "<leader>ee") #'pathaction-main)
-;; (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
+(define-key evil-normal-state-map (kbd "<leader>ee") #'pathaction-main)
+(define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
 (define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main)
 
 (with-eval-after-load 'pathaction
@@ -1839,18 +1839,28 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 
 ;;; Compilation: pathaction
 
-(defun my-compilation-pathaction-install ()
-  "Compile using pathaction install."
-  (interactive)
-  (compile "pathaction -t install ."))
+;; This isn't good because pathaction can be interactive.
 
-(defun my-compilation-pathaction-main ()
-  "Compile using pathaction install."
-  (interactive)
-  (compile "pathaction -t main ."))
-
-(define-key evil-normal-state-map (kbd "<leader>ee") #'my-compilation-pathaction-main)
-(define-key evil-normal-state-map (kbd "<leader>ei") #'my-compilation-pathaction-install)
+;; (defun my-compilation-pathaction-install ()
+;;   "Compile current file using pathaction install."
+;;   (interactive)
+;;   (let ((target-file (or buffer-file-name
+;;                          (buffer-file-name (buffer-base-buffer)))))
+;;     (when target-file
+;;       (let ((quoted-file (shell-quote-argument target-file)))
+;;         (compile (format "pathaction -t install %s" quoted-file))))))
+;;
+;; (defun my-compilation-pathaction-main ()
+;;   "Compile current file using pathaction main."
+;;   (interactive)
+;;   (let ((target-file (or buffer-file-name
+;;                          (buffer-file-name (buffer-base-buffer)))))
+;;     (when target-file
+;;       (let ((quoted-file (shell-quote-argument target-file)))
+;;         (compile (format "pathaction -t main %s" quoted-file))))))
+;;
+;; (define-key evil-normal-state-map (kbd "<leader>ee") #'my-compilation-pathaction-main)
+;; (define-key evil-normal-state-map (kbd "<leader>ei") #'my-compilation-pathaction-install)
 
 ;;; Better vc
 
