@@ -1105,24 +1105,7 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;;
 ;; (global-completion-preview-mode 1)
 
-;;; Disabled defaults
-
-;; Truncate the compilation buffer to avoid excessive memory use by limiting
-;; its size.
-;; TODO minimal emacs.d
-
-(with-eval-after-load 'savehist
-  (add-to-list 'savehist-additional-variables 'compile-history))
-
-(unless noninteractive
-  ;; Explicitly tell Emacs to split the window at the bottom for compilation
-  (add-to-list 'display-buffer-alist
-               '("^\\*compilation\\*$"
-                 (display-buffer-in-direction)
-                 (direction . bottom)
-                 (window-height . 0.2))))
-
-(setq compile-command "pathaction -t install .")
+;;; comint
 
 (setq comint-input-ring-size 600)
 
@@ -1151,6 +1134,100 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 
 ;; (setq comint-completion-autolist t)
 ;; (setq comint-input-ignoredups t)
+
+;;; Compilation settings
+
+;; (with-eval-after-load 'compile
+;;   (add-to-list 'compilation-environment "TERM=xterm-256color"))
+
+;; Sets the scroll margin in *compilation*: When compilation-scroll-output is
+;; active or when you jump between errors, Emacs keeps 10 lines of context above
+;; the matched error line instead of scrolling the error all the way to the very
+;; top edge of the window.
+;;
+;; Preserves multi-line diagnostic headers: Compilers like GCC, Clang, Rust, and
+;; Python tracebacks often print the file path, function signature, or call
+;; frame a few lines above the actual error: line. Keeping 10 lines visible lets
+;; you read that header context without manually scrolling up.
+;;
+;; Pairs with compilation-window-height: If your compilation window is 12 lines
+;; tall (compilation-window-height 12), setting compilation-context-lines to 10
+;; pins the active error near the very bottom of the window (leaving 10 lines
+;; above it and ~1-2 lines below it). If you want to see both the header above
+;; and the code snippet/caret (^) printed below the error line, a value around 4
+;; to 6 works better with a 12-line window.
+(setq compilation-context-lines 10)
+
+;; Prevents re-visiting already inspected errors: When stepping through
+;; diagnostics with next-error (M-g n) or previous-error (M-g p), Emacs skips
+;; any error or warning location you have already jumped to.
+(setq compilation-skip-visited t)
+
+;; Sets a compact, predictable window size: Forces the *compilation* split
+;; window to open at exactly 12 lines tall instead of splitting the frame 50/50.
+;;
+;; Preserves code visibility: Leaves most of your screen dedicated to your
+;; source buffer while showing enough lines to read compiler errors, stack
+;; traces, or command output.
+;;
+;; Interaction with display-buffer-alist: Keep in mind that if you also
+;; configure window-height inside display-buffer-alist (such as (window-height .
+;; 0.25) or (window-height . 12)), display-buffer-alist takes precedence over
+;; compilation-window-height. Use one or the other so they do not conflict.
+(setq compilation-window-height 12)
+
+;; Speed up compilation output
+(setq compilation-max-output-line-length nil)
+
+;; Skip warnings when jumping with `next-error` (`M-g n` / `M-n`)
+;; 0 = info/notes, 1 = warnings, 2 = errors only
+(setq compilation-skip-threshold 2)
+
+;;; Compilation
+
+(defun my-compilation-close-window (buffer status)
+  "Close BUFFER window on success unless it is selected."
+  (when (string-match-p "^finished" status)
+    (run-at-time
+     "2 sec" nil
+     (lambda ()
+       (let ((comp-win (get-buffer-window buffer)))
+         (when (and comp-win
+                    (not (eq comp-win (selected-window))))
+           (delete-window comp-win)))))))
+
+(add-hook 'compilation-finish-functions #'my-compilation-close-window)
+
+;;; Compilation: Silence echo area
+
+(defun my-suppress-compilation-exit-message (orig-fn process-status exit-status msg)
+  "Silence echo-area exit message when compilation buffer is visible."
+  (let ((inhibit-message (if (get-buffer-window (current-buffer) t)
+                             t
+                           inhibit-message)))
+    (funcall orig-fn process-status exit-status msg)))
+
+(advice-add 'compilation-handle-exit :around #'my-suppress-compilation-exit-message)
+
+
+;;; Disabled defaults
+
+;; Truncate the compilation buffer to avoid excessive memory use by limiting
+;; its size.
+;; TODO minimal emacs.d
+
+(with-eval-after-load 'savehist
+  (add-to-list 'savehist-additional-variables 'compile-history))
+
+(unless noninteractive
+  ;; Explicitly tell Emacs to split the window at the bottom for compilation
+  (add-to-list 'display-buffer-alist
+               '("^\\*compilation\\*$"
+                 (display-buffer-in-direction)
+                 (direction . bottom)
+                 (window-height . 0.2))))
+
+(setq compile-command "pathaction -t install .")
 
 ;; When you initiate a compilation or a Git commit, Emacs prompts you to save
 ;; every modified buffer across all active directories. This restricts the save
