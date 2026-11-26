@@ -1265,11 +1265,10 @@ Candidates absent from the accessible source buffer follow."
 (evil-define-key 'insert 'global (kbd "C-x C-f") 'cape-file)
 
 (with-eval-after-load 'corfu
-  (with-eval-after-load 'evil
-    (evil-define-key 'insert 'global (kbd "C-SPC") 'completion-at-point)
+  (evil-define-key 'insert 'global (kbd "C-SPC") 'completion-at-point)
 
-    (unless (display-graphic-p)
-      (define-key key-translation-map (kbd "C-@") (kbd "C-SPC")))))
+  (unless (display-graphic-p)
+    (define-key key-translation-map (kbd "C-@") (kbd "C-SPC"))))
 
 ;;; evil inferior mode (Python)
 
@@ -1369,16 +1368,15 @@ If the parentheses are balanced, the function returns t."
 
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
-            (with-eval-after-load 'evil
-              (evil-define-key 'normal 'global (kbd "gV")
-                #'my-elisp-mode-select-sexp)
+            (evil-define-key 'normal 'global (kbd "gV")
+              #'my-elisp-mode-select-sexp)
 
-              (add-hook 'evil-insert-state-exit-hook
-                        (lambda() (when (and
-                                         (fboundp 'evil-insert-state-p)
-                                         (evil-insert-state-p))
-                                    (my-check-parens-no-jump t)))
-                        nil t))
+            (add-hook 'evil-insert-state-exit-hook
+                      (lambda() (when (and
+                                       (fboundp 'evil-insert-state-p)
+                                       (evil-insert-state-p))
+                                  (my-check-parens-no-jump t)))
+                      nil t)
             (add-hook 'after-save-hook #'my-check-parens-no-jump -99 t)))
 
 ;;; Markdown mode
@@ -1542,8 +1540,7 @@ search direction (default: \='forward)."
     (let ((inhibit-message t))
       (evil-collection-vterm-toggle-send-escape))))
 
-(with-eval-after-load 'evil-collection
-  (add-hook 'vterm-mode-hook #'my-evil-collection-vterm-toggle-send-escape))
+(add-hook 'vterm-mode-hook #'my-evil-collection-vterm-toggle-send-escape)
 
 ;; (setq vterm-set-bold-hightbright t)
 ;; (setq vterm-disable-bold t)
@@ -1701,9 +1698,8 @@ If COUNT is given, move COUNT - 1 lines downward first."
     ;; the temporary column
     (setq-local temporary-goal-column (current-column))))
 
-(with-eval-after-load 'evil
-  (define-key evil-motion-state-map "$" 'my-evil-end-of-line)
-  (define-key evil-motion-state-map [end] 'my-evil-end-of-line))
+(define-key evil-motion-state-map "$" 'my-evil-end-of-line)
+(define-key evil-motion-state-map [end] 'my-evil-end-of-line)
 
 ;;; Toggle comment
 
@@ -1759,8 +1755,7 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
 
 (setq quick-sdcv-fold-on-search t)
 
-(with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "<leader>sd") 'quick-sdcv-search-input))
+(define-key evil-normal-state-map (kbd "<leader>sd") 'quick-sdcv-search-input)
 
 ;; (setq quick-sdcv-dictionary-prefix-symbol "►")
 
@@ -1828,10 +1823,9 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   (when (fboundp 'pathaction-run)
     (pathaction-run "main")))
 
-(with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "<leader>ee") #'pathaction-main)
-  (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
-  (define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main))
+;; (define-key evil-normal-state-map (kbd "<leader>ee") #'pathaction-main)
+;; (define-key evil-normal-state-map (kbd "<leader>ei") #'pathaction-install)
+(define-key evil-normal-state-map (kbd "<leader>xx") #'pathaction-main)
 
 (with-eval-after-load 'pathaction
   (remove-hook 'pathaction-before-run-hook 'save-some-buffers)
@@ -1842,6 +1836,77 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
   "Setup `ultisnips-mode'."
   (setq stripspace-normalize-indentation nil))
 (add-hook 'ultisnips-mode-hook #'my-setup-ultisnips-mode)
+
+;;; Compilation: pathaction
+
+(defun my-compilation-pathaction-install ()
+  "Compile using pathaction install."
+  (interactive)
+  (compile "pathaction -t install ."))
+
+(defun my-compilation-pathaction-main ()
+  "Compile using pathaction install."
+  (interactive)
+  (compile "pathaction -t main ."))
+
+(define-key evil-normal-state-map (kbd "<leader>ee") #'my-compilation-pathaction-main)
+(define-key evil-normal-state-map (kbd "<leader>ei") #'my-compilation-pathaction-install)
+
+;;; Compilation settings
+
+(with-eval-after-load 'compile
+  (add-to-list 'compilation-environment "TERM=xterm-256color"))
+
+;; Prevents re-visiting already inspected errors: When stepping through
+;; diagnostics with next-error (M-g n) or previous-error (M-g p), Emacs skips
+;; any error or warning location you have already jumped to.
+(setq compilation-skip-visited t)
+
+;; Sets a compact, predictable window size: Forces the *compilation* split
+;; window to open at exactly 12 lines tall instead of splitting the frame 50/50.
+;;
+;; Preserves code visibility: Leaves most of your screen dedicated to your
+;; source buffer while showing enough lines to read compiler errors, stack
+;; traces, or command output.
+;;
+;; Interaction with display-buffer-alist: Keep in mind that if you also
+;; configure window-height inside display-buffer-alist (such as (window-height .
+;; 0.25) or (window-height . 12)), display-buffer-alist takes precedence over
+;; compilation-window-height. Use one or the other so they do not conflict.
+(setq compilation-window-height 12)
+
+;; Speed up compilation output
+(setq compilation-max-output-line-length nil)
+
+;; Skip warnings when jumping with `next-error` (`M-g n` / `M-n`)
+;; 0 = info/notes, 1 = warnings, 2 = errors only
+(setq compilation-skip-threshold 2)
+
+;;; Compilation
+
+(defun my-compilation-close-window (buffer status)
+  "Close BUFFER window on success unless it is selected."
+  (when (string-match-p "^finished" status)
+    (run-at-time
+     "2 sec" nil
+     (lambda ()
+       (let ((comp-win (get-buffer-window buffer)))
+         (when (and comp-win
+                    (not (eq comp-win (selected-window))))
+           (delete-window comp-win)))))))
+
+(add-hook 'compilation-finish-functions #'my-compilation-close-window)
+
+;;; Compilation: Silence echo area
+
+(defun my-suppress-compilation-exit-message (orig-fn process-status exit-status msg)
+  "Silence echo-area exit message when compilation buffer is visible."
+  (let ((inhibit-message (if (get-buffer-window (current-buffer) t)
+                             t
+                           inhibit-message)))
+    (funcall orig-fn process-status exit-status msg)))
+
+(advice-add 'compilation-handle-exit :around #'my-suppress-compilation-exit-message)
 
 ;;; Better vc
 
@@ -1864,18 +1929,17 @@ In `outline-mode', `org-mode', or `outline-minor-mode', unfold the region first.
      (t
       (user-error "Not a Git repository")))))
 
-(with-eval-after-load 'evil
-  ;; (evil-define-key 'normal 'global (kbd "<leader>vl") #'better-vc-version-diff-main)
-  ;; (evil-define-key 'normal 'global (kbd "<leader>vd") #'vc-print-log)
-  (define-key evil-normal-state-map (kbd "<leader>gt") #'mod-better-vc-git-toplevel)
-  (define-key evil-normal-state-map (kbd "<leader>vt") #'mod-better-vc-git-toplevel)
-  (define-key evil-normal-state-map (kbd "<leader>vd") #'mod-better-vc-diff)
+;; (evil-define-key 'normal 'global (kbd "<leader>vl") #'better-vc-version-diff-main)
+;; (evil-define-key 'normal 'global (kbd "<leader>vd") #'vc-print-log)
+(define-key evil-normal-state-map (kbd "<leader>gt") #'mod-better-vc-git-toplevel)
+(define-key evil-normal-state-map (kbd "<leader>vt") #'mod-better-vc-git-toplevel)
+(define-key evil-normal-state-map (kbd "<leader>vd") #'mod-better-vc-diff)
 
-  (global-set-key (kbd "C-x ve") 'vc-ediff)
+(global-set-key (kbd "C-x ve") 'vc-ediff)
 
-  ;; TODO: Not available in emacs 31
-  ;; (define-key evil-normal-state-map (kbd "<leader>vb") #'vc-print-branch-log)
-  )
+;; TODO: Not available in emacs 31
+;; (define-key evil-normal-state-map (kbd "<leader>vb") #'vc-print-branch-log)
+
 
 ;;; Scroll the window down
 
@@ -2139,9 +2203,8 @@ Accepts any arguments so it can be used as advice or a hook."
     (call-interactively #'evil-paste-before)
     (fill-region (evil-get-marker ?\[) (evil-get-marker ?\]))))
 
-(with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "<leader>fp") #'my-evil-paste-and-fill)
-  (define-key evil-normal-state-map (kbd "<leader>fP") #'my-evil-paste-before-and-fill))
+(define-key evil-normal-state-map (kbd "<leader>fp") #'my-evil-paste-and-fill)
+(define-key evil-normal-state-map (kbd "<leader>fP") #'my-evil-paste-before-and-fill)
 
 ;;; Disable emacs state
 

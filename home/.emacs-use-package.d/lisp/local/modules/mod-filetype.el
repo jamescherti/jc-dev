@@ -652,6 +652,9 @@ invoking the original function ORIG-FUN with ARGS."
 
 ;;; Bash
 
+(add-hook 'bash-ts-mode-hook #'executable-make-buffer-file-executable-if-script-p)
+(add-hook 'sh-mode-hook #'executable-make-buffer-file-executable-if-script-p)
+
 (setq sh-basic-offset 2)
 
 (defun setup-sh-mode ()

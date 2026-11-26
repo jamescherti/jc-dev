@@ -1111,10 +1111,6 @@ ORIG-FUN is the original upgrade function, and ARGS are its arguments."
 ;; its size.
 ;; TODO minimal emacs.d
 
-(with-eval-after-load 'compile
-  (add-to-list 'compilation-environment "TERM=xterm-256color"))
-(setq compilation-skip-visited t)
-(setq compilation-window-height 12)
 (with-eval-after-load 'savehist
   (add-to-list 'savehist-additional-variables 'compile-history))
 
