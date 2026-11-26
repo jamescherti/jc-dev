@@ -957,7 +957,7 @@ subsequent GCC invocations."
                            le-yasnippet
                            ;; le-compile-angel
                            le-quick-fasd
-                           le-display-line-numbers
+                           ;; le-display-line-numbers
                            le-vim-tab-bar
 
                            le-theme
@@ -1065,6 +1065,7 @@ subsequent GCC invocations."
                            le-bufferfile
 
                            le-diff-hl
+                           le-quick-sdcv
 
                            le-dtrt-indent
 
