@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+#
+# Author: James Cherti
+# URL: https://github.com/jamescherti/jc-dev
+#
+# Copyright (C) 2004-2026 James Cherti
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+#
+"""Extract elisp code blocks from a README and write them to an output file."""
+
+import re
+import sys
+from pathlib import Path
+
+
+def main() -> None:
+    """Parse README markers and concatenate elisp blocks into a single file."""
+    if len(sys.argv) != 3:
+        print(f"Usage: {sys.argv[0]} <readme.md> <output.el>")
+        sys.exit(1)
+
+    readme_path = Path(sys.argv[1])
+    output_path = Path(sys.argv[2])
+
+    if not readme_path.exists():
+        print(f"Error: {readme_path} not found")
+        sys.exit(1)
+
+    text = readme_path.read_text()
+
+    pat = re.compile(
+        r"<!--\s+(?P<fname>[\w-]+\.el)\s*:begin\s*-->\s*"
+        r"(?P<content>.*?)?"
+        r"<!--\s+\1\s*:end\s*-->",
+        re.DOTALL | re.MULTILINE,
+    )
+
+    parts: list[str] = []
+    for m in pat.finditer(text):
+        fname = m.group("fname")
+        content = m.group("content")
+        start_line = text[: m.start()].count("\n") + 1
+
+        # Strip surrounding ``` fences if present
+        stripped = content.strip()
+        fence_m = re.match(r"^```[\w-]*\n(.*)```\s*$", stripped, re.DOTALL)
+        code = fence_m.group(1).strip() if fence_m else stripped.strip()
+
+        parts.append(
+            f"\n;;; --- extracted from {readme_path.name} line {start_line} "
+            f"({fname}) ---\n{code}"
+        )
+
+    if not parts:
+        print("No elisp blocks found in README.")
+        sys.exit(0)
+
+    combined = "\n".join(parts)
+    output_path.write_text(combined + "\n")
+    size = output_path.stat().st_size
+    print(f"Wrote {len(parts)} block(s) to {output_path} ({size} bytes)")
+
+
+if __name__ == "__main__":
+    main()
