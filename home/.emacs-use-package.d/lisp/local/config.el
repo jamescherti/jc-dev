@@ -1083,7 +1083,7 @@ subsequent GCC invocations."
                            ;; le-eat
                            le-vterm
 
-                           le-persist-text-scale
+                           ;; le-persist-text-scale
 
                            ;; TODO support project dirs like shell-pop
                            ;; mod-toggle-term
