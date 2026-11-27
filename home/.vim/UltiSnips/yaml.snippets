@@ -252,7 +252,7 @@ snippet os
 endsnippet
 
 snippet virt
-when: ansible_virtualization_type == "kvm" and ansible_virtualization_role ${1:==} "guest"
+when: ansible_facts.virtualization_type == "kvm" and ansible_facts.virtualization_role ${1:==} "guest"
 endsnippet
 
 snippet def
@@ -294,7 +294,7 @@ snippet hostsb
 endsnippet
 
 snippet ifhost
-ansible_fqdn | search('${1:\.home\.org}$')
+ansible_facts.fqdn | search('${1:\.home\.org}$')
 endsnippet
 
 snippet assert
@@ -328,11 +328,11 @@ ignore_errors: true
 endsnippet
 
 snippet regex
-${1:ansible_fqdn} | search('${2:\.domain\.com}')
+${1:ansible_facts.fqdn} | search('${2:\.domain\.com}')
 endsnippet
 
 snippet fqdn
-ansible_fqdn
+ansible_facts.fqdn
 endsnippet
 
 snippet fact
@@ -710,7 +710,7 @@ snippet sysctl
 endsnippet
 
 snippet notdocker
-ansible_virtualization_type != "docker"
+ansible_facts.virtualization_type != "docker"
 endsnippet
 
 snippet arch

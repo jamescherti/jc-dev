@@ -83,17 +83,17 @@ endsnippet
 # Misc
 #
 snippet fqdn
-ansible_fqdn ${1:==} '${2:fqdn.domain.com}'
+ansible_facts.fqdn ${1:==} '${2:fqdn.domain.com}'
 endsnippet
 
 snippet host
-ansible_hostname ${1:==} '${2:hostname}'
+ansible_facts.hostname ${1:==} '${2:hostname}'
 endsnippet
 
 snippet docker
-ansible_virtualization_type ${1:==} '${2:docker}'
+ansible_facts.virtualization_type ${1:==} '${2:docker}'
 endsnippet
 
 snippet notdocker
-ansible_virtualization_type ${1:!=} '${2:docker}'
+ansible_facts.virtualization_type ${1:!=} '${2:docker}'
 endsnippet
