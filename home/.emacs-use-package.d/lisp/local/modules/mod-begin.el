@@ -469,6 +469,7 @@ Opens a split window showing the added and removed features."
 
     ;; Dark
     (lightemacs-theme-create-loader "ef-melissa-dark" 'ef-themes)
+    (lightemacs-theme-create-loader "ef-dark" 'ef-themes)
     (lightemacs-theme-create-loader "ef-symbiosis" 'ef-themes)
     ;; Yellow
     (lightemacs-theme-create-loader "ef-melissa-light" 'ef-themes)
